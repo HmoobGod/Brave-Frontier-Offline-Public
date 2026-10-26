@@ -114,6 +114,7 @@ jobs:
           python test_bf_critical_ko_guard_v9600.py
           python test_bf_qol_rotating_backups_v9700.py
           python test_bf_qol_cleared_quest_repeat_v9800.py
+          python test_bf_qol_battle_speed_v9900.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -548,6 +549,8 @@ jobs:
         run: python3 test_bf_packaged_qol_rotating_backups_v9700.py
       - name: Verify v98 optional cleared-quest repeat in signed APK
         run: python3 test_bf_packaged_qol_cleared_quest_repeat_v9800.py
+      - name: Verify v99 optional battle speed and animation skip in signed APK
+        run: python3 test_bf_packaged_qol_battle_speed_v9900.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
