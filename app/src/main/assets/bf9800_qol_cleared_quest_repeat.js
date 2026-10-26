@@ -51,7 +51,7 @@
    const s=results.snapshot();
    const cleared=Number(s?.clears)>0;
    const eligible=!session&&!document.hidden&&!S.busy&&
-     S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&
+     S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
      !!s.canReplay&&cleared&&s.missionId===QUEST?.missionId;
    go.disabled=!eligible;
    picker.disabled=!!session;halt.disabled=!session;
@@ -77,7 +77,7 @@
    if(!session)return false;
    const s=results.snapshot();
    if(S.busy||S.mode!=='archive'||!s?.done||!s.victory||
-      !s.archive||s.missionId!==session.missionId||
+      !s.archive||!s.stored||s.missionId!==session.missionId||
       QUEST?.missionId!==session.missionId||!s.canReplay){
      stop('Stopped: replay prerequisites changed',false);return false;
    }
@@ -94,7 +94,7 @@
    if(session||!Number.isInteger(count)||![2,5,10].includes(count))return false;
    const s=results.snapshot();
    if(document.hidden||S.busy||S.mode!=='archive'||
-      !s?.done||!s.victory||!s.archive||!s.canReplay||
+      !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
       !Number.isSafeInteger(s.clears)||s.clears<1)return false;
    session={missionId:s.missionId,target:count,completed:0,
@@ -117,6 +117,7 @@
      update();return true;
    }
    if(!s.victory)return stop('Stopped: battle lost',false);
+   if(!s.stored)return stop('Stopped: game save unavailable',false);
    if(!Number.isSafeInteger(s.clears)||s.clears<=session.lastClear)
      return stop('Stopped: new clear not confirmed',false);
    session.completed++;
