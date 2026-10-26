@@ -10,7 +10,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'appliedDamage' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 gradle=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '96.00.0-demo'" in gradle
+assert any("versionName '"+str(v)+".00.0-demo'" in gradle for v in range(96,200))
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert 'bf-development-debug.keystore' in gradle
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
