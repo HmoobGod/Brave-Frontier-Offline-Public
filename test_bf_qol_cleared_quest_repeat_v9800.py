@@ -28,7 +28,8 @@ with sync_playwright() as pw:
    window.__repeatCount=0;
    const snapshot=()=>({missionId:QUEST.missionId,done:S.over,
      victory:S.over&&S.phase==='Victory',archive:S.mode==='archive',
-     clears:P.questClears[QUEST.missionId]||0,canReplay:S.over&&!S.busy});
+     clears:P.questClears[QUEST.missionId]||0,stored:window.__stored98!==false,
+     canReplay:S.over&&!S.busy});
    const replayBattle=()=>{
      if(!S.over||S.busy)return false;
      window.__repeatCount++;S.over=false;S.phase='Battle';return true;
@@ -41,6 +42,9 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert p.evaluate(api+'.start(1)') is False
  assert p.evaluate(api+'.start(20)') is False
+ p.evaluate("window.__stored98=false")
+ assert p.evaluate(api+'.start(2)') is False
+ p.evaluate("window.__stored98=true")
  assert p.evaluate(api+'.start(2)') is True
  assert p.evaluate('window.__repeatCount')==1
  assert p.locator('#auto').is_checked()
