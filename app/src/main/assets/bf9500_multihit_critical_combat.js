@@ -64,13 +64,22 @@
       !portions.every(n=>Number.isSafeInteger(n)&&n>=0))return portions;
    local.attempted=true;
    local.baseTotal=portions.reduce((a,b)=>a+b,0);
+   // V9600_OVERKILL_GUARD: splitDemoDamage is computed before the animated
+   // hits land. Only roll a critical for a strike that can actually land
+   // while the current target has HP. Never count phantom post-KO strikes.
+   // This mirrors the existing DEMO application order; it does not infer
+   // native overkill/extra-hit rules or change the 2022 damage weights.
+   let remaining=local.target.hp;
    const modified=portions.map((damage,i)=>{
-     const critical=damage>0&&roll()===true;
-     if(damage>0)local.rolls++;
+     const landed=damage>0&&remaining>0;
+     const critical=landed&&roll()===true;
+     if(landed)local.rolls++;
      if(critical)local.criticals++;
      const result=criticalDamage(damage,critical);
+     const appliedDamage=landed?Math.min(remaining,result):0;
+     remaining=Math.max(0,remaining-appliedDamage);
      local.hits.push(freeze({index:i+1,baseDamage:damage,
-       critical,resultDamage:result}));
+       landed,critical,appliedDamage,resultDamage:result}));
      return result;
    });
    local.resultTotal=modified.reduce((a,b)=>a+b,0);

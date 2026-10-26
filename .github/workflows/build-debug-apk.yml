@@ -111,6 +111,7 @@ jobs:
           python -m pip install playwright
           python test_bf_single_hit_critical_combat_v9300.py
           python test_bf_multihit_critical_combat_v9500.py
+          python test_bf_critical_ko_guard_v9600.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -539,6 +540,8 @@ jobs:
         run: python3 test_bf_packaged_single_hit_critical_combat_v9300.py
       - name: Verify v95 source multihit critical combat in signed APK
         run: python3 test_bf_packaged_multihit_critical_combat_v9500.py
+      - name: Verify v96 no phantom critical rolls in signed APK
+        run: python3 test_bf_packaged_critical_ko_guard_v9600.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
