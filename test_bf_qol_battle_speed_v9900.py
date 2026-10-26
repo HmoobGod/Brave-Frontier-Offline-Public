@@ -57,7 +57,7 @@ with sync_playwright() as pw:
  normal=p.evaluate("""async()=>{const t=performance.now();await window.wait(125);
     return performance.now()-t;}""")
  assert normal>=95,normal
- p.evaluate("S.mode='archive';S.busy=true")
+ p.evaluate("""()=>{S.mode='archive';S.busy=true;}""")
  assert p.evaluate(api+'.setSkip(false)') is False
  assert p.evaluate(api+'.snapshot().skip') is True
  p.evaluate("S.busy=false")
