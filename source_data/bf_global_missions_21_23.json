@@ -1,0 +1,62 @@
+{
+  "schema": "bf-global-mission-expansion-v1",
+  "originalSources": {
+    "masterZip": "mst-decoded.zip",
+    "masterSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "masterEntry": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "dungeonEntry": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+    "englishTextZip": "BF1_sgtext_part001.zip",
+    "englishTextSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "background": "dungeon_battle_10200.jpg",
+    "backgroundSha256": "50b7833e5045b5ffbf23056d33ee13d1e96654e9665e6b4d770fe6f8baef473b"
+  },
+  "notes": [
+    "Exact original Global mission IDs, dungeon IDs, unlock-required ID, wave-count metadata, exp/zel/karma and energy fees",
+    "Monster assignments, wave scripts, AI, status effects, and exact battle drops are not yet verified; existing offline demo wave generator remains in use",
+    "Uses already packaged original Cave of Flames background; no change to save v7 or core battle engine"
+  ],
+  "missions": [
+    {
+      "missionId": 21,
+      "label": "Mission 21",
+      "missionNameKey": "MST_DUNGEONS_MISSION_21_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_20_NAME",
+      "dungeonId": 20,
+      "requires": 20,
+      "battles": 5,
+      "exp": 35,
+      "zel": 450,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10200.jpg"
+    },
+    {
+      "missionId": 22,
+      "label": "Mission 22",
+      "missionNameKey": "MST_DUNGEONS_MISSION_22_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_20_NAME",
+      "dungeonId": 20,
+      "requires": 21,
+      "battles": 5,
+      "exp": 50,
+      "zel": 500,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10200.jpg"
+    },
+    {
+      "missionId": 23,
+      "label": "Mission 23",
+      "missionNameKey": "MST_DUNGEONS_MISSION_23_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_20_NAME",
+      "dungeonId": 20,
+      "requires": 22,
+      "battles": 6,
+      "exp": 80,
+      "zel": 600,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10200.jpg"
+    }
+  ]
+}

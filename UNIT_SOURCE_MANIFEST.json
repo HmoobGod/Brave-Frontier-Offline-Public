@@ -1,0 +1,106 @@
+{
+  "version": "0.7",
+  "units": [
+    {
+      "id": 10011,
+      "name": "Vargas",
+      "element": "Fire",
+      "rarity": 2,
+      "stats": {
+        "hp": 1030,
+        "atk": 500,
+        "def": 410,
+        "rec": 320
+      },
+      "frameCount": 27,
+      "rawFlipCount": 0,
+      "scale": 0.486
+    },
+    {
+      "id": 20011,
+      "name": "Selena",
+      "element": "Water",
+      "rarity": 2,
+      "stats": {
+        "hp": 1000,
+        "atk": 490,
+        "def": 360,
+        "rec": 420
+      },
+      "frameCount": 12,
+      "rawFlipCount": 0,
+      "scale": 0.377
+    },
+    {
+      "id": 30011,
+      "name": "Lance",
+      "element": "Earth",
+      "rarity": 2,
+      "stats": {
+        "hp": 1010,
+        "atk": 500,
+        "def": 500,
+        "rec": 150
+      },
+      "frameCount": 12,
+      "rawFlipCount": 0,
+      "scale": 0.33
+    },
+    {
+      "id": 40011,
+      "name": "Eze",
+      "element": "Thunder",
+      "rarity": 2,
+      "stats": {
+        "hp": 1180,
+        "atk": 580,
+        "def": 320,
+        "rec": 120
+      },
+      "frameCount": 13,
+      "rawFlipCount": 0,
+      "scale": 0.268
+    },
+    {
+      "id": 50011,
+      "name": "Atro",
+      "element": "Light",
+      "rarity": 2,
+      "stats": {
+        "hp": 970,
+        "atk": 500,
+        "def": 500,
+        "rec": 500
+      },
+      "frameCount": 12,
+      "rawFlipCount": 0,
+      "scale": 0.298
+    },
+    {
+      "id": 60011,
+      "name": "Magress",
+      "element": "Dark",
+      "rarity": 2,
+      "stats": {
+        "hp": 1500,
+        "atk": 430,
+        "def": 530,
+        "rec": 120
+      },
+      "frameCount": 20,
+      "rawFlipCount": 2,
+      "scale": 0.33
+    }
+  ],
+  "gameplayNotOriginal": [
+    "Unit demo leveling/stat growth",
+    "Prototype damage formula",
+    "Brave Burst charging/damage",
+    "Encounter assignment",
+    "Enemy stats"
+  ],
+  "save": {
+    "key": "bf_global_offline_demo_v2",
+    "migrateFrom": "bf_global_offline_demo_v1"
+  }
+}

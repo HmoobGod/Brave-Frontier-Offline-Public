@@ -1,0 +1,192 @@
+{
+  "schema": "bf-global-2022-all-source-normal-crystal-checks-v8400",
+  "sourceZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "unitTableParts": [
+    {
+      "file": "F_UNIT_MST_1_Ver1084.json",
+      "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+    },
+    {
+      "file": "F_UNIT_MST_2_Ver1084.json",
+      "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+    }
+  ],
+  "archivedUnits": 2291,
+  "validCollectibleProfiles": 2258,
+  "excluded": [
+    {
+      "unitId": 1,
+      "reason": "special_summoner_identity"
+    },
+    {
+      "unitId": 10023,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 130
+    },
+    {
+      "unitId": 10093,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 10172,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 60
+    },
+    {
+      "unitId": 20050,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 120
+    },
+    {
+      "unitId": 20082,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 20093,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 30093,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 30113,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 30154,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 90
+    },
+    {
+      "unitId": 30233,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 85
+    },
+    {
+      "unitId": 30235,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 123
+    },
+    {
+      "unitId": 40082,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 40214,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 110
+    },
+    {
+      "unitId": 40234,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 120
+    },
+    {
+      "unitId": 40315,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 110
+    },
+    {
+      "unitId": 40424,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 50092,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 50254,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 110
+    },
+    {
+      "unitId": 60062,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 60083,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 125
+    },
+    {
+      "unitId": 60294,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 110
+    },
+    {
+      "unitId": 60355,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 116
+    },
+    {
+      "unitId": 60543,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 99
+    },
+    {
+      "unitId": 810003,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 104
+    },
+    {
+      "unitId": 810114,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 99
+    },
+    {
+      "unitId": 810338,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 101
+    },
+    {
+      "unitId": 820005,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 116
+    },
+    {
+      "unitId": 850124,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 104
+    },
+    {
+      "unitId": 850135,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 101
+    },
+    {
+      "unitId": 850146,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 101
+    },
+    {
+      "unitId": 850377,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 106
+    },
+    {
+      "unitId": 860134,
+      "reason": "damage_weights_not_100",
+      "actualWeightSum": 90
+    }
+  ],
+  "whitespaceOnlySanitizedIds": [
+    20926,
+    51136,
+    820317,
+    850347
+  ],
+  "packedFNV1a32": "690fb10d",
+  "encoding": "Sorted unitId deltas in base36, each followed by comma then base36 (normalHits*64+dropCheckCount), separated with vertical bars. Unambiguous and lossless.",
+  "sourceBoundary": "Unit damageFrames entry count and second-column weights sum to 100. Independent original dropCheckCount parsed as positive integer. No imagined multi-hit, target, enemies, pickup, BB/HP effects.",
+  "packedProfileEncoding": "Lossless source tuples embedded in bf8400_original_normal_crystal_checks.js as base36 unitId deltas + normalHits*64+dropCheckCount; each record hash-verified."
+}

@@ -1,0 +1,76 @@
+{
+  "schema": "bf-global-2022-status-cure-contract-v5700",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceTable": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "sourceSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474",
+    "note": "Cure codes from archived interpreted item data. Original infliction, duration, turn effects and live item inventory are not decoded."
+  },
+  "ailments": [
+    {
+      "code": 1,
+      "label": "Poison"
+    },
+    {
+      "code": 2,
+      "label": "Weakness"
+    },
+    {
+      "code": 3,
+      "label": "Disease"
+    },
+    {
+      "code": 4,
+      "label": "Injury"
+    },
+    {
+      "code": 5,
+      "label": "Curse"
+    },
+    {
+      "code": 6,
+      "label": "Paralysis"
+    }
+  ],
+  "cures": [
+    {
+      "itemId": 20200,
+      "codes": [
+        1
+      ]
+    },
+    {
+      "itemId": 20210,
+      "codes": [
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "itemId": 20220,
+      "codes": [
+        5
+      ]
+    },
+    {
+      "itemId": 20230,
+      "codes": [
+        6
+      ]
+    },
+    {
+      "itemId": 50200,
+      "codes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "scope": "in-memory status-state and cure contract only; no standalone item-action UI or native infliction"
+}

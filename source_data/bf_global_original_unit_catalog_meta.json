@@ -1,0 +1,10 @@
+{
+  "schema": "bf-global-unit-archive-package-v1",
+  "catalogJsonSha256": "bf4ffef3f23b6b57c1b355886bf352d28e0354418b1fa93f9140f1a2e800a832",
+  "catalogJsonBytes": 877642,
+  "catalogGzipSha256": "318b656fe7764f67a27aff6ea1ce3247fca0944b77ef6a3ee93685045de4a731",
+  "catalogRecordCount": 2291,
+  "thumbnailZipSha256": "fb086e3dbccd8d430deed2267754b17db3316dcdde7f1b1835cef85d371c81a7",
+  "thumbnailCount": 127,
+  "sourceArchiveSha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556"
+}

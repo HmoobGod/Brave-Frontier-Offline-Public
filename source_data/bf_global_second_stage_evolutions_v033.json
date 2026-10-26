@@ -1,0 +1,397 @@
+{
+  "schema": "bf-global-second-stage-evolutions-2022-v033",
+  "provenance": {
+    "sourceMstSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceUnitPart001Sha256": "c0f03306a4e5efd2513c982ac58b12fff2d72c9ff978b19a839f8932536fc846",
+    "sourceUnitPart007Sha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556",
+    "source": "original 2022 Global source ZIP + English sgtext + decoded MST"
+  },
+  "records": {
+    "10013": {
+      "id": 10013,
+      "ownedBaseId": 10011,
+      "fromId": 10012,
+      "name": "Fire King Vargas",
+      "element": 1,
+      "rarity": 4,
+      "stats": {
+        "hp": 1995,
+        "atk": 826,
+        "def": 725,
+        "rec": 632
+      },
+      "originalLordStats": {
+        "hp": 3201,
+        "atk": 1113,
+        "def": 989,
+        "rec": 845
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "10132": 1,
+          "10131": 1
+        }
+      },
+      "bb": {
+        "name": "Infinity Burst",
+        "description": "6 combo Fire elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 10013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "19:110011:1,19:170:1,20:121:1,41:121:1,62:121:1,84:121:1,94:121:1,104:121:1",
+        "damageFramesRaw": "26:13:2:2,47:14:2:2,68:15:2:2,90:18:2:2,100:19:2:2,110:21:2:2",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      },
+      "frameCount": 18,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_10013.png": "8f3c97ac0b633eff38029fee6678e2a6bb7454ed0f4fd1a06d3b09a56c56813d",
+        "content/unit/cgg/unit_cgg_10013.csv": "e8d5ef7f16ef20c8db954e1d6431c2b654bcb4717b173c0246dd413213225095",
+        "content/unit/cgs/unit_idle_cgs_10013.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_10013.csv": "38375f13f2595b1c11cbe7f3de3a422441e96998625eb9064489c983bf664b3d",
+        "content/unit/cgs/unit_move_cgs_10013.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82",
+        "content/unit/img/unit_ills_thum_10013.png": "d154f0eb6ea1360e83dd9df56dea9905e3fd03866335fe3855ca3371f6f526aa"
+      }
+    },
+    "20013": {
+      "id": 20013,
+      "ownedBaseId": 20011,
+      "fromId": 20012,
+      "name": "Ice Queen Selena",
+      "element": 2,
+      "rarity": 4,
+      "stats": {
+        "hp": 1928,
+        "atk": 826,
+        "def": 661,
+        "rec": 743
+      },
+      "originalLordStats": {
+        "hp": 3055,
+        "atk": 1170,
+        "def": 901,
+        "rec": 1195
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "20132": 1,
+          "20131": 1
+        }
+      },
+      "bb": {
+        "name": "Blizzard Pain",
+        "description": "7 combo Water elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 20013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:200010:1,0:210:1,20:122:1,24:122:1,28:122:1",
+        "damageFramesRaw": "10:5:2:1,14:5:2:1,26:10:2:1,30:10:2:1,34:20:2:1,40:25:2:2,46:25:2:2",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_20013.png": "6a3ba1701bd61050ddbbad03cb1703392294944e32a0c9c5d3a2c5c9020b26a6",
+        "content/unit/cgg/unit_cgg_20013.csv": "e2a2b0c3f4214ca600d189818349212ae34bcbfeb0fcd442d82bde4ed5285fc3",
+        "content/unit/cgs/unit_idle_cgs_20013.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_20013.csv": "83ce7fc98524edd8e72f1d1ba0b351ed0f1742a4a563454e83cb2444a5978d12",
+        "content/unit/cgs/unit_move_cgs_20013.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82",
+        "content/unit/img/unit_ills_thum_20013.png": "4dc80589ceb4ab1b4622d707fce1f948c00018a08dfc0a6ef4bd6fcaa4c92b8d"
+      }
+    },
+    "30013": {
+      "id": 30013,
+      "ownedBaseId": 30011,
+      "fromId": 30012,
+      "name": "Earth Pike Lance",
+      "element": 3,
+      "rarity": 4,
+      "stats": {
+        "hp": 1980,
+        "atk": 832,
+        "def": 844,
+        "rec": 410
+      },
+      "originalLordStats": {
+        "hp": 3173,
+        "atk": 1188,
+        "def": 1162,
+        "rec": 613
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "30132": 1,
+          "30131": 1
+        }
+      },
+      "bb": {
+        "name": "Mystral Rage",
+        "description": "5 combo Earth elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 30013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:300010:1,0:260:1,20:123:1,26:123:1,32:123:1,38:123:1,44:123:1",
+        "damageFramesRaw": "26:20:2:1,32:20:2:4,38:20:2:4,44:20:2:4,50:20:2:4",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_30013.png": "9acd9c06d3556150f4b4a7e3612a01e3f9f34289a69a94096783aff70f717f09",
+        "content/unit/cgg/unit_cgg_30013.csv": "91a2d385516721d9be7c27706a2736186321cbfb216a4ca497a09c4dc513a353",
+        "content/unit/cgs/unit_idle_cgs_30013.csv": "1870dd0c8d34e07614e09edcc8faeb4209bd2892a2de79067270869229309187",
+        "content/unit/cgs/unit_atk_cgs_30013.csv": "452fe2fa6ec36296a774b067e35c3b3f7949bfe48cad37119cf929a86213f3c4",
+        "content/unit/cgs/unit_move_cgs_30013.csv": "aa89758bdd7d950ad09b5351c16bc2e2bbe6ba041ae5c39e272287fd1a3fb48c",
+        "content/unit/img/unit_ills_thum_30013.png": "1ed5000f219e9a48634a4172b7b65e3c8ec86aaab8118b90976e5f139f00308c"
+      }
+    },
+    "40013": {
+      "id": 40013,
+      "ownedBaseId": 40011,
+      "fromId": 40012,
+      "name": "Thunder King Eze",
+      "element": 4,
+      "rarity": 4,
+      "stats": {
+        "hp": 2205,
+        "atk": 906,
+        "def": 618,
+        "rec": 384
+      },
+      "originalLordStats": {
+        "hp": 3509,
+        "atk": 1294,
+        "def": 838,
+        "rec": 565
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "40132": 1,
+          "40131": 1
+        }
+      },
+      "bb": {
+        "name": "Thunder Retribution",
+        "description": "5 combo Thunder elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 40013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "23:300:1,24:400010:1,24:124:1,33:300:1,34:400010:1,34:124:1",
+        "damageFramesRaw": "30:25:2:4,40:30:2:4,60:15:2:2,75:15:2:2,90:15:2:2",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      },
+      "frameCount": 13,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_40013.png": "cb29d271a9e93625202c52e6c0ba54efe84ee2f90739d72fc78ea487203feb48",
+        "content/unit/cgg/unit_cgg_40013.csv": "29b6b1351b636b4ea07a6a9cdaf8af61bb4fe111c9c8127d829df2529ad33600",
+        "content/unit/cgs/unit_idle_cgs_40013.csv": "6b8e8541d517e4e401cba98d2c726fa88f620e1d360ae15d72487aac70d35214",
+        "content/unit/cgs/unit_atk_cgs_40013.csv": "60a1dca4b1e07181c6eec7d97b2cd5e1d106c4ae205d77754379842f380c0f13",
+        "content/unit/cgs/unit_move_cgs_40013.csv": "df69b8dde691d80b3c24a5f1871c4ea031f5885b12b3a8fd4eeda2ce6e717d9a",
+        "content/unit/img/unit_ills_thum_40013.png": "d8f4f3eefcadbce84d26f2fd5c15ed3e385eefb063caabe9312ff80c7dfdef66"
+      }
+    },
+    "50013": {
+      "id": 50013,
+      "ownedBaseId": 50011,
+      "fromId": 50012,
+      "name": "Holy Knight Atro",
+      "element": 5,
+      "rarity": 4,
+      "stats": {
+        "hp": 1887,
+        "atk": 819,
+        "def": 819,
+        "rec": 819
+      },
+      "originalLordStats": {
+        "hp": 3014,
+        "atk": 1104,
+        "def": 1104,
+        "rec": 1104
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "50122": 1,
+          "50121": 1
+        }
+      },
+      "bb": {
+        "name": "Thousand Nemesis",
+        "description": "4 combo Light elemental attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 50013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "17:500010:1,22:500020:1,23:125:1,29:125:1,35:125:1,41:125:1",
+        "damageFramesRaw": "29:25:2:4,35:25:2:4,41:25:2:4,47:25:2:4",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_50013.png": "19468afab4d3ccb5aca046c1020f61a709ca2442d7cf7cee9a16fe6f95f260ca",
+        "content/unit/cgg/unit_cgg_50013.csv": "b5160c2b45f642d0f9ea47900984b57075c6f97b7325f013642fd9f242aee24d",
+        "content/unit/cgs/unit_idle_cgs_50013.csv": "1870dd0c8d34e07614e09edcc8faeb4209bd2892a2de79067270869229309187",
+        "content/unit/cgs/unit_atk_cgs_50013.csv": "1b4b75993cb95e0200e4e73a5c8992126852b5a904c118902cd4ff1a61115f03",
+        "content/unit/cgs/unit_move_cgs_50013.csv": "aa89758bdd7d950ad09b5351c16bc2e2bbe6ba041ae5c39e272287fd1a3fb48c",
+        "content/unit/img/unit_ills_thum_50013.png": "cb641de31958999d85b9674e5ab5ec91fddcdfe1f6317880a92bbab9cc1904fa"
+      }
+    },
+    "60023": {
+      "id": 60023,
+      "ownedBaseId": 60021,
+      "fromId": 60022,
+      "name": "God Blade Mifune",
+      "element": 6,
+      "rarity": 4,
+      "stats": {
+        "hp": 2016,
+        "atk": 1018,
+        "def": 480,
+        "rec": 540
+      },
+      "originalLordStats": {
+        "hp": 2993,
+        "atk": 1472,
+        "def": 659,
+        "rec": 728
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "60122": 1,
+          "60121": 1,
+          "60120": 2
+        }
+      },
+      "bb": {
+        "name": "Aurora Flash",
+        "description": "4 combo Dark elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 60023,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "10:600160:1,24:271:1,25:126:1,26:126:1,27:126:1,28:126:1",
+        "damageFramesRaw": "31:25:2:2,32:25:2:2,33:25:2:2,34:25:2:2",
+        "levelInfo": "1:2500:90,50,0,0,0,0|2:2500:100,50,0,0,0,0|3:2500:110,50,0,0,0,0|4:2500:120,50,0,0,0,0|5:2500:130,50,0,0,0,0|6:2500:140,50,0,0,0,0|7:2500:150,50,0,0,0,0|8:2500:160,50,0,0,0,0|9:2500:170,50,0,0,0,0|10:2500:180,50,0,0,0,0",
+        "effectCode": 2500,
+        "levelPower": [
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160,
+          170,
+          180
+        ]
+      },
+      "frameCount": 14,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_60023.png": "66d19646f003e2baaa72bbf9253534a633471b74d7955a8d62ef9b8c0d058eb1",
+        "content/unit/cgg/unit_cgg_60023.csv": "c8b0436df859f4e3de946430bfddc331d7c91b74ba52d5240f2084981863ea14",
+        "content/unit/cgs/unit_idle_cgs_60023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_60023.csv": "e0bfad91ce6248064bf04498c2bc0576fccf92053a6ce72d96bc279f4686dd9c",
+        "content/unit/cgs/unit_move_cgs_60023.csv": "eb0770af1502d204d5717ca52b6da3fa15c2ed1770d612822764beed9fae8a8f",
+        "content/unit/img/unit_ills_thum_60023.png": "68615450cced7f050e987b9f3fe263e571a0a04d6cd7ed58908f672ac11a45c1"
+      }
+    }
+  },
+  "sourcePackSha256": "01bb47d1e63b7fbaf464b283287faa67855df11418e372584bf73d8139a6c914"
+}

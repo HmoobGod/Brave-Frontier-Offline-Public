@@ -1,0 +1,1213 @@
+{
+  "version": "0.13",
+  "source": "3-mst-translated/F_UNIT_MST_1/2 and F_SKILL_MST_1/2",
+  "profiles": {
+    "10011": {
+      "unitId": 10011,
+      "bbId": 10011,
+      "skillNameSource": "MST_SKILLS_10011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "19:110011:1,20:121:1,41:121:1,62:121:1,83:121:1,104:121:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "26:20:2:2,47:20:2:2,68:20:2:2,89:20:2:2,110:20:2:2",
+      "groups": [
+        [
+          [
+            26,
+            20,
+            2,
+            2
+          ],
+          [
+            47,
+            20,
+            2,
+            2
+          ],
+          [
+            68,
+            20,
+            2,
+            2
+          ],
+          [
+            89,
+            20,
+            2,
+            2
+          ],
+          [
+            110,
+            20,
+            2,
+            2
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "20011": {
+      "unitId": 20011,
+      "bbId": 20011,
+      "skillNameSource": "MST_SKILLS_20011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:200010:1,20:122:1,24:122:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "10:20:2:1,14:20:2:1,26:30:2:1,30:30:2:1",
+      "groups": [
+        [
+          [
+            10,
+            20,
+            2,
+            1
+          ],
+          [
+            14,
+            20,
+            2,
+            1
+          ],
+          [
+            26,
+            30,
+            2,
+            1
+          ],
+          [
+            30,
+            30,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 4
+    },
+    "30011": {
+      "unitId": 30011,
+      "bbId": 30011,
+      "skillNameSource": "MST_SKILLS_30011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:300010:1,20:123:1,26:123:1,32:123:1,38:123:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "26:25:2:1,32:25:2:4,38:25:2:4,44:25:2:4",
+      "groups": [
+        [
+          [
+            26,
+            25,
+            2,
+            1
+          ],
+          [
+            32,
+            25,
+            2,
+            4
+          ],
+          [
+            38,
+            25,
+            2,
+            4
+          ],
+          [
+            44,
+            25,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 4
+    },
+    "40011": {
+      "unitId": 40011,
+      "bbId": 40011,
+      "skillNameSource": "MST_SKILLS_40011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "23:300:1,24:124:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "30:50:2:4,40:50:2:4",
+      "groups": [
+        [
+          [
+            30,
+            50,
+            2,
+            4
+          ],
+          [
+            40,
+            50,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "50011": {
+      "unitId": 50011,
+      "bbId": 50011,
+      "skillNameSource": "MST_SKILLS_50011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "17:500010:1,23:125:1,29:125:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "29:50:2:1,35:50:2:1",
+      "groups": [
+        [
+          [
+            29,
+            50,
+            2,
+            1
+          ],
+          [
+            35,
+            50,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "60011": {
+      "unitId": 60011,
+      "bbId": 60011,
+      "skillNameSource": "MST_SKILLS_60011_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "48:600070:1,55:126:1,70:126:1,85:126:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "61:33:2:4,76:33:2:4,91:34:2:4",
+      "groups": [
+        [
+          [
+            61,
+            33,
+            2,
+            4
+          ],
+          [
+            76,
+            33,
+            2,
+            4
+          ],
+          [
+            91,
+            34,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    },
+    "10021": {
+      "unitId": 10021,
+      "bbId": 10021,
+      "skillNameSource": "MST_SKILLS_10021_NAME",
+      "skillTypeRaw": "1@11",
+      "targetTypeRaw": "2@2",
+      "targetAreaRaw": "1@1",
+      "effectFramesRaw": "8:121:1,8:161:1,41:121:1,41:161:1",
+      "skillStartFrameRaw": "0@0",
+      "damageFramesRaw": "14:40:3:1,47:60:2:1@0:100:2:1",
+      "groups": [
+        [
+          [
+            14,
+            40,
+            3,
+            1
+          ],
+          [
+            47,
+            60,
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100,
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "20021": {
+      "unitId": 20021,
+      "bbId": 20021,
+      "skillNameSource": "MST_SKILLS_20021_NAME",
+      "skillTypeRaw": "1@11",
+      "targetTypeRaw": "2@2",
+      "targetAreaRaw": "1@1",
+      "effectFramesRaw": "1:200020:1,2:122:1,2:200030:1,4:190:1,8:200020:1,9:122:1,9:200030:1,11:190:1,14:200020:1,15:122:1,15:200030:1,17:190:1,20:200020:1,21:122:1,21:200030:1,23:190:1",
+      "skillStartFrameRaw": "0@0",
+      "damageFramesRaw": "8:30:2:1,15:20:2:1,21:30:2:1,27:20:2:1@0:100:2:1",
+      "groups": [
+        [
+          [
+            8,
+            30,
+            2,
+            1
+          ],
+          [
+            15,
+            20,
+            2,
+            1
+          ],
+          [
+            21,
+            30,
+            2,
+            1
+          ],
+          [
+            27,
+            20,
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100,
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 4
+    },
+    "30021": {
+      "unitId": 30021,
+      "bbId": 30021,
+      "skillNameSource": "MST_SKILLS_30021_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "24:300020:1,28:112:1,42:112:1,56:112:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "28:33:2:1,42:33:2:1,56:34:2:1",
+      "groups": [
+        [
+          [
+            28,
+            33,
+            2,
+            1
+          ],
+          [
+            42,
+            33,
+            2,
+            1
+          ],
+          [
+            56,
+            34,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    },
+    "40021": {
+      "unitId": 40021,
+      "bbId": 40021,
+      "skillNameSource": "MST_SKILLS_40021_NAME",
+      "skillTypeRaw": "5",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "49:400040:1,70:400:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "100:100:2:1",
+      "groups": [
+        [
+          [
+            100,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "50021": {
+      "unitId": 50021,
+      "bbId": 50021,
+      "skillNameSource": "MST_SKILLS_50021_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "33:200061:1,33:320:1,34:125:1,40:125:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "40:50:2:1,46:50:2:1",
+      "groups": [
+        [
+          [
+            40,
+            50,
+            2,
+            1
+          ],
+          [
+            46,
+            50,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "60021": {
+      "unitId": 60021,
+      "bbId": 60021,
+      "skillNameSource": "MST_SKILLS_60021_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "10:600160:1,18:271:1,19:126:1,24:126:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "25:50:2:2,30:50:2:2",
+      "groups": [
+        [
+          [
+            25,
+            50,
+            2,
+            2
+          ],
+          [
+            30,
+            50,
+            2,
+            2
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "10041": {
+      "unitId": 10041,
+      "bbId": 10041,
+      "skillNameSource": "MST_SKILLS_10041_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "54:100020:1,55:100010:1,61:100010:1,67:100010:1,73:100010:1,79:100010:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "56:20:2:2,62:20:3:2,68:20:2:2,74:20:3:2,80:20:2:2",
+      "groups": [
+        [
+          [
+            56,
+            20,
+            2,
+            2
+          ],
+          [
+            62,
+            20,
+            3,
+            2
+          ],
+          [
+            68,
+            20,
+            2,
+            2
+          ],
+          [
+            74,
+            20,
+            3,
+            2
+          ],
+          [
+            80,
+            20,
+            2,
+            2
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "20041": {
+      "unitId": 20041,
+      "bbId": 20041,
+      "skillNameSource": "MST_SKILLS_20041_NAME",
+      "skillTypeRaw": "2",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:200040:1,140:520:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "146:100:2:1",
+      "groups": [
+        [
+          [
+            146,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "30041": {
+      "unitId": 30041,
+      "bbId": 30041,
+      "skillNameSource": "MST_SKILLS_30041_NAME",
+      "skillTypeRaw": "2",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:300030:1,80:520:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "86:100:2:1",
+      "groups": [
+        [
+          [
+            86,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "40041": {
+      "unitId": 40041,
+      "bbId": 40041,
+      "skillNameSource": "MST_SKILLS_40041_NAME",
+      "skillTypeRaw": "2",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "44:400050:1,124:520:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "130:100:2:1",
+      "groups": [
+        [
+          [
+            130,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "50041": {
+      "unitId": 50041,
+      "bbId": 50041,
+      "skillNameSource": "MST_SKILLS_50041_NAME",
+      "skillTypeRaw": "2",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "6:500030:1,86:520:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "92:100:2:1",
+      "groups": [
+        [
+          [
+            92,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "60041": {
+      "unitId": 60041,
+      "bbId": 60041,
+      "skillNameSource": "MST_SKILLS_60041_NAME",
+      "skillTypeRaw": "1@11",
+      "targetTypeRaw": "2@2",
+      "targetAreaRaw": "1@1",
+      "effectFramesRaw": "50:600030:1,83:360:1",
+      "skillStartFrameRaw": "0@0",
+      "damageFramesRaw": "74:15:2:1,79:15:2:1,84:15:2:1,89:15:2:1,94:20:2:1,99:20:2:1@0:100:2:1",
+      "groups": [
+        [
+          [
+            74,
+            15,
+            2,
+            1
+          ],
+          [
+            79,
+            15,
+            2,
+            1
+          ],
+          [
+            84,
+            15,
+            2,
+            1
+          ],
+          [
+            89,
+            15,
+            2,
+            1
+          ],
+          [
+            94,
+            20,
+            2,
+            1
+          ],
+          [
+            99,
+            20,
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100,
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 6
+    },
+    "10012": {
+      "unitId": 10012,
+      "bbId": 10012,
+      "skillNameSource": "MST_SKILLS_10012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "19:110011:1,20:121:1,41:121:1,62:121:1,83:121:1,104:121:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "26:20:2:2,47:20:2:2,68:20:2:2,89:20:2:2,110:20:2:2",
+      "groups": [
+        [
+          [
+            26,
+            20,
+            2,
+            2
+          ],
+          [
+            47,
+            20,
+            2,
+            2
+          ],
+          [
+            68,
+            20,
+            2,
+            2
+          ],
+          [
+            89,
+            20,
+            2,
+            2
+          ],
+          [
+            110,
+            20,
+            2,
+            2
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "20012": {
+      "unitId": 20012,
+      "bbId": 20012,
+      "skillNameSource": "MST_SKILLS_20012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:200010:1,20:122:1,24:122:1,28:122:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "10:15:2:1,14:15:2:1,26:25:2:1,30:25:2:1,34:20:2:1",
+      "groups": [
+        [
+          [
+            10,
+            15,
+            2,
+            1
+          ],
+          [
+            14,
+            15,
+            2,
+            1
+          ],
+          [
+            26,
+            25,
+            2,
+            1
+          ],
+          [
+            30,
+            25,
+            2,
+            1
+          ],
+          [
+            34,
+            20,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "30012": {
+      "unitId": 30012,
+      "bbId": 30012,
+      "skillNameSource": "MST_SKILLS_30012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "0:300010:1,20:123:1,26:123:1,32:123:1,38:123:1,44:123:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "26:20:2:1,32:20:2:4,38:20:2:4,44:20:2:4,50:20:2:4",
+      "groups": [
+        [
+          [
+            26,
+            20,
+            2,
+            1
+          ],
+          [
+            32,
+            20,
+            2,
+            4
+          ],
+          [
+            38,
+            20,
+            2,
+            4
+          ],
+          [
+            44,
+            20,
+            2,
+            4
+          ],
+          [
+            50,
+            20,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "40012": {
+      "unitId": 40012,
+      "bbId": 40012,
+      "skillNameSource": "MST_SKILLS_40012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "23:300:1,24:124:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "30:50:2:4,40:50:2:4",
+      "groups": [
+        [
+          [
+            30,
+            50,
+            2,
+            4
+          ],
+          [
+            40,
+            50,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 2
+    },
+    "50012": {
+      "unitId": 50012,
+      "bbId": 50012,
+      "skillNameSource": "MST_SKILLS_50012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "17:500010:1,23:125:1,29:125:1,35:125:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "29:33:2:1,35:33:2:1,41:34:2:1",
+      "groups": [
+        [
+          [
+            29,
+            33,
+            2,
+            1
+          ],
+          [
+            35,
+            33,
+            2,
+            1
+          ],
+          [
+            41,
+            34,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    },
+    "60012": {
+      "unitId": 60012,
+      "bbId": 60012,
+      "skillNameSource": "MST_SKILLS_60012_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "48:600070:1,55:126:1,67:126:1,79:126:1,91:126:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "61:25:2:4,73:25:2:4,85:25:2:4,97:25:2:4",
+      "groups": [
+        [
+          [
+            61,
+            25,
+            2,
+            4
+          ],
+          [
+            73,
+            25,
+            2,
+            4
+          ],
+          [
+            85,
+            25,
+            2,
+            4
+          ],
+          [
+            97,
+            25,
+            2,
+            4
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 4
+    },
+    "10022": {
+      "unitId": 10022,
+      "bbId": 10022,
+      "skillNameSource": "MST_SKILLS_10022_NAME",
+      "skillTypeRaw": "1@11",
+      "targetTypeRaw": "2@2",
+      "targetAreaRaw": "1@1",
+      "effectFramesRaw": "7:121:1,7:161:1,12:121:1,12:161:1,40:121:1,40:161:1,45:121:1,45:161:1",
+      "skillStartFrameRaw": "0@0",
+      "damageFramesRaw": "13:25:3:1,18:15:2:1,46:40:3:1,51:20:2:1@0:100:2:1",
+      "groups": [
+        [
+          [
+            13,
+            25,
+            3,
+            1
+          ],
+          [
+            18,
+            15,
+            2,
+            1
+          ],
+          [
+            46,
+            40,
+            3,
+            1
+          ],
+          [
+            51,
+            20,
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100,
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 4
+    },
+    "20022": {
+      "unitId": 20022,
+      "bbId": 20022,
+      "skillNameSource": "MST_SKILLS_20022_NAME",
+      "skillTypeRaw": "1@11",
+      "targetTypeRaw": "2@2",
+      "targetAreaRaw": "1@1",
+      "effectFramesRaw": "2:200020:1,3:122:1,3:200030:1,5:190:1,11:200020:1,12:122:1,12:200030:1,14:190:1,20:200020:1,21:122:1,21:200030:1,23:190:1,29:200020:1,30:122:1,30:200030:1,32:190:1,38:200020:1,39:122:1,39:200030:1,41:190:1",
+      "skillStartFrameRaw": "0@0",
+      "damageFramesRaw": "9:25:2:1,18:15:2:1,27:25:2:1,36:15:2:1,45:20:2:1@0:100:2:1",
+      "groups": [
+        [
+          [
+            9,
+            25,
+            2,
+            1
+          ],
+          [
+            18,
+            15,
+            2,
+            1
+          ],
+          [
+            27,
+            25,
+            2,
+            1
+          ],
+          [
+            36,
+            15,
+            2,
+            1
+          ],
+          [
+            45,
+            20,
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100,
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 5
+    },
+    "30022": {
+      "unitId": 30022,
+      "bbId": 30022,
+      "skillNameSource": "MST_SKILLS_30022_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "24:300020:1,28:112:1,42:112:1,56:112:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "28:33:2:1,42:33:2:1,56:34:2:1",
+      "groups": [
+        [
+          [
+            28,
+            33,
+            2,
+            1
+          ],
+          [
+            42,
+            33,
+            2,
+            1
+          ],
+          [
+            56,
+            34,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    },
+    "40022": {
+      "unitId": 40022,
+      "bbId": 40022,
+      "skillNameSource": "MST_SKILLS_40022_NAME",
+      "skillTypeRaw": "5",
+      "targetTypeRaw": "1",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "49:400040:1,70:400:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "100:100:2:1",
+      "groups": [
+        [
+          [
+            100,
+            100,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": false,
+      "firstGroupHitCount": 1
+    },
+    "50022": {
+      "unitId": 50022,
+      "bbId": 50022,
+      "skillNameSource": "MST_SKILLS_50022_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "33:200061:1,33:320:1,34:125:1,40:125:1,42:125:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "40:33:2:1,46:33:2:1,48:34:2:1",
+      "groups": [
+        [
+          [
+            40,
+            33,
+            2,
+            1
+          ],
+          [
+            46,
+            33,
+            2,
+            1
+          ],
+          [
+            48,
+            34,
+            2,
+            1
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    },
+    "60022": {
+      "unitId": 60022,
+      "bbId": 60022,
+      "skillNameSource": "MST_SKILLS_60022_NAME",
+      "skillTypeRaw": "1",
+      "targetTypeRaw": "2",
+      "targetAreaRaw": "2",
+      "effectFramesRaw": "10:600160:1,24:271:1,25:126:1,26:126:1,27:126:1",
+      "skillStartFrameRaw": "0",
+      "damageFramesRaw": "31:33:2:2,32:33:2:2,33:34:2:2",
+      "groups": [
+        [
+          [
+            31,
+            33,
+            2,
+            2
+          ],
+          [
+            32,
+            33,
+            2,
+            2
+          ],
+          [
+            33,
+            34,
+            2,
+            2
+          ]
+        ]
+      ],
+      "groupWeights": [
+        100
+      ],
+      "offensiveCandidate": true,
+      "firstGroupHitCount": 3
+    }
+  },
+  "summary": {
+    "unitForms": 30,
+    "firstGroupOffensiveCandidates": 24,
+    "nonOffensiveCandidates": 6,
+    "multipleAtGroups": 5,
+    "tickFrequency": "60 UNVERIFIED",
+    "damageFormula": "DEMO",
+    "skillSemantics": "UNVERIFIED"
+  },
+  "htmlSHA256": "07dd3d328146d3e78c8475a7054161ad485b42cb1bf8b321914dfbde02af1be3"
+}

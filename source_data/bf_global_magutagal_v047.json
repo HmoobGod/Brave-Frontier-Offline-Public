@@ -1,0 +1,125 @@
+{
+  "schema": "bf-global-magutagal-v047",
+  "sources": {
+    "masterZip": "mst-decoded.zip",
+    "masterSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "missionPath": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "dungeonPath": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+    "dungeonSha256": "16f090514d65846f6bd4a9998b50d6c810bc806a79858c0ff766cdb1a22536fc",
+    "languageZip": "BF1_sgtext_part001.zip",
+    "languageSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "englishNameZipSha256": "b73ab7460bacc1503e26ccaf833e86ce4d0efa1c74e7bc84fb1cfef92807f9ea",
+    "englishDescZipSha256": "d3a7f4fb27487394f6bbcf2356a0498b8a6771b7c0fc0898a6289f535fa0f8a9",
+    "englishDungeonZipSha256": "beb21ca7b2f0687f74b9104dbb972e1c790dfb865ab7bb07e4fb07a9e86c46df",
+    "originalArtZip": "BF1_dungeon_part001.zip",
+    "artZipSha256": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644",
+    "originalArtPath": "content/dungeon/dungeon_battle_10500.jpg",
+    "backgroundSha256": "db81dbe675c15ffc4ca0e46ca0ed862f36489f22197e06bb3281d8512c9dd923",
+    "originalQuestMusic": "bf014_map_swamp.mp3",
+    "originalMission53ExtraReward": "8:0:1:0:0"
+  },
+  "dungeon": {
+    "id": 50,
+    "name": "Magutagal Wetlands",
+    "nameKey": "MST_DUNGEONS_DUNGEON_50_NAME",
+    "areaId": 100,
+    "landId": 1,
+    "x": 252,
+    "y": 420,
+    "requires": 43,
+    "background": "dungeon_battle_10500.jpg"
+  },
+  "quests": [
+    {
+      "missionId": 50,
+      "label": "Mission 50",
+      "missionNameKey": "MST_DUNGEONS_MISSION_50_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_50_NAME",
+      "dungeonId": 50,
+      "requires": 43,
+      "battles": 5,
+      "exp": 41,
+      "zel": 400,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10500.jpg"
+    },
+    {
+      "missionId": 51,
+      "label": "Mission 51",
+      "missionNameKey": "MST_DUNGEONS_MISSION_51_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_50_NAME",
+      "dungeonId": 50,
+      "requires": 50,
+      "battles": 5,
+      "exp": 47,
+      "zel": 450,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10500.jpg"
+    },
+    {
+      "missionId": 52,
+      "label": "Mission 52",
+      "missionNameKey": "MST_DUNGEONS_MISSION_52_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_50_NAME",
+      "dungeonId": 50,
+      "requires": 51,
+      "battles": 5,
+      "exp": 59,
+      "zel": 500,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10500.jpg"
+    },
+    {
+      "missionId": 53,
+      "label": "Mission 53",
+      "missionNameKey": "MST_DUNGEONS_MISSION_53_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_50_NAME",
+      "dungeonId": 50,
+      "requires": 52,
+      "battles": 6,
+      "exp": 87,
+      "zel": 600,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10500.jpg"
+    }
+  ],
+  "english": [
+    {
+      "id": 50,
+      "key": "MST_DUNGEONS_MISSION_50_NAME",
+      "name": "Thunder Blasting Wetlands",
+      "descriptionKey": "MST_DUNGEONS_MISSION_50_DESCRIPTION",
+      "description": "Lightning occasionally roars throughout this damp land. It's quite unpleasant here. Prepare yourself for thunder."
+    },
+    {
+      "id": 51,
+      "key": "MST_DUNGEONS_MISSION_51_NAME",
+      "name": "Commander of the Thunder",
+      "descriptionKey": "MST_DUNGEONS_MISSION_51_DESCRIPTION",
+      "description": "It looks to be a vast wetland. The terrain may prove more troublesome than the thunder-wielding enemies hiding in it."
+    },
+    {
+      "id": 52,
+      "key": "MST_DUNGEONS_MISSION_52_NAME",
+      "name": "Pirate of the Wetlands",
+      "descriptionKey": "MST_DUNGEONS_MISSION_52_DESCRIPTION",
+      "description": "Seems there are bandits around here, too. They used to call the skies their own, but what strength that must've taken..."
+    },
+    {
+      "id": 53,
+      "key": "MST_DUNGEONS_MISSION_53_NAME",
+      "name": "The Thundering Strategist",
+      "descriptionKey": "MST_DUNGEONS_MISSION_53_DESCRIPTION",
+      "description": "At the end of these unpleasant wetlands the way is blocked by a former hero of Grand Gaia who was summoned by Maxwell."
+    }
+  ],
+  "limitations": [
+    "The source records establish quest identities, unlock chain, energy, standard experience/Zel/Karma, English descriptions and background only",
+    "Original enemy wave assignments, item reward code semantics, status effects and native battle AI remain unknown and explicitly DEMO",
+    "Source identifies original swamp BGM filename but this version does not restore that soundtrack"
+  ]
+}

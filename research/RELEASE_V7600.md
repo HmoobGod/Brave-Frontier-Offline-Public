@@ -1,0 +1,9 @@
+# Brave Frontier Global v76.00 — Original Nullifier (#20250) Status Prevention
+
+Base: v75 Saint Light candidate commit bdc6bb02478b11fc8fdd030b731dfb864fe11a31; promote only after complete green inherited CI, and exact v76 CI plus Android signed APK.
+
+Verified translated 2022 `F_ITEM_MST_Ver1027.json` identifies item **#20250 抗疫薬** with battleEffectGroupId 530, **skillTypeId 17**, **allied party target 2**, and **`100,100,100,100,100,100,3,0`** payload. Historical 2014–2017 community item documentation confirms the matching Nullifier/Vaccine-type item makes the entire party immune to ailments **for 3 turns**. Independent Global source descriptions distinguish **Status Negation** from **Status Cure** (<https://bravefrontierglobal.fandom.com/wiki/Status_Infliction>). Therefore existing Poison/Weakness/Sickness/Injury/Curse/Paralysis are **not removed**; new inflictions are prevented during protection.
+
+v76 implements a guarded hook inside v57's existing `inflict(slot,code)` method, delegating only when optional `BFGlobalStatusNegationV7600` is loaded. It protects all currently living allies, checks original unit identity, and clears protection at the end of three **observed enemy phases**, retaining all earlier status consequences and cures. One temporary battle charge and Guard cost are explicitly DEMO choices; no original enemy proc rates, item inventory or broader status resistances are invented. The optional module can be absent with no change to historical behavior. All code is battle-local and resets with S.
+
+CI tests cover all six status codes on all six allies, no cure of preexisting ailments, idempotent three-round expiration, manual cure after expiration, session stock, Guard, training isolation and v7 save stability. Packaged signer, INTERNET omission, original unit data, quests and source archives remain untouched.

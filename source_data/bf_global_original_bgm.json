@@ -1,0 +1,45 @@
+{
+  "schema": "bf-global-original-quest-audio-v1",
+  "sourcePack": "BF1_sound_part001.zip",
+  "originalArchivePath": "Brave Frontier/Original Assets/BF1 Asset Packs/BF1_sound_part001.zip",
+  "notes": [
+    "Original MP3 bytes copied losslessly; no transcoding or normalization.",
+    "Battle theme mapping comes from original F_MISSION_MST_1_Ver1118 field missionBattleMusic.",
+    "Boss track filename occurs in missionBossBattleMusic but specific boss encounter timing is unverified. Boss preview requires manual tap; never autoplay.",
+    "User audio defaults OFF and is not stored in save v7. No network streaming."
+  ],
+  "tracks": [
+    {
+      "file": "bf010_map_grass.mp3",
+      "sha256": "2b346d22c843a43d62abdac25ce02aa333e40199c7b5070f6d30530e8cbbe0f1",
+      "bytes": 1027878,
+      "missionIds": [
+        1,
+        2,
+        10,
+        11,
+        12
+      ],
+      "sourceField": "missionBattleMusic"
+    },
+    {
+      "file": "bf011_map_firecave.mp3",
+      "sha256": "0ce693931ed45607c791e1499117fe803d2930da21f05aa1b8548fd3be9df03e",
+      "bytes": 831126,
+      "missionIds": [
+        20,
+        21,
+        22,
+        23
+      ],
+      "sourceField": "missionBattleMusic"
+    },
+    {
+      "file": "bf006_btl_boss.mp3",
+      "sha256": "e9729c2823c2b606133b415866c7b16180f310b78ef75797c2ea61a2403c6294",
+      "bytes": 1292616,
+      "missionIds": [],
+      "sourceField": "missionBossBattleMusic"
+    }
+  ]
+}

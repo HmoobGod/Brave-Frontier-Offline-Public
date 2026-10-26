@@ -1,0 +1,297 @@
+{
+  "schema": "bf-global-2022-mistral-raw-mission-evidence-v056",
+  "source": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "file": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "fileSha256": "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83",
+    "columns": [
+      "missionId",
+      "MISSION_8f4NYKxb",
+      "missionMimicInfo",
+      "missionRewards",
+      "cutsceneFile",
+      "missionNpcId"
+    ],
+    "limitations": [
+      "Opaque MISSION_8f4NYKxb tokens are preserved exactly; do NOT treat as native wave assignments or boss/unit IDs.",
+      "missionMimicInfo and missionRewards are opaque serialized fields; no decoded chances/items.",
+      "Filename references do not establish accessible original cutscenes or playable content.",
+      "Raw IDs are reference-only and must never be used to award loot or change combat."
+    ]
+  },
+  "rows": [
+    {
+      "missionId": 1,
+      "rawEncounterRef": "3:10100,1:10101,0:10102",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 2,
+      "rawEncounterRef": "3:10100,1:10101,0:10102",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 10,
+      "rawEncounterRef": "3:10100,1:10101,0:10102",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,map1-dungeon0-1end.txt",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 11,
+      "rawEncounterRef": "3:10100,1:10101,0:10102",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,map1-dungeon0-2end.txt",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 12,
+      "rawEncounterRef": "3:10100,1:10101,0:10102",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 20,
+      "rawEncounterRef": "3:10200,1:10201,0:10202",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 21,
+      "rawEncounterRef": "3:10200,1:10201,0:10202",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,map1-dungeon0-3end.txt",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 22,
+      "rawEncounterRef": "3:10200,1:10201,0:10202",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 23,
+      "rawEncounterRef": "3:10200,1:10201,0:10202",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 30,
+      "rawEncounterRef": "3:10300,1:10301",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 31,
+      "rawEncounterRef": "3:10300,1:10301",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 32,
+      "rawEncounterRef": "3:10300,1:10301",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 33,
+      "rawEncounterRef": "3:10300,1:10301",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 40,
+      "rawEncounterRef": "3:10400,1:10402",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 41,
+      "rawEncounterRef": "3:10400,1:10402",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 42,
+      "rawEncounterRef": "3:10400,1:10402",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 43,
+      "rawEncounterRef": "3:10400,1:10402",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 50,
+      "rawEncounterRef": "3:10500,1:10501,0:10502",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 51,
+      "rawEncounterRef": "3:10500,1:10501,0:10502",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 52,
+      "rawEncounterRef": "3:10500,1:10501,0:10502",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 53,
+      "rawEncounterRef": "3:10500,1:10501,0:10502",
+      "rawMimicInfo": "0,0,0:0,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 60,
+      "rawEncounterRef": "1:10600",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 61,
+      "rawEncounterRef": "1:10600",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 62,
+      "rawEncounterRef": "1:10600",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 63,
+      "rawEncounterRef": "1:10600",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 70,
+      "rawEncounterRef": "3:10400,2:10701,1:10702,0:10703",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 71,
+      "rawEncounterRef": "3:10400,2:10701,1:10702,0:10703",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 72,
+      "rawEncounterRef": "3:10400,2:10701,1:10702,0:10703",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 73,
+      "rawEncounterRef": "3:10400,2:10701,1:10702,0:10703",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 81,
+      "rawEncounterRef": "1:10800,0:10801",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 82,
+      "rawEncounterRef": "1:10800,0:10801",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 83,
+      "rawEncounterRef": "1:10800,0:10801",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 84,
+      "rawEncounterRef": "1:10800,0:10801",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    },
+    {
+      "missionId": 85,
+      "rawEncounterRef": "1:10800,0:10801",
+      "rawMimicInfo": "1,10,100:1000,0:0",
+      "rawRewards": "8:0:1:0:0",
+      "rawCutscene": "0,0",
+      "rawMissionNpcId": "0"
+    }
+  ]
+}

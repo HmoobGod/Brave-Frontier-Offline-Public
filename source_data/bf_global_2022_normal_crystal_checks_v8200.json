@@ -1,0 +1,314 @@
+{
+  "schema": "bf-global-2022-normal-attack-drop-checks-v8200",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "tableParts": [
+      {
+        "file": "3-mst-translated/F_UNIT_MST_1_Ver1084.json",
+        "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645",
+        "sourceRows": 1146
+      },
+      {
+        "file": "3-mst-translated/F_UNIT_MST_2_Ver1084.json",
+        "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b",
+        "sourceRows": 1145
+      }
+    ],
+    "column": "dropCheckCount",
+    "selection": "Only the 71 valid-weight normal hit forms from bf700_original_normal_hits.js; unit 10023 excluded for weight 130 not 100",
+    "interpretation": "Global base BC rolls occur dropCheckCount times per original normal hit; exact enemy BC resistance and pickup distribution unavailable."
+  },
+  "rows": [
+    {
+      "unitId": 10011,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10012,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10013,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10014,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 10015,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 10021,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10022,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10024,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10025,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 10042,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20011,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 20012,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 20013,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 20014,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 20015,
+      "dropCheckCount": 4
+    },
+    {
+      "unitId": 20021,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20022,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20023,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20024,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20025,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 20042,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30011,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 30012,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 30013,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 30014,
+      "dropCheckCount": 4
+    },
+    {
+      "unitId": 30015,
+      "dropCheckCount": 5
+    },
+    {
+      "unitId": 30021,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30022,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30023,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30024,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30025,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 30042,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40011,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 40012,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 40013,
+      "dropCheckCount": 7
+    },
+    {
+      "unitId": 40014,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 40015,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 40021,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40022,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40023,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40024,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40025,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 40042,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50011,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 50012,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 50013,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 50014,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 50015,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 50021,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50022,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50023,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50024,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50025,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 50041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 50042,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 60011,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 60012,
+      "dropCheckCount": 8
+    },
+    {
+      "unitId": 60013,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 60014,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 60015,
+      "dropCheckCount": 6
+    },
+    {
+      "unitId": 60021,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 60022,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 60023,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 60024,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 60025,
+      "dropCheckCount": 3
+    },
+    {
+      "unitId": 60041,
+      "dropCheckCount": 2
+    },
+    {
+      "unitId": 60042,
+      "dropCheckCount": 2
+    }
+  ],
+  "excluded": [
+    {
+      "unitId": 10023,
+      "reason": "original damageFrames weights total 130%; v700 correctly rejects"
+    }
+  ]
+}

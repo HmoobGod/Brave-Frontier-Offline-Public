@@ -1,0 +1,113 @@
+{
+  "id": 31,
+  "name": "Manipulator of the Water",
+  "sourcePath": "missions_parsed/Manipulator of the Water_2014-14-10-08-24.json",
+  "gitBlobSha": "abc5e1bd6341e86b3b9f9351611346d6b513f0bc",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 1560,
+          "atk": 410,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1550,
+          "atk": 450,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Water Nymph",
+          "unitId": 20130,
+          "hp": 4500,
+          "atk": 500,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Healer Merith",
+          "unitId": 20041,
+          "hp": 10500,
+          "atk": 600,
+          "def": 200,
+          "aiId": 5000
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

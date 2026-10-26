@@ -1,0 +1,179 @@
+{
+  "version": "0.8",
+  "quests": [
+    {
+      "missionId": 1,
+      "label": "Mission 1",
+      "missionNameKey": "MST_DUNGEONS_MISSION_1_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_1_NAME",
+      "dungeonId": 1,
+      "requires": 0,
+      "battles": 3,
+      "exp": 5,
+      "zel": 500,
+      "karma": 100,
+      "energy": 0,
+      "background": "dungeon_battle_10100.jpg"
+    },
+    {
+      "missionId": 2,
+      "label": "Mission 2",
+      "missionNameKey": "MST_DUNGEONS_MISSION_2_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_1_NAME",
+      "dungeonId": 1,
+      "requires": 1,
+      "battles": 3,
+      "exp": 8,
+      "zel": 1000,
+      "karma": 200,
+      "energy": 0,
+      "background": "dungeon_battle_10100.jpg"
+    },
+    {
+      "missionId": 10,
+      "label": "Mission 10",
+      "missionNameKey": "MST_DUNGEONS_MISSION_10_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_10_NAME",
+      "dungeonId": 10,
+      "requires": 2,
+      "battles": 5,
+      "exp": 20,
+      "zel": 300,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10100.jpg"
+    },
+    {
+      "missionId": 11,
+      "label": "Mission 11",
+      "missionNameKey": "MST_DUNGEONS_MISSION_11_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_10_NAME",
+      "dungeonId": 10,
+      "requires": 10,
+      "battles": 5,
+      "exp": 25,
+      "zel": 350,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10100.jpg"
+    },
+    {
+      "missionId": 12,
+      "label": "Mission 12",
+      "missionNameKey": "MST_DUNGEONS_MISSION_12_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_10_NAME",
+      "dungeonId": 10,
+      "requires": 11,
+      "battles": 6,
+      "exp": 29,
+      "zel": 400,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10100.jpg"
+    },
+    {
+      "missionId": 20,
+      "label": "Mission 20",
+      "missionNameKey": "MST_DUNGEONS_MISSION_20_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_20_NAME",
+      "dungeonId": 20,
+      "requires": 12,
+      "battles": 5,
+      "exp": 32,
+      "zel": 400,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10200.jpg"
+    }
+  ],
+  "monsters": [
+    {
+      "id": "0001",
+      "key": "gel",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 4,
+      "partCount": 4,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0002",
+      "key": "golem",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 5,
+      "partCount": 5,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0003",
+      "key": "wisp",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 5,
+      "partCount": 5,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0004",
+      "key": "monster4",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 5,
+      "partCount": 5,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0005",
+      "key": "monster5",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 5,
+      "partCount": 5,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0006",
+      "key": "monster6",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 4,
+      "partCount": 4,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0007",
+      "key": "monster7",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 4,
+      "partCount": 4,
+      "transformScope": "single-part simple CGG only"
+    },
+    {
+      "id": "0008",
+      "key": "monster8",
+      "source": "BF1_monster_part001.zip",
+      "cgFrames": 5,
+      "partCount": 5,
+      "transformScope": "single-part simple CGG only"
+    }
+  ],
+  "backgrounds": {
+    "dungeon_battle_10100.jpg": {
+      "size": [
+        640,
+        440
+      ],
+      "sha256": "16bbcc5631b9c6812f5f36a9a446e4b89a35e7e600e515133a4f23f79d27169a"
+    },
+    "dungeon_battle_10200.jpg": {
+      "size": [
+        640,
+        440
+      ],
+      "sha256": "50b7833e5045b5ffbf23056d33ee13d1e96654e9665e6b4d770fe6f8baef473b"
+    }
+  },
+  "gameplayUnverified": [
+    "monster quest assignments",
+    "monster stats",
+    "damage formulas",
+    "BB charging",
+    "experience curve",
+    "actual offline progression rules"
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "schema": "bf-global-quest-sgtext-english-v1",
+  "provenance": {
+    "archive": "BF1_sgtext_part001.zip",
+    "archiveSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "nestedZipSha256": {
+      "missionNames": "b73ab7460bacc1503e26ccaf833e86ce4d0efa1c74e7bc84fb1cfef92807f9ea",
+      "missionDescriptions": "d3a7f4fb27487394f6bbcf2356a0498b8a6771b7c0fc0898a6289f535fa0f8a9",
+      "dungeonNames": "beb21ca7b2f0687f74b9104dbb972e1c790dfb865ab7bb07a9e86c46df"
+    },
+    "sourcePaths": [
+      "content/sgtext/sgtext_Dungeons_M_NAME_127.zip",
+      "content/sgtext/sgtext_Dungeons_M_DESC_146.zip",
+      "content/sgtext/sgtext_Dungeons_D_111.zip"
+    ],
+    "extraction": "Curated, byte-accurate original English text from the nested, base64-encoded 2022 BF1 sgtext ZIP CSVs for the nine now-playable quests. Source punctuation/grammar deliberately retained."
+  },
+  "dungeons": [
+    {
+      "id": 1,
+      "key": "MST_DUNGEONS_DUNGEON_1_NAME",
+      "name": "Beginner's Prairie"
+    },
+    {
+      "id": 10,
+      "key": "MST_DUNGEONS_DUNGEON_10_NAME",
+      "name": "Adventurer's Prairie"
+    },
+    {
+      "id": 20,
+      "key": "MST_DUNGEONS_DUNGEON_20_NAME",
+      "name": "Cave of Flames"
+    }
+  ],
+  "missions": [
+    {
+      "id": 1,
+      "key": "MST_DUNGEONS_MISSION_1_NAME",
+      "name": "Basics of Battle",
+      "descriptionKey": "MST_DUNGEONS_MISSION_1_DESCRIPTION",
+      "description": "It's time to discuss basic combat techniques!"
+    },
+    {
+      "id": 2,
+      "key": "MST_DUNGEONS_MISSION_2_NAME",
+      "name": "Element & Skill",
+      "descriptionKey": "MST_DUNGEONS_MISSION_2_DESCRIPTION",
+      "description": "Memorize the strengths and weaknesses of each elements and how to trigger the Brave Burst!"
+    },
+    {
+      "id": 10,
+      "key": "MST_DUNGEONS_MISSION_10_NAME",
+      "name": "Start of Adventure",
+      "descriptionKey": "MST_DUNGEONS_MISSION_10_DESCRIPTION",
+      "description": "Your journey as a Summoner traveling across Grand Gaia has begun! Go forth, and don't forget what Tilith taught you!"
+    },
+    {
+      "id": 11,
+      "key": "MST_DUNGEONS_MISSION_11_NAME",
+      "name": "Monsters of the Prairie",
+      "descriptionKey": "MST_DUNGEONS_MISSION_11_DESCRIPTION",
+      "description": "The calm grasslands keep on going.The monsters here are just right for a beginner.Keep moving forward."
+    },
+    {
+      "id": 12,
+      "key": "MST_DUNGEONS_MISSION_12_NAME",
+      "name": "Guardians of the Prairie",
+      "descriptionKey": "MST_DUNGEONS_MISSION_12_DESCRIPTION",
+      "description": "You can see a rocky mountain faintly on the horizon. Tilith is waiting at the \"Cave of Flames\" just beyond here."
+    },
+    {
+      "id": 20,
+      "key": "MST_DUNGEONS_MISSION_20_NAME",
+      "name": "Cave of Dancing Flames",
+      "descriptionKey": "MST_DUNGEONS_MISSION_20_DESCRIPTION",
+      "description": "The magma flowing within this cave gives off an intense heat. The enemies in this cave have the power of fire."
+    },
+    {
+      "id": 21,
+      "key": "MST_DUNGEONS_MISSION_21_NAME",
+      "name": "Wielder of the Fire",
+      "descriptionKey": "MST_DUNGEONS_MISSION_21_DESCRIPTION",
+      "description": "Continue deeper into the Cave of Flames. Beings who control fire are waiting ahead."
+    },
+    {
+      "id": 22,
+      "key": "MST_DUNGEONS_MISSION_22_NAME",
+      "name": "The Thief's Hideout",
+      "descriptionKey": "MST_DUNGEONS_MISSION_22_DESCRIPTION",
+      "description": "You've come far, but there's still no exit in site. There are supposed to be bandits in this area."
+    },
+    {
+      "id": 23,
+      "key": "MST_DUNGEONS_MISSION_23_NAME",
+      "name": "The Blazing Beast",
+      "descriptionKey": "MST_DUNGEONS_MISSION_23_DESCRIPTION",
+      "description": "Looks like you'll be able to leave this cave soon, but there seems to be something sinister awaiting you at the end."
+    }
+  ]
+}

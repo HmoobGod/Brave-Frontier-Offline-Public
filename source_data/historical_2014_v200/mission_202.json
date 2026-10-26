@@ -1,0 +1,248 @@
+{
+  "id": 202,
+  "name": "The Precarious Beast Master",
+  "sourcePath": "missions_parsed/The Precarious Beast Master_2014-05-10-08-41.json",
+  "gitBlobSha": "1f859c9ddd1534a146a8f402cd97fd51d341a7c9",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 4000,
+          "atk": 660,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 4000,
+          "atk": 660,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Witch Liza",
+          "unitId": 10040,
+          "hp": 3800,
+          "atk": 590,
+          "def": 200,
+          "aiId": 10
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 4000,
+          "atk": 660,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 4000,
+          "atk": 660,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Witch Liza",
+          "unitId": 10040,
+          "hp": 3800,
+          "atk": 590,
+          "def": 200,
+          "aiId": 10
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Witch Liza",
+          "unitId": 10040,
+          "hp": 3800,
+          "atk": 590,
+          "def": 200,
+          "aiId": 10
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 2800,
+          "atk": 640,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 2400,
+          "atk": 580,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "enemies": [
+        {
+          "name": "Warlock Liza",
+          "unitId": 10041,
+          "hp": 14000,
+          "atk": 620,
+          "def": 200,
+          "aiId": 5000
+        },
+        {
+          "name": "Rage Beast Zegar",
+          "unitId": 10022,
+          "hp": 23000,
+          "atk": 750,
+          "def": 10,
+          "aiId": 5001
+        }
+      ]
+    }
+  ]
+}

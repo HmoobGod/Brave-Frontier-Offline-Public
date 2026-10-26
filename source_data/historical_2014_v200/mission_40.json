@@ -1,0 +1,113 @@
+{
+  "id": 40,
+  "name": "Shadowy Forests",
+  "sourcePath": "missions_parsed/Shadowy Forests_2014-14-10-08-25.json",
+  "gitBlobSha": "24da1148c7e8fd2293e504d0fd1b8f0594a6df51",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "King Mossy",
+          "unitId": 30031,
+          "hp": 7500,
+          "atk": 500,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "King Mossy",
+          "unitId": 30031,
+          "hp": 7500,
+          "atk": 500,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

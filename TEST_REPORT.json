@@ -1,0 +1,24 @@
+{
+  "version": "0.12",
+  "saveSchema": 7,
+  "checks": [
+    "30 original spritesheets (18 base + 12 evolved), 18 base roster, 12 recruits, 30 archived hit datasets load",
+    "Squad selector and data-driven Vargas 3-hit inspector (50/30/20) render",
+    "v0.11 v6 saved levels, evolved unit, shards, roster and quests migrate into v7",
+    "Source-time hit distribution conserves demo damage and refuses non-100 weights",
+    "Actual queued Vargas normal attack applies three individually-timed hits and DEMO BB filling unchanged",
+    "Restart while attack in progress cancels pending hits via epoch-token",
+    "New 60041 archive recruit can be summoned, assigned, and displays five normal hits",
+    "v7 portable JSON export and fresh-browser save reload retain all 18 owned units",
+    "Full three-wave quest, auto battle and rewards survive multi-hit changes",
+    "Canvas save/restore balanced and no browser JavaScript errors",
+    "Source-hit inspector and squad UI work at 390px and 320px mobile widths"
+  ],
+  "browserErrors": [],
+  "checksPassed": 11,
+  "canvasSaves": 2756,
+  "canvasRestores": 2756,
+  "sourcesSha256": "cace2f1e63b52741b52b32ad3ee909acbdb33f8df38bdf1e0cc2d068a2847554",
+  "androidStatus": "Prepared, not compiled/device-tested",
+  "issues": []
+}

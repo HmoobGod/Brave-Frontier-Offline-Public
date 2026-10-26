@@ -1,0 +1,545 @@
+name: Build Offline Android APK
+on:
+  workflow_dispatch:
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Android SDK packages
+        shell: bash
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | sort -V | tail -n 1)"
+          test -n "$SDKMANAGER"
+          echo "Using $SDKMANAGER"
+          "$SDKMANAGER" --version
+          yes | "$SDKMANAGER" --licenses || true
+          "$SDKMANAGER" --install "platforms;android-35" "build-tools;35.0.0"
+      - name: Restore persistent debug signing key
+        shell: bash
+        env:
+          BF_DEBUG_KEYSTORE_B64: ${{ secrets.BF_DEBUG_KEYSTORE_B64 }}
+        run: |
+          set -euo pipefail
+          mkdir -p .github/debug
+          if [[ -z "${BF_DEBUG_KEYSTORE_B64:-}" ]]; then
+            echo 'Missing BF_DEBUG_KEYSTORE_B64 Actions repository secret.' >&2
+            exit 1
+          fi
+          printf '%s' "$BF_DEBUG_KEYSTORE_B64" | base64 --decode > .github/debug/bf-development-debug.keystore
+          keytool -list -keystore .github/debug/bf-development-debug.keystore -storepass android -alias androiddebugkey > /dev/null
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Set up Python for Chromium regressions
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original sprite atlas renderer
+        run: python -m pip install Pillow
+      - name: Prepare bundled HTML assets
+        run: |
+          python3 patch_bf_save_quarantine.py
+          python3 prepare_global_mission_expansion.py
+          python3 prepare_global_unit_archive.py
+          python3 prepare_global_unit_codex.py
+          python3 prepare_original_bb_targeting.py
+          python3 prepare_original_bb_support.py
+          python3 prepare_original_bb_power.py
+          python3 prepare_original_playable_identity.py
+          python3 prepare_original_six_evolutions.py
+          python3 prepare_original_second_stage_evolutions.py
+          python3 prepare_original_more_second_stage.py
+          python3 prepare_original_five_star_starters.py
+          python3 prepare_original_other_five_star.py
+          python3 prepare_original_six_star_starters.py
+          python3 prepare_original_other_six_star.py
+          python3 prepare_evolution_roadmap_v039.py
+          python3 prepare_battle_bb_guide_v040.py
+          python3 prepare_source_aware_auto_v041.py
+          python3 prepare_coordinated_auto_v042.py
+          python3 prepare_original_sbb_preview_v043.py
+          python3 prepare_experimental_sbb_v044.py
+          python3 prepare_egor_snowfield_v045.py
+          python3 prepare_forest_of_beasts_v046.py
+          python3 prepare_magutagal_v047.py
+          python3 prepare_quest_english_data_v048.py
+          python3 prepare_remains_mirza_v049.py
+          python3 prepare_monsters_nest_v050.py
+          python3 prepare_tower_of_mistral_v051.py
+          python3 prepare_story_boss_v052.py
+          python3 prepare_monster_training_v053.py
+          python3 prepare_tower_formations_v055.py
+          python3 verify_original_mistral_evidence_v059.py
+          python3 prepare_original_mission_evidence_v060.py
+          python3 prepare_playable_attack_frames_v065.py
+          python3 prepare_playable_hit_inspector_v070.py
+          python3 prepare_morgan_quests_v080.py
+          python3 prepare_st_lamia_original_v090.py
+          python3 prepare_historical_wave_lab_v200.py
+          python3 patch_bf_burst_recipient_recovery_v6700.py
+          python3 patch_bf_elemental_combat_v6900.py
+          python3 patch_bf_original_atk_bb_levels_v7100.py
+      - name: Prepare verified BF1 Global home sprites
+        run: |
+          python3 prepare_original_home_assets.py
+          python3 test_bf_original_home_assets.py
+          python3 prepare_original_bgm_assets.py
+          python3 prepare_original_mistral_assets.py
+          python3 prepare_original_event_backdrop_v2700.py
+          python3 prepare_original_event_expressions_v2900.py
+          python3 prepare_original_battle_controls.py
+      - name: Test save recovery and offline combat
+        shell: bash
+        run: |
+          python -m pip install playwright
+          python test_bf_single_hit_critical_combat_v9300.py
+          python test_bf_original_mission_evidence_v060.py
+          python test_bf_playable_attack_frames_v065.py
+          python test_bf_playable_hit_inspector_v070.py
+          python test_bf_complete_mistral_progression_v070.py
+          python test_bf_morgan_source_audit_v080.py
+          python test_bf_original_st_lamia_v090.py
+          python test_bf_grand_gaia_campaign_v100.py
+          python test_bf_story_continue_v101.py
+          python test_bf_quest_journal_v110.py
+          python test_bf_historical_encounters_v120.py
+          python test_bf_source_crosscheck_v150.py
+          python test_bf_historical_wave_lab_v200.py
+          python test_bf_squad_training_v250.py
+          python test_bf_tactical_rounds_v300.py
+          python test_bf_tactical_undo_v350.py
+          python test_bf_original_battle_dossier_v400.py
+          python test_bf_original_bb_practice_v500.py
+          python test_bf_original_bb_levels_v600.py
+          python test_bf_original_normal_hits_v700.py
+          python test_bf_archive_draft_v800.py
+          python test_bf_optional_labs_hub_v900.py
+          python test_bf_original_evolution_paths_v1000.py
+          python test_bf_archive_formations_v1100.py
+          python test_bf_archive_presets_v1200.py
+          python test_bf_evolution_recipes_v1300.py
+          python test_bf_evolution_material_plan_v1400.py
+          python test_bf_evolution_chain_v1500.py
+          python test_bf_draft_evolution_v1600.py
+          python test_bf_batch_draft_evolution_v1700.py
+          python test_bf_multistage_draft_v1800.py
+          python test_bf_evolution_ab_v1900.py
+          python test_bf_story_battle_hud_v2000.py
+          python test_bf_battle_command_tray_v2100.py
+          python test_bf_original_event_reader_v2200.py
+          python test_bf_morgan_event_dialogue_v2300.py
+          python test_bf_st_lamia_event_dialogue_v2400.py
+          python test_bf_story_event_cue_v2500.py
+          python test_bf_original_event_portraits_v2600.py
+          python test_bf_original_event_stage_v2700.py
+          python test_bf_dialogue_speaker_cues_v2800.py
+          python test_bf_original_event_expressions_v2900.py
+          python test_bf_battle_results_v3000.py
+          python test_bf_battle_focus_v3100.py
+          python test_bf_combat_journal_v3200.py
+          python test_bf_story_playback_v3300.py
+          python test_bf_source_scene_placement_v3400.py
+          python test_bf_story_page_navigation_v3500.py
+          python test_bf_composited_event_scene_v3600.py
+          python test_bf_cinematic_story_reader_v3700.py
+          python test_bf_source_battle_backdrop_v3800.py
+          python test_bf_story_battle_handoff_v3900.py
+          python test_bf_story_next_intro_v4000.py
+          python test_bf_live_quest_banner_v4100.py
+          python test_bf_demo_potion_command_v4200.py
+          python test_bf_source_party_heal_v4300.py
+          python test_bf_source_atk_item_v4400.py
+          python test_bf_item_turn_reservations_v4500.py
+          python test_bf_source_bb_gauge_item_v4600.py
+          python test_bf_source_full_revive_v4700.py
+          python test_bf_demo_auto_item_guard_v4800.py
+          python test_bf_source_def_item_v4900.py
+          python test_bf_source_party_atk_item_v5000.py
+          python test_bf_source_double_atk_item_v5100.py
+          python test_bf_source_double_def_item_v5200.py
+          python test_bf_source_party_def_item_v5300.py
+          python test_bf_source_hope_light_v5400.py
+          python test_bf_source_strong_life_v5500.py
+          python test_bf_source_life_potion_v5600.py
+          python test_bf_original_ailment_state_v5700.py
+          python test_bf_poison_turn_v5800.py
+          python test_bf_curse_bb_lock_v5900.py
+          python test_bf_paralysis_action_lock_v6000.py
+          python test_bf_weakness_defense_v6100.py
+          python test_bf_injury_attack_v6200.py
+          python test_bf_status_reinfliction_v6300.py
+          python test_bf_status_remedy_command_v6400.py
+          python test_bf_sickness_recovery_v6500.py
+          python test_bf_curse_bb_item_lock_v6600.py
+          python test_bf_burst_recipient_recovery_v6700.py
+          python test_bf_original_heal_bb_levels_v6800.py
+          python test_bf_elemental_combat_v6900.py
+          python test_bf_blessing_light_source_v7000.py
+          python test_bf_original_atk_bb_levels_v7100.py
+          python test_bf_original_potion_v7200.py
+          python test_bf_original_potion_target_v7300.py
+          python test_bf_original_strong_potions_v7400.py
+          python test_bf_original_saint_light_v7500.py
+          python test_bf_original_nullifier_v7600.py
+          python test_bf_original_party_regen_v7700.py
+          python test_bf_status_regen_chain_v7700.py
+          python test_bf_live_battle_status_v7800.py
+          python test_bf_injury_additive_stacking_v7900.py
+          python test_bf_weakness_additive_stacking_v8000.py
+          python test_bf_original_crystal_drop_core_v8100.py
+          python test_bf_original_normal_crystal_checks_v8200.py
+          python test_bf_original_burst_crystal_checks_v8300.py
+          python test_bf_original_normal_crystal_checks_v8400.py
+          python test_bf_original_all_bb_checks_v8500.py
+          python test_bf_original_all_sbb_ubb_checks_v8600.py
+          python test_bf_original_basics_ai_reference_v8700.py
+          python test_bf_live_normal_crystal_events_v8800.py
+          python test_bf_live_simple_bb_crystals_v8900.py
+          python test_bf_live_crystal_provenance_v9000.py
+          python test_bf_innate_status_resistance_v9100.py
+          python test_bf_source_offensive_bb_levels_v9200.py
+          python test_bf_morgan_original_v080.py
+          python test_bf_v0131.py
+          python test_bf_home_nav.py
+          python test_bf_global_home_scene.py
+          python test_bf_inner_screens.py
+          python test_bf_unit_box_quest_details.py
+          python test_bf_quest_areas_unit_filters.py
+          python test_bf_quest_path_evolution.py
+          python test_bf_global_english_quests.py
+          python test_bf_cave_of_flames_expansion.py
+          python test_bf_original_offline_bgm.py
+          python test_bf_mistral_quest_map.py
+          python test_bf_original_battle_controls.py
+          python test_bf_global_collaboration_archive.py
+          python test_bf_global_unit_archive.py
+          python test_bf_global_original_codex.py
+          python test_bf_original_bb_targeting.py
+          python test_bf_original_bb_support.py
+          python test_bf_original_bb_power.py
+          python test_bf_original_playable_identity.py
+          python test_bf_original_six_evolutions.py
+          python test_bf_original_second_stage_evolutions.py
+          python test_bf_original_more_second_stage.py
+          python test_bf_original_five_star_starters.py
+          python test_bf_original_other_five_star.py
+          python test_bf_original_six_star_starters.py
+          python test_bf_original_other_six_star.py
+          python test_bf_evolution_roadmap_v039.py
+          python test_bf_battle_bb_guide_v040.py
+          python test_bf_source_aware_auto_v041.py
+          python test_bf_coordinated_auto_v042.py
+          python test_bf_original_sbb_preview_v043.py
+          python test_bf_experimental_sbb_v044.py
+          python test_bf_egor_snowfield_v045.py
+          python test_bf_forest_of_beasts_v046.py
+          python test_bf_magutagal_v047.py
+          python test_bf_quest_english_data_v048.py
+          python test_bf_remains_mirza_v049.py
+          python test_bf_monsters_nest_v050.py
+          python test_bf_tower_of_mistral_v051.py
+          python test_bf_mistral_boss_intel_v052.py
+          python test_bf_monster_training_v053.py
+          python test_bf_header_status_v054.py
+          python test_bf_tower_formations_v055.py
+      - name: Build debug APK
+        # New public repository build numbering starts fresh; offset avoids APK downgrades.
+        run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify packaged original battle sprites
+        run: python3 test_bf_packaged_battle_assets.py
+      - name: Verify packaged original Global encyclopedia
+        run: python3 test_bf_packaged_unit_archive.py
+      - name: Verify packaged original Global lore and skill records
+        run: python3 test_bf_packaged_global_codex.py
+      - name: Verify packaged original Global BB target scopes
+        run: python3 test_bf_packaged_original_bb_targeting.py
+      - name: Verify packaged original Global BB Lv1 support effects
+        run: python3 test_bf_packaged_original_bb_support.py
+      - name: Verify packaged original Global BB Lv1 power and all source levels
+        run: python3 test_bf_packaged_original_bb_power.py
+      - name: Verify packaged original Global playable identities
+        run: python3 test_bf_packaged_playable_identity.py
+      - name: Verify packaged six original Global playable evolutions
+        run: python3 test_bf_packaged_six_evolutions.py
+      - name: Verify packaged six original 4-star playable evolution chains
+        run: python3 test_bf_packaged_second_stage_evolutions.py
+      - name: Verify packaged six additional original Global 4-star forms
+        run: python3 test_bf_packaged_more_second_stage.py
+      - name: Verify packaged six original 5-star starter forms and v7 compatibility
+        run: python3 test_bf_packaged_five_star_starters.py
+      - name: Verify packaged six original other 5-star forms and v7 save identity
+        run: python3 test_bf_packaged_other_five_star.py
+      - name: Verify packaged six original Global 6-star starters and saved v7 identity
+        run: python3 test_bf_packaged_six_star_starters.py
+      - name: Verify packaged six alternate Global 6-star source units and v7 compatibility
+        run: python3 test_bf_packaged_other_six_star.py
+      - name: Verify packaged read-only Evolution Roadmap
+        run: python3 test_bf_packaged_evolution_roadmap_v039.py
+      - name: Verify packaged v0.40 BB source guide
+        run: python3 test_bf_packaged_battle_bb_guide_v040.py
+      - name: Verify packaged v0.41 optional smart Auto Battle
+        run: python3 test_bf_packaged_source_aware_auto_v041.py
+      - name: Verify packaged v0.42 coordinated smart Auto Battle
+        run: python3 test_bf_packaged_coordinated_auto_v042.py
+      - name: Verify packaged original SBB source preview v0.43
+        run: python3 test_bf_packaged_original_sbb_preview_v043.py
+      - name: Verify packaged optional SBB demo v0.44
+        run: python3 test_bf_packaged_experimental_sbb_v044.py
+      - name: Verify packaged v0.45 Egor Snowfield quests
+        run: python3 test_bf_packaged_egor_snowfield_v045.py
+      - name: Verify packaged v0.46 Forest of Beasts quests
+        run: python3 test_bf_packaged_forest_of_beasts_v046.py
+      - name: Verify packaged v0.47 Magutagal Wetlands quests
+        run: python3 test_bf_packaged_magutagal_v047.py
+      - name: Verify packaged v0.48 source-backed English quest descriptions
+        run: python3 test_bf_packaged_quest_english_data_v048.py
+      - name: Verify packaged v0.49 original Remains of Mirza quests
+        run: python3 test_bf_packaged_remains_mirza_v049.py
+      - name: Verify packaged v0.50 original Monster's Nest quests
+        run: python3 test_bf_packaged_monsters_nest_v050.py
+      - name: Verify packaged v0.51 original Tower of Mistral quests
+        run: python3 test_bf_packaged_tower_of_mistral_v051.py
+      - name: Verify packaged v0.52 original Mistral boss intel
+        run: python3 test_bf_packaged_mistral_boss_intel_v052.py
+      - name: Verify packaged v0.53 original BF1 monster animation frames
+        run: python3 test_bf_packaged_monster_training_v053.py
+      - name: Verify packaged v0.54 faithful BF1 header and demo EXP
+        run: python3 test_bf_packaged_header_status_v054.py
+      - name: Verify packaged v0.55 original Tower boss formation references
+        run: python3 test_bf_packaged_tower_formations_v055.py
+      - name: Verify packaged v0.60 source-exact 34 Mistral battle references
+        run: python3 test_bf_packaged_original_mission_evidence_v060.py
+      - name: Verify packaged v0.65 source-exact playable unit attacks
+        run: python3 test_bf_packaged_playable_attack_frames_v065.py
+      - name: Verify packaged v0.70 original playable attack inspector
+        run: python3 test_bf_packaged_playable_hit_inspector_v070.py
+      - name: Verify packaged original Morgan world and 36 missions v0.80
+        run: python3 test_bf_packaged_morgan_source_v080.py
+      - name: Verify packaged v0.80 original Morgan map and source-record joins
+        run: python3 test_bf_packaged_morgan_v080.py
+      - name: Verify packaged St. Lamia original region and quest data v0.90
+        run: python3 test_bf_packaged_st_lamia_v090.py
+      - name: Verify packaged v1.00 Grand Gaia campaign 106 quests
+        run: python3 test_bf_packaged_grand_gaia_campaign_v100.py
+      - name: Verify v1.01 packaged Continue Story
+        run: python3 test_bf_packaged_story_continue_v101.py
+      - name: Verify v1.10 source-backed quest journal APK
+        run: python3 test_bf_packaged_quest_journal_v110.py
+      - name: Verify historical 2014 encounter references v1.20
+        run: python3 test_bf_packaged_historical_encounters_v120.py
+      - name: Verify integrated v1.50 offline source crosscheck APK
+        run: python3 test_bf_packaged_source_crosscheck_v150.py
+      - name: Verify v2.00 packaged historical-wave sandbox
+        run: python3 test_bf_packaged_historical_wave_lab_v200.py
+      - name: Verify v2.50 squad training APK and save/signing identity
+        run: python3 test_bf_packaged_squad_training_v250.py
+      - name: Verify v3.00 tactical round APK, signed identity and saved progress safety
+        run: python3 test_bf_packaged_tactical_rounds_v300.py
+      - name: Verify v3.50 reversible training and safe Android APK
+        run: python3 test_bf_packaged_tactical_undo_v350.py
+      - name: Verify v4.00 source-backed dossier and APK save compatibility
+        run: python3 test_bf_packaged_original_battle_dossier_v400.py
+      - name: Verify v5.00 original BB evidence, sources and Android APK
+        run: python3 test_bf_packaged_original_bb_practice_v500.py
+      - name: Verify v6.00 original level 1-10 mastery data and offline signed APK
+        run: python3 test_bf_packaged_original_bb_levels_v600.py
+      - name: Verify v7.00 historical original normal hit references and APK
+        run: python3 test_bf_packaged_original_normal_hits_v700.py
+      - name: Verify v8.00 temporary Global 2022 archive draft APK
+        run: python3 test_bf_packaged_archive_draft_v800.py
+      - name: Verify v9.00 source research lab hub in Android APK
+        run: python3 test_bf_packaged_optional_labs_hub_v900.py
+      - name: Verify v10.00 all 2022 original evolution paths and offline APK
+        run: python3 test_bf_packaged_original_evolution_paths_v1000.py
+      - name: Verify v11.00 temporary archive formations and Android APK
+        run: python3 test_bf_packaged_archive_formations_v1100.py
+      - name: Verify v12.00 source-stat draft sorting and signed Android APK
+        run: python3 test_bf_packaged_archive_presets_v1200.py
+      - name: Verify v13.00 recovered evolution recipes and offline APK
+        run: python3 test_bf_packaged_evolution_recipes_v1300.py
+      - name: Verify v14.00 archived evolution checklist and offline APK
+        run: python3 test_bf_packaged_evolution_material_plan_v1400.py
+      - name: Verify v15.00 source-recipe evolution chains and offline APK
+        run: python3 test_bf_packaged_evolution_chain_v1500.py
+      - name: Verify v16.00 reversible archive evolution and offline Android APK
+        run: python3 test_bf_packaged_draft_evolution_v1600.py
+      - name: Verify v17.00 squad source evolution batch and offline Android APK
+        run: python3 test_bf_packaged_batch_draft_evolution_v1700.py
+      - name: Verify v18.00 original 2022 multi-stage evolution squad plan and signed APK
+        run: python3 test_bf_packaged_multistage_draft_v1800.py
+      - name: Verify v19.00 matched synthetic before-after evolution combat and offline signed APK
+        run: python3 test_bf_packaged_evolution_ab_v1900.py
+      - name: Verify v20.00 source-backed live quest battle HUD and advance flow
+        run: python3 test_bf_packaged_story_battle_hud_v2000.py
+      - name: Verify v21.00 packaged battle command tray
+        run: python3 test_bf_packaged_battle_command_tray_v2100.py
+      - name: Verify v22.00 packaged original dialogue reader
+        run: python3 test_bf_packaged_original_event_reader_v2200.py
+      - name: Verify v23.00 original Morgan event dialogue APK
+        run: python3 test_bf_packaged_morgan_event_dialogue_v2300.py
+      - name: Verify v24.00 original St. Lamia dialogue APK
+        run: python3 test_bf_packaged_st_lamia_event_dialogue_v2400.py
+      - name: Verify v25.00 source-aware campaign story cue APK
+        run: python3 test_bf_packaged_story_event_cue_v2500.py
+      - name: Verify v26.00 original event portrait image bytes and UI
+        run: python3 test_bf_packaged_original_event_portraits_v2600.py
+      - name: Verify v27.00 source-matched story scene backgrounds
+        run: python3 test_bf_packaged_original_event_stage_v2700.py
+      - name: Verify v28.00 source-exact speaker cues
+        run: python3 test_bf_packaged_dialogue_speaker_cues_v2800.py
+      - name: Verify v29.00 original source exact expression art
+        run: python3 test_bf_packaged_original_event_expressions_v2900.py
+      - name: Verify v30.00 packaged battle results and progression
+        run: python3 test_bf_packaged_battle_results_v3000.py
+      - name: Verify v31.00 packed tactical target focus
+        run: python3 test_bf_packaged_battle_focus_v3100.py
+      - name: Verify v32.00 packaged combat journal
+        run: python3 test_bf_packaged_combat_journal_v3200.py
+      - name: Verify v33.00 packaged dialogue playback
+        run: python3 test_bf_packaged_story_playback_v3300.py
+      - name: Verify v34.00 packaged source event scene positions
+        run: python3 test_bf_packaged_source_scene_placement_v3400.py
+      - name: Verify v35.00 packaged unlocked story line navigation
+        run: python3 test_bf_packaged_story_page_navigation_v3500.py
+      - name: Verify v36.00 source composited event scene APK
+        run: python3 test_bf_packaged_composited_event_scene_v3600.py
+      - name: Verify v37.00 original story theater APK
+        run: python3 test_bf_packaged_cinematic_story_reader_v3700.py
+      - name: Verify v38.00 optional original dungeon battle stage APK
+        run: python3 test_bf_packaged_source_battle_backdrop_v3800.py
+      - name: Verify v39.00 original intro to story battle APK
+        run: python3 test_bf_packaged_story_battle_handoff_v3900.py
+      - name: Verify v40.00 next original chapter introduction in APK
+        run: python3 test_bf_packaged_story_next_intro_v4000.py
+      - name: Verify v41.00 packaged original quest name overlay
+        run: python3 test_bf_packaged_live_quest_banner_v4100.py
+      - name: Verify v42.00 packaged optional demo Potion command
+        run: python3 test_bf_packaged_demo_potion_command_v4200.py
+      - name: Verify v43.00 source-indexed demo party heal in APK
+        run: python3 test_bf_packaged_source_party_heal_v4300.py
+      - name: Verify v44.00 source-indexed ATK item in APK
+        run: python3 test_bf_packaged_source_atk_item_v4400.py
+      - name: Verify v45 shared item-turn reservation in signed APK
+        run: python3 test_bf_packaged_item_turn_reservations_v4500.py
+      - name: Verify v46 source-backed BB gauge item in offline signed APK
+        run: python3 test_bf_packaged_source_bb_gauge_item_v4600.py
+      - name: Verify v47 source full-HP revive item in offline APK
+        run: python3 test_bf_packaged_source_full_revive_v4700.py
+      - name: Verify v48 DEMO Auto reserved item turn safeguard in APK
+        run: python3 test_bf_packaged_demo_auto_item_guard_v4800.py
+      - name: Verify v49 source DEF +30% timed item in APK
+        run: python3 test_bf_packaged_source_def_item_v4900.py
+      - name: Verify v50 original party ATK item in offline APK
+        run: python3 test_bf_packaged_source_party_atk_item_v5000.py
+      - name: Verify complete original 2022 battle item effect catalog
+        run: python3 test_bf_battle_item_catalog_v5000.py
+      - name: Verify v51 double-ATK item in offline signed APK
+        run: python3 test_bf_packaged_source_double_atk_item_v5100.py
+      - name: Verify v52 double-DEF item in offline signed APK
+        run: python3 test_bf_packaged_source_double_def_item_v5200.py
+      - name: Verify v53 source party-DEF item in offline signed APK
+        run: python3 test_bf_packaged_source_party_def_item_v5300.py
+      - name: Verify v54 original Hope Light signed offline APK
+        run: python3 test_bf_packaged_source_hope_light_v5400.py
+      - name: Verify v55 Strong Life offline signed APK
+        run: python3 test_bf_packaged_source_strong_life_v5500.py
+      - name: Verify v56 original Life Potion in offline signed APK
+        run: python3 test_bf_packaged_source_life_potion_v5600.py
+      - name: Verify v57 original ailment state in offline signed APK
+        run: python3 test_bf_packaged_original_ailment_state_v5700.py
+      - name: Verify v58 poison turn with offline signed APK
+        run: python3 test_bf_packaged_poison_turn_v5800.py
+      - name: Verify v59 Curse BB lock in signed offline APK
+        run: python3 test_bf_packaged_curse_bb_lock_v5900.py
+      - name: Verify v60 Paralysis action lock in signed offline APK
+        run: python3 test_bf_packaged_paralysis_action_lock_v6000.py
+      - name: Verify v61 Weakness DEF effect in signed offline APK
+        run: python3 test_bf_packaged_weakness_defense_v6100.py
+      - name: Verify v62 Injury ATK consequence in offline signed APK
+        run: python3 test_bf_packaged_injury_attack_v6200.py
+      - name: Verify v63 status reinfliction in signed offline APK
+        run: python3 test_bf_packaged_status_reinfliction_v6300.py
+      - name: Verify v64 status remedy command in signed offline APK
+        run: python3 test_bf_packaged_status_remedy_command_v6400.py
+      - name: Verify v65 Sickness REC penalty in signed offline APK
+        run: python3 test_bf_packaged_sickness_recovery_v6500.py
+      - name: Verify v66 Curse blocks source BB item in signed offline APK
+        run: python3 test_bf_packaged_curse_bb_item_lock_v6600.py
+      - name: Verify v67 source burst recipient REC in signed offline APK
+        run: python3 test_bf_packaged_burst_recipient_recovery_v6700.py
+      - name: Verify v68 archived healing BB levels in signed offline APK
+        run: python3 test_bf_packaged_original_heal_bb_levels_v6800.py
+      - name: Verify v69 original element combat in signed offline APK
+        run: python3 test_bf_packaged_elemental_combat_v6900.py
+      - name: Verify v70 original Blessing Light 500 in signed offline APK
+        run: python3 test_bf_packaged_blessing_light_source_v7000.py
+      - name: Verify v71 exact ATK BB levels and offline signed APK
+        run: python3 test_bf_packaged_original_atk_bb_levels_v7100.py
+      - name: Verify v72 original Potion #20000 in signed offline APK
+        run: python3 test_bf_packaged_original_potion_v7200.py
+      - name: Verify v73 Potion ally-targeting in signed offline APK
+        run: python3 test_bf_packaged_original_potion_target_v7300.py
+      - name: Verify v74 original 1000/2000 recovery potions in signed APK
+        run: python3 test_bf_packaged_original_strong_potions_v7400.py
+      - name: Verify v75 source Saint Light item in signed offline APK
+        run: python3 test_bf_packaged_original_saint_light_v7500.py
+      - name: Verify v76 original party Nullifier in signed offline APK
+        run: python3 test_bf_packaged_original_nullifier_v7600.py
+      - name: Verify v77 original Regeneration Light in signed offline APK
+        run: python3 test_bf_packaged_original_party_regen_v7700.py
+      - name: Verify v78 live battle status display in signed offline APK
+        run: python3 test_bf_packaged_live_battle_status_v7800.py
+      - name: Verify v79 additive Injury stacking in signed offline APK
+        run: python3 test_bf_packaged_injury_additive_stacking_v7900.py
+      - name: Verify v80 additive Weakness stacking in signed offline APK
+        run: python3 test_bf_packaged_weakness_additive_stacking_v8000.py
+      - name: Verify v81 original crystal drop core in signed offline APK
+        run: python3 test_bf_packaged_original_crystal_drop_core_v8100.py
+      - name: Verify v82 original normal-attack crystal checks in signed offline APK
+        run: python3 test_bf_packaged_original_normal_crystal_checks_v8200.py
+      - name: Verify v83 original BB/SBB burst crystal checks in signed offline APK
+        run: python3 test_bf_packaged_original_burst_crystal_checks_v8300.py
+      - name: Verify v84 all-source normal crystal profiles in signed offline APK
+        run: python3 test_bf_packaged_original_normal_crystal_checks_v8400.py
+      - name: Verify v85 all-unit original BB checks in signed offline APK
+        run: python3 test_bf_packaged_original_all_bb_checks_v8500.py
+      - name: Verify v86 original SBB/UBB source checks in signed offline APK
+        run: python3 test_bf_packaged_original_all_sbb_ubb_checks_v8600.py
+      - name: Verify v87 source-validated historical AI reference in signed APK
+        run: python3 test_bf_packaged_original_basics_ai_reference_v8700.py
+      - name: Verify v88 live source normal-crystal events in signed APK
+        run: python3 test_bf_packaged_live_normal_crystal_events_v8800.py
+      - name: Verify v89 source simple offensive BB crystal evidence in signed APK
+        run: python3 test_bf_packaged_live_simple_bb_crystals_v8900.py
+      - name: Verify v90 live crystal provenance source ledger in signed APK
+        run: python3 test_bf_packaged_live_crystal_provenance_v9000.py
+      - name: Verify v91 original innate status resistance in signed APK
+        run: python3 test_bf_packaged_innate_status_resistance_v9100.py
+      - name: Verify v92 original offensive BB levels in signed APK
+        run: python3 test_bf_packaged_source_offensive_bb_levels_v9200.py
+      - name: Verify v93 original source single-hit critical combat in signed APK
+        run: python3 test_bf_packaged_single_hit_critical_combat_v9300.py
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-demo-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 90

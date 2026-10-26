@@ -1,0 +1,127 @@
+{
+  "schema": "bf-global-forest-of-beasts-v046",
+  "sources": {
+    "master": "mst-decoded.zip",
+    "masterSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "missionTable": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "dungeonTable": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+    "dungeonTableSha256": "16f090514d65846f6bd4a9998b50d6c810bc806a79858c0ff766cdb1a22536fc",
+    "languagePack": "BF1_sgtext_part001.zip",
+    "languageSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "languageMemberChecksums": {
+      "missionNames": "b73ab7460bacc1503e26ccaf833e86ce4d0efa1c74e7bc84fb1cfef92807f9ea",
+      "missionDescriptions": "d3a7f4fb27487394f6bbcf2356a0498b8a6771b7c0fc0898a6289f535fa0f8a9",
+      "dungeonNames": "beb21ca7b2f0687f74b9104dbb972e1c790dfb865ab7bb07e4fb07a9e86c46df"
+    },
+    "artPack": "BF1_dungeon_part001.zip",
+    "artPackSha256": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644",
+    "backgroundSha256": "5de95afe07c72cc7685f70507f01f84d262aa0cee8b32bc191f6d26ef85ac212",
+    "originalMission43RewardCode": "8:0:1:0:0",
+    "originalMissionBattleMusic": "bf013_map_wood.mp3"
+  },
+  "dungeon": {
+    "id": 40,
+    "name": "Forest of Beasts",
+    "nameKey": "MST_DUNGEONS_DUNGEON_40_NAME",
+    "landId": 1,
+    "areaId": 100,
+    "x": 64,
+    "y": 502,
+    "requires": 33,
+    "background": "dungeon_battle_10400.jpg"
+  },
+  "quests": [
+    {
+      "missionId": 40,
+      "label": "Mission 40",
+      "missionNameKey": "MST_DUNGEONS_MISSION_40_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_40_NAME",
+      "dungeonId": 40,
+      "requires": 33,
+      "battles": 5,
+      "exp": 36,
+      "zel": 400,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10400.jpg"
+    },
+    {
+      "missionId": 41,
+      "label": "Mission 41",
+      "missionNameKey": "MST_DUNGEONS_MISSION_41_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_40_NAME",
+      "dungeonId": 40,
+      "requires": 40,
+      "battles": 5,
+      "exp": 42,
+      "zel": 450,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10400.jpg"
+    },
+    {
+      "missionId": 42,
+      "label": "Mission 42",
+      "missionNameKey": "MST_DUNGEONS_MISSION_42_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_40_NAME",
+      "dungeonId": 40,
+      "requires": 41,
+      "battles": 5,
+      "exp": 57,
+      "zel": 500,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10400.jpg"
+    },
+    {
+      "missionId": 43,
+      "label": "Mission 43",
+      "missionNameKey": "MST_DUNGEONS_MISSION_43_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_40_NAME",
+      "dungeonId": 40,
+      "requires": 42,
+      "battles": 6,
+      "exp": 84,
+      "zel": 600,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10400.jpg"
+    }
+  ],
+  "english": [
+    {
+      "id": 40,
+      "key": "MST_DUNGEONS_MISSION_40_NAME",
+      "name": "Shadowy Forests",
+      "descriptionKey": "MST_DUNGEONS_MISSION_40_DESCRIPTION",
+      "description": "Beyond the snow lie the forests that the sun doesn't reach. Beware, there are signs of monsters are all around."
+    },
+    {
+      "id": 41,
+      "key": "MST_DUNGEONS_MISSION_41_NAME",
+      "name": "Puppeteer of the Trees",
+      "descriptionKey": "MST_DUNGEONS_MISSION_41_DESCRIPTION",
+      "description": "This monster-packed forest just goes on forever. Everything's the same, seems like you're walking in circles..."
+    },
+    {
+      "id": 42,
+      "key": "MST_DUNGEONS_MISSION_42_NAME",
+      "name": "Bandit of the Forest",
+      "descriptionKey": "MST_DUNGEONS_MISSION_42_DESCRIPTION",
+      "description": "It's said that bandits occupy this forest. They may be tough, but there's no way to avoid them."
+    },
+    {
+      "id": 43,
+      "key": "MST_DUNGEONS_MISSION_43_NAME",
+      "name": "Hunter from the Forest",
+      "descriptionKey": "MST_DUNGEONS_MISSION_43_DESCRIPTION",
+      "description": "Dangerous hunters wielding longbows inhabit the depths of this forest, and they attack anyone who dares enter."
+    }
+  ],
+  "limitations": [
+    "Original quest ID, order, unlocked predecessor, battles, EXP/Zel/Karma, energy, archived English and background recovered from 2022 files",
+    "Enemy assignments, event scripts, item reward code and exact drops are undecoded; do not grant special items from mission 43",
+    "Battle waves, enemy AI and drops continue to use the explicitly simulated offline quest engine",
+    "Map coordinate fields x/y are interpreted in the existing approximate Mistral map layout"
+  ]
+}

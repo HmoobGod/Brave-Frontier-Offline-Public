@@ -1,0 +1,145 @@
+{
+  "id": 42,
+  "name": "Bandit of the Forest",
+  "sourcePath": "missions_parsed/Bandit of the Forest_2014-14-10-08-27.json",
+  "gitBlobSha": "0924501d0ee0592c52038aa3b22cd7950e5ffc7d",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        },
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        },
+        {
+          "name": "Head Bandit Zaza",
+          "unitId": 30062,
+          "hp": 12000,
+          "atk": 660,
+          "def": 20,
+          "aiId": 5004
+        }
+      ]
+    }
+  ]
+}

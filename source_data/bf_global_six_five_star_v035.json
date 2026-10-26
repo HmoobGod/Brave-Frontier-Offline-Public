@@ -1,0 +1,601 @@
+{
+  "schema": "bf-global-six-five-star-starters-2022-v035",
+  "provenance": {
+    "mstZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "originalUnitZipSha256": "c0f03306a4e5efd2513c982ac58b12fff2d72c9ff978b19a839f8932536fc846",
+    "originalThumbnailsZipSha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556",
+    "source": "2022 translated F_UNIT_MST / F_SKILL_MST / F_SKILL_LEVEL_MST / F_UNIT_EVO_MST plus Global English sgtext and archived CGG/CGS/PNG"
+  },
+  "records": {
+    "10014": {
+      "id": 10014,
+      "ownedBaseId": 10011,
+      "fromId": 10013,
+      "name": "Fire God Vargas",
+      "element": 1,
+      "rarity": 5,
+      "stats": {
+        "hp": 2466,
+        "atk": 946,
+        "def": 841,
+        "rec": 718
+      },
+      "lordStats": {
+        "hp": 3917,
+        "atk": 1364,
+        "def": 1230,
+        "rec": 1082
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "10133": 1,
+          "10132": 1,
+          "10131": 1,
+          "10130": 2
+        }
+      },
+      "bb": {
+        "name": "Infinity Nova",
+        "description": "6 combo Fire elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 10014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "19:110011:1,19:170:1,20:121:1,41:121:1,62:121:1,84:121:1,94:121:1,104:121:1",
+        "damageFramesRaw": "26:13:2:2,47:14:2:2,68:15:2:2,90:18:2:2,100:19:2:2,110:21:2:2",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 18,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_10014.png": "48c6b9a2088511b4b98d4e5033232138ff738c2d1c7565052d636004ee24df8a",
+        "content/unit/cgg/unit_cgg_10014.csv": "d2cf1cc279c94c02632dd8ffd7773aeb0307f41e522439a8c06c82167e8e5347",
+        "content/unit/cgs/unit_idle_cgs_10014.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_10014.csv": "38375f13f2595b1c11cbe7f3de3a422441e96998625eb9064489c983bf664b3d",
+        "content/unit/cgs/unit_move_cgs_10014.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82",
+        "content/unit/img/unit_ills_thum_10014.png": "451f48b22f49914e618a5476a0f1720ef060f2363b4a3194f7622b8cd8ef3161"
+      },
+      "unverifiedSpriteTransformLayers": []
+    },
+    "20014": {
+      "id": 20014,
+      "ownedBaseId": 20011,
+      "fromId": 20013,
+      "name": "Ice Goddess Selena",
+      "element": 2,
+      "rarity": 5,
+      "stats": {
+        "hp": 2342,
+        "atk": 994,
+        "def": 766,
+        "rec": 1016
+      },
+      "lordStats": {
+        "hp": 3815,
+        "atk": 1355,
+        "def": 1127,
+        "rec": 1461
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "20133": 1,
+          "20132": 1,
+          "20131": 1,
+          "20130": 2
+        }
+      },
+      "bb": {
+        "name": "Cocytus Zero",
+        "description": "8 combo Water elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 20014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:200010:1,0:210:1,20:122:1,24:122:1,28:122:1",
+        "damageFramesRaw": "10:5:2:1,14:5:2:1,26:10:2:1,30:10:2:1,34:20:2:1,40:15:2:2,46:15:2:2,52:20:2:2",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_20014.png": "89017e8a53125e521f77497a49f1199a47b4170028a63337eb7bec9c29959f7d",
+        "content/unit/cgg/unit_cgg_20014.csv": "e2a2b0c3f4214ca600d189818349212ae34bcbfeb0fcd442d82bde4ed5285fc3",
+        "content/unit/cgs/unit_idle_cgs_20014.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_20014.csv": "83ce7fc98524edd8e72f1d1ba0b351ed0f1742a4a563454e83cb2444a5978d12",
+        "content/unit/cgs/unit_move_cgs_20014.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82",
+        "content/unit/img/unit_ills_thum_20014.png": "cd767171b552fa84c085ed519519fbf1c9c46d8fbbb0add9359815d24e82f7fd"
+      },
+      "unverifiedSpriteTransformLayers": []
+    },
+    "30014": {
+      "id": 30014,
+      "ownedBaseId": 30011,
+      "fromId": 30013,
+      "name": "Nature God Lance",
+      "element": 3,
+      "rarity": 5,
+      "stats": {
+        "hp": 2442,
+        "atk": 1010,
+        "def": 987,
+        "rec": 522
+      },
+      "lordStats": {
+        "hp": 3894,
+        "atk": 1373,
+        "def": 1378,
+        "rec": 805
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "30133": 1,
+          "30132": 1,
+          "30131": 1,
+          "30130": 2
+        }
+      },
+      "bb": {
+        "name": "Eternal Zephyr",
+        "description": "6 combo Earth elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 30014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:300010:1,0:260:1,20:123:1,26:123:1,32:123:1,38:123:1,44:123:1,50:123:1",
+        "damageFramesRaw": "26:15:2:1,32:15:2:4,38:15:2:4,44:15:2:4,50:20:2:4,56:20:2:4",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_30014.png": "7398011094dadda1fb6496d85cecd9b53b6f799493ad38d056900135737e49b3",
+        "content/unit/cgg/unit_cgg_30014.csv": "cfdb8f4872792138e70423e1948f5c6ac799b5a93a4e29398a32670763fd5957",
+        "content/unit/cgs/unit_idle_cgs_30014.csv": "1870dd0c8d34e07614e09edcc8faeb4209bd2892a2de79067270869229309187",
+        "content/unit/cgs/unit_atk_cgs_30014.csv": "452fe2fa6ec36296a774b067e35c3b3f7949bfe48cad37119cf929a86213f3c4",
+        "content/unit/cgs/unit_move_cgs_30014.csv": "aa89758bdd7d950ad09b5351c16bc2e2bbe6ba041ae5c39e272287fd1a3fb48c",
+        "content/unit/img/unit_ills_thum_30014.png": "5effee7c7ca4fb238c49ccd1d545ed946dc10da5c8bf1ed4293186ad1fa85669"
+      },
+      "unverifiedSpriteTransformLayers": []
+    },
+    "40014": {
+      "id": 40014,
+      "ownedBaseId": 40011,
+      "fromId": 40013,
+      "name": "Thunder God Eze",
+      "element": 4,
+      "rarity": 5,
+      "stats": {
+        "hp": 2728,
+        "atk": 1100,
+        "def": 712,
+        "rec": 480
+      },
+      "lordStats": {
+        "hp": 4233,
+        "atk": 1460,
+        "def": 1006,
+        "rec": 770
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "40133": 1,
+          "40132": 1,
+          "40131": 1,
+          "40130": 2
+        }
+      },
+      "bb": {
+        "name": "Heavenly Thunder",
+        "description": "7 combo Thunder elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 40014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "23:300:1,24:400010:1,24:124:1,33:300:1,34:400010:1,34:124:1,38:300:1,39:400010:1,39:124:1",
+        "damageFramesRaw": "30:20:2:4,40:20:2:4,45:20:2:4,60:10:2:2,70:10:2:2,80:10:2:2,90:10:2:2",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 13,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_40014.png": "96e344e075de9a2baa1a548b5b60e3c78d36290e6157edecf564a5b1f6709c7d",
+        "content/unit/cgg/unit_cgg_40014.csv": "e8412c18e6f91076296b4cf86a89cdb92536c6feca5bb49a90bbd8b673a89c3a",
+        "content/unit/cgs/unit_idle_cgs_40014.csv": "6b8e8541d517e4e401cba98d2c726fa88f620e1d360ae15d72487aac70d35214",
+        "content/unit/cgs/unit_atk_cgs_40014.csv": "60a1dca4b1e07181c6eec7d97b2cd5e1d106c4ae205d77754379842f380c0f13",
+        "content/unit/cgs/unit_move_cgs_40014.csv": "df69b8dde691d80b3c24a5f1871c4ea031f5885b12b3a8fd4eeda2ce6e717d9a",
+        "content/unit/img/unit_ills_thum_40014.png": "a0c7355de0c144ffdf2c9b0d0ee2e37c2da7fda945689ad11d6dbc023b4d2c09"
+      },
+      "unverifiedSpriteTransformLayers": []
+    },
+    "50014": {
+      "id": 50014,
+      "ownedBaseId": 50011,
+      "fromId": 50013,
+      "name": "God Atro",
+      "element": 5,
+      "rarity": 5,
+      "stats": {
+        "hp": 2307,
+        "atk": 939,
+        "def": 939,
+        "rec": 939
+      },
+      "lordStats": {
+        "hp": 3730,
+        "atk": 1325,
+        "def": 1325,
+        "rec": 1325
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "50123": 1,
+          "50122": 1,
+          "50121": 1,
+          "50120": 2
+        }
+      },
+      "bb": {
+        "name": "Messiah Hazzard",
+        "description": "5 combo Light elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 50014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "17:500010:1,22:500020:1,23:125:1,29:125:1,35:125:1,41:125:1,47:125:1",
+        "damageFramesRaw": "29:20:2:4,35:20:2:4,41:20:2:4,47:20:2:4,53:20:2:4",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 12,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_50014.png": "e773753995f1ba0739d5fe05e4d69c50b46a40e2ea1fb417ca7c7625ed6948df",
+        "content/unit/cgg/unit_cgg_50014.csv": "b5160c2b45f642d0f9ea47900984b57075c6f97b7325f013642fd9f242aee24d",
+        "content/unit/cgs/unit_idle_cgs_50014.csv": "1870dd0c8d34e07614e09edcc8faeb4209bd2892a2de79067270869229309187",
+        "content/unit/cgs/unit_atk_cgs_50014.csv": "1b4b75993cb95e0200e4e73a5c8992126852b5a904c118902cd4ff1a61115f03",
+        "content/unit/cgs/unit_move_cgs_50014.csv": "aa89758bdd7d950ad09b5351c16bc2e2bbe6ba041ae5c39e272287fd1a3fb48c",
+        "content/unit/img/unit_ills_thum_50014.png": "172253bb6eb468ac19f2bbcef54f0d9a64ce45cbba99012f23f518c6f85a70ad"
+      },
+      "unverifiedSpriteTransformLayers": []
+    },
+    "60014": {
+      "id": 60014,
+      "ownedBaseId": 60011,
+      "fromId": 60013,
+      "name": "Death Magress",
+      "element": 6,
+      "rarity": 5,
+      "stats": {
+        "hp": 3127,
+        "atk": 845,
+        "def": 1011,
+        "rec": 487
+      },
+      "lordStats": {
+        "hp": 4876,
+        "atk": 1198,
+        "def": 1400,
+        "rec": 755
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 10,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "60123": 1,
+          "60122": 1,
+          "60121": 1,
+          "60120": 2
+        }
+      },
+      "bb": {
+        "name": "Vermillion Tower",
+        "description": "6 combo Dark elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 60014,
+        "sourceTable": "3-mst-translated/F_SKILL_MST_1_Ver1535.json",
+        "sourceLevelTable": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "48:600070:1,48:600010:1,49:126:1,55:126:1,61:126:1,67:126:1,73:126:1,79:126:1",
+        "damageFramesRaw": "55:15:2:4,61:15:2:4,67:15:2:4,73:15:2:4,79:20:2:4,85:20:2:4",
+        "levelInfo": "1:2500:70,60,0,0,0,0|2:2500:80,60,0,0,0,0|3:2500:90,60,0,0,0,0|4:2500:100,60,0,0,0,0|5:2500:110,60,0,0,0,0|6:2500:120,60,0,0,0,0|7:2500:130,60,0,0,0,0|8:2500:140,60,0,0,0,0|9:2500:150,60,0,0,0,0|10:2500:160,60,0,0,0,0",
+        "effectCode": 2500,
+        "firstParameterByLevel": [
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160
+        ],
+        "otherParamsNotDecoded": [
+          60,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "frameCount": 30,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_60014.png": "31849ffc16893813bdfcfc218b5b40f9164bf55627a5fa5930015e1cb39f9c97",
+        "content/unit/cgg/unit_cgg_60014.csv": "6cd74a3909d7c1e338a12f3f43915f3823b7227aeb752262545b849be4079561",
+        "content/unit/cgs/unit_idle_cgs_60014.csv": "9f54d34e81bb150859bb3399a701a96996bf6c4f2024b949477dfdb2cac4e7a9",
+        "content/unit/cgs/unit_atk_cgs_60014.csv": "e7437acf57936baf6ab8d5aadee994dcb4cc80c1cd1cd63e31cfd6380d472ad6",
+        "content/unit/cgs/unit_move_cgs_60014.csv": "6727ccb353f5785edd0b054c5feb97078d7e01be39c7e74b5e8cbd79a1c237ff",
+        "content/unit/img/unit_ills_thum_60014.png": "7068f1fdfc195788919f74f5560739bf17ada14c3b52d906cb8f0e08f7fb510b"
+      },
+      "unverifiedSpriteTransformLayers": [
+        {
+          "frame": 24,
+          "layer": 1,
+          "orientationCode": 2,
+          "scalePercent": 100
+        },
+        {
+          "frame": 24,
+          "layer": 8,
+          "orientationCode": 2,
+          "scalePercent": 100
+        },
+        {
+          "frame": 25,
+          "layer": 8,
+          "orientationCode": 2,
+          "scalePercent": 100
+        },
+        {
+          "frame": 25,
+          "layer": 12,
+          "orientationCode": 2,
+          "scalePercent": 100
+        },
+        {
+          "frame": 26,
+          "layer": 0,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 1,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 2,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 3,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 4,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 5,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 6,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 7,
+          "orientationCode": 0,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 8,
+          "orientationCode": 2,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 9,
+          "orientationCode": 2,
+          "scalePercent": 60
+        },
+        {
+          "frame": 26,
+          "layer": 11,
+          "orientationCode": 2,
+          "scalePercent": 80
+        },
+        {
+          "frame": 26,
+          "layer": 12,
+          "orientationCode": 2,
+          "scalePercent": 80
+        },
+        {
+          "frame": 26,
+          "layer": 13,
+          "orientationCode": 0,
+          "scalePercent": 80
+        },
+        {
+          "frame": 27,
+          "layer": 0,
+          "orientationCode": 0,
+          "scalePercent": 30
+        },
+        {
+          "frame": 27,
+          "layer": 1,
+          "orientationCode": 0,
+          "scalePercent": 30
+        },
+        {
+          "frame": 27,
+          "layer": 2,
+          "orientationCode": 0,
+          "scalePercent": 30
+        },
+        {
+          "frame": 27,
+          "layer": 3,
+          "orientationCode": 0,
+          "scalePercent": 30
+        },
+        {
+          "frame": 28,
+          "layer": 0,
+          "orientationCode": 0,
+          "scalePercent": 40
+        }
+      ]
+    }
+  },
+  "sourcePackSha256": "17c3c2007135374f10abb97d95cfda9a6810c753e161cdddcde737aaa491a9ab"
+}

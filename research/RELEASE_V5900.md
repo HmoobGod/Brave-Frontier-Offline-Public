@@ -1,0 +1,9 @@
+# Brave Frontier Global v59.00 — Curse Blocks Brave Burst and Gauge Gain
+
+Based strictly on an exact green v58.00 poison-state build. Original 2022 translated item record #20220 identifies the curse-removal category (ailment code 5), integrated into v57's battle-local status registry. Independent Brave Frontier Global wiki documentation (https://bravefrontierglobal.fandom.com/wiki/Status_Infliction, inspected 2026-10-23) states Curse prevents Brave Burst activation and prevents BB gauge charging; player ailments normally last three turns.
+
+v59 adds guarded wrappers to the existing demo `performUnit` and `enemyPhase`. If an ally is marked with original Curse code 5, a BB action is converted to a normal attack for safety; normal attacks no longer gain the simulated +34 BB gauge while Cursed. Manual BB clicks are blocked before the native command handler. The effect is removed by the existing v57 source-indexed curse cure; an uncured Curse expires after three observed enemy phases in this reconstruction. The original roster, unit stats, save, source BB data, Android signing and offline package identity remain unchanged.
+
+**Limitations:** This implements a documented *Curse consequence* but does not make enemies inflict Curse; original proc rates, animations, exact expiration across wave transitions, skill protections, BB item interactions and network-era arena rules remain unverified. Automated BB corrections are limited to the existing 6-unit DEMO battle system. The public community documentation is not an archived implementation bytecode proof.
+
+Regression gates: force a known status via the v57 integration API in a browser fixture; verify BB queue rejection, attack fallback and blocked gauge charging, cure restores ability, third observed turn expiry, battle reset, no saved field changes, all inherited Chromium regression checks, and signed APK artifact. Do not claim real physical phone validation.

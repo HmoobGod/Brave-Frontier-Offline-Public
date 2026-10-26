@@ -1,0 +1,13 @@
+# Brave Frontier Global v61.00 — Weakness DEF Reduction
+
+**Baseline:** v60.00 exact successful GitHub Actions Build #273, commit `7fbe1abee783821d29a2f958bc9f5917c2643dcc`. Existing v57 status code **2** is Weakness, and the 2022 translated item table associates item #20210 with clearing status codes **2, 3, 4**. Independent Brave Frontier Global reference [Status Infliction](https://bravefrontierglobal.fandom.com/wiki/Status_Infliction) describes Weakness as a **subtractive -50% DEF status** and player ailments lasting **three turns**. That reference documents player-era behavior, not original decompiled game code. The archived source confirms cure identity but not the original status duration, rounding or combat formula.
+
+## Integration
+
+v61 uses the existing battle-local status API and wraps the active DEMO `enemyPhase`. Before enemy damage is evaluated, it temporarily applies `round(DEF * 0.5)` to eligible afflicted living allies; afterward, it restores each original DEF value in `finally`, including if the enemy phase throws. This makes existing simulated `prototypeDamage(enemy.atk, target.def, guard)` sensitive to Weakness without permanently corrupting native stats, v49/v52/v53 item buffs, saved squad fields or later rounds. Active effects expire after three **observed DEMO enemy phases**, deduplicated per round; original enemy infliction probabilities and real status application are still absent. The existing registry gains per-infliction tokens and selective `removeCode(slot,code)`, so Weakness expiry removes only code 2 without prematurely curing Sickness (3) or Injury (4) via the shared source item #20210. Reinfection receives a fresh token and full duration.
+
+**Source-backed:** ailment identity/cure code (#20210) from original translated archive, DEF -50% and duration from community documentation. **DEMO choices:** temporary numerical DEF rounding, subtractive stat composition with simultaneous item buffs, turn boundary and timing, cached animations, simulated damage formula and battle-only registry. No random enemy ailments or fake inventory are added. No `P`, localStorage, app ID, signing identity, manifest permissions, unit/quest records or original artwork altered.
+
+## Verification requirements
+
+New browser regression: effect only during awaitable enemy-phase callback, restored DEF after success and rejection, no effect on KO/non-afflicted ally, item buff interaction, cure #20210, three observed turns with idempotence, mode/new battle, no saved mutation. Inherited browser suite, exact v61 Android version and signed offline APK package checks. Physical Android device testing remains separately required. Promote **only** an exact green GitHub Actions commit with APK artifact.

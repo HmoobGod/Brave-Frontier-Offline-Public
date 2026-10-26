@@ -1,0 +1,126 @@
+{
+  "schema": "bf-global-remains-mirza-v049",
+  "sources": {
+    "masterZip": "mst-decoded.zip",
+    "masterSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "missionPath": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "dungeonPath": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+    "dungeonSha256": "16f090514d65846f6bd4a9998b50d6c810bc806a79858c0ff766cdb1a22536fc",
+    "languageZip": "BF1_sgtext_part001.zip",
+    "languageSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "englishNameZipSha256": "b73ab7460bacc1503e26ccaf833e86ce4d0efa1c74e7bc84fb1cfef92807f9ea",
+    "englishDescZipSha256": "d3a7f4fb27487394f6bbcf2356a0498b8a6771b7c0fc0898a6289f535fa0f8a9",
+    "englishDungeonZipSha256": "beb21ca7b2f0687f74b9104dbb972e1c790dfb865ab7bb07e4fb07a9e86c46df",
+    "originalArtZip": "BF1_dungeon_part001.zip",
+    "artZipSha256": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644",
+    "originalArtPath": "content/dungeon/dungeon_battle_10600.jpg",
+    "backgroundSha256": "7864a64a1c0aca9d3c59d33f9c84b0494bbac848a49f628d46b64b2a4f8881f2",
+    "originalQuestMusic": "bf015_map_wilds.mp3",
+    "originalBossMusic": "bf006_btl_boss.mp3",
+    "originalMission63ExtraReward": "8:0:1:0:0"
+  },
+  "dungeon": {
+    "id": 60,
+    "name": "Remains of Mirza",
+    "nameKey": "MST_DUNGEONS_DUNGEON_60_NAME",
+    "areaId": 100,
+    "landId": 1,
+    "x": 425,
+    "y": 343,
+    "requires": 53,
+    "background": "dungeon_battle_10600.jpg"
+  },
+  "quests": [
+    {
+      "missionId": 60,
+      "label": "Mission 60",
+      "missionNameKey": "MST_DUNGEONS_MISSION_60_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_60_NAME",
+      "dungeonId": 60,
+      "requires": 53,
+      "battles": 6,
+      "exp": 44,
+      "zel": 400,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10600.jpg"
+    },
+    {
+      "missionId": 61,
+      "label": "Mission 61",
+      "missionNameKey": "MST_DUNGEONS_MISSION_61_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_60_NAME",
+      "dungeonId": 60,
+      "requires": 60,
+      "battles": 6,
+      "exp": 51,
+      "zel": 450,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10600.jpg"
+    },
+    {
+      "missionId": 62,
+      "label": "Mission 62",
+      "missionNameKey": "MST_DUNGEONS_MISSION_62_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_60_NAME",
+      "dungeonId": 60,
+      "requires": 61,
+      "battles": 6,
+      "exp": 62,
+      "zel": 500,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10600.jpg"
+    },
+    {
+      "missionId": 63,
+      "label": "Mission 63",
+      "missionNameKey": "MST_DUNGEONS_MISSION_63_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_60_NAME",
+      "dungeonId": 60,
+      "requires": 62,
+      "battles": 7,
+      "exp": 89,
+      "zel": 600,
+      "karma": 0,
+      "energy": 7,
+      "background": "dungeon_battle_10600.jpg"
+    }
+  ],
+  "english": [
+    {
+      "id": 60,
+      "key": "MST_DUNGEONS_MISSION_60_NAME",
+      "name": "Sacred Ruins",
+      "descriptionKey": "MST_DUNGEONS_MISSION_60_DESCRIPTION",
+      "description": "These ancient ruins have a solemn, holy air. It's much better than where you were before, but it's still ominous."
+    },
+    {
+      "id": 61,
+      "key": "MST_DUNGEONS_MISSION_61_NAME",
+      "name": "Wielder of the Light",
+      "descriptionKey": "MST_DUNGEONS_MISSION_61_DESCRIPTION",
+      "description": "It appears that a sage with the power of light is in the ruins. A guardian, perhaps?"
+    },
+    {
+      "id": 62,
+      "key": "MST_DUNGEONS_MISSION_62_NAME",
+      "name": "The White Horse of Light",
+      "descriptionKey": "MST_DUNGEONS_MISSION_62_DESCRIPTION",
+      "description": "A shining, gallant white horse blocks the path. It defends its position, attacking mercilessly."
+    },
+    {
+      "id": 63,
+      "key": "MST_DUNGEONS_MISSION_63_NAME",
+      "name": "Moonlit Battle",
+      "descriptionKey": "MST_DUNGEONS_MISSION_63_DESCRIPTION",
+      "description": "A warrior of light lies in wait in the depths of these ruins, testing adventurers before they're allowed to pass."
+    }
+  ],
+  "limitations": [
+    "The archived 2022 MST establishes mission names and unlocks, energy, wave counts and standard EXP/Zel/Karma rewards, and the exact original battle background",
+    "Archived enemy-wave assignments, drop logic, item reward semantics and native battle formulas remain unknown; simulated fights must be visibly DEMO",
+    "Original battle and boss music filenames are sourced but audio is not yet restored"
+  ]
+}

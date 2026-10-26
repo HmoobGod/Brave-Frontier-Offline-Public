@@ -1,0 +1,115 @@
+{
+  "schema": "bf-global-egor-snowfield-v045",
+  "sources": {
+    "master": "mst-decoded.zip",
+    "masterSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "missionTable": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "dungeonTable": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+    "dungeonTableSha256": "16f090514d65846f6bd4a9998b50d6c810bc806a79858c0ff766cdb1a22536fc",
+    "languagePack": "BF1_sgtext_part001.zip",
+    "languageSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "artPack": "BF1_dungeon_part001.zip",
+    "artPackSha256": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644",
+    "backgroundSha256": "9938feefc0407062420170d0ad40f9602dc0ce07b349aac0430ff13ef0c6dfc4"
+  },
+  "dungeon": {
+    "id": 30,
+    "name": "Egor Snowfield",
+    "nameKey": "MST_DUNGEONS_DUNGEON_30_NAME",
+    "x": 344,
+    "y": 656,
+    "requires": 23
+  },
+  "quests": [
+    {
+      "missionId": 30,
+      "label": "Mission 30",
+      "missionNameKey": "MST_DUNGEONS_MISSION_30_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_30_NAME",
+      "dungeonId": 30,
+      "requires": 23,
+      "battles": 5,
+      "exp": 35,
+      "zel": 400,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10300.jpg"
+    },
+    {
+      "missionId": 31,
+      "label": "Mission 31",
+      "missionNameKey": "MST_DUNGEONS_MISSION_31_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_30_NAME",
+      "dungeonId": 30,
+      "requires": 30,
+      "battles": 5,
+      "exp": 40,
+      "zel": 450,
+      "karma": 0,
+      "energy": 3,
+      "background": "dungeon_battle_10300.jpg"
+    },
+    {
+      "missionId": 32,
+      "label": "Mission 32",
+      "missionNameKey": "MST_DUNGEONS_MISSION_32_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_30_NAME",
+      "dungeonId": 30,
+      "requires": 31,
+      "battles": 5,
+      "exp": 53,
+      "zel": 500,
+      "karma": 0,
+      "energy": 4,
+      "background": "dungeon_battle_10300.jpg"
+    },
+    {
+      "missionId": 33,
+      "label": "Mission 33",
+      "missionNameKey": "MST_DUNGEONS_MISSION_33_NAME",
+      "dungeonNameKey": "MST_DUNGEONS_DUNGEON_30_NAME",
+      "dungeonId": 30,
+      "requires": 32,
+      "battles": 6,
+      "exp": 83,
+      "zel": 600,
+      "karma": 0,
+      "energy": 5,
+      "background": "dungeon_battle_10300.jpg"
+    }
+  ],
+  "english": [
+    {
+      "id": 30,
+      "key": "MST_DUNGEONS_MISSION_30_NAME",
+      "name": "Breath Freezing Snowfields",
+      "descriptionKey": "MST_DUNGEONS_MISSION_30_DESCRIPTION",
+      "description": "You've emerged into a blizzard. It's so cold, watch out for enemies with water attacks."
+    },
+    {
+      "id": 31,
+      "key": "MST_DUNGEONS_MISSION_31_NAME",
+      "name": "Manipulator of the Water",
+      "descriptionKey": "MST_DUNGEONS_MISSION_31_DESCRIPTION",
+      "description": "You are making progress, but the end of the snowscape still isn't visible. Don't forget to plan for water enemies."
+    },
+    {
+      "id": 32,
+      "key": "MST_DUNGEONS_MISSION_32_NAME",
+      "name": "The Pirate on Ice",
+      "descriptionKey": "MST_DUNGEONS_MISSION_32_DESCRIPTION",
+      "description": "You've reached the center of the icy field. Beware, apparently there are pirates about on the ice..."
+    },
+    {
+      "id": 33,
+      "key": "MST_DUNGEONS_MISSION_33_NAME",
+      "name": "The Dragon Hunting Ice Knight",
+      "descriptionKey": "MST_DUNGEONS_MISSION_33_DESCRIPTION",
+      "description": "The end of this cold snow field has come into view at last. However, it seems one of Maxwell's knights is waiting just ahead."
+    }
+  ],
+  "limitations": [
+    "Enemy waves, enemy AI, conditional drops and native effects remain demo-simulated",
+    "Original English, quests, fees, rewards and snowfield battle art were recovered from original archive"
+  ]
+}

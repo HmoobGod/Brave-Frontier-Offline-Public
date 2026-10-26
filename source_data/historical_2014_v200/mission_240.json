@@ -1,0 +1,147 @@
+{
+  "id": 240,
+  "name": "Land of the Light",
+  "sourcePath": "missions_parsed/Land of the Light_2014-08-10-09-49.json",
+  "gitBlobSha": "1cdf8e966110f18ed3c0fe6b86a7d49848a08673",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 3600,
+          "atk": 700,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Sage Mimir",
+          "unitId": 50040,
+          "hp": 4500,
+          "atk": 620,
+          "def": 240,
+          "aiId": 10
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 3600,
+          "atk": 700,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 3000,
+          "atk": 590,
+          "def": 200,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 3600,
+          "atk": 700,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Sage Mimir",
+          "unitId": 50040,
+          "hp": 4500,
+          "atk": 620,
+          "def": 240,
+          "aiId": 10
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Ramia",
+          "unitId": 20071,
+          "hp": 3500,
+          "atk": 690,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Cowboy Heidt",
+          "unitId": 50092,
+          "hp": 38000,
+          "atk": 840,
+          "def": 350,
+          "aiId": 5030
+        }
+      ]
+    }
+  ]
+}

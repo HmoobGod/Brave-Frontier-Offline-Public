@@ -1,0 +1,844 @@
+{
+  "schema": "bf-global-2022-bb-sbb-dropcheck-source-v8300",
+  "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "unitTableParts": [
+    {
+      "file": "F_UNIT_MST_1_Ver1084.json",
+      "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+    },
+    {
+      "file": "F_UNIT_MST_2_Ver1084.json",
+      "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+    }
+  ],
+  "skillTableParts": [
+    {
+      "file": "F_SKILL_MST_1_Ver1535.json",
+      "sha256": "5e8d7d1489565d63291ff1e2f0575e03e3b9eaa673ef85c74ee393d852d6957b"
+    },
+    {
+      "file": "F_SKILL_MST_2_Ver1535.json",
+      "sha256": "84478c9cdc3878631ab4077f324f43d719340d32abe0de780235b458b6585a33"
+    },
+    {
+      "file": "F_SKILL_MST_3_Ver1535.json",
+      "sha256": "83e27447ad68fbebe17f3687da5d9e6d3534a737b03d6d0f22339211a57bd9d5"
+    },
+    {
+      "file": "F_SKILL_MST_4_Ver1535.json",
+      "sha256": "447cfd01e995ae0ed717c3d73dac44d49af8f4a980b0ab6b125b0bdc6a443a8c"
+    },
+    {
+      "file": "F_SKILL_MST_5_Ver1535.json",
+      "sha256": "e59caf263f6b3bfa9bbc1b53e5c4ea8e1fadb47221f28db0180f88cd7ac8bd96"
+    },
+    {
+      "file": "F_SKILL_MST_6_Ver1535.json",
+      "sha256": "deee65f5392597efc86db18b7e95af253054aaf409dd7c9930e6ba5ca513ba1b"
+    },
+    {
+      "file": "F_SKILL_MST_7_Ver1535.json",
+      "sha256": "2be8cd9d935d01680c4df15ee362232563489556176479dc530ac21600fe4720"
+    },
+    {
+      "file": "F_SKILL_MST_8_Ver1535.json",
+      "sha256": "fc3ab5aa2297e79b0db93e68d9114826716df3eef8e612c52b91420a89282d99"
+    },
+    {
+      "file": "F_SKILL_MST_9_Ver1535.json",
+      "sha256": "da1e88075902a92964be5f51b405b01ac9d0bad1aebbad744b6ce15fcf9d3352"
+    }
+  ],
+  "join": "Exact F_UNIT bbId/sbbId to F_SKILL bbId for the 71 previously validated v82 normal-attack unit IDs",
+  "method": "simpleDamageEvents only when one non-@ damageFrames group contains four-integer colon tuples and damage weights sum to 100; complex groups are null",
+  "limitations": "Raw source preserved in user's immutable archive; no native multi-group timing, target multiplicity, resistances or crystal pickups inferred.",
+  "rows": [
+    {
+      "unitId": 10011,
+      "kind": "BB",
+      "skillId": 10011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10012,
+      "kind": "BB",
+      "skillId": 10012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10013,
+      "kind": "BB",
+      "skillId": 10013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10014,
+      "kind": "BB",
+      "skillId": 10014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10015,
+      "kind": "BB",
+      "skillId": 10015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10021,
+      "kind": "BB",
+      "skillId": 10021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10022,
+      "kind": "BB",
+      "skillId": 10022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10024,
+      "kind": "BB",
+      "skillId": 10024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10025,
+      "kind": "BB",
+      "skillId": 10025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10041,
+      "kind": "BB",
+      "skillId": 10041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 10042,
+      "kind": "BB",
+      "skillId": 10042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 7,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20011,
+      "kind": "BB",
+      "skillId": 20011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20012,
+      "kind": "BB",
+      "skillId": 20012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20013,
+      "kind": "BB",
+      "skillId": 20013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 7,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20014,
+      "kind": "BB",
+      "skillId": 20014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20015,
+      "kind": "BB",
+      "skillId": 20015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 20021,
+      "kind": "BB",
+      "skillId": 20021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20022,
+      "kind": "BB",
+      "skillId": 20022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20023,
+      "kind": "BB",
+      "skillId": 20023,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20024,
+      "kind": "BB",
+      "skillId": 20024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20025,
+      "kind": "BB",
+      "skillId": 20025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20041,
+      "kind": "BB",
+      "skillId": 20041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 20042,
+      "kind": "BB",
+      "skillId": 20042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 30011,
+      "kind": "BB",
+      "skillId": 30011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30012,
+      "kind": "BB",
+      "skillId": 30012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30013,
+      "kind": "BB",
+      "skillId": 30013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30014,
+      "kind": "BB",
+      "skillId": 30014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30015,
+      "kind": "BB",
+      "skillId": 30015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30021,
+      "kind": "BB",
+      "skillId": 30021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30022,
+      "kind": "BB",
+      "skillId": 30022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30023,
+      "kind": "BB",
+      "skillId": 30023,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30024,
+      "kind": "BB",
+      "skillId": 30024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30025,
+      "kind": "BB",
+      "skillId": 30025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 13,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 30041,
+      "kind": "BB",
+      "skillId": 30041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 30042,
+      "kind": "BB",
+      "skillId": 30042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40011,
+      "kind": "BB",
+      "skillId": 40011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 2,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 40012,
+      "kind": "BB",
+      "skillId": 40012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 2,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 40013,
+      "kind": "BB",
+      "skillId": 40013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 40014,
+      "kind": "BB",
+      "skillId": 40014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 7,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 40015,
+      "kind": "BB",
+      "skillId": 40015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 40021,
+      "kind": "BB",
+      "skillId": 40021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "5",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40022,
+      "kind": "BB",
+      "skillId": 40022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "5",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40023,
+      "kind": "BB",
+      "skillId": 40023,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "5",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40024,
+      "kind": "BB",
+      "skillId": 40024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "5",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40025,
+      "kind": "BB",
+      "skillId": 40025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "5",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40041,
+      "kind": "BB",
+      "skillId": 40041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 40042,
+      "kind": "BB",
+      "skillId": 40042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 50011,
+      "kind": "BB",
+      "skillId": 50011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 2,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50012,
+      "kind": "BB",
+      "skillId": 50012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50013,
+      "kind": "BB",
+      "skillId": 50013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50014,
+      "kind": "BB",
+      "skillId": 50014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 5,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50015,
+      "kind": "BB",
+      "skillId": 50015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50021,
+      "kind": "BB",
+      "skillId": 50021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 2,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50022,
+      "kind": "BB",
+      "skillId": 50022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50023,
+      "kind": "BB",
+      "skillId": 50023,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50024,
+      "kind": "BB",
+      "skillId": 50024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50025,
+      "kind": "BB",
+      "skillId": 50025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 10,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 50041,
+      "kind": "BB",
+      "skillId": 50041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 50042,
+      "kind": "BB",
+      "skillId": 50042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": false,
+      "skillTypeId": "2",
+      "targetType": "1"
+    },
+    {
+      "unitId": 60011,
+      "kind": "BB",
+      "skillId": 60011,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60012,
+      "kind": "BB",
+      "skillId": 60012,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60013,
+      "kind": "BB",
+      "skillId": 60013,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60014,
+      "kind": "BB",
+      "skillId": 60014,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60015,
+      "kind": "BB",
+      "skillId": 60015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60021,
+      "kind": "BB",
+      "skillId": 60021,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 2,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60022,
+      "kind": "BB",
+      "skillId": 60022,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 3,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60023,
+      "kind": "BB",
+      "skillId": 60023,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 4,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60024,
+      "kind": "BB",
+      "skillId": 60024,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 6,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60025,
+      "kind": "BB",
+      "skillId": 60025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": 8,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    },
+    {
+      "unitId": 60041,
+      "kind": "BB",
+      "skillId": 60041,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 60042,
+      "kind": "BB",
+      "skillId": 60042,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10015,
+      "kind": "SBB",
+      "skillId": 110015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 10025,
+      "kind": "SBB",
+      "skillId": 110025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20015,
+      "kind": "SBB",
+      "skillId": 120015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 20025,
+      "kind": "SBB",
+      "skillId": 120025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 30015,
+      "kind": "SBB",
+      "skillId": 130015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 30025,
+      "kind": "SBB",
+      "skillId": 130025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 40015,
+      "kind": "SBB",
+      "skillId": 140015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 40025,
+      "kind": "SBB",
+      "skillId": 140025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 50015,
+      "kind": "SBB",
+      "skillId": 150015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 50025,
+      "kind": "SBB",
+      "skillId": 150025,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 60015,
+      "kind": "SBB",
+      "skillId": 160015,
+      "dropCheckCount": 1,
+      "simpleDamageEvents": null,
+      "offensiveDamageEvidence": false
+    },
+    {
+      "unitId": 60025,
+      "kind": "SBB",
+      "skillId": 160025,
+      "dropCheckCount": 25,
+      "simpleDamageEvents": 1,
+      "offensiveDamageEvidence": true,
+      "skillTypeId": "1",
+      "targetType": "2"
+    }
+  ],
+  "classification": "Only simple damage group AND F_SKILL skillTypeId=1, targetType=2 can produce BC reference counts. Skill types 2 and 5 are nonoffensive effects. Complex @ groups remain unknown."
+}

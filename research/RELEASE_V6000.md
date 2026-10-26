@@ -1,0 +1,9 @@
+# Brave Frontier Global v60.00 — Paralysis Prevents DEMO Unit Actions
+
+Base: exact green v59.00 signed APK and commit. Archived 2022 source identifies Paralysis as ailment code 6, cured by item #20230, via v57's status registry. Independent Global-era reference https://bravefrontierglobal.fandom.com/wiki/Status_Infliction (accessed 2026-10-23) documents that Paralysis prevents an afflicted unit from moving, and lasts three turns on the player's units.
+
+This release integrates that specific status consequence into the existing DEMO battle's player-action execution. An affected active party unit skips its queued attack, BB or Guard at the actual `performUnit` execution stage, including Auto Battle-generated commands. The shared item actor-reservation `free()` also rejects paralyzed actors, avoiding free effects from temporary DEMO items. Paralysis expires after three observed enemy-phase ends if not cured earlier by source item #20230. Other source status codes, other effect modules, and all original assets remain unchanged.
+
+**Scope limits:** There is still no authenticated original enemy infliction/roll source, no complete source-derived NPC ability table, no item inventory or status immunity, and no full native battle scheduler. A wave completed without an enemy phase does not advance this status timer; the integer/animation decisions stay DEMO. This is a community-grounded paralysis consequence, not a full binary recreation. No actual poison/Curse/status is randomly inflicted by dummy enemies.
+
+Regression checks: paralyzed actor skips native `performUnit`; ailment-free actor proceeds; cure restores action; three-turn expiry and once-per-round dedupe; temporary item actors blocked; no P/localStorage mutation; inherited browser/APK suites and unchanged signing/versionCode/offline identity. Only exact successful CI commit with APK can become Current.

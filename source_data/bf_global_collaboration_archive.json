@@ -1,0 +1,61 @@
+{
+  "schema": "bf-global-collaboration-archive-preview-v1",
+  "provenance": {
+    "audit": "BF_Global_Asset_Audit_2026-10-18.md",
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "manifest": "2022APR03-FULL-GL.txt",
+    "meaning": "Names/IDs and expected asset-reference paths cross-checked in earlier audit; not confirmation illustration/animation ZIP bytes are present."
+  },
+  "scope": "Eight vetted examples, NOT the complete Global collaboration roster. Preview-only; not owned/recruitable.",
+  "units": [
+    {
+      "id": 810547,
+      "name": "Natsu Dragneel",
+      "series": "Fairy Tail",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 840548,
+      "name": "Erza Scarlet",
+      "series": "Fairy Tail",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 860637,
+      "name": "Acnologia",
+      "series": "Fairy Tail",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 810588,
+      "name": "Katsuki Bakugo",
+      "series": "My Hero Academia",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 850588,
+      "name": "All Might",
+      "series": "My Hero Academia",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 810178,
+      "name": "Mai Shiranui",
+      "series": "The King of Fighters",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 860868,
+      "name": "Legato Bluesummers",
+      "series": "Trigun",
+      "animation": "CGG/CGS"
+    },
+    {
+      "id": 850198,
+      "name": "Mankai Sakura Miku",
+      "series": "Hatsune Miku",
+      "animation": "SAM"
+    }
+  ]
+}

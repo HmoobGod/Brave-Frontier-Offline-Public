@@ -1,0 +1,16 @@
+{
+  "release": "v0.9.1",
+  "save_schema": "bf-global-offline-demo v4 (unchanged)",
+  "features": [
+    "browser JSON download",
+    "browser JSON import",
+    "Android ACTION_CREATE_DOCUMENT export",
+    "Android ACTION_OPEN_DOCUMENT import",
+    "pre-import backup and undo",
+    "pasted JSON backwards compatibility"
+  ],
+  "status": "browser regression and JS bridge contract tests passed; Android APK compilation/device test pending",
+  "apk_compiled": false,
+  "browser_test_report": "BF_v0.9.1_Cross_Device_Save_Test_Report.json",
+  "battle_regression": "BF_v0.9.1_Battle_Regression_Report.json"
+}

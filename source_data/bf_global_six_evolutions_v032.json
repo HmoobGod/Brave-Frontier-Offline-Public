@@ -1,0 +1,313 @@
+{
+  "schema": "bf-global-six-first-evolutions-2022-v032",
+  "provenance": {
+    "sourceMstSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceUnitPart001Sha256": "c0f03306a4e5efd2513c982ac58b12fff2d72c9ff978b19a839f8932536fc846",
+    "sourceUnitPart007Sha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556",
+    "originalData": "translated F_UNIT_MST, F_EVOLUTION_MST, F_SKILL_MST, F_SKILL_LEVEL_MST, Global English sgtext"
+  },
+  "sourcePackSha256": "e00e64d2f7c3ae9566c1a19f2d60330f06641c40b8671a577b41e6c43c25c063",
+  "records": {
+    "10042": {
+      "baseId": 10041,
+      "id": 10042,
+      "name": "Pyromancer Liza",
+      "element": 1,
+      "rarity": 3,
+      "stats": {
+        "hp": 2217,
+        "atk": 534,
+        "def": 696,
+        "rec": 730
+      },
+      "originalLordStats": {
+        "hp": 3788,
+        "atk": 683,
+        "def": 994,
+        "rec": 1161
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "10131": 1,
+          "10130": 1
+        }
+      },
+      "bb": {
+        "name": "Meteor Storm",
+        "description": "7 combo Fire attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 10042,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "54:100020:1,55:100010:1,61:100010:1,67:100010:1,73:100010:1,79:100010:1,85:100010:1,91:100010:1",
+        "damageFramesRaw": "56:14:2:2,62:14:3:2,68:14:2:2,74:14:3:2,80:14:2:2,86:15:3:2,92:15:2:2",
+        "levelInfo": "1:1500:60,0,0,0,0,0|2:1500:65,0,0,0,0,0|3:1500:70,0,0,0,0,0|4:1500:75,0,0,0,0,0|5:1500:80,0,0,0,0,0|6:1500:85,0,0,0,0,0|7:1500:90,0,0,0,0,0|8:1500:95,0,0,0,0,0|9:1500:100,0,0,0,0,0|10:1500:105,0,0,0,0,0"
+      },
+      "frameCount": 15,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_10042.png": "447463a14f437a0f8bcba91420d6889a175ce410f848fd715eb9350a12675d4a",
+        "content/unit/cgg/unit_cgg_10042.csv": "8b5c8c39846ea71daacc5d9d69e423ac6b1162a440c096369948b56587e58684",
+        "content/unit/cgs/unit_idle_cgs_10042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_10042.csv": "a157a4734770253fcc95c7a36a32414139fc308f1c2af22a950abc2d4c1aeded",
+        "content/unit/img/unit_ills_thum_10042.png": "cd96fb3314732755e3bc6c678fda6f4c2b31f27d9876119b182658bd85d43d96"
+      },
+      "missingOriginalMoveCGS": true
+    },
+    "20042": {
+      "baseId": 20041,
+      "id": 20042,
+      "name": "Bishop Merith",
+      "element": 2,
+      "rarity": 3,
+      "stats": {
+        "hp": 2279,
+        "atk": 526,
+        "def": 718,
+        "rec": 765
+      },
+      "originalLordStats": {
+        "hp": 3902,
+        "atk": 667,
+        "def": 1029,
+        "rec": 1241
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "20131": 1,
+          "20130": 1
+        }
+      },
+      "bb": {
+        "name": "Cure Storm",
+        "description": "Greatly recovers HP for all allies",
+        "target": "support",
+        "skillId": 20042,
+        "sourceType": "2",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:200040:1,140:520:1",
+        "damageFramesRaw": "146:100:2:1",
+        "levelInfo": "1:1500:1000,1200,50,50|2:1500:1030,1230,50,50|3:1500:1060,1260,50,50|4:1500:1090,1290,50,50|5:1500:1120,1320,50,50|6:1500:1150,1350,50,50|7:1500:1180,1380,50,50|8:1500:1210,1410,50,50|9:1500:1240,1440,50,50|10:1500:1270,1470,50,50"
+      },
+      "frameCount": 14,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_20042.png": "e1227947dba7b04b7f3dce8a2b7073e62e734c53caab473352d4bfdeca1f1ae4",
+        "content/unit/cgg/unit_cgg_20042.csv": "e3c27924d63af13495745ecc0a39b714b1d1df48746ee3af75b387714625f583",
+        "content/unit/cgs/unit_idle_cgs_20042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_20042.csv": "3bb7a98268498926153d3d2e9326b38f364d2bf6908fa8354a0e6534a2498a7f",
+        "content/unit/img/unit_ills_thum_20042.png": "2036e0dfe62821dcf58e9d66a92367e16e843e30d53932d0808715b37059a97e"
+      },
+      "missingOriginalMoveCGS": true
+    },
+    "30042": {
+      "baseId": 30041,
+      "id": 30042,
+      "name": "Time Lord Claris",
+      "element": 3,
+      "rarity": 3,
+      "stats": {
+        "hp": 2304,
+        "atk": 514,
+        "def": 773,
+        "rec": 742
+      },
+      "originalLordStats": {
+        "hp": 3970,
+        "atk": 639,
+        "def": 1098,
+        "rec": 1188
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "30131": 1,
+          "30130": 1
+        }
+      },
+      "bb": {
+        "name": "Space Ray",
+        "description": "Greatly recovers HP for all allies",
+        "target": "support",
+        "skillId": 30042,
+        "sourceType": "2",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "0:300030:1,80:520:1",
+        "damageFramesRaw": "86:100:2:1",
+        "levelInfo": "1:1500:1000,1200,50,50|2:1500:1030,1230,50,50|3:1500:1060,1260,50,50|4:1500:1090,1290,50,50|5:1500:1120,1320,50,50|6:1500:1150,1350,50,50|7:1500:1180,1380,50,50|8:1500:1210,1410,50,50|9:1500:1240,1440,50,50|10:1500:1270,1470,50,50"
+      },
+      "frameCount": 14,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_30042.png": "975a4adf87cdcf10acdd108160bf9b7fc88f4b8d94fec4280fb3f9c0a26ab4fd",
+        "content/unit/cgg/unit_cgg_30042.csv": "6593d2a892950c99b061895afc935e1b67b4902607da13ea4f641b4f1e179cfe",
+        "content/unit/cgs/unit_idle_cgs_30042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_30042.csv": "d85cf07d2906dfe60aa4a70a08ab90f06f7c0f26fb8a8e8ae53516cf28f27b7e",
+        "content/unit/img/unit_ills_thum_30042.png": "fb1ffc05c5e0f9989e88646211269a5b515fa274099b0367fc0ee56e8bb18185"
+      },
+      "missingOriginalMoveCGS": true
+    },
+    "40042": {
+      "baseId": 40041,
+      "id": 40042,
+      "name": "Royal Dancer May",
+      "element": 4,
+      "rarity": 3,
+      "stats": {
+        "hp": 2203,
+        "atk": 578,
+        "def": 663,
+        "rec": 713
+      },
+      "originalLordStats": {
+        "hp": 3648,
+        "atk": 701,
+        "def": 957,
+        "rec": 1126
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "40131": 1,
+          "40130": 1
+        }
+      },
+      "bb": {
+        "name": "Healing Samba",
+        "description": "Greatly recovers HP for all allies",
+        "target": "support",
+        "skillId": 40042,
+        "sourceType": "2",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "44:400050:1,124:520:1",
+        "damageFramesRaw": "130:100:2:1",
+        "levelInfo": "1:1500:1000,1200,50,50|2:1500:1030,1230,50,50|3:1500:1060,1260,50,50|4:1500:1090,1290,50,50|5:1500:1120,1320,50,50|6:1500:1150,1350,50,50|7:1500:1180,1380,50,50|8:1500:1210,1410,50,50|9:1500:1240,1440,50,50|10:1500:1270,1470,50,50"
+      },
+      "frameCount": 18,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_40042.png": "501ea9139170a26ad912404abcd00b3ef3e768705c1d9d4fa180ccfa4c1710be",
+        "content/unit/cgg/unit_cgg_40042.csv": "675a45a426a940d1a678c63c3098b1d804738acd61f710e3af64f90c8cce05b8",
+        "content/unit/cgs/unit_idle_cgs_40042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_40042.csv": "96b11c700607ca95c354f6ca08ebc3c46585fadb2a8444c76ff5b1ba55ab854d",
+        "content/unit/cgs/unit_move_cgs_40042.csv": "7cb76b08dbf37ff5c075ba175444f16cd0ad9f035194779f5e355b5475f0825c",
+        "content/unit/img/unit_ills_thum_40042.png": "21be40a2b2d92e45183d6aa4ec74512b39d394f8118693cad66089676e04f5d0"
+      },
+      "missingOriginalMoveCGS": false
+    },
+    "50042": {
+      "baseId": 50041,
+      "id": 50042,
+      "name": "Great Sage Mimir",
+      "element": 5,
+      "rarity": 3,
+      "stats": {
+        "hp": 2266,
+        "atk": 498,
+        "def": 718,
+        "rec": 789
+      },
+      "originalLordStats": {
+        "hp": 3880,
+        "atk": 639,
+        "def": 1030,
+        "rec": 1269
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "50121": 1,
+          "50120": 1
+        }
+      },
+      "bb": {
+        "name": "Star Heal",
+        "description": "Greatly recovers HP for all allies",
+        "target": "support",
+        "skillId": 50042,
+        "sourceType": "2",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "6:500030:1,86:520:1",
+        "damageFramesRaw": "92:100:2:1",
+        "levelInfo": "1:1500:1000,1200,50,50|2:1500:1030,1230,50,50|3:1500:1060,1260,50,50|4:1500:1090,1290,50,50|5:1500:1120,1320,50,50|6:1500:1150,1350,50,50|7:1500:1180,1380,50,50|8:1500:1210,1410,50,50|9:1500:1240,1440,50,50|10:1500:1270,1470,50,50"
+      },
+      "frameCount": 15,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_50042.png": "c484e8d6b3fdc4fcd36de90bc1b3feabbf2e3129afa02af8fd6c53f8eb652416",
+        "content/unit/cgg/unit_cgg_50042.csv": "bf4781d9ad5b0821adfecda43ba1497b055af3e9d8be530af26339910e48c9a1",
+        "content/unit/cgs/unit_idle_cgs_50042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_50042.csv": "b23212d0277ee80db349ffeb2217e6f0d8b043fd17568f5bf4728e586263a5b5",
+        "content/unit/img/unit_ills_thum_50042.png": "c5236654214e7c5510a1138b46551dc979869b29652fd7c85920f8a629e9388b"
+      },
+      "missingOriginalMoveCGS": true
+    },
+    "60042": {
+      "baseId": 60041,
+      "id": 60042,
+      "name": "Dark Arts Lily",
+      "element": 6,
+      "rarity": 3,
+      "stats": {
+        "hp": 2137,
+        "atk": 590,
+        "def": 663,
+        "rec": 718
+      },
+      "originalLordStats": {
+        "hp": 3741,
+        "atk": 716,
+        "def": 958,
+        "rec": 1133
+      },
+      "originalMaxLevel": 40,
+      "originalUnitCost": 6,
+      "sourceRecipe": {
+        "zel": 50000,
+        "karma": 0,
+        "materials": {
+          "60121": 1,
+          "60120": 1
+        }
+      },
+      "bb": {
+        "name": "Grand Despair",
+        "description": "6 combo powerful Dark attack on single enemy & probable Curse effect",
+        "target": "single_enemy",
+        "skillId": 60042,
+        "sourceType": "1@11",
+        "sourceTargetType": "2@2",
+        "sourceTargetArea": "1@1",
+        "effectFramesRaw": "50:600030:1,83:360:1",
+        "damageFramesRaw": "74:15:2:1,79:15:2:1,84:15:2:1,89:15:2:1,94:20:2:1,99:20:2:1@0:100:2:1",
+        "levelInfo": "1:1500:70,100,0,0,0,0@5,80,0,0,0,0,0,0,189|2:1500:75,100,0,0,0,0@5,80,0,0,0,0,0,0,189|3:1500:80,100,0,0,0,0@5,80,0,0,0,0,0,0,189|4:1500:85,100,0,0,0,0@5,80,0,0,0,0,0,0,189|5:1500:90,100,0,0,0,0@5,80,0,0,0,0,0,0,189|6:1500:95,100,0,0,0,0@5,80,0,0,0,0,0,0,189|7:1500:100,100,0,0,0,0@5,80,0,0,0,0,0,0,189|8:1500:105,100,0,0,0,0@5,80,0,0,0,0,0,0,189|9:1500:110,100,0,0,0,0@5,80,0,0,0,0,0,0,189|10:1500:115,100,0,0,0,0@5,80,0,0,0,0,0,0,189"
+      },
+      "frameCount": 16,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_60042.png": "c8b413e40f349d58c50eaa6925cccb1d9e758821dd174f21fa1ef8303f7077a5",
+        "content/unit/cgg/unit_cgg_60042.csv": "bcef2904156d1988f14e78ff3eaa7f004f6bbbe19a9362e1416ab25c0bb90528",
+        "content/unit/cgs/unit_idle_cgs_60042.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_60042.csv": "e83ab548ac146c17a8c1eb8346000b1324bda0d5ca0213c1bb2cb45738faea4f",
+        "content/unit/img/unit_ills_thum_60042.png": "b45bfde4036d83f4a61a75fedc50d7d4e296c0e336680531b0b1800828f2cab8"
+      },
+      "missingOriginalMoveCGS": true
+    }
+  }
+}

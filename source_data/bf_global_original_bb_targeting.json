@@ -1,0 +1,191 @@
+{
+  "schema": "bf-global-original-bb-targets-2022-v1",
+  "provenance": {
+    "source": "2022 original Global English skill strings and decoded unit master",
+    "loreGzipSha256": "849c4a76574b35749ff81f998a642eed061fd3751dc2d9daf7ed12517cbb1d4f",
+    "loreJsonSha256": "88847b75758153d3c036df8b208df96b8998de0de92decb7ada5c3637e45772e",
+    "accuracy": "Target scope and names only. Damage, charge and support effects are still DEMO."
+  },
+  "targets": {
+    "10011": {
+      "skillId": 10011,
+      "name": "Flare Ride",
+      "target": "all_enemies",
+      "description": "5 combo Fire elemental attack on all enemies"
+    },
+    "20011": {
+      "skillId": 20011,
+      "name": "Ethereal Blade",
+      "target": "all_enemies",
+      "description": "4 combo Water elemental attack on all enemies"
+    },
+    "30011": {
+      "skillId": 30011,
+      "name": "Flash Gale",
+      "target": "all_enemies",
+      "description": "4 combo Earth elemental attack on all enemies"
+    },
+    "40011": {
+      "skillId": 40011,
+      "name": "Thunder Expulsion",
+      "target": "all_enemies",
+      "description": "2 combo Thunder elemental attack on all enemies"
+    },
+    "50011": {
+      "skillId": 50011,
+      "name": "Divine Sword",
+      "target": "all_enemies",
+      "description": "2 combo Light elemental attack on all enemies"
+    },
+    "60011": {
+      "skillId": 60011,
+      "name": "Guilty Ash",
+      "target": "all_enemies",
+      "description": "3 combo Dark elemental attack on all enemies"
+    },
+    "10021": {
+      "skillId": 10021,
+      "name": "Fire Claw Attack",
+      "target": "single_enemy",
+      "description": "2 combo Fire elemental attack on single Enemy & probable Injury effect"
+    },
+    "20021": {
+      "skillId": 20021,
+      "name": "Raging Needle",
+      "target": "single_enemy",
+      "description": "4 combo Water elemental attack on single Enemy & probable Weakening effect"
+    },
+    "30021": {
+      "skillId": 30021,
+      "name": "Carnage Sky",
+      "target": "all_enemies",
+      "description": "3 combo Earth elemental attack on all enemies"
+    },
+    "40021": {
+      "skillId": 40021,
+      "name": "Thunder's Command",
+      "target": "support",
+      "description": "Boost to all allies' ATK for 3 turns"
+    },
+    "50021": {
+      "skillId": 50021,
+      "name": "Rude Thrust",
+      "target": "all_enemies",
+      "description": "2 combo Light elemental attack on all enemies"
+    },
+    "60021": {
+      "skillId": 60021,
+      "name": "Moonbeam",
+      "target": "all_enemies",
+      "description": "2 combo Dark elemental attack on all enemies"
+    },
+    "10041": {
+      "skillId": 10041,
+      "name": "Explosion",
+      "target": "all_enemies",
+      "description": "5 combo Fire elemental attack on all enemies"
+    },
+    "20041": {
+      "skillId": 20041,
+      "name": "Cure Light",
+      "target": "support",
+      "description": "Large recovery of all allies' HP"
+    },
+    "30041": {
+      "skillId": 30041,
+      "name": "Arcanadia",
+      "target": "support",
+      "description": "Large recovery of all allies' HP"
+    },
+    "40041": {
+      "skillId": 40041,
+      "name": "Cure Drill",
+      "target": "support",
+      "description": "Large recovery of all allies' HP"
+    },
+    "50041": {
+      "skillId": 50041,
+      "name": "Saint Benediction",
+      "target": "support",
+      "description": "Large recovery of all allies' HP"
+    },
+    "60041": {
+      "skillId": 60041,
+      "name": "Soul Intention",
+      "target": "single_enemy",
+      "description": "6 combo Dark elemental attack on single Enemy & probable Curse effect"
+    },
+    "10012": {
+      "skillId": 10012,
+      "name": "Flare Ride Plus",
+      "target": "all_enemies",
+      "description": "5 combo Fire elemental attack on all enemies"
+    },
+    "20012": {
+      "skillId": 20012,
+      "name": "Divine Hail",
+      "target": "all_enemies",
+      "description": "5 combo Water elemental attack on all enemies"
+    },
+    "30012": {
+      "skillId": 30012,
+      "name": "Flash Tornado",
+      "target": "all_enemies",
+      "description": "5 combo Earth elemental attack on all enemies"
+    },
+    "40012": {
+      "skillId": 40012,
+      "name": "Thunder Execution",
+      "target": "all_enemies",
+      "description": "2 combo Thunder elemental attack on all enemies"
+    },
+    "50012": {
+      "skillId": 50012,
+      "name": "Cardinal Judgement",
+      "target": "all_enemies",
+      "description": "3 combo Light elemental attack on all enemies"
+    },
+    "60012": {
+      "skillId": 60012,
+      "name": "Gravity Eclipse",
+      "target": "all_enemies",
+      "description": "4 combo Dark elemental attack on all enemies"
+    },
+    "10022": {
+      "skillId": 10022,
+      "name": "Fire Spring Attack",
+      "target": "single_enemy",
+      "description": "4 combo Fire elemental power attack on single Enemy & probable Injury effect"
+    },
+    "20022": {
+      "skillId": 20022,
+      "name": "Raging Ballad",
+      "target": "single_enemy",
+      "description": "5 combo Water elemental power attack on single Enemy & probable Weakening effect"
+    },
+    "30022": {
+      "skillId": 30022,
+      "name": "Superior Needle",
+      "target": "all_enemies",
+      "description": "3 combo Earth elemental attack on all enemies"
+    },
+    "40022": {
+      "skillId": 40022,
+      "name": "Thunder's Rage",
+      "target": "support",
+      "description": "Great boost to all allies' ATK for 3 turns"
+    },
+    "50022": {
+      "skillId": 50022,
+      "name": "Crude Stab",
+      "target": "all_enemies",
+      "description": "3 combo Light elemental power attack on all enemies"
+    },
+    "60022": {
+      "skillId": 60022,
+      "name": "Swordflash",
+      "target": "all_enemies",
+      "description": "3 combo Dark elemental power attack on all enemies"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "schema": "bf-global-2022-status-nullifier-v7600",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "source": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "sourceSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474",
+    "historicalReference": "https://forum.gamer.com.tw/Co.php?bsn=24641&sn=125267"
+  },
+  "item": {
+    "itemId": 20250,
+    "itemName": "抗疫薬",
+    "battleEffectGroupId": 530,
+    "targetType": 1,
+    "itemTargetArea": 2,
+    "skillTypeId": 17,
+    "passiveSkillInfo": "100,100,100,100,100,100,3,0",
+    "itemMaxStack": 99,
+    "itemMaxEquipped": 3
+  },
+  "effect": {
+    "ailmentCodes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "negationPercent": [
+      100,
+      100,
+      100,
+      100,
+      100,
+      100
+    ],
+    "durationTurns": 3,
+    "allLivingAllies": true,
+    "doesNotCureExisting": true
+  },
+  "limits": [
+    "item count 1 and Guard action cost are simulated",
+    "expiry after three observed enemy-phase ends is simulated",
+    "no invented enemy infliction odds or original inventory"
+  ]
+}

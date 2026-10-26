@@ -1,0 +1,9 @@
+# Brave Frontier Global v67.00 — Original Burst-Heal Recipient REC Contribution
+
+Parent: green v66.00 commit a7e2de9bdeb1d8d27f4de8b9cb9a5aa58a10dee7, Build #283. Original 2022 `F_SKILL_LEVEL_MST` establishes Lv1 base heal 600..800 for four starter healer BBs (unit IDs 20041,30041,40041,50041), as previously verified in `source_data/bf_global_original_bb_support_v029.json`. The independent community [Brave Frontier Global Burst Healing documentation](https://bravefrontierglobal.fandom.com/wiki/Burst_Healing) gives:
+
+> Healing = random original base amount + healed unit's Total REC + healer's Total REC × healer bonus.
+
+v67 adopts **only the recipient REC term**, because the archived `1500:600,800,50,50` fourth/fifth parameters have not been confidently mapped to the exact healer coefficient. It leaves the unknown healer coefficient unapplied rather than fabricate a complete formula. It adds a strict optional engine hook (one line guarded by `?.`/fallback) to the existing source-backed healing branch and a tiny JS calculator. With no optional module it uses old base healing; with the module it adds living recipient's current positive REC. The v65 Sickness status penalty already scopes `rec` to half during BB action, so status can now **materially decrease recipient recovery** in the simulated battle. HP caps and KO exclusion remain the original demo's checks.
+
+The old core index is modified at build time with `patch_bf_burst_recipient_recovery_v6700.py` after all archived-source preparers, with an idempotent exact-anchor guard. No modification to original MST, BB source records, item inventory, save format v7, Android package, signer, manifest, or scripts which operate on other source skills. Native integer rounding, negative/stacked REC buffs and exact healer multipliers remain unresolved. Chromium functional test, packaged signed APK test and all inherited regressions required before promotion.

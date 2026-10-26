@@ -1,0 +1,142 @@
+{
+  "id": 70,
+  "name": "The Heinous Chamber",
+  "sourcePath": "missions_parsed/The Heinous Chamber_2014-14-10-08-33.json",
+  "gitBlobSha": "fde7fc3378d9c0382b1a20c362cfc179eab81880",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Gloomy",
+          "unitId": 60030,
+          "hp": 1950,
+          "atk": 520,
+          "def": 20,
+          "aiId": 1
+        },
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2100,
+          "atk": 530,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Gloomy",
+          "unitId": 60030,
+          "hp": 1950,
+          "atk": 520,
+          "def": 20,
+          "aiId": 1
+        },
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2100,
+          "atk": 530,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Gloomy",
+          "unitId": 60030,
+          "hp": 1950,
+          "atk": 520,
+          "def": 20,
+          "aiId": 1
+        },
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2100,
+          "atk": 530,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2100,
+          "atk": 530,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2100,
+          "atk": 530,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2500,
+          "atk": 570,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Medusa",
+          "unitId": 60061,
+          "hp": 4000,
+          "atk": 570,
+          "def": 60,
+          "aiId": 20
+        },
+        {
+          "name": "Skeleton",
+          "unitId": 60050,
+          "hp": 2500,
+          "atk": 570,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "King Gloomy",
+          "unitId": 60031,
+          "hp": 13000,
+          "atk": 620,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "King Gloomy",
+          "unitId": 60031,
+          "hp": 13000,
+          "atk": 620,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

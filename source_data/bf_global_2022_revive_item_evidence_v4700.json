@@ -1,0 +1,48 @@
+{
+  "schema": "bf-global-2022-full-revive-source-v4700",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceTable": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "sourceSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474"
+  },
+  "items": [
+    {
+      "itemId": 22400,
+      "rawName": "蘇生薬",
+      "battleEffectGroupId": 610,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 12,
+      "passiveSkillInfo": "1",
+      "itemMaxEquipped": 1,
+      "description": "味方単体の戦闘不能を回復する",
+      "interpretation": "Revives one KO ally; native restoration HP not fully decoded"
+    },
+    {
+      "itemId": 22410,
+      "rawName": "蘇生薬改",
+      "battleEffectGroupId": 610,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 12,
+      "passiveSkillInfo": "1",
+      "itemMaxEquipped": 2,
+      "description": "味方単体の戦闘不能を回復する。携帯可能数が多い",
+      "interpretation": "Revives one KO ally; native restoration HP not fully decoded"
+    },
+    {
+      "itemId": 52400,
+      "rawName": "復活薬",
+      "battleEffectGroupId": 610,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 12,
+      "passiveSkillInfo": "100",
+      "itemMaxEquipped": 2,
+      "itemMaxStack": 99,
+      "description": "味方単体の戦闘不能をＨＰ全快の状態で回復する。",
+      "interpretation": "Revive one KO ally to full HP; native timing/inventory still unknown"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "version": "0.13",
+  "checks": [
+    "30 original BB profiles load, with 24 candidates for first-group damage scheduling and save schema v7 unchanged",
+    "Inspector shows Vargas original first BB group: five hits of 20%",
+    "Original hit times and weights preserved, @ groups not merged; non-offensive skills gated to demo fallback",
+    "Actual queued Vargas BB applies five source-timed demo damage events, empties gauge and completes round",
+    "Non-offensive candidate remains a labeled simulated BB fallback instead of decoding unknown support effects",
+    "Reset during pending BB event cancels future hits via epoch token",
+    "v6 save format still imports to v7 without changes",
+    "Save export/reimport into independent browser session preserves v7 progress",
+    "Three-wave auto quest clears, and archived BB update does not disrupt rewards",
+    "Canvas saves/restores balanced, 30 sprite atlases loaded, no JS errors",
+    "BB inspector remains accessible at 390px and 320px mobile widths"
+  ],
+  "browserErrors": [],
+  "checksPassed": 11,
+  "canvasSaves": 2723,
+  "canvasRestores": 2723,
+  "sha256": "07dd3d328146d3e78c8475a7054161ad485b42cb1bf8b321914dfbde02af1be3",
+  "androidStatus": "project generated; APK not compiled or device-tested"
+}

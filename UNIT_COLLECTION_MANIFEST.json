@@ -1,0 +1,119 @@
+{
+  "version": "0.9",
+  "starterIds": [
+    10011,
+    20011,
+    30011,
+    40011,
+    50011,
+    60011
+  ],
+  "recruitIds": [
+    10021,
+    20021,
+    30021,
+    40021,
+    50021,
+    60021
+  ],
+  "recruitSource": "BF1_unit_part001.zip, BF1_unit_part007.zip, F_UNIT_MST",
+  "units": [
+    {
+      "id": 10021,
+      "name": "Unit 10021",
+      "element": "Fire",
+      "rarity": 2,
+      "stats": {
+        "hp": 1450,
+        "atk": 550,
+        "def": 280,
+        "rec": 210
+      },
+      "frameCount": 17,
+      "rawFlipCount": 0
+    },
+    {
+      "id": 20021,
+      "name": "Unit 20021",
+      "element": "Water",
+      "rarity": 2,
+      "stats": {
+        "hp": 1500,
+        "atk": 530,
+        "def": 300,
+        "rec": 110
+      },
+      "frameCount": 15,
+      "rawFlipCount": 4
+    },
+    {
+      "id": 30021,
+      "name": "Unit 30021",
+      "element": "Earth",
+      "rarity": 2,
+      "stats": {
+        "hp": 1480,
+        "atk": 450,
+        "def": 380,
+        "rec": 560
+      },
+      "frameCount": 14,
+      "rawFlipCount": 4
+    },
+    {
+      "id": 40021,
+      "name": "Unit 40021",
+      "element": "Thunder",
+      "rarity": 2,
+      "stats": {
+        "hp": 1450,
+        "atk": 410,
+        "def": 350,
+        "rec": 570
+      },
+      "frameCount": 16,
+      "rawFlipCount": 0
+    },
+    {
+      "id": 50021,
+      "name": "Unit 50021",
+      "element": "Light",
+      "rarity": 2,
+      "stats": {
+        "hp": 980,
+        "atk": 570,
+        "def": 570,
+        "rec": 180
+      },
+      "frameCount": 16,
+      "rawFlipCount": 2
+    },
+    {
+      "id": 60021,
+      "name": "Unit 60021",
+      "element": "Dark",
+      "rarity": 2,
+      "stats": {
+        "hp": 1000,
+        "atk": 650,
+        "def": 210,
+        "rec": 250
+      },
+      "frameCount": 14,
+      "rawFlipCount": 0
+    }
+  ],
+  "demoRules": {
+    "oneTokenPerArchivedQuestClear": true,
+    "drawFromUnowned": true,
+    "duplicates": false,
+    "originalRates": false,
+    "originalLeveling": false
+  },
+  "saveVersion": 4,
+  "missingMoveCGS": [
+    30021,
+    40021
+  ],
+  "movementFallback": "idle animation used for missing move files in demo"
+}

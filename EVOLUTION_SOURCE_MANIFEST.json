@@ -1,0 +1,249 @@
+{
+  "version": "0.10",
+  "saveVersion": 5,
+  "source": "F_UNIT_EVO_MST_Ver597 and F_UNIT_MST_Ver1084",
+  "evolutions": [
+    {
+      "baseId": 10011,
+      "evolvedId": 10012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 2500,
+      "demoZel": 2500,
+      "materials": {
+        "10130": 1
+      },
+      "targetStats": {
+        "hp": 1484,
+        "atk": 630,
+        "def": 517,
+        "rec": 404
+      },
+      "frameCount": 18,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 20011,
+      "evolvedId": 20012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 2500,
+      "demoZel": 2500,
+      "materials": {
+        "20130": 1
+      },
+      "targetStats": {
+        "hp": 1377,
+        "atk": 636,
+        "def": 422,
+        "rec": 624
+      },
+      "frameCount": 12,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 30011,
+      "evolvedId": 30012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 2500,
+      "demoZel": 2500,
+      "materials": {
+        "30130": 1
+      },
+      "targetStats": {
+        "hp": 1419,
+        "atk": 648,
+        "def": 630,
+        "rec": 223
+      },
+      "frameCount": 12,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 40011,
+      "evolvedId": 40012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 2500,
+      "demoZel": 2500,
+      "materials": {
+        "40130": 1
+      },
+      "targetStats": {
+        "hp": 1593,
+        "atk": 731,
+        "def": 378,
+        "rec": 189
+      },
+      "frameCount": 13,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 50011,
+      "evolvedId": 50012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "50120": 1
+      },
+      "targetStats": {
+        "hp": 1397,
+        "atk": 630,
+        "def": 630,
+        "rec": 630
+      },
+      "frameCount": 12,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 60011,
+      "evolvedId": 60012,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "60120": 1
+      },
+      "targetStats": {
+        "hp": 2228,
+        "atk": 542,
+        "def": 715,
+        "rec": 195
+      },
+      "frameCount": 20,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 10021,
+      "evolvedId": 10022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "10130": 2,
+        "10131": 1
+      },
+      "targetStats": {
+        "hp": 2088,
+        "atk": 743,
+        "def": 353,
+        "rec": 284
+      },
+      "frameCount": 17,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 20021,
+      "evolvedId": 20022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "20130": 2,
+        "20131": 1
+      },
+      "targetStats": {
+        "hp": 2160,
+        "atk": 716,
+        "def": 378,
+        "rec": 179
+      },
+      "frameCount": 15,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 30021,
+      "evolvedId": 30022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "30130": 2,
+        "30131": 1
+      },
+      "targetStats": {
+        "hp": 2198,
+        "atk": 535,
+        "def": 452,
+        "rec": 857
+      },
+      "frameCount": 14,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 40021,
+      "evolvedId": 40022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "40130": 2,
+        "40131": 1
+      },
+      "targetStats": {
+        "hp": 2284,
+        "atk": 480,
+        "def": 426,
+        "rec": 888
+      },
+      "frameCount": 16,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 50021,
+      "evolvedId": 50022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "50120": 2,
+        "50121": 1
+      },
+      "targetStats": {
+        "hp": 1376,
+        "atk": 770,
+        "def": 770,
+        "rec": 243
+      },
+      "frameCount": 16,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    },
+    {
+      "baseId": 60021,
+      "evolvedId": 60022,
+      "sourceRarity": 2,
+      "targetRarity": 3,
+      "archivedZel": 50000,
+      "demoZel": 2500,
+      "materials": {
+        "60120": 2,
+        "60121": 1
+      },
+      "targetStats": {
+        "hp": 1395,
+        "atk": 907,
+        "def": 275,
+        "rec": 360
+      },
+      "frameCount": 14,
+      "animationNote": "Archived CGG/CGS; standard atlas baker covers this specific sample only"
+    }
+  ],
+  "demoRules": {
+    "unitMinLevel": 2,
+    "zelCost": "min(archivedZel,2500)",
+    "questCatalysts": "one per archived mission completion, third clear gives tier2",
+    "resetUnitExpOnEvolution": true,
+    "retainsSquadSlot": true
+  },
+  "unverified": "Quest catalyst drop associations, leveling, use of archived stat growth, original source render semantics"
+}

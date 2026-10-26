@@ -1,0 +1,137 @@
+{
+  "id": 41,
+  "name": "Puppeteer of the Trees",
+  "sourcePath": "missions_parsed/Puppeteer of the Trees_2014-14-10-08-26.json",
+  "gitBlobSha": "d89860fe5a45a7d3cce3a6a9c0d60e6c643b99d8",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 1650,
+          "atk": 460,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        },
+        {
+          "name": "Mossy",
+          "unitId": 30030,
+          "hp": 1600,
+          "atk": 440,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        },
+        {
+          "name": "Time Mage Claris",
+          "unitId": 30041,
+          "hp": 11000,
+          "atk": 610,
+          "def": 200,
+          "aiId": 5000
+        },
+        {
+          "name": "Mandragora",
+          "unitId": 30050,
+          "hp": 2000,
+          "atk": 520,
+          "def": 250,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

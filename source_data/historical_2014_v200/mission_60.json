@@ -1,0 +1,150 @@
+{
+  "id": 60,
+  "name": "Sacred Ruins",
+  "sourcePath": "missions_parsed/Sacred Ruins_2014-14-10-08-30.json",
+  "gitBlobSha": "3c0b2a0d2b10fe890370c2aa3105949ab9ea8511",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 2000,
+          "atk": 500,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 2000,
+          "atk": 500,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 2000,
+          "atk": 500,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Unicorn",
+          "unitId": 50060,
+          "hp": 3900,
+          "atk": 560,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Unicorn",
+          "unitId": 50060,
+          "hp": 3900,
+          "atk": 560,
+          "def": 150,
+          "aiId": 20
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "King Glowy",
+          "unitId": 50031,
+          "hp": 12000,
+          "atk": 620,
+          "def": 200,
+          "aiId": 1
+        },
+        {
+          "name": "King Glowy",
+          "unitId": 50031,
+          "hp": 12000,
+          "atk": 620,
+          "def": 200,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

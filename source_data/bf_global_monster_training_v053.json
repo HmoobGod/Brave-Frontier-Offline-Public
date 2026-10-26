@@ -1,0 +1,109 @@
+{
+  "schema": "bf-global-original-monster-training-v053",
+  "sourceArchive": {
+    "file": "BF1_monster_part001.zip",
+    "sha256": "7487c043b31d54759fcf4bc6462c0c5e4ef50a8c66d886a37b156e0ba21804f3",
+    "note": "2022 archived monster sprite PNGs and layout CSVs; original enemy identity, stats, spawn placement and animation durations unknown"
+  },
+  "derivedAtlas": {
+    "sourcePath": "source_assets/bf1/monster/bf053_training_monsters.png",
+    "apkPath": "content/monster/img/bf053_training_monsters.png",
+    "sha256": "781721404fa25b233b832686ca61d4998d18998e82434d2b6aefc1ed8eb2f25f",
+    "bytes": 914491,
+    "cellW": 192,
+    "cellH": 256,
+    "columns": 8,
+    "rows": 8,
+    "originalFrames": true,
+    "originalTiming": false,
+    "description": "Cropped original PNG sprite frames at original pixel scale using CGG frame coordinates; transparent padding only"
+  },
+  "entries": [
+    {
+      "id": "0009",
+      "trainingKey": "bf053_0009",
+      "row": 0,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0009.png",
+      "spriteSha256": "488fd74a1075b2636af82e0db7bcdf513ca4db8fb2fb79f35faec35d423c5313",
+      "layout": "content/monster/cgg/monster_cgg_0009.csv",
+      "layoutSha256": "45e1451e1300078920451ebe1310a59d8dc83961dc0a4ddbe80ebbaa342a6481"
+    },
+    {
+      "id": "0010",
+      "trainingKey": "bf053_0010",
+      "row": 1,
+      "frames": 8,
+      "sprite": "content/monster/img/monster_anime_0010.png",
+      "spriteSha256": "6f57b8e18ddfa267db706751a2ab31f6c827b79f124cc91fd0a65768e0d10606",
+      "layout": "content/monster/cgg/monster_cgg_0010.csv",
+      "layoutSha256": "5eea9b70841029f73d9df6688eaae6af0887a232d35e0283d7c4cc002aeca7c2"
+    },
+    {
+      "id": "0011",
+      "trainingKey": "bf053_0011",
+      "row": 2,
+      "frames": 8,
+      "sprite": "content/monster/img/monster_anime_0011.png",
+      "spriteSha256": "670cac48d81b56ad0a3d9ca67d60689f517097106ae96a0980143cb4cffc9404",
+      "layout": "content/monster/cgg/monster_cgg_0011.csv",
+      "layoutSha256": "5eea9b70841029f73d9df6688eaae6af0887a232d35e0283d7c4cc002aeca7c2"
+    },
+    {
+      "id": "0012",
+      "trainingKey": "bf053_0012",
+      "row": 3,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0012.png",
+      "spriteSha256": "77b3d220d99d015ad6cac5c5a399b3b6b0449c59c6a8f4710dd2028c38af6472",
+      "layout": "content/monster/cgg/monster_cgg_0012.csv",
+      "layoutSha256": "84f9c0594d4672ef1c56a996eeae01b3508cfa8650899a0deff2b12c944588bf"
+    },
+    {
+      "id": "0013",
+      "trainingKey": "bf053_0013",
+      "row": 4,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0013.png",
+      "spriteSha256": "99096d1d75f6276cf1d140e7524c07c205a8d5e97613b42ffce88c4c886c6f06",
+      "layout": "content/monster/cgg/monster_cgg_0013.csv",
+      "layoutSha256": "84f9c0594d4672ef1c56a996eeae01b3508cfa8650899a0deff2b12c944588bf"
+    },
+    {
+      "id": "0014",
+      "trainingKey": "bf053_0014",
+      "row": 5,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0014.png",
+      "spriteSha256": "064fcf34e39bf3cd28063628e38430b34e41eca7a40bf9f22c37836c8faeede7",
+      "layout": "content/monster/cgg/monster_cgg_0014.csv",
+      "layoutSha256": "64aa52c7d7ec3aaf2a22e331ce1ccf17bc9949f86b4989c76607ea496924ec3d"
+    },
+    {
+      "id": "0015",
+      "trainingKey": "bf053_0015",
+      "row": 6,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0015.png",
+      "spriteSha256": "35af950e4e5b1f926408d6e8fded5d4b4c2d44c504c53222281296c3a2206e47",
+      "layout": "content/monster/cgg/monster_cgg_0015.csv",
+      "layoutSha256": "64aa52c7d7ec3aaf2a22e331ce1ccf17bc9949f86b4989c76607ea496924ec3d"
+    },
+    {
+      "id": "0016",
+      "trainingKey": "bf053_0016",
+      "row": 7,
+      "frames": 5,
+      "sprite": "content/monster/img/monster_anime_0016.png",
+      "spriteSha256": "8c5aae2f1e15c975db4ec02614e27b65d042c7daa632957879dc3424b9bcf2b0",
+      "layout": "content/monster/cgg/monster_cgg_0016.csv",
+      "layoutSha256": "55fcfb7e8686dfe92505362573b78e11ef855e6b6d6fe08c9a68b52bd325ac41"
+    }
+  ],
+  "runtime": {
+    "mode": "training-only",
+    "optInDefault": false,
+    "gameplay": "DEMO enemy selection, HP/ATK/DEF, AI, pacing and frame timing; original pixels and frame layout",
+    "saveVersion": 7
+  }
+}

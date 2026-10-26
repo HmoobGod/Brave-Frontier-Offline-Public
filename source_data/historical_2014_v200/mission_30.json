@@ -1,0 +1,121 @@
+{
+  "id": 30,
+  "name": "Breath Freezing Snowfields",
+  "sourcePath": "missions_parsed/Breath Freezing Snowfields_2014-14-10-08-23.json",
+  "gitBlobSha": "a2efc4a22ae5d50ef714ad85c126461fef91762b",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 1560,
+          "atk": 410,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1550,
+          "atk": 450,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Pirate Verica",
+          "unitId": 20061,
+          "hp": 3300,
+          "atk": 560,
+          "def": 100,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 1560,
+          "atk": 410,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1550,
+          "atk": 450,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 1560,
+          "atk": 410,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 1860,
+          "atk": 510,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 1560,
+          "atk": 410,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "King Squirty",
+          "unitId": 20031,
+          "hp": 8000,
+          "atk": 490,
+          "def": 120,
+          "aiId": 1
+        },
+        {
+          "name": "King Squirty",
+          "unitId": 20031,
+          "hp": 8000,
+          "atk": 490,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "id": 11,
+  "name": "Monsters of the Prairie",
+  "sourcePath": "missions_parsed/Monsters of the Prairie_2014-14-10-08-08.json",
+  "gitBlobSha": "cd089b9640c049b033ef16a6c52e5f3c1d9a3f36",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Squirty",
+          "unitId": 20030,
+          "hp": 780,
+          "atk": 330,
+          "def": 20,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1000,
+          "atk": 370,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 850,
+          "atk": 340,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1000,
+          "atk": 370,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Merman",
+          "unitId": 20050,
+          "hp": 950,
+          "atk": 360,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Burny",
+          "unitId": 10030,
+          "hp": 800,
+          "atk": 320,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 850,
+          "atk": 340,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1000,
+          "atk": 370,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "King Glowy",
+          "unitId": 50031,
+          "hp": 3300,
+          "atk": 450,
+          "def": 80,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

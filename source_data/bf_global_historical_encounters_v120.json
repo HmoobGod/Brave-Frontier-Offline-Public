@@ -1,0 +1,383 @@
+{
+  "schema": "bf-global-historical-encounters-2014-v120",
+  "provenance": "https://github.com/cheahjs/bravefrontier_data",
+  "caution": "2014 Global parsed files, NOT confirmed 2022 native spawns, sprites, AI or loot",
+  "missions": [
+    {
+      "id": 1,
+      "name": "Basics of Battle",
+      "sourcePath": "missions_parsed/Basics of Battle_2014-03-10-20-43.json",
+      "gitBlobSha": "797a2945a40bcfffe7dfc500c8e3dfb6eb81b8fe",
+      "waves": [
+        {
+          "wave": 1,
+          "enemies": [
+            {
+              "name": "Mossy",
+              "unitId": 30030,
+              "hp": 300,
+              "atk": 290,
+              "def": 50,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 2,
+          "enemies": [
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 300,
+              "atk": 320,
+              "def": 0,
+              "aiId": 1
+            },
+            {
+              "name": "Mossy",
+              "unitId": 30030,
+              "hp": 300,
+              "atk": 290,
+              "def": 50,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 3,
+          "enemies": [
+            {
+              "name": "King Mossy",
+              "unitId": 30031,
+              "hp": 3000,
+              "atk": 320,
+              "def": 30,
+              "aiId": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Element & Skill",
+      "sourcePath": "missions_parsed/Element & Skill_2014-03-10-20-47.json",
+      "gitBlobSha": "4b85fcbea4ee41c722b4d54a4140c5d84cd819b0",
+      "waves": [
+        {
+          "wave": 1,
+          "enemies": [
+            {
+              "name": "Squirty",
+              "unitId": 20030,
+              "hp": 300,
+              "atk": 280,
+              "def": 10,
+              "aiId": 1
+            },
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 300,
+              "atk": 320,
+              "def": 0,
+              "aiId": 1
+            },
+            {
+              "name": "Mossy",
+              "unitId": 30030,
+              "hp": 300,
+              "atk": 290,
+              "def": 50,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 2,
+          "enemies": [
+            {
+              "name": "Burny",
+              "unitId": 10030,
+              "hp": 300,
+              "atk": 300,
+              "def": 20,
+              "aiId": 1
+            },
+            {
+              "name": "Mossy",
+              "unitId": 30030,
+              "hp": 300,
+              "atk": 290,
+              "def": 50,
+              "aiId": 1
+            },
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 300,
+              "atk": 320,
+              "def": 0,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 3,
+          "enemies": [
+            {
+              "name": "Skeleton",
+              "unitId": 60050,
+              "hp": 4000,
+              "atk": 340,
+              "def": 20,
+              "aiId": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Start of Adventure",
+      "sourcePath": "missions_parsed/Start of Adventure_2014-14-10-08-07.json",
+      "gitBlobSha": "556829bc0639e417ecd4dbc99ef28c44da25c621",
+      "waves": [
+        {
+          "wave": 1,
+          "enemies": [
+            {
+              "name": "Mossy",
+              "unitId": 30030,
+              "hp": 830,
+              "atk": 340,
+              "def": 90,
+              "aiId": 1
+            },
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 760,
+              "atk": 370,
+              "def": 0,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 2,
+          "enemies": [
+            {
+              "name": "Squirty",
+              "unitId": 20030,
+              "hp": 780,
+              "atk": 330,
+              "def": 20,
+              "aiId": 1
+            },
+            {
+              "name": "Gloomy",
+              "unitId": 60030,
+              "hp": 760,
+              "atk": 370,
+              "def": 0,
+              "aiId": 1
+            },
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 760,
+              "atk": 370,
+              "def": 0,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 3,
+          "enemies": [
+            {
+              "name": "Burny",
+              "unitId": 10030,
+              "hp": 800,
+              "atk": 320,
+              "def": 50,
+              "aiId": 1
+            },
+            {
+              "name": "Squirty",
+              "unitId": 20030,
+              "hp": 780,
+              "atk": 330,
+              "def": 20,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 4,
+          "enemies": [
+            {
+              "name": "Squirty",
+              "unitId": 20030,
+              "hp": 780,
+              "atk": 330,
+              "def": 20,
+              "aiId": 1
+            },
+            {
+              "name": "Gloomy",
+              "unitId": 60030,
+              "hp": 760,
+              "atk": 370,
+              "def": 0,
+              "aiId": 1
+            },
+            {
+              "name": "Sparky",
+              "unitId": 40030,
+              "hp": 760,
+              "atk": 370,
+              "def": 0,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 5,
+          "enemies": [
+            {
+              "name": "King Sparky",
+              "unitId": 40031,
+              "hp": 2500,
+              "atk": 470,
+              "def": 30,
+              "aiId": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Cave of Dancing Flames",
+      "sourcePath": "missions_parsed/Cave of Dancing Flames_2014-14-10-08-22.json",
+      "gitBlobSha": "5049589d2ed64e08cbd6621fc332f27df945a83a",
+      "waves": [
+        {
+          "wave": 1,
+          "enemies": [
+            {
+              "name": "Burny",
+              "unitId": 10030,
+              "hp": 1500,
+              "atk": 420,
+              "def": 60,
+              "aiId": 1
+            },
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1300,
+              "atk": 400,
+              "def": 90,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 2,
+          "enemies": [
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1700,
+              "atk": 450,
+              "def": 95,
+              "aiId": 1
+            },
+            {
+              "name": "Fire Nymph",
+              "unitId": 10130,
+              "hp": 4000,
+              "atk": 470,
+              "def": 10,
+              "aiId": 1
+            },
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1700,
+              "atk": 450,
+              "def": 95,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 3,
+          "enemies": [
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1300,
+              "atk": 400,
+              "def": 90,
+              "aiId": 1
+            },
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1300,
+              "atk": 400,
+              "def": 90,
+              "aiId": 1
+            }
+          ]
+        },
+        {
+          "wave": 4,
+          "enemies": [
+            {
+              "name": "Goblin",
+              "unitId": 10050,
+              "hp": 1700,
+              "atk": 450,
+              "def": 95,
+              "aiId": 1
+            },
+            {
+              "name": "Thief Leon",
+              "unitId": 10061,
+              "hp": 2300,
+              "atk": 470,
+              "def": 20,
+              "aiId": 20
+            }
+          ]
+        },
+        {
+          "wave": 5,
+          "enemies": [
+            {
+              "name": "King Burny",
+              "unitId": 10031,
+              "hp": 7000,
+              "atk": 470,
+              "def": 30,
+              "aiId": 1
+            },
+            {
+              "name": "King Burny",
+              "unitId": 10031,
+              "hp": 7000,
+              "atk": 470,
+              "def": 30,
+              "aiId": 1
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

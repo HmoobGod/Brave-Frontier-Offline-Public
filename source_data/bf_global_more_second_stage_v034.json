@@ -1,0 +1,607 @@
+{
+  "schema": "bf-global-more-second-stage-2022-v034",
+  "provenance": {
+    "sourceMstSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceUnitPart001Sha256": "c0f03306a4e5efd2513c982ac58b12fff2d72c9ff978b19a839f8932536fc846",
+    "sourceUnitPart007Sha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556",
+    "source": "decoded 2022 Global F_UNIT/F_SKILL/F_SKILL_LEVEL/F_EVO MST and English sgtext"
+  },
+  "records": {
+    "60013": {
+      "id": 60013,
+      "ownedBaseId": 60011,
+      "fromId": 60012,
+      "name": "Black Magress",
+      "element": 6,
+      "rarity": 4,
+      "stats": {
+        "hp": 2651,
+        "atk": 743,
+        "def": 860,
+        "rec": 381
+      },
+      "lordStats": {
+        "hp": 3979,
+        "atk": 995,
+        "def": 1190,
+        "rec": 572
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 8,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "60122": 1,
+          "60121": 1
+        }
+      },
+      "bb": {
+        "name": "Void Pillar",
+        "description": "4 combo Dark elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 60013,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "48:600070:1,48:600010:1,55:126:1,61:126:1,67:126:1,73:126:1",
+        "damageFramesRaw": "61:25:2:4,67:25:2:4,73:25:2:4,79:25:2:4",
+        "levelInfo": "1:2000:50,50,0,0,0,0|2:2000:60,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:80,50,0,0,0,0|5:2000:90,50,0,0,0,0|6:2000:100,50,0,0,0,0|7:2000:110,50,0,0,0,0|8:2000:120,50,0,0,0,0|9:2000:130,50,0,0,0,0|10:2000:140,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          60,
+          70,
+          80,
+          90,
+          100,
+          110,
+          120,
+          130,
+          140
+        ],
+        "secondaryUnmodeled": false
+      },
+      "frameCount": 29,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_60013.png": "5aadf45892358175d57bee206e9bdae4c9bb45c0dbf08f91055e28b15b21c7ac",
+        "content/unit/cgg/unit_cgg_60013.csv": "d946346aaa18d7b06de5f166a72f9337972d0f374741a76e6e12f3942e5e74fc",
+        "content/unit/cgs/unit_idle_cgs_60013.csv": "addf47a2a388bb7c347ae25b68ad375e93a7721db8fe36ca608960c0a47271af",
+        "content/unit/cgs/unit_atk_cgs_60013.csv": "1d94d056dcb6083a0aa428c4badc47a0938ad096750f74790cfce1ab68d6f9ce",
+        "content/unit/img/unit_ills_thum_60013.png": "89a29ad99dea26962f9d5d500f0f1faa95af9d5e6194f0b585a65ff2d48f9254",
+        "content/unit/cgs/unit_move_cgs_60013.csv": "280bd4e3c0c3c30d18b90c78cd84e059cf866821117bb81455c52f7f39e349a6"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [
+          {
+            "frame": 23,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 24,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 24,
+            "layer": 4,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 24,
+            "layer": 5,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 25,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 26,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 50
+          },
+          {
+            "frame": 26,
+            "layer": 1,
+            "angleCode": 0,
+            "scalePct": 50
+          },
+          {
+            "frame": 26,
+            "layer": 2,
+            "angleCode": 0,
+            "scalePct": 50
+          },
+          {
+            "frame": 26,
+            "layer": 3,
+            "angleCode": 0,
+            "scalePct": 70
+          },
+          {
+            "frame": 27,
+            "layer": 0,
+            "angleCode": 0,
+            "scalePct": 30
+          }
+        ],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    },
+    "10023": {
+      "id": 10023,
+      "ownedBaseId": 10021,
+      "fromId": 10022,
+      "name": "Fire Beast Zegar",
+      "element": 1,
+      "rarity": 4,
+      "stats": {
+        "hp": 2664,
+        "atk": 912,
+        "def": 571,
+        "rec": 484
+      },
+      "lordStats": {
+        "hp": 4008,
+        "atk": 1245,
+        "def": 758,
+        "rec": 677
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "10132": 1,
+          "10131": 1,
+          "10130": 2
+        }
+      },
+      "bb": {
+        "name": "Hell Twins Attack",
+        "description": "7 combo Fire elemental power attack on single Enemy & probable Injury effect",
+        "target": "single_enemy",
+        "skillId": 10023,
+        "sourceType": "1@11",
+        "sourceTargetType": "2@2",
+        "sourceTargetArea": "1@1",
+        "effectFramesRaw": "8:121:1,8:161:1,26:121:1,26:161:1,46:121:1,46:161:1,66:121:1,66:161:1,116:121:1,116:161:1,126:121:1,126:161:1,136:121:1,136:161:1",
+        "damageFramesRaw": "14:15:3:1,32:10:2:1,52:20:3:1,72:10:2:1,122:10:3:1,132:15:2:1,142:20:1:1@0:100:2:1",
+        "levelInfo": "1:1600:230,50,0,0,0,0@4,80,0,0,0,0,0,0,232|2:1600:240,50,0,0,0,0@4,80,0,0,0,0,0,0,232|3:1600:250,50,0,0,0,0@4,80,0,0,0,0,0,0,232|4:1600:260,50,0,0,0,0@4,80,0,0,0,0,0,0,232|5:1600:270,50,0,0,0,0@4,80,0,0,0,0,0,0,232|6:1600:280,50,0,0,0,0@4,80,0,0,0,0,0,0,232|7:1600:290,50,0,0,0,0@4,80,0,0,0,0,0,0,232|8:1600:300,50,0,0,0,0@4,80,0,0,0,0,0,0,232|9:1600:310,50,0,0,0,0@4,80,0,0,0,0,0,0,232|10:1600:330,50,0,0,0,0@4,80,0,0,0,0,0,0,232",
+        "effectCode": 1600,
+        "levelPower": [
+          230,
+          240,
+          250,
+          260,
+          270,
+          280,
+          290,
+          300,
+          310,
+          330
+        ],
+        "secondaryUnmodeled": true
+      },
+      "frameCount": 16,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_10023.png": "a3123fd4a1e23da2c7b2e380ab2c639fcf1544e200e8baa0b5ecc9e9f6c455fd",
+        "content/unit/cgg/unit_cgg_10023.csv": "7c0884c2b1948d0f5f1d6c123272419103a7466dacc74d446d4570da5fc3f58b",
+        "content/unit/cgs/unit_idle_cgs_10023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_10023.csv": "6f7d9556dba594c8862e2fb4b04f221c66c891fec9e3b10c90bb372c99949dca",
+        "content/unit/img/unit_ills_thum_10023.png": "9e6000addc7005c170439d0caf3f805f1b51db3c859411f5ba011149fd77b38d",
+        "content/unit/cgs/unit_move_cgs_10023.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    },
+    "20023": {
+      "id": 20023,
+      "ownedBaseId": 20021,
+      "fromId": 20022,
+      "name": "Dragoon Zephu",
+      "element": 2,
+      "rarity": 4,
+      "stats": {
+        "hp": 2822,
+        "atk": 986,
+        "def": 594,
+        "rec": 377
+      },
+      "lordStats": {
+        "hp": 4140,
+        "atk": 1191,
+        "def": 792,
+        "rec": 556
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "20132": 1,
+          "20131": 1,
+          "20130": 2
+        }
+      },
+      "bb": {
+        "name": "Raging Glory",
+        "description": "6 combo Water elemental power attack on single Enemy & probable Weakening effect",
+        "target": "single_enemy",
+        "skillId": 20023,
+        "sourceType": "1@11",
+        "sourceTargetType": "2@2",
+        "sourceTargetArea": "1@1",
+        "effectFramesRaw": "2:200020:1,3:122:1,3:200030:1,5:190:1,11:200020:1,12:122:1,12:200030:1,14:190:1,20:200020:1,21:122:1,21:200030:1,23:190:1,29:200020:1,30:122:1,30:200030:1,32:190:1,38:200020:1,39:122:1,39:200030:1,41:190:1,47:200020:1,48:122:1,48:200030:1,50:190:1",
+        "damageFramesRaw": "9:15:2:1,18:10:2:1,27:15:2:1,36:20:2:1,45:20:2:1,54:20:2:1@0:100:2:1",
+        "levelInfo": "1:1600:230,50,0,0,0,0@2,80,0,0,0,0,0,0,114|2:1600:240,50,0,0,0,0@2,80,0,0,0,0,0,0,114|3:1600:250,50,0,0,0,0@2,80,0,0,0,0,0,0,114|4:1600:260,50,0,0,0,0@2,80,0,0,0,0,0,0,114|5:1600:270,50,0,0,0,0@2,80,0,0,0,0,0,0,114|6:1600:280,50,0,0,0,0@2,80,0,0,0,0,0,0,114|7:1600:290,50,0,0,0,0@2,80,0,0,0,0,0,0,114|8:1600:300,50,0,0,0,0@2,80,0,0,0,0,0,0,114|9:1600:310,50,0,0,0,0@2,80,0,0,0,0,0,0,114|10:1600:330,50,0,0,0,0@2,80,0,0,0,0,0,0,114",
+        "effectCode": 1600,
+        "levelPower": [
+          230,
+          240,
+          250,
+          260,
+          270,
+          280,
+          290,
+          300,
+          310,
+          330
+        ],
+        "secondaryUnmodeled": true
+      },
+      "frameCount": 15,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_20023.png": "50ac0f75e904ff8881c61dc4a2f9a3e8202dc5855173e74865369b08c5dfd475",
+        "content/unit/cgg/unit_cgg_20023.csv": "b9024810e1b88a7fb1b42a811fa6a7989f47349d1428977f0c1eabd5eda52d11",
+        "content/unit/cgs/unit_idle_cgs_20023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_20023.csv": "7a0fee1681259421c099a277f2f58fe6b14f1260ff7ba06bed53f3e6070a97d9",
+        "content/unit/img/unit_ills_thum_20023.png": "58a66a34c195630a26b6e8b65374d3bcaee6446b9ec99219a2d2a8d47ce3bb4d",
+        "content/unit/cgs/unit_move_cgs_20023.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [
+          {
+            "frame": 6,
+            "layer": 2,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 7,
+            "layer": 2,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 9,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 10,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          }
+        ],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    },
+    "30023": {
+      "id": 30023,
+      "ownedBaseId": 30021,
+      "fromId": 30022,
+      "name": "Hawkeye Lario",
+      "element": 3,
+      "rarity": 4,
+      "stats": {
+        "hp": 2894,
+        "atk": 779,
+        "def": 721,
+        "rec": 958
+      },
+      "lordStats": {
+        "hp": 4249,
+        "atk": 963,
+        "def": 899,
+        "rec": 1512
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "30132": 1,
+          "30131": 1,
+          "30130": 2
+        }
+      },
+      "bb": {
+        "name": "Shooting Star",
+        "description": "6 combo Earth elemental power attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 30023,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "24:300020:1,28:112:1,32:112:1,42:112:1,46:112:1,56:112:1,60:112:1",
+        "damageFramesRaw": "28:17:2:1,32:16:2:1,42:17:2:1,46:16:2:1,56:17:2:1,60:17:2:1",
+        "levelInfo": "1:2000:60,50,0,0,0,0|2:2000:65,50,0,0,0,0|3:2000:70,50,0,0,0,0|4:2000:75,50,0,0,0,0|5:2000:80,50,0,0,0,0|6:2000:85,50,0,0,0,0|7:2000:90,50,0,0,0,0|8:2000:95,50,0,0,0,0|9:2000:100,50,0,0,0,0|10:2000:110,50,0,0,0,0",
+        "effectCode": 2000,
+        "levelPower": [
+          60,
+          65,
+          70,
+          75,
+          80,
+          85,
+          90,
+          95,
+          100,
+          110
+        ],
+        "secondaryUnmodeled": false
+      },
+      "frameCount": 14,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_30023.png": "841abe59b70788546d677910658e08330b761da3b1ed50826320f76b84f79449",
+        "content/unit/cgg/unit_cgg_30023.csv": "933bef5ba79d4f8e7fbddcc64c25932c8c74e60b5b221f15dbe13a3bb7ef53e3",
+        "content/unit/cgs/unit_idle_cgs_30023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_30023.csv": "09932a26771887a1ca4ac811f0c63879b35f672cd42bb4623cf85c8a7a406ddd",
+        "content/unit/img/unit_ills_thum_30023.png": "52bd42f61c4d83d036484538ab0abc53e93f4ef67e0f4d571ec5d2f84ea7846f"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [
+          {
+            "frame": 7,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 8,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 9,
+            "layer": 1,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 11,
+            "layer": 1,
+            "angleCode": 2,
+            "scalePct": 100
+          }
+        ],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    },
+    "40023": {
+      "id": 40023,
+      "ownedBaseId": 40021,
+      "fromId": 40022,
+      "name": "Commander Weiss",
+      "element": 4,
+      "rarity": 4,
+      "stats": {
+        "hp": 2997,
+        "atk": 742,
+        "def": 644,
+        "rec": 1283
+      },
+      "lordStats": {
+        "hp": 4326,
+        "atk": 925,
+        "def": 826,
+        "rec": 1740
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "40132": 1,
+          "40131": 1,
+          "40130": 2
+        }
+      },
+      "bb": {
+        "name": "Thunder's Reign",
+        "description": "Great boost to all allies' ATK for 3 turns",
+        "target": "support",
+        "skillId": 40023,
+        "sourceType": "5",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "49:400040:1,70:400:1",
+        "damageFramesRaw": "100:100:2:1",
+        "levelInfo": "1:2000:0,50,0,0,0,3,90|2:2000:0,51,0,0,0,3,90|3:2000:0,52,0,0,0,3,90|4:2000:0,53,0,0,0,3,90|5:2000:0,54,0,0,0,3,90|6:2000:0,55,0,0,0,3,90|7:2000:0,56,0,0,0,3,90|8:2000:0,57,0,0,0,3,90|9:2000:0,58,0,0,0,3,90|10:2000:0,60,0,0,0,3,90",
+        "effectCode": 2000,
+        "levelPower": [
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          58,
+          60
+        ],
+        "secondaryUnmodeled": false
+      },
+      "frameCount": 16,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_40023.png": "990709967ae7e11555688cf307cdc0ac685e8010cf48354f1afba2477fc3c003",
+        "content/unit/cgg/unit_cgg_40023.csv": "404a478360d1a0054558d5cf3606567d58ba01e008beb6b133ecef51f41ad88c",
+        "content/unit/cgs/unit_idle_cgs_40023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_40023.csv": "27d82a43e4fd4d8f14007094f2ea1431e38f632089e5aa71cea352a1eb981fd0",
+        "content/unit/img/unit_ills_thum_40023.png": "1da21a324374af577952170ec0e39e192789796435d123379baef20edfe4ea56"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    },
+    "50023": {
+      "id": 50023,
+      "ownedBaseId": 50021,
+      "fromId": 50022,
+      "name": "Holy Queen Luna",
+      "element": 5,
+      "rarity": 4,
+      "stats": {
+        "hp": 1988,
+        "atk": 936,
+        "def": 936,
+        "rec": 452
+      },
+      "lordStats": {
+        "hp": 2840,
+        "atk": 1280,
+        "def": 1290,
+        "rec": 634
+      },
+      "originalMaxLevel": 60,
+      "originalUnitCost": 9,
+      "sourceRecipe": {
+        "zel": 100000,
+        "karma": 0,
+        "materials": {
+          "50122": 1,
+          "50121": 1,
+          "50120": 2
+        }
+      },
+      "bb": {
+        "name": "Vulgar Jab",
+        "description": "4 combo Light elemental attack on all enemies",
+        "target": "all_enemies",
+        "skillId": 50023,
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "33:200061:1,33:320:1,34:125:1,40:125:1,42:125:1,44:125:1",
+        "damageFramesRaw": "40:25:2:1,46:25:2:1,48:25:2:1,50:25:2:1",
+        "levelInfo": "1:2500:90,50,0,0,0,0|2:2500:100,50,0,0,0,0|3:2500:110,50,0,0,0,0|4:2500:120,50,0,0,0,0|5:2500:130,50,0,0,0,0|6:2500:140,50,0,0,0,0|7:2500:150,50,0,0,0,0|8:2500:160,50,0,0,0,0|9:2500:170,50,0,0,0,0|10:2500:180,50,0,0,0,0",
+        "effectCode": 2500,
+        "levelPower": [
+          90,
+          100,
+          110,
+          120,
+          130,
+          140,
+          150,
+          160,
+          170,
+          180
+        ],
+        "secondaryUnmodeled": false
+      },
+      "frameCount": 16,
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_50023.png": "2b55f1b50e9fc5dc8aa04660e53fc5cc29a1f7562d3b02cc19c42ec3d57e5394",
+        "content/unit/cgg/unit_cgg_50023.csv": "e91a8bac5d3fb87f0ed204cf29e4a9da460f4f51f8e8b6de2d881d86b7ef8f2f",
+        "content/unit/cgs/unit_idle_cgs_50023.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_50023.csv": "3aed19e4d48f43697c3f7b4ab1eef87fdd7ea454e2706d71a32e46da503e62d4",
+        "content/unit/img/unit_ills_thum_50023.png": "120618f4a33051471a82d5e33e35c10c537339d080303b7f64d061aa61f31773",
+        "content/unit/cgs/unit_move_cgs_50023.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      },
+      "spriteTransformNotes": {
+        "angleCodes": [
+          0,
+          1,
+          2
+        ],
+        "scalePercentRange": [
+          30,
+          100
+        ],
+        "nonDefaultLayers": [
+          {
+            "frame": 9,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          },
+          {
+            "frame": 10,
+            "layer": 0,
+            "angleCode": 2,
+            "scalePct": 100
+          }
+        ],
+        "geometryInterpretation": "ANGLE CODE treated as archival orientation metadata; scale percent resizes PNG layer. Full native transforms not verified."
+      }
+    }
+  },
+  "sourcePackSha256": "ee982ec89d83753f801004a0a873538dd2e7fe47dfd3d0c3b16a188399df54a6"
+}

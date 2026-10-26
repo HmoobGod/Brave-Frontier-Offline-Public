@@ -1,0 +1,118 @@
+{
+  "schema": "bf-global-mistral-boss-intel-v052",
+  "provenance": {
+    "classification": "historical-community-record, not 2022 MST combat formula",
+    "sourceUrl": "https://bravefrontierglobal.fandom.com/wiki/Tower_of_Mistral",
+    "sourceTitle": "Tower of Mistral — Brave Frontier Global Wiki",
+    "archiveSource": "2022 BF1 monster animation sprite 0001 recovered and already bundled",
+    "limitation": "Historical quest boss identities and documented HP; no original wave spawn tables, combat formulas, AI, drop probabilities or ailments have been reconstructed."
+  },
+  "entries": [
+    {
+      "missionId": 81,
+      "missionName": "The Skyhigh Tower",
+      "bosses": [
+        {
+          "name": "King Glowy",
+          "hp": 15000
+        },
+        {
+          "name": "King Gloomy",
+          "hp": 15000
+        }
+      ],
+      "notes": [
+        "Both are listed at 15,000 HP",
+        "Cannot be captured"
+      ]
+    },
+    {
+      "missionId": 82,
+      "missionName": "Monsters of the Corridor",
+      "bosses": [
+        {
+          "name": "Behemoth"
+        },
+        {
+          "name": "Skeleton",
+          "count": 2
+        }
+      ],
+      "notes": [
+        "Capture disabled for this documented encounter"
+      ]
+    },
+    {
+      "missionId": 83,
+      "missionName": "The Stairs of Trial",
+      "bosses": [
+        {
+          "name": "Wyvern"
+        }
+      ],
+      "notes": [
+        "Cannot be captured",
+        "Can cause paralysis"
+      ]
+    },
+    {
+      "missionId": 84,
+      "missionName": "The Pillars of Force",
+      "bosses": [
+        {
+          "name": "King Burny"
+        },
+        {
+          "name": "King Squirty"
+        },
+        {
+          "name": "King Mossy"
+        },
+        {
+          "name": "King Sparky"
+        }
+      ],
+      "notes": [
+        "Cannot be captured"
+      ]
+    },
+    {
+      "missionId": 85,
+      "missionName": "The Forged Gigantor",
+      "bosses": [
+        {
+          "name": "Juggernaut",
+          "hp": 50000,
+          "element": "Thunder",
+          "monsterGraphicId": "0001",
+          "bundledSpriteKey": "gel"
+        }
+      ],
+      "notes": [
+        "Historical guide lists 50,000 HP and the 0001 original monster animation",
+        "Can suffer injury, curse and poison",
+        "Causes Weakness (not yet simulated)",
+        "Drop Blue Stone is archival reference only"
+      ]
+    }
+  ],
+  "optIn": {
+    "scope": "only Mission 85 archive mode, last wave",
+    "activeByDefault": false,
+    "originalValues": [
+      "Juggernaut name",
+      "Thunder element",
+      "50,000 HP",
+      "monster 0001 sprite"
+    ],
+    "remainsSimulated": [
+      "ATK",
+      "DEF",
+      "damage formula",
+      "AI",
+      "ailments",
+      "drops",
+      "reward rules"
+    ]
+  }
+}

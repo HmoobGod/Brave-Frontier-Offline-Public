@@ -1,0 +1,32 @@
+{
+  "schema": "bf-global-2022-regeneration-light-v7700",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "table": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "tableSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474",
+    "historicalReference": "https://forum.gamer.com.tw/Co.php?bsn=24641&sn=125267"
+  },
+  "item": {
+    "itemId": 20102,
+    "itemName": "継復光",
+    "battleEffectGroupId": 520,
+    "targetType": 1,
+    "itemTargetArea": 2,
+    "skillTypeId": 3,
+    "passiveSkillInfo": "800,1000,0,3,0",
+    "itemMaxStack": 99,
+    "itemMaxEquipped": 3
+  },
+  "evidence": {
+    "allAllyGradualRecovery": true,
+    "durationTurns": 3,
+    "baseLow": 800,
+    "baseHigh": 1000
+  },
+  "unknowns": [
+    "source base parameters applied per turn are not independently confirmed",
+    "random roll distribution and native frame boundary",
+    "native item inventory and action costs"
+  ]
+}

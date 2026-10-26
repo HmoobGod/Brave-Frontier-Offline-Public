@@ -1,0 +1,15 @@
+.gradle/
+build/
+app/build/
+local.properties
+.idea/
+*.iml
+*.keystore
+*.jks
+.tools/
+.DS_Store
+
+# Recreated from immutable BF1 original ZIP source packs at build time.
+app/src/main/assets/content/
+# Prevent re-adding development signing-key exports after secret migration.
+.github/debug/*.keystore.b64

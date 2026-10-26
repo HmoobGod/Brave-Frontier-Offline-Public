@@ -1,0 +1,137 @@
+{
+  "id": 52,
+  "name": "Pirate of the Wetlands",
+  "sourcePath": "missions_parsed/Pirate of the Wetlands_2014-14-10-08-29.json",
+  "gitBlobSha": "ffcb59327583e8dd504d5767a072bb3b5b30c297",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Thunder Nymph",
+          "unitId": 40130,
+          "hp": 4800,
+          "atk": 520,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Sparky",
+          "unitId": 40030,
+          "hp": 1500,
+          "atk": 470,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1900,
+          "atk": 510,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Sparky",
+          "unitId": 40030,
+          "hp": 1500,
+          "atk": 470,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1900,
+          "atk": 510,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1900,
+          "atk": 510,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Sky Boss Grafl",
+          "unitId": 40062,
+          "hp": 13500,
+          "atk": 650,
+          "def": 130,
+          "aiId": 5004
+        }
+      ]
+    }
+  ]
+}

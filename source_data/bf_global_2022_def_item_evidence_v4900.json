@@ -1,0 +1,59 @@
+{
+  "schema": "bf-global-2022-def-buff-item-evidence-v4900",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceTable": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "sourceSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474"
+  },
+  "items": [
+    {
+      "itemId": 20600,
+      "rawName": "硬化薬",
+      "battleEffectGroupId": 410,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 5,
+      "passiveSkillInfo": "0,0,30,0,0,3",
+      "itemMaxEquipped": 10,
+      "description": "３ターンの間、味方単体の防御力を<br>３０％アップ",
+      "interpretation": "source +30 percent defense for one ally, three turns"
+    },
+    {
+      "itemId": 20601,
+      "rawName": "堅牢薬",
+      "battleEffectGroupId": 410,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 5,
+      "passiveSkillInfo": "0,0,50,0,0,3",
+      "itemMaxEquipped": 10,
+      "description": "３ターンの間、味方単体の防御力を<br>５０％アップ",
+      "interpretation": "source +50 percent defense for one ally, three turns; evidence only"
+    },
+    {
+      "itemId": 50600,
+      "rawName": "総防薬",
+      "battleEffectGroupId": 410,
+      "targetType": 1,
+      "itemTargetArea": 2,
+      "skillTypeId": 5,
+      "passiveSkillInfo": "0,0,50,0,0,3",
+      "itemMaxEquipped": 5,
+      "description": "３ターンの間、味方全体の防御力を<br>５０％アップ",
+      "interpretation": "source +50 percent defense for all allies, three turns; evidence only"
+    },
+    {
+      "itemId": 50601,
+      "rawName": "壁護薬",
+      "battleEffectGroupId": 410,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 5,
+      "passiveSkillInfo": "0,0,100,0,0,3",
+      "itemMaxEquipped": 5,
+      "description": "３ターンの間、味方単体の防御力を<br>２倍にする",
+      "interpretation": "source +100 percent defense for one ally, three turns; evidence only"
+    }
+  ]
+}

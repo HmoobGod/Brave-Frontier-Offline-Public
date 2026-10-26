@@ -1,0 +1,7 @@
+# Brave Frontier Global v53.00 — Original Party DEF +50% Item
+
+Continue only from an exact successful v52 Build. Archived 2022 `3-mst-translated/F_ITEM_MST_Ver1027.json` (SHA-256 `0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474`) records **#50600 (総防薬)**, effect group 410, itemTargetArea=2 (all allies), passiveSkillInfo `0,0,50,0,0,3`, itemMaxEquipped=5 and a description stating **all allies +50% DEF for three turns**. Archive `mst-decoded.zip` SHA-256 `69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9`.
+
+Optional DEMO command applies +50% to each eligible living ally DEF through the existing simulated damage path for 3 rounds, then restores each exact baseline. It skips KO and targets already protected by the v49 +30% or v52 +100% DEF status, rather than combining uncertain original stacking rules. Reciprocal target exclusions added to v49 and v52 prevent same-round stacking and base-DEF corruption. Shared v45 item-turn ledger costs one acting Guard; v48 Auto safeguard remains.
+
+Only original item identity, targeting scope, percentage and duration are source-backed. Temporary one-charge inventory, Guard cost, rounding, collision policy and cast-turn timing remain DEMO. No save schema, archived original assets, package identity, Android signing, saved item inventory or quest progress changed. Test lifecycle, source data, KO and DEF-buff collision in both directions, v45/48 action integrity and complete inherited Android regression suite.

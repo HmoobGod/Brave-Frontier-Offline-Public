@@ -1,0 +1,53 @@
+/* v0.26 original Global unit encyclopedia, isolated from owned roster */
+.bf-global-original-unit-archive{margin:12px 0 8px;padding:10px;background:linear-gradient(#304057,#131d2e);border:2px ridge #b18e56;color:#e0ecfa}
+.bf-global-original-unit-archive summary{padding:7px 3px;font:900 14px/1.4 Georgia,serif;color:#ffe6b4;cursor:pointer}
+.bf-global-original-unit-archive summary small{display:block;font:11px/1.5 Arial,sans-serif;color:#cad8e7}
+.bf-global-original-unit-archive p{font:12px/1.45 Arial,sans-serif}
+.bf-archive-warning{padding:8px;background:#17283b;border:1px solid #708198;color:#dbe9f8}
+.bf-archive-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bf-archive-filters label{display:flex;flex-direction:column;gap:4px;min-width:0;color:#f5dbab;font:700 11px Arial,sans-serif}
+.bf-archive-filters label:first-child{grid-column:1/-1}
+.bf-archive-filters select,.bf-archive-filters input{min-width:0;box-sizing:border-box;width:100%;min-height:37px;border:1px solid #9cbbcd;border-radius:3px;background:#ecf1f7;color:#1d2b3b;padding:6px;font:13px Arial,sans-serif}
+.bf-global-original-unit-archive button:focus-visible,.bf-archive-filters input:focus-visible,.bf-archive-filters select:focus-visible{outline:3px solid #98e4ff;outline-offset:2px}
+#bf-archive-count{font:11px Arial,sans-serif;color:#d5e2ee;margin:10px 0}
+.bf-archive-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.bf-archive-unit{display:flex;align-items:center;gap:7px;min-height:76px;padding:6px 5px;min-width:0;text-align:left;border:1px solid #8d794b;border-radius:5px;background:linear-gradient(#455268,#1a2a3e);color:#fcdfb0;cursor:pointer}
+.bf-archive-unit img{width:57px;height:57px;flex:0 0 57px;object-fit:contain;image-rendering:pixelated;background:#071322;border-radius:3px}
+.bf-archive-noart{display:flex;width:57px;height:57px;flex:0 0 57px;align-items:center;justify-content:center;font:8px/1.3 Arial,sans-serif;text-align:center;color:#b5c4d2;background:#152638;border:1px dashed #718094;box-sizing:border-box}
+.bf-archive-unit-text{display:flex;flex-direction:column;gap:5px;min-width:0}
+.bf-archive-unit-text strong{font:800 11px/1.25 Georgia,serif;color:#ffe4b0;overflow-wrap:anywhere}
+.bf-archive-unit-text small{font:10px/1.35 Arial,sans-serif;color:#ced8e8}
+.bf-archive-pagination{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:12px;color:#f7ddb0;font:700 11px Arial,sans-serif}
+.bf-archive-pagination button,.bf-archive-close{min-height:37px;padding:6px 10px;border:1px solid #baa16f;border-radius:3px;background:#39465b;color:#ffedcf;font:800 11px Arial,sans-serif;cursor:pointer}
+.bf-archive-pagination button:disabled{opacity:.4;cursor:default}
+.bf-archive-detail{margin-top:12px;padding:10px;border:2px solid #c0a16d;background:#142336;color:#e0ecf8}
+.bf-archive-detail[hidden]{display:none}
+.bf-archive-detail h4{margin:8px 0;color:#ffe2aa;font:900 16px Georgia,serif}
+.bf-archive-detail table{width:100%;border-collapse:collapse;font:12px Arial,sans-serif}
+.bf-archive-detail th,.bf-archive-detail td{padding:5px 6px;border:1px solid #65748a;text-align:left}
+.bf-archive-detail td{color:#fff}
+.bf-archive-footnote{display:block;margin-top:11px;color:#bbcde2;font:10px/1.5 Arial,sans-serif}
+.bf-archive-nohits{grid-column:1/-1}
+@media(max-width:370px){.bf-archive-results{grid-template-columns:1fr}}
+
+/* v0.27: authenticated Global descriptions and skill/recipe records. */
+.bf-archive-codex{margin:14px 0 4px;padding:9px;border:1px solid #bb9851;background:linear-gradient(165deg,#233951,#152436);color:#e9f0f8;border-radius:4px}
+.bf-archive-codex h4{margin:3px 0 7px;font:900 14px Georgia,serif;color:#f7dea6}
+.bf-archive-codex .bf-codex-note{font:11px/1.5 Arial,sans-serif;color:#c7d3e1}
+.bf-archive-codex details{margin:8px 0;padding:6px 8px;background:#122333;border:1px solid #68788b;border-radius:4px}
+.bf-archive-codex summary{cursor:pointer;padding:6px 0;color:#e8d5aa;font:bold 12px/1.4 Arial,sans-serif}
+.bf-archive-codex summary:focus-visible{outline:3px solid #8ad0fa}
+.bf-archive-codex p{margin:5px 0 10px;color:#e3eaf4;font:12px/1.55 Arial,sans-serif;white-space:pre-line;overflow-wrap:anywhere}
+.bf-codex-ability,.bf-codex-recipe{padding:9px 5px;border-top:1px solid #42566d;display:flex;flex-direction:column;gap:4px}
+.bf-codex-ability strong,.bf-codex-recipe strong{font:bold 12px/1.4 Arial,sans-serif;color:#ffe1a0}
+.bf-codex-ability small{font:10px Arial,sans-serif;color:#a8c5df}
+.bf-archive-codex .bf-codex-missing{color:#aebac8;font-style:italic}
+.bf-codex-evo-jump{align-self:flex-start;border:1px solid #c5a25e;background:#3b5878;color:white;font:bold 11px Arial,sans-serif;padding:9px;min-height:35px;border-radius:3px}
+.bf-box-original-profile{border:1px solid #caa559;background:#284866;color:#ffdf9a;padding:9px;margin-top:6px;max-width:100%;white-space:normal;font:bold 11px Arial,sans-serif}
+
+/* Original Global 2022 BB level modifiers: read-only reference grid. */
+.bf-codex-bb-levels{margin:8px 0;border-top:1px solid #ffffff28;padding-top:7px}
+.bf-codex-bb-levels summary{cursor:pointer;color:#e9d29a;font-size:12px;font-weight:700}
+.bf-codex-bb-power-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:9px}
+.bf-codex-bb-power-grid span{border:1px solid #ffffff20;border-radius:5px;padding:6px;color:#c3d2e4;font-size:11px}
+.bf-codex-bb-power-grid .bf-codex-bb-current{background:#483a2360;border-color:#dcbf7790;color:#ffe4aa;font-weight:bold}

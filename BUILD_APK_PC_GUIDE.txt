@@ -1,0 +1,7 @@
+BRAVE FRONTIER OFFLINE v0.13 — WINDOWS
+1. Extract ZIP, open Brave_Frontier_Android_Offline_v0.13 in Android Studio.
+2. Ensure Android SDK API 35 and JDK 17 are configured.
+3. Sync Gradle and use Build > Build APK(s); or run BUILD_APK_WINDOWS.bat.
+4. On success find app\build\outputs\apk\debug\app-debug.apk.
+5. Export your previous JSON save before installing; browser and APK share the same save format.
+APK not built or verified on Android in this environment.

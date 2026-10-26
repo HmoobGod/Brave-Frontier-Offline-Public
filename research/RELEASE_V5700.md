@@ -1,0 +1,9 @@
+# Brave Frontier Global v57.00 — Source-Indexed Status State and Cure Foundation
+
+Based on successful Build #269 (v56.00 SHA `1a6defd47f92eac53bd4f34d87b1cca767f70abb`).
+
+The recovered 2022 translated item master in `mst-decoded.zip` identifies ailment remedy items **#20200** (code 1), **#20210** (codes 2–4), **#20220** (code 5), **#20230** (code 6), and **#50200** (codes 1–6). A new read-only metadata record and a small in-memory status registry preserve these identities. Statuses are keyed to the exact live demo unit instance and clear automatically when the battle restarts, the slot changes, or the unit becomes KO. The API exposes `inflict(slot,code)`, `codesFor(slot)`, `cure(slot,itemId)`, `clear(slot)`, and immutable `snapshot()`. It prevents invalid/KO/empty/other-mode application and supports selective restoration without dropping unrelated ailments. A small battle-only status readout appears when any status is tracked.
+
+This is an **original-source-indexed foundational status mechanism**, NOT a claim that poison now deals its original damage or paralysis blocks the correct original turns. Native proc rates, enemy skill source hooks, duration, damage-over-time timing, player action restrictions and actual saved inventory consumption remain unimplemented. In-game enemies cannot yet inflict these statuses and the registry has **no new user-facing status-injection controls**. Cure APIs represent the effect before inventory/turn enforcement, not a free in-game item. No demo HP/ATK/DEF/BB formulas changed.
+
+All states live in a module-private Map, never in `P` or localStorage. Android app ID, v7 save key, offline permissions and existing signing configuration are untouched. Tests must cover exact source ids, code legality, concurrent ailments, targeted and universal cleanses, KO/new battle cleanup, no save mutations, no network, all existing tests and signed APK packaging. No promotion before exact GitHub Actions green with artifact.

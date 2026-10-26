@@ -1,0 +1,31 @@
+{
+  "initial_format": "bf-global-offline-demo",
+  "initial_version": 4,
+  "browser_export": {
+    "name": "BraveFrontier-Offline-2026-10-19T15-57-00-758Z.json",
+    "format": "bf-global-offline-demo",
+    "version": 4,
+    "zel": 9876,
+    "squad": [
+      10011,
+      20011
+    ],
+    "questClears": {
+      "1": 2
+    }
+  },
+  "browser_import": {
+    "zel": 9876,
+    "tokens": 3
+  },
+  "undo_previous_progress": 15,
+  "reject_malformed": true,
+  "v3_import_migrates_to_v4": true,
+  "android_native_import_callback": true,
+  "android_native_export_cancel_message": true,
+  "android_native_export_success_message": true,
+  "android_bridge_export_import_routing": true,
+  "different_device_persists_after_reinitialization": true,
+  "preview_image": "/mnt/data/BF_v0.9.1_Cross_Device_Saves_Preview.png",
+  "javascript_page_errors": []
+}

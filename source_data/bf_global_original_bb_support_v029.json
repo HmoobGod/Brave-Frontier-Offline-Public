@@ -1,0 +1,772 @@
+{
+  "schema": "bf-global-original-bb-support-v029",
+  "provenance": {
+    "sourceArchive": "mst-decoded.zip",
+    "mstZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "table": "3-mst-translated/F_SKILL_LEVEL_MST_*_Ver1487.json",
+    "englishManifest": "source_data/bf_global_original_bb_targeting.json",
+    "interpretation": "BB Lv1 base parameters and English effect types. Demo does not track BB skill-level, exact REC heal formula, stacking, and expiration rules."
+  },
+  "skills": {
+    "20041": {
+      "skillId": 20041,
+      "name": "Cure Light",
+      "description": "Large recovery of all allies' HP",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1500:600,800,50,50|2:1500:630,830,50,50|3:1500:660,860,50,50|4:1500:690,890,50,50|5:1500:720,920,50,50|6:1500:750,950,50,50|7:1500:780,980,50,50|8:1500:810,1010,50,50|9:1500:840,1040,50,50|10:1500:870,1070,50,50",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1500,
+          "params": [
+            600,
+            800,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1500,
+          "params": [
+            630,
+            830,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1500,
+          "params": [
+            660,
+            860,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1500,
+          "params": [
+            690,
+            890,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1500,
+          "params": [
+            720,
+            920,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1500,
+          "params": [
+            750,
+            950,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1500,
+          "params": [
+            780,
+            980,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1500,
+          "params": [
+            810,
+            1010,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1500,
+          "params": [
+            840,
+            1040,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1500,
+          "params": [
+            870,
+            1070,
+            50,
+            50
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "heal_all",
+        "lowAtLv1": 600,
+        "highAtLv1": 800,
+        "recParamsNotDecoded": [
+          50,
+          50
+        ]
+      }
+    },
+    "30041": {
+      "skillId": 30041,
+      "name": "Arcanadia",
+      "description": "Large recovery of all allies' HP",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1500:600,800,50,50|2:1500:630,830,50,50|3:1500:660,860,50,50|4:1500:690,890,50,50|5:1500:720,920,50,50|6:1500:750,950,50,50|7:1500:780,980,50,50|8:1500:810,1010,50,50|9:1500:840,1040,50,50|10:1500:870,1070,50,50",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1500,
+          "params": [
+            600,
+            800,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1500,
+          "params": [
+            630,
+            830,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1500,
+          "params": [
+            660,
+            860,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1500,
+          "params": [
+            690,
+            890,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1500,
+          "params": [
+            720,
+            920,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1500,
+          "params": [
+            750,
+            950,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1500,
+          "params": [
+            780,
+            980,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1500,
+          "params": [
+            810,
+            1010,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1500,
+          "params": [
+            840,
+            1040,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1500,
+          "params": [
+            870,
+            1070,
+            50,
+            50
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "heal_all",
+        "lowAtLv1": 600,
+        "highAtLv1": 800,
+        "recParamsNotDecoded": [
+          50,
+          50
+        ]
+      }
+    },
+    "40021": {
+      "skillId": 40021,
+      "name": "Thunder's Command",
+      "description": "Boost to all allies' ATK for 3 turns",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1300:0,30,0,0,0,3,90|2:1300:0,31,0,0,0,3,90|3:1300:0,32,0,0,0,3,90|4:1300:0,33,0,0,0,3,90|5:1300:0,34,0,0,0,3,90|6:1300:0,35,0,0,0,3,90|7:1300:0,36,0,0,0,3,90|8:1300:0,37,0,0,0,3,90|9:1300:0,38,0,0,0,3,90|10:1300:0,40,0,0,0,3,90",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1300,
+          "params": [
+            0,
+            30,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1300,
+          "params": [
+            0,
+            31,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1300,
+          "params": [
+            0,
+            32,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1300,
+          "params": [
+            0,
+            33,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1300,
+          "params": [
+            0,
+            34,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1300,
+          "params": [
+            0,
+            35,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1300,
+          "params": [
+            0,
+            36,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1300,
+          "params": [
+            0,
+            37,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1300,
+          "params": [
+            0,
+            38,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1300,
+          "params": [
+            0,
+            40,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "atk_buff_all",
+        "pctAtLv1": 30,
+        "roundsAtLv1": 3
+      }
+    },
+    "40022": {
+      "skillId": 40022,
+      "name": "Thunder's Rage",
+      "description": "Great boost to all allies' ATK for 3 turns",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1600:0,40,0,0,0,3,90|2:1600:0,41,0,0,0,3,90|3:1600:0,42,0,0,0,3,90|4:1600:0,43,0,0,0,3,90|5:1600:0,44,0,0,0,3,90|6:1600:0,45,0,0,0,3,90|7:1600:0,46,0,0,0,3,90|8:1600:0,47,0,0,0,3,90|9:1600:0,48,0,0,0,3,90|10:1600:0,50,0,0,0,3,90",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1600,
+          "params": [
+            0,
+            40,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1600,
+          "params": [
+            0,
+            41,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1600,
+          "params": [
+            0,
+            42,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1600,
+          "params": [
+            0,
+            43,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1600,
+          "params": [
+            0,
+            44,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1600,
+          "params": [
+            0,
+            45,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1600,
+          "params": [
+            0,
+            46,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1600,
+          "params": [
+            0,
+            47,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1600,
+          "params": [
+            0,
+            48,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1600,
+          "params": [
+            0,
+            50,
+            0,
+            0,
+            0,
+            3,
+            90
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "atk_buff_all",
+        "pctAtLv1": 40,
+        "roundsAtLv1": 3
+      }
+    },
+    "40041": {
+      "skillId": 40041,
+      "name": "Cure Drill",
+      "description": "Large recovery of all allies' HP",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1500:600,800,50,50|2:1500:630,830,50,50|3:1500:660,860,50,50|4:1500:690,890,50,50|5:1500:720,920,50,50|6:1500:750,950,50,50|7:1500:780,980,50,50|8:1500:810,1010,50,50|9:1500:840,1040,50,50|10:1500:870,1070,50,50",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1500,
+          "params": [
+            600,
+            800,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1500,
+          "params": [
+            630,
+            830,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1500,
+          "params": [
+            660,
+            860,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1500,
+          "params": [
+            690,
+            890,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1500,
+          "params": [
+            720,
+            920,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1500,
+          "params": [
+            750,
+            950,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1500,
+          "params": [
+            780,
+            980,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1500,
+          "params": [
+            810,
+            1010,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1500,
+          "params": [
+            840,
+            1040,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1500,
+          "params": [
+            870,
+            1070,
+            50,
+            50
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "heal_all",
+        "lowAtLv1": 600,
+        "highAtLv1": 800,
+        "recParamsNotDecoded": [
+          50,
+          50
+        ]
+      }
+    },
+    "50041": {
+      "skillId": 50041,
+      "name": "Saint Benediction",
+      "description": "Large recovery of all allies' HP",
+      "sourceFile": "3-mst-translated/F_SKILL_LEVEL_MST_1_Ver1487.json",
+      "rawLevelData": "1:1500:600,800,50,50|2:1500:630,830,50,50|3:1500:660,860,50,50|4:1500:690,890,50,50|5:1500:720,920,50,50|6:1500:750,950,50,50|7:1500:780,980,50,50|8:1500:810,1010,50,50|9:1500:840,1040,50,50|10:1500:870,1070,50,50",
+      "levels": [
+        {
+          "level": 1,
+          "effectCode": 1500,
+          "params": [
+            600,
+            800,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 2,
+          "effectCode": 1500,
+          "params": [
+            630,
+            830,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 3,
+          "effectCode": 1500,
+          "params": [
+            660,
+            860,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 4,
+          "effectCode": 1500,
+          "params": [
+            690,
+            890,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 5,
+          "effectCode": 1500,
+          "params": [
+            720,
+            920,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 6,
+          "effectCode": 1500,
+          "params": [
+            750,
+            950,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 7,
+          "effectCode": 1500,
+          "params": [
+            780,
+            980,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 8,
+          "effectCode": 1500,
+          "params": [
+            810,
+            1010,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 9,
+          "effectCode": 1500,
+          "params": [
+            840,
+            1040,
+            50,
+            50
+          ]
+        },
+        {
+          "level": 10,
+          "effectCode": 1500,
+          "params": [
+            870,
+            1070,
+            50,
+            50
+          ]
+        }
+      ],
+      "level1DemoEffect": {
+        "type": "heal_all",
+        "lowAtLv1": 600,
+        "highAtLv1": 800,
+        "recParamsNotDecoded": [
+          50,
+          50
+        ]
+      }
+    }
+  }
+}

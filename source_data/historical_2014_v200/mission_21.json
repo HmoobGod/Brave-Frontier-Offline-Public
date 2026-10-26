@@ -1,0 +1,145 @@
+{
+  "id": 21,
+  "name": "Wielder of the Fire",
+  "sourcePath": "missions_parsed/Wielder of the Fire_2014-01-10-06-37.json",
+  "gitBlobSha": "b5d57b45ce77858ab8f9b7301f2091c5da663993",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1300,
+          "atk": 400,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1300,
+          "atk": 400,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1300,
+          "atk": 400,
+          "def": 90,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1300,
+          "atk": 400,
+          "def": 90,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Burny",
+          "unitId": 10030,
+          "hp": 1500,
+          "atk": 420,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        },
+        {
+          "name": "Burny",
+          "unitId": 10030,
+          "hp": 1500,
+          "atk": 420,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        },
+        {
+          "name": "Warlock Liza",
+          "unitId": 10041,
+          "hp": 10000,
+          "atk": 540,
+          "def": 50,
+          "aiId": 5000
+        },
+        {
+          "name": "Goblin",
+          "unitId": 10050,
+          "hp": 1700,
+          "atk": 450,
+          "def": 95,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

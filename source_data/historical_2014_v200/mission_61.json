@@ -1,0 +1,158 @@
+{
+  "id": 61,
+  "name": "Wielder of the Light",
+  "sourcePath": "missions_parsed/Wielder of the Light_2014-14-10-08-31.json",
+  "gitBlobSha": "460515a59b6f8cdb81cccfb2b0501f077570c1ce",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2200,
+          "atk": 510,
+          "def": 120,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 2000,
+          "atk": 500,
+          "def": 180,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Glowy",
+          "unitId": 50030,
+          "hp": 2000,
+          "atk": 500,
+          "def": 180,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Light Nymph",
+          "unitId": 50120,
+          "hp": 5000,
+          "atk": 540,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        },
+        {
+          "name": "Light Lord Mimir",
+          "unitId": 50041,
+          "hp": 16000,
+          "atk": 700,
+          "def": 200,
+          "aiId": 5000
+        },
+        {
+          "name": "Angel",
+          "unitId": 50050,
+          "hp": 2600,
+          "atk": 550,
+          "def": 150,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

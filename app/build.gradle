@@ -1,0 +1,617 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'org.bravefrontier.offline'
+    compileSdk 35
+    // CI provides a monotonically increasing installable versionCode.
+    // Local development builds retain the existing value by default.
+    def ciBuildCode = project.findProperty('ciVersionCode')
+    defaultConfig {
+        applicationId 'org.bravefrontier.offline'
+        minSdk 26
+        targetSdk 35
+        versionCode ciBuildCode ? ciBuildCode.toString().toInteger() : 15
+        versionName '94.00.0-demo'
+    }
+    // Debug-only development identity loaded from a GitHub Actions secret.
+    // This must remain the same certificate for existing in-place APK updates;
+    // it is NOT a production signing key.
+    signingConfigs {
+        debug {
+            storeFile file("${rootProject.projectDir}/.github/debug/bf-development-debug.keystore")
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.debug }
+        release { minifyEnabled false }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// Keep direct Gradle builds consistent with CI: patch the bundled HTML
+// with a tested, idempotent save-recovery fix before processing assets.
+tasks.register('prepareDemoAssets', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'patch_bf_save_quarantine.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareDemoAssets') } }
+
+
+// Extract only verified original BF1 Global UI sprites from intact archived packs.
+// Keeps original ZIPs untouched and generated Android assets untracked.
+tasks.register('prepareGlobalHomeAssets', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_home_assets.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareGlobalHomeAssets') } }
+
+
+// Source-backed, idempotent expansion of the six-quest demo catalog to the
+// next three archived Global Cave of Flames missions, without touching saves.
+// Run after the save-quarantine patch when executing Gradle directly.
+tasks.register('prepareGlobalMissionAssets', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_global_mission_expansion.py'
+}
+afterEvaluate {
+    tasks.named('prepareGlobalMissionAssets').configure {
+        dependsOn tasks.named('prepareDemoAssets')
+    }
+    tasks.named('preBuild').configure {
+        dependsOn tasks.named('prepareGlobalMissionAssets')
+    }
+}
+
+
+// Preserve exact 2022 BF Global mission music bytes in the offline APK.
+tasks.register('prepareOriginalGlobalBgm', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_bgm_assets.py'
+}
+afterEvaluate {
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalGlobalBgm') }
+}
+
+// Stage source-hashed Mistral original art before packaging.
+tasks.register('prepareGlobalMistralMap', Exec) {
+ workingDir rootProject.projectDir
+ commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_mistral_assets.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareGlobalMistralMap') } }
+
+// Verify recovered 2022 Global battle PNG archives and stage 17 original UI graphics.
+tasks.register('prepareOriginalBattleControls', Exec) {
+ workingDir rootProject.projectDir
+ commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_battle_controls.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalBattleControls') } }
+
+
+// Stage the original Global unit encyclopedia's verified data and thumbnails.
+// This is a read-only archive; saves, battle behavior and demo roster untouched.
+tasks.register('prepareGlobalUnitArchive', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_global_unit_archive.py'
+}
+afterEvaluate {
+    tasks.named('prepareGlobalUnitArchive').configure {
+        dependsOn tasks.named('prepareGlobalMissionAssets')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareGlobalUnitArchive') }
+}
+
+
+// v0.27: offline, source-verified Global unit history, ability text and
+// original evolution costs. Adds read-only JSON; never touches saves/combat.
+tasks.register('prepareGlobalUnitCodex', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_global_unit_codex.py'
+}
+afterEvaluate {
+    tasks.named('prepareGlobalUnitCodex').configure {
+        dependsOn tasks.named('prepareGlobalUnitArchive')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareGlobalUnitCodex') }
+}
+
+
+// Restore archived original Brave Burst TARGET SCOPE only; keep existing
+// demo damage formulas, BC charge, AI, support fallback and saved progress.
+// The patch is SHA/source-checked and safe to rerun before Android packaging.
+tasks.register('prepareOriginalBBTargeting', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_bb_targeting.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalBBTargeting').configure {
+        dependsOn tasks.named('prepareGlobalUnitCodex')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalBBTargeting') }
+}
+
+
+// Source-backed original Brave Burst Lv1 support classes: +ATK and base heal.
+// Idempotent; requires the original v0.28 targeting layer to be in place.
+tasks.register('prepareOriginalBBSupport', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_bb_support.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalBBSupport').configure {
+        dependsOn tasks.named('prepareOriginalBBTargeting')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalBBSupport') }
+}
+
+
+// Restore original Global offensive Brave Burst Lv1 damage modifier from
+// immutable 2022 source-derived records. Other formulas remain DEMO.
+tasks.register('prepareOriginalBBPower', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_bb_power.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalBBPower').configure {
+        dependsOn tasks.named('prepareOriginalBBSupport')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalBBPower') }
+}
+
+
+// v0.31: Restore original 2022 Global playable unit names and references.
+// Source baseline stats are SHA-verified and unchanged. Original max-level and
+// unit cost references are informational; demo experience and save v7 unchanged.
+tasks.register('prepareOriginalPlayableIdentity', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_playable_identity.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalPlayableIdentity').configure {
+        dependsOn tasks.named('prepareOriginalBBPower')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalPlayableIdentity') }
+}
+
+
+// v0.32: six playable original BF Global first evolutions from exact CGG/CGS
+// and PNG source packs. Original 50,000-Zel requirements are shown alongside
+// the existing demo economy; save schema v7 and prior roster remain intact.
+tasks.register('prepareOriginalSixEvolutions', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_six_evolutions.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalSixEvolutions').configure {
+        dependsOn tasks.named('prepareOriginalPlayableIdentity')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalSixEvolutions') }
+}
+
+
+// v0.33: six original second-stage (4-star) evolution forms. Exact archived
+// 2022 CGG/CGS/PNG sprites and BB source metadata, save schema v7 unchanged.
+// Reuses the same owned base ID to represent the latest evolved form.
+tasks.register('prepareOriginalSecondStageEvolutions', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_second_stage_evolutions.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalSecondStageEvolutions').configure {
+        dependsOn tasks.named('prepareOriginalSixEvolutions')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalSecondStageEvolutions') }
+}
+
+
+// v0.34 — another six authentic 2022 Global four-star second-stage units.
+// The sprite reconstruction understands archived percentage-scale CGG layers;
+// unknown native orientation semantics are not claimed as fully reproduced.
+// Chained evolutions and all previous v7 saved player data remain unchanged.
+tasks.register('prepareOriginalMoreSecondStage', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_more_second_stage.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalMoreSecondStage').configure {
+        dependsOn tasks.named('prepareOriginalSecondStageEvolutions')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalMoreSecondStage') }
+}
+
+
+// v0.35: third-stage 5-star starter evolutions (six original Global forms).
+// Rebuild original CGG/CGS/PNG sprite atlases from hash-verified archived data.
+// Original evolution materials and source Lv1 BB scalar retained; offline demo
+// costs are separate, saves remain v7, original native damage formula unknown.
+tasks.register('prepareOriginalFiveStarStarters', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_five_star_starters.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalFiveStarStarters').configure {
+        dependsOn tasks.named('prepareOriginalMoreSecondStage')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalFiveStarStarters') }
+}
+
+
+// v0.36: six original Global five-star alternate starter-path evolutions.
+// Source PNG/CGG/CGS, English BB target scopes and recipes are SHA-checked;
+// uncertain native attack formula and status effects stay DEMO.
+tasks.register('prepareOriginalOtherFiveStar', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_other_five_star.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalOtherFiveStar').configure {
+        dependsOn tasks.named('prepareOriginalFiveStarStarters')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalOtherFiveStar') }
+}
+
+
+// v0.37 — six original six-star starter evolutions from 2022 Global masters.
+// Source CGG/CGS/PNG/English/recipes are SHA-verified. Native orientation,
+// damage and drop rate semantics remain DEMO; existing v7 save stays untouched.
+tasks.register('prepareOriginalSixStarStarters', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_six_star_starters.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalSixStarStarters').configure {
+        dependsOn tasks.named('prepareOriginalOtherFiveStar')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalSixStarStarters') }
+}
+
+
+// v0.38: six original 2022 Global alternate six-star evolution forms and
+// source-backed character atlases. Native CGG flags and offensive native
+// formulas are not guessed; older save v7 and all starter lines stay intact.
+tasks.register('prepareOriginalOtherSixStar', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_other_six_star.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalOtherSixStar').configure {
+        dependsOn tasks.named('prepareOriginalSixStarStarters')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalOtherSixStar') }
+}
+
+
+// v0.39: non-invasive owned-unit Evolution Roadmap. Must run after verified
+// original 6-star recipes have been staged. UI never mutates save schema v7.
+tasks.register('prepareEvolutionRoadmapV039', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_evolution_roadmap_v039.py'
+}
+afterEvaluate {
+    tasks.named('prepareEvolutionRoadmapV039').configure {
+        dependsOn tasks.named('prepareOriginalOtherSixStar')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareEvolutionRoadmapV039') }
+}
+
+// v0.40 read-only in-battle BB source reference (retains v7 data and v0.39).
+tasks.register('prepareBattleBBGuideV040', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_battle_bb_guide_v040.py'
+}
+afterEvaluate {
+    tasks.named('prepareBattleBBGuideV040').configure {
+        dependsOn tasks.named('prepareEvolutionRoadmapV039')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareBattleBBGuideV040') }
+}
+
+
+// v0.41 source-aware Auto Battle. Optional DEMO strategy, enabled only by player.
+tasks.register('prepareSourceAwareAutoV041', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_source_aware_auto_v041.py'
+}
+afterEvaluate {
+    tasks.named('prepareSourceAwareAutoV041').configure {
+        dependsOn tasks.named('prepareBattleBBGuideV040')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareSourceAwareAutoV041') }
+}
+
+// v0.42 optional coordinated Auto targeting and source-audited buff planning.
+tasks.register('prepareCoordinatedAutoV042', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_coordinated_auto_v042.py'
+}
+afterEvaluate {
+    tasks.named('prepareCoordinatedAutoV042').configure {
+        dependsOn tasks.named('prepareSourceAwareAutoV041')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareCoordinatedAutoV042') }
+}
+
+// v0.43 original Global six-star SBB English source preview, reference-only.
+tasks.register('prepareOriginalSBBPreviewV043', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_sbb_preview_v043.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalSBBPreviewV043').configure {
+        dependsOn tasks.named('prepareCoordinatedAutoV042')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalSBBPreviewV043') }
+}
+
+// v0.44 experimental SBB combat (OFF by default; original skill names only).
+tasks.register('prepareExperimentalSBBV044', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_experimental_sbb_v044.py'
+}
+afterEvaluate {
+    tasks.named('prepareExperimentalSBBV044').configure {
+        dependsOn tasks.named('prepareOriginalSBBPreviewV043')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareExperimentalSBBV044') }
+}
+
+// v0.45 four source-verified Egor Snowfield missions + original 2022 snowfield image.
+tasks.register('prepareEgorSnowfieldV045', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_egor_snowfield_v045.py'
+}
+afterEvaluate {
+    tasks.named('prepareEgorSnowfieldV045').configure {
+        dependsOn tasks.named('prepareExperimentalSBBV044')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareEgorSnowfieldV045') }
+}
+
+
+// v0.46 original 2022 Forest of Beasts quest chain and verified forest art.
+tasks.register('prepareForestOfBeastsV046', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_forest_of_beasts_v046.py'
+}
+afterEvaluate {
+    tasks.named('prepareForestOfBeastsV046').configure {
+        dependsOn tasks.named('prepareEgorSnowfieldV045')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareForestOfBeastsV046') }
+}
+
+
+// v0.47 source-authenticated Magutagal Wetlands missions 50-53 and original JPG.
+tasks.register('prepareMagutagalV047', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_magutagal_v047.py'
+}
+afterEvaluate {
+    tasks.named('prepareMagutagalV047').configure {
+        dependsOn tasks.named('prepareForestOfBeastsV046')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareMagutagalV047') }
+}
+
+// v0.48: separate source-verified 2022 English quest descriptions from the
+// navigation JavaScript. Local and CI builds remain entirely offline.
+tasks.register('prepareQuestEnglishDataV048', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_quest_english_data_v048.py'
+}
+afterEvaluate {
+    tasks.named('prepareQuestEnglishDataV048').configure {
+        dependsOn tasks.named('prepareMagutagalV047')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareQuestEnglishDataV048') }
+}
+
+// v0.49: 4 original Remains of Mirza missions, sourced 2022 battle background,
+// exact English references; preserves all old missions and local save v7.
+tasks.register('prepareRemainsMirzaV049', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_remains_mirza_v049.py'
+}
+afterEvaluate {
+    tasks.named('prepareRemainsMirzaV049').configure {
+        dependsOn tasks.named('prepareQuestEnglishDataV048')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareRemainsMirzaV049') }
+}
+
+// v0.50: source-authenticated Monster's Nest Mistral dungeon, missions 70–73.
+tasks.register('prepareMonstersNestV050', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_monsters_nest_v050.py'
+}
+afterEvaluate {
+    tasks.named('prepareMonstersNestV050').configure {
+        dependsOn tasks.named('prepareRemainsMirzaV049')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareMonstersNestV050') }
+}
+
+// v0.51: original Tower of Mistral quests 81–85 and JPEG from 2022 archives.
+// Maintains existing local save format v7 and all optional demo feature gates.
+tasks.register('prepareTowerMistralV051', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_tower_of_mistral_v051.py'
+}
+afterEvaluate {
+    tasks.named('prepareTowerMistralV051').configure {
+        dependsOn tasks.named('prepareMonstersNestV050')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareTowerMistralV051') }
+}
+
+// v0.52: documented Mistral boss intel and strictly opt-in Juggernaut demo.
+// Historical HP/sprite source references; original AI/formulas remain unknown.
+tasks.register('prepareStoryBossV052', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_story_boss_v052.py'
+}
+afterEvaluate {
+    tasks.named('prepareStoryBossV052').configure {
+        dependsOn tasks.named('prepareTowerMistralV051')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareStoryBossV052') }
+}
+
+// v0.53: original 2022 BF1 sprite frames 0009-0016 in optional training only.
+tasks.register('prepareMonsterTrainingV053', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_monster_training_v053.py'
+}
+afterEvaluate {
+    tasks.named('prepareMonsterTrainingV053').configure {
+        dependsOn tasks.named('prepareStoryBossV052')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareMonsterTrainingV053') }
+}
+
+// v0.55: off-by-default historical Tower final-wave boss names and group counts.
+// Neutral placeholder art until native sprite identity is source verified.
+tasks.register('prepareTowerFormationsV055', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_tower_formations_v055.py'
+}
+afterEvaluate {
+    tasks.named('prepareTowerFormationsV055').configure {
+        dependsOn tasks.named('prepareMonsterTrainingV053')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareTowerFormationsV055') }
+}
+
+// v0.56–v0.60: fail-closed archival research layer, no original wave semantics guessed.
+tasks.register('prepareOriginalMistralEvidenceV060', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_mission_evidence_v060.py'
+}
+afterEvaluate {
+    tasks.named('prepareOriginalMistralEvidenceV060').configure {
+        dependsOn tasks.named('prepareTowerFormationsV055')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalMistralEvidenceV060') }
+}
+
+// v0.61-0.65: extend verified original attack hit frames from 6 starter units
+// to 71 playable forms; 10023 (130% weight) remains DEMO fallback.
+tasks.register('preparePlayableAttackFramesV065', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_playable_attack_frames_v065.py'
+}
+afterEvaluate {
+    tasks.named('preparePlayableAttackFramesV065').configure {
+        dependsOn tasks.named('prepareOriginalMistralEvidenceV060')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('preparePlayableAttackFramesV065') }
+}
+
+// v0.70: show archived hit profiles for 72 unit forms in the read-only
+// inspector without unlocking any; regression covers 34 Mistral clears.
+tasks.register('preparePlayableHitInspectorV070', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_playable_hit_inspector_v070.py'
+}
+afterEvaluate {
+    tasks.named('preparePlayableHitInspectorV070').configure {
+        dependsOn tasks.named('preparePlayableAttackFramesV065')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('preparePlayableHitInspectorV070') }
+}
+
+// v0.80 original 2022 Global Morgan expansion, preserving v7 and all Mistral quests.
+tasks.register('prepareMorganOriginalV080', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_morgan_quests_v080.py'
+}
+afterEvaluate {
+    tasks.named('prepareMorganOriginalV080').configure {
+        dependsOn tasks.named('preparePlayableHitInspectorV070')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareMorganOriginalV080') }
+}
+
+// v0.90: source-authenticated St. Lamia original world map and 36 missions.
+tasks.register('prepareStLamiaV090', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_st_lamia_original_v090.py'
+}
+afterEvaluate {
+    tasks.named('prepareStLamiaV090').configure {
+        dependsOn tasks.named('prepareMorganOriginalV080')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('prepareStLamiaV090') }
+}
+
+
+// v2.00: Offline, deterministic historical archive build. No network, save or
+// native combat modifications; direct Gradle builds must also stage the data.
+tasks.register('prepareHistoricalWaveLabV200', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_historical_wave_lab_v200.py'
+}
+afterEvaluate {
+    tasks.named('prepareHistoricalWaveLabV200').configure {
+        dependsOn tasks.named('prepareStLamiaV090')
+    }
+    tasks.named('preBuild').configure {
+        dependsOn tasks.named('prepareHistoricalWaveLabV200')
+    }
+}
+
+// Original 2022 event-only Cave of Flames background, source-SHA checked.
+tasks.register('prepareOriginalEventBackdropV2700', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_event_backdrop_v2700.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalEventBackdropV2700') } }
+
+// Stage original 2022 event art + indexed expressions from immutable curated ZIP.
+tasks.register('prepareOriginalEventExpressionsV2900', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'prepare_original_event_expressions_v2900.py'
+}
+afterEvaluate { tasks.named('preBuild').configure { dependsOn tasks.named('prepareOriginalEventExpressionsV2900') } }
+
+// v67.00: apply original recipient REC contribution to source-backed Lv1 BB heal.
+tasks.register('patchBurstRecipientRecoveryV6700', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'patch_bf_burst_recipient_recovery_v6700.py'
+}
+afterEvaluate {
+    tasks.named('patchBurstRecipientRecoveryV6700').configure {
+        dependsOn tasks.named('prepareHistoricalWaveLabV200')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('patchBurstRecipientRecoveryV6700') }
+}
+
+
+// v69.00: add source-identified elemental matching to DEMO damage calculations.
+tasks.register('patchOriginalElementalCombatV6900', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'patch_bf_elemental_combat_v6900.py'
+}
+afterEvaluate {
+    tasks.named('patchOriginalElementalCombatV6900').configure {
+        dependsOn tasks.named('patchBurstRecipientRecoveryV6700')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('patchOriginalElementalCombatV6900') }
+}
+
+
+// v71 source-exact ATK support BB percent variation by optional battle level.
+tasks.register('patchOriginalAtkBBLevelsV7100', Exec) {
+    workingDir rootProject.projectDir
+    commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3', 'patch_bf_original_atk_bb_levels_v7100.py'
+}
+afterEvaluate {
+    tasks.named('patchOriginalAtkBBLevelsV7100').configure {
+        dependsOn tasks.named('patchOriginalElementalCombatV6900')
+    }
+    tasks.named('preBuild').configure { dependsOn tasks.named('patchOriginalAtkBBLevelsV7100') }
+}

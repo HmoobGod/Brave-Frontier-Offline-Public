@@ -1,0 +1,72 @@
+{
+  "schema": "bf-global-2022-battle-item-evidence-v4600",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceTable": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+    "sourceSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474",
+    "sourceRows": 1668
+  },
+  "items": [
+    {
+      "itemId": 20000,
+      "rawName": "回復薬",
+      "battleEffectGroupId": 520,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 2,
+      "passiveSkillInfo": "100,120,0,0",
+      "itemMaxEquipped": 10,
+      "description": "味方単体のＨＰを少し回復する",
+      "interpretation": "numeric heal formula not independently decoded"
+    },
+    {
+      "itemId": 20100,
+      "rawName": "祝福の光",
+      "battleEffectGroupId": 520,
+      "targetType": 1,
+      "itemTargetArea": 2,
+      "skillTypeId": 2,
+      "passiveSkillInfo": "500,500,0,0",
+      "itemMaxEquipped": 3,
+      "description": "味方全体のＨＰを少し回復する",
+      "interpretation": "all-ally scope source-backed; native numeric heal formula not independently decoded"
+    },
+    {
+      "itemId": 20400,
+      "rawName": "強化薬",
+      "battleEffectGroupId": 400,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 5,
+      "passiveSkillInfo": "0,30,0,0,0,3",
+      "itemMaxEquipped": 10,
+      "description": "３ターンの間、味方単体の攻撃力を<br>３０％アップ",
+      "interpretation": "+30 percent ATK for three turns, native timing/stacking unverified"
+    },
+    {
+      "itemId": 21000,
+      "rawName": "武神薬",
+      "battleEffectGroupId": 540,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 4,
+      "passiveSkillInfo": "0,100",
+      "itemMaxEquipped": 2,
+      "description": "味方単体のＢＢゲージを最大にする",
+      "interpretation": "one ally BB gauge maximum, native item inventory/timing unverified"
+    },
+    {
+      "itemId": 21010,
+      "rawName": "武神薬改",
+      "battleEffectGroupId": 540,
+      "targetType": 1,
+      "itemTargetArea": 1,
+      "skillTypeId": 4,
+      "passiveSkillInfo": "0,100",
+      "itemMaxEquipped": 3,
+      "description": "味方単体のＢＢゲージを最大にする。携帯可能数が多い",
+      "interpretation": "same gauge effect; different original equipped max"
+    }
+  ]
+}

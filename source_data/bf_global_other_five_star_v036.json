@@ -1,0 +1,1138 @@
+{
+  "schema": "bf-global-six-other-five-star-2022-v036",
+  "provenance": {
+    "mstZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceUnitPart001Sha256": "c0f03306a4e5efd2513c982ac58b12fff2d72c9ff978b19a839f8932536fc846",
+    "sourceUnitPart007Sha256": "ad937083a4d023228f8796d45e5edd6adaf575872270476be994121941db3556",
+    "source": "2022 translated Global F_UNIT_MST, F_SKILL_MST, F_SKILL_LEVEL_MST, F_UNIT_EVO_MST and English sgtext"
+  },
+  "records": {
+    "10024": {
+      "id": 10024,
+      "ownedBaseId": 10021,
+      "fromId": 10023,
+      "name": "Beast King Zegar",
+      "element": 1,
+      "rarity": 5,
+      "stats": {
+        "hp": 3151,
+        "atk": 1057,
+        "def": 643,
+        "rec": 575
+      },
+      "lordStats": {
+        "hp": 4761,
+        "atk": 1522,
+        "def": 1001,
+        "rec": 956
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "10133": 1,
+          "10191": 1,
+          "10132": 2,
+          "10130": 1
+        }
+      },
+      "bb": {
+        "name": "Twin Dragon Slash",
+        "description": "9 combo powerful Fire attack on single enemy & probable Injury effect",
+        "target": "single_enemy",
+        "sourceType": "1@11",
+        "sourceTargetType": "2@2",
+        "sourceTargetArea": "1@1",
+        "effectFramesRaw": "8:121:1,8:161:1,26:121:1,26:161:1,46:121:1,46:161:1,66:121:1,66:161:1,116:121:1,116:161:1,122:121:1,122:161:1,128:121:1,128:161:1,134:100110:1,134:121:1,138:161:1,138:121:1,138:100020:1",
+        "damageFramesRaw": "14:10:3:1,32:10:2:1,52:10:3:1,72:10:2:1,122:20:3:1,128:10:2:4,134:10:1:4,140:10:1:4,144:10:1:4@0:100:2:1",
+        "levelInfo": "1:1600:280,100,0,0,0,0@4,80,0,0,0,0,0,0,232|2:1600:290,100,0,0,0,0@4,80,0,0,0,0,0,0,232|3:1600:300,100,0,0,0,0@4,80,0,0,0,0,0,0,232|4:1600:310,100,0,0,0,0@4,80,0,0,0,0,0,0,232|5:1600:320,100,0,0,0,0@4,80,0,0,0,0,0,0,232|6:1600:330,100,0,0,0,0@4,80,0,0,0,0,0,0,232|7:1600:340,100,0,0,0,0@4,80,0,0,0,0,0,0,232|8:1600:350,100,0,0,0,0@4,80,0,0,0,0,0,0,232|9:1600:360,100,0,0,0,0@4,80,0,0,0,0,0,0,232|10:1600:380,100,0,0,0,0@4,80,0,0,0,0,0,0,232",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 1600,
+            "params": [
+              280,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 2,
+            "effectCode": 1600,
+            "params": [
+              290,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 3,
+            "effectCode": 1600,
+            "params": [
+              300,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 4,
+            "effectCode": 1600,
+            "params": [
+              310,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 5,
+            "effectCode": 1600,
+            "params": [
+              320,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 6,
+            "effectCode": 1600,
+            "params": [
+              330,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 7,
+            "effectCode": 1600,
+            "params": [
+              340,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 8,
+            "effectCode": 1600,
+            "params": [
+              350,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 9,
+            "effectCode": 1600,
+            "params": [
+              360,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 10,
+            "effectCode": 1600,
+            "params": [
+              380,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          }
+        ]
+      },
+      "frameCount": 16,
+      "missingOriginalMoveCGS": false,
+      "unverifiedReservedFlags": {},
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_10024.png": "0928ebf1bfd96c4a871cbd74921c15e83c24f11ba6f8674d2f0b3dd4716d13da",
+        "content/unit/cgg/unit_cgg_10024.csv": "39f608928f1abfb73b253c3127850731316d6430bbba4b520c1578b9f3760c4d",
+        "content/unit/cgs/unit_idle_cgs_10024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_10024.csv": "d2fdf3d700aeb41618796c7f569e151c84ed85e94d0cb80bcd0ad54f2131cf46",
+        "content/unit/img/unit_ills_thum_10024.png": "6330944410df369e582ca2fc719028644a79bedd97fd4bf32712600f758eaba5",
+        "content/unit/cgs/unit_move_cgs_10024.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      }
+    },
+    "20024": {
+      "id": 20024,
+      "ownedBaseId": 20021,
+      "fromId": 20023,
+      "name": "Dragon Hero Zephu",
+      "element": 2,
+      "rarity": 5,
+      "stats": {
+        "hp": 3264,
+        "atk": 1011,
+        "def": 673,
+        "rec": 472
+      },
+      "lordStats": {
+        "hp": 4971,
+        "atk": 1505,
+        "def": 1032,
+        "rec": 807
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "20133": 1,
+          "20191": 1,
+          "20132": 2,
+          "20130": 1
+        }
+      },
+      "bb": {
+        "name": "Rising Storm",
+        "description": "8 combo powerful Water attack on single enemy & probable Weak effect",
+        "target": "single_enemy",
+        "sourceType": "1@11",
+        "sourceTargetType": "2@2",
+        "sourceTargetArea": "1@1",
+        "effectFramesRaw": "2:200020:1,3:122:1,4:200050:1,5:190:1,11:200020:1,12:122:1,14:190:1,20:200020:1,21:122:1,23:190:1,29:200020:1,30:122:1,32:190:1,38:200020:1,39:122:1,41:190:1,47:200020:1,48:122:1,54:200:1,54:122:1,58:122:1",
+        "damageFramesRaw": "9:15:2:1,18:10:2:1,27:15:2:1,36:10:2:1,45:10:2:1,54:10:2:1,60:20:2:1,64:10:2:1@0:100:2:1",
+        "levelInfo": "1:1600:280,100,0,0,0,0@2,80,0,0,0,0,0,0,114|2:1600:290,100,0,0,0,0@2,80,0,0,0,0,0,0,114|3:1600:300,100,0,0,0,0@2,80,0,0,0,0,0,0,114|4:1600:310,100,0,0,0,0@2,80,0,0,0,0,0,0,114|5:1600:320,100,0,0,0,0@2,80,0,0,0,0,0,0,114|6:1600:330,100,0,0,0,0@2,80,0,0,0,0,0,0,114|7:1600:340,100,0,0,0,0@2,80,0,0,0,0,0,0,114|8:1600:350,100,0,0,0,0@2,80,0,0,0,0,0,0,114|9:1600:360,100,0,0,0,0@2,80,0,0,0,0,0,0,114|10:1600:380,100,0,0,0,0@2,80,0,0,0,0,0,0,114",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 1600,
+            "params": [
+              280,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 2,
+            "effectCode": 1600,
+            "params": [
+              290,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 3,
+            "effectCode": 1600,
+            "params": [
+              300,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 4,
+            "effectCode": 1600,
+            "params": [
+              310,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 5,
+            "effectCode": 1600,
+            "params": [
+              320,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 6,
+            "effectCode": 1600,
+            "params": [
+              330,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 7,
+            "effectCode": 1600,
+            "params": [
+              340,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 8,
+            "effectCode": 1600,
+            "params": [
+              350,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 9,
+            "effectCode": 1600,
+            "params": [
+              360,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          },
+          {
+            "level": 10,
+            "effectCode": 1600,
+            "params": [
+              380,
+              100,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": true
+          }
+        ]
+      },
+      "frameCount": 15,
+      "missingOriginalMoveCGS": false,
+      "unverifiedReservedFlags": {},
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_20024.png": "119e2551d0d763f4604c4aea6fc1f3c2ce88f878c9d4956dbe3fafe13f38f0f8",
+        "content/unit/cgg/unit_cgg_20024.csv": "85baa18b9e29fafed690c1e6596f60aa1b2eb6cb0056930f164412a50bbf2444",
+        "content/unit/cgs/unit_idle_cgs_20024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_20024.csv": "7a0fee1681259421c099a277f2f58fe6b14f1260ff7ba06bed53f3e6070a97d9",
+        "content/unit/img/unit_ills_thum_20024.png": "d0c89f87b426ad3496b2a6aa78dda5839b8deb4a20a2ec0edc84b3f768048c27",
+        "content/unit/cgs/unit_move_cgs_20024.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      }
+    },
+    "30024": {
+      "id": 30024,
+      "ownedBaseId": 30021,
+      "fromId": 30023,
+      "name": "Bow God Lario",
+      "element": 3,
+      "rarity": 5,
+      "stats": {
+        "hp": 3356,
+        "atk": 817,
+        "def": 764,
+        "rec": 1284
+      },
+      "lordStats": {
+        "hp": 5010,
+        "atk": 1281,
+        "def": 1205,
+        "rec": 1620
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "30133": 1,
+          "30191": 1,
+          "30132": 2,
+          "30130": 1
+        }
+      },
+      "bb": {
+        "name": "Star Gale",
+        "description": "8 combo powerful Earth attack on all enemies",
+        "target": "all_enemies",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "24:300020:1,24:300040:1,24:112:1,28:112:1,32:112:1,42:112:1,42:690:1,46:112:1,46:690:1,56:112:1,56:690:1,60:112:1,64:690:1,64:112:1",
+        "damageFramesRaw": "24:15:2:1,28:10:2:1,32:10:2:1,42:15:2:1,46:15:2:2,56:15:2:2,60:10:2:2,64:10:2:2",
+        "levelInfo": "1:2300:80,60,0,0,0,0|2:2300:85,60,0,0,0,0|3:2300:90,60,0,0,0,0|4:2300:95,60,0,0,0,0|5:2300:100,60,0,0,0,0|6:2300:105,60,0,0,0,0|7:2300:110,60,0,0,0,0|8:2300:115,60,0,0,0,0|9:2300:120,60,0,0,0,0|10:2300:130,60,0,0,0,0",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 2300,
+            "params": [
+              80,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 2,
+            "effectCode": 2300,
+            "params": [
+              85,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 3,
+            "effectCode": 2300,
+            "params": [
+              90,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 4,
+            "effectCode": 2300,
+            "params": [
+              95,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 5,
+            "effectCode": 2300,
+            "params": [
+              100,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 6,
+            "effectCode": 2300,
+            "params": [
+              105,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 7,
+            "effectCode": 2300,
+            "params": [
+              110,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 8,
+            "effectCode": 2300,
+            "params": [
+              115,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 9,
+            "effectCode": 2300,
+            "params": [
+              120,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 10,
+            "effectCode": 2300,
+            "params": [
+              130,
+              60,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          }
+        ]
+      },
+      "frameCount": 14,
+      "missingOriginalMoveCGS": true,
+      "unverifiedReservedFlags": {
+        "1": 5
+      },
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_30024.png": "2fccdb5aedc8b1c615866da5d4ee95810e6188f5137b85269418f94ea9e872f5",
+        "content/unit/cgg/unit_cgg_30024.csv": "824222640003eef71ee910206510b793a94afbe4fe9c6518dd8849a10028d934",
+        "content/unit/cgs/unit_idle_cgs_30024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_30024.csv": "09932a26771887a1ca4ac811f0c63879b35f672cd42bb4623cf85c8a7a406ddd",
+        "content/unit/img/unit_ills_thum_30024.png": "af9bacc6b431a20bc6ce1033f5abe3b747756b9fdec26968237b9c442dfa81e4"
+      }
+    },
+    "40024": {
+      "id": 40024,
+      "ownedBaseId": 40021,
+      "fromId": 40023,
+      "name": "General Weiss",
+      "element": 4,
+      "rarity": 5,
+      "stats": {
+        "hp": 3421,
+        "atk": 785,
+        "def": 701,
+        "rec": 1478
+      },
+      "lordStats": {
+        "hp": 5157,
+        "atk": 1223,
+        "def": 1130,
+        "rec": 1926
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "40133": 1,
+          "40191": 1,
+          "40132": 2,
+          "40130": 1
+        }
+      },
+      "bb": {
+        "name": "Thunder's Order",
+        "description": "Greatly boosts all allies' Atk for 3 turns",
+        "target": "support",
+        "sourceType": "5",
+        "sourceTargetType": "1",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "49:400040:1,49:500031:1,60:400040:1,70:400:1",
+        "damageFramesRaw": "100:100:2:1",
+        "levelInfo": "1:2500:0,80,0,0,0,3,90|2:2500:0,82,0,0,0,3,90|3:2500:0,84,0,0,0,3,90|4:2500:0,86,0,0,0,3,90|5:2500:0,88,0,0,0,3,90|6:2500:0,90,0,0,0,3,90|7:2500:0,92,0,0,0,3,90|8:2500:0,94,0,0,0,3,90|9:2500:0,96,0,0,0,3,90|10:2500:0,100,0,0,0,3,90",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 2500,
+            "params": [
+              0,
+              80,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 2,
+            "effectCode": 2500,
+            "params": [
+              0,
+              82,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 3,
+            "effectCode": 2500,
+            "params": [
+              0,
+              84,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 4,
+            "effectCode": 2500,
+            "params": [
+              0,
+              86,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 5,
+            "effectCode": 2500,
+            "params": [
+              0,
+              88,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 6,
+            "effectCode": 2500,
+            "params": [
+              0,
+              90,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 7,
+            "effectCode": 2500,
+            "params": [
+              0,
+              92,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 8,
+            "effectCode": 2500,
+            "params": [
+              0,
+              94,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 9,
+            "effectCode": 2500,
+            "params": [
+              0,
+              96,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 10,
+            "effectCode": 2500,
+            "params": [
+              0,
+              100,
+              0,
+              0,
+              0,
+              3,
+              90
+            ],
+            "secondaryEffectUndecoded": false
+          }
+        ]
+      },
+      "frameCount": 16,
+      "missingOriginalMoveCGS": true,
+      "unverifiedReservedFlags": {},
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_40024.png": "c8e64f6215cf3e3eb3fc847128cc1616e54c90dbe6c8322e5302c751a063203c",
+        "content/unit/cgg/unit_cgg_40024.csv": "ddd0a007d043d43cf597bae59452fa2a5d581f72d78e791e477f120dd1cb2ee0",
+        "content/unit/cgs/unit_idle_cgs_40024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_40024.csv": "57f3d87daa3a5bedb4efc6d8f733c60345ddd727a04e25c02aa488a17ddd0d67",
+        "content/unit/img/unit_ills_thum_40024.png": "01ce9357a43d2f34cfc94a178981b7d277787c4c10d0c27d0369ba175e6575ae"
+      }
+    },
+    "50024": {
+      "id": 50024,
+      "ownedBaseId": 50021,
+      "fromId": 50023,
+      "name": "Holy Empress Luna",
+      "element": 5,
+      "rarity": 5,
+      "stats": {
+        "hp": 2158,
+        "atk": 1087,
+        "def": 1096,
+        "rec": 538
+      },
+      "lordStats": {
+        "hp": 3880,
+        "atk": 1567,
+        "def": 1578,
+        "rec": 918
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "50123": 1,
+          "50191": 1,
+          "50122": 2,
+          "50120": 1
+        }
+      },
+      "bb": {
+        "name": "Savage Stab",
+        "description": "6 combo powerful Light attack on all enemies",
+        "target": "all_enemies",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "33:200061:1,33:320:1,33:500010:1,34:125:1,40:125:1,42:125:1,44:125:1,48:125:1,52:125:1",
+        "damageFramesRaw": "40:20:2:1,46:20:2:1,48:15:2:1,50:15:2:1,54:15:2:1,58:15:2:1",
+        "levelInfo": "1:3300:110,80,0,0,0,0|2:3300:120,80,0,0,0,0|3:3300:130,80,0,0,0,0|4:3300:140,80,0,0,0,0|5:3300:150,80,0,0,0,0|6:3300:160,80,0,0,0,0|7:3300:170,80,0,0,0,0|8:3300:180,80,0,0,0,0|9:3300:190,80,0,0,0,0|10:3300:200,80,0,0,0,0",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 3300,
+            "params": [
+              110,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 2,
+            "effectCode": 3300,
+            "params": [
+              120,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 3,
+            "effectCode": 3300,
+            "params": [
+              130,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 4,
+            "effectCode": 3300,
+            "params": [
+              140,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 5,
+            "effectCode": 3300,
+            "params": [
+              150,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 6,
+            "effectCode": 3300,
+            "params": [
+              160,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 7,
+            "effectCode": 3300,
+            "params": [
+              170,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 8,
+            "effectCode": 3300,
+            "params": [
+              180,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 9,
+            "effectCode": 3300,
+            "params": [
+              190,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 10,
+            "effectCode": 3300,
+            "params": [
+              200,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          }
+        ]
+      },
+      "frameCount": 16,
+      "missingOriginalMoveCGS": false,
+      "unverifiedReservedFlags": {},
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_50024.png": "dddb746c5fa7e4582c60a0407a04dc09419f607c86fdd5618c06e9c074431235",
+        "content/unit/cgg/unit_cgg_50024.csv": "167c5d201963659d9378f9181244c52f2683814a91e42561db97c3aa6525e4b8",
+        "content/unit/cgs/unit_idle_cgs_50024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_50024.csv": "3aed19e4d48f43697c3f7b4ab1eef87fdd7ea454e2706d71a32e46da503e62d4",
+        "content/unit/img/unit_ills_thum_50024.png": "f6ba6d2bb7653fcfc81f5c7e94737d5957890f869a59338d8daa91ac669ca606",
+        "content/unit/cgs/unit_move_cgs_50024.csv": "9d24bfd8da3269e63444e6017a1b47ada53354483fe9c7a3c7b16c79290b2a82"
+      }
+    },
+    "60024": {
+      "id": 60024,
+      "ownedBaseId": 60021,
+      "fromId": 60023,
+      "name": "Ryujin Mifune",
+      "element": 6,
+      "rarity": 5,
+      "stats": {
+        "hp": 2288,
+        "atk": 1251,
+        "def": 560,
+        "rec": 618
+      },
+      "lordStats": {
+        "hp": 3682,
+        "atk": 1948,
+        "def": 928,
+        "rec": 961
+      },
+      "originalMaxLevel": 80,
+      "originalUnitCost": 14,
+      "sourceRecipe": {
+        "zel": 200000,
+        "karma": 0,
+        "materials": {
+          "60123": 1,
+          "60201": 1,
+          "60122": 2,
+          "60120": 1
+        }
+      },
+      "bb": {
+        "name": "Cosmic Flash",
+        "description": "6 combo powerful Dark attack on all enemies",
+        "target": "all_enemies",
+        "sourceType": "1",
+        "sourceTargetType": "2",
+        "sourceTargetArea": "2",
+        "effectFramesRaw": "10:600160:1,10:600020:1,24:270:1,25:126:1,26:126:1,27:126:1,28:126:1,30:126:1,32:126:1",
+        "damageFramesRaw": "31:20:2:2,32:20:2:2,33:20:2:2,34:20:2:2,36:10:2:2,38:10:2:2",
+        "levelInfo": "1:3400:110,80,0,0,0,0|2:3400:120,80,0,0,0,0|3:3400:130,80,0,0,0,0|4:3400:140,80,0,0,0,0|5:3400:150,80,0,0,0,0|6:3400:160,80,0,0,0,0|7:3400:170,80,0,0,0,0|8:3400:180,80,0,0,0,0|9:3400:190,80,0,0,0,0|10:3400:200,80,0,0,0,0",
+        "levels": [
+          {
+            "level": 1,
+            "effectCode": 3400,
+            "params": [
+              110,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 2,
+            "effectCode": 3400,
+            "params": [
+              120,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 3,
+            "effectCode": 3400,
+            "params": [
+              130,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 4,
+            "effectCode": 3400,
+            "params": [
+              140,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 5,
+            "effectCode": 3400,
+            "params": [
+              150,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 6,
+            "effectCode": 3400,
+            "params": [
+              160,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 7,
+            "effectCode": 3400,
+            "params": [
+              170,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 8,
+            "effectCode": 3400,
+            "params": [
+              180,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 9,
+            "effectCode": 3400,
+            "params": [
+              190,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          },
+          {
+            "level": 10,
+            "effectCode": 3400,
+            "params": [
+              200,
+              80,
+              0,
+              0,
+              0,
+              0
+            ],
+            "secondaryEffectUndecoded": false
+          }
+        ]
+      },
+      "frameCount": 14,
+      "missingOriginalMoveCGS": false,
+      "unverifiedReservedFlags": {},
+      "sourceFilesSha256": {
+        "content/unit/img/unit_anime_60024.png": "7cc4d694ffa200c9b9c608b3182e99f634aa9b1eb2fa7496488a2e3f9322c7d8",
+        "content/unit/cgg/unit_cgg_60024.csv": "ff6d3fa40886e3bdc969d15fa48665e4085c171499f15fcc62d35d1f60a46e03",
+        "content/unit/cgs/unit_idle_cgs_60024.csv": "b790fe2c650824bb25752e6dceb91081f0df528b77f8c714dc8b58d7d2dcb8c9",
+        "content/unit/cgs/unit_atk_cgs_60024.csv": "e0bfad91ce6248064bf04498c2bc0576fccf92053a6ce72d96bc279f4686dd9c",
+        "content/unit/img/unit_ills_thum_60024.png": "a9b42c70f65552336dcc727c4120993cec15bb5c14aeb6a7c2d1aeed2488839e",
+        "content/unit/cgs/unit_move_cgs_60024.csv": "eb0770af1502d204d5717ca52b6da3fa15c2ed1770d612822764beed9fae8a8f"
+      }
+    }
+  },
+  "sourcePackSha256": "9823fb3234d302950f6651e7b4612b5fdf429a7bc6271f86766e151184d13695"
+}

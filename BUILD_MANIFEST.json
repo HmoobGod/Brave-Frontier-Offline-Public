@@ -1,0 +1,10 @@
+{
+  "version": "0.13.1",
+  "browserHtmlSha256": "82e81c853362342a753714b2569faa48e1d1fec7ac4c4676fdb419acd077a0f0",
+  "sourceBase": "v0.13",
+  "scope": "pre-APK hardening",
+  "saveSchemaVersion": 7,
+  "androidCompiled": false,
+  "targetSdk": 35,
+  "testsPassed": 12
+}

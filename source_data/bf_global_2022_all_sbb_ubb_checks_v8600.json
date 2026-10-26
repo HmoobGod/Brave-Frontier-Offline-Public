@@ -1,0 +1,75 @@
+{
+  "schema": "bf-global-2022-original-all-sbb-ubb-dropchecks-v8600",
+  "sourceZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "unitTableParts": [
+    {
+      "file": "F_UNIT_MST_1_Ver1084.json",
+      "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+    },
+    {
+      "file": "F_UNIT_MST_2_Ver1084.json",
+      "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+    }
+  ],
+  "skillTableParts": [
+    {
+      "file": "F_SKILL_MST_1_Ver1535.json",
+      "sha256": "5e8d7d1489565d63291ff1e2f0575e03e3b9eaa673ef85c74ee393d852d6957b"
+    },
+    {
+      "file": "F_SKILL_MST_2_Ver1535.json",
+      "sha256": "84478c9cdc3878631ab4077f324f43d719340d32abe0de780235b458b6585a33"
+    },
+    {
+      "file": "F_SKILL_MST_3_Ver1535.json",
+      "sha256": "83e27447ad68fbebe17f3687da5d9e6d3534a737b03d6d0f22339211a57bd9d5"
+    },
+    {
+      "file": "F_SKILL_MST_4_Ver1535.json",
+      "sha256": "447cfd01e995ae0ed717c3d73dac44d49af8f4a980b0ab6b125b0bdc6a443a8c"
+    },
+    {
+      "file": "F_SKILL_MST_5_Ver1535.json",
+      "sha256": "e59caf263f6b3bfa9bbc1b53e5c4ea8e1fadb47221f28db0180f88cd7ac8bd96"
+    },
+    {
+      "file": "F_SKILL_MST_6_Ver1535.json",
+      "sha256": "deee65f5392597efc86db18b7e95af253054aaf409dd7c9930e6ba5ca513ba1b"
+    },
+    {
+      "file": "F_SKILL_MST_7_Ver1535.json",
+      "sha256": "2be8cd9d935d01680c4df15ee362232563489556176479dc530ac21600fe4720"
+    },
+    {
+      "file": "F_SKILL_MST_8_Ver1535.json",
+      "sha256": "fc3ab5aa2297e79b0db93e68d9114826716df3eef8e612c52b91420a89282d99"
+    },
+    {
+      "file": "F_SKILL_MST_9_Ver1535.json",
+      "sha256": "da1e88075902a92964be5f51b405b01ac9d0bad1aebbad744b6ce15fcf9d3352"
+    }
+  ],
+  "validatedNormalUnitIds": 2258,
+  "sourceBoundary": "SBB and UBB original source check counts are preserved, but almost all skill damage frames are multi-group/opaque. No guessed native hits, targets, passives, pickup, or save effects.",
+  "sbb": {
+    "count": 1290,
+    "stats": {
+      "missing": 968,
+      "complex": 1282,
+      "offensiveSimple": 7,
+      "nonOffensiveSimple": 1
+    },
+    "packedHashFNV32": "e5d6ec6a",
+    "packedLength": 14833
+  },
+  "ubb": {
+    "count": 932,
+    "stats": {
+      "missing": 1326,
+      "complex": 931,
+      "nonOffensiveSimple": 1
+    },
+    "packedHashFNV32": "e058a575",
+    "packedLength": 10864
+  }
+}

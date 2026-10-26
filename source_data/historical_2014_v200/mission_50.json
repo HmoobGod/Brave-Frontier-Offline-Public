@@ -1,0 +1,129 @@
+{
+  "id": 50,
+  "name": "Thunder Blasting Wetlands",
+  "sourcePath": "missions_parsed/Thunder Blasting Wetlands_2014-24-9-18-02.json",
+  "gitBlobSha": "96342e58a56be659740a1e7c0968680a3e4c9522",
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1900,
+          "atk": 510,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 3500,
+          "atk": 570,
+          "def": 130,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Sparky",
+          "unitId": 40030,
+          "hp": 1500,
+          "atk": 470,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Harpy",
+          "unitId": 40050,
+          "hp": 1600,
+          "atk": 460,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "King Sparky",
+          "unitId": 40031,
+          "hp": 9000,
+          "atk": 520,
+          "def": 30,
+          "aiId": 1
+        },
+        {
+          "name": "King Sparky",
+          "unitId": 40031,
+          "hp": 9000,
+          "atk": 520,
+          "def": 30,
+          "aiId": 1
+        }
+      ]
+    }
+  ]
+}

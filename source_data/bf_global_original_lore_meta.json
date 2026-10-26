@@ -1,0 +1,19 @@
+{
+  "schema": "bf-global-original-lore-package-v1",
+  "payloadJsonSha256": "88847b75758153d3c036df8b208df96b8998de0de92decb7ada5c3637e45772e",
+  "payloadGzipSha256": "849c4a76574b35749ff81f998a642eed061fd3751dc2d9daf7ed12517cbb1d4f",
+  "payloadRecordCount": 2291,
+  "jsonBytes": 2459943,
+  "gzipBytes": 615678,
+  "stats": {
+    "story": 1645,
+    "recipes": 1294,
+    "leader": 1424,
+    "bb": 1659,
+    "sbb": 860,
+    "ubb": 576,
+    "extra": 571
+  },
+  "mstZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "englishTextZipSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285"
+}

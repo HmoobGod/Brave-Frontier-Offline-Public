@@ -1,0 +1,7 @@
+# Brave Frontier Global v85.00 — Source BB Crystal Profiles Across the Archived Unit Catalog
+
+**Verified parent:** v84.00 Build #321, commit `b223735a8a0f67ad6cd627d0d4de515dfe4d7a18` (signed GitHub Actions APK artifact #12589914533). Do not promote v85 until its own tests/artifact pass.
+
+The exact original 2022 `F_UNIT_MST_*_Ver1084.json` to `F_SKILL_MST_1..9_Ver1535.json` join produces **2,125 existing BB skill links** among the **2,258 validated source normal-attack unit forms**. Another 133 forms have no BB link (`bbId=0`). All 2,125 linked source skills have numeric original `dropCheckCount` fields. We preserve **213 offensive one-group skill timelines** with weight sum 100 for bounded per-target calculations. **1,808 complex/multi-group skills, 95 simple buff/heal effects and 9 invalid-weight timelines** keep their original raw source check counts without inventing total hit events or BC outcomes.
+
+The compact read-only `BFGlobalAllBBDropChecksV8500` service adds `lookup` and reference `rollPerTarget` for the 213 strictly supported cases. Source provenance and original table part SHA256s live in `source_data/bf_global_2022_all_bb_checks_v8500.json`, all tuple data embedded compactly in the JS with FNV-1a integrity check `3ee23008`. v83's original 71 BB records must match exactly. This still **does not implement native crystal spawning, collection, BB filling, enemy resistance, quest/loot rewards, or save writes**; legacy DEMO battle behavior and all v7 saves remain untouched.
