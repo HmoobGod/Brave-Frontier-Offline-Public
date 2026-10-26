@@ -796,6 +796,14 @@ public class MainActivity extends Activity {
                 } catch (IOException ex) {
                     android.util.Log.e("BraveFrontier", "Unit archive preview unavailable; gameplay unaffected", ex);
                 }
+                // v97 QoL: additive local backups; no active-save or combat hooks.
+                // Independently try this even if optional archive research is missing.
+                try {
+                    String qolBackups = readPackagedText("bf9700_qol_rotating_backups.js");
+                    view.evaluateJavascript(qolBackups, null);
+                } catch (IOException backupError) {
+                    android.util.Log.w("BraveFrontier", "Optional local backup panel unavailable", backupError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
