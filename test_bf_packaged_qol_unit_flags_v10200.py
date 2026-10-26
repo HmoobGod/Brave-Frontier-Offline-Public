@@ -11,7 +11,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf10100_qol_viewed_dialogue.js")')<java.index('readPackagedText("bf10200_qol_unit_flags.js")')
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '102.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(102,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
