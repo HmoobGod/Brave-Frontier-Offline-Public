@@ -110,8 +110,12 @@
       QUEST?.missionId!==session.missionId||
       S.mode!=='archive'||!s.archive)
      return stop('Stopped: quest or mode changed',false);
-   if(!auto.checked)return stop('Stopped: Auto Battle disabled',false);
-   if(!s.done){update();return true;}
+   // Native finish() deliberately unchecks Auto after every result, including
+   // victory. Only treat Auto-off as cancellation while a battle is ongoing.
+   if(!s.done){
+     if(!auto.checked)return stop('Stopped: Auto Battle disabled',false);
+     update();return true;
+   }
    if(!s.victory)return stop('Stopped: battle lost',false);
    if(!Number.isSafeInteger(s.clears)||s.clears<=session.lastClear)
      return stop('Stopped: new clear not confirmed',false);
