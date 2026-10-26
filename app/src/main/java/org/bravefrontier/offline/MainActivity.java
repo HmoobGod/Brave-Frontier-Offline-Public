@@ -846,6 +846,13 @@ public class MainActivity extends Activity {
                 } catch (IOException detailsError) {
                     android.util.Log.w("BraveFrontier", "Optional battle details unavailable", detailsError);
                 }
+                // v104 QoL: source-only owned evolution material deficit viewer.
+                try {
+                    String evoNeeds = readPackagedText("bf10400_qol_evolution_needs.js");
+                    view.evaluateJavascript(evoNeeds, null);
+                } catch (IOException evoNeedsError) {
+                    android.util.Log.w("BraveFrontier", "Optional material needs unavailable", evoNeedsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
