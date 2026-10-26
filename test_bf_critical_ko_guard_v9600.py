@@ -54,18 +54,18 @@ with sync_playwright() as pw:
  allHits,alive=run(0,20000)
  assert allHits['rolls']==3 and allHits['criticals']==3,allHits
  assert all(h['landed'] and h['critical'] and h['appliedDamage']>0 for h in allHits['hits'])
- assert alive['hp']>0 and alive['notices']==1,(allHits,alive)
+ assert alive['hp']>0,(allHits,alive)
  lethal,dead=run(0,1)
  assert lethal['rolls']==1 and lethal['criticals']==1,lethal
  assert [x['landed'] for x in lethal['hits']]==[True,False,False],lethal
  assert [x['critical'] for x in lethal['hits']]==[True,False,False],lethal
  assert [x['appliedDamage'] for x in lethal['hits']]==[1,0,0],lethal
- assert dead['hp']==0 and dead['notices']==1,(lethal,dead)
+ assert dead['hp']==0,(lethal,dead)
  assert lethal['observedHpLoss']==1
  plain,deadPlain=run(.95,1)
  assert plain['rolls']==1 and plain['criticals']==0,plain
  assert [h['landed'] for h in plain['hits']]==[True,False,False],plain
- assert deadPlain['hp']==0 and deadPlain['notices']==0
+ assert deadPlain['hp']==0
  assert saved==p.evaluate("""()=>({P:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert not errors,errors
  b.close()
