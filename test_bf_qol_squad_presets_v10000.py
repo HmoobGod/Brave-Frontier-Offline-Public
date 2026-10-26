@@ -63,9 +63,9 @@ with sync_playwright() as pw:
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate('window.__resetCalls')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
- p.evaluate('window.__savePossible=true;window.S.busy=true')
+ p.evaluate('''()=>{window.__savePossible=true;window.S.busy=true;}''')
  assert p.evaluate(api+'.applyPreset(1)') is False
- p.evaluate('window.S.busy=false;P.roster=[10011,30011]')
+ p.evaluate('''()=>{window.S.busy=false;P.roster=[10011,30011];}''')
  assert p.evaluate(api+'.applyPreset(0)') is False
  assert p.evaluate(api+'.info()[0].available') is False
  # Deleting a preset never alters the currently active squad.
