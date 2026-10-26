@@ -61,6 +61,8 @@ with sync_playwright() as pw:
  assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==before
  # A backup is exported only on an explicit tap.
  assert p.evaluate("window.__export97") is None
+ p.locator('#bf9700-backups > summary').click()
+ assert p.locator('#bf9700-backups').get_attribute('open') is not None
  p.locator('#bf9700-export').click()
  exported=p.evaluate('window.__export97')
  assert exported['name'].startswith('BraveFrontier-v7-backup-')
