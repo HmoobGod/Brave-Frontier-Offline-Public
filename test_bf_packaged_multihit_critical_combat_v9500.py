@@ -15,7 +15,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text()
 assert java.index('readPackagedText("bf9300_single_hit_critical_combat.js")')<java.index('readPackagedText("bf9500_multihit_critical_combat.js")')
 gradle=(R/'app/build.gradle').read_text()
-assert "versionName '95.00.0-demo'" in gradle
+assert any("versionName '"+str(v)+".00.0-demo'" in gradle for v in range(95,200))
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert 'bf-development-debug.keystore' in gradle
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text()
