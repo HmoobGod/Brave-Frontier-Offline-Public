@@ -7,6 +7,12 @@ on:
 permissions:
   contents: read
 
+# Prevent outdated feature-branch pushes from consuming parallel CI runners.
+# Main and each feature branch keep their own independent run group.
+concurrency:
+  group: bf-offline-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
