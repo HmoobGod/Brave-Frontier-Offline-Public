@@ -818,6 +818,13 @@ public class MainActivity extends Activity {
                 } catch (IOException speedError) {
                     android.util.Log.w("BraveFrontier", "Optional battle speed UI unavailable", speedError);
                 }
+                // v100 QoL: manual owned-unit squad loadouts, no new save schema.
+                try {
+                    String qolSquads = readPackagedText("bf10000_qol_squad_presets.js");
+                    view.evaluateJavascript(qolSquads, null);
+                } catch (IOException squadPresetError) {
+                    android.util.Log.w("BraveFrontier", "Optional squad presets unavailable", squadPresetError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
