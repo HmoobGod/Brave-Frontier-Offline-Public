@@ -839,6 +839,13 @@ public class MainActivity extends Activity {
                 } catch (IOException markerError) {
                     android.util.Log.w("BraveFrontier", "Optional unit markers unavailable", markerError);
                 }
+                // v103 QoL: read-only per-unit live HP/BB and critical detail panel.
+                try {
+                    String battleDetails = readPackagedText("bf10300_qol_battle_details.js");
+                    view.evaluateJavascript(battleDetails, null);
+                } catch (IOException detailsError) {
+                    android.util.Log.w("BraveFrontier", "Optional battle details unavailable", detailsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
