@@ -38,7 +38,7 @@ for name,marker in MODULES:
  assert not any(t in script for t in
     ('XMLHttpRequest','sendBeacon(', 'navigator.sendBeacon','fetch(')),name
  assert not re.search(r'localStorage\.(setItem|removeItem)\s*\(\s*["\x27]bf_global_offline_demo_v7',script),name
- assert not re.search(r'\bP\s*\.\s*version\s*=',script),name
+ assert not re.search(r'\bP\s*\.\s*version\s*=(?!=)',script),name
  assert "test_bf_"+{
    'bf9700_qol_rotating_backups.js':'qol_rotating_backups_v9700',
    'bf9800_qol_cleared_quest_repeat.js':'qol_cleared_quest_repeat_v9800',
@@ -57,7 +57,7 @@ for name,_ in MODULES:
   continue
  script=(ASSETS/name).read_text('utf8')
  assert 'saveProgress(' not in script,(name,'unexpected save API')
- assert not re.search(r'\bP\.(?:squad|roster|materials|questClears|unitExp|exp|zel|karma)\s*=',script),name
+ assert not re.search(r'\bP\.(?:squad|roster|materials|questClears|unitExp|exp|zel|karma)\s*=(?!=)',script),name
 
 squads=(ASSETS/'bf10000_qol_squad_presets.js').read_text('utf8')
 assert 'if(!saveProgress())' in squads
