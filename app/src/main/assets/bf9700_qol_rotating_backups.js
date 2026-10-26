@@ -37,8 +37,8 @@
      slot:i+1,time:x.time,bytes:new TextEncoder().encode(x.raw).length
    })));
  }
- function capture(){
-   if(!enabled)return false;
+ function capture(force=false){
+   if(!enabled&&!force)return false;
    const raw=safeGet(liveKey);
    if(!valid(raw))return false;
    const slots=existing();
@@ -125,7 +125,7 @@
    return slots;
  }
  checkbox.addEventListener('change',()=>{if(!enable(checkbox.checked))refresh();});
- now.addEventListener('click',()=>{capture();refresh();});
+ now.addEventListener('click',()=>{capture(true);refresh();});
  exportButton.addEventListener('click',()=>download(Number(selector.value)));
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden)capture();
