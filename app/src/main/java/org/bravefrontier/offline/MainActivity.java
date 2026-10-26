@@ -853,6 +853,13 @@ public class MainActivity extends Activity {
                 } catch (IOException evoNeedsError) {
                     android.util.Log.w("BraveFrontier", "Optional material needs unavailable", evoNeedsError);
                 }
+                // v105 QoL: opt-in source-aware Auto Battle preferences.
+                try {
+                    String advancedAI = readPackagedText("bf10500_qol_advanced_smart_auto.js");
+                    view.evaluateJavascript(advancedAI, null);
+                } catch (IOException advancedError) {
+                    android.util.Log.w("BraveFrontier", "Optional advanced Auto Battle unavailable", advancedError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
