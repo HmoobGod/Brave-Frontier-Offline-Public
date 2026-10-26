@@ -45,7 +45,8 @@ with sync_playwright() as pw:
  assert p.evaluate('window.__repeatCount')==1
  assert p.locator('#auto').is_checked()
  assert p.evaluate(api+'.statusSnapshot().target')==2
- p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory'}""")
+ p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory';
+   document.getElementById('auto').checked=false;}""")
  assert p.evaluate(api+'.poll()') is True
  assert p.evaluate('window.__repeatCount')==2
  assert p.evaluate(api+'.statusSnapshot().completed')==1
