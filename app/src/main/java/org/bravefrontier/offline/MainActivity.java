@@ -825,6 +825,13 @@ public class MainActivity extends Activity {
                 } catch (IOException squadPresetError) {
                     android.util.Log.w("BraveFrontier", "Optional squad presets unavailable", squadPresetError);
                 }
+                // v101 QoL: unlock-gated, already-viewed source dialogue skips.
+                try {
+                    String viewed = readPackagedText("bf10100_qol_viewed_dialogue.js");
+                    view.evaluateJavascript(viewed, null);
+                } catch (IOException viewedError) {
+                    android.util.Log.w("BraveFrontier", "Optional viewed dialogue control unavailable", viewedError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
