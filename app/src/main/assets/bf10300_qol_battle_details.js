@@ -17,7 +17,7 @@
      kind,unitId:Number.isSafeInteger(u.unitId)?u.unitId:null,
      hp,maxHp:max,hpPercent:Math.round(100*hp/max),
      bb:kind==='ally'?Math.min(100,safe(u.bb)):null,
-     active:kind==='ally'?!!u.active:hp>0,
+     active:kind==='ally'?!!u.active&&hp>0:hp>0,
      defending:kind==='ally'?!!u.guard:null});
  }
  function snapshot(){
