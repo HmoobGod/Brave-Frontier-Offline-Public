@@ -818,6 +818,48 @@ public class MainActivity extends Activity {
                 } catch (IOException speedError) {
                     android.util.Log.w("BraveFrontier", "Optional battle speed UI unavailable", speedError);
                 }
+                // v100 QoL: manual owned-unit squad loadouts, no new save schema.
+                try {
+                    String qolSquads = readPackagedText("bf10000_qol_squad_presets.js");
+                    view.evaluateJavascript(qolSquads, null);
+                } catch (IOException squadPresetError) {
+                    android.util.Log.w("BraveFrontier", "Optional squad presets unavailable", squadPresetError);
+                }
+                // v101 QoL: unlock-gated, already-viewed source dialogue skips.
+                try {
+                    String viewed = readPackagedText("bf10100_qol_viewed_dialogue.js");
+                    view.evaluateJavascript(viewed, null);
+                } catch (IOException viewedError) {
+                    android.util.Log.w("BraveFrontier", "Optional viewed dialogue control unavailable", viewedError);
+                }
+                // v102 QoL: advisory owned-unit favorites and lock markers.
+                try {
+                    String markers = readPackagedText("bf10200_qol_unit_flags.js");
+                    view.evaluateJavascript(markers, null);
+                } catch (IOException markerError) {
+                    android.util.Log.w("BraveFrontier", "Optional unit markers unavailable", markerError);
+                }
+                // v103 QoL: read-only per-unit live HP/BB and critical detail panel.
+                try {
+                    String battleDetails = readPackagedText("bf10300_qol_battle_details.js");
+                    view.evaluateJavascript(battleDetails, null);
+                } catch (IOException detailsError) {
+                    android.util.Log.w("BraveFrontier", "Optional battle details unavailable", detailsError);
+                }
+                // v104 QoL: source-only owned evolution material deficit viewer.
+                try {
+                    String evoNeeds = readPackagedText("bf10400_qol_evolution_needs.js");
+                    view.evaluateJavascript(evoNeeds, null);
+                } catch (IOException evoNeedsError) {
+                    android.util.Log.w("BraveFrontier", "Optional material needs unavailable", evoNeedsError);
+                }
+                // v105 QoL: opt-in source-aware Auto Battle preferences.
+                try {
+                    String advancedAI = readPackagedText("bf10500_qol_advanced_smart_auto.js");
+                    view.evaluateJavascript(advancedAI, null);
+                } catch (IOException advancedError) {
+                    android.util.Log.w("BraveFrontier", "Optional advanced Auto Battle unavailable", advancedError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
