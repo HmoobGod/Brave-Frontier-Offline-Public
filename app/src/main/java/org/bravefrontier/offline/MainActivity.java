@@ -804,6 +804,13 @@ public class MainActivity extends Activity {
                 } catch (IOException backupError) {
                     android.util.Log.w("BraveFrontier", "Optional local backup panel unavailable", backupError);
                 }
+                // v98 QoL: bounded replay of cleared quests via existing Auto + result API.
+                try {
+                    String qolRepeat = readPackagedText("bf9800_qol_cleared_quest_repeat.js");
+                    view.evaluateJavascript(qolRepeat, null);
+                } catch (IOException repeatError) {
+                    android.util.Log.w("BraveFrontier", "Optional quest repeat unavailable", repeatError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
