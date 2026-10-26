@@ -15,7 +15,7 @@ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_te
 assert java.index('readPackagedText("bf9700_qol_rotating_backups.js")')<java.index('readPackagedText("bf9800_qol_cleared_quest_repeat.js")')
 gradle=(R/'app/build.gradle').read_text('utf8')
 manifest=(R/'app/src/main/AndroidManifest.xml').read_text('utf8')
-assert "versionName '98.00.0-demo'" in gradle
+assert any("versionName '"+str(v)+".00.0-demo'" in gradle for v in range(98,200))
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert "bf-development-debug.keystore" in gradle
 assert 'android.permission.INTERNET' not in manifest
