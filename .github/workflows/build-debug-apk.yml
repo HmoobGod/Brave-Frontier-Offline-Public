@@ -125,6 +125,7 @@ jobs:
           python test_bf_qol_viewed_dialogue_v10100.py
           python test_bf_qol_unit_flags_v10200.py
           python test_bf_qol_battle_details_v10300.py
+          python test_bf_qol_evolution_needs_v10400.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -569,6 +570,8 @@ jobs:
         run: python3 test_bf_packaged_qol_unit_flags_v10200.py
       - name: Verify v103 live battle detail HUD in signed APK
         run: python3 test_bf_packaged_qol_battle_details_v10300.py
+      - name: Verify v104 source evolution material deficit panel in APK
+        run: python3 test_bf_packaged_qol_evolution_needs_v10400.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
