@@ -123,6 +123,7 @@ jobs:
           python test_bf_qol_battle_speed_v9900.py
           python test_bf_qol_squad_presets_v10000.py
           python test_bf_qol_viewed_dialogue_v10100.py
+          python test_bf_qol_unit_flags_v10200.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -563,6 +564,8 @@ jobs:
         run: python3 test_bf_packaged_qol_squad_presets_v10000.py
       - name: Verify v101 previously viewed dialogue skip in signed APK
         run: python3 test_bf_packaged_qol_viewed_dialogue_v10100.py
+      - name: Verify v102 favorite and lock markers in signed APK
+        run: python3 test_bf_packaged_qol_unit_flags_v10200.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
