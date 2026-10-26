@@ -832,6 +832,13 @@ public class MainActivity extends Activity {
                 } catch (IOException viewedError) {
                     android.util.Log.w("BraveFrontier", "Optional viewed dialogue control unavailable", viewedError);
                 }
+                // v102 QoL: advisory owned-unit favorites and lock markers.
+                try {
+                    String markers = readPackagedText("bf10200_qol_unit_flags.js");
+                    view.evaluateJavascript(markers, null);
+                } catch (IOException markerError) {
+                    android.util.Log.w("BraveFrontier", "Optional unit markers unavailable", markerError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
