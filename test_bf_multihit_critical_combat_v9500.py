@@ -84,7 +84,7 @@ with sync_playwright() as pw:
  p.locator('#reset').click()
  assert p.evaluate(api+'.snapshot().observed')==0
  assert saved==p.evaluate("""()=>({P:JSON.stringify(P),stored:localStorage.getItem('bf_global_offline_demo_v7')})""")
- p.evaluate('window.__v95=window.performUnit')
+ p.evaluate('()=>{window.__v95=window.performUnit;return true}')
  p.add_script_tag(path=str(A/name))
  assert p.evaluate('window.__v95===window.performUnit')
  assert p.locator('#bf9500-multihit-critical').count()==1
