@@ -71,6 +71,10 @@ with sync_playwright() as pw:
  assert p.evaluate("localStorage.getItem('bf_global_offline_qol_backups_enabled_v97')")=='off'
  p.evaluate("localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P))")
  assert p.evaluate(api+'.capture()') is False
+ # Manual snapshot remains usable with background collection paused.
+ p.evaluate("P.questClears[1]=5;localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P))")
+ p.locator('#bf9700-capture').click()
+ assert p.evaluate("JSON.parse(JSON.parse(localStorage.getItem(BFGlobalQoLBackupsV9700.key)).slots[0].raw).questClears[1]")==5
  # Re-enable catches up without wiping stored snapshots.
  p.locator('#bf9700-auto').check()
  assert p.evaluate(api+'.enabled') is True
