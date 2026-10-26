@@ -65,7 +65,8 @@ with sync_playwright() as pw:
  assert crit['observed']==1 and crit['criticals']==1,(crit,critical_damage)
  assert crit['recent'][0]['critical'] is True,crit
  assert p.locator('#log .bf9400-critical-notice').count()==1
- assert 'CRITICAL HIT!' in p.locator('#log .bf9400-critical-notice').inner_text()
+ # The combat log is collapsed by default; verify its stored DOM text, not rendered innerText.
+ assert 'CRITICAL HIT!' in p.locator('#log .bf9400-critical-notice').text_content()
  assert p.locator('#bf9400-critical-banner').is_visible()
  assert 'CRITICAL HIT!' in p.locator('#bf9400-critical-banner').inner_text()
  assert critical_damage>=int(damage*1.35),(critical_damage,damage)
