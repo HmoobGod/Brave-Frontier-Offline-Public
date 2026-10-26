@@ -667,6 +667,13 @@ public class MainActivity extends Activity {
                                                                     try {
                                                                         String singleCrit = readPackagedText("bf9300_single_hit_critical_combat.js");
                                                                         view.evaluateJavascript(singleCrit, null);
+                                                                        // v95: source-verified multi-hit normal critical strikes.
+                                                                        try {
+                                                                            String multiCrit = readPackagedText("bf9500_multihit_critical_combat.js");
+                                                                            view.evaluateJavascript(multiCrit, null);
+                                                                        } catch (IOException multiCritError) {
+                                                                            android.util.Log.w("BraveFrontier", "Optional original multi-hit critical combat unavailable", multiCritError);
+                                                                        }
                                                                     } catch (IOException singleCritError) {
                                                                         android.util.Log.w("BraveFrontier", "Optional original critical combat unavailable", singleCritError);
                                                                     }
