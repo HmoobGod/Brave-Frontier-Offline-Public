@@ -811,6 +811,13 @@ public class MainActivity extends Activity {
                 } catch (IOException repeatError) {
                     android.util.Log.w("BraveFrontier", "Optional quest repeat unavailable", repeatError);
                 }
+                // v99 QoL: optional battle speeds and skip-presentation toggle.
+                try {
+                    String qolSpeed = readPackagedText("bf9900_qol_battle_speed.js");
+                    view.evaluateJavascript(qolSpeed, null);
+                } catch (IOException speedError) {
+                    android.util.Log.w("BraveFrontier", "Optional battle speed UI unavailable", speedError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
