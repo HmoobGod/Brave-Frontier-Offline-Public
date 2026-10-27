@@ -74,12 +74,22 @@ with sync_playwright() as pw:
  assert final['atk']==expected['atk']*125//100,(final,expected)
  assert final['maxHp']==final['hp']==expected['hp'],(final,expected)
  assert p.evaluate('BFGlobalStarterLeaderCombatV11100.snapshot().rows[0].hpPercent')==0
- # Higher 4★–6★ effects remain SOURCE-VERIFIED only: those original forms
- # are NOT in the currently bundled playable UNIT_BY_ID catalog.
+ # GitHub's prepare_original_six_star_starters.py injects original
+ # 4★–6★ playable forms AFTER the checked-in core HTML loads. These MUST
+ # be present in the PREPARED signed APK to exercise both original boosts.
+ assert p.evaluate('BFGlobalOriginalSixStar?.count')==6
+ assert p.evaluate('UNIT_BY_ID.has(10015)') is True
  assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).atkPercent')==50
  assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).hpPercent')==10
  assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10013,10013).atkPercent')==50
- assert p.evaluate('UNIT_BY_ID.has(10015)') is False
+ p.evaluate('P.evolutions[10011]=10015;reset()')
+ final=p.evaluate('S.party[0]')
+ expected=p.evaluate("""()=>{const src=effectiveUnit(10011),grow=demoLevel(P.unitExp[10011])-1;
+    return {id:src.id,atk:src.stats.atk+grow*12,hp:src.stats.hp+grow*30}}""")
+ assert final['unitId']==expected['id']==10015
+ assert final['atk']==expected['atk']*150//100,(final,expected)
+ assert final['maxHp']==final['hp']==expected['hp']*110//100,(final,expected)
+ assert p.evaluate('BFGlobalStarterLeaderCombatV11100.snapshot().rows[0].hpPercent')==10
  p.evaluate('document.getElementById("mode").value="training";reset()')
  training=p.evaluate('S.party[0]')
  assert training['atk']==expected['atk']
