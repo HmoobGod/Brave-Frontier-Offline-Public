@@ -876,6 +876,14 @@ public class MainActivity extends Activity {
                 } catch (IOException refError) {
                     android.util.Log.w("BraveFrontier", "Optional 2022 encounter reference ledger unavailable", refError);
                 }
+                // v109: extend 2022 source-only mission reference audit to
+                // original St. Lamia without inferring enemy/wave/AI identities.
+                try {
+                    String stRefs = readPackagedText("bf10900_stlamia_encounter_refs.js");
+                    view.evaluateJavascript(stRefs, null);
+                } catch (IOException stRefsError) {
+                    android.util.Log.w("BraveFrontier", "Optional St. Lamia source refs unavailable", stRefsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
