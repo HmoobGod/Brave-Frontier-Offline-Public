@@ -860,6 +860,14 @@ public class MainActivity extends Activity {
                 } catch (IOException advancedError) {
                     android.util.Log.w("BraveFrontier", "Optional advanced Auto Battle unavailable", advancedError);
                 }
+                // v107 source: landed-hit BC/HC check eligibility only;
+                // never award pickups, HP/BB or modify battle/save state.
+                try {
+                    String landedChecks = readPackagedText("bf10700_source_landed_crystal_eligibility.js");
+                    view.evaluateJavascript(landedChecks, null);
+                } catch (IOException landedError) {
+                    android.util.Log.w("BraveFrontier", "Optional source crystal check audit unavailable", landedError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
