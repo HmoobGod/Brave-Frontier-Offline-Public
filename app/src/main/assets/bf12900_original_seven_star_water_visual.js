@@ -22,12 +22,12 @@
     });
     return promise;
   }
-  async function renderFrame(canvas,index){
+  async function renderFrame(canvas,index,previewImage=null){
     if(!Number.isSafeInteger(index)||index<0||index>=source.originalCggFrames||
        !canvas||typeof canvas.getContext!=='function'||
        canvas.width!==240||canvas.height!==200)return false;
-    const image=await getImage();
-    if(!image)return false;
+    const image=previewImage||await getImage();
+    if(!image||image.naturalWidth!==2400||image.naturalHeight!==2000)return false;
     const ctx=canvas.getContext('2d',{alpha:true});
     if(!ctx)return false;
     ctx.clearRect(0,0,240,200);

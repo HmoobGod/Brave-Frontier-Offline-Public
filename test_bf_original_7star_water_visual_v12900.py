@@ -40,18 +40,30 @@ with sync_playwright() as pw:
    args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844});errors=[]
  p.on('pageerror',lambda exc:errors.append(str(exc)))
- # Isolated file document allows a package-relative PNG to decode offline.
- testpage=A/'bf12900_local_preview_test.html'
- testpage.write_text('<html><body><canvas id="pilot" width="240" height="200"></canvas></body></html>','utf8')
- try:
-  p.goto(testpage.resolve().as_uri())
-  p.add_script_tag(path=str(A/'bf12900_original_seven_star_water_visual.js'))
-  assert p.evaluate('BFGlobalOriginalSevenStarWaterVisualV12900.source.playable') is False
-  assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),0)") is True
-  assert p.evaluate("()=>{const a=document.getElementById('pilot');return [...a.getContext('2d').getImageData(0,0,240,200).data].some((v,i)=>i%4===3&&v>0)}") is True
-  assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),22)") is True
-  assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),23)") is False
- finally: testpage.unlink(missing_ok=True)
+ # Chromium test uses a data: URL for the *original generated* atlas,
+ # never navigating to any external host or blocked file:// route.
+ p.set_content('<canvas id="pilot" width="240" height="200"></canvas>')
+ p.add_script_tag(path=str(A/'bf12900_original_seven_star_water_visual.js'))
+ encoded=base64.b64encode(image.read_bytes()).decode('ascii')
+ assert p.evaluate("""data=>new Promise(done=>{
+   const source=new Image();source.onload=()=>{window.__v129TestImage=source;done(true)};
+   source.onerror=()=>done(false);
+   source.src='data:image/png;base64,'+data;
+ })""",encoded) is True
+ assert p.evaluate('BFGlobalOriginalSevenStarWaterVisualV12900.source.playable') is False
+ assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),0,window.__v129TestImage)") is True
+ assert p.evaluate("()=>{const a=document.getElementById('pilot');return [...a.getContext('2d').getImageData(0,0,240,200).data].some((v,i)=>i%4===3&&v>0)}") is True
+ assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),22,window.__v129TestImage)") is True
+ assert p.evaluate("async()=>await BFGlobalOriginalSevenStarWaterVisualV12900.renderFrame(document.getElementById('pilot'),23,window.__v129TestImage)") is False
+ p.close()
+ p=b.new_page(viewport={'width':390,'height':844});p.on('pageerror',lambda exc:errors.append(str(exc)))
+ p.evaluate("""()=>{const store={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
+    getItem:k=>store[k]??null,setItem:(k,v)=>store[k]=String(v),
+    removeItem:k=>delete store[k],key:i=>Object.keys(store)[i]??null,
+    get length(){return Object.keys(store).length}}});
+    window.alert=()=>{};window.confirm=()=>true;
+    HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
+    HTMLMediaElement.prototype.play=()=>Promise.resolve();}""")
  p.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
  assert p.evaluate('P.version')==7
  before=p.evaluate('JSON.stringify(P)')
