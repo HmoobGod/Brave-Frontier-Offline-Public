@@ -62,6 +62,9 @@
  }
  window.playerUnit=function(i){
    const unit=original.apply(this,arguments);
+   // v115: source-matched 2022 form cap before 2022 leader bonuses.
+   // Optional: absence of the cap module preserves v111/v113 behavior.
+   window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i);
    return apply(unit,i);
  };
  function snapshot(){
