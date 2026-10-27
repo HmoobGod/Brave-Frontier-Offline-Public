@@ -58,14 +58,21 @@ with sync_playwright() as pw:
  p.evaluate('BFGlobalStarterLeaderCombatV11100.apply(S.party[0],0)')
  assert p.evaluate('S.party[0].atk')==first[0]['atk']
  assert p.evaluate('BFGlobalStarterLeaderCombatV11100.fromSource(10011,20011)') is None
- p.evaluate('P.evolutions[10011]=10015;reset()')
+ # 3-star actual playable evolved form: same original 25% ATK and zero HP.
+ p.evaluate('P.evolutions[10011]=10012;reset()')
  final=p.evaluate('S.party[0]')
  expected=p.evaluate("""()=>{const src=effectiveUnit(10011),grow=demoLevel(P.unitExp[10011])-1;
     return {id:src.id,atk:src.stats.atk+grow*12,hp:src.stats.hp+grow*30}}""")
- assert final['unitId']==expected['id']==10015
- assert final['atk']==expected['atk']*150//100,(final,expected)
- assert final['maxHp']==final['hp']==expected['hp']*110//100,(final,expected)
- assert p.evaluate('BFGlobalStarterLeaderCombatV11100.snapshot().rows[0].hpPercent')==10
+ assert final['unitId']==expected['id']==10012
+ assert final['atk']==expected['atk']*125//100,(final,expected)
+ assert final['maxHp']==final['hp']==expected['hp'],(final,expected)
+ assert p.evaluate('BFGlobalStarterLeaderCombatV11100.snapshot().rows[0].hpPercent')==0
+ # Higher 4★–6★ effects remain SOURCE-VERIFIED only: those original forms
+ # are NOT in the currently bundled playable UNIT_BY_ID catalog.
+ assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).atkPercent')==50
+ assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).hpPercent')==10
+ assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10013,10013).atkPercent')==50
+ assert p.evaluate('UNIT_BY_ID.has(10015)') is False
  p.evaluate('document.getElementById("mode").value="training";reset()')
  training=p.evaluate('S.party[0]')
  assert training['atk']==expected['atk']
