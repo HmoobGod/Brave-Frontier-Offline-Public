@@ -12,7 +12,7 @@ Parent: v110 recovered 30 starter forms, six elements and 18 leader skills. Prov
 - Existing P progress, v7 save schema, localStorage, quests, training battle rules, enemy combat, stamina and rewards are unchanged.
 
 ## Tests and safety
-Browser tests pin exact 4.47 MB audited index.html SHA256 82e81c853362342a753714b2569faa48e1d1fec7ac4c4676fdb419acd077a0f0 and check **live** 2★ and 3★ +25% ATK, **source-only** 4★–6★ +50% ATK / +10% HP, leader rotations, no double application, repeated resets, training-mode neutrality and v7 save integrity. APK tests byte-verify packaged JS, load order, signed identity and no internet permission. Device testing remains outstanding.
+Browser tests pin the exact audited playerUnit/reset constructor signatures. The original checked-in 4.47 MB core index.html SHA256 is 82e81c853362342a753714b2569faa48e1d1fec7ac4c4676fdb419acd077a0f0, but GitHub's existing Prepare bundled HTML assets step changes the file bytes; packaged test instead byte-matches the resulting prepared HTML to the APK and check **live** 2★ and 3★ +25% ATK, **source-only** 4★–6★ +50% ATK / +10% HP, leader rotations, no double application, repeated resets, training-mode neutrality and v7 save integrity. APK tests byte-verify packaged JS, load order, signed identity and no internet permission. Device testing remains outstanding.
 
 ## Remaining source gaps
 All other leader skills, friend leader stacking, 2022 battle stat type/level rounding, sphere/passive composition, native enemies, encounter groups, loot and true native combat AI are not yet recovered. Do not infer those effects from this narrow source-backed subset.
