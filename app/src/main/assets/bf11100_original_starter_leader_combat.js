@@ -62,6 +62,9 @@
  }
  window.playerUnit=function(i){
    const unit=original.apply(this,arguments);
+   // v114 optional 2022 maximum level cap is applied before the
+   // original leader ATK/HP bonus. Absent v114, retain v111 behavior.
+   window.BFGlobalOriginalUnitLevelCapsV11400?.apply?.(unit,i);
    return apply(unit,i);
  };
  function snapshot(){
