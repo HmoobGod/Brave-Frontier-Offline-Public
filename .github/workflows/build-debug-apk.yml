@@ -140,6 +140,7 @@ jobs:
           python test_bf_original_unit_level_caps_v11500.py
           python test_bf_original_lord_stats_v11600.py
           python test_bf_original_playable_stat_catalog_v11700.py
+          python test_bf_original_exp_type_source_v11800.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
