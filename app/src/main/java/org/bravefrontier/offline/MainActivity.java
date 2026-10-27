@@ -908,6 +908,14 @@ public class MainActivity extends Activity {
                 } catch (IOException leadersError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader research unavailable", leadersError);
                 }
+                // v113: 2022 source-verified maximum level only, on newly
+                // constructed archive party units before v111 leader buffs.
+                try {
+                    String caps = readPackagedText("bf11300_original_unit_level_caps.js");
+                    view.evaluateJavascript(caps, null);
+                } catch (IOException capError) {
+                    android.util.Log.w("BraveFrontier", "Original source level cap audit unavailable", capError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
