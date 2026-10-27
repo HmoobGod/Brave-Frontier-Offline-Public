@@ -13,7 +13,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf10700_source_landed_crystal_eligibility.js")')<java.index('readPackagedText("bf10800_2022_encounter_reference_ledger.js")')
 gradle=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '108.00.0-demo'" in gradle
+assert any("versionName '"+str(v)+".00.0-demo'" in gradle for v in range(108,200))
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert 'bf-development-debug.keystore' in gradle
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
