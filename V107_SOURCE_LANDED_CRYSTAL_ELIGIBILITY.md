@@ -3,13 +3,13 @@
 Parent: v106 source and save hardening.
 
 ## Exact original source inputs
-- \`bf8400_original_normal_crystal_checks.js\`: 2,258 original 2022 F_UNIT normal attack hit counts and \`dropCheckCount\` per hit, strict source exclusions.
+- \`bf8400_original_normal_crystal_checks.js\`: 2,258 source-validated 2022 F_UNIT normal attack hit counts and \`dropCheckCount\` per hit, strict source exclusions.
 - \`bf9300_single_hit_critical_combat.js\`: actual source-eligible, positively damaging DEMO single-hit normal attack events.
 - \`bf9500_multihit_critical_combat.js\` (v96 post-KO guard): positively damaging *landed* original-timeline normal hits, with post-KO strikes explicitly marked \`landed:false\`.
 
 ## v107 result
 - For each validated observed normal attack, count exactly \`landed hits × original drop checks per hit\` as **eligible BC checks**, and \`landed hits\` as **eligible HC checks**.
-- Exclude post-KO attacks from these checks, including multi-hit attempts whose later strokes were never landed.
+- Exclude post-KO unlanded DEMO strikes from the **confirmed landed-only baseline**, without claiming whether native BF overkill would create additional checks or different rates.
 - Strictly reject unrecognized/malformed source profiles, inconsistent struck-damage rows, unconfirmed single-hit events, unknown BB/SBB, simulated enemy events, and other uncertain states.
 - Add an optional read-only in-battle audit panel so players and future developers can see the source-qualified *potential checks* next to the older **uncollected reference ledger**.
 - No new drops, BC/HC recipients, HP restoration, BB charging, RNG, overkill multipliers, rewards, Energy, battle turns or saved fields.
