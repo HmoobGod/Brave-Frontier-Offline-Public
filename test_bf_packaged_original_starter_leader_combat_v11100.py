@@ -14,7 +14,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert b'nativeRoundingVerified:false' in packaged
  assert b'localStorage' not in packaged and b'saveProgress(' not in packaged
  assert b'bf_global_offline_demo_v7' in z.read('assets/index.html')
- assert sha256(z.read('assets/index.html')).hexdigest()=='82e81c853362342a753714b2569faa48e1d1fec7ac4c4676fdb419acd077a0f0'
+ assert sha256(z.read('assets/index.html')).digest()==sha256((R/'app/src/main/assets/index.html').read_bytes()).digest()
+ assert b'function playerUnit(i){' in z.read('assets/index.html')
+ assert b'party:Array.from({length:6},(_,i)=>playerUnit(i))' in z.read('assets/index.html')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf11000_source_starter_leader_skills.js")')<java.index('readPackagedText("bf11100_original_starter_leader_combat.js")')
 g=(R/'app/build.gradle').read_text('utf8')
