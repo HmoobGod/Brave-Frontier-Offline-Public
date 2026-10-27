@@ -147,6 +147,7 @@ jobs:
           python test_bf_original_unit_kind_filter_v12200.py
           python test_bf_original_imp_caps_v12300.py
           python test_bf_live_level_one_2022_parity_v12400.py
+          python test_bf_original_full_normal_hit_archive_v12500.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
