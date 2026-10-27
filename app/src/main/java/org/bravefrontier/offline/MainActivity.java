@@ -884,6 +884,14 @@ public class MainActivity extends Activity {
                 } catch (IOException stRefsError) {
                     android.util.Log.w("BraveFrontier", "Optional St. Lamia source refs unavailable", stRefsError);
                 }
+                // v110: original 2022 starter leader-skill eligibility audit,
+                // read-only until original stat initialization is verified.
+                try {
+                    String leaderSource = readPackagedText("bf11000_source_starter_leader_skills.js");
+                    view.evaluateJavascript(leaderSource, null);
+                } catch (IOException leaderError) {
+                    android.util.Log.w("BraveFrontier", "Optional original leader-skill audit unavailable", leaderError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
