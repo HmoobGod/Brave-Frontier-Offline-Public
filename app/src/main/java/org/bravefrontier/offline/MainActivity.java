@@ -983,6 +983,14 @@ public class MainActivity extends Activity {
                 } catch (IOException pilotError) {
                     android.util.Log.w("BraveFrontier", "Optional seven star visual reference unavailable", pilotError);
                 }
+                // v130: 2022 Global typed 7-star/8-star source recipes; no
+                // inferred inventory rules, playable unlock or save mutation.
+                try {
+                    String typedRecipes = readPackagedText("bf13000_original_starter_typed_evolution.js");
+                    view.evaluateJavascript(typedRecipes, null);
+                } catch (IOException recipeError) {
+                    android.util.Log.w("BraveFrontier", "Optional original typed evolution reference unavailable", recipeError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
