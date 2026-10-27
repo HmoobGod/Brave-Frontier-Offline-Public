@@ -1,0 +1,203 @@
+{
+  "schema": "bf-global-original-leader-english-v114",
+  "source": {
+    "archive": "BF1_sgtext_part001.zip",
+    "archiveSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "names": {
+      "nested": "content/sgtext/sgtext_leaderSkillName_411.zip",
+      "nestedSha256": "145f04664ae89e3f507c70186c63f8dbd15c4ef6953ead2f93ea30c3368b91c3",
+      "base64CsvSha256": "7cac2428a89e7597d1be897acf8f8cb1f60b9c79772aefaef1f56d3e63f871db"
+    },
+    "descriptions": {
+      "nested": "content/sgtext/sgtext_leaderSkillDescription_497.zip",
+      "nestedSha256": "5e9d92095b1417f3cd619cfb9c36eb518945c33cd3bce181854da57ad7f87c47",
+      "base64CsvSha256": "1f4ec2ca3c00c5a19a4ef579420956cadd806c46b6900e682e60f7ffa4354c8d"
+    },
+    "extraction": "Base64-decode nested ^-separated UTF-8 Global English CSV, lookup original 36 leader IDs; retain English punctuation and original text verbatim.",
+    "limits": "Source descriptions do not implement missing Spark/BC mechanics, 2022 combat timing or damage formula."
+  },
+  "leaderSkillCount": 36,
+  "originalPlayableFormCount": 72,
+  "records": [
+    {
+      "leaderSkillId": 100,
+      "originalEnglishName": "Fire Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Fire Types"
+    },
+    {
+      "leaderSkillId": 101,
+      "originalEnglishName": "Fire God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Fire Types"
+    },
+    {
+      "leaderSkillId": 102,
+      "originalEnglishName": "Fire Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Fire types"
+    },
+    {
+      "leaderSkillId": 110,
+      "originalEnglishName": "Water Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Water Types"
+    },
+    {
+      "leaderSkillId": 111,
+      "originalEnglishName": "Water God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Water Types"
+    },
+    {
+      "leaderSkillId": 112,
+      "originalEnglishName": "Water Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Water types"
+    },
+    {
+      "leaderSkillId": 120,
+      "originalEnglishName": "Earth Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Earth Types"
+    },
+    {
+      "leaderSkillId": 121,
+      "originalEnglishName": "Earth God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Earth Types"
+    },
+    {
+      "leaderSkillId": 122,
+      "originalEnglishName": "Earth Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Earth types"
+    },
+    {
+      "leaderSkillId": 130,
+      "originalEnglishName": "Thunder Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Thunder Types"
+    },
+    {
+      "leaderSkillId": 131,
+      "originalEnglishName": "Thunder God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Thunder Types"
+    },
+    {
+      "leaderSkillId": 132,
+      "originalEnglishName": "Thunder Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Thunder types"
+    },
+    {
+      "leaderSkillId": 140,
+      "originalEnglishName": "Light Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Light Types"
+    },
+    {
+      "leaderSkillId": 141,
+      "originalEnglishName": "Light God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Light Types"
+    },
+    {
+      "leaderSkillId": 142,
+      "originalEnglishName": "Light Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Light types"
+    },
+    {
+      "leaderSkillId": 150,
+      "originalEnglishName": "Dark Spirit's Power",
+      "originalEnglishDescription": "25% boost to Atk Power of Dark Types"
+    },
+    {
+      "leaderSkillId": 151,
+      "originalEnglishName": "Dark God's Power",
+      "originalEnglishDescription": "50% boost to Atk Power of Dark Types"
+    },
+    {
+      "leaderSkillId": 152,
+      "originalEnglishName": "Dark Creator's Power",
+      "originalEnglishDescription": "50% boost to Atk power and 10% increase in HP of Dark types"
+    },
+    {
+      "leaderSkillId": 500,
+      "originalEnglishName": "Fire's Protection",
+      "originalEnglishDescription": "10% reduction in damage from Fire Types"
+    },
+    {
+      "leaderSkillId": 502,
+      "originalEnglishName": "Water's Protection",
+      "originalEnglishDescription": "10% reduction in damage from Water Types"
+    },
+    {
+      "leaderSkillId": 504,
+      "originalEnglishName": "Earth's Protection",
+      "originalEnglishDescription": "10% reduction in damage from Earth Types"
+    },
+    {
+      "leaderSkillId": 506,
+      "originalEnglishName": "Thunder's Protection",
+      "originalEnglishDescription": "10% reduction in damage from Thunder Types"
+    },
+    {
+      "leaderSkillId": 508,
+      "originalEnglishName": "Light's Protection",
+      "originalEnglishDescription": "10% reduction in damage from Light Types"
+    },
+    {
+      "leaderSkillId": 510,
+      "originalEnglishName": "Dark Protection",
+      "originalEnglishDescription": "10% reduction in damage from Dark Types"
+    },
+    {
+      "leaderSkillId": 1300,
+      "originalEnglishName": "Intense Light",
+      "originalEnglishDescription": "Small boost in damage dealt during Spark"
+    },
+    {
+      "leaderSkillId": 1301,
+      "originalEnglishName": "Intense Flash",
+      "originalEnglishDescription": "Boost in damage dealt during Spark"
+    },
+    {
+      "leaderSkillId": 1302,
+      "originalEnglishName": "Intense Strobe",
+      "originalEnglishDescription": "Large boost in damage dealt during Spark"
+    },
+    {
+      "leaderSkillId": 1303,
+      "originalEnglishName": "Blinding Light",
+      "originalEnglishDescription": "Huge boost in damage dealt during Spark"
+    },
+    {
+      "leaderSkillId": 1313,
+      "originalEnglishName": "Intense Edge",
+      "originalEnglishDescription": "Huge boost to damage produced during Spark & slight boost to critical hit damage"
+    },
+    {
+      "leaderSkillId": 1314,
+      "originalEnglishName": "Ruin God's Epidemic",
+      "originalEnglishDescription": "Huge boost to damage produced during Spark & adds chance of ignoring an opponent's Def when attacking"
+    },
+    {
+      "leaderSkillId": 1400,
+      "originalEnglishName": "Fighting Light",
+      "originalEnglishDescription": "Small boost in Battle Crystals produced during Spark"
+    },
+    {
+      "leaderSkillId": 1401,
+      "originalEnglishName": "Fighting Flash",
+      "originalEnglishDescription": "Boost in Battle Crystals produced during Spark"
+    },
+    {
+      "leaderSkillId": 1402,
+      "originalEnglishName": "Fighting Strobe",
+      "originalEnglishDescription": "Large boost in Battle Crystals produced during Spark"
+    },
+    {
+      "leaderSkillId": 1410,
+      "originalEnglishName": "Combat Magic",
+      "originalEnglishDescription": "Small reduction in BB gauge required for BB & large boost to drop rate of BC produced during Spark"
+    },
+    {
+      "leaderSkillId": 1411,
+      "originalEnglishName": "Combat Ambition",
+      "originalEnglishDescription": "Small reduction in BB gauge amount consumed during BB & large boost to drop rate of BC produced during Spark"
+    },
+    {
+      "leaderSkillId": 1412,
+      "originalEnglishName": "Combat Wave",
+      "originalEnglishDescription": "Small boost in the BB gauge fill rate & large boost to drop rate of BC produced during Spark"
+    }
+  ]
+}

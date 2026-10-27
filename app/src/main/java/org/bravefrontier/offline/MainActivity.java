@@ -917,6 +917,14 @@ public class MainActivity extends Activity {
                 } catch (IOException recipientsError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader recipients unavailable", recipientsError);
                 }
+                // v114: original archived 2022 Global English names and descriptions
+                // for 36 leader skills / 72 playable forms. Localization only.
+                try {
+                    String leaderEnglish = readPackagedText("bf11400_original_global_leader_english.js");
+                    view.evaluateJavascript(leaderEnglish, null);
+                } catch (IOException englishError) {
+                    android.util.Log.w("BraveFrontier", "Optional original leader English unavailable", englishError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
