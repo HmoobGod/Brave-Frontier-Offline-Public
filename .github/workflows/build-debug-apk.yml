@@ -127,6 +127,7 @@ jobs:
           python test_bf_qol_battle_details_v10300.py
           python test_bf_qol_evolution_needs_v10400.py
           python test_bf_qol_advanced_smart_auto_v10500.py
+          python test_bf_qol_integration_contract_v106.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -575,6 +576,8 @@ jobs:
         run: python3 test_bf_packaged_qol_evolution_needs_v10400.py
       - name: Verify v105 advanced source-aware Auto options in signed APK
         run: python3 test_bf_packaged_qol_advanced_smart_auto_v10500.py
+      - name: Verify v106 integrated optional QoL source and APK identity
+        run: python3 test_bf_packaged_qol_integration_contract_v106.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

@@ -34,6 +34,9 @@ with sync_playwright() as pw:
  assert s['paths'][0]['materials'][0]['required']==1
  assert s['paths'][0]['materials'][1]['required']==2
  p.locator('#bf10400-evolution-needs > summary').click()
+ # A <details> toggle event renders asynchronously; wait for the actual
+ # source-backed missing-count row rather than racing the event queue.
+ p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('2 missing')")
  assert '2 missing' in p.locator('#bf10400-rows').inner_text()
  p.evaluate('P.materials[50120]=2')
  assert p.evaluate(api+'.snapshot().readyMaterialPaths')==1
