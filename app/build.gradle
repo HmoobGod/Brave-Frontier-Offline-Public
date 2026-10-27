@@ -10,7 +10,7 @@ android {
         minSdk 26
         targetSdk 35
         versionCode ciBuildCode ? ciBuildCode.toString().toInteger() : 15
-        versionName '110.00.0-demo'
+        versionName '111.00.0-demo'
     }
     // Debug-only development identity loaded from a GitHub Actions secret.
     // This must remain the same certificate for existing in-place APK updates;
