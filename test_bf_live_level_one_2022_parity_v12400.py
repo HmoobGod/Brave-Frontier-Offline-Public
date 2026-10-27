@@ -53,6 +53,19 @@ with sync_playwright() as playwright:
     page = browser.new_page(viewport={"width": 390, "height": 844})
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
+    # about:blank denies localStorage without a controlled stub; match existing UI regressions.
+    page.evaluate("""() => {
+      const db={};
+      Object.defineProperty(window,'localStorage',{configurable:true,value:{
+        getItem:k=>db[k]??null,setItem:(k,v)=>{db[k]=String(v)},
+        removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+        get length(){return Object.keys(db).length}
+      }});
+      window.alert=()=>{};window.confirm=()=>true;
+      HTMLMediaElement.prototype.load=()=>{};
+      HTMLMediaElement.prototype.pause=()=>{};
+      HTMLMediaElement.prototype.play=()=>Promise.resolve();
+    }""")
     page.set_content(html, wait_until="load", timeout=90000)
     result = page.evaluate("""rows => {
       if (P.version !== 7 || typeof playerUnit !== 'function' ||
