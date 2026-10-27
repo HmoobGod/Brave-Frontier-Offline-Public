@@ -142,6 +142,34 @@
     }
 
     const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
+    // v129: the original 7-star Water sprite is source-derived, but its
+    // blend/transform compositing is a VISUAL RECONSTRUCTION only.
+    const visual=id===20016?window.BFGlobalOriginalSevenStarWaterVisualV12900:null;
+    if(visual?.source?.playable===false){
+      const pilot=document.createElement('details');
+      pilot.className='bf-codex-bb-levels';
+      pilot.append(item('summary','','7★ WATER · SOURCE SPRITE VISUAL PREVIEW'));
+      pilot.append(item('p','bf-codex-note',
+        'Reference rendering of original 2022 source pixels, NOT verified native blending or timing. 7★ remains non-playable.'));
+      const frame=document.createElement('canvas');
+      frame.width=240;frame.height=200;
+      frame.style.cssText='display:block;max-width:100%;height:auto;background:#142636;border:1px solid #5e8298';
+      frame.setAttribute('aria-label','Original seven-star Water sprite source composition preview');
+      const control=document.createElement('input');
+      control.type='range';control.min='0';control.max='22';control.value='0';
+      control.setAttribute('aria-label','Select original source sprite composition frame');
+      control.style.cssText='display:block;width:100%;margin:8px 0';
+      const status=item('p','','Original CGG source frame 0 / 22');
+      const paint=async()=>{status.textContent='Original CGG source frame '+control.value+' / 22';
+        if(!(await visual.renderFrame(frame,Number(control.value))))
+          status.textContent+=' · preview asset unavailable';};
+      pilot.addEventListener('toggle',()=>{if(pilot.open)paint();});
+      control.addEventListener('input',paint);
+      pilot.append(frame,control,status);
+      detail.append(pilot);
+    }
+
+    const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
     if(Number.isSafeInteger(expPattern)&&[10,15,20].includes(expPattern))
       detail.append(item('p','','Original EXP pattern ID '+expPattern+
         ' · numeric EXP thresholds not verified for 2022 Global; gameplay remains DEMO.'));

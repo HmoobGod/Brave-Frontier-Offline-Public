@@ -975,6 +975,14 @@ public class MainActivity extends Activity {
                 } catch (IOException seqError) {
                     android.util.Log.w("BraveFrontier", "Optional original animation sequences unavailable", seqError);
                 }
+                // v129: original 7-star Water sprite-frame proof (read-only).
+                // No playable unlock, combat or save changes.
+                try {
+                    String pilot = readPackagedText("bf12900_original_seven_star_water_visual.js");
+                    view.evaluateJavascript(pilot, null);
+                } catch (IOException pilotError) {
+                    android.util.Log.w("BraveFrontier", "Optional seven star visual reference unavailable", pilotError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
