@@ -917,6 +917,14 @@ public class MainActivity extends Activity {
                 } catch (IOException recipientsError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader recipients unavailable", recipientsError);
                 }
+                // v114: apply exact 2022 Global maximum levels to new archive
+                // parties, before existing v111 source-backed leader bonuses.
+                try {
+                    String maxLevels = readPackagedText("bf11400_original_unit_level_caps.js");
+                    view.evaluateJavascript(maxLevels, null);
+                } catch (IOException levelError) {
+                    android.util.Log.w("BraveFrontier", "Original unit max-level caps unavailable", levelError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
