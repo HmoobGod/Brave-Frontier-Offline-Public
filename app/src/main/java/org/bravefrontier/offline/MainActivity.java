@@ -933,6 +933,16 @@ public class MainActivity extends Activity {
                 } catch (IOException capsError) {
                     android.util.Log.w("BraveFrontier", "Optional original unit level caps unavailable", capsError);
                 }
+                // v116: original 2022 level-one and Lord-max stats from the
+                // master archive. Reference-only; no live stat changes.
+                try {
+                    String statsData = readPackagedText("bf11600_original_lord_stats_data.js");
+                    view.evaluateJavascript(statsData, null);
+                    String statsReference = readPackagedText("bf11600_original_lord_stats_reference.js");
+                    view.evaluateJavascript(statsReference, null);
+                } catch (IOException statsError) {
+                    android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
