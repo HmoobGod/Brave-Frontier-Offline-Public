@@ -1,0 +1,1309 @@
+{
+  "schema": "bf-global-2022-playable-lord-stat-endpoints-v116",
+  "source": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "units": [
+      {
+        "file": "3-mst-translated/F_UNIT_MST_1_Ver1084.json",
+        "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+      },
+      {
+        "file": "3-mst-translated/F_UNIT_MST_2_Ver1084.json",
+        "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+      }
+    ],
+    "typeMaster": {
+      "file": "3-mst-translated/F_UNIT_TYPE_MST_Ver52.json",
+      "sha256": "69cc9a357b1915d31f852346e144fd6b4a0e61c9d7d64e0ac9c1a60297a10301"
+    },
+    "notes": [
+      "Exact original level-one base and Lord max-level endpoints, not complete native level-interpolation formula.",
+      "Original unit type raw ranges are descriptive source, not a verified executable type bonus implementation."
+    ]
+  },
+  "unitCount": 72,
+  "rawUnitTypeCount": 6,
+  "rows": [
+    {
+      "unitId": 10011,
+      "maxLevel": 12,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1030,
+        "atk": 500,
+        "def": 410,
+        "rec": 320
+      },
+      "lordAtMax": {
+        "hp": 1948,
+        "atk": 700,
+        "def": 574,
+        "rec": 448
+      }
+    },
+    {
+      "unitId": 10012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1484,
+        "atk": 630,
+        "def": 517,
+        "rec": 404
+      },
+      "lordAtMax": {
+        "hp": 2517,
+        "atk": 917,
+        "def": 806,
+        "rec": 702
+      }
+    },
+    {
+      "unitId": 10013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1995,
+        "atk": 826,
+        "def": 725,
+        "rec": 632
+      },
+      "lordAtMax": {
+        "hp": 3201,
+        "atk": 1113,
+        "def": 989,
+        "rec": 845
+      }
+    },
+    {
+      "unitId": 10014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2466,
+        "atk": 946,
+        "def": 841,
+        "rec": 718
+      },
+      "lordAtMax": {
+        "hp": 3917,
+        "atk": 1364,
+        "def": 1230,
+        "rec": 1082
+      }
+    },
+    {
+      "unitId": 10015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3254,
+        "atk": 1227,
+        "def": 1106,
+        "rec": 973
+      },
+      "lordAtMax": {
+        "hp": 5313,
+        "atk": 1660,
+        "def": 1456,
+        "rec": 1376
+      }
+    },
+    {
+      "unitId": 10021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1450,
+        "atk": 550,
+        "def": 280,
+        "rec": 210
+      },
+      "lordAtMax": {
+        "hp": 2620,
+        "atk": 825,
+        "def": 392,
+        "rec": 315
+      }
+    },
+    {
+      "unitId": 10022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2088,
+        "atk": 743,
+        "def": 353,
+        "rec": 284
+      },
+      "lordAtMax": {
+        "hp": 3260,
+        "atk": 1013,
+        "def": 634,
+        "rec": 538
+      }
+    },
+    {
+      "unitId": 10023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2664,
+        "atk": 912,
+        "def": 571,
+        "rec": 484
+      },
+      "lordAtMax": {
+        "hp": 4008,
+        "atk": 1245,
+        "def": 758,
+        "rec": 677
+      }
+    },
+    {
+      "unitId": 10024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 3151,
+        "atk": 1057,
+        "def": 643,
+        "rec": 575
+      },
+      "lordAtMax": {
+        "hp": 4761,
+        "atk": 1522,
+        "def": 1001,
+        "rec": 956
+      }
+    },
+    {
+      "unitId": 10025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 3792,
+        "atk": 1294,
+        "def": 851,
+        "rec": 813
+      },
+      "lordAtMax": {
+        "hp": 5663,
+        "atk": 1868,
+        "def": 1602,
+        "rec": 1555
+      }
+    },
+    {
+      "unitId": 10041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1260,
+        "atk": 405,
+        "def": 405,
+        "rec": 445
+      },
+      "lordAtMax": {
+        "hp": 2400,
+        "atk": 675,
+        "def": 675,
+        "rec": 696
+      }
+    },
+    {
+      "unitId": 10042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2217,
+        "atk": 534,
+        "def": 696,
+        "rec": 730
+      },
+      "lordAtMax": {
+        "hp": 3788,
+        "atk": 683,
+        "def": 994,
+        "rec": 1161
+      }
+    },
+    {
+      "unitId": 20011,
+      "maxLevel": 12,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1000,
+        "atk": 490,
+        "def": 360,
+        "rec": 420
+      },
+      "lordAtMax": {
+        "hp": 1830,
+        "atk": 706,
+        "def": 468,
+        "rec": 693
+      }
+    },
+    {
+      "unitId": 20012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1377,
+        "atk": 636,
+        "def": 422,
+        "rec": 624
+      },
+      "lordAtMax": {
+        "hp": 2442,
+        "atk": 918,
+        "def": 734,
+        "rec": 825
+      }
+    },
+    {
+      "unitId": 20013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1928,
+        "atk": 826,
+        "def": 661,
+        "rec": 743
+      },
+      "lordAtMax": {
+        "hp": 3055,
+        "atk": 1170,
+        "def": 901,
+        "rec": 1195
+      }
+    },
+    {
+      "unitId": 20014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2342,
+        "atk": 994,
+        "def": 766,
+        "rec": 1016
+      },
+      "lordAtMax": {
+        "hp": 3815,
+        "atk": 1355,
+        "def": 1127,
+        "rec": 1461
+      }
+    },
+    {
+      "unitId": 20015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3163,
+        "atk": 1218,
+        "def": 1014,
+        "rec": 1314
+      },
+      "lordAtMax": {
+        "hp": 5097,
+        "atk": 1647,
+        "def": 1351,
+        "rec": 1701
+      }
+    },
+    {
+      "unitId": 20021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1500,
+        "atk": 530,
+        "def": 300,
+        "rec": 110
+      },
+      "lordAtMax": {
+        "hp": 2700,
+        "atk": 795,
+        "def": 420,
+        "rec": 198
+      }
+    },
+    {
+      "unitId": 20022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2160,
+        "atk": 716,
+        "def": 378,
+        "rec": 179
+      },
+      "lordAtMax": {
+        "hp": 3435,
+        "atk": 1095,
+        "def": 660,
+        "rec": 419
+      }
+    },
+    {
+      "unitId": 20023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2822,
+        "atk": 986,
+        "def": 594,
+        "rec": 377
+      },
+      "lordAtMax": {
+        "hp": 4140,
+        "atk": 1191,
+        "def": 792,
+        "rec": 556
+      }
+    },
+    {
+      "unitId": 20024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 3264,
+        "atk": 1011,
+        "def": 673,
+        "rec": 472
+      },
+      "lordAtMax": {
+        "hp": 4971,
+        "atk": 1505,
+        "def": 1032,
+        "rec": 807
+      }
+    },
+    {
+      "unitId": 20025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 3970,
+        "atk": 1279,
+        "def": 877,
+        "rec": 686
+      },
+      "lordAtMax": {
+        "hp": 5822,
+        "atk": 1849,
+        "def": 1631,
+        "rec": 1483
+      }
+    },
+    {
+      "unitId": 20041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1323,
+        "atk": 292,
+        "def": 472,
+        "rec": 541
+      },
+      "lordAtMax": {
+        "hp": 2475,
+        "atk": 598,
+        "def": 731,
+        "rec": 850
+      }
+    },
+    {
+      "unitId": 20042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2279,
+        "atk": 526,
+        "def": 718,
+        "rec": 765
+      },
+      "lordAtMax": {
+        "hp": 3902,
+        "atk": 667,
+        "def": 1029,
+        "rec": 1241
+      }
+    },
+    {
+      "unitId": 30011,
+      "maxLevel": 12,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1010,
+        "atk": 500,
+        "def": 500,
+        "rec": 150
+      },
+      "lordAtMax": {
+        "hp": 1876,
+        "atk": 720,
+        "def": 700,
+        "rec": 248
+      }
+    },
+    {
+      "unitId": 30012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1419,
+        "atk": 648,
+        "def": 630,
+        "rec": 223
+      },
+      "lordAtMax": {
+        "hp": 2500,
+        "atk": 924,
+        "def": 938,
+        "rec": 455
+      }
+    },
+    {
+      "unitId": 30013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1980,
+        "atk": 832,
+        "def": 844,
+        "rec": 410
+      },
+      "lordAtMax": {
+        "hp": 3173,
+        "atk": 1188,
+        "def": 1162,
+        "rec": 613
+      }
+    },
+    {
+      "unitId": 30014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2442,
+        "atk": 1010,
+        "def": 987,
+        "rec": 522
+      },
+      "lordAtMax": {
+        "hp": 3894,
+        "atk": 1373,
+        "def": 1378,
+        "rec": 805
+      }
+    },
+    {
+      "unitId": 30015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3233,
+        "atk": 1234,
+        "def": 1240,
+        "rec": 724
+      },
+      "lordAtMax": {
+        "hp": 5272,
+        "atk": 1656,
+        "def": 1603,
+        "rec": 1010
+      }
+    },
+    {
+      "unitId": 30021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1480,
+        "atk": 450,
+        "def": 380,
+        "rec": 560
+      },
+      "lordAtMax": {
+        "hp": 2742,
+        "atk": 594,
+        "def": 502,
+        "rec": 952
+      }
+    },
+    {
+      "unitId": 30022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2198,
+        "atk": 535,
+        "def": 452,
+        "rec": 857
+      },
+      "lordAtMax": {
+        "hp": 3515,
+        "atk": 865,
+        "def": 801,
+        "rec": 1064
+      }
+    },
+    {
+      "unitId": 30023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2894,
+        "atk": 779,
+        "def": 721,
+        "rec": 958
+      },
+      "lordAtMax": {
+        "hp": 4249,
+        "atk": 963,
+        "def": 899,
+        "rec": 1512
+      }
+    },
+    {
+      "unitId": 30024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 3356,
+        "atk": 817,
+        "def": 764,
+        "rec": 1284
+      },
+      "lordAtMax": {
+        "hp": 5010,
+        "atk": 1281,
+        "def": 1205,
+        "rec": 1620
+      }
+    },
+    {
+      "unitId": 30025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 4004,
+        "atk": 1089,
+        "def": 1024,
+        "rec": 1377
+      },
+      "lordAtMax": {
+        "hp": 5854,
+        "atk": 1632,
+        "def": 1698,
+        "rec": 1822
+      }
+    },
+    {
+      "unitId": 30041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1360,
+        "atk": 234,
+        "def": 540,
+        "rec": 463
+      },
+      "lordAtMax": {
+        "hp": 2520,
+        "atk": 544,
+        "def": 792,
+        "rec": 784
+      }
+    },
+    {
+      "unitId": 30042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2304,
+        "atk": 514,
+        "def": 773,
+        "rec": 742
+      },
+      "lordAtMax": {
+        "hp": 3970,
+        "atk": 639,
+        "def": 1098,
+        "rec": 1188
+      }
+    },
+    {
+      "unitId": 40011,
+      "maxLevel": 12,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1180,
+        "atk": 580,
+        "def": 320,
+        "rec": 120
+      },
+      "lordAtMax": {
+        "hp": 2070,
+        "atk": 812,
+        "def": 420,
+        "rec": 210
+      }
+    },
+    {
+      "unitId": 40012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1593,
+        "atk": 731,
+        "def": 378,
+        "rec": 189
+      },
+      "lordAtMax": {
+        "hp": 2749,
+        "atk": 1007,
+        "def": 687,
+        "rec": 426
+      }
+    },
+    {
+      "unitId": 40013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2205,
+        "atk": 906,
+        "def": 618,
+        "rec": 384
+      },
+      "lordAtMax": {
+        "hp": 3509,
+        "atk": 1294,
+        "def": 838,
+        "rec": 565
+      }
+    },
+    {
+      "unitId": 40014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2728,
+        "atk": 1100,
+        "def": 712,
+        "rec": 480
+      },
+      "lordAtMax": {
+        "hp": 4233,
+        "atk": 1460,
+        "def": 1006,
+        "rec": 770
+      }
+    },
+    {
+      "unitId": 40015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3538,
+        "atk": 1313,
+        "def": 905,
+        "rec": 692
+      },
+      "lordAtMax": {
+        "hp": 5460,
+        "atk": 1806,
+        "def": 1230,
+        "rec": 971
+      }
+    },
+    {
+      "unitId": 40021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1450,
+        "atk": 410,
+        "def": 350,
+        "rec": 570
+      },
+      "lordAtMax": {
+        "hp": 2838,
+        "atk": 533,
+        "def": 473,
+        "rec": 987
+      }
+    },
+    {
+      "unitId": 40022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2284,
+        "atk": 480,
+        "def": 426,
+        "rec": 888
+      },
+      "lordAtMax": {
+        "hp": 3630,
+        "atk": 824,
+        "def": 715,
+        "rec": 1425
+      }
+    },
+    {
+      "unitId": 40023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2997,
+        "atk": 742,
+        "def": 644,
+        "rec": 1283
+      },
+      "lordAtMax": {
+        "hp": 4326,
+        "atk": 925,
+        "def": 826,
+        "rec": 1740
+      }
+    },
+    {
+      "unitId": 40024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 3421,
+        "atk": 785,
+        "def": 701,
+        "rec": 1478
+      },
+      "lordAtMax": {
+        "hp": 5157,
+        "atk": 1223,
+        "def": 1130,
+        "rec": 1926
+      }
+    },
+    {
+      "unitId": 40025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 4128,
+        "atk": 1040,
+        "def": 961,
+        "rec": 1637
+      },
+      "lordAtMax": {
+        "hp": 5821,
+        "atk": 1554,
+        "def": 1617,
+        "rec": 2011
+      }
+    },
+    {
+      "unitId": 40041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1234,
+        "atk": 432,
+        "def": 391,
+        "rec": 425
+      },
+      "lordAtMax": {
+        "hp": 2070,
+        "atk": 743,
+        "def": 648,
+        "rec": 675
+      }
+    },
+    {
+      "unitId": 40042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2203,
+        "atk": 578,
+        "def": 663,
+        "rec": 713
+      },
+      "lordAtMax": {
+        "hp": 3648,
+        "atk": 701,
+        "def": 957,
+        "rec": 1126
+      }
+    },
+    {
+      "unitId": 50011,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 970,
+        "atk": 500,
+        "def": 500,
+        "rec": 500
+      },
+      "lordAtMax": {
+        "hp": 1852,
+        "atk": 700,
+        "def": 700,
+        "rec": 700
+      }
+    },
+    {
+      "unitId": 50012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1397,
+        "atk": 630,
+        "def": 630,
+        "rec": 630
+      },
+      "lordAtMax": {
+        "hp": 2397,
+        "atk": 910,
+        "def": 910,
+        "rec": 910
+      }
+    },
+    {
+      "unitId": 50013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1887,
+        "atk": 819,
+        "def": 819,
+        "rec": 819
+      },
+      "lordAtMax": {
+        "hp": 3014,
+        "atk": 1104,
+        "def": 1104,
+        "rec": 1104
+      }
+    },
+    {
+      "unitId": 50014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2307,
+        "atk": 939,
+        "def": 939,
+        "rec": 939
+      },
+      "lordAtMax": {
+        "hp": 3730,
+        "atk": 1325,
+        "def": 1325,
+        "rec": 1325
+      }
+    },
+    {
+      "unitId": 50015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3086,
+        "atk": 1192,
+        "def": 1192,
+        "rec": 1192
+      },
+      "lordAtMax": {
+        "hp": 5035,
+        "atk": 1605,
+        "def": 1605,
+        "rec": 1605
+      }
+    },
+    {
+      "unitId": 50021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 980,
+        "atk": 570,
+        "def": 570,
+        "rec": 180
+      },
+      "lordAtMax": {
+        "hp": 1829,
+        "atk": 855,
+        "def": 855,
+        "rec": 270
+      }
+    },
+    {
+      "unitId": 50022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1376,
+        "atk": 770,
+        "def": 770,
+        "rec": 243
+      },
+      "lordAtMax": {
+        "hp": 2508,
+        "atk": 1040,
+        "def": 1040,
+        "rec": 502
+      }
+    },
+    {
+      "unitId": 50023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1988,
+        "atk": 936,
+        "def": 936,
+        "rec": 452
+      },
+      "lordAtMax": {
+        "hp": 2840,
+        "atk": 1280,
+        "def": 1290,
+        "rec": 634
+      }
+    },
+    {
+      "unitId": 50024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2158,
+        "atk": 1087,
+        "def": 1096,
+        "rec": 538
+      },
+      "lordAtMax": {
+        "hp": 3880,
+        "atk": 1567,
+        "def": 1578,
+        "rec": 918
+      }
+    },
+    {
+      "unitId": 50025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 3043,
+        "atk": 1332,
+        "def": 1341,
+        "rec": 780
+      },
+      "lordAtMax": {
+        "hp": 5248,
+        "atk": 1905,
+        "def": 1878,
+        "rec": 1500
+      }
+    },
+    {
+      "unitId": 50041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1310,
+        "atk": 327,
+        "def": 513,
+        "rec": 510
+      },
+      "lordAtMax": {
+        "hp": 2460,
+        "atk": 633,
+        "def": 765,
+        "rec": 837
+      }
+    },
+    {
+      "unitId": 50042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2266,
+        "atk": 498,
+        "def": 718,
+        "rec": 789
+      },
+      "lordAtMax": {
+        "hp": 3880,
+        "atk": 639,
+        "def": 1030,
+        "rec": 1269
+      }
+    },
+    {
+      "unitId": 60011,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1500,
+        "atk": 430,
+        "def": 530,
+        "rec": 120
+      },
+      "lordAtMax": {
+        "hp": 2775,
+        "atk": 602,
+        "def": 795,
+        "rec": 216
+      }
+    },
+    {
+      "unitId": 60012,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2228,
+        "atk": 542,
+        "def": 715,
+        "rec": 195
+      },
+      "lordAtMax": {
+        "hp": 3245,
+        "atk": 826,
+        "def": 956,
+        "rec": 423
+      }
+    },
+    {
+      "unitId": 60013,
+      "maxLevel": 60,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2651,
+        "atk": 743,
+        "def": 860,
+        "rec": 381
+      },
+      "lordAtMax": {
+        "hp": 3979,
+        "atk": 995,
+        "def": 1190,
+        "rec": 572
+      }
+    },
+    {
+      "unitId": 60014,
+      "maxLevel": 80,
+      "expPatternId": 10,
+      "base": {
+        "hp": 3127,
+        "atk": 845,
+        "def": 1011,
+        "rec": 487
+      },
+      "lordAtMax": {
+        "hp": 4876,
+        "atk": 1198,
+        "def": 1400,
+        "rec": 755
+      }
+    },
+    {
+      "unitId": 60015,
+      "maxLevel": 100,
+      "expPatternId": 10,
+      "base": {
+        "hp": 4118,
+        "atk": 1077,
+        "def": 1260,
+        "rec": 678
+      },
+      "lordAtMax": {
+        "hp": 5942,
+        "atk": 1483,
+        "def": 1659,
+        "rec": 960
+      }
+    },
+    {
+      "unitId": 60021,
+      "maxLevel": 30,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1000,
+        "atk": 650,
+        "def": 210,
+        "rec": 250
+      },
+      "lordAtMax": {
+        "hp": 1850,
+        "atk": 1008,
+        "def": 305,
+        "rec": 400
+      }
+    },
+    {
+      "unitId": 60022,
+      "maxLevel": 40,
+      "expPatternId": 15,
+      "base": {
+        "hp": 1395,
+        "atk": 907,
+        "def": 275,
+        "rec": 360
+      },
+      "lordAtMax": {
+        "hp": 2540,
+        "atk": 1131,
+        "def": 533,
+        "rec": 600
+      }
+    },
+    {
+      "unitId": 60023,
+      "maxLevel": 60,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2016,
+        "atk": 1018,
+        "def": 480,
+        "rec": 540
+      },
+      "lordAtMax": {
+        "hp": 2993,
+        "atk": 1472,
+        "def": 659,
+        "rec": 728
+      }
+    },
+    {
+      "unitId": 60024,
+      "maxLevel": 80,
+      "expPatternId": 15,
+      "base": {
+        "hp": 2288,
+        "atk": 1251,
+        "def": 560,
+        "rec": 618
+      },
+      "lordAtMax": {
+        "hp": 3682,
+        "atk": 1948,
+        "def": 928,
+        "rec": 961
+      }
+    },
+    {
+      "unitId": 60025,
+      "maxLevel": 100,
+      "expPatternId": 20,
+      "base": {
+        "hp": 2875,
+        "atk": 1656,
+        "def": 789,
+        "rec": 817
+      },
+      "lordAtMax": {
+        "hp": 5099,
+        "atk": 2600,
+        "def": 1353,
+        "rec": 1511
+      }
+    },
+    {
+      "unitId": 60041,
+      "maxLevel": 30,
+      "expPatternId": 10,
+      "base": {
+        "hp": 1215,
+        "atk": 459,
+        "def": 378,
+        "rec": 421
+      },
+      "lordAtMax": {
+        "hp": 2315,
+        "atk": 772,
+        "def": 630,
+        "rec": 672
+      }
+    },
+    {
+      "unitId": 60042,
+      "maxLevel": 40,
+      "expPatternId": 10,
+      "base": {
+        "hp": 2137,
+        "atk": 590,
+        "def": 663,
+        "rec": 718
+      },
+      "lordAtMax": {
+        "hp": 3741,
+        "atk": 716,
+        "def": 958,
+        "rec": 1133
+      }
+    }
+  ],
+  "unitTypeRaw": [
+    {
+      "unitTypeId": 1,
+      "unitTypeHpRaw": "0,0",
+      "unitTypeAtkRaw": "0,0",
+      "unitTypeDefRaw": "0,0",
+      "unitTypeRecRaw": "0,0",
+      "unitTypeChanceRaw": "23.00",
+      "unknownRaw": "1.00"
+    },
+    {
+      "unitTypeId": 2,
+      "unitTypeHpRaw": "5,10",
+      "unitTypeAtkRaw": "0,0",
+      "unitTypeDefRaw": "0,0",
+      "unitTypeRecRaw": "-3,-1",
+      "unitTypeChanceRaw": "23.00",
+      "unknownRaw": "2.00"
+    },
+    {
+      "unitTypeId": 3,
+      "unitTypeHpRaw": "0,0",
+      "unitTypeAtkRaw": "1,3",
+      "unitTypeDefRaw": "-3,-1",
+      "unitTypeRecRaw": "0,0",
+      "unitTypeChanceRaw": "22.00",
+      "unknownRaw": "1.00"
+    },
+    {
+      "unitTypeId": 4,
+      "unitTypeHpRaw": "0,0",
+      "unitTypeAtkRaw": "0,0",
+      "unitTypeDefRaw": "1,3",
+      "unitTypeRecRaw": "-2,0",
+      "unitTypeChanceRaw": "22.00",
+      "unknownRaw": "1.00"
+    },
+    {
+      "unitTypeId": 5,
+      "unitTypeHpRaw": "0,0",
+      "unitTypeAtkRaw": "0,0",
+      "unitTypeDefRaw": "-2,0",
+      "unitTypeRecRaw": "2,4",
+      "unitTypeChanceRaw": "10.00",
+      "unknownRaw": "0.50"
+    },
+    {
+      "unitTypeId": 6,
+      "unitTypeHpRaw": "10,15",
+      "unitTypeAtkRaw": "1,2",
+      "unitTypeDefRaw": "1,2",
+      "unitTypeRecRaw": "1,2",
+      "unitTypeChanceRaw": "0.00",
+      "unknownRaw": "0.75"
+    }
+  ]
+}
