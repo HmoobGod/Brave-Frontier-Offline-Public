@@ -71,7 +71,7 @@ with sync_playwright() as pw:
  assert p.evaluate('demoLevel(P.unitExp[10011])')>40
  before=p.evaluate("""()=>({
    player:JSON.stringify(P),
-   local:localStorage.getItem('bf_global_offline_demo_v7')
+   local:(()=>{try{return localStorage.getItem('bf_global_offline_demo_v7')}catch(_){return null}})()
  })""")
  p.evaluate('reset()')
  rows=p.evaluate("""()=>S.party.map(u=>({
@@ -118,7 +118,7 @@ with sync_playwright() as pw:
  p.evaluate('delete P.evolutions[10011];reset()')
  after=p.evaluate("""()=>({
    player:JSON.stringify(P),
-   local:localStorage.getItem('bf_global_offline_demo_v7')
+   local:(()=>{try{return localStorage.getItem('bf_global_offline_demo_v7')}catch(_){return null}})()
  })""")
  assert before==after,(before,after)
  p.locator('#bf11300-original-level-caps').evaluate('(el)=>el.open=true')
