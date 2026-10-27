@@ -1,0 +1,156 @@
+{
+  "schema": "bf-global-st-lamia-2022-raw-encounter-refs-v109",
+  "provenance": {
+    "archive": "mst-decoded.zip",
+    "masterFile": "3-mst-translated/F_MISSION_MST_1_Ver1118.json",
+    "masterSha256": "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83",
+    "column": "MISSION_8f4NYKxb",
+    "limitation": "Opaque mission group identifiers, NOT decoded enemy identities, wave positions, random encounter weights or native drop rates."
+  },
+  "rows": [
+    {
+      "missionId": 300,
+      "rawEncounterRef": "3:30100,0:30101"
+    },
+    {
+      "missionId": 301,
+      "rawEncounterRef": "3:30100,0:30101"
+    },
+    {
+      "missionId": 302,
+      "rawEncounterRef": "3:30100,0:30101"
+    },
+    {
+      "missionId": 303,
+      "rawEncounterRef": "3:30100,0:30101"
+    },
+    {
+      "missionId": 304,
+      "rawEncounterRef": "3:30100,0:30101"
+    },
+    {
+      "missionId": 310,
+      "rawEncounterRef": "3:30200,1:30201"
+    },
+    {
+      "missionId": 311,
+      "rawEncounterRef": "3:30200,1:30201"
+    },
+    {
+      "missionId": 312,
+      "rawEncounterRef": "3:30200,1:30201"
+    },
+    {
+      "missionId": 313,
+      "rawEncounterRef": "3:30200,1:30201"
+    },
+    {
+      "missionId": 314,
+      "rawEncounterRef": "3:30200,1:30201"
+    },
+    {
+      "missionId": 320,
+      "rawEncounterRef": "3:30300,2:30301"
+    },
+    {
+      "missionId": 321,
+      "rawEncounterRef": "3:30300,2:30301"
+    },
+    {
+      "missionId": 322,
+      "rawEncounterRef": "3:30300,2:30301"
+    },
+    {
+      "missionId": 323,
+      "rawEncounterRef": "3:30300,2:30301"
+    },
+    {
+      "missionId": 324,
+      "rawEncounterRef": "3:30300,2:30301"
+    },
+    {
+      "missionId": 330,
+      "rawEncounterRef": "1:30400,0:30401"
+    },
+    {
+      "missionId": 331,
+      "rawEncounterRef": "1:30400,0:30401"
+    },
+    {
+      "missionId": 332,
+      "rawEncounterRef": "1:30400,0:30401"
+    },
+    {
+      "missionId": 333,
+      "rawEncounterRef": "1:30400,0:30401"
+    },
+    {
+      "missionId": 334,
+      "rawEncounterRef": "1:30400,0:30401"
+    },
+    {
+      "missionId": 340,
+      "rawEncounterRef": "3:30500,0:30501"
+    },
+    {
+      "missionId": 341,
+      "rawEncounterRef": "3:30500,0:30501"
+    },
+    {
+      "missionId": 342,
+      "rawEncounterRef": "3:30500,0:30501"
+    },
+    {
+      "missionId": 343,
+      "rawEncounterRef": "3:30500,0:30501"
+    },
+    {
+      "missionId": 344,
+      "rawEncounterRef": "3:30500,0:30501"
+    },
+    {
+      "missionId": 350,
+      "rawEncounterRef": "3:30600,0:30601"
+    },
+    {
+      "missionId": 351,
+      "rawEncounterRef": "3:30600,0:30601"
+    },
+    {
+      "missionId": 352,
+      "rawEncounterRef": "3:30600,0:30601"
+    },
+    {
+      "missionId": 353,
+      "rawEncounterRef": "3:30600,0:30601"
+    },
+    {
+      "missionId": 354,
+      "rawEncounterRef": "3:30600,0:30601"
+    },
+    {
+      "missionId": 360,
+      "rawEncounterRef": "3:30700"
+    },
+    {
+      "missionId": 361,
+      "rawEncounterRef": "3:30700"
+    },
+    {
+      "missionId": 362,
+      "rawEncounterRef": "3:30700"
+    },
+    {
+      "missionId": 363,
+      "rawEncounterRef": "3:30700"
+    },
+    {
+      "missionId": 364,
+      "rawEncounterRef": "3:30700"
+    },
+    {
+      "missionId": 365,
+      "rawEncounterRef": "3:30700"
+    }
+  ]
+}
