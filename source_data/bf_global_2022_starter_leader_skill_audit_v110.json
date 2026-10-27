@@ -1,0 +1,291 @@
+{
+  "schema": "bf-global-2022-starter-leader-skill-audit-v110",
+  "provenance": {
+    "zipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "unitMaster1": {
+      "file": "3-mst-translated/F_UNIT_MST_1_Ver1084.json",
+      "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+    },
+    "unitMaster2": {
+      "file": "3-mst-translated/F_UNIT_MST_2_Ver1084.json",
+      "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+    },
+    "leaderMaster": {
+      "file": "3-mst-translated/F_LEADER_SKILL_MST_Ver749.json",
+      "sha256": "65e591557264d656be2408e9c426ef35050b960f1736a488da8f0a55a5e845fe"
+    },
+    "note": "Only source-identified six starter lines with simple 2022 elemental ATK/HP leader skills. Does not imply ability to apply these to native combat without verifying party construction."
+  },
+  "rows": [
+    {
+      "unitId": 10011,
+      "element": 1,
+      "lsId": 100,
+      "skillTypeId": 2,
+      "rawPassive": "1,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 10012,
+      "element": 1,
+      "lsId": 100,
+      "skillTypeId": 2,
+      "rawPassive": "1,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 10013,
+      "element": 1,
+      "lsId": 101,
+      "skillTypeId": 2,
+      "rawPassive": "1,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 10014,
+      "element": 1,
+      "lsId": 101,
+      "skillTypeId": 2,
+      "rawPassive": "1,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 10015,
+      "element": 1,
+      "lsId": 102,
+      "skillTypeId": 2,
+      "rawPassive": "1,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    },
+    {
+      "unitId": 20011,
+      "element": 2,
+      "lsId": 110,
+      "skillTypeId": 2,
+      "rawPassive": "2,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 20012,
+      "element": 2,
+      "lsId": 110,
+      "skillTypeId": 2,
+      "rawPassive": "2,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 20013,
+      "element": 2,
+      "lsId": 111,
+      "skillTypeId": 2,
+      "rawPassive": "2,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 20014,
+      "element": 2,
+      "lsId": 111,
+      "skillTypeId": 2,
+      "rawPassive": "2,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 20015,
+      "element": 2,
+      "lsId": 112,
+      "skillTypeId": 2,
+      "rawPassive": "2,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    },
+    {
+      "unitId": 30011,
+      "element": 3,
+      "lsId": 120,
+      "skillTypeId": 2,
+      "rawPassive": "3,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 30012,
+      "element": 3,
+      "lsId": 120,
+      "skillTypeId": 2,
+      "rawPassive": "3,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 30013,
+      "element": 3,
+      "lsId": 121,
+      "skillTypeId": 2,
+      "rawPassive": "3,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 30014,
+      "element": 3,
+      "lsId": 121,
+      "skillTypeId": 2,
+      "rawPassive": "3,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 30015,
+      "element": 3,
+      "lsId": 122,
+      "skillTypeId": 2,
+      "rawPassive": "3,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    },
+    {
+      "unitId": 40011,
+      "element": 4,
+      "lsId": 130,
+      "skillTypeId": 2,
+      "rawPassive": "4,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 40012,
+      "element": 4,
+      "lsId": 130,
+      "skillTypeId": 2,
+      "rawPassive": "4,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 40013,
+      "element": 4,
+      "lsId": 131,
+      "skillTypeId": 2,
+      "rawPassive": "4,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 40014,
+      "element": 4,
+      "lsId": 131,
+      "skillTypeId": 2,
+      "rawPassive": "4,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 40015,
+      "element": 4,
+      "lsId": 132,
+      "skillTypeId": 2,
+      "rawPassive": "4,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    },
+    {
+      "unitId": 50011,
+      "element": 5,
+      "lsId": 140,
+      "skillTypeId": 2,
+      "rawPassive": "5,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 50012,
+      "element": 5,
+      "lsId": 140,
+      "skillTypeId": 2,
+      "rawPassive": "5,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 50013,
+      "element": 5,
+      "lsId": 141,
+      "skillTypeId": 2,
+      "rawPassive": "5,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 50014,
+      "element": 5,
+      "lsId": 141,
+      "skillTypeId": 2,
+      "rawPassive": "5,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 50015,
+      "element": 5,
+      "lsId": 142,
+      "skillTypeId": 2,
+      "rawPassive": "5,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    },
+    {
+      "unitId": 60011,
+      "element": 6,
+      "lsId": 150,
+      "skillTypeId": 2,
+      "rawPassive": "6,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 60012,
+      "element": 6,
+      "lsId": 150,
+      "skillTypeId": 2,
+      "rawPassive": "6,0,25,0,0,0,0",
+      "atkPercent": 25,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 60013,
+      "element": 6,
+      "lsId": 151,
+      "skillTypeId": 2,
+      "rawPassive": "6,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 60014,
+      "element": 6,
+      "lsId": 151,
+      "skillTypeId": 2,
+      "rawPassive": "6,0,50,0,0,0,0",
+      "atkPercent": 50,
+      "hpPercent": 0
+    },
+    {
+      "unitId": 60015,
+      "element": 6,
+      "lsId": 152,
+      "skillTypeId": 2,
+      "rawPassive": "6,0,50,0,0,0,10",
+      "atkPercent": 50,
+      "hpPercent": 10
+    }
+  ]
+}
