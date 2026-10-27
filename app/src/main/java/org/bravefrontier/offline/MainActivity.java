@@ -892,6 +892,14 @@ public class MainActivity extends Activity {
                 } catch (IOException leaderError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader-skill audit unavailable", leaderError);
                 }
+                // v111: original-source matching-element ATK/HP effects on
+                // newly constructed ARCHIVE DEMO squads only; no saved fields.
+                try {
+                    String leaderCombat = readPackagedText("bf11100_original_starter_leader_combat.js");
+                    view.evaluateJavascript(leaderCombat, null);
+                } catch (IOException leaderCombatError) {
+                    android.util.Log.w("BraveFrontier", "Optional original leader combat unavailable", leaderCombatError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {

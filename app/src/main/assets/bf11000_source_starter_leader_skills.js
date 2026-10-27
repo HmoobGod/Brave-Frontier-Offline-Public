@@ -78,11 +78,21 @@
  panel.append(heading,status,targets,caution);host.after(panel);
  function refresh(){
    const state=snapshot();
+   const archiveCombat=!!window.BFGlobalStarterLeaderCombatV11100;
+   caution.textContent=archiveCombat?
+     'Original 2022 source effects for 30 starter forms. Matching-element '+
+     'ATK/HP bonuses are applied to NEW archive DEMO squads; training is '+
+     'unchanged. Native damage, stat rounding and other leaders remain unverified.':
+     '2022 original data for 30 starter unit forms only. '+
+     'ATK +25%/+50% and 6★ HP +10% for same-element units. '+
+     'Source-qualified preview, NOT applied to combat yet. '+
+     'Unknown leaders and other unit forms fail closed. '+
+     'No squad, HP, ATK, save or rewards are changed.';
    status.textContent=state.leader?
      ('Slot 1 leader form #'+state.leaderId+' · Leader Skill #'+
        state.leader.lsId+' · matching element +'+
        state.leader.atkPercent+'% ATK / +'+
-       state.leader.hpPercent+'% max HP (reference only)'):
+       state.leader.hpPercent+'% max HP '+(archiveCombat?'(archive DEMO battles)':'(reference only)')):
      'Selected leader is not among the 30 source-verified starter forms.';
    targets.replaceChildren();
    if(panel.open){
@@ -91,7 +101,7 @@
        line.textContent='Squad slot '+(i+1)+' · Unit #'+
          (slot.currentId??'?')+' · '+
          (slot.effect?('ATK +'+slot.effect.atkPercent+
-           '% / HP +'+slot.effect.hpPercent+'% (not applied)'):
+           '% / HP +'+slot.effect.hpPercent+'% '+(archiveCombat?'(new archive battles)':'(not applied)')):
            'No verified leader bonus in this subset');
        targets.append(line);
      });
