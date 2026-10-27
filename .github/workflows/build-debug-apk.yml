@@ -104,6 +104,9 @@ jobs:
           python3 patch_bf_original_atk_bb_levels_v7100.py
           python3 prepare_original_lord_stats_v116.py
           python3 prepare_original_seven_star_water_visual_v129.py
+          # Catch JavaScript parser regressions before the long Chromium suite.
+          node --check app/src/main/assets/bf_global_unit_archive.js
+          node --check app/src/main/assets/bf12900_original_seven_star_water_visual.js
       - name: Prepare verified BF1 Global home sprites
         run: |
           python3 prepare_original_home_assets.py
