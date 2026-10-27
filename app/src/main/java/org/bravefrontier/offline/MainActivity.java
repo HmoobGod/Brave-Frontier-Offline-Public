@@ -959,6 +959,14 @@ public class MainActivity extends Activity {
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
                 }
+                // v126: show original 2022 playable squad cost totals (advisory).
+                // No unverified summoner-capacity limits or roster mutations.
+                try {
+                    String squadCost = readPackagedText("bf12600_original_squad_cost.js");
+                    view.evaluateJavascript(squadCost, null);
+                } catch (IOException squadCostError) {
+                    android.util.Log.w("BraveFrontier", "Optional original squad cost unavailable", squadCostError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
