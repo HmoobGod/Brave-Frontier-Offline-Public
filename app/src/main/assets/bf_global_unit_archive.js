@@ -107,6 +107,19 @@
       'Original Imp bonus caps · HP +'+imp[0]+' · ATK +'+imp[1]+' · DEF +'+imp[2]+' · REC +'+imp[3]+
       ' · source reference only; demo enhancement is unchanged.'));
 
+    // v125: source-authenticated 2022 normal attack frame evidence. Nothing here
+    // affects damage, playable recruitment, attack speed, RNG, XP, or player saves.
+    const originalNormal=window.BFGlobalOriginalNormalHitArchiveV12500?.lookup?.(id);
+    if(originalNormal){
+      const frameDetail=document.createElement('details');
+      frameDetail.className='bf-codex-bb-levels';
+      frameDetail.append(item('summary','','ORIGINAL NORMAL ATTACK FRAMES · '+originalNormal.events.length+' HITS'));
+      frameDetail.append(item('p','bf-codex-note',
+        'Original 2022 frame-tick and damage-weight references, NOT verified playback seconds or native damage calculation. This archive reference does not recruit or activate units.'));
+      frameDetail.append(item('p','',originalNormal.events.map(e=>e[0]+' ticks · '+e[1]+'% weight').join(' | ')));
+      detail.append(frameDetail);
+    }
+
     const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
     if(Number.isSafeInteger(expPattern)&&[10,15,20].includes(expPattern))
       detail.append(item('p','','Original EXP pattern ID '+expPattern+
