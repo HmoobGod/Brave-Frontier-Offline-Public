@@ -15,11 +15,8 @@
    document.getElementById('bf2000-run');
  if(!host)return;
  const freeze=Object.freeze;
- function eligibleHit(kind,e) {
-   return e&&e.landed===true&&Number.isSafeInteger(e.appliedDamage)&&
-     e.appliedDamage>0&&Number.isSafeInteger(e.baseDamage)&&e.baseDamage>0&&
-     Number.isSafeInteger(e.resultDamage)&&e.resultDamage>=e.appliedDamage&&
-     e.critical===true||e&&e.landed===true&&e.critical===false&&
+ function eligibleHit(e) {
+   return !!e&&e.landed===true&&typeof e.critical==='boolean'&&
      Number.isSafeInteger(e.appliedDamage)&&e.appliedDamage>0&&
      Number.isSafeInteger(e.baseDamage)&&e.baseDamage>0&&
      Number.isSafeInteger(e.resultDamage)&&e.resultDamage>=e.appliedDamage;
@@ -54,7 +51,7 @@
           h.baseDamage<0||!Number.isSafeInteger(h.resultDamage)||
           h.resultDamage<0)return null;
        if(h.landed){
-         if(gap||!eligibleHit(kind,h))return null;
+         if(gap||!eligibleHit(h))return null;
          landed++;applied+=h.appliedDamage;
          if(h.critical)criticalHits++;
        }else{
