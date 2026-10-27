@@ -141,7 +141,6 @@
       detail.append(frames);
     }
 
-    const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
     // v129: the original 7-star Water sprite is source-derived, but its
     // blend/transform compositing is a VISUAL RECONSTRUCTION only.
     const visual=id===20016?window.BFGlobalOriginalSevenStarWaterVisualV12900:null;
