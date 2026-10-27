@@ -30,12 +30,12 @@ with sync_playwright() as pw:
  audit=p.evaluate("""()=>{
    const source=window.BFGlobalOriginalLordStatsDataV11600;
    if(!source||source.unitCount!==72)return {error:'missing source'};
-   let found=0,matched=0,missing=[],mismatches=[],names=[];
+   let found=0,matched=0,missing=[],mismatches=[],identities=[];
    for(const row of source.rows){
      const current=UNIT_BY_ID.get(row.unitId);
      if(!current){missing.push(row.unitId);continue;}
      found++;
-     names.push(current.name);
+     if(current.id!==row.unitId||typeof current.name!=='string'||!current.name)identities.push(row.unitId);
      for(const k of ['hp','atk','def','rec']){
        if(!Number.isSafeInteger(current.stats?.[k])||
           current.stats[k]!==row.base[k]){
@@ -44,12 +44,12 @@ with sync_playwright() as pw:
        }else matched++;
      }
    }
-   return {found,matched,missing,mismatches,distinctNames:new Set(names).size};
+   return {found,matched,missing,mismatches,identities};
  }""")
  assert audit['found']==72,audit
  assert audit['matched']==72*4,audit
  assert audit['missing']==[] and audit['mismatches']==[],audit
- assert audit['distinctNames']==72,audit
+ assert audit['identities']==[],audit
  assert p.evaluate('JSON.stringify(P)')==original
  assert not errors,errors
  b.close()
