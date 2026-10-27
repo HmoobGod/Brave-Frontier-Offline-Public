@@ -78,6 +78,7 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.references("30100")')==[300,301,302,303,304]
  assert p.evaluate(api+'.references("10100")')==[1,2,10,11,12]
  assert p.evaluate(api+'.lookup(399)') is None
+ p.locator('#bf10800-encounter-ledger > summary').click()
  p.locator('#bf10800-mission').select_option('365')
  assert '3:30700' in p.locator('#bf10800-raw').inner_text()
  assert p.evaluate('JSON.stringify(P)')==p.evaluate('window.__start109')
