@@ -67,10 +67,10 @@ with sync_playwright() as pw:
  summary=p.evaluate(api+'.snapshot()')
  x=summary['recent'][0]
  assert x['landedHits']==1 and x['sourceHits']==3
- assert x['eligibleBCChecks']==2 and x['excludedBCChecks']==4
+ assert x['eligibleBCChecks']==2 and x['unverifiedPostKOBCChecks']==4
  assert x['eligibleHCChecks']==1 and x['skippedPostKO']==2
  assert summary['totals']['eligibleBCChecks']==2
- assert summary['totals']['excludedPostKOBCChecks']==4
+ assert summary['totals']['unverifiedPostKOBCChecks']==4
  # Source one-hit unit (e.g. thunder 40011) is independently eligible.
  p.evaluate("""()=>{
   __one107.push({unitId:40011,wave:1,round:1,
@@ -93,7 +93,7 @@ with sync_playwright() as pw:
      resultDamage:10,appliedDamage:10}]});
  }""")
  x=p.evaluate(api+'.snapshot().recent.at(-1)')
- assert x['eligibleBCChecks']==6 and x['excludedBCChecks']==0
+ assert x['eligibleBCChecks']==6 and x['unverifiedPostKOBCChecks']==0
  assert x['criticalHits']==1
  # Reject data that looks like a source hit but claims post-KO criticals.
  p.evaluate("""()=>{
@@ -110,7 +110,7 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.audit(__one107[0],"bb")') is None
  p.locator('#bf10700-landed-crystals > summary').click()
  p.wait_for_function("""()=>document.querySelector('#bf10700-totals').textContent.includes('potential BC checks')""")
- assert 'post-KO BC checks excluded' in p.locator('#bf10700-totals').inner_text()
+ assert 'post-KO BC checks outside confirmed landed baseline' in p.locator('#bf10700-totals').inner_text()
  p.evaluate('S.mode="training"')
  assert p.evaluate(api+'.snapshot().active') is False
  assert p.evaluate("""()=>{
