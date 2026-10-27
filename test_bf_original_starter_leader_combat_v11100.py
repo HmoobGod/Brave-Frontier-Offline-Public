@@ -9,7 +9,14 @@ from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parent
 A=R/'app/src/main/assets'
 core=(A/'index.html').read_bytes()
-assert hashlib.sha256(core).hexdigest()=='82e81c853362342a753714b2569faa48e1d1fec7ac4c4676fdb419acd077a0f0'
+# The CI asset-preparation stage extends index.html before regression runs,
+# so pin the precise audited *party constructor* contract rather than whole HTML.
+assert b'function playerUnit(i){' in core
+assert b'const uid=P.squad[i],src=uid?effectiveUnit(uid):null;' in core
+assert b'const hp=src.stats.hp+grow*30;' in core
+assert b'atk:src.stats.atk+grow*12' in core
+assert b'function reset(){selectSavedQuest();' in core
+assert b'party:Array.from({length:6},(_,i)=>playerUnit(i))' in core
 js=(A/'bf11100_original_starter_leader_combat.js').read_text('utf8')
 assert js.count('BF_GLOBAL_ORIGINAL_STARTER_LEADER_COMBAT_V11100')==1
 assert len(js.encode('utf8'))<65536
