@@ -156,6 +156,7 @@ jobs:
           python test_bf_original_starter_7_8_source_v12700.py
           python test_bf_original_starter_cgg_cgs_v12800.py
           python test_bf_original_7star_water_visual_v12900.py
+          python test_bf_original_starter_typed_evolution_v13000.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
