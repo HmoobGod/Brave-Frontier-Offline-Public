@@ -142,6 +142,7 @@ jobs:
           python test_bf_original_playable_stat_catalog_v11700.py
           python test_bf_original_exp_type_source_v11800.py
           python test_bf_original_exp_readonly_crosscheck_v11900.py
+          python test_bf_original_all_unit_stat_archive_v12000.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
