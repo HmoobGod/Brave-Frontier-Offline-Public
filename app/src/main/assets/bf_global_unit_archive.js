@@ -10,6 +10,31 @@
   if(archive.schema!=='bf-global-unit-archive-2022-v1' || archive.units.length!==2291)return;
   const units=archive.units;
   const byId=new Map(units.map(u=>[u.id,u]));
+  // v123: compact source-verified 2022 Imp *bonus cap metadata* only.
+  // 2291 indexed bytes + 147 unique big-endian uint16x4 tuples. No enhancement
+  // engine, saved unit stat write or numeric experience migration is involved.
+  const originalImpCaps=(()=>{
+    try{
+      const ids=[...byId.keys()].sort((a,b)=>a-b);
+      if(ids.length!==2291||ids[0]!==1||ids[1]!==10011||ids.at(-1)!==87602603)return null;
+      const which=atob('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');
+      const data=atob('AAAAAAAAAAAAZAEYACgAKACWACgAKABkAJYAKABQADwAlgA8ADwAPACWADwAPAEsAJYAUAAoADwAlgEsADwAPADIACgAKAAoAMgAUABQAFAAyABQAFABkADIAKAAUACgAMgAoACgAFAAyAGQAFAAUAD6AFAAUACMAPoAUAB4AGQA+gBkAGQAZAD6AGQAZAH0APoAeABQAGQA+gB4AHgAeAD6AfQAZABkASwAUABQAFABLABQAKAAeAEsAGQAZACgASwAeAB4AHgBLACgAFAAeAEsAMgAeADIASwAyADIAHgBXgDIAKAAjAFeANwAjACMAV4BBACMAQQBXgEEAQQAjAGQAGQAZABkAZAAeADIAKABkACMAIwAyAGQAKAAUABQAZAAoACgAKABkADIAHgAoAGQAMgAjAB4AZAC0ACgAKABwgCgALQAeAHCALQAjACgAcIAtAC0ASwBwgDIAMgBQAHCAPAAoADIAcIA8ADIALQBwgEEALQAtAH0AHgAeAB4AfQAjAEEAMgB9ACgAKABGAH0ALQAtADwAfQAyAB4AHgB9ADIAMgAyAH0AMgAyAEEAfQAyADcAKAB9ADIAQQAjAH0ANwAtADIAfQA8AC0AKAB9AEEAIwAyAH0AQQAyACMAfQBGACMARgB9AFAAIwAjAH0AZAAZABkAfQBkADIAZAB9AGQAZAAyAImANwA3AFUAlgAeAB4AHgCWADcANwBVAJYANwA3AFoAooBaAEsAVQCvADwAIwAjAK8AVQBLAEYArwBaAEYARgCvAJEARgCRAK8AkQCRAEYArwFUAEYARgC7gCMAIwAjALuAKAAoACgAu4AyAGQASwC7gDwAPABpALuAQQA8AGQAu4BGAFAASwC7gEsASwBLALuASwBLAFoAu4BLAEsAtAC7gEsAVQBBALuASwBkADIAu4BQAEsAUAC7gFUAPABLALuAVQBBAEsAu4BVAEYAQQC7gFUASwBLALuAV4AyAFeAu4BkADIASwC7gGQASwAyALuAfQAyADIA4QBaADIAMgDhAIIAWgBaAPoAMgAyADIA+gA8AGQAjAD6ADwAjABkAPoASwCWAGQA+gBQAFAAjAD6AFUAVQCbAPoAZABkAGQA+gBkAJYASwD6AIIAbgBkAPoAjAA8AGQA+gCWAEsAZAD6AJYAZABLAPoArwBGAF8A+gCvAEsASwD6ANIAZADSAPoA0gDSAGQBBoB4AG4AaQETAG4AbgBuARMAfQBLAH0BEwCCAGQAZAEsAHgAQQBBATiASwBLAEsBOIBkAMgAfQE4gHMAcwDNATiAfQCWAGQBOIB9AMgAZAE4gMgAZAB9ATiAyAB9AGQBOIDIAH0AfQE4gOEAZABkATiA+gBkAH0BRQETAIIBEwFFARMBEwCCAVGAVQCgADwBdwBLAEsASwF3AG4AvgCWAXcAlgCWAJYBdwC+AG4AlgF3AMgAfQB9AZAAjACMAAABqQCqAFoAWgG1gH0AyABkAfQAZABkAGQB9ADIAAAAZAH0AMgAyADIAfQA8ACgAMgCJgDcAHMAcwJYALQAtAAAAu4BLAEsASw');
+      if(which.length!==2291||data.length!==1176)return null;
+      const choices=[];
+      for(let i=0;i<147;i++){
+        const row=[];
+        for(let k=0;k<4;k++){const at=i*8+k*2;row.push((data.charCodeAt(at)<<8)|data.charCodeAt(at+1));}
+        choices.push(Object.freeze(row));
+      }
+      const out=new Map();
+      for(let i=0;i<2291;i++){
+        const code=which.charCodeAt(i);
+        if(code>=147)return null;
+        out.set(ids[i],choices[code]);
+      }
+      return out;
+    }catch(_){return null;}
+  })();
   // Hash-validated English strings, lore and precise evolution *references*.
   // Never evaluate archived skill formulas or mutate player records.
   let codex=null;
@@ -75,6 +100,13 @@
     close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();});
     detail.append(close,item('h4','',u.name),item('p','','Original unit ID '+u.id+' · '+(elements[u.element]||'Element '+u.element)+' · '+u.rarity+'★'));
     detail.append(item('p','', 'Max level '+fmt(u.unitMaxLevel)+' · Cost '+fmt(u.unitCost)+' · '+(u.nameSource==='2022_Global_English'?'2022 Global English localization':u.nameSource==='master_literal'?'Literal master-table name':'Original English name not recovered')));
+    // Original 2022 source Imp cap values are displayed as archival reference;
+    // the offline demo does not apply these caps or mutate existing unit stats.
+    const imp=originalImpCaps?.get(id);
+    if(imp)detail.append(item('p','',
+      'Original Imp bonus caps · HP +'+imp[0]+' · ATK +'+imp[1]+' · DEF +'+imp[2]+' · REC +'+imp[3]+
+      ' · source reference only; demo enhancement is unchanged.'));
+
     const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
     if(Number.isSafeInteger(expPattern)&&[10,15,20].includes(expPattern))
       detail.append(item('p','','Original EXP pattern ID '+expPattern+
@@ -205,6 +237,7 @@
   render();
   window.BFGlobalUnitArchive=Object.freeze({
     get count(){return units.length;},
+    originalImpCaps:id=>originalImpCaps?.get(Number(id))||null,
     get thumbnailCount(){return archive.stats.thumbnailCount;},
     get loreCount(){return codex ? [...codex.values()].filter(u=>!!u.story).length : 0;},
     get originalCodexAvailable(){return codex!==null;},
