@@ -37,7 +37,7 @@
         '<label>Search by name or unit ID<input id="bf-archive-search" type="search" autocomplete="off" placeholder="Vargas, Miku, 810547…" /></label>',
         '<label>Element<select id="bf-archive-element"><option value="all">All elements</option><option value="1">Fire</option><option value="2">Water</option><option value="3">Earth</option><option value="4">Thunder</option><option value="5">Light</option><option value="6">Dark</option></select></label>',
         '<label>Rarity<select id="bf-archive-rarity"><option value="all">All rarities</option></select></label>',
-        '<label>Record type<select id="bf-archive-type"><option value="all">All original records</option><option value="0">Standard unit entries</option><option value="1">Special/material entries</option></select></label>',
+        '<label>Record type<select id="bf-archive-type"><option value="all">All original records</option><option value="0">Standard unit entries</option><option value="other">Other original kind codes</option></select></label>',
         '<label>Sort<select id="bf-archive-sort"><option value="id">Original ID</option><option value="name">English name</option><option value="rarity">Highest rarity</option></select></label>',
       '</div>',
       '<div id="bf-archive-count" role="status" aria-live="polite"></div>',
@@ -61,7 +61,7 @@
     const q=search.value.trim().toLocaleLowerCase();
     const data=units.filter(u=>(element.value==='all'||u.element===Number(element.value)) &&
       (rarity.value==='all'||u.rarity===Number(rarity.value)) &&
-      (kind.value==='all'||u.unitKind===Number(kind.value)) &&
+      (kind.value==='all'||(kind.value==='0'?u.unitKind===0:u.unitKind!==0)) &&
       (!q||String(u.id).includes(q)||u.name.toLocaleLowerCase().includes(q)));
     if(sort.value==='name')data.sort((a,b)=>a.name.localeCompare(b.name)||a.id-b.id);
     if(sort.value==='rarity')data.sort((a,b)=>b.rarity-a.rarity||a.id-b.id);
