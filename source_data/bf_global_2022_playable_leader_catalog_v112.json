@@ -1,0 +1,617 @@
+{
+  "schema": "bf-global-2022-all-72-playable-unit-leader-profiles-v112",
+  "source": {
+    "archive": "mst-decoded.zip",
+    "zipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "unitMasters": [
+      {
+        "file": "3-mst-translated/F_UNIT_MST_1_Ver1084.json",
+        "sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645"
+      },
+      {
+        "file": "3-mst-translated/F_UNIT_MST_2_Ver1084.json",
+        "sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b"
+      }
+    ],
+    "leaderMaster": {
+      "file": "3-mst-translated/F_LEADER_SKILL_MST_Ver749.json",
+      "sha256": "65e591557264d656be2408e9c426ef35050b960f1736a488da8f0a55a5e845fe"
+    },
+    "limitations": [
+      "Exact original source LS ID, type, passive string ONLY",
+      "Do not extrapolate spark triggers, mitigation or unknown compound @ effect semantics from raw fields",
+      "Only 30 type2 starters have source-qualified v111 stat support, conditional on APK verification",
+      "Do not modify save data or game damage until active test verified"
+    ]
+  },
+  "totalForms": 72,
+  "distinctLeaderIds": 36,
+  "skillTypesCount": {
+    "2": 30,
+    "5": 12,
+    "31": 25,
+    "31@34": 1,
+    "31@48": 1,
+    "31@49": 1,
+    "31@32": 1,
+    "31@29": 1
+  },
+  "rows": [
+    {
+      "unitId": 10011,
+      "rarity": 2,
+      "element": 1,
+      "leaderSkillId": 100,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "1,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 10012,
+      "rarity": 3,
+      "element": 1,
+      "leaderSkillId": 100,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "1,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 10013,
+      "rarity": 4,
+      "element": 1,
+      "leaderSkillId": 101,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "1,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 10014,
+      "rarity": 5,
+      "element": 1,
+      "leaderSkillId": 101,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "1,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 10015,
+      "rarity": 6,
+      "element": 1,
+      "leaderSkillId": 102,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "1,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 10021,
+      "rarity": 2,
+      "element": 1,
+      "leaderSkillId": 1300,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "15,0,0,0,0,0"
+    },
+    {
+      "unitId": 10022,
+      "rarity": 3,
+      "element": 1,
+      "leaderSkillId": 1301,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "30,0,0,0,0,0"
+    },
+    {
+      "unitId": 10023,
+      "rarity": 4,
+      "element": 1,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 10024,
+      "rarity": 5,
+      "element": 1,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 10025,
+      "rarity": 6,
+      "element": 1,
+      "leaderSkillId": 1313,
+      "skillTypeRaw": "31@34",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0@0.5"
+    },
+    {
+      "unitId": 10041,
+      "rarity": 2,
+      "element": 1,
+      "leaderSkillId": 500,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "1,10"
+    },
+    {
+      "unitId": 10042,
+      "rarity": 3,
+      "element": 1,
+      "leaderSkillId": 500,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "1,10"
+    },
+    {
+      "unitId": 20011,
+      "rarity": 2,
+      "element": 2,
+      "leaderSkillId": 110,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "2,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 20012,
+      "rarity": 3,
+      "element": 2,
+      "leaderSkillId": 110,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "2,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 20013,
+      "rarity": 4,
+      "element": 2,
+      "leaderSkillId": 111,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "2,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 20014,
+      "rarity": 5,
+      "element": 2,
+      "leaderSkillId": 111,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "2,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 20015,
+      "rarity": 6,
+      "element": 2,
+      "leaderSkillId": 112,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "2,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 20021,
+      "rarity": 2,
+      "element": 2,
+      "leaderSkillId": 1300,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "15,0,0,0,0,0"
+    },
+    {
+      "unitId": 20022,
+      "rarity": 3,
+      "element": 2,
+      "leaderSkillId": 1301,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "30,0,0,0,0,0"
+    },
+    {
+      "unitId": 20023,
+      "rarity": 4,
+      "element": 2,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 20024,
+      "rarity": 5,
+      "element": 2,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 20025,
+      "rarity": 6,
+      "element": 2,
+      "leaderSkillId": 1303,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "75,0,0,0,0,0"
+    },
+    {
+      "unitId": 20041,
+      "rarity": 2,
+      "element": 2,
+      "leaderSkillId": 502,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "2,10"
+    },
+    {
+      "unitId": 20042,
+      "rarity": 3,
+      "element": 2,
+      "leaderSkillId": 502,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "2,10"
+    },
+    {
+      "unitId": 30011,
+      "rarity": 2,
+      "element": 3,
+      "leaderSkillId": 120,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "3,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 30012,
+      "rarity": 3,
+      "element": 3,
+      "leaderSkillId": 120,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "3,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 30013,
+      "rarity": 4,
+      "element": 3,
+      "leaderSkillId": 121,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "3,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 30014,
+      "rarity": 5,
+      "element": 3,
+      "leaderSkillId": 121,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "3,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 30015,
+      "rarity": 6,
+      "element": 3,
+      "leaderSkillId": 122,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "3,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 30021,
+      "rarity": 2,
+      "element": 3,
+      "leaderSkillId": 1400,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,30,0,0,0,0"
+    },
+    {
+      "unitId": 30022,
+      "rarity": 3,
+      "element": 3,
+      "leaderSkillId": 1401,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,50,0,0,0,0"
+    },
+    {
+      "unitId": 30023,
+      "rarity": 4,
+      "element": 3,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 30024,
+      "rarity": 5,
+      "element": 3,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 30025,
+      "rarity": 6,
+      "element": 3,
+      "leaderSkillId": 1410,
+      "skillTypeRaw": "31@48",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0@15"
+    },
+    {
+      "unitId": 30041,
+      "rarity": 2,
+      "element": 3,
+      "leaderSkillId": 504,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "3,10"
+    },
+    {
+      "unitId": 30042,
+      "rarity": 3,
+      "element": 3,
+      "leaderSkillId": 504,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "3,10"
+    },
+    {
+      "unitId": 40011,
+      "rarity": 2,
+      "element": 4,
+      "leaderSkillId": 130,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "4,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 40012,
+      "rarity": 3,
+      "element": 4,
+      "leaderSkillId": 130,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "4,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 40013,
+      "rarity": 4,
+      "element": 4,
+      "leaderSkillId": 131,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "4,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 40014,
+      "rarity": 5,
+      "element": 4,
+      "leaderSkillId": 131,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "4,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 40015,
+      "rarity": 6,
+      "element": 4,
+      "leaderSkillId": 132,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "4,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 40021,
+      "rarity": 2,
+      "element": 4,
+      "leaderSkillId": 1400,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,30,0,0,0,0"
+    },
+    {
+      "unitId": 40022,
+      "rarity": 3,
+      "element": 4,
+      "leaderSkillId": 1401,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,50,0,0,0,0"
+    },
+    {
+      "unitId": 40023,
+      "rarity": 4,
+      "element": 4,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 40024,
+      "rarity": 5,
+      "element": 4,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 40025,
+      "rarity": 6,
+      "element": 4,
+      "leaderSkillId": 1411,
+      "skillTypeRaw": "31@49",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0@15,20,100"
+    },
+    {
+      "unitId": 40041,
+      "rarity": 2,
+      "element": 4,
+      "leaderSkillId": 506,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "4,10"
+    },
+    {
+      "unitId": 40042,
+      "rarity": 3,
+      "element": 4,
+      "leaderSkillId": 506,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "4,10"
+    },
+    {
+      "unitId": 50011,
+      "rarity": 2,
+      "element": 5,
+      "leaderSkillId": 140,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "5,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 50012,
+      "rarity": 3,
+      "element": 5,
+      "leaderSkillId": 140,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "5,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 50013,
+      "rarity": 4,
+      "element": 5,
+      "leaderSkillId": 141,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "5,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 50014,
+      "rarity": 5,
+      "element": 5,
+      "leaderSkillId": 141,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "5,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 50015,
+      "rarity": 6,
+      "element": 5,
+      "leaderSkillId": 142,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "5,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 50021,
+      "rarity": 2,
+      "element": 5,
+      "leaderSkillId": 1400,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,30,0,0,0,0"
+    },
+    {
+      "unitId": 50022,
+      "rarity": 3,
+      "element": 5,
+      "leaderSkillId": 1401,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,50,0,0,0,0"
+    },
+    {
+      "unitId": 50023,
+      "rarity": 4,
+      "element": 5,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 50024,
+      "rarity": 5,
+      "element": 5,
+      "leaderSkillId": 1402,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0"
+    },
+    {
+      "unitId": 50025,
+      "rarity": 6,
+      "element": 5,
+      "leaderSkillId": 1412,
+      "skillTypeRaw": "31@32",
+      "passiveSkillInfoRaw": "0,70,0,0,0,0@20"
+    },
+    {
+      "unitId": 50041,
+      "rarity": 2,
+      "element": 5,
+      "leaderSkillId": 508,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "5,10"
+    },
+    {
+      "unitId": 50042,
+      "rarity": 3,
+      "element": 5,
+      "leaderSkillId": 508,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "5,10"
+    },
+    {
+      "unitId": 60011,
+      "rarity": 2,
+      "element": 6,
+      "leaderSkillId": 150,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "6,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 60012,
+      "rarity": 3,
+      "element": 6,
+      "leaderSkillId": 150,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "6,0,25,0,0,0,0"
+    },
+    {
+      "unitId": 60013,
+      "rarity": 4,
+      "element": 6,
+      "leaderSkillId": 151,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "6,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 60014,
+      "rarity": 5,
+      "element": 6,
+      "leaderSkillId": 151,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "6,0,50,0,0,0,0"
+    },
+    {
+      "unitId": 60015,
+      "rarity": 6,
+      "element": 6,
+      "leaderSkillId": 152,
+      "skillTypeRaw": "2",
+      "passiveSkillInfoRaw": "6,0,50,0,0,0,10"
+    },
+    {
+      "unitId": 60021,
+      "rarity": 2,
+      "element": 6,
+      "leaderSkillId": 1300,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "15,0,0,0,0,0"
+    },
+    {
+      "unitId": 60022,
+      "rarity": 3,
+      "element": 6,
+      "leaderSkillId": 1301,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "30,0,0,0,0,0"
+    },
+    {
+      "unitId": 60023,
+      "rarity": 4,
+      "element": 6,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 60024,
+      "rarity": 5,
+      "element": 6,
+      "leaderSkillId": 1302,
+      "skillTypeRaw": "31",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0"
+    },
+    {
+      "unitId": 60025,
+      "rarity": 6,
+      "element": 6,
+      "leaderSkillId": 1314,
+      "skillTypeRaw": "31@29",
+      "passiveSkillInfoRaw": "50,0,0,0,0,0@15"
+    },
+    {
+      "unitId": 60041,
+      "rarity": 2,
+      "element": 6,
+      "leaderSkillId": 510,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "6,10"
+    },
+    {
+      "unitId": 60042,
+      "rarity": 3,
+      "element": 6,
+      "leaderSkillId": 510,
+      "skillTypeRaw": "5",
+      "passiveSkillInfoRaw": "6,10"
+    }
+  ]
+}
