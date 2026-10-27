@@ -93,6 +93,7 @@ with sync_playwright() as pw:
     page.locator('#bf-archive-search').fill('840548')
     page.locator('.bf-archive-unit').first.click()
     assert 'ORIGINAL NORMAL ATTACK FRAMES' in page.locator('#bf-archive-detail').inner_text()
+    page.locator('#bf-archive-detail summary').filter(has_text='ORIGINAL NORMAL ATTACK FRAMES').click()
     assert 'NOT verified playback seconds' in page.locator('#bf-archive-detail').inner_text()
     assert not errors,errors
     browser.close()
