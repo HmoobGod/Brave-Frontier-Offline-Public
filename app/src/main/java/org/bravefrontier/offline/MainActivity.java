@@ -642,6 +642,14 @@ public class MainActivity extends Activity {
                                             try {
                                                 String allNormals = readPackagedText("bf8400_original_normal_crystal_checks.js");
                                                 view.evaluateJavascript(allNormals, null);
+                                                // v125: original 2022 archived normal-attack frame references;
+                                                // read-only, asynchronous decompression, no battle/save modifications.
+                                                try {
+                                                    String allFrames = readPackagedText("bf12500_full_original_normal_hits.js");
+                                                    view.evaluateJavascript(allFrames, null);
+                                                } catch (IOException allFramesError) {
+                                                    android.util.Log.w("BraveFrontier", "Optional source normal hit archive unavailable", allFramesError);
+                                                }
                                                 // v88: sample source-backed normal crystal production only
                                                 // after a real demo attack; do not invent pickups/BB or healing.
                                                 try {
