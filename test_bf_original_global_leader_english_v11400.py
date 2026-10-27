@@ -45,7 +45,8 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.forUnit(10021).combatImplemented') is False
  assert p.evaluate(api+'.forUnit(123456)') is None
  assert p.locator('#bf11200-form option').count()==72
- assert 'Fire Spirit' in p.locator('#bf11200-form option').first.inner_text()
+ p.locator('#bf11200-playable-leaders > summary').click()
+ assert 'Fire Spirit' in p.locator('#bf11200-form option').first.text_content()
  p.locator('#bf11200-form').evaluate("""el=>{el.value='50021';el.dispatchEvent(new Event('change'));}""")
  assert 'Fighting Light' in p.locator('#bf11400-original-name').inner_text()
  assert 'Battle Crystals produced during Spark' in p.locator('#bf11400-original-description').inner_text()
