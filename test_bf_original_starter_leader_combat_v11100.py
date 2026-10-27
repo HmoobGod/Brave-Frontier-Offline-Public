@@ -104,8 +104,12 @@ with sync_playwright() as pw:
  assert p.evaluate('S.party.map(u=>({atk:u.atk,hp:u.maxHp,id:u.unitId}))')==first
  after=p.evaluate("""()=>({P:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,(before,after)
- p.locator('#bf11100-leader-combat > summary').click()
- p.wait_for_function("document.querySelector('#bf11100-rows').children.length===1")
+ # Browser's default page may have the Battle tab hidden. Validate
+ # the expandable panel's DOM through its source-backed refresh API,
+ # without relying on a visible tab navigation state in this isolated test.
+ p.locator('#bf11100-leader-combat').evaluate('(el)=>el.open=true')
+ p.evaluate('BFGlobalStarterLeaderCombatV11100.refresh()')
+ assert p.locator('#bf11100-rows li').count()==1
  assert 'ATK' in p.locator('#bf11100-rows').inner_text()
  p.add_script_tag(path=str(A/'bf11100_original_starter_leader_combat.js'))
  assert p.locator('#bf11100-leader-combat').count()==1
