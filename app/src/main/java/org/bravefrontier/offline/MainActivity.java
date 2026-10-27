@@ -925,6 +925,14 @@ public class MainActivity extends Activity {
                 } catch (IOException englishError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader English unavailable", englishError);
                 }
+                // v115: enforce exact 2022 original unitMaxLevel only on newly
+                // constructed archive DEMO battle party units, not saved EXP.
+                try {
+                    String levelCaps = readPackagedText("bf11500_original_unit_level_caps.js");
+                    view.evaluateJavascript(levelCaps, null);
+                } catch (IOException capsError) {
+                    android.util.Log.w("BraveFrontier", "Optional original unit level caps unavailable", capsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
