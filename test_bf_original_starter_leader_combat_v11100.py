@@ -77,7 +77,7 @@ with sync_playwright() as pw:
  # GitHub's prepare_original_six_star_starters.py injects original
  # 4★–6★ playable forms AFTER the checked-in core HTML loads. These MUST
  # be present in the PREPARED signed APK to exercise both original boosts.
- assert p.evaluate('BFGlobalOriginalSixStar?.count')==6
+ assert p.evaluate('BFOriginalSixStar?.count')==6
  assert p.evaluate('UNIT_BY_ID.has(10015)') is True
  assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).atkPercent')==50
  assert p.evaluate('BFGlobalStarterLeaderSourceV11000.bonusFor(10015,10015).hpPercent')==10
