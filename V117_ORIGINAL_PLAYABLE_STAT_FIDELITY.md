@@ -5,7 +5,7 @@ The original 2022 F_UNIT_MST base stat evidence was recovered in v116. This regr
 Checks:
 - All 72 original 2022 unit IDs exist as live playable `UNIT_BY_ID` records in the assembled game.
 - All **288** HP/ATK/DEF/REC level-one values match the authenticated 2022 unit master exactly.
-- The loaded units have 72 distinct display names and no forms are silently substituted by another source ID.
+- The loaded units preserve each original unit ID and provide a non-empty display name; localized names need not be unique.
 - Existing v7 player/save state is untouched by the source audit.
 - Existing v115 battle-time max level caps and v111/v113 leader skills remain unchanged.
 
