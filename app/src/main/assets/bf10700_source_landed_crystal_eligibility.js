@@ -69,7 +69,7 @@
      sourceHits:profile.normalHits,landedHits:landed,
      skippedPostKO,checksPerHit:profile.checksPerHit,
      originalPossibleBCChecks:profile.totalDropChecks,
-     eligibleBCChecks,excludedBCChecks:skippedPostKO*profile.checksPerHit,
+     eligibleBCChecks,unverifiedPostKOBCChecks:skippedPostKO*profile.checksPerHit,
      eligibleHCChecks:landed,criticalHits,
      bcRatePercent:35,hcRatePercent:10,
      overkillApplied:false,referenceOnly:true,collected:false,
@@ -91,7 +91,7 @@
    const totals=freeze({
      eligibleBCChecks:entries.reduce((x,e)=>x+e.eligibleBCChecks,0),
      eligibleHCChecks:entries.reduce((x,e)=>x+e.eligibleHCChecks,0),
-     excludedPostKOBCChecks:entries.reduce((x,e)=>x+e.excludedBCChecks,0),
+     unverifiedPostKOBCChecks:entries.reduce((x,e)=>x+e.unverifiedPostKOBCChecks,0),
      observedAttacks:entries.length
    });
    return freeze({mode:S.mode,active:S.mode==='archive',
@@ -111,10 +111,10 @@
  const rows=document.createElement('ol');rows.id='bf10700-rows';
  const caution=document.createElement('small');
  caution.textContent='2022 Global normal damage-hit/check records × confirmed DEMO landed strikes. '+
-   'Excludes post-KO strikes from eligibility. These are potential BC/HC RNG '+
+   'Counts only DEMO landed strikes; native overkill/post-KO mechanics remain unknown. These are potential BC/HC RNG '+
    'check counts, not collected crystals. Native pickup, overkill, '+
    'HP recovery and BB charging are NOT implemented. Older v88 ledger '+
-   'may still count all sourced hits; do not interpret it as collectible.';
+   'may still count all sourced hits; neither ledger establishes original native overkill, and neither is collectible.';
  panel.append(title,count,rows,caution);host.append(panel);
  let last='';
  function refresh(){
@@ -125,7 +125,7 @@
    count.textContent='Recent '+s.totals.observedAttacks+' validated attacks · '+
      s.totals.eligibleBCChecks+' potential BC checks · '+
      s.totals.eligibleHCChecks+' potential HC checks · '+
-     s.totals.excludedPostKOBCChecks+' post-KO BC checks excluded';
+     s.totals.unverifiedPostKOBCChecks+' post-KO BC checks outside confirmed landed baseline';
    rows.replaceChildren();
    for(const e of s.recent.slice(-8)){
      const li=document.createElement('li');
