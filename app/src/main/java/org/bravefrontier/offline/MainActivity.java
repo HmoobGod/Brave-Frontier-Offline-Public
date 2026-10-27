@@ -900,6 +900,14 @@ public class MainActivity extends Activity {
                 } catch (IOException leaderCombatError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader combat unavailable", leaderCombatError);
                 }
+                // v112: research-only 2022 leader skills for all 72
+                // source-supported playable forms; never alter combat/save.
+                try {
+                    String allLeaders = readPackagedText("bf11200_all_playable_leader_source.js");
+                    view.evaluateJavascript(allLeaders, null);
+                } catch (IOException leadersError) {
+                    android.util.Log.w("BraveFrontier", "Optional original leader research unavailable", leadersError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {

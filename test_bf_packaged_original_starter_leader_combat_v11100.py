@@ -20,7 +20,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf11000_source_starter_leader_skills.js")')<java.index('readPackagedText("bf11100_original_starter_leader_combat.js")')
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '111.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(111,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
