@@ -120,6 +120,27 @@
       detail.append(frameDetail);
     }
 
+    // v128 original 7/8-star sprite composition geometry, not a playable
+    // animation or verified native engine implementation.
+    const cgg=window.BFGlobalOriginalStarterCggV12800?.lookup?.(id);
+    if(cgg){
+      const frames=document.createElement('details');
+      frames.className='bf-codex-bb-levels';
+      frames.append(item('summary','','ORIGINAL 2022 SPRITE CGG / CGS · '+cgg.cggFrameCount+' FRAMES'));
+      frames.append(item('p','bf-codex-note',
+        'Exact archived layer and animation sequence data. Native 2022 rendering is not verified; '+
+        'flip, blend, opacity, rotation follow a community field interpretation, and no new unit is playable.'));
+      frames.append(item('p','',
+        cgg.cggFrameCount+' source frames · '+cgg.sourceLayerCount+' source layers · '+
+        cgg.sequences.idle.length+' idle steps · '+
+        cgg.sequences.atk.length+' attack steps · '+
+        cgg.sequences.move.length+' move steps'));
+      frames.append(item('p','',
+        'Original attack CGS entries: '+cgg.sequences.atk.map(step=>
+          'frame '+step[0]+' / raw delay '+step[3]).join(' | ')));
+      detail.append(frames);
+    }
+
     const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
     if(Number.isSafeInteger(expPattern)&&[10,15,20].includes(expPattern))
       detail.append(item('p','','Original EXP pattern ID '+expPattern+

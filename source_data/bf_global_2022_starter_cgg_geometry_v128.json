@@ -1,0 +1,43 @@
+{
+  "schema": "bf-global-2022-starter-cgg-cgs-sequences-v128",
+  "sourceZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "v127Canonical12SourceSha256": "dcd3fb0f3d57b44880088f42c87409e3588a24a183ec866095ea0dbeae57bcbd",
+  "formIds": [
+    10016,
+    10017,
+    20016,
+    20017,
+    30016,
+    30017,
+    40016,
+    40017,
+    50016,
+    50017,
+    60016,
+    60017
+  ],
+  "totalCggFrames": 308,
+  "totalCggLayers": 5378,
+  "normalizedJsonSha256": "7535ec0bae51fe425fc8db7ee3341d0dda0b6e80d6586c88cd888161c4f0951a",
+  "normalizedJsonBytes": 184101,
+  "normalizedGzipSha256": "b0f3a29cbec8640b70a1ee0d77512d1f966f473840ec2c9002df9f108a60b976",
+  "normalizedGzipBytes": 22994,
+  "originalCggFields": [
+    "x",
+    "y",
+    "flip",
+    "blend",
+    "opacity",
+    "rotation",
+    "spriteX",
+    "spriteY",
+    "width",
+    "height",
+    "page"
+  ],
+  "fieldInterpretation": "BluuArc BFFrameAnimator src/Frame.java (2016), community interpretation; 2022 native render unverified",
+  "referenceUrl": "https://github.com/BluuArc/BFFrameAnimator/blob/master/src/Frame.java",
+  "sourceAssetsBundled": false,
+  "playableExpansion": false,
+  "originalNativeRendererVerified": false
+}

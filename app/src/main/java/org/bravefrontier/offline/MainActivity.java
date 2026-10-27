@@ -967,6 +967,14 @@ public class MainActivity extends Activity {
                 } catch (IOException squadCostError) {
                     android.util.Log.w("BraveFrontier", "Optional original squad cost unavailable", squadCostError);
                 }
+                // v128: exact original 7/8-star CGG + CGS source sequences.
+                // Reader only: no sprite approximation, recruit or save changes.
+                try {
+                    String sequences = readPackagedText("bf12800_original_starter_cgg_cgs.js");
+                    view.evaluateJavascript(sequences, null);
+                } catch (IOException seqError) {
+                    android.util.Log.w("BraveFrontier", "Optional original animation sequences unavailable", seqError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
