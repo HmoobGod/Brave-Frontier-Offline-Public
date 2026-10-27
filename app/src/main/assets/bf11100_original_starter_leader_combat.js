@@ -62,6 +62,9 @@
  }
  window.playerUnit=function(i){
    const unit=original.apply(this,arguments);
+   // v113 optional original 2022 cap runs BEFORE the source leader bonus.
+   // Absent v113, retain v111's previously verified native behavior.
+   window.BFGlobalOriginalUnitLevelCapsV11300?.apply?.(unit,i);
    return apply(unit,i);
  };
  function snapshot(){
