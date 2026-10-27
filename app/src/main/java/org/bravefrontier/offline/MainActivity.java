@@ -868,6 +868,14 @@ public class MainActivity extends Activity {
                 } catch (IOException landedError) {
                     android.util.Log.w("BraveFrontier", "Optional source crystal check audit unavailable", landedError);
                 }
+                // v108 source: original opaque Mistral/Morgan encounter reference
+                // provenance only. No enemy/wave/AI/reward inference.
+                try {
+                    String encounterRefs = readPackagedText("bf10800_2022_encounter_reference_ledger.js");
+                    view.evaluateJavascript(encounterRefs, null);
+                } catch (IOException refError) {
+                    android.util.Log.w("BraveFrontier", "Optional 2022 encounter reference ledger unavailable", refError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
