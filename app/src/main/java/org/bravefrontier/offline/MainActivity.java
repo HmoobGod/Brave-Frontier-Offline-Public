@@ -584,6 +584,14 @@ public class MainActivity extends Activity {
                             "style.textContent=" + JSONObject.quote(catalogStyle) +
                             ";document.head.append(style);})();", null);
                     view.evaluateJavascript(catalogScript, null);
+                    // v121: separate read-only original 2022 EXP pattern IDs.
+                    // No 2022 numeric EXP thresholds or live level change.
+                    try {
+                        String sourceExpIds = readPackagedText("bf12100_original_all_unit_exp_ids.js");
+                        view.evaluateJavascript(sourceExpIds, null);
+                    } catch (IOException expIdError) {
+                        android.util.Log.w("BraveFrontier", "Optional original EXP ID lookup unavailable", expIdError);
+                    }
                     // v1.50: optional cross-era ID research and local QA; load
                     // only after the archived 2,291-unit catalog renderer.
                     try {
