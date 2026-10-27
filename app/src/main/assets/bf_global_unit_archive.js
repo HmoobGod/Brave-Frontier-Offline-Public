@@ -75,6 +75,10 @@
     close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();});
     detail.append(close,item('h4','',u.name),item('p','','Original unit ID '+u.id+' · '+(elements[u.element]||'Element '+u.element)+' · '+u.rarity+'★'));
     detail.append(item('p','', 'Max level '+fmt(u.unitMaxLevel)+' · Cost '+fmt(u.unitCost)+' · '+(u.nameSource==='2022_Global_English'?'2022 Global English localization':u.nameSource==='master_literal'?'Literal master-table name':'Original English name not recovered')));
+    const expPattern=window.BFGlobalOriginalExpPatternIdsV12100?.lookup?.(id);
+    if(Number.isSafeInteger(expPattern)&&[10,15,20].includes(expPattern))
+      detail.append(item('p','','Original EXP pattern ID '+expPattern+
+        ' · numeric EXP thresholds not verified for 2022 Global; gameplay remains DEMO.'));
     const table=document.createElement('table');
     const head=document.createElement('tr');
     for(const label of ['Stat','Base','Lord'])head.append(item('th','',label));
