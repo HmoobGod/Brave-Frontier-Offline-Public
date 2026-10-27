@@ -908,6 +908,15 @@ public class MainActivity extends Activity {
                 } catch (IOException leadersError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader research unavailable", leadersError);
                 }
+                // v113: apply the original starter leader's elemental ATK/HP
+                // percentages to other source-verified playable recipients.
+                // Raw type31/5/compound leader abilities remain disabled.
+                try {
+                    String allRecipients = readPackagedText("bf11300_all_playable_leader_recipients.js");
+                    view.evaluateJavascript(allRecipients, null);
+                } catch (IOException recipientsError) {
+                    android.util.Log.w("BraveFrontier", "Optional original leader recipients unavailable", recipientsError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
