@@ -53,6 +53,19 @@ with sync_playwright() as pw:
   args=['--no-sandbox','--disable-dev-shm-usage'])
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda err:errors.append(str(err)))
+ # about:blank has no localStorage authority in CI. Use isolated, throw-free
+ # save emulation, exactly as the v127 owner-save regression does.
+ page.evaluate("""() => {
+   const db={};
+   Object.defineProperty(window,'localStorage',{configurable:true,value:{
+     getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
+     removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+     get length(){return Object.keys(db).length}}});
+   window.alert=()=>{};window.confirm=()=>true;
+   HTMLMediaElement.prototype.load=()=>{};
+   HTMLMediaElement.prototype.pause=()=>{};
+   HTMLMediaElement.prototype.play=()=>Promise.resolve();
+ }""")
  page.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
  assert page.evaluate('P.version')==7
  before=page.evaluate("""()=>({player:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
