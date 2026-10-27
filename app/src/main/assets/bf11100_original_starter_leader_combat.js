@@ -88,6 +88,8 @@
  note.textContent='Original 2022 starter leader ATK/HP percentages are applied '+
    'once when a new archive DEMO party is created. Only 30 source-verified '+
    'forms and matching elements qualify. No training changes; no save writes. '+
+   'The current playable catalog contains only 2★ and 3★ starter forms: '+
+   '4★–6★ bonuses remain source reference until those units are playable. '+
    'Base level/type stats, rounding order and damage formula remain DEMO, '+
    'not fully reconstructed original Brave Frontier mechanics.';
  panel.append(heading,totals,rows,note);host.after(panel);
