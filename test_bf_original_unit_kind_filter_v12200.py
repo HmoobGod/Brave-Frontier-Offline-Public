@@ -35,6 +35,8 @@ with sync_playwright() as pw:
     page.evaluate('payload=>{window.BFUnitBox={};document.getElementById("bf-global-unit-catalog-data").textContent=payload}',json.dumps(archive,separators=(',',':')))
     previous=page.evaluate("""()=>{try{return localStorage.getItem('bf_global_offline_demo_v7')}catch(_){return null}}""")
     page.add_script_tag(content=code)
+    # The original archive is intentionally collapsed until opened by the user.
+    page.locator('#bf-unit-encyclopedia').evaluate('(node)=>{node.open=true}')
     assert page.evaluate('BFGlobalUnitArchive.count')==2291
     assert page.evaluate('BFGlobalUnitArchive.matchingCount')==2291
     choice=page.locator('#bf-archive-type')
