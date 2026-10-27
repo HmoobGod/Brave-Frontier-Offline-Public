@@ -1,0 +1,26 @@
+{
+  "schema": "bf-global-2022-water-7-star-source-visual-preview-v129",
+  "sourceUnitId": 20016,
+  "sourcePackageSha256": "0e23e955e2f7548000c6891f1718c9773d8f459a1aef165b1b34d8c772bae33d",
+  "sourceFrameCount": 23,
+  "frameWidth": 480,
+  "frameHeight": 400,
+  "columns": 5,
+  "originalArtWidth": 720,
+  "originalArtHeight": 640,
+  "atlasPixelsSha256": "2c59d87d592f86a77abbf9330e324603047819d7040cf5c5d7ed0f6be250f322",
+  "referenceOnly": true,
+  "nativeBlendProven": false,
+  "nativeTransformProven": false,
+  "nativeFrameClockProven": false,
+  "spritePixelsAreReconstruction": true,
+  "saveFieldsAdded": 0,
+  "sourceFileHashes": {
+    "content/unit/cgg/unit_cgg_20016.csv": "b8646a39976121a5762167ad888fdaf6404cc80f17a14092fa76a76d33ec081f",
+    "content/unit/cgs/unit_atk_cgs_20016.csv": "5b79bf467e2b1328d5ca8c6288a66579bfa0afab410fcfe4374996cf3fee277c",
+    "content/unit/cgs/unit_idle_cgs_20016.csv": "65be617fad3a5c3502cd43007c507a0bcc8e111fe16fa0893f3b6aa6f079b337",
+    "content/unit/cgs/unit_move_cgs_20016.csv": "fc8b1bdd586049f4c45c1af6f926ec67868d87efb7c098d63067a1b5f7af786c",
+    "content/unit/img/unit_anime_20016.png": "4380c66706823c56635ca43174b1bee1d632a6b10c032eefe5af694088bfc2a7",
+    "content/unit/img/unit_ills_thum_20016.png": "6d4ce88a51f092f3abdb363fa22214e7741bdf3d1642287713058594102befad"
+  }
+}

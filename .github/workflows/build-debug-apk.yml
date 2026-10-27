@@ -103,6 +103,10 @@ jobs:
           python3 patch_bf_elemental_combat_v6900.py
           python3 patch_bf_original_atk_bb_levels_v7100.py
           python3 prepare_original_lord_stats_v116.py
+          python3 prepare_original_seven_star_water_visual_v129.py
+          # Catch JavaScript parser regressions before the long Chromium suite.
+          node --check app/src/main/assets/bf_global_unit_archive.js
+          node --check app/src/main/assets/bf12900_original_seven_star_water_visual.js
       - name: Prepare verified BF1 Global home sprites
         run: |
           python3 prepare_original_home_assets.py
@@ -151,6 +155,7 @@ jobs:
           python test_bf_original_squad_cost_v12600.py
           python test_bf_original_starter_7_8_source_v12700.py
           python test_bf_original_starter_cgg_cgs_v12800.py
+          python test_bf_original_7star_water_visual_v12900.py
           python test_bf_original_mission_evidence_v060.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
@@ -303,6 +308,8 @@ jobs:
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify v129 packaged read-only original seven-star Water source sprite
+        run: python3 test_bf_packaged_7star_water_visual_v12900.py
       - name: Verify packaged original battle sprites
         run: python3 test_bf_packaged_battle_assets.py
       - name: Verify packaged original Global encyclopedia
