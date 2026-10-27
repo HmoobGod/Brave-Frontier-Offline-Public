@@ -8,7 +8,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  src=z.read(file).decode('utf8')
  assert 'BF_GLOBAL_2022_STLAMIA_ENCOUNTER_REFERENCE_EXTENSION_V10900' in src
  assert 'nativeEnemyIdsKnown:false' in src
- assert 'source' not in src or 'MISSION_8f4NYKxb' in src
+ assert 'nativeWaveIdentitiesKnown:false' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf10800_2022_encounter_reference_ledger.js")')<java.index('readPackagedText("bf10900_stlamia_encounter_refs.js")')
