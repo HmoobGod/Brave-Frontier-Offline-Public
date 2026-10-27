@@ -75,5 +75,6 @@ assert 'bf-development-debug.keystore' in GRADLE
 assert 'BF_DEBUG_KEYSTORE_B64' in YAML
 assert 'android.permission.INTERNET' not in MANIFEST
 assert 'bf_global_offline_demo_v7' in (ASSETS/'index.html').read_text('utf8')
-assert re.search(r"versionName '10[5-9]\.00\.0-demo'",GRADLE)
+version_match=re.search(r"versionName '([0-9]+)\.00\.0-demo'",GRADLE)
+assert version_match and int(version_match.group(1))>=105
 print('PASS v106 all nine QoL source modules: original v7, load order, local only, signing/CI and save invariants')
