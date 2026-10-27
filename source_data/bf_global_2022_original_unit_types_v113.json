@@ -1,0 +1,77 @@
+{
+  "schema": "bf-global-2022-original-unit-type-raw-v113",
+  "source": {
+    "archive": "mst-decoded.zip",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "masterFile": "3-mst-translated/F_UNIT_TYPE_MST_Ver52.json",
+    "masterSha256": "69cc9a357b1915d31f852346e144fd6b4a0e61c9d7d64e0ac9c1a60297a10301",
+    "limitations": [
+      "Exact 2022 raw unit type metadata only",
+      "Two-number stat fields and secondary type factor are not native stat formulas",
+      "Type6 chance 0% is a table value, not proof of acquisition behavior",
+      "No changes to P.version7, roster, progression or battle stats"
+    ]
+  },
+  "rows": [
+    {
+      "unitTypeId": "1",
+      "unitTypeName": "MST_UNITTYPES_1_NAME",
+      "unitTypeHp": "0,0",
+      "unitTypeAtk": "0,0",
+      "unitTypeDef": "0,0",
+      "uniTypeRec": "0,0",
+      "unitTypeChance": "23.00",
+      "UNIT_TYPE_7N1smiod": "1.00"
+    },
+    {
+      "unitTypeId": "2",
+      "unitTypeName": "MST_UNITTYPES_2_NAME",
+      "unitTypeHp": "5,10",
+      "unitTypeAtk": "0,0",
+      "unitTypeDef": "0,0",
+      "uniTypeRec": "-3,-1",
+      "unitTypeChance": "23.00",
+      "UNIT_TYPE_7N1smiod": "2.00"
+    },
+    {
+      "unitTypeId": "3",
+      "unitTypeName": "MST_UNITTYPES_3_NAME",
+      "unitTypeHp": "0,0",
+      "unitTypeAtk": "1,3",
+      "unitTypeDef": "-3,-1",
+      "uniTypeRec": "0,0",
+      "unitTypeChance": "22.00",
+      "UNIT_TYPE_7N1smiod": "1.00"
+    },
+    {
+      "unitTypeId": "4",
+      "unitTypeName": "MST_UNITTYPES_4_NAME",
+      "unitTypeHp": "0,0",
+      "unitTypeAtk": "0,0",
+      "unitTypeDef": "1,3",
+      "uniTypeRec": "-2,0",
+      "unitTypeChance": "22.00",
+      "UNIT_TYPE_7N1smiod": "1.00"
+    },
+    {
+      "unitTypeId": "5",
+      "unitTypeName": "MST_UNITTYPES_5_NAME",
+      "unitTypeHp": "0,0",
+      "unitTypeAtk": "0,0",
+      "unitTypeDef": "-2,0",
+      "uniTypeRec": "2,4",
+      "unitTypeChance": "10.00",
+      "UNIT_TYPE_7N1smiod": "0.50"
+    },
+    {
+      "unitTypeId": "6",
+      "unitTypeName": "MST_UNITTYPES_6_NAME",
+      "unitTypeHp": "10,15",
+      "unitTypeAtk": "1,2",
+      "unitTypeDef": "1,2",
+      "uniTypeRec": "1,2",
+      "unitTypeChance": "0.00",
+      "UNIT_TYPE_7N1smiod": "0.75"
+    }
+  ]
+}
