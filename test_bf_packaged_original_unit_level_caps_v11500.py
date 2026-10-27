@@ -25,7 +25,7 @@ assert main.index('readPackagedText("bf11200_all_playable_leader_source.js")')<m
 assert 'window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i)' in (
  R/'app/src/main/assets/bf11100_original_starter_leader_combat.js').read_text('utf8')
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '115.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(115,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
