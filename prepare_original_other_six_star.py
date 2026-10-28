@@ -46,7 +46,20 @@ def bake(z,uid):
    assert orientation in (0,1,2) and reserved in (0,1) and extra in (0,90) and mode==0 and 0<scale<=100
    assert sx>=0 and sy>=0 and w>0 and h>0 and sx+w<=sheet.width and sy+h<=sheet.height
    tile=sheet.crop((sx,sy,sx+w,sy+h))
-   if scale!=100:
+   # BF_GLOBAL_6STAR_THUNDER_FLIP_OPACITY_V13200: only the three
+   # sourced transform layers of 6-star Thunder alternate #40025.
+   # Community CGG mapping: orientation=horizontal flip, scale=opacity %.
+   # No source blend/rotation/Page transforms on this particular form.
+   if uid==40025:
+    assert (reserved,extra,mode)==(0,0,0)
+    assert orientation in (0,1) and scale in (50,100)
+    if orientation:
+     assert (fi,li,scale)==(15,1,100)
+     tile=tile.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+    if scale!=100:
+     assert (fi,li,orientation) in ((6,6,0),(24,0,0))
+     tile.putalpha(tile.getchannel('A').point(lambda a:round(a*scale/100)))
+   elif scale!=100:
     # BF_GLOBAL_6STAR_OPACITY_FIX_V13100: verified 2022 #30025 source
     # Original column 4 is opacity, not sprite scale. This single form has
     # six 50%-opacity layers in source frame 19, no flips/blend/rotation.
