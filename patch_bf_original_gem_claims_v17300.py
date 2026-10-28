@@ -131,7 +131,7 @@ window.BFGlobalOriginalGemClaimsV17300=Object.freeze({
 });
 document.getElementById('mode')?.addEventListener('change',bf173Refresh);
 document.getElementById('reset')?.addEventListener('click',()=>setTimeout(bf173Refresh,0));
-bf173Refresh();
+setTimeout(bf173Refresh,0);
 """
 # Avoid a cross-save context lookup in the helper. Parse/save already verify
 # pending IDs against their own quest-clears using v161 first.
