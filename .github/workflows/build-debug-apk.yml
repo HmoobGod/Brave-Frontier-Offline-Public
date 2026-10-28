@@ -112,6 +112,8 @@ jobs:
           node --check app/src/main/assets/bf12900_original_seven_star_water_visual.js
           node --check app/src/main/assets/bf16600_original_type5_element_resist.js
           node --check app/src/main/assets/bf16800_original_level_one_lord_combat.js
+          node --check app/src/main/assets/bf16900_optional_imp_fusion.js
+          node test_bf_optional_imp_fusion_v16900.js
           node --check test_bf_original_type5_battle_audit_v16700.js
       - name: Prepare verified BF1 Global home sprites
         run: |
@@ -720,6 +722,8 @@ jobs:
         run: python3 test_bf_packaged_original_lord_stats_v11600.py
       - name: Verify v168 authentic 2022 level-one Lord stats in signed APK
         run: python3 test_bf_packaged_original_level_one_lord_combat_v16800.py
+      - name: Verify v169 optional Imp fusion in signed APK
+        run: python3 test_bf_packaged_optional_imp_fusion_v16900.py
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
