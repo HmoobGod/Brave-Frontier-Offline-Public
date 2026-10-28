@@ -1,0 +1,13 @@
+# v146 — Original 2022 Global 5★ Death Magress CGG opacity + vertical flip restoration
+
+This patch fixes **live playable artwork**, not archive-only reference content. Source comes from the owner's 2022 Global BF1 unit pack, pinned by `source_data/bf_global_six_five_star_v035.json`, source `BF1_Global_2022_Six_Five_Star.zip.b64` and original per-file SHA256 records. All six preexisting 5★ starter forms, original sprites, original attack keyframes, combat/BB, quest and evolution data remain unchanged.
+
+The **5★ Dark original #60014 Death Magress** has 30 original CGG frames and exactly **22 non-default CGG layers**: eight vertical-flip code `2` layers, 18 opacity percentages other than 100 (including four layers with both). Its original CGG has **no blend, nonzero rotation or extra texture page**. The older renderer ignored flips and treated percentages as geometric resizing. Independently understood BF1 CGG fields via [BluuArc BFFrameAnimator](https://github.com/BluuArc/BFFrameAnimator/blob/master/src/Frame.java), a community reverse-engineering reference. This is not proof of the native 2022 engine's entire rendering pipeline; our changes apply only the two independently identified source fields.
+
+Independent raw-PNG/CGG rasterization exactly reproduced the prior installed **v124** source atlas SHA256 `3301ac9b3bb828ed31d3146a128833602013ef0a236a6a6709e0f90b14548b0d`. Correct source flip/opacity output SHA256 **`e8582ed0a8a1eba005b208def14d97ba8f2892d38c83629941b536c2ac7b2b46`**, PNG 313,928 bytes. Source renderer `prepare_original_five_star_starters.py` changes behavior solely for ID `60014`. The binary PNG is explicitly updated in Git so local source build and signed APK use the same byte-identical source-backed file.
+
+Verification: `test_bf_original_death_magress_sprite_v14600.py` recomputes original archive SHA joins and **both original and corrected** PNG hashes, all 22 per-layer transforms, original frame count, and exact unchanged hashes of the other five 5★ source atlases. `test_bf_packaged_death_magress_sprite_v14600.py` checks the Android APK's source art, five unchanged peers, `P.version===7` context and existing `bf_global_offline_demo_v7` key.
+
+**No new units unlocked or saved, no combat damage/AI changes, no native playback timing or source inventory changes.** This is a narrow original-art correction on a preexisting playable unit.
+
+Branch stacks on v145 feature-head SHA `b1019eac57ad23df291847b9021596a6f440a714`; merge only after v141–v145 prior exact feature CI and fresh merged-main CI pass, then verify v146 exact-head CI and subsequent merged-main CI. Owner installed v124, next requested APK v150.
