@@ -107,6 +107,25 @@ assert.equal(imp.view(10025).applied[0]>0,true);
 assert.equal(JSON.parse(db.get(coreSave))._bfImpsV171.inventory.arton,imp.stock().arton);
 const wrongUnit={...newBattleUnit(),unitId:20011};imp.apply(wrongUnit,0);
 assert.equal(wrongUnit.hp,1030,'mismatched form cannot receive Imp bonuses');
+// Claude F3: no partial quest cursor consumption at the 10,000 Arton cap.
+const originalImp171=JSON.parse(JSON.stringify(P._bfImpsV171));
+P._bfImpsV171={...P._bfImpsV171,inventory:{...P._bfImpsV171.inventory,arton:9999}};
+P.questClears[10]=6;
+const pendingBefore=imp.snapshot().enabled&&P._bfImpsV171.cursors['10'];
+assert.equal(imp.claim(),0,'one free inventory slot cannot fit 2-Arton award');
+assert.equal(P._bfImpsV171.cursors['10'],pendingBefore);
+P._bfImpsV171={...P._bfImpsV171,inventory:{...P._bfImpsV171.inventory,arton:9998}};
+assert.equal(imp.claim(),2);
+assert.equal(P._bfImpsV171.inventory.arton,10000);
+assert.equal(P._bfImpsV171.cursors['10'],6);
+P.questClears[10]=7;
+assert.equal(imp.claim(),0);
+assert.equal(P._bfImpsV171.cursors['10'],6);
+P._bfImpsV171={...P._bfImpsV171,inventory:{...P._bfImpsV171.inventory,arton:9998}};
+assert.equal(imp.claim(),2,'pending clear is claimable after stock room returns');
+assert.equal(P._bfImpsV171.cursors['10'],7);
+P._bfImpsV171=originalImp171;
+P.questClears[10]=5;
 // Corrupted optional sidecar must fail closed, while explicit restore must work.
 const backup=imp.exportState();P._bfImpsV171=null;db.set(imp.key,'{malformed');
 const window2={BFGlobalUnitArchive:window.BFGlobalUnitArchive};
