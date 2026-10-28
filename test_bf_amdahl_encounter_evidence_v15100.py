@@ -107,6 +107,7 @@ with sync_playwright() as pw:
     assert page.evaluate(api+'.references("10100")')==[1,2]
     assert page.evaluate(api+'.references("__proto__")')==[]
     assert '142 SOURCE MISSIONS' in page.locator('#bf10800-encounter-ledger summary').inner_text()
+    page.locator('#bf10800-encounter-ledger > summary').click()
     page.locator('#bf10800-mission').select_option('465')
     rendered=page.locator('#bf10800-raw').inner_text()
     assert 'Amdahl' in rendered and 'NO decoded enemy formations' in rendered
