@@ -55,7 +55,7 @@ with sync_playwright() as pw:
  assert p.evaluate('!!window.'+api)
  assert p.evaluate(api+'.source.sourceQualifiedForms')==12
  assert p.locator('#bf16600-resist').count()==1
- assert 'Type5 10% elemental' in p.locator('#bf11400-original-leader-english small').inner_text()
+ assert 'Type5 10% elemental' in p.locator('#bf11400-original-leader-english small').text_content()
  before=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
  for uid,(ls,element,_) in expected.items():
   p.evaluate("""id=>{if(!P.roster.includes(id))P.roster.push(id);
