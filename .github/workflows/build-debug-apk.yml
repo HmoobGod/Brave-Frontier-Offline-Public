@@ -301,6 +301,7 @@ jobs:
           python test_bf_original_omni_prerequisites_v13600.py
           python test_bf_legend_stone_acquisition_v13700.py
           python test_bf_legend_stone_merit_source_v15300.py
+          python test_bf_original_merit_clear_preview_v15400.py
           python test_bf_global_merit_achievements_v13800.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
@@ -670,6 +671,8 @@ jobs:
         run: python3 test_bf_packaged_amdahl_encounter_evidence_v15100.py
       - name: Verify v153 historical Legend Stone Merit listing in signed APK
         run: python3 test_bf_packaged_legend_stone_merit_source_v15300.py
+      - name: Verify v154 2022 Merit quest-clear preview in signed APK
+        run: python3 test_bf_packaged_original_merit_clear_preview_v15400.py
       - name: Verify v110 original starter leader skill source in signed APK
         run: python3 test_bf_packaged_source_starter_leader_skills_v11000.py
       - name: Verify v111 source-gated archive leader buffs in signed APK

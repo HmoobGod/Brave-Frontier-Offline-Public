@@ -1056,6 +1056,14 @@ public class MainActivity extends Activity {
                 } catch (IOException meritStoneRefError) {
                     android.util.Log.w("BraveFrontier", "Optional Legend Stone historical exchange source unavailable", meritStoneRefError);
                 }
+                // v154: original 2022 quest-clear Merit achievement source
+                // preview only. Reads local v7 clears, grants no Merit Points.
+                try {
+                    String meritClearPreview = readPackagedText("bf15400_original_merit_clear_preview.js");
+                    view.evaluateJavascript(meritClearPreview, null);
+                } catch (IOException meritClearError) {
+                    android.util.Log.w("BraveFrontier", "Optional 2022 Merit quest milestones unavailable", meritClearError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
