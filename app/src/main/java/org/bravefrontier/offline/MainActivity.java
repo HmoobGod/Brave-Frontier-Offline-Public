@@ -1021,6 +1021,10 @@ public class MainActivity extends Activity {
                     view.evaluateJavascript(statsData, null);
                     String statsReference = readPackagedText("bf11600_original_lord_stats_reference.js");
                     view.evaluateJavascript(statsReference, null);
+                    // v168: optional 2022 exact level-one Lord battle endpoints.
+                    // No saved-level changes; v111 applies them before leader boosts.
+                    String levelOneCombat = readPackagedText("bf16800_original_level_one_lord_combat.js");
+                    view.evaluateJavascript(levelOneCombat, null);
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
                 }
