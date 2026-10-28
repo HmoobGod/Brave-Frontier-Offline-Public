@@ -145,6 +145,39 @@ with sync_playwright() as pw:
     # A pristine exported v7 backup restores stats without separate Imp JSON.
     page.evaluate("raw=>{P=parseProgress(JSON.parse(raw))}",exported['raw'])
     assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[500,200,100,100]
+    # Claude A1/A2: do not force unrelated legacy data into an imported save.
+    # The default Enable remains blocked, but an explicit CONFIRMED clean
+    # start records independent starter Imps in the selected canonical save.
+    page.evaluate('''raw=>{const other=JSON.parse(raw);
+      other._bfImpsV171=null;
+      P=parseProgress(other);renderProgress();
+    }''',exported['raw'])
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
+    assert page.evaluate('BFGlobalOptionalImpsV16900.activate()') is False
+    assert page.get_by_text('IGNORE LEGACY v169 IMPS',exact=False).first.is_enabled()
+    original_sidecar=page.evaluate("localStorage.getItem('bf_global_offline_optional_imps_v169')")
+    old_save=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+    page.evaluate("window.confirm=()=>false")
+    assert page.evaluate('BFGlobalOptionalImpsV16900.startFreshIgnoringLegacy()') is False
+    assert page.evaluate('P._bfImpsV171') is None
+    assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==old_save
+    page.evaluate("window.confirm=()=>true")
+    assert page.evaluate('BFGlobalOptionalImpsV16900.startFreshIgnoringLegacy()') is True
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is True
+    assert page.evaluate('BFGlobalOptionalImpsV16900.stock().arton')==5
+    assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[0,0,0,0]
+    assert page.evaluate("localStorage.getItem('bf_global_offline_optional_imps_v169')")==original_sidecar
+    assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))._bfImpsV171.inventory.arton")==5
+    assert page.evaluate('BFGlobalOptionalImpsV16900.legacyImport()') is False
+    # Importing another save can show the same choice again without changing
+    # the old sidecar or auto-linking its fed stats.
+    page.evaluate('''raw=>{const other=JSON.parse(raw);
+      other._bfImpsV171=null;
+      P=parseProgress(other);renderProgress();
+    }''',exported['raw'])
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
+    assert page.get_by_text('IGNORE LEGACY v169 IMPS',exact=False).first.is_enabled()
+    assert page.evaluate("localStorage.getItem('bf_global_offline_optional_imps_v169')")==original_sidecar
     assert not errors,errors
     browser.close()
 print('PASS v171 browser: original archive, canonical v7 Imp persist and import isolation, 125% cap, smart batch and battle source ordering')
