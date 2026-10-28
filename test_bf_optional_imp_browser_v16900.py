@@ -80,12 +80,12 @@ with sync_playwright() as pw:
     assert page.evaluate('S.party[0].maxHp')==1530
     # Rewards come only from new DEMO quest clears after explicit activation.
     assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==0
-    page.evaluate('''()=>{P.questClears[1]=(P.questClears[1]||0)+2;}''')
+    page.evaluate('''()=>{window.__imp169OldClear=Object.prototype.hasOwnProperty.call(P.questClears,'1')?P.questClears[1]:null;P.questClears[1]=(P.questClears[1]||0)+2;}''')
     assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==4
     assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==0
     # Updates to live quest-clear state above are test-owned; subtract them
     # before comparing the original game state and canonical v7 saved bytes.
-    page.evaluate("P.questClears[1]-=2")
+    page.evaluate('''()=>{if(window.__imp169OldClear===null)delete P.questClears[1];else P.questClears[1]=window.__imp169OldClear;}''')
     after=page.evaluate('''()=>({
       p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')
     })''')
