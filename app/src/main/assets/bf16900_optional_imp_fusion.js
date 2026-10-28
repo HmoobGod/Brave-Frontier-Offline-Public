@@ -33,8 +33,7 @@
        Object.keys(raw.cursors).length>3000)return null;
     for(const [k,v] of Object.entries(raw.amounts)){
       if(!/^[1-9]\d{0,9}$/.test(k)||!Array.isArray(v)||v.length!==4||
-         v.some((n,i)=>!Number.isSafeInteger(n)||n<0||n>65535||
-           n%steps[i]!==0))return null;
+         v.some(n=>!Number.isSafeInteger(n)||n<0||n>65535))return null;
       amounts[k]=v.slice();
     }
     for(const id of ids){
@@ -213,10 +212,14 @@
   }
   function exportState(){return state?JSON.stringify(state):null;}
   function importState(raw){
-    if(invalidStorage||typeof raw!=='string'||raw.length>250000)return false;
+    if(typeof raw!=='string'||raw.length>250000)return false;
     let data;try{data=validState(JSON.parse(raw));}catch(_){return false;}
     if(!data)return false;
-    const done=persist(data);if(done)refresh();return done;
+    const previousInvalid=invalidStorage;
+    invalidStorage=false;
+    const done=persist(data);
+    if(!done)invalidStorage=previousInvalid;
+    if(done)refresh();return done;
   }
   // User-triggered control; no auto-granted legacy quest rewards or Gem changes.
   const panel=document.createElement('details');
