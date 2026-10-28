@@ -165,6 +165,14 @@ public class MainActivity extends Activity {
                     } catch (IOException campaignError) {
                         android.util.Log.w("BraveFrontier", "Optional campaign overview unavailable", campaignError);
                     }
+                    // v149: original 2022 Amdahl source map and dungeon artwork.
+                    // Read-only reference; never enables unverified playable quests.
+                    try {
+                        String amdahlArt = readPackagedText("bf14900_original_amdahl_art.js");
+                        view.evaluateJavascript(amdahlArt, null);
+                    } catch (IOException amdahlError) {
+                        android.util.Log.w("BraveFrontier", "Optional original Amdahl map unavailable", amdahlError);
+                    }
                     // v1.01: optional unlock-gated Continue Story across 106 original quests.
                     try {
                         String continueStory = readPackagedText("bf101_story_continue.js");
