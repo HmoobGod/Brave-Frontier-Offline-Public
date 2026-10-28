@@ -1036,6 +1036,14 @@ public class MainActivity extends Activity {
                 } catch (IOException impError) {
                     android.util.Log.w("BraveFrontier", "Optional Imp feeding unavailable", impError);
                 }
+                // v170: personal offline Gem wallet UI, with all reward state
+                // committed atomically through the existing v7 player save.
+                try {
+                    String gemRewards = readPackagedText("bf17000_personal_gem_rewards_ui.js");
+                    view.evaluateJavascript(gemRewards, null);
+                } catch (IOException gemUiError) {
+                    android.util.Log.w("BraveFrontier", "Personal offline Gem UI unavailable", gemUiError);
+                }
                 // v126: show original 2022 playable squad cost totals (advisory).
                 // No unverified summoner-capacity limits or roster mutations.
                 try {
