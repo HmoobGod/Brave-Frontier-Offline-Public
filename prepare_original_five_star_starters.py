@@ -50,7 +50,31 @@ def bake(z,id):
             assert scale in (30,40,60,80,100)
             assert x>=0 and y>=0 and w>0 and h>0 and x+w<=sprite.width and y+h<=sprite.height
             patch=sprite.crop((x,y,x+w,y+h))
-            if scale!=100:patch=patch.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
+            # BF_GLOBAL_5STAR_DARK_SOURCE_CGG_V14600:
+            # Original 2022 Global #60014 (Death Magress) CGG uses code 2
+            # for vertical flip, and field five is opacity, not size scale.
+            # This is an isolated source-based correction: original blend
+            # and rotation codes are zero for ALL 251 source sprite layers.
+            if id==60014:
+                expected_flip={(24,1),(24,8),(25,8),(25,12),
+                               (26,8),(26,9),(26,11),(26,12)}
+                expected_alpha={
+                   (26,0):60,(26,1):60,(26,2):60,(26,3):60,
+                   (26,4):60,(26,5):60,(26,6):60,(26,7):60,
+                   (26,8):60,(26,9):60,(26,11):80,(26,12):80,
+                   (26,13):80,(27,0):30,(27,1):30,(27,2):30,
+                   (27,3):30,(28,0):40}
+                assert rsv==unused==mode==0
+                assert (orientation==2)==((fi,j) in expected_flip)
+                assert scale==expected_alpha.get((fi,j),100)
+                if orientation==2:
+                    patch=patch.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+                if scale!=100:
+                    patch.putalpha(patch.getchannel('A').point(
+                        lambda a:round(a*scale/100)))
+            elif scale!=100:
+                patch=patch.resize((max(1,round(w*scale/100)),
+                    max(1,round(h*scale/100))),Image.Resampling.NEAREST)
             dest=(originx+dx,originy+dy)
             assert dest[0]>=0 and dest[1]>=0 and dest[0]+patch.width<=fw and dest[1]+patch.height<=fh
             frame.alpha_composite(patch,dest)
