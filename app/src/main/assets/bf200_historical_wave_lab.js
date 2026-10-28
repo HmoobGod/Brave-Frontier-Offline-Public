@@ -152,6 +152,15 @@
  // Fail closed to the legacy synthetic volley if the archive reference or
  // a wave/slot/source-stat join ever diverges.
  function sourceEnemyPlan2014(foes){
+    // v141: for four mixed 2014 archives, return authenticated normal
+    // attacks where proven and visibly mark complex actions as synthetic.
+    const mixed=window.BFHistoricalMixedMissionSourceAIV14100;
+    if(mixed?.source?.era===2014&&
+       mixed.source.confirmed2022===false&&
+       mixed.source.slots===46&&typeof mixed.plan==='function'){
+      const plan=mixed.plan(current?.missionId,current?.wave+1,foes);
+      if(plan)return plan;
+    }
     // v140: use original archived 2014 source action decisions from the
     // five fully authenticated all-normal-attack historical missions.
     // Every row is checked against the exact loaded v2.00 source roster.
@@ -228,8 +237,11 @@
        const harm=action==='guard'?Math.ceil(volley*.3):volley;
        current.hp=Math.max(0,current.hp-harm);
        if(sourceAttacks){
-          current.log.push('2014 source AI: '+sourceAttacks.map(a=>
-            a.name+' #'+a.unitId+' ATTACK 100% (1 action)').join(' · ')+
+          const anyComplex=sourceAttacks.some(a=>a.sourceBacked===false);
+          current.log.push((anyComplex?'2014 source AI PARTIAL: ':'2014 source AI: ')+
+            sourceAttacks.map(a=>a.sourceBacked===false?
+              a.name+' #'+a.unitId+' UNMODELED COMPLEX AI (synthetic reply)':
+              a.name+' #'+a.unitId+' ATTACK 100% (1 action)').join(' · ')+
             ' · random target NOT simulated.');
        }
        current.log.push('Synthetic enemy reply: '+harm+' HP.');

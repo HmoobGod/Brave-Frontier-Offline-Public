@@ -611,6 +611,14 @@ public class MainActivity extends Activity {
                                 try {
                                     String sourceFiveAI = readPackagedText("bf14000_five_historical_source_ai.js");
                                     view.evaluateJavascript(sourceFiveAI, null);
+                                    // v141: source-backed mixed AI cases with
+                                    // strict synthetic fallback for complex skills.
+                                    try {
+                                        String mixedAI = readPackagedText("bf14100_mixed_historical_source_ai.js");
+                                        view.evaluateJavascript(mixedAI, null);
+                                    } catch (IOException mixedAIError) {
+                                        android.util.Log.w("BraveFrontier", "Optional mixed historical AI source unavailable", mixedAIError);
+                                    }
                                 } catch (IOException fiveAIError) {
                                     android.util.Log.w("BraveFrontier", "Optional historical source attack AI unavailable", fiveAIError);
                                 }
