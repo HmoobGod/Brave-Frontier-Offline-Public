@@ -26,6 +26,9 @@ with sync_playwright() as pw:
     }''')
     page.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
     assert page.evaluate('P.version')==7
+    # The v0.26 archive requires the routed Unit Box built by home_nav.
+    page.add_script_tag(path=str(A/'bf_home_nav.js'))
+    assert page.evaluate('!!window.BFUnitBox')
     page.add_script_tag(path=str(A/'bf_global_unit_archive.js'))
     assert page.evaluate('BFGlobalUnitArchive.count')==2291
     assert page.evaluate('BFGlobalUnitArchive.originalImpCaps(10011)')==[400,160,80,80]
