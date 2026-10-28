@@ -32,6 +32,11 @@ function bf170NewWallet(clears) {
   lastDailyDate:null,dailyClaims:0,firstPaid:[],
   legacyClears:bf170OldClears(clears),replaysPaid:0};
 }
+function bf170ValidLocalDate(value){
+ if(typeof value!=='string'||!/^20[2-9]\\d-(0[1-9]|1[0-2])-([0-2]\\d|3[01])$/.test(value))return false;
+ const [year,month,day]=value.split('-').map(Number),date=new Date(year,month-1,day);
+ return date.getFullYear()===year&&date.getMonth()+1===month&&date.getDate()===day;
+}
 function bf170ValidateWallet(source,clears) {
  if(source===undefined)return bf170NewWallet(clears);
  if(!source||typeof source!=='object'||Array.isArray(source)||
@@ -45,8 +50,7 @@ function bf170ValidateWallet(source,clears) {
    !Array.isArray(source.firstPaid)||!Array.isArray(source.legacyClears))
   throw new Error('Invalid custom offline Gem wallet');
  if(source.dailyClaims===0&&source.lastDailyDate!==null||
-    source.dailyClaims>0&&!(typeof source.lastDailyDate==='string'&&
-     /^20[2-9]\d-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(source.lastDailyDate)))
+    source.dailyClaims>0&&!(bf170ValidLocalDate(source.lastDailyDate)))
   throw new Error('Invalid personal Gem daily date');
  const completed=bf170OldClears(clears),check=(list)=>{
   if(list.length>106)return false;
@@ -153,6 +157,12 @@ a='bf161RecordNewFirstClear(previousQuestClearCount);P.summonTokens='
 assert s.count(a)==1
 s=s.replace(a,'bf161RecordNewFirstClear(previousQuestClearCount);bf170ApplyQuestReward(previousQuestClearCount,QUEST.missionId);P.summonTokens=',1)
 assert s.count('BF_GLOBAL_GEMS_PERSONAL_V17000')==1
+# A custom-balance panel must refresh only AFTER a successful canonical
+# save. In particular, a failed/quota save must not display phantom Gems.
+commit='localStorage.setItem(SAVE_KEY,JSON.stringify(P));saveEnabled=true;return true;}'
+assert s.count(commit)==1,'v170 unexpected canonical save success path'
+s=s.replace(commit,'localStorage.setItem(SAVE_KEY,JSON.stringify(P));saveEnabled=true;'+
+ 'window.BFGlobalPersonalGemUIV17000?.refresh?.();return true;}',1)
 assert s.count('localStorage.setItem(SAVE_KEY,JSON.stringify(P))')==1
 html.write_text(s,'utf8')
 print('PASS patch v170: personal Gem wallet, 106 source quests, original 22 finales, one-Gem replay and login claims in canonical v7 save')
