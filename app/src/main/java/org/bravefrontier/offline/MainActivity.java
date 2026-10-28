@@ -1028,6 +1028,14 @@ public class MainActivity extends Activity {
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
                 }
+                // v172: source-exact 2022 max-level Lord stats in owned archive battles.
+                // No EXP curve guesses, save changes or non-Lord type rolls.
+                try {
+                    String lordMax = readPackagedText("bf17200_original_max_level_lord_combat.js");
+                    view.evaluateJavascript(lordMax, null);
+                } catch (IOException lordMaxError) {
+                    android.util.Log.w("BraveFrontier", "Original max-level Lord endpoint unavailable", lordMaxError);
+                }
                 // v169: optional user-activated Imp feeding and original +25% caps.
                 // Sidecar save is separate; no legacy v7 save fields or Gem awards.
                 try {
