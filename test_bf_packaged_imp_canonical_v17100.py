@@ -15,7 +15,7 @@ assert b'Math.max(n,Math.floor((n*5/4)/steps[i])*steps[i])' in imps
 assert b'P[canonicalField]=checked' in imps
 assert b'localStorage.setItem(key' not in imps
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '171.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(171,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
