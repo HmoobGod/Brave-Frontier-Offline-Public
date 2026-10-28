@@ -1,7 +1,9 @@
 /* BF_GLOBAL_ORIGINAL_MAX_LEVEL_LORD_COMBAT_V17200 */
 (() => {
  'use strict';
- // Exact original 2022 Lord MAX endpoint only. Current EXP thresholds,
+ // Exact original 2022 Lord MAX endpoint only. Only 60 of 72 form max levels
+ // are reachable with DEMO level cap 99; 12 max-level-100 forms skip.
+ // Current EXP thresholds,
  // intermediate stat growth and all non-Lord type rolls remain DEMO.
  const source=window.BFGlobalOriginalLordStatsV11600;
  const caps=window.BFGlobalOriginalUnitLevelCapsV11500;
@@ -60,6 +62,8 @@
  function snapshot(){
    const rows=Array.isArray(S.party)?S.party.map(u=>audited.get(u)).filter(Boolean):[];
    return freeze({mode:S.mode,sourceForms:72,
+      reachableSourceFormsUnderDemoLevel99:60,
+      maxLevel100UnreachableForms:12,
       exactLordMaxPartyUnits:rows.length,rows:freeze(rows),
       appliedBuilders:applied,skippedBuilders:skipped,
       originalLevelOneBaselinePreserved:true,
@@ -79,7 +83,9 @@
  note.textContent='Uses exact original 2022 HP/ATK/DEF/REC Lord endpoints only when '+ 
    'the currently playable unit reaches its archived source max level in '+ 
    'the existing DEMO progression. Intermediate leveling, EXP patterns, '+ 
-   'non-Lord type bonuses and native damage formulas remain unverified. '+ 
+   'non-Lord type bonuses and native damage formulas remain unverified. '+
+   'Current DEMO leveling stops at 99: 12 source Lv.100 forms cannot '+
+   'reach this max endpoint yet, while 60 of 72 can qualify. '+ 
    'No change to saved experience, rosters, quest rewards or training.';
  panel.append(summary,status,list,note);host.after(panel);
  function refresh(){
@@ -103,7 +109,8 @@
  document.getElementById('reset')?.addEventListener('click',()=>setTimeout(refresh,0));
  window.BFGlobalOriginalMaxLevelLordV17200=freeze({
    source:freeze({archive:'2022 F_UNIT_MST_1/2_Ver1084.json',
-     qualifiedForms:72,sourceLordMaxOnly:true,
+     qualifiedForms:72,reachableUnderCurrentDemoLevel99:60,
+     skippedSourceLv100Forms:12,sourceLordMaxOnly:true,
      exactIntermediateGrowthClaimed:false,saveFieldsAdded:0}),
    apply,snapshot,refresh
  });
