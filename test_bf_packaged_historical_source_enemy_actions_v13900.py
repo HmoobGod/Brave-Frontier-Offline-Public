@@ -9,7 +9,8 @@ with zipfile.ZipFile(APK) as z:
  assert 'function sourceEnemyPlan2014(foes)' in historic
  assert "sourceAttacks.reduce((n,a)=>n+a.syntheticHarm,0)" in historic
  assert 'random target NOT simulated' in historic
- assert "gitBlobSha:'797a2945a40bcfffe7dfc500c8e3dfb6eb81b8fe'" in original
+ assert "const blob='797a2945a40bcfffe7dfc500c8e3dfb6eb81b8fe'" in original
+ assert 'gitBlobSha:blob' in original
  assert 'bf_global_offline_demo_v7' in html
  assert 'BF_GLOBAL_ARCHIVE_TRIALS_V200' in historic
 print('PASS v139 APK: authentic 2014 archived AI cadence wired to sandbox practice, no 2022 runtime/save changes')
