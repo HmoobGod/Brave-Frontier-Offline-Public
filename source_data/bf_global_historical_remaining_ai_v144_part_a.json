@@ -1,0 +1,1987 @@
+{
+  "schema": "bf-original-historical-2014-source-ai-remaining-v144-part-a",
+  "originalEra": 2014,
+  "confirmed2022": false,
+  "totals": {
+    "waves": 31,
+    "slots": 82,
+    "simple": 73,
+    "complex": 9
+  },
+  "missions": [
+    {
+      "id": 41,
+      "name": "Puppeteer of the Trees",
+      "sourcePath": "missions_parsed/Puppeteer of the Trees_2014-14-10-08-26.json",
+      "gitBlobSha": "d89860fe5a45a7d3cce3a6a9c0d60e6c643b99d8",
+      "waves": [
+        [
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30041,
+            "name": "Time Mage Claris",
+            "hp": 11000,
+            "atk": 610,
+            "def": 200,
+            "aiId": 5000,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 42,
+      "name": "Bandit of the Forest",
+      "sourcePath": "missions_parsed/Bandit of the Forest_2014-14-10-08-27.json",
+      "gitBlobSha": "0924501d0ee0592c52038aa3b22cd7950e5ffc7d",
+      "waves": [
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 1650,
+            "atk": 460,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30030,
+            "name": "Mossy",
+            "hp": 1600,
+            "atk": 440,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30050,
+            "name": "Mandragora",
+            "hp": 2000,
+            "atk": 520,
+            "def": 250,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 30062,
+            "name": "Head Bandit Zaza",
+            "hp": 12000,
+            "atk": 660,
+            "def": 20,
+            "aiId": 5004,
+            "actCounts": "2~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ]
+      ]
+    },
+    {
+      "id": 50,
+      "name": "Thunder Blasting Wetlands",
+      "sourcePath": "missions_parsed/Thunder Blasting Wetlands_2014-24-9-18-02.json",
+      "gitBlobSha": "96342e58a56be659740a1e7c0968680a3e4c9522",
+      "waves": [
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40061,
+            "name": "Sky Pirate Grafl",
+            "hp": 3500,
+            "atk": 570,
+            "def": 130,
+            "aiId": 20,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 40030,
+            "name": "Sparky",
+            "hp": 1500,
+            "atk": 470,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40031,
+            "name": "King Sparky",
+            "hp": 9000,
+            "atk": 520,
+            "def": 30,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40031,
+            "name": "King Sparky",
+            "hp": 9000,
+            "atk": 520,
+            "def": 30,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 51,
+      "name": "Commander of the Thunder",
+      "sourcePath": "missions_parsed/Commander of the Thunder_2014-14-10-08-28.json",
+      "gitBlobSha": "77eb5b825a4549b6a670b678216aac11d6be42c8",
+      "waves": [
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40130,
+            "name": "Thunder Nymph",
+            "hp": 4800,
+            "atk": 520,
+            "def": 100,
+            "aiId": 1,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40030,
+            "name": "Sparky",
+            "hp": 1500,
+            "atk": 470,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40041,
+            "name": "High Dancer May",
+            "hp": 13000,
+            "atk": 620,
+            "def": 100,
+            "aiId": 5000,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 52,
+      "name": "Pirate of the Wetlands",
+      "sourcePath": "missions_parsed/Pirate of the Wetlands_2014-14-10-08-29.json",
+      "gitBlobSha": "ffcb59327583e8dd504d5767a072bb3b5b30c297",
+      "waves": [
+        [
+          {
+            "unitId": 40130,
+            "name": "Thunder Nymph",
+            "hp": 4800,
+            "atk": 520,
+            "def": 100,
+            "aiId": 1,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1600,
+            "atk": 460,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40030,
+            "name": "Sparky",
+            "hp": 1500,
+            "atk": 470,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40030,
+            "name": "Sparky",
+            "hp": 1500,
+            "atk": 470,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40050,
+            "name": "Harpy",
+            "hp": 1900,
+            "atk": 510,
+            "def": 60,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 40062,
+            "name": "Sky Boss Grafl",
+            "hp": 13500,
+            "atk": 650,
+            "def": 130,
+            "aiId": 5004,
+            "actCounts": "2~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ]
+      ]
+    },
+    {
+      "id": 60,
+      "name": "Sacred Ruins",
+      "sourcePath": "missions_parsed/Sacred Ruins_2014-14-10-08-30.json",
+      "gitBlobSha": "3c0b2a0d2b10fe890370c2aa3105949ab9ea8511",
+      "waves": [
+        [
+          {
+            "unitId": 50030,
+            "name": "Glowy",
+            "hp": 2000,
+            "atk": 500,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50030,
+            "name": "Glowy",
+            "hp": 2000,
+            "atk": 500,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50030,
+            "name": "Glowy",
+            "hp": 2000,
+            "atk": 500,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50060,
+            "name": "Unicorn",
+            "hp": 3900,
+            "atk": 560,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50060,
+            "name": "Unicorn",
+            "hp": 3900,
+            "atk": 560,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50031,
+            "name": "King Glowy",
+            "hp": 12000,
+            "atk": 620,
+            "def": 200,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50031,
+            "name": "King Glowy",
+            "hp": 12000,
+            "atk": 620,
+            "def": 200,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    }
+  ]
+}
