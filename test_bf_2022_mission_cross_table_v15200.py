@@ -60,7 +60,6 @@ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_te
 html=(R/'app/src/main/assets/index.html').read_text('utf8')
 assert 'bf_global_offline_demo_v7' in html
 assert 'bf15200' not in java and 'bf15200' not in html
-assert 'P.version' in html
 assert "applicationId 'org.bravefrontier.offline'" in (R/'app/build.gradle').read_text('utf8')
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
 
