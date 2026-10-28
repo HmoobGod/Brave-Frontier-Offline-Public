@@ -145,6 +145,40 @@
        burst:0,kits:2,turns:0,enemies:[],log:[]};
     putWave(row,0);render();return true;
  }
+ // The 2014 original Basics-of-Battle archive specifies precisely one
+ // normal attack per living foe per turn, action weight 100%, random targeting.
+ // Here only the ACTION DECISION is source-backed: practice has a single
+ // simulated aggregate HP bar, and damage/target RNG remain explicitly DEMO.
+ // Fail closed to the legacy synthetic volley if the archive reference or
+ // a wave/slot/source-stat join ever diverges.
+ function sourceEnemyPlan2014(foes){
+    if(current?.missionId!==1||!Array.isArray(foes))return null;
+    const ref=window.BFHistoricalBasicsAIReferenceV8700;
+    const src=ref?.source;
+    if(src?.gitBlobSha!=='797a2945a40bcfffe7dfc500c8e3dfb6eb81b8fe'||
+       src.confirmed2022!==false||src.enemySlots!==4||
+       typeof ref.lookup!=='function')return null;
+    const plan=[];
+    for(let slot=0;slot<foes.length;slot++){
+      const foe=foes[slot], original=ref.lookup(current.wave+1,slot);
+      if(!original||foe.unitId!==original.unitId||foe.name!==original.name||
+         foe.maxHp!==original.hp||foe.atk!==original.atk||
+         foe.def!==original.def||foe.aiId!==original.aiId||
+         original.actionsPerTurn?.min!==1||original.actionsPerTurn?.max!==1||
+         original.action?.type!=='attack'||original.action?.percent!==100||
+         original.action?.parameters!=='-1'||
+         original.action?.targetCondition!=='random'||
+         original.action?.targetType!==2||
+         original.action?.conditionCount!==0)return null;
+      if(foe.hp>0)plan.push(Object.freeze({
+        wave:current.wave+1,slot,unitId:foe.unitId,name:foe.name,
+        action:'attack',sourceWeight:100,
+        nativeRandomTargetImplemented:false,
+        syntheticHarm:Math.max(12,Math.ceil(foe.atk/12))
+      }));
+    }
+    return Object.freeze(plan);
+ }
  function perform(action){
     if(!current||current.state!=='running'||
        !['attack','burst','guard','heal'].includes(action))return false;
@@ -175,10 +209,18 @@
           current.log.push('PRACTICE COMPLETE. No game progress or rewards granted.');
        }else putWave(row,current.wave+1);
     }else{
-       const volley=foes.filter(e=>e.hp>0).reduce((n,e)=>
-           n+Math.max(12,Math.ceil(e.atk/12)),0);
+       const sourceAttacks=sourceEnemyPlan2014(foes);
+       const volley=sourceAttacks?
+           sourceAttacks.reduce((n,a)=>n+a.syntheticHarm,0):
+           foes.filter(e=>e.hp>0).reduce((n,e)=>
+             n+Math.max(12,Math.ceil(e.atk/12)),0);
        const harm=action==='guard'?Math.ceil(volley*.3):volley;
        current.hp=Math.max(0,current.hp-harm);
+       if(sourceAttacks){
+          current.log.push('2014 source AI: '+sourceAttacks.map(a=>
+            a.name+' #'+a.unitId+' ATTACK 100% (1 action)').join(' · ')+
+            ' · random target NOT simulated.');
+       }
        current.log.push('Synthetic enemy reply: '+harm+' HP.');
        if(!current.hp){
           current.state='lost';current.log.push('Practice lost. No game penalty.');
