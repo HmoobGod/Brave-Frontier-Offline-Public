@@ -105,6 +105,12 @@ with sync_playwright() as pw:
       simulatedDamage:start-S.enemies[0].hp,
       DEMOBurstGauge:actor.bb,
       saveVersion:P.version};
+   // The canvas animation loop reads UNIT_BY_ID for every live party actor.
+   // Reset the disposable battle (and invalidate its epoch) BEFORE dropping
+   // its temporary 7-star actor, otherwise the next rAF may render an ID
+   // that no longer exists and raise a nondeterministic page error.
+   BF_debug.reset();
+   await new Promise(resolve => requestAnimationFrame(resolve));
    UNIT_BY_ID.delete(20016);
    delete BF_ARCHIVE_NORMAL_HITS['20016'];
    result.temporaryUnitGone=!UNIT_BY_ID.has(20016);
