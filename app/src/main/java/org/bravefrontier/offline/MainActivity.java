@@ -187,6 +187,15 @@ public class MainActivity extends Activity {
                     } catch (IOException energyError) {
                         android.util.Log.w("BraveFrontier", "Optional original quest energy view unavailable", energyError);
                     }
+                    // v145: owner-supplied 2022 original BGM, opt-in only.
+                    // Uses the 3 original tracks already bundled in v124;
+                    // all session-only, no save or network changes.
+                    try {
+                        String originalMusic = readPackagedText("bf14500_original_global_music.js");
+                        view.evaluateJavascript(originalMusic, null);
+                    } catch (IOException musicError) {
+                        android.util.Log.w("BraveFrontier", "Optional original music control unavailable", musicError);
+                    }
                     // v20.00: authentic 2022 quest metadata + live existing DEMO battle HUD.
                     // Optional and read-only; no native formula or save-schema changes.
                     try {
