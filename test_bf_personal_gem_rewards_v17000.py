@@ -133,14 +133,14 @@ with sync_playwright() as pw:
  assert ('Gem balance: '+format(initial+25,',')) in p.locator('#bf17000-gem-rewards').inner_text()
  # Claude F7: exact Gregorian dates only; no Feb 31 or non-leap Feb 29.
  for bad_date in ('2025-02-31','2025-02-29','2026-11-31'):
-  assert p.evaluate("""+"'''"+"""s=>{const data=JSON.parse(JSON.stringify(P));
+  assert p.evaluate('''s=>{const data=JSON.parse(JSON.stringify(P));
     data._bfGemV170Custom.lastDailyDate=s;
     try{parseProgress(data);return false;}catch(_){return true}
-  }"""+"'''"+""",bad_date)
- assert p.evaluate("""+"'''"+"""()=>{const data=JSON.parse(JSON.stringify(P));
+  }''',bad_date)
+ assert p.evaluate('''()=>{const data=JSON.parse(JSON.stringify(P));
   data._bfGemV170Custom.lastDailyDate='2028-02-29';
   return parseProgress(data)._bfGemV170Custom.lastDailyDate;
- }"""+"'''"+""")== '2028-02-29'
+ }''')== '2028-02-29'
  assert set(p.evaluate('window.__gemWrites'))=={'bf_global_offline_demo_v7'}
  assert not errs,errs
  b.close()
