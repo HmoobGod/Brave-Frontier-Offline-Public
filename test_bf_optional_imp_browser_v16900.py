@@ -86,14 +86,24 @@ with sync_playwright() as pw:
     page.evaluate('''()=>{window.__imp169OldClear=Object.prototype.hasOwnProperty.call(P.questClears,'1')?P.questClears[1]:null;P.questClears[1]=(P.questClears[1]||0)+2;}''')
     assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==4
     assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==0
-    # Updates to live quest-clear state above are test-owned; subtract them
-    # before comparing the original game state and canonical v7 saved bytes.
-    page.evaluate('''()=>{if(window.__imp169OldClear===null)delete P.questClears[1];else P.questClears[1]=window.__imp169OldClear;}''')
+    # v171: fed Imps, claims and quest counters now persist together.
     after=page.evaluate('''()=>({
       p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')
     })''')
-    assert before==after,(before,after)
+    assert before!=after
+    assert after['p']==after['save'],(before,after)
+    assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))._bfImpsV171.inventory.arton")==5
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().canonicalField')=='_bfImpsV171'
+    # Switching to a different imported v7 must not attach previous Imps.
+    page.evaluate('''()=>{window.__firstImp171=P._bfImpsV171;
+       const next=JSON.parse(JSON.stringify(P));next._bfImpsV171=null;
+       P=parseProgress(next);
+    }''')
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
+    assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[0,0,0,0]
+    page.evaluate('P._bfImpsV171=window.__firstImp171')
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is True
     assert page.evaluate('BFGlobalOptionalImpsV16900.exportState()') is not None
     assert not errors,errors
     browser.close()
-print('PASS v169 full browser original archive, user enable/feed, battle bridge source+Imp+leader, original mode, training, earned Artons and v7 isolation')
+print('PASS v171 browser: original archive, canonical v7 Imp persist and import isolation, 125% cap, smart batch and battle source ordering')
