@@ -162,7 +162,7 @@ assert s.count('BF_GLOBAL_GEMS_PERSONAL_V17000')==1
 commit='localStorage.setItem(SAVE_KEY,JSON.stringify(P));saveEnabled=true;return true;}'
 assert s.count(commit)==1,'v170 unexpected canonical save success path'
 s=s.replace(commit,'localStorage.setItem(SAVE_KEY,JSON.stringify(P));saveEnabled=true;'+
- 'window.BFGlobalPersonalGemUIV17000?.refresh?.();return true;}',1)
+ 'try{window.BFGlobalPersonalGemUIV17000?.refresh?.()}catch(_){}return true;}',1)
 assert s.count('localStorage.setItem(SAVE_KEY,JSON.stringify(P))')==1
 html.write_text(s,'utf8')
 print('PASS patch v170: personal Gem wallet, 106 source quests, original 22 finales, one-Gem replay and login claims in canonical v7 save')
