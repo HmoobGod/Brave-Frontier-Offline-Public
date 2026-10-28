@@ -1,0 +1,15 @@
+# v134 — original 2022 Global 4★ Black Magress source-layer restoration
+
+This is a **source-art correction for an already playable 4★ form**, not a 7★/8★ unlock or experiment in battle mechanics. Unit **#60013 Black Magress** uses the owner's original 2022 Global six-file sprite/CGG/CGS record, pinned in `bf_global_more_second_stage_v034.json` and the source asset pack `BF1_Global_2022_More_Second_Stage.zip.b64`.
+
+The original CGG has 29 composition frames and 223 sprite layers. Exactly six source layers use orientation code `2`, and five use original opacity percentages 30%, 50% or 70%, with one layer requiring **both** a flip and opacity adjustment. All original blend, rotation and source-sheet page fields are zero; untouched source layers remain unchanged. v34 mistakenly interpreted original column 4 opacity as sprite *resizing* and ignored flip code 2. Independent [BluuArc BFFrameAnimator](https://github.com/BluuArc/BFFrameAnimator/blob/master/src/Frame.java) community field mapping identifies CGG code `2` as vertical flip, and the percentage as alpha; no claim is made that this independently reconstructs the 2022 Global native renderer's entire alpha/blend engine.
+
+Exact source frame/layer vertical flips: `(23,0),(24,0),(24,4),(24,5),(25,0),(26,0)`. Source alpha values: `(26,0,50),(26,1,50),(26,2,50),(26,3,70),(27,0,30)`.
+
+A standalone Pillow source rasterization reproduced the exact previous signed v124 APK image SHA256 `d556d3f64fe120cd2f9aeac296d92405d140d50860073362244909882bd309cf`. The v134 restored source alpha + flips yields new byte-pinned PNG SHA256 **`b12bdb2eea55eec3ec6ffe734923ad07ebccda10aca0e8ab5235c6a0d0c0cd40`**. The five remaining 4★ alternate source atlases (including the three newly corrected in v133) are unchanged.
+
+`test_bf_original_fourstar_dark_v13400.py` independently reconstructs original and corrected CGG layers and source/pack hashes, and asserts the unchanged five companion original atlases. `test_bf_packaged_fourstar_dark_v13400.py` checks the installed Android build packages the exact changed art, the three corrected v133 companions, and **`bf_global_offline_demo_v7`** unchanged. The v133 post-v134 image-isolation regression intentionally expects the new source-correct #60013 SHA.
+
+**Safety:** Preserves 72 playable forms and does not modify enemy/NPC AI, combat, BB damage, original skill descriptions, rewards, 2022 leveling/EXP, 7★/8★ playability, evo materials, saved roster, or Android package and signing. Continue source-faithful gameplay research separately. User installed v124, next APK on request around v150.
+
+**Gates:** Branch is stacked on exact v133 feature SHA `3cf12a713bb9ba5e6585b35a781d631a5365d0a0`. Require v132 fresh merged-main CI SUCCESS, exact v133 feature-head CI SUCCESS, merge v133 and verify new fresh main CI SUCCESS, then verify exact v134 feature-head CI SUCCESS before merging v134. Require subsequent fresh merged-main CI SUCCESS before declaring v134 stable. Never fast-forward an unverified branch.
