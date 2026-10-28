@@ -152,6 +152,17 @@
  // Fail closed to the legacy synthetic volley if the archive reference or
  // a wave/slot/source-stat join ever diverges.
  function sourceEnemyPlan2014(foes){
+    // v144: remaining twelve archived 2014 Global missions.
+    // Source-backed one-action normals only; complex source AI stays
+    // explicitly labeled synthetic and never contaminates 2022 combat.
+    const remaining=window.BFHistoricalRemainingMissionSourceAIV14400;
+    if(remaining?.source?.era===2014&&
+       remaining.source.confirmed2022===false&&
+       remaining.source.slots===177&&
+       typeof remaining.plan==='function'){
+       const original=remaining.plan(current?.missionId,current?.wave+1,foes);
+       if(original)return original;
+    }
     // v141: for four mixed 2014 archives, return authenticated normal
     // attacks where proven and visibly mark complex actions as synthetic.
     const mixed=window.BFHistoricalMixedMissionSourceAIV14100;
