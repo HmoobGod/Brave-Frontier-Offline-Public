@@ -606,6 +606,14 @@ public class MainActivity extends Activity {
                             try {
                                 String basicsAI = readPackagedText("bf8700_original_basics_ai_reference.js");
                                 view.evaluateJavascript(basicsAI, null);
+                                // v140: five original 2014 all-attack AI references.
+                                // Optional practice only, not 2022 Global battles.
+                                try {
+                                    String sourceFiveAI = readPackagedText("bf14000_five_historical_source_ai.js");
+                                    view.evaluateJavascript(sourceFiveAI, null);
+                                } catch (IOException fiveAIError) {
+                                    android.util.Log.w("BraveFrontier", "Optional historical source attack AI unavailable", fiveAIError);
+                                }
                             } catch (IOException basicsAIError) {
                                 android.util.Log.w("BraveFrontier", "Optional historical 2014 AI reference unavailable", basicsAIError);
                             }
