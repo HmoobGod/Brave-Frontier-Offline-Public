@@ -1064,6 +1064,14 @@ public class MainActivity extends Activity {
                 } catch (IOException meritClearError) {
                     android.util.Log.w("BraveFrontier", "Optional 2022 Merit quest milestones unavailable", meritClearError);
                 }
+                // v155: authenticated original 2022 dungeon first-clear
+                // reward source references; no Gem awards or save changes.
+                try {
+                    String firstClearRefs = readPackagedText("bf15500_first_clear_gem_source.js");
+                    view.evaluateJavascript(firstClearRefs, null);
+                } catch (IOException firstClearRefError) {
+                    android.util.Log.w("BraveFrontier", "Optional original Gem reward source unavailable", firstClearRefError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
