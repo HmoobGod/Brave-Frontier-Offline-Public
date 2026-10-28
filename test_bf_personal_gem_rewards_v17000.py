@@ -145,6 +145,14 @@ with sync_playwright() as pw:
   data._bfGemV170Custom.balance+=100;
   return parseProgress(data)._bfGemV170Custom.lastDailyDate;
  }''')== '2028-02-29'
+ # A UI rendering fault must NEVER turn a successfully committed save into
+ # a false failure, which could cause repeat payouts or confused callers.
+ assert p.evaluate('''()=>{const ui=window.BFGlobalPersonalGemUIV17000;
+   window.BFGlobalPersonalGemUIV17000={refresh(){throw Error('UI unavailable')}};
+   const success=saveProgress();window.BFGlobalPersonalGemUIV17000=ui;
+   return success;
+ }''') is True
+ assert p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))._bfGemV170Custom.balance")==initial+25
  assert set(p.evaluate('window.__gemWrites'))=={'bf_global_offline_demo_v7'}
  assert not errs,errs
  b.close()
