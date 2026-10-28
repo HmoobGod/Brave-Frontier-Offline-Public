@@ -157,6 +157,7 @@ jobs:
           python test_bf_original_unit_level_caps_v11500.py
           python test_bf_original_lord_stats_v11600.py
           python test_bf_original_level_one_lord_combat_v16800.py
+          python test_bf_optional_imp_browser_v16900.py
           python test_bf_original_playable_stat_catalog_v11700.py
           python test_bf_original_exp_type_source_v11800.py
           python test_bf_original_exp_readonly_crosscheck_v11900.py
