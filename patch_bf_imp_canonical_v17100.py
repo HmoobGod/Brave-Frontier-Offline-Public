@@ -59,6 +59,19 @@ s=s.replace(old,old+' out._bfImpsV171=bf171ValidateCanonicalImps(data._bfImpsV17
 old='  P._bfGemV170Custom=bf170ValidateWallet(P._bfGemV170Custom,P.questClears);\n'
 assert s.count(old)==1
 s=s.replace(old,old+'  P._bfImpsV171=bf171ValidateCanonicalImps(P._bfImpsV171);\n',1)
+# Claude N3: save imports rerender progression without necessarily saving.
+# Refresh the optional Imp panel on that same gameplay UI entrypoint, and
+# after a successful canonical save. Never let a UI fault block save success.
+render='function renderProgress(){'
+assert s.count(render)==1,'v171 missing unique game progress render entrypoint'
+s=s.replace(render,render+"""
+ try{window.BFGlobalOptionalImpsV16900?.refresh?.()}catch(_){}
+""",1)
+gem="""try{window.BFGlobalPersonalGemUIV17000?.refresh?.()}catch(_){}return true;}"""
+assert s.count(gem)==1,'v171 missing v170 save success UI boundary'
+s=s.replace(gem,"""try{window.BFGlobalPersonalGemUIV17000?.refresh?.()}catch(_){}
+  try{window.BFGlobalOptionalImpsV16900?.refresh?.()}catch(_){}
+  return true;}""",1)
 assert s.count("localStorage.setItem(SAVE_KEY,JSON.stringify(P))")==1
 file.write_text(s,'utf8')
 print('PASS v171: Imp and Gem state now share one canonical v7 transaction; legacy sidecar requires explicit migration')
