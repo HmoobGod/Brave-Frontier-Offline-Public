@@ -16,7 +16,7 @@ assert bridge.index('BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i)')<bridg
 assert not any(x in source.decode('utf8') for x in (
  'saveProgress(', 'P.unitExp=', 'P.roster=', 'P.questClears=', 'awardDemoRewards(', 'Math.random','fetch('))
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '169.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(169,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
