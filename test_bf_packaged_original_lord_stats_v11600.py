@@ -22,7 +22,8 @@ assert java.index('readPackagedText("bf11500_original_unit_level_caps.js")')<jav
  'readPackagedText("bf11600_original_lord_stats_data.js")')<java.index(
  'readPackagedText("bf11600_original_lord_stats_reference.js")')
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '116.00.0-demo'" in g
+# v116 source proof survives later verified APK version labels.
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(116,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
