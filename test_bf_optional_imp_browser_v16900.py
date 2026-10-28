@@ -104,6 +104,37 @@ with sync_playwright() as pw:
     page.evaluate('P._bfImpsV171=window.__firstImp171')
     assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is True
     assert page.evaluate('BFGlobalOptionalImpsV16900.exportState()') is not None
+    # Native Android current-save export and rotating backups now retain Imps:
+    # they are a field within the SAME canonical v7 JSON.
+    page.evaluate('''()=>{window.BFAndroid={exportSaveFile:(raw,name)=>{
+        window.__imp171Export={raw,name};
+      }};}''')
+    page.add_script_tag(path=str(A/'bf9700_qol_rotating_backups.js'))
+    assert page.evaluate('BFGlobalQoLBackupsV9700.listing().length')>=1
+    page.evaluate('BFGlobalQoLBackupsV9700.exportCurrent()')
+    exported=page.evaluate('window.__imp171Export')
+    assert exported['name'].startswith('BraveFrontier-v7-current-')
+    assert __import__('json').loads(exported['raw'])['_bfImpsV171']['started'] is True
+    assert __import__('json').loads(exported['raw'])['_bfImpsV171']['amounts']['10011']==[500,200,100,100]
+    assert page.evaluate('''()=>JSON.parse(JSON.parse(localStorage.getItem(
+      'bf_global_offline_qol_rotating_backups_v97')).slots[0].raw)._bfImpsV171.started''') is True
+    # v169 sidecar never automatically attaches to a different imported save.
+    page.evaluate('''raw=>{localStorage.setItem(
+      'bf_global_offline_optional_imps_v169',JSON.stringify(
+      JSON.parse(raw)._bfImpsV171));const next=JSON.parse(raw);
+      next._bfImpsV171=null;P=parseProgress(next);}''',exported['raw'])
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
+    # Explicit owner-controlled legacy migration: quest cursors are clamped
+    # to current clears so a swapped save cannot retro-earn Artons.
+    assert page.evaluate('BFGlobalOptionalImpsV16900.legacyImport()') is True
+    assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is True
+    assert page.evaluate('BFGlobalOptionalImpsV16900.claim()')==0
+    assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[500,200,100,100]
+    assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))._bfImpsV171.started") is True
+    assert page.evaluate('BFGlobalOptionalImpsV16900.legacyImport()') is False
+    # A pristine exported v7 backup restores stats without separate Imp JSON.
+    page.evaluate("raw=>{P=parseProgress(JSON.parse(raw))}",exported['raw'])
+    assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[500,200,100,100]
     assert not errors,errors
     browser.close()
 print('PASS v171 browser: original archive, canonical v7 Imp persist and import isolation, 125% cap, smart batch and battle source ordering')
