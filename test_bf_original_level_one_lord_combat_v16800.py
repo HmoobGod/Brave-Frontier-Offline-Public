@@ -72,7 +72,7 @@ with sync_playwright() as pw:
  # Any experience means the intermediate original curve is unverified.
  actor=select(10011,12345)
  assert p.evaluate('BFGlobalOriginalLevelOneLordV16800.snapshot().originalLevelOnePartyUnits')==0
- exp_demo=p.evaluate('(()=>{const src=effectiveUnit(10011);const grow=demoLevel(P.unitExp[10011])-1;return {hp:src.stats.hp+grow*30,atk:src.stats.atk+grow*12}})()')
+ exp_demo=p.evaluate('(()=>{const src=effectiveUnit(10011);const cap=BFGlobalOriginalUnitLevelCapsV11500.lookup(10011);const grow=Math.min(demoLevel(P.unitExp[10011]),cap)-1;return {hp:src.stats.hp+grow*30,atk:src.stats.atk+grow*12}})()')
  assert actor['maxHp']==exp_demo['hp']
  assert actor['atk']==exp_demo['atk']*125//100
  # Training and unknown/non-owned roster forms are untouched.
