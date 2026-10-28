@@ -83,6 +83,8 @@ with sync_playwright() as pw:
  assert p.evaluate(A+'.read(store).gems')==1
  for expr in (
    A+'.fromLegacy({version:8,questClears:{}})',
+   A+'.fromLegacy({version:7,questClears:null})',
+   A+'.fromLegacy({version:7})',
    A+'.fromLegacy({version:7,questClears:{"12":-1}})',
    A+'.fromLegacy({version:7,questClears:{"12":true}})',
    A+'.apply(initial,0)',
