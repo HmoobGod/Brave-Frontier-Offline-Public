@@ -1,0 +1,135 @@
+{
+  "schema": "bf-global-2022-amdahl-original-art-v149",
+  "sourceArchiveSha256": {
+    "BF1_area_part001.zip": "17b7da1c4dc3e82a454571f5b4983e54ef95d1eff7eb19a808f1ea39ced98082",
+    "BF1_dungeon_part001.zip": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644"
+  },
+  "sourceMstSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "sourceV147QuestCanonicalSha256": "f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3",
+  "packagedZipSha256": "65790b0c0e9099fedb347e4a0c53f76bde7ebe3ea0cb7b9089557cf51c759179",
+  "sourceImages": {
+    "content/area/area_0004.jpg": {
+      "bytes": 173639,
+      "sha256": "ed9dfa69f43647a47921d509b095d70666a31e0b4f7fb5385381e132bce3455f",
+      "sourcePack": "BF1_area_part001.zip"
+    },
+    "content/area/area_plate_0004.png": {
+      "bytes": 54246,
+      "sha256": "e8e44a11c13cb364768bc7d6c140881f59f8afadf4a0445a7df7ebd3aef17d6f",
+      "sourcePack": "BF1_area_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50100.jpg": {
+      "bytes": 55598,
+      "sha256": "634045c12ba1e0037950e3f994e642cc4e260d1635eb0711fa8d0d0babb3f314",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50200.jpg": {
+      "bytes": 94125,
+      "sha256": "1e4b4e81dae6913ff056eec82da3b2dda4f50152e7fd1932a46143e532a37751",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50300.jpg": {
+      "bytes": 57123,
+      "sha256": "c79e2d01dd7c02ed7f4885cd31672909f58787885129908b3d7b8d7060a477e3",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50400.jpg": {
+      "bytes": 48720,
+      "sha256": "fd4f3a37a4638f2c40ff31a5ec900b72f9df525c06862399c9947295bef1e6b3",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50500.jpg": {
+      "bytes": 79124,
+      "sha256": "095a112f560b433e2d598c16cc72d83254d0ced97e21e04f4bb172fba74503e9",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50600.jpg": {
+      "bytes": 78251,
+      "sha256": "063c9fd7a835cbb771ff25742b4f00a5c94a5f8da06da79eda6c56d629305346",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    },
+    "content/dungeon/dungeon_battle_50700.jpg": {
+      "bytes": 54105,
+      "sha256": "59ee3e67159a625e23b3d660527e931aee932777c37b9887bd2d6d4a85fd8e2b",
+      "sourcePack": "BF1_dungeon_part001.zip"
+    }
+  },
+  "originalArea": {
+    "landId": 3,
+    "areaId": 400,
+    "image": "content/area/area_0004.jpg",
+    "plate": "content/area/area_plate_0004.png",
+    "width": 640,
+    "height": 960
+  },
+  "dungeons": [
+    {
+      "id": 400,
+      "x": 39,
+      "y": 779,
+      "name": "Julep Village",
+      "battleBackground": "dungeon_battle_50100.jpg",
+      "firstMissionId": 400,
+      "requires": 365
+    },
+    {
+      "id": 410,
+      "x": 430,
+      "y": 775,
+      "name": "Ghost Ship Legnia",
+      "battleBackground": "dungeon_battle_50200.jpg",
+      "firstMissionId": 410,
+      "requires": 404
+    },
+    {
+      "id": 420,
+      "x": 197,
+      "y": 633,
+      "name": "Elios Plains",
+      "battleBackground": "dungeon_battle_50300.jpg",
+      "firstMissionId": 420,
+      "requires": 414
+    },
+    {
+      "id": 430,
+      "x": 74,
+      "y": 480,
+      "name": "Saji Mines",
+      "battleBackground": "dungeon_battle_50400.jpg",
+      "firstMissionId": 430,
+      "requires": 424
+    },
+    {
+      "id": 440,
+      "x": 121,
+      "y": 318,
+      "name": "Lamellia Temple",
+      "battleBackground": "dungeon_battle_50500.jpg",
+      "firstMissionId": 440,
+      "requires": 434
+    },
+    {
+      "id": 450,
+      "x": 23,
+      "y": 201,
+      "name": "Ghost Town Edila",
+      "battleBackground": "dungeon_battle_50600.jpg",
+      "firstMissionId": 450,
+      "requires": 444
+    },
+    {
+      "id": 460,
+      "x": 403,
+      "y": 192,
+      "name": "Amdahl Castle",
+      "battleBackground": "dungeon_battle_50700.jpg",
+      "firstMissionId": 460,
+      "requires": 454
+    }
+  ],
+  "gameplayPolicy": {
+    "original2022QuestWavesDecoded": false,
+    "playableQuests": false,
+    "saveMutation": false
+  }
+}
