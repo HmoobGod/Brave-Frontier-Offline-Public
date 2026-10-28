@@ -152,6 +152,17 @@
  // Fail closed to the legacy synthetic volley if the archive reference or
  // a wave/slot/source-stat join ever diverges.
  function sourceEnemyPlan2014(foes){
+    // v140: use original archived 2014 source action decisions from the
+    // five fully authenticated all-normal-attack historical missions.
+    // Every row is checked against the exact loaded v2.00 source roster.
+    const expanded=window.BFHistoricalFiveMissionSourceAIV14000;
+    if(expanded?.source?.era===2014&&
+       expanded.source.confirmed2022===false&&
+       expanded.source.slots===41&&
+       typeof expanded.plan==='function'){
+      const planned=expanded.plan(current?.missionId,current?.wave+1,foes);
+      if(planned)return planned;
+    }
     if(current?.missionId!==1||!Array.isArray(foes))return null;
     const ref=window.BFHistoricalBasicsAIReferenceV8700;
     const src=ref?.source;
