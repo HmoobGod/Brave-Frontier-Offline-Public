@@ -57,9 +57,23 @@ def bake(z,uid):
             assert scale in (30,50,70,100)
             assert min(x,y)>=0 and min(w,h)>0 and x+w<=image.width and y+h<=image.height
             tile=image.crop((x,y,x+w,y+h))
-            if scale!=100:
-                # Original CGG percentage scale; blocky nearest-neighbor keeps
-                # native pixel-art edges. Rotation code has not been decoded.
+            # BF_GLOBAL_4STAR_VERTICAL_FLIP_SOURCE_V13300: the archived
+            # CGG code 2 is a VERTICAL FLIP (community BFFrameAnimator map),
+            # not a sprite rotation. These three precise original 4-star
+            # profiles have no scale/opacity, blend, rotation or page flags.
+            if uid in (20023,30023,50023):
+                expected={
+                    20023:{(6,2),(7,2),(9,0),(10,0)},
+                    30023:{(7,0),(8,0),(9,1),(11,1)},
+                    50023:{(9,0),(10,0)}
+                }[uid]
+                assert scale==100 and orientation in (0,2)
+                assert ((fi,part) in expected)==(orientation==2)
+                if orientation==2:
+                    tile=tile.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+            elif scale!=100:
+                # Legacy source fields previously treated as size scaling
+                # remain unchanged for other forms awaiting native verification.
                 tile=tile.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
                 scaled+=1
             if orientation:nonzero_angles+=1
