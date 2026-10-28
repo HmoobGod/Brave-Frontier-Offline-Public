@@ -65,6 +65,8 @@
    // v115: source-matched 2022 form cap before 2022 leader bonuses.
    // Optional: absence of the cap module preserves v111/v113 behavior.
    window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i);
+   // v168: exact 2022 zero-EXP Lord base stats before source leader buffs.
+   window.BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i);
    return apply(unit,i);
  };
  function snapshot(){
