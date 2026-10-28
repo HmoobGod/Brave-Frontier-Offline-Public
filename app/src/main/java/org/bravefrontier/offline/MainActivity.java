@@ -949,6 +949,14 @@ public class MainActivity extends Activity {
                 } catch (IOException stRefsError) {
                     android.util.Log.w("BraveFrontier", "Optional St. Lamia source refs unavailable", stRefsError);
                 }
+                // v151: source-only original 2022 Amdahl encounter group audit.
+                // Does not unlock 400-series quests or invent native waves/AI.
+                try {
+                    String amdahlRefs = readPackagedText("bf15100_amdahl_encounter_evidence.js");
+                    view.evaluateJavascript(amdahlRefs, null);
+                } catch (IOException amdahlRefsError) {
+                    android.util.Log.w("BraveFrontier", "Optional Amdahl source refs unavailable", amdahlRefsError);
+                }
                 // v110: original 2022 starter leader-skill eligibility audit,
                 // read-only until original stat initialization is verified.
                 try {
