@@ -9,7 +9,7 @@ import base64,gzip,hashlib,json,os,re,zipfile
 
 R=Path(__file__).resolve().parent
 sha=lambda b:hashlib.sha256(b).hexdigest()
-packed=base64.b64decode((R/'source_data/bf_global_2022_mission_cross_table_v152.json.gz.b64').read_text('ascii'),validate=True)
+packed=base64.b64decode((R/'source_data/bf_global_2022_mission_cross_table_v152.json.gz.b64').read_text('ascii').strip(),validate=True)
 assert sha(packed)=='cc8aeda4a3f95555985bf4aada5c75f1f1dfdb67f0ee800d36b7aba56327f59a'
 raw=gzip.decompress(packed)
 assert sha(raw)=='2f5daf4b5c74fcc53965f1115e5e1ce37bf788f03e372900f57bb1bd9843f2f7'
