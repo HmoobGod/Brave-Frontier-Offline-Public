@@ -298,6 +298,7 @@ jobs:
           python test_bf_global_merit_achievements_v13800.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
+          python test_bf_original_amdahl_quest_readiness_v14700.py
           python test_bf_original_other_five_star.py
           python test_bf_original_six_star_starters.py
           python test_bf_original_other_six_star.py
