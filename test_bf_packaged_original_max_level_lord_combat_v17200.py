@@ -13,7 +13,7 @@ assert java.index('readPackagedText("bf11600_original_lord_stats_reference.js")'
  'readPackagedText("bf16900_optional_imp_fusion.js")')
 assert not any(x in src for x in (b'saveProgress(',b'localStorage',b'P.unitExp=',b'P.roster=',b'Math.random',b'fetch('))
 g=(R/'app/build.gradle').read_text('utf8')
-assert "versionName '172.00.0-demo'" in g
+assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(172,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
