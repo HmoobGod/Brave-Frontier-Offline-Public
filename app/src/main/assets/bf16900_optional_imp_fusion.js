@@ -1,8 +1,8 @@
 /* BF_GLOBAL_OPTIONAL_IMP_FUSION_V16900 */
 (() => {
   'use strict';
-  // Original 2022 per-unit caps; OPTIONAL 125% ceiling and convenience Arton
-  // supply. Separate sidecar avoids changing canonical v7 saves and rewards.
+  // 2022 source caps; opt-in strict <=125% enhancements now persist alongside
+  // the canonical v7 quest/summon save. v169 sidecar is legacy import only.
   const archive=window.BFGlobalUnitArchive;
   if(window.BFGlobalOptionalImpsV16900||!archive||archive.count!==2291||
      typeof archive.originalImpCaps!=='function'||
@@ -11,7 +11,8 @@
      typeof S==='undefined')return;
   const host=document.getElementById('squadpicker');
   if(!host)return;
-  const key='bf_global_offline_optional_imps_v169';
+  const key='bf_global_offline_optional_imps_v169'; // legacy v169 read-only migration source
+  const canonicalField='_bfImpsV171';
   const ids=Object.freeze(['molin','pakpak','ganju','fwahl','arton']);
   const names=Object.freeze({molin:'Vigor Imp Molin',pakpak:'Power Imp Pakpak',
     ganju:'Guard Imp Ganju',fwahl:'Healing Imp Fwahl',
@@ -48,20 +49,28 @@
     }
     return {version:1,started:true,mode:raw.mode,amounts,inventory,cursors};
   }
-  let state=null,invalidStorage=false;
-  try{
-    const raw=localStorage.getItem(key);
-    if(raw!==null){
-      state=validState(JSON.parse(raw));
-      invalidStorage=!state;
-    }
-  }catch(_){invalidStorage=true;}
+  let state=null,invalidStorage=false,observedP=null,observedState=undefined;
+  // Cache by canonical state object identity: all production writes replace the
+  // complete object. Never mutate P._bfImpsV171 directly in-place.
+  function synchronize(){
+    const raw=P?.[canonicalField];
+    if(observedP===P&&observedState===raw)return;
+    observedP=P;observedState=raw;
+    state=raw===null||raw===undefined?null:validState(raw);
+    invalidStorage=raw!==null&&raw!==undefined&&!state;
+  }
+  synchronize();
   function persist(next){
-    if(invalidStorage)return false;
+    synchronize();
+    if(invalidStorage||typeof saveProgress!=='function')return false;
     const checked=validState(next);
     if(!checked)return false;
-    try{localStorage.setItem(key,JSON.stringify(checked));state=checked;return true;}
-    catch(_){return false;}
+    const before=P[canonicalField];
+    P[canonicalField]=checked;
+    try{
+      if(!saveProgress()){P[canonicalField]=before;synchronize();return false;}
+      synchronize();return true;
+    }catch(_){P[canonicalField]=before;synchronize();return false;}
   }
   function cursorsNow(){
     const seen={};
@@ -71,12 +80,41 @@
     }
     return seen;
   }
-  function activate(){
-    if(state||invalidStorage)return false;
-    const starter={version:1,started:true,mode:'custom',amounts:{},
+  // A2: cache validation of the legacy sidecar by its raw bytes. Reimporting
+  // or changing the legacy storage key invalidates the cached result naturally.
+  let legacyCacheRaw=undefined,legacyCacheValid=false;
+  function validLegacySidecar(){
+    if(state)return false;
+    try{
+      const raw=localStorage.getItem(key);
+      if(raw===legacyCacheRaw)return legacyCacheValid;
+      legacyCacheRaw=raw;
+      legacyCacheValid=!!raw&&raw.length<=250000&&
+        !!validState(JSON.parse(raw));
+      return legacyCacheValid;
+    }catch(_){legacyCacheValid=false;return false;}
+  }
+  function freshStarter(){
+    return {version:1,started:true,mode:'custom',amounts:{},
       inventory:{molin:0,pakpak:0,ganju:0,fwahl:0,arton:5},
       cursors:cursorsNow()};
-    const done=persist(starter);
+  }
+  function activate(){
+    synchronize();
+    // Do not let a fresh start hide the migration path to earned v169 Imps.
+    if(state||invalidStorage||validLegacySidecar())return false;
+    const done=persist(freshStarter());
+    if(done)refresh();
+    return done;
+  }
+  function startFreshIgnoringLegacy(){
+    synchronize();
+    if(state||invalidStorage||!validLegacySidecar())return false;
+    if(typeof confirm!=='function'||!confirm(
+      'A valid v169 Imp backup exists. Start fresh for THIS save with 5 '+
+      'starter Artons instead of importing those Imps? The old backup '+
+      'will be kept, but it will not be attached to this save.'))return false;
+    const done=persist(freshStarter());
     if(done)refresh();
     return done;
   }
@@ -91,15 +129,18 @@
       caps.every(n=>Number.isSafeInteger(n)&&n>=0&&n<=65535)?
       caps.slice():null;
   }
-  function maximum(baseId,mode=state?.mode||'original'){
+  function maximum(baseId,mode=undefined){
+    synchronize();
+    mode=mode??state?.mode??'original';
     const formId=formOf(baseId),caps=original(formId);
     if(!caps)return null;
     const max=caps.map((n,i)=>mode==='custom'&&n>0?
-      Math.round((n*1.25)/steps[i])*steps[i]:n);
+      Math.max(n,Math.floor((n*5/4)/steps[i])*steps[i]):n);
     return freeze({baseId,formId,mode,original:freeze(caps),
       maximum:freeze(max)});
   }
   function bonus(baseId){
+    synchronize();
     if(!state)return freeze([0,0,0,0]);
     const saved=state.amounts[String(baseId)];
     return freeze(saved?saved.slice():[0,0,0,0]);
@@ -111,9 +152,10 @@
     return freeze({...cap,stored,applied:freeze(live),
       remaining:freeze(cap.maximum.map((n,i)=>Math.max(0,n-live[i])))});
   }
-  function stock(){return freeze(state?{...state.inventory}:
+  function stock(){synchronize();return freeze(state?{...state.inventory}:
     {molin:0,pakpak:0,ganju:0,fwahl:0,arton:0});}
   function plan(baseId,preferred='smart',limit=500){
+    synchronize();
     if(!state||!ids.includes(preferred)&&preferred!=='smart')return null;
     const cur=view(baseId);
     if(!cur||!Number.isSafeInteger(limit)||limit<1||limit>500)return null;
@@ -145,6 +187,7 @@
       gained:freeze(add),remaining:freeze(remaining)});
   }
   function feed(baseId,preferred='smart',limit=500){
+    synchronize();
     if(!state||invalidStorage)return false;
     const proposed=plan(baseId,preferred,limit);
     if(!proposed||proposed.total===0)return false;
@@ -156,6 +199,7 @@
     return proposed;
   }
   function claim(){
+    synchronize();
     if(!state||invalidStorage)return 0;
     const current=cursorsNow(),next=copy(state);
     let clears=0;
@@ -167,8 +211,19 @@
       }
       if(clears>=20)break;
     }
-    const granted=Math.min(clears*2,10000-next.inventory.arton);
+    const granted=2*Math.min(clears,Math.floor((10000-next.inventory.arton)/2));
     if(granted<=0)return 0;
+    // Never advance the paid cursor beyond the material actually granted.
+    if(granted<clears*2){
+      let pending=granted/2;
+      next.cursors={...state.cursors};
+      for(const [id,n] of Object.entries(current)){
+        if(pending<=0)break;
+        const old=next.cursors[id]??0;
+        const delta=Math.min(n-old,Math.floor(pending));
+        if(delta>0){next.cursors[id]=old+delta;pending-=delta;}
+      }
+    }
     next.inventory.arton+=granted;
     if(!persist(next))return 0;
     refresh();
@@ -176,6 +231,7 @@
   }
   const audits=new WeakMap();
   function apply(unit,slot){
+    synchronize();
     if(!state||!unit||typeof unit!=='object'||audits.has(unit)||
        document.getElementById('mode')?.value!=='archive'||
        !unit.active||!Number.isSafeInteger(slot)||slot<0||slot>=6||
@@ -193,25 +249,28 @@
     unit.maxHp=unit.hp=next[0];
     unit.atk=next[1];unit.def=next[2];unit.rec=next[3];
     audits.set(unit,freeze({baseId:unit.baseId,formId:unit.unitId,
-      applied:actual,customCap:row.mode==='custom',saveFieldsAdded:0}));
+      applied:actual,customCap:row.mode==='custom',saveFieldsAdded:1}));
     return unit;
   }
   function snapshot(){
+    synchronize();
     const rows=Array.isArray(S.party)?S.party.map(unit=>audits.get(unit)).
       filter(Boolean):[];
     return freeze({enabled:!!state,mode:state?.mode||'off',
       ownedForms:P.roster.length,inventory:stock(),rows:freeze(rows),
-      noCanonicalSaveMutation:true,original2022Caps:true,
+      noCanonicalSaveMutation:false,original2022Caps:true,
       impFeedValuesOriginal:true,customCeilingMultiplier:1.25,
-      sidecarKey:key,saveFieldsAdded:0});
+      sidecarKey:null,legacySidecarKey:key,canonicalField,saveFieldsAdded:1});
   }
   function modeChange(value){
+    synchronize();
     if(!state||!['original','custom'].includes(value))return false;
     const next=copy(state);next.mode=value;
     const done=persist(next);if(done)refresh();return done;
   }
-  function exportState(){return state?JSON.stringify(state):null;}
+  function exportState(){synchronize();return state?JSON.stringify(state):null;}
   function importState(raw){
+    synchronize();
     if(typeof raw!=='string'||raw.length>250000)return false;
     let data;try{data=validState(JSON.parse(raw));}catch(_){return false;}
     if(!data)return false;
@@ -227,14 +286,14 @@
   panel.style.cssText='margin:9px 3px;padding:10px;border:1px solid #a5c7b0;'+
     'border-radius:8px;background:#243637;color:#eff9ed;font:12px/1.5 system-ui';
   const heading=document.createElement('summary');heading.textContent=
-    'IMPS · ORIGINAL GAINS / OPTIONAL +25% CAPS';
+    'IMPS · ORIGINAL GAINS / CUSTOM CAPS (UP TO +25%)';
   heading.style.cssText='cursor:pointer;min-height:40px;font-weight:800';
   const status=document.createElement('p');
   const selector=document.createElement('select');selector.id='bf16900-owned';
   selector.setAttribute('aria-label','Choose owned unit for Imp fusion');
   selector.style.cssText='width:100%;min-height:40px;margin:5px 0';
   const selectMode=document.createElement('select');selectMode.id='bf16900-mode';
-  for(const [v,title] of [['custom','Custom caps (+25%)'],
+  for(const [v,title] of [['custom','Custom caps (up to +25%, rounded down)'],
                            ['original','Original Brave Frontier caps']]){
     const opt=document.createElement('option');opt.value=v;opt.textContent=title;
     selectMode.append(opt);
@@ -251,7 +310,7 @@
   feedButton.textContent='SMART BATCH FEED (no zero-gain materials)';
   const backups=document.createElement('details');
   const backupHeading=document.createElement('summary');
-  backupHeading.textContent='Imp progress backup / restore (separate from v7)';
+  backupHeading.textContent='Imp progress in main v7 save · separate legacy import';
   const backupText=document.createElement('textarea');
   backupText.id='bf16900-backup';backupText.rows=4;
   backupText.style.cssText='width:100%;min-height:80px;color:#182322';
@@ -259,22 +318,34 @@
   const exportButton=document.createElement('button');exportButton.type='button';
   exportButton.textContent='SHOW IMP BACKUP';
   const importButton=document.createElement('button');importButton.type='button';
-  importButton.textContent='RESTORE IMP BACKUP';
+  importButton.textContent='RESTORE IMP BACKUP TO CURRENT SAVE';
+  const migrateButton=document.createElement('button');migrateButton.type='button';
+  migrateButton.textContent='IMPORT LEGACY v169 IMPS INTO THIS SAVE';
+  const ignoreLegacyButton=document.createElement('button');
+  ignoreLegacyButton.type='button';
+  ignoreLegacyButton.textContent='IGNORE LEGACY v169 IMPS · START FRESH';
   const notice=document.createElement('small');
   notice.textContent='Imp enhancement is optional, applied to newly built archive DEMO squads only. '+
-    'Original per-form caps and Imp feeding gains are preserved. The +25% cap mode, '+
+    'Original per-form caps and Imp feeding gains are preserved. The custom cap mode rounds down, never above +25%. '+
     'starter Artons and two-Arton-per-new-clear supply are OFFLINE QoL, NOT original Global drops. '+
-    'No Gems awarded. Training, original v7 save, and saved unit EXP remain unchanged. '+
-    'Keep a separate Imp backup when transferring or importing your main save.';
-  for(const button of [enable,claimButton,feedButton,exportButton,importButton]){
+    'No Gems awarded. Training and saved EXP remain unchanged. '+
+    'Imp progress is now included in full v7 exports and rotating backups. '+
+    'Legacy v169 Imp sidecars are NOT auto-linked to another save; import only '+
+    'if you know those Imps belong to this exact save. '+
+    'If they belong to another save, choose Ignore legacy and start fresh; '+
+    'the old separate backup will remain available. '+
+    'Before migrating from v169, claim any pending earned Artons in that old build: '+
+    'unclaimed old supply cannot be safely associated with another save and is forfeited.';
+  for(const button of [enable,claimButton,feedButton,exportButton,importButton,migrateButton,ignoreLegacyButton]){
     button.style.cssText='padding:8px;margin:5px 4px 4px 0;min-height:38px';
   }
-  backups.append(backupHeading,backupText,exportButton,importButton);
+  backups.append(backupHeading,backupText,exportButton,importButton,migrateButton,ignoreLegacyButton);
   panel.append(heading,status,enable,selector,selectMode,stockLine,
     capLine,preview,claimButton,feedButton,backups,notice);
   host.after(panel);
   let message='';
   function refresh(){
+    synchronize();
     const selected=Number(selector.value);
     const old=selected;
     selector.replaceChildren();
@@ -287,11 +358,17 @@
     }
     if([...selector.options].some(o=>Number(o.value)===old))selector.value=String(old);
     const baseId=Number(selector.value),current=view(baseId),prediction=plan(baseId);
+    const legacyAvailable=!state&&validLegacySidecar();
     status.textContent=invalidStorage?
       'Saved Imp state is invalid; no enhancements or rewards applied. Restore valid backup.' :
+      !state&&legacyAvailable?
+      'Legacy v169 Imp progress detected. Migrate it below BEFORE enabling fresh Imps. '+
+      'If the old Imps belong to another save, expand Backup / Restore and '+
+      'confirm Ignore legacy and start fresh.' :
       !state?'Imp fusion inactive. Activate explicitly to create optional Imp progress.' :
       'Imp fusion ACTIVE · next-battle stats only · '+(message||'No changes to core v7 saves');
     enable.hidden=!!state||invalidStorage;
+    enable.disabled=legacyAvailable||invalidStorage;
     selector.disabled=!state;selectMode.disabled=!state;
     selectMode.value=state?.mode||'custom';
     const inv=stock();
@@ -307,11 +384,15 @@
       '; expected stat gains '+prediction.gained.join(' / '):
       'No available smart feed preview';
     claimButton.disabled=!state;feedButton.disabled=!prediction?.total;
+    migrateButton.disabled=!legacyAvailable||invalidStorage;
+    ignoreLegacyButton.disabled=!legacyAvailable||invalidStorage;
     return current;
   }
   selector.addEventListener('change',refresh);
   enable.addEventListener('click',()=>{
-    message=activate()?'Enabled; starter Artons received.':'Could not safely enable Imp fusion.';
+    message=activate()?'Enabled; starter Artons received.':
+      validLegacySidecar()?'Migrate your existing v169 Imps before starting fresh.':
+      'Could not safely enable Imp fusion.';
     refresh();
   });
   selectMode.addEventListener('change',()=>{message=modeChange(selectMode.value)?
@@ -322,14 +403,46 @@
   feedButton.addEventListener('click',()=>{
     const result=feed(Number(selector.value));message=result?
       'Fed '+result.total+' Imps; bonuses take effect next archive battle.':
+      (typeof saveRecoveryPending!=='undefined'&&saveRecoveryPending)||
+      (typeof saveEnabled!=='undefined'&&!saveEnabled)?
+      'Save is paused or storage is unavailable. No Imp materials were spent.':
       'No beneficial Imp materials available; no inventory spent.';refresh();
   });
   exportButton.addEventListener('click',()=>{backupText.value=exportState()||'';});
   importButton.addEventListener('click',()=>{message=importState(backupText.value)?
-    'Imp backup restored.':'Invalid Imp backup; current state not changed.';refresh();});
+    'Imp progress stored with the current v7 save.':
+    'Invalid Imp backup; current save was not changed.';refresh();});
+  function legacyImport(){
+    synchronize();
+    if(state||invalidStorage)return false;
+    let raw;
+    try{raw=localStorage.getItem(key);}catch(_){return false;}
+    if(!raw||raw.length>250000)return false;
+    let data;try{data=validState(JSON.parse(raw));}catch(_){return false;}
+    if(!data)return false;
+    // Imported saves with higher quest counters must never earn unplayed
+    // Arton supply merely because the v169 cursor belonged to another save.
+    const current=cursorsNow();
+    for(const [id,n] of Object.entries(current))
+      data.cursors[id]=Math.max(data.cursors[id]??0,n);
+    return importState(JSON.stringify(data));
+  }
+  migrateButton.addEventListener('click',()=>{
+    const yes=typeof confirm==='function'?
+      confirm('Only migrate v169 Imp progress if it belongs to THIS game save. Continue?'):true;
+    message=yes&&legacyImport()?'Legacy Imps safely moved into the current v7 save.':
+      'No legacy import performed. No save changed.';
+    refresh();
+  });
+  ignoreLegacyButton.addEventListener('click',()=>{
+    message=startFreshIgnoringLegacy()?
+      'Started fresh for this save. The legacy Imp backup was preserved.':
+      'Fresh start cancelled or save failed; no Imp progress changed.';
+    refresh();
+  });
   window.BFGlobalOptionalImpsV16900=freeze({
     key,gains,names,original,maximum,bonus,view,stock,plan,feed,claim,
-    activate,modeChange,exportState,importState,apply,snapshot,refresh
+    activate,startFreshIgnoringLegacy,modeChange,exportState,importState,legacyImport,apply,snapshot,refresh
   });
   refresh();
 })();

@@ -14,7 +14,7 @@ assert java.index('readPackagedText("bf16800_original_level_one_lord_combat.js")
 assert bridge.index('BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i)')<bridge.index(
  'BFGlobalOptionalImpsV16900?.apply?.(unit,i)')<bridge.index('return apply(unit,i);')
 assert not any(x in source.decode('utf8') for x in (
- 'saveProgress(', 'P.unitExp=', 'P.roster=', 'P.questClears=', 'awardDemoRewards(', 'Math.random','fetch('))
+ 'P.unitExp=', 'P.roster=', 'P.questClears=', 'awardDemoRewards(', 'Math.random','fetch('))
 g=(R/'app/build.gradle').read_text('utf8')
 assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(169,200))
 assert "applicationId 'org.bravefrontier.offline'" in g
@@ -31,4 +31,4 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
       'assets/bf11100_original_starter_leader_combat.js')
     assert b'function playerUnit(i){' in z.read('assets/index.html')
     assert b'party:Array.from({length:6},(_,i)=>playerUnit(i))' in z.read('assets/index.html')
-print('PASS v169 optional original Imp gains, +25% cap, earned Arton supply, signed APK, v7 identity/save untouched')
+print('PASS v171 original Imp gains, canonical saved custom caps, Arton supply, signed APK, v7 identity unchanged')

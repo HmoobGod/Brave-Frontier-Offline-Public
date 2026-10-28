@@ -17,7 +17,7 @@ assert b'bf_global_offline_demo_v7' in html
 assert b'BF_GLOBAL_GEM_V160_ORIGINAL_CLEAR_LEDGER' in html
 assert b'BF_GLOBAL_GEM_V161_NEW_FIRST_CLEAR_PENDING' in html
 assert 'readPackagedText("bf17000_personal_gem_rewards_ui.js")' in java
-assert "versionName '170.00.0-demo'" in gradle
+assert any("versionName '"+str(v)+".00.0-demo'" in gradle for v in range(170,200))
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert 'bf-development-debug.keystore' in gradle
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
