@@ -52,7 +52,7 @@
  function clone(s){return JSON.parse(JSON.stringify(s));}
  function fromLegacy(old){
   assert(isObject(old)&&old.version===7,'only old v7 progress');
-  const c=validKeys(old.questClears||{});
+  const c=validKeys(old.questClears);
   return validate({modelVersion:1,gems:0,questClears:c,
      legacyFinales:ELIGIBLE.filter(id=>(c[String(id)]||0)>0),paidFinales:[]});
  }
