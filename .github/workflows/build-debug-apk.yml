@@ -116,6 +116,7 @@ jobs:
           python3 prepare_original_event_backdrop_v2700.py
           python3 prepare_original_event_expressions_v2900.py
           python3 prepare_original_battle_controls.py
+          python3 prepare_original_amdahl_art_v149.py
       - name: Test save recovery and offline combat
         shell: bash
         run: |
@@ -292,6 +293,7 @@ jobs:
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
           python test_bf_original_amdahl_quest_readiness_v14700.py
+          python test_bf_original_amdahl_art_v14900.py
           python test_bf_original_other_five_star.py
           python test_bf_original_six_star_starters.py
           python test_bf_original_other_six_star.py
@@ -350,6 +352,8 @@ jobs:
         run: python3 test_bf_packaged_five_star_starters.py
       - name: Verify v146 original 5-star Dark animation sprite in signed APK
         run: python3 test_bf_packaged_dark_five_star_source_art_v14600.py
+      - name: Verify packaged original 2022 Amdahl source art and read-only world map
+        run: python3 test_bf_packaged_amdahl_art_v14900.py
       - name: Verify packaged six original other 5-star forms and v7 save identity
         run: python3 test_bf_packaged_other_five_star.py
       - name: Verify packaged six original Global 6-star starters and saved v7 identity
