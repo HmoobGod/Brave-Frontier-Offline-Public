@@ -135,10 +135,14 @@ with sync_playwright() as pw:
  for bad_date in ('2025-02-31','2025-02-29','2026-11-31'):
   assert p.evaluate('''s=>{const data=JSON.parse(JSON.stringify(P));
     data._bfGemV170Custom.lastDailyDate=s;
+    data._bfGemV170Custom.dailyClaims=1;
+    data._bfGemV170Custom.balance+=100;
     try{parseProgress(data);return false;}catch(_){return true}
   }''',bad_date)
  assert p.evaluate('''()=>{const data=JSON.parse(JSON.stringify(P));
   data._bfGemV170Custom.lastDailyDate='2028-02-29';
+  data._bfGemV170Custom.dailyClaims=1;
+  data._bfGemV170Custom.balance+=100;
   return parseProgress(data)._bfGemV170Custom.lastDailyDate;
  }''')== '2028-02-29'
  assert set(p.evaluate('window.__gemWrites'))=={'bf_global_offline_demo_v7'}
