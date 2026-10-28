@@ -1,0 +1,2505 @@
+{
+  "schema": "bf-original-historical-2014-source-ai-remaining-v144-part-b",
+  "originalEra": 2014,
+  "confirmed2022": false,
+  "totals": {
+    "waves": 40,
+    "slots": 95,
+    "simple": 75,
+    "complex": 20
+  },
+  "missions": [
+    {
+      "id": 61,
+      "name": "Wielder of the Light",
+      "sourcePath": "missions_parsed/Wielder of the Light_2014-14-10-08-31.json",
+      "gitBlobSha": "460515a59b6f8cdb81cccfb2b0501f077570c1ce",
+      "waves": [
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2200,
+            "atk": 510,
+            "def": 120,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50030,
+            "name": "Glowy",
+            "hp": 2000,
+            "atk": 500,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50030,
+            "name": "Glowy",
+            "hp": 2000,
+            "atk": 500,
+            "def": 180,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50120,
+            "name": "Light Nymph",
+            "hp": 5000,
+            "atk": 540,
+            "def": 100,
+            "aiId": 1,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50041,
+            "name": "Light Lord Mimir",
+            "hp": 16000,
+            "atk": 700,
+            "def": 200,
+            "aiId": 5000,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 2600,
+            "atk": 550,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 70,
+      "name": "The Heinous Chamber",
+      "sourcePath": "missions_parsed/The Heinous Chamber_2014-14-10-08-33.json",
+      "gitBlobSha": "fde7fc3378d9c0382b1a20c362cfc179eab81880",
+      "waves": [
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60061,
+            "name": "Medusa",
+            "hp": 4000,
+            "atk": 570,
+            "def": 60,
+            "aiId": 20,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60031,
+            "name": "King Gloomy",
+            "hp": 13000,
+            "atk": 620,
+            "def": 100,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60031,
+            "name": "King Gloomy",
+            "hp": 13000,
+            "atk": 620,
+            "def": 100,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 71,
+      "name": "Manipulator of the Dark",
+      "sourcePath": "missions_parsed/Manipulator of the Dark_2014-14-10-08-03.json",
+      "gitBlobSha": "6d0e0d2aa5ac98521cf04e36160b6e26d72e91d5",
+      "waves": [
+        [
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2100,
+            "atk": 530,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60030,
+            "name": "Gloomy",
+            "hp": 1950,
+            "atk": 520,
+            "def": 20,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 60041,
+            "name": "Magician Lily",
+            "hp": 16000,
+            "atk": 690,
+            "def": 100,
+            "aiId": 5000,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 60050,
+            "name": "Skeleton",
+            "hp": 2500,
+            "atk": 570,
+            "def": 50,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ]
+      ]
+    },
+    {
+      "id": 200,
+      "name": "The Burning Desert",
+      "sourcePath": "missions_parsed/The Burning Desert_2014-06-10-08-17.json",
+      "gitBlobSha": "5b7abb59542983348d0b32e6028b8d02781598c9",
+      "waves": [
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 10102,
+            "name": "Knight Agni",
+            "hp": 30000,
+            "atk": 770,
+            "def": 350,
+            "aiId": 5030,
+            "actCounts": "2~3",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ]
+      ]
+    },
+    {
+      "id": 202,
+      "name": "The Precarious Beast Master",
+      "sourcePath": "missions_parsed/The Precarious Beast Master_2014-05-10-08-41.json",
+      "gitBlobSha": "1f859c9ddd1534a146a8f402cd97fd51d341a7c9",
+      "waves": [
+        [
+          {
+            "unitId": 10061,
+            "name": "Thief Leon",
+            "hp": 4000,
+            "atk": 660,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10061,
+            "name": "Thief Leon",
+            "hp": 4000,
+            "atk": 660,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10061,
+            "name": "Thief Leon",
+            "hp": 4000,
+            "atk": 660,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10061,
+            "name": "Thief Leon",
+            "hp": 4000,
+            "atk": 660,
+            "def": 150,
+            "aiId": 20,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 30,
+                "targetCondition": "hp_max",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10040,
+            "name": "Witch Liza",
+            "hp": 3800,
+            "atk": 590,
+            "def": 200,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 2800,
+            "atk": 640,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 10050,
+            "name": "Goblin",
+            "hp": 2400,
+            "atk": 580,
+            "def": 90,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10041,
+            "name": "Warlock Liza",
+            "hp": 14000,
+            "atk": 620,
+            "def": 200,
+            "aiId": 5000,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          },
+          {
+            "unitId": 10022,
+            "name": "Rage Beast Zegar",
+            "hp": 23000,
+            "atk": 750,
+            "def": 10,
+            "aiId": 5001,
+            "actCounts": "2~2",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ]
+      ]
+    },
+    {
+      "id": 240,
+      "name": "Land of the Light",
+      "sourcePath": "missions_parsed/Land of the Light_2014-08-10-09-49.json",
+      "gitBlobSha": "1cdf8e966110f18ed3c0fe6b86a7d49848a08673",
+      "waves": [
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 3600,
+            "atk": 700,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50040,
+            "name": "Sage Mimir",
+            "hp": 4500,
+            "atk": 620,
+            "def": 240,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 3600,
+            "atk": 700,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50050,
+            "name": "Angel",
+            "hp": 3000,
+            "atk": 590,
+            "def": 200,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 10071,
+            "name": "Orthos",
+            "hp": 3600,
+            "atk": 700,
+            "def": 130,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 50040,
+            "name": "Sage Mimir",
+            "hp": 4500,
+            "atk": 620,
+            "def": 240,
+            "aiId": 10,
+            "actCounts": "1~2",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 50,
+                "targetCondition": "hp_50pr_under",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ],
+        [
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          },
+          {
+            "unitId": 20071,
+            "name": "Ramia",
+            "hp": 3500,
+            "atk": 690,
+            "def": 150,
+            "aiId": 1,
+            "actCounts": "1~1",
+            "actions": [
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": true
+          }
+        ],
+        [
+          {
+            "unitId": 50092,
+            "name": "Cowboy Heidt",
+            "hp": 38000,
+            "atk": 840,
+            "def": 350,
+            "aiId": 5030,
+            "actCounts": "2~3",
+            "actions": [
+              {
+                "type": "turn_end",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 1
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "skill",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 3
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "weakness",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 40,
+                "targetCondition": "hp_min",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 60,
+                "targetCondition": "bb_100pr",
+                "targetType": 2,
+                "conditionCount": 0
+              },
+              {
+                "type": "attack",
+                "parameters": "-1",
+                "weight": 100,
+                "targetCondition": "random",
+                "targetType": 2,
+                "conditionCount": 0
+              }
+            ],
+            "simpleAttack": false
+          }
+        ]
+      ]
+    }
+  ]
+}

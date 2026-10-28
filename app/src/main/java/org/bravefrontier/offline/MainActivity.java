@@ -624,6 +624,14 @@ public class MainActivity extends Activity {
                                     try {
                                         String mixedAI = readPackagedText("bf14100_mixed_historical_source_ai.js");
                                         view.evaluateJavascript(mixedAI, null);
+                                        // v144: source-backed 2014 AI selection for
+                                        // all 12 remaining historical Archive Trials.
+                                        try {
+                                            String remainingAI = readPackagedText("bf14400_remaining_historical_source_ai.js");
+                                            view.evaluateJavascript(remainingAI, null);
+                                        } catch (IOException remainingAIError) {
+                                            android.util.Log.w("BraveFrontier", "Optional historical remaining mission AI unavailable", remainingAIError);
+                                        }
                                     } catch (IOException mixedAIError) {
                                         android.util.Log.w("BraveFrontier", "Optional mixed historical AI source unavailable", mixedAIError);
                                     }
