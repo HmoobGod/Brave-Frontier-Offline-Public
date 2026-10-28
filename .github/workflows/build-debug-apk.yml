@@ -287,6 +287,7 @@ jobs:
           python test_bf_original_more_second_stage.py
           python test_bf_original_fourstar_vertical_flip_v13300.py
           python test_bf_original_fourstar_dark_v13400.py
+          python test_bf_decomp_progression_candidates_v13500.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_other_five_star.py
           python test_bf_original_six_star_starters.py
