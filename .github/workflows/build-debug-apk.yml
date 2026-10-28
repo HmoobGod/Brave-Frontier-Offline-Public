@@ -305,6 +305,7 @@ jobs:
           python test_bf_original_first_clear_gem_sources_v15500.py
           python test_bf_2022_dungeon_finale_gate_v15600.py
           python test_bf_historical_explicit_first_clear_gem_v15700.py
+          python test_bf_gem_first_clear_transaction_model_v15800.py
           python test_bf_global_merit_achievements_v13800.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
