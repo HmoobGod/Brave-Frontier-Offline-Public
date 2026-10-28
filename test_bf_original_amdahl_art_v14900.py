@@ -55,6 +55,16 @@ with sync_playwright() as p:
  page.locator('[data-bf14900-dungeon="460"]').click()
  assert 'Amdahl Castle' in page.locator('#bf14900-selected').inner_text()
  assert 'not in the playable' in page.locator('#bf14900-selected').inner_text()
+ # Browser image loading is asynchronous. Preserve the original strict
+ # image-dimension assertion, but allow the JPEG decode to complete.
+ page.wait_for_function("""() => {
+   const e=document.querySelector('#bf14900-selected img');
+   return !!e && e.complete && e.naturalWidth>0 && e.naturalHeight>0;
+ }""",timeout=20000)
+ page.wait_for_function("""() => {
+   const e=document.querySelector('#bf14900-amdahl-art div > img');
+   return !!e && e.complete && e.naturalWidth>0 && e.naturalHeight>0;
+ }""",timeout=20000)
  assert page.locator('#bf14900-selected img').evaluate('(e)=>e.complete && e.naturalWidth>0') is True
  assert page.locator('#bf14900-amdahl-art div > img').first.evaluate('(e)=>e.complete && e.naturalWidth>0') is True
  assert page.evaluate('BFAmdahlOriginalArtV14900.preview(9999)') is False
