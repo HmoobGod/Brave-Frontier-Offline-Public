@@ -69,11 +69,11 @@ with sync_playwright() as pw:
    attack:BFGlobalOriginalStarterCggV12800.lookup(20016)?.sequences?.atk,
    events:BFGlobalOriginalNormalHitArchiveV12500.lookup(20016)?.events,
    originalArchive:BFGlobalOriginalNormalHitArchiveV12500.count,
-   7starLive:UNIT_BY_ID.has(20016)
+   sevenStarLive:UNIT_BY_ID.has(20016)
  })""")
  assert profile['cgg']==23 and profile['attack']==attack
  assert profile['events']==damage and profile['originalArchive']==2258
- assert profile['7starLive'] is False
+ assert profile['sevenStarLive'] is False
  result=page.evaluate("""async({attack,damage,stats}) => {
    const originalSave=JSON.stringify(P);
    const stored=localStorage.getItem('bf_global_offline_demo_v7');
