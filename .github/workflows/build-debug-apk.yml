@@ -105,6 +105,7 @@ jobs:
           python3 prepare_original_lord_stats_v116.py
           python3 prepare_original_seven_star_water_visual_v129.py
           python3 patch_bf_original_gem_ledger_v16000.py
+          python3 patch_bf_original_gem_pending_v16100.py
           # Catch JavaScript parser regressions before the long Chromium suite.
           node --check app/src/main/assets/bf_global_unit_archive.js
           node --check app/src/main/assets/bf12900_original_seven_star_water_visual.js
@@ -309,6 +310,7 @@ jobs:
           python test_bf_gem_first_clear_transaction_model_v15800.py
           python test_bf_gem_atomic_persistence_lab_v15900.py
           python test_bf_original_gem_ledger_v16000.py
+          python test_bf_original_gem_pending_v16100.py
           python test_bf_global_merit_achievements_v13800.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
@@ -684,6 +686,8 @@ jobs:
         run: python3 test_bf_packaged_first_clear_gem_sources_v15500.py
       - name: Verify v160 zero-award original Gem ledger in signed APK
         run: python3 test_bf_packaged_original_gem_ledger_v16000.py
+      - name: Verify v161 2022 original pending first clears in signed APK
+        run: python3 test_bf_packaged_original_gem_pending_v16100.py
       - name: Verify v110 original starter leader skill source in signed APK
         run: python3 test_bf_packaged_source_starter_leader_skills_v11000.py
       - name: Verify v111 source-gated archive leader buffs in signed APK
