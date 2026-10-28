@@ -56,6 +56,46 @@ with sync_playwright() as pw:
   assert endpoint and endpoint['exactOriginalLordEndpoint'] is True
   assert endpoint['stats']==r['lordAtMax'],(id,endpoint,r)
   assert p.evaluate(f'BFGlobalOriginalUnitLevelCapsV11500.lookup({id})')==r['maxLevel']
+ # Claude V1/V2: all 72 forms through the real saved evolution mapping.
+ # DEMO level stops at 99, so 12 2022 source Lv.100 forms remain unreachable.
+ assert p.evaluate('BFGlobalOriginalMaxLevelLordV17200.source.reachableUnderCurrentDemoLevel99')==60
+ assert p.evaluate('demoLevel(1000000000000)')==99
+ assert sorted(uid for uid,row in rows.items() if row['maxLevel']==100)==[
+  10015,10025,20015,20025,30015,30025,
+  40015,40025,50015,50025,60015,60025]
+ reachable,unreachable=[],[]
+ for uid,ref in sorted(rows.items()):
+  suffix=uid%10000
+  stem=41 if suffix>=41 else 21 if suffix>=21 else 11
+  base=uid//10000*10000+stem
+  result=p.evaluate("""({uid,base})=>{
+    document.getElementById('mode').value='archive';
+    if(!P.roster.includes(base))P.roster.push(base);
+    P.squad=[base];
+    P.evolutions={};P.evolutions[base]=uid;
+    P.unitExp[base]=1000000000000;
+    reset();
+    return {unit:S.party[0],actualForm:effectiveUnit(base)?.id,
+      demoLevel:demoLevel(P.unitExp[base]),
+      applied:BFGlobalOriginalMaxLevelLordV17200.snapshot().exactLordMaxPartyUnits,
+      bonus:BFGlobalStarterLeaderCombatV11100.fromSource(base,uid)};
+  }""",{'uid':uid,'base':base})
+  assert result['actualForm']==uid and result['unit']['unitId']==uid,(uid,result)
+  assert result['demoLevel']==99
+  bonus=result['bonus'] or {'atkPercent':0,'hpPercent':0}
+  actor=result['unit']
+  if ref['maxLevel']==100:
+   assert result['applied']==0 and actor['level']==99,(uid,result)
+   unreachable.append(uid)
+   continue
+  assert actor['level']==ref['maxLevel'] and result['applied']==1,(uid,result)
+  lord=ref['lordAtMax']
+  assert actor['hp']==actor['maxHp']==lord['hp']*(100+bonus['hpPercent'])//100,(uid,actor,lord,bonus)
+  assert actor['atk']==lord['atk']*(100+bonus['atkPercent'])//100,(uid,actor,lord,bonus)
+  assert actor['def']==lord['def'] and actor['rec']==lord['rec'],(uid,actor,lord)
+  reachable.append(uid)
+ assert len(reachable)==60 and len(unreachable)==12,(reachable,unreachable)
+ assert '12 source Lv.100 forms' in p.locator('#bf17200-original-max-lord').text_content()
  # Reached via existing DEMO EXP thresholds; never fabricate a native curve.
  for id in (10011,20011,50011,10021,20021,10041,60041):
   cap=rows[id]['maxLevel']
@@ -95,4 +135,4 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==prior
  assert not errors,errors
  b.close()
-print('PASS v172: 72 original max Lord endpoint records, qualified owned battle source stats, leader stacking, Lv1/training fail closed and v7 save isolation')
+print('PASS v172: 60/72 playable forms gain source Lord max; 12 Lv100 skip, all evolution mappings and save isolation')
