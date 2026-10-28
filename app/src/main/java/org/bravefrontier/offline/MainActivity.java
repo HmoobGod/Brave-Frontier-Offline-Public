@@ -1028,6 +1028,14 @@ public class MainActivity extends Activity {
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
                 }
+                // v169: optional user-activated Imp feeding and original +25% caps.
+                // Sidecar save is separate; no legacy v7 save fields or Gem awards.
+                try {
+                    String impFusion = readPackagedText("bf16900_optional_imp_fusion.js");
+                    view.evaluateJavascript(impFusion, null);
+                } catch (IOException impError) {
+                    android.util.Log.w("BraveFrontier", "Optional Imp feeding unavailable", impError);
+                }
                 // v126: show original 2022 playable squad cost totals (advisory).
                 // No unverified summoner-capacity limits or roster mutations.
                 try {

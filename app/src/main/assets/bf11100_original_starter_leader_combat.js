@@ -67,6 +67,9 @@
    window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i);
    // v168: exact 2022 zero-EXP Lord base stats before source leader buffs.
    window.BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i);
+   // v169: optional, locally saved Imp bonuses before 2022 leader buffs.
+   // Owned source-qualified forms only; never changes canonical v7 saves.
+   window.BFGlobalOptionalImpsV16900?.apply?.(unit,i);
    return apply(unit,i);
  };
  function snapshot(){
