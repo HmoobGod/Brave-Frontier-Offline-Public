@@ -34,7 +34,9 @@ with sync_playwright() as pw:
  assert p.evaluate('P.version')==7
  p.add_script_tag(path=str(A/'bf11000_source_starter_leader_skills.js'))
  p.add_script_tag(path=str(A/'bf11100_original_starter_leader_combat.js'))
+ p.add_script_tag(path=str(A/'bf11200_all_playable_leader_source.js'))
  p.add_script_tag(path=str(A/'bf11500_original_unit_level_caps.js'))
+ assert p.evaluate('!!window.BFGlobalOriginalUnitLevelCapsV11500')
  p.add_script_tag(path=str(A/'bf11600_original_lord_stats_data.js'))
  p.add_script_tag(path=str(A/'bf11600_original_lord_stats_reference.js'))
  p.add_script_tag(path=str(A/'bf16800_original_level_one_lord_combat.js'))
