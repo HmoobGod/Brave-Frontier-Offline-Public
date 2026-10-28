@@ -33,7 +33,7 @@ function bf170NewWallet(clears) {
   legacyClears:bf170OldClears(clears),replaysPaid:0};
 }
 function bf170ValidLocalDate(value){
- if(typeof value!=='string'||!/^20[2-9]\\d-(0[1-9]|1[0-2])-([0-2]\\d|3[01])$/.test(value))return false;
+ if(typeof value!=='string'||!/^20[2-9]\d-(0[1-9]|1[0-2])-([0-2]\d|3[01])$/.test(value))return false;
  const [year,month,day]=value.split('-').map(Number),date=new Date(year,month-1,day);
  return date.getFullYear()===year&&date.getMonth()+1===month&&date.getDate()===day;
 }
