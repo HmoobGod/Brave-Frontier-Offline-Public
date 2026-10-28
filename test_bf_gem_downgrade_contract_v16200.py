@@ -30,7 +30,7 @@ assert "clears[id]<=0" in pending
 assert "P._bfGemV161Pending.sort((a,b)=>a-b)" in pending
 
 # Preserve same canonical storage transaction and save version for upgrade.
-assert "bf_global_offline_demo_v7" in ledger
+assert "SAME atomic v7 JSON save write" in ledger
 assert "P.version=7" in pending
 assert "out._bfGemV161Pending=bf161ValidateOriginalPending" in pending
 assert "P._bfGemV161Pending=bf161ValidateOriginalPending" in pending
