@@ -306,6 +306,7 @@ jobs:
           python test_bf_magutagal_v047.py
           python test_bf_quest_english_data_v048.py
           python test_bf_original_quest_economy_v14200.py
+          python test_bf_original_quest_energy_visibility_v14300.py
           python test_bf_remains_mirza_v049.py
           python test_bf_monsters_nest_v050.py
           python test_bf_tower_of_mistral_v051.py
@@ -375,6 +376,8 @@ jobs:
         run: python3 test_bf_packaged_quest_english_data_v048.py
       - name: Verify APK exact original 2022 Global 106-quest economy and unlock values
         run: python3 test_bf_packaged_original_quest_economy_v14200.py
+      - name: Verify original 2022 quest Energy and Karma displayed without enforcing stamina
+        run: python3 test_bf_packaged_original_quest_energy_v14300.py
       - name: Verify packaged v0.49 original Remains of Mirza quests
         run: python3 test_bf_packaged_remains_mirza_v049.py
       - name: Verify packaged v0.50 original Monster's Nest quests
