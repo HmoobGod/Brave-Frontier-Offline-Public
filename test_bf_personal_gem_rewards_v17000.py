@@ -37,6 +37,9 @@ with sync_playwright() as pw:
   HTMLMediaElement.prototype.play=()=>Promise.resolve();
  }""")
  p.set_content(s,wait_until='load',timeout=90000)
+ p.add_script_tag(path=str(A/'bf17000_personal_gem_rewards_ui.js'))
+ assert p.locator('#bf17000-gem-rewards').count()==1
+ assert 'Gem balance: 0' in p.locator('#bf17000-gem-rewards').inner_text()
  assert p.evaluate('P.version')==7
  assert p.evaluate('QUESTS.length')==106
  assert p.evaluate('BF170_QUEST_IDS.length')==106
@@ -59,6 +62,8 @@ with sync_playwright() as pw:
  # First regular quest receives 25 and repeat receives exactly 1 per run.
  p.evaluate('QUEST=QUESTS.find(q=>q.missionId===10);awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==1125
+ # Claude F5/F10: actual in-browser Gem panel follows the successful save.
+ assert 'Gem balance: 1,125' in p.locator('#bf17000-gem-rewards').inner_text()
  p.evaluate('awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==1126
  assert p.evaluate('P._bfGemV170Custom.firstPaid')==[10]
@@ -108,6 +113,34 @@ with sync_playwright() as pw:
  p.evaluate('QUEST=QUESTS.find(q=>q.missionId===33);awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==1001
  assert p.evaluate('P._bfGemV170Custom.legacyClears')==[10,12,23,33]
+ # Claude F6: first-clear memory may advance under quota failure, but
+ # neither the quest nor its 25 Gems is persisted. After restoring the last
+ # committed canonical save, a new successful first clear earns 25, not 1.
+ assert p.evaluate('BFGlobalCustomGemsV17000.setMode("custom")') is True
+ saved=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ initial=p.evaluate('P._bfGemV170Custom.balance')
+ p.evaluate('window.__gemQuota=true;QUEST=QUESTS.find(q=>q.missionId===11);awardDemoRewards()')
+ assert p.evaluate('P._bfGemV170Custom.balance')==initial+25
+ assert p.evaluate('P.questClears[11]')==1
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
+ assert ('Gem balance: '+format(initial,',')) in p.locator('#bf17000-gem-rewards').inner_text()
+ p.evaluate("raw=>{window.__gemQuota=false;P=parseProgress(JSON.parse(raw));}",saved)
+ assert p.evaluate('P.questClears[11]||0')==0
+ assert p.evaluate('P._bfGemV170Custom.balance')==initial
+ p.evaluate('awardDemoRewards()')
+ assert p.evaluate('P._bfGemV170Custom.balance')==initial+25
+ assert p.evaluate('P._bfGemV170Custom.replaysPaid')==1
+ assert ('Gem balance: '+format(initial+25,',')) in p.locator('#bf17000-gem-rewards').inner_text()
+ # Claude F7: exact Gregorian dates only; no Feb 31 or non-leap Feb 29.
+ for bad_date in ('2025-02-31','2025-02-29','2026-11-31'):
+  assert p.evaluate("""+"'''"+"""s=>{const data=JSON.parse(JSON.stringify(P));
+    data._bfGemV170Custom.lastDailyDate=s;
+    try{parseProgress(data);return false;}catch(_){return true}
+  }"""+"'''"+""",bad_date)
+ assert p.evaluate("""+"'''"+"""()=>{const data=JSON.parse(JSON.stringify(P));
+  data._bfGemV170Custom.lastDailyDate='2028-02-29';
+  return parseProgress(data)._bfGemV170Custom.lastDailyDate;
+ }"""+"'''"+""")== '2028-02-29'
  assert set(p.evaluate('window.__gemWrites'))=={'bf_global_offline_demo_v7'}
  assert not errs,errs
  b.close()
