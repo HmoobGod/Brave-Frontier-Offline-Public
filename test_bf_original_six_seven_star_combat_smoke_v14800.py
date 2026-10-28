@@ -110,6 +110,10 @@ with sync_playwright() as pw:
       sourceAtkCGSSteps:row.attack.length,
       simulatedDamage:hp-S.enemies[0].hp,
       demoBBGauge:actor.bb,version:P.version});
+    // Prevent the next canvas frame from reading a removed temporary
+    // 7-star unit in animationFrame; preserve production roster isolation.
+    BF_debug.reset();
+    await new Promise(resolve => requestAnimationFrame(resolve));
     UNIT_BY_ID.delete(id);
     delete BF_ARCHIVE_NORMAL_HITS[String(id)];
   }
