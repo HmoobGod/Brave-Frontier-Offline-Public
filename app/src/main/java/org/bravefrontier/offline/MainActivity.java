@@ -1048,6 +1048,14 @@ public class MainActivity extends Activity {
                 } catch (IOException recipeError) {
                     android.util.Log.w("BraveFrontier", "Optional original typed evolution reference unavailable", recipeError);
                 }
+                // v153: authenticated April-2022 Legend Stone merit-price
+                // source reference only: no balance, item acquisition or evolution.
+                try {
+                    String meritStoneRef = readPackagedText("bf15300_legend_stone_merit_source.js");
+                    view.evaluateJavascript(meritStoneRef, null);
+                } catch (IOException meritStoneRefError) {
+                    android.util.Log.w("BraveFrontier", "Optional Legend Stone historical exchange source unavailable", meritStoneRefError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
