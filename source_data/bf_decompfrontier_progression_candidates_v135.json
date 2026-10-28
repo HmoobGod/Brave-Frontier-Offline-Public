@@ -1,0 +1,431 @@
+{
+  "schema": "bf-decompfrontier-candidate-progression-v135",
+  "researchOnly": true,
+  "source": {
+    "repository": "decompfrontier/server",
+    "commit": "7cc0ebd3be79ca561874f70224c3ed924224583b",
+    "license": "AGPL-3.0-or-later",
+    "copiedThirdPartyCode": false,
+    "rawExternalTablesBundled": false,
+    "localFiles": [
+      {
+        "path": "deploy/system/user_level.json",
+        "gitBlobSha": "32a0510835917dd1a41f360de4ac1c62eda1db60",
+        "sourceRows": 1000
+      },
+      {
+        "path": "deploy/system/unit_exp_pattern.json",
+        "gitBlobSha": "c109ff5059f3fad457d95ad196552d601716d4db",
+        "sourceRows": 804
+      }
+    ]
+  },
+  "summonerLevel": {
+    "sourceFieldOrder": [
+      "level",
+      "rawExperience",
+      "candidateEnergy",
+      "candidateSquadCost",
+      "candidateFriendLimit"
+    ],
+    "samples": [
+      [
+        1,
+        0,
+        15,
+        100,
+        10
+      ],
+      [
+        2,
+        20,
+        16,
+        102,
+        10
+      ],
+      [
+        3,
+        40,
+        16,
+        104,
+        11
+      ],
+      [
+        5,
+        110,
+        17,
+        108,
+        12
+      ],
+      [
+        10,
+        460,
+        18,
+        117,
+        14
+      ],
+      [
+        12,
+        966,
+        19,
+        119,
+        15
+      ],
+      [
+        20,
+        3685,
+        27,
+        131,
+        19
+      ],
+      [
+        30,
+        7915,
+        35,
+        145,
+        24
+      ],
+      [
+        50,
+        18620,
+        52,
+        173,
+        34
+      ],
+      [
+        60,
+        25580,
+        60,
+        187,
+        39
+      ],
+      [
+        80,
+        41000,
+        77,
+        215,
+        49
+      ],
+      [
+        100,
+        57220,
+        96,
+        243,
+        50
+      ],
+      [
+        120,
+        74240,
+        103,
+        257,
+        50
+      ],
+      [
+        150,
+        101270,
+        113,
+        277,
+        50
+      ],
+      [
+        200,
+        150320,
+        147,
+        310,
+        50
+      ],
+      [
+        500,
+        856245,
+        263,
+        510,
+        50
+      ],
+      [
+        1000,
+        1023143,
+        431,
+        844,
+        50
+      ]
+    ],
+    "fullTableAvailableInSource": true,
+    "original2022Verified": false
+  },
+  "unitExp": {
+    "patterns": {
+      "10": {
+        "rowCount": 201,
+        "nonzeroRows": 200,
+        "examples": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            10
+          ],
+          [
+            3,
+            48
+          ],
+          [
+            5,
+            168
+          ],
+          [
+            10,
+            636
+          ],
+          [
+            12,
+            872
+          ],
+          [
+            20,
+            2040
+          ],
+          [
+            30,
+            3901
+          ],
+          [
+            60,
+            11471
+          ],
+          [
+            100,
+            25062
+          ],
+          [
+            120,
+            33070
+          ],
+          [
+            150,
+            46392
+          ],
+          [
+            200,
+            71696
+          ],
+          [
+            201,
+            72238
+          ]
+        ]
+      },
+      "15": {
+        "rowCount": 201,
+        "nonzeroRows": 200,
+        "examples": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            15
+          ],
+          [
+            3,
+            72
+          ],
+          [
+            5,
+            252
+          ],
+          [
+            10,
+            953
+          ],
+          [
+            12,
+            1309
+          ],
+          [
+            20,
+            3060
+          ],
+          [
+            30,
+            5851
+          ],
+          [
+            60,
+            17206
+          ],
+          [
+            100,
+            37592
+          ],
+          [
+            120,
+            49605
+          ],
+          [
+            150,
+            69588
+          ],
+          [
+            200,
+            107544
+          ],
+          [
+            201,
+            108357
+          ]
+        ]
+      },
+      "20": {
+        "rowCount": 201,
+        "nonzeroRows": 200,
+        "examples": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            21
+          ],
+          [
+            3,
+            96
+          ],
+          [
+            5,
+            337
+          ],
+          [
+            10,
+            1271
+          ],
+          [
+            12,
+            1745
+          ],
+          [
+            20,
+            4080
+          ],
+          [
+            30,
+            7801
+          ],
+          [
+            60,
+            22941
+          ],
+          [
+            100,
+            50123
+          ],
+          [
+            120,
+            66142
+          ],
+          [
+            150,
+            92787
+          ],
+          [
+            200,
+            143394
+          ],
+          [
+            201,
+            144476
+          ]
+        ]
+      },
+      "25": {
+        "rowCount": 201,
+        "nonzeroRows": 0,
+        "examples": [
+          [
+            1,
+            0
+          ],
+          [
+            2,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            5,
+            0
+          ],
+          [
+            10,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            20,
+            0
+          ],
+          [
+            30,
+            0
+          ],
+          [
+            60,
+            0
+          ],
+          [
+            100,
+            0
+          ],
+          [
+            120,
+            0
+          ],
+          [
+            150,
+            0
+          ],
+          [
+            200,
+            0
+          ],
+          [
+            201,
+            0
+          ]
+        ]
+      }
+    },
+    "sourceFieldOrder": [
+      "patternId",
+      "level",
+      "rawExperience"
+    ],
+    "original2022NumericLevelsVerified": false,
+    "zeroPattern25Unsafe": true
+  },
+  "ownerOriginalGlobal2022": {
+    "sourceArchive": "mst-decoded.zip 2022 original 2291 units",
+    "unitCount": 2291,
+    "patternIdDistribution": {
+      "10": 248,
+      "15": 245,
+      "20": 1798
+    },
+    "playableForms": 72,
+    "levelThresholdsMissing": true
+  },
+  "warnings": [
+    "The DecompFrontier server is an experimental emulator, not the original 2022 Global production client/server.",
+    "AGPL-3.0 code and full data tables were NOT copied to the Android app.",
+    "Only selected numerical research examples and source identifiers are retained; gameplay leveling, cost restrictions, experience, summons and saves remain unchanged.",
+    "The DecompFrontier pattern 25 consists of 201 zero-valued entries and must never be used as a playable progression curve."
+  ]
+}
