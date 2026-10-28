@@ -114,6 +114,7 @@ jobs:
           node --check app/src/main/assets/bf16600_original_type5_element_resist.js
           node --check app/src/main/assets/bf16800_original_level_one_lord_combat.js
           node --check app/src/main/assets/bf16900_optional_imp_fusion.js
+          node --check app/src/main/assets/bf17000_personal_gem_rewards_ui.js
           node test_bf_optional_imp_fusion_v16900.js
           node --check test_bf_original_type5_battle_audit_v16700.js
       - name: Prepare verified BF1 Global home sprites
@@ -322,6 +323,7 @@ jobs:
           python test_bf_gem_atomic_persistence_lab_v15900.py
           python test_bf_original_gem_ledger_v16000.py
           python test_bf_original_gem_pending_v16100.py
+          python test_bf_personal_gem_rewards_v17000.py
           python test_bf_gem_downgrade_contract_v16200.py
           python test_bf_original_gem_downgrade_roundtrip_v16300.py
           python test_bf_real_v124_save_upgrade_v16500.py
@@ -702,6 +704,8 @@ jobs:
         run: python3 test_bf_packaged_original_gem_ledger_v16000.py
       - name: Verify v161 2022 original pending first clears in signed APK
         run: python3 test_bf_packaged_original_gem_pending_v16100.py
+      - name: Verify v170 personal Gems and replay payouts in signed APK
+        run: python3 test_bf_packaged_personal_gem_rewards_v17000.py
       - name: Verify signed APK actual-v124-save migration and current-export compatibility
         run: python3 test_bf_packaged_real_v124_save_upgrade_v16500.py
       - name: Verify v110 original starter leader skill source in signed APK
