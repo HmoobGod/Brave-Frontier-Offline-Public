@@ -50,7 +50,21 @@ def bake(z,id):
             assert scale in (30,40,60,80,100)
             assert x>=0 and y>=0 and w>0 and h>0 and x+w<=sprite.width and y+h<=sprite.height
             patch=sprite.crop((x,y,x+w,y+h))
-            if scale!=100:patch=patch.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
+            # BF_GLOBAL_DEATH_MAGRESS_CGG_ALPHA_FLIP_V14600
+            # Source 2022 CGG column 4 records opacity, not sprite size;
+            # orientation code 2 is vertical flip (independent BFFrameAnimator
+            # mapping). Apply to the exact 5-star Dark original only. All
+            # non-default sprite parts are pinned by the v146 source test.
+            if id==60014:
+                assert orientation in (0,2) and rsv==unused==mode==0
+                if orientation==2:
+                    patch=patch.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+                if scale!=100:
+                    patch.putalpha(patch.getchannel('A').point(
+                        lambda alpha:round(alpha*scale/100)))
+            elif scale!=100:
+                # Other 5-star forms retain their existing visual baseline.
+                patch=patch.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
             dest=(originx+dx,originy+dy)
             assert dest[0]>=0 and dest[1]>=0 and dest[0]+patch.width<=fw and dest[1]+patch.height<=fh
             frame.alpha_composite(patch,dest)
