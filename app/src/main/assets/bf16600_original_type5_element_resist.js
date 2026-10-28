@@ -44,6 +44,13 @@
    applied++;
    return reduced;
  }
+ // Keep v114's older reader note accurate after this opt-in extension loads.
+ const priorNote=document.querySelector?.('#bf11400-original-leader-english small');
+ if(priorNote)priorNote.textContent='Original 2022 Global English localization. '+
+   'Starter type2 ATK/HP effects remain source-gated. Type5 10% elemental '+
+   'protection now applies in v166 only to known-element enemy hits in '+
+   'archive DEMO battles. Type31 Spark/BC effects, native damage rounding '+
+   'and undocumented 2022 encounters remain unimplemented.';
  const panelHost=document.getElementById('bf11100-leader-combat')||
    document.getElementById('squadpicker');
  let panel=null,status=null;
