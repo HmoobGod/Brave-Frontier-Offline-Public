@@ -80,20 +80,41 @@
     }
     return seen;
   }
+  // A2: cache validation of the legacy sidecar by its raw bytes. Reimporting
+  // or changing the legacy storage key invalidates the cached result naturally.
+  let legacyCacheRaw=undefined,legacyCacheValid=false;
   function validLegacySidecar(){
+    if(state)return false;
     try{
       const raw=localStorage.getItem(key);
-      return !!raw&&raw.length<=250000&&!!validState(JSON.parse(raw));
-    }catch(_){return false;}
+      if(raw===legacyCacheRaw)return legacyCacheValid;
+      legacyCacheRaw=raw;
+      legacyCacheValid=!!raw&&raw.length<=250000&&
+        !!validState(JSON.parse(raw));
+      return legacyCacheValid;
+    }catch(_){legacyCacheValid=false;return false;}
+  }
+  function freshStarter(){
+    return {version:1,started:true,mode:'custom',amounts:{},
+      inventory:{molin:0,pakpak:0,ganju:0,fwahl:0,arton:5},
+      cursors:cursorsNow()};
   }
   function activate(){
     synchronize();
     // Do not let a fresh start hide the migration path to earned v169 Imps.
     if(state||invalidStorage||validLegacySidecar())return false;
-    const starter={version:1,started:true,mode:'custom',amounts:{},
-      inventory:{molin:0,pakpak:0,ganju:0,fwahl:0,arton:5},
-      cursors:cursorsNow()};
-    const done=persist(starter);
+    const done=persist(freshStarter());
+    if(done)refresh();
+    return done;
+  }
+  function startFreshIgnoringLegacy(){
+    synchronize();
+    if(state||invalidStorage||!validLegacySidecar())return false;
+    if(typeof confirm!=='function'||!confirm(
+      'A valid v169 Imp backup exists. Start fresh for THIS save with 5 '+
+      'starter Artons instead of importing those Imps? The old backup '+
+      'will be kept, but it will not be attached to this save.'))return false;
+    const done=persist(freshStarter());
     if(done)refresh();
     return done;
   }
@@ -300,6 +321,9 @@
   importButton.textContent='RESTORE IMP BACKUP TO CURRENT SAVE';
   const migrateButton=document.createElement('button');migrateButton.type='button';
   migrateButton.textContent='IMPORT LEGACY v169 IMPS INTO THIS SAVE';
+  const ignoreLegacyButton=document.createElement('button');
+  ignoreLegacyButton.type='button';
+  ignoreLegacyButton.textContent='IGNORE LEGACY v169 IMPS · START FRESH';
   const notice=document.createElement('small');
   notice.textContent='Imp enhancement is optional, applied to newly built archive DEMO squads only. '+
     'Original per-form caps and Imp feeding gains are preserved. The custom cap mode rounds down, never above +25%. '+
@@ -308,12 +332,14 @@
     'Imp progress is now included in full v7 exports and rotating backups. '+
     'Legacy v169 Imp sidecars are NOT auto-linked to another save; import only '+
     'if you know those Imps belong to this exact save. '+
+    'If they belong to another save, choose Ignore legacy and start fresh; '+
+    'the old separate backup will remain available. '+
     'Before migrating from v169, claim any pending earned Artons in that old build: '+
     'unclaimed old supply cannot be safely associated with another save and is forfeited.';
-  for(const button of [enable,claimButton,feedButton,exportButton,importButton,migrateButton]){
+  for(const button of [enable,claimButton,feedButton,exportButton,importButton,migrateButton,ignoreLegacyButton]){
     button.style.cssText='padding:8px;margin:5px 4px 4px 0;min-height:38px';
   }
-  backups.append(backupHeading,backupText,exportButton,importButton,migrateButton);
+  backups.append(backupHeading,backupText,exportButton,importButton,migrateButton,ignoreLegacyButton);
   panel.append(heading,status,enable,selector,selectMode,stockLine,
     capLine,preview,claimButton,feedButton,backups,notice);
   host.after(panel);
@@ -337,7 +363,8 @@
       'Saved Imp state is invalid; no enhancements or rewards applied. Restore valid backup.' :
       !state&&legacyAvailable?
       'Legacy v169 Imp progress detected. Migrate it below BEFORE enabling fresh Imps. '+
-      'Do not start fresh until you safely transfer your earned enhancements.' :
+      'If the old Imps belong to another save, expand Backup / Restore and '+
+      'confirm Ignore legacy and start fresh.' :
       !state?'Imp fusion inactive. Activate explicitly to create optional Imp progress.' :
       'Imp fusion ACTIVE · next-battle stats only · '+(message||'No changes to core v7 saves');
     enable.hidden=!!state||invalidStorage;
@@ -358,6 +385,7 @@
       'No available smart feed preview';
     claimButton.disabled=!state;feedButton.disabled=!prediction?.total;
     migrateButton.disabled=!legacyAvailable||invalidStorage;
+    ignoreLegacyButton.disabled=!legacyAvailable||invalidStorage;
     return current;
   }
   selector.addEventListener('change',refresh);
@@ -406,9 +434,15 @@
       'No legacy import performed. No save changed.';
     refresh();
   });
+  ignoreLegacyButton.addEventListener('click',()=>{
+    message=startFreshIgnoringLegacy()?
+      'Started fresh for this save. The legacy Imp backup was preserved.':
+      'Fresh start cancelled or save failed; no Imp progress changed.';
+    refresh();
+  });
   window.BFGlobalOptionalImpsV16900=freeze({
     key,gains,names,original,maximum,bonus,view,stock,plan,feed,claim,
-    activate,modeChange,exportState,importState,legacyImport,apply,snapshot,refresh
+    activate,startFreshIgnoringLegacy,modeChange,exportState,importState,legacyImport,apply,snapshot,refresh
   });
   refresh();
 })();
