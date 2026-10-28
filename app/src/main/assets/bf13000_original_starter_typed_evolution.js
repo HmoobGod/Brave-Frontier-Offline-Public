@@ -31,7 +31,9 @@
    '69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9',
    typedRowsSha256:'a5b91a61b5101f378fcc2692ca97b601c2034cf150c0716e9b561aebc7a0bed6',totalForms:12,
    sourceItemId:110100,itemMeaning:'source type 2; original non-unit evolution item',
-   verifiedEnglishItemName:false,sourceItemAcquisitionKnown:false,
+   verifiedEnglishItemName:true,sourceItemName:'Legend Stone',
+   sourceTextPackSha256:'4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285',
+   sourceItemAcquisitionKnown:false,
    playableExpansion:false,inventoryMutated:false,saveFieldsAdded:0});
  function lookup(id){return Number.isSafeInteger(id)?rows.get(id)||null:null;}
  function snapshot(){
@@ -66,8 +68,8 @@
  const costs=document.createElement('p');costs.id='bf13000-price';
  const note=document.createElement('small');note.textContent=
    'Original 2022 typed recipe metadata only. Type 1 = material UNIT; '+
-   'type 2 = separate original evolution ITEM #110100. English item name, '+
-   'item acquisition, current inventory and summoner resource handling are '+
+   'type 2 = separate original evolution ITEM #110100 (Legend Stone, 2022 Global English). '+
+   'Item acquisition, current inventory and summoner resource handling are '+
    'not restored. No 7★/8★ units are playable here, and no resources or saved '+
    'evolutions are changed.';
  panel.append(title,select,costs,list,note);host.after(panel);
@@ -79,7 +81,8 @@
      row.zel.toLocaleString('en-US')+' Zel · '+row.karma.toLocaleString('en-US')+' Karma';
    for(const m of row.materials){
      const item=document.createElement('li');item.textContent='Slot '+m.slot+': '+
-       (m.type===1?'original material UNIT':'original evolution ITEM')+' #'+m.id;
+       (m.type===1?'original material UNIT':'original evolution ITEM')+' #'+m.id+
+       (m.type===2?' · original English: Legend Stone':'');
      list.append(item);
    }
    return row;
