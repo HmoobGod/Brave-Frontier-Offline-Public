@@ -530,5 +530,15 @@
     ]
   ],
   "saveMutation": false,
-  "playableChange": false
+  "playableChange": false,
+  "sourceText": {
+    "sourceAssetPack": "BF1_sgtext_part001.zip",
+    "sourceAssetPackSha256": "4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285",
+    "nestedAsset": "content/sgtext/sgtext_EvoItem_22.zip",
+    "nestedZipSha256": "757de3a06b2991c673f5d797feb92312abcb883c3acaf089f01a88fd6fcbbae2",
+    "decodedCsvSha256": "fc69ca86c2864a930739d3791f70b511902a7a94a9855fdeb0edddd579170957",
+    "nameKey": "MST_EVOITEM_110100_NAME",
+    "official2022GlobalEnglishName": "Legend Stone",
+    "shortDescription": "A mysterious stone that allows Units to surpass the gods' power"
+  }
 }
