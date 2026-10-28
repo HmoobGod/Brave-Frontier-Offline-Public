@@ -22,6 +22,9 @@ for uid,prev,rarity,cost,maxLv,zel,karma,mats in rows:
  assert [m[1] for m in mats]==[1]*(len(mats)-1)+[2]
  assert [m[2] for m in mats if m[1]==2]==[110100]
 assert V['saveMutation'] is False and V['playableChange'] is False
+assert V['sourceText']['official2022GlobalEnglishName']=='Legend Stone'
+assert V['sourceText']['nameKey']=='MST_EVOITEM_110100_NAME'
+assert V['sourceText']['sourceAssetPackSha256']=='4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285'
 js=(A/'bf13000_original_starter_typed_evolution.js').read_text('utf8')
 assert len(js.encode())<65536
 assert all(x not in js for x in ['localStorage','P.materials[','P.roster=','P.evolutions[','fetch(','XMLHttpRequest','Math.random'])
@@ -41,6 +44,8 @@ with sync_playwright() as pw:
  api='BFGlobalOriginalStarterTypedEvolutionV13000'
  assert p.evaluate(api+'.source.totalForms')==12
  assert p.evaluate(api+'.source.inventoryMutated') is False
+ assert p.evaluate(api+'.source.verifiedEnglishItemName') is True
+ assert p.evaluate(api+'.source.sourceItemName')=='Legend Stone'
  assert p.evaluate(api+'.lookup(10016).zel')==1500000
  assert p.evaluate(api+'.lookup(10017).karma')==1000000
  assert p.evaluate(api+'.lookup(10017).materials.at(-1).kind')=='original item'
@@ -51,6 +56,7 @@ with sync_playwright() as pw:
  p.select_option('#bf13000-select','20017')
  assert p.locator('#bf13000-materials li').count()==8
  assert 'ITEM #110100' in p.locator('#bf13000-materials').inner_text()
+ assert 'Legend Stone' in p.locator('#bf13000-materials').inner_text()
  assert '3,000,000 Zel' in p.locator('#bf13000-price').inner_text()
  assert p.evaluate('JSON.stringify(P)')==before
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
