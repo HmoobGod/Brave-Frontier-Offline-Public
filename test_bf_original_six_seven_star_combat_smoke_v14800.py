@@ -110,6 +110,9 @@ with sync_playwright() as pw:
       sourceAtkCGSSteps:row.attack.length,
       simulatedDamage:hp-S.enemies[0].hp,
       demoBBGauge:actor.bb,version:P.version});
+    // Reset transient battle before unregistering its 7-star sprite data.
+    BF_debug.reset();
+    await new Promise(resolve => requestAnimationFrame(resolve));
     UNIT_BY_ID.delete(id);
     delete BF_ARCHIVE_NORMAL_HITS[String(id)];
   }
