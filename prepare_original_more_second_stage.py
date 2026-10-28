@@ -61,7 +61,25 @@ def bake(z,uid):
             # CGG code 2 is a VERTICAL FLIP (community BFFrameAnimator map),
             # not a sprite rotation. These three precise original 4-star
             # profiles have no scale/opacity, blend, rotation or page flags.
-            if uid in (20023,30023,50023):
+            # BF_GLOBAL_4STAR_DARK_ALPHA_FLIP_V13400: original source
+            # Black Magress #60013 has 6 vertical flip references and five
+            # original opacity percentages, NOT resized source components.
+            # It has no blend, rotation or multi-page CGG semantics.
+            if uid==60013:
+                assert (reserved,unused,mode)==(0,0,0)
+                assert orientation in (0,2) and scale in (30,50,70,100)
+                flipped={(23,0),(24,0),(24,4),(24,5),(25,0),(26,0)}
+                opacities={(26,0,50),(26,1,50),(26,2,50),
+                           (26,3,70),(27,0,30)}
+                assert ((fi,part) in flipped)==(orientation==2)
+                assert ((fi,part,scale) in opacities)==(scale!=100)
+                if orientation==2:
+                    tile=tile.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+                if scale!=100:
+                    tile.putalpha(tile.getchannel('A').point(
+                        lambda alpha:round(alpha*scale/100)))
+                    scaled+=1
+            elif uid in (20023,30023,50023):
                 expected={
                     20023:{(6,2),(7,2),(9,0),(10,0)},
                     30023:{(7,0),(8,0),(9,1),(11,1)},
