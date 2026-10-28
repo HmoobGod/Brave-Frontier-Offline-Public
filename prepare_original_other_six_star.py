@@ -47,7 +47,17 @@ def bake(z,uid):
    assert sx>=0 and sy>=0 and w>0 and h>0 and sx+w<=sheet.width and sy+h<=sheet.height
    tile=sheet.crop((sx,sy,sx+w,sy+h))
    if scale!=100:
-    tile=tile.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
+    # BF_GLOBAL_6STAR_OPACITY_FIX_V13100: verified 2022 #30025 source
+    # Original column 4 is opacity, not sprite scale. This single form has
+    # six 50%-opacity layers in source frame 19, no flips/blend/rotation.
+    # Keep the old generator unchanged for all other forms until their
+    # native blend/transform semantics receive independent visual proof.
+    if uid==30025:
+     assert fi==19 and li in range(3,9) and scale==50
+     assert (orientation,reserved,extra,mode)==(0,0,0,0)
+     tile.putalpha(tile.getchannel('A').point(lambda a:round(a*scale/100)))
+    else:
+     tile=tile.resize((max(1,round(w*scale/100)),max(1,round(h*scale/100))),Image.Resampling.NEAREST)
    x,y=ox+dx,oy+dy
    if x<0 or y<0 or x+tile.width>fw or y+tile.height>fh:clipped+=1
    frame.alpha_composite(tile,(x,y))  # native clipping, source pixel content unchanged
