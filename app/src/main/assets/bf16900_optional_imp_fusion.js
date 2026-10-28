@@ -50,6 +50,8 @@
     return {version:1,started:true,mode:raw.mode,amounts,inventory,cursors};
   }
   let state=null,invalidStorage=false,observedP=null,observedState=undefined;
+  // Cache by canonical state object identity: all production writes replace the
+  // complete object. Never mutate P._bfImpsV171 directly in-place.
   function synchronize(){
     const raw=P?.[canonicalField];
     if(observedP===P&&observedState===raw)return;
@@ -78,9 +80,16 @@
     }
     return seen;
   }
+  function validLegacySidecar(){
+    try{
+      const raw=localStorage.getItem(key);
+      return !!raw&&raw.length<=250000&&!!validState(JSON.parse(raw));
+    }catch(_){return false;}
+  }
   function activate(){
     synchronize();
-    if(state||invalidStorage)return false;
+    // Do not let a fresh start hide the migration path to earned v169 Imps.
+    if(state||invalidStorage||validLegacySidecar())return false;
     const starter={version:1,started:true,mode:'custom',amounts:{},
       inventory:{molin:0,pakpak:0,ganju:0,fwahl:0,arton:5},
       cursors:cursorsNow()};
@@ -298,7 +307,9 @@
     'No Gems awarded. Training and saved EXP remain unchanged. '+
     'Imp progress is now included in full v7 exports and rotating backups. '+
     'Legacy v169 Imp sidecars are NOT auto-linked to another save; import only '+
-    'if you know those Imps belong to this exact save.';
+    'if you know those Imps belong to this exact save. '+
+    'Before migrating from v169, claim any pending earned Artons in that old build: '+
+    'unclaimed old supply cannot be safely associated with another save and is forfeited.';
   for(const button of [enable,claimButton,feedButton,exportButton,importButton,migrateButton]){
     button.style.cssText='padding:8px;margin:5px 4px 4px 0;min-height:38px';
   }
@@ -321,11 +332,16 @@
     }
     if([...selector.options].some(o=>Number(o.value)===old))selector.value=String(old);
     const baseId=Number(selector.value),current=view(baseId),prediction=plan(baseId);
+    const legacyAvailable=!state&&validLegacySidecar();
     status.textContent=invalidStorage?
       'Saved Imp state is invalid; no enhancements or rewards applied. Restore valid backup.' :
+      !state&&legacyAvailable?
+      'Legacy v169 Imp progress detected. Migrate it below BEFORE enabling fresh Imps. '+
+      'Do not start fresh until you safely transfer your earned enhancements.' :
       !state?'Imp fusion inactive. Activate explicitly to create optional Imp progress.' :
       'Imp fusion ACTIVE · next-battle stats only · '+(message||'No changes to core v7 saves');
     enable.hidden=!!state||invalidStorage;
+    enable.disabled=legacyAvailable||invalidStorage;
     selector.disabled=!state;selectMode.disabled=!state;
     selectMode.value=state?.mode||'custom';
     const inv=stock();
@@ -341,14 +357,14 @@
       '; expected stat gains '+prediction.gained.join(' / '):
       'No available smart feed preview';
     claimButton.disabled=!state;feedButton.disabled=!prediction?.total;
-    let legacyAvailable=false;
-    if(!state){try{legacyAvailable=!!validState(JSON.parse(localStorage.getItem(key)||'null'));}catch(_){}}
     migrateButton.disabled=!legacyAvailable||invalidStorage;
     return current;
   }
   selector.addEventListener('change',refresh);
   enable.addEventListener('click',()=>{
-    message=activate()?'Enabled; starter Artons received.':'Could not safely enable Imp fusion.';
+    message=activate()?'Enabled; starter Artons received.':
+      validLegacySidecar()?'Migrate your existing v169 Imps before starting fresh.':
+      'Could not safely enable Imp fusion.';
     refresh();
   });
   selectMode.addEventListener('change',()=>{message=modeChange(selectMode.value)?
@@ -359,6 +375,9 @@
   feedButton.addEventListener('click',()=>{
     const result=feed(Number(selector.value));message=result?
       'Fed '+result.total+' Imps; bonuses take effect next archive battle.':
+      (typeof saveRecoveryPending!=='undefined'&&saveRecoveryPending)||
+      (typeof saveEnabled!=='undefined'&&!saveEnabled)?
+      'Save is paused or storage is unavailable. No Imp materials were spent.':
       'No beneficial Imp materials available; no inventory spent.';refresh();
   });
   exportButton.addEventListener('click',()=>{backupText.value=exportState()||'';});
