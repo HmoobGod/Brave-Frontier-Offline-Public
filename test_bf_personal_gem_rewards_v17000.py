@@ -39,7 +39,7 @@ with sync_playwright() as pw:
  p.set_content(s,wait_until='load',timeout=90000)
  p.add_script_tag(path=str(A/'bf17000_personal_gem_rewards_ui.js'))
  assert p.locator('#bf17000-gem-rewards').count()==1
- assert 'Gem balance: 0' in p.locator('#bf17000-gem-rewards').inner_text()
+ assert 'Gem balance: 0' in p.locator('#bf17000-gem-rewards p').first.text_content()
  assert p.evaluate('P.version')==7
  assert p.evaluate('QUESTS.length')==106
  assert p.evaluate('BF170_QUEST_IDS.length')==106
@@ -63,7 +63,7 @@ with sync_playwright() as pw:
  p.evaluate('QUEST=QUESTS.find(q=>q.missionId===10);awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==1125
  # Claude F5/F10: actual in-browser Gem panel follows the successful save.
- assert 'Gem balance: 1,125' in p.locator('#bf17000-gem-rewards').inner_text()
+ assert 'Gem balance: 1,125' in p.locator('#bf17000-gem-rewards p').first.text_content()
  p.evaluate('awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==1126
  assert p.evaluate('P._bfGemV170Custom.firstPaid')==[10]
@@ -123,14 +123,14 @@ with sync_playwright() as pw:
  assert p.evaluate('P._bfGemV170Custom.balance')==initial+25
  assert p.evaluate('P.questClears[11]')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
- assert ('Gem balance: '+format(initial,',')) in p.locator('#bf17000-gem-rewards').inner_text()
+ assert ('Gem balance: '+format(initial,',')) in p.locator('#bf17000-gem-rewards p').first.text_content()
  p.evaluate("raw=>{window.__gemQuota=false;P=parseProgress(JSON.parse(raw));}",saved)
  assert p.evaluate('P.questClears[11]||0')==0
  assert p.evaluate('P._bfGemV170Custom.balance')==initial
  p.evaluate('awardDemoRewards()')
  assert p.evaluate('P._bfGemV170Custom.balance')==initial+25
  assert p.evaluate('P._bfGemV170Custom.replaysPaid')==1
- assert ('Gem balance: '+format(initial+25,',')) in p.locator('#bf17000-gem-rewards').inner_text()
+ assert ('Gem balance: '+format(initial+25,',')) in p.locator('#bf17000-gem-rewards p').first.text_content()
  # Claude F7: exact Gregorian dates only; no Feb 31 or non-leap Feb 29.
  for bad_date in ('2025-02-31','2025-02-29','2026-11-31'):
   assert p.evaluate('''s=>{const data=JSON.parse(JSON.stringify(P));
