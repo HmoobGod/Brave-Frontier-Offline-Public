@@ -311,6 +311,7 @@ jobs:
           python test_bf_gem_atomic_persistence_lab_v15900.py
           python test_bf_original_gem_ledger_v16000.py
           python test_bf_original_gem_pending_v16100.py
+          python test_bf_gem_downgrade_contract_v16200.py
           python test_bf_global_merit_achievements_v13800.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_dark_five_star_source_art_v14600.py
