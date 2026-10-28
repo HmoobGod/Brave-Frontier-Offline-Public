@@ -181,7 +181,7 @@
       }
       if(clears>=20)break;
     }
-    const granted=Math.min(clears*2,10000-next.inventory.arton);
+    const granted=2*Math.min(clears,Math.floor((10000-next.inventory.arton)/2));
     if(granted<=0)return 0;
     // Never advance the paid cursor beyond the material actually granted.
     if(granted<clears*2){
