@@ -290,6 +290,7 @@ jobs:
           python test_bf_decomp_progression_candidates_v13500.py
           python test_bf_original_omni_prerequisites_v13600.py
           python test_bf_original_five_star_starters.py
+          python test_bf_original_dark_five_star_source_art_v14600.py
           python test_bf_original_other_five_star.py
           python test_bf_original_six_star_starters.py
           python test_bf_original_other_six_star.py
@@ -346,6 +347,8 @@ jobs:
           python3 test_bf_packaged_fourstar_dark_v13400.py
       - name: Verify packaged six original 5-star starter forms and v7 compatibility
         run: python3 test_bf_packaged_five_star_starters.py
+      - name: Verify v146 original 5-star Dark animation sprite in signed APK
+        run: python3 test_bf_packaged_dark_five_star_source_art_v14600.py
       - name: Verify packaged six original other 5-star forms and v7 save identity
         run: python3 test_bf_packaged_other_five_star.py
       - name: Verify packaged six original Global 6-star starters and saved v7 identity
