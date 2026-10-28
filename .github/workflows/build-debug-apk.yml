@@ -289,6 +289,7 @@ jobs:
           python test_bf_original_fourstar_dark_v13400.py
           python test_bf_decomp_progression_candidates_v13500.py
           python test_bf_original_omni_prerequisites_v13600.py
+          python test_bf_legend_stone_acquisition_v13700.py
           python test_bf_original_five_star_starters.py
           python test_bf_original_other_five_star.py
           python test_bf_original_six_star_starters.py
