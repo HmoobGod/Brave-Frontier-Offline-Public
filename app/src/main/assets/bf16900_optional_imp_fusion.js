@@ -256,14 +256,14 @@
   panel.style.cssText='margin:9px 3px;padding:10px;border:1px solid #a5c7b0;'+
     'border-radius:8px;background:#243637;color:#eff9ed;font:12px/1.5 system-ui';
   const heading=document.createElement('summary');heading.textContent=
-    'IMPS · ORIGINAL GAINS / OPTIONAL +25% CAPS';
+    'IMPS · ORIGINAL GAINS / CUSTOM CAPS (UP TO +25%)';
   heading.style.cssText='cursor:pointer;min-height:40px;font-weight:800';
   const status=document.createElement('p');
   const selector=document.createElement('select');selector.id='bf16900-owned';
   selector.setAttribute('aria-label','Choose owned unit for Imp fusion');
   selector.style.cssText='width:100%;min-height:40px;margin:5px 0';
   const selectMode=document.createElement('select');selectMode.id='bf16900-mode';
-  for(const [v,title] of [['custom','Custom caps (+25%)'],
+  for(const [v,title] of [['custom','Custom caps (up to +25%, rounded down)'],
                            ['original','Original Brave Frontier caps']]){
     const opt=document.createElement('option');opt.value=v;opt.textContent=title;
     selectMode.append(opt);
@@ -293,7 +293,7 @@
   migrateButton.textContent='IMPORT LEGACY v169 IMPS INTO THIS SAVE';
   const notice=document.createElement('small');
   notice.textContent='Imp enhancement is optional, applied to newly built archive DEMO squads only. '+
-    'Original per-form caps and Imp feeding gains are preserved. The +25% cap mode, '+
+    'Original per-form caps and Imp feeding gains are preserved. The custom cap mode rounds down, never above +25%. '+
     'starter Artons and two-Arton-per-new-clear supply are OFFLINE QoL, NOT original Global drops. '+
     'No Gems awarded. Training and saved EXP remain unchanged. '+
     'Imp progress is now included in full v7 exports and rotating backups. '+
