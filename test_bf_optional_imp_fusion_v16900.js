@@ -13,7 +13,7 @@ assert(java.indexOf('readPackagedText("bf16800_original_level_one_lord_combat.js
        java.indexOf('readPackagedText("bf16900_optional_imp_fusion.js")'));
 const coreSave='bf_global_offline_demo_v7';
 for(const denied of ['localStorage.removeItem(', 'localStorage.clear(', 'P.roster=', 'P.unitExp=',
-                     'P.questClears=', 'saveProgress(', 'awardDemoRewards(', 'Math.random', 'fetch('])
+                     'P.questClears=', 'awardDemoRewards(', 'Math.random', 'fetch('])
   assert(!script.includes(denied),denied);
 const db=new Map([[coreSave,'{"version":7,"roster":[10011]}']]);
 let failWrite=false;
@@ -36,14 +36,15 @@ function el(tag='div'){
 }
 elements.set('mode',mode);elements.set('squadpicker',el());
 const document={getElementById:k=>elements.get(k)||null,createElement:el};
-const P={version:7,roster:[10011,10025,60015,10041],squad:[10011],
+const P={version:7,_bfImpsV171:null,roster:[10011,10025,60015,10041],squad:[10011],
   questClears:{10:2},unitExp:{10011:0}};
 const S={mode:'archive',party:[]};
 const source={10011:[400,160,80,80],10025:[1000,240,560,400],
   60015:[700,580,580,280],10041:[400,160,80,80],
   20011:[750,350,200,350],99999:[0,0,0,0]};
 const window={BFGlobalUnitArchive:{count:2291,originalImpCaps:id=>source[id]||null}};
-const ctx={window,P,S,document,localStorage,effectiveUnit:baseId=>({id:baseId,stats:{
+const saveProgress=()=>{if(failWrite)return false;db.set(coreSave,JSON.stringify(P));return true;};
+const ctx={window,P,S,document,localStorage,saveProgress,effectiveUnit:baseId=>({id:baseId,stats:{
   hp:1030,atk:500,def:410,rec:320}})};
 vm.runInNewContext(script,ctx,{filename:'bf16900_optional_imp_fusion.js'});
 const imp=window.BFGlobalOptionalImpsV16900;
@@ -59,7 +60,7 @@ assert.equal(imp.activate(),false);
 assert.equal(imp.snapshot().mode,'custom');
 assert.equal(imp.stock().arton,5);
 assert.deepEqual(Array.from(imp.bonus(10011)),[0,0,0,0]);
-assert.equal(db.get(coreSave),'{"version":7,"roster":[10011]}');
+assert.equal(JSON.parse(db.get(coreSave))._bfImpsV171.inventory.arton,imp.stock().arton);
 assert.equal(imp.claim(),0,'no retroactive claim for existing cleared quests');
 P.questClears[10]=5;
 assert.equal(imp.claim(),6,'two Artons per newly recorded DEMO clear');
@@ -80,7 +81,7 @@ imp.apply(unit,0);
 assert.equal(unit.maxHp,1530);assert.equal(unit.atk,700);
 assert.equal(unit.def,510);assert.equal(unit.rec,420);
 imp.apply(unit,0);assert.equal(unit.maxHp,1530,'double application forbidden');
-const snap=imp.snapshot();assert.equal(snap.noCanonicalSaveMutation,true);
+const snap=imp.snapshot();assert.equal(snap.noCanonicalSaveMutation,false);
 S.party=[unit];assert.equal(imp.snapshot().rows.length,1);
 mode.value='training';const training=newBattleUnit();
 imp.apply(training,0);assert.equal(training.hp,1030);
@@ -103,11 +104,11 @@ failWrite=false;
 const second=imp.feed(10025);
 assert(second&&second.total>0);
 assert.equal(imp.view(10025).applied[0]>0,true);
-assert.equal(db.get(coreSave),'{"version":7,"roster":[10011]}');
+assert.equal(JSON.parse(db.get(coreSave))._bfImpsV171.inventory.arton,imp.stock().arton);
 const wrongUnit={...newBattleUnit(),unitId:20011};imp.apply(wrongUnit,0);
 assert.equal(wrongUnit.hp,1030,'mismatched form cannot receive Imp bonuses');
 // Corrupted optional sidecar must fail closed, while explicit restore must work.
-const backup=db.get(imp.key);db.set(imp.key,'{malformed');
+const backup=imp.exportState();P._bfImpsV171=null;db.set(imp.key,'{malformed');
 const window2={BFGlobalUnitArchive:window.BFGlobalUnitArchive};
 const ctx2={...ctx,window:window2};
 vm.runInNewContext(script,ctx2);
@@ -115,4 +116,4 @@ assert.equal(window2.BFGlobalOptionalImpsV16900.snapshot().enabled,false);
 assert.equal(window2.BFGlobalOptionalImpsV16900.feed(10011),false);
 assert.equal(window2.BFGlobalOptionalImpsV16900.importState(backup),true);
 assert.equal(window2.BFGlobalOptionalImpsV16900.snapshot().enabled,true);
-console.log('PASS v169: 125% source caps, 5 Imp types, 4-item full Vargas Smart batch, Arton quest supply, original mode, source-only owned form, battle application, save rollback, corrupted backup restore');
+console.log('PASS v171: strict Imp cap and canonical v7 save, original Imp increments, no double application, rollback, manual old backup restore');
