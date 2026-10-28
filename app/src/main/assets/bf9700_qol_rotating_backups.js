@@ -48,17 +48,16 @@
    catch(_){return false;}
    refresh();return true;
  }
- function download(index=0){
-   const x=existing()[index];
-   if(!x||!valid(x.raw))return false;
-   const filename='BraveFrontier-v7-backup-'+
-     new Date(x.time).toISOString().replace(/[:.]/g,'-')+'.json';
+ // v164: direct export of the canonical *current* save. Rotation is not
+ // a substitute for an independent JSON export before rolling back an APK.
+ function exportRaw(raw,filename){
+   if(!valid(raw))return false;
    try{
-     // Android SAF is deliberately invoked only from an explicit tap.
+     // Android SAF is deliberately invoked only from an explicit user tap.
      if(window.BFAndroid?.exportSaveFile){
-       window.BFAndroid.exportSaveFile(x.raw,filename);
+       window.BFAndroid.exportSaveFile(raw,filename);
      }else{
-       const blob=new Blob([x.raw],{type:'application/json'});
+       const blob=new Blob([raw],{type:'application/json'});
        const url=URL.createObjectURL(blob);
        const a=document.createElement('a');
        a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();
@@ -66,6 +65,19 @@
      }
      return true;
    }catch(_){return false;}
+ }
+ function download(index=0){
+   const x=existing()[index];
+   if(!x)return false;
+   const filename='BraveFrontier-v7-backup-'+
+     new Date(x.time).toISOString().replace(/[:.]/g,'-')+'.json';
+   return exportRaw(x.raw,filename);
+ }
+ function exportCurrent(){
+   const raw=safeGet(liveKey);
+   const filename='BraveFrontier-v7-current-'+
+     new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+   return exportRaw(raw,filename);
  }
  function enable(value){
    const newValue=value===true;
@@ -86,7 +98,7 @@
  const caution=document.createElement('small');
  caution.textContent='Keeps up to three different valid v7 snapshots on this device. '+
    'Never restores or overwrites progress automatically. '+
-   'Download a copy for protection against uninstall or app-data loss.';
+   'Before downgrading to an older APK, export the CURRENT save outside the app: older versions can discard newer save records on their next save.';
  const toggle=document.createElement('label');
  toggle.style.cssText='display:block;margin:9px 0';
  const checkbox=document.createElement('input');
@@ -103,6 +115,7 @@
  }
  const now=button('bf9700-capture','BACK UP NOW');
  const exportButton=button('bf9700-export','EXPORT A BACKUP');
+ const currentButton=button('bf9700-export-current','EXPORT CURRENT SAVE');
  const selector=document.createElement('select');selector.id='bf9700-select';
  selector.setAttribute('aria-label','Choose local backup');
  selector.style.cssText='min-height:42px;max-width:100%;background:#193943;'+
@@ -122,11 +135,13 @@
    }
    selector.value=slots.some(x=>String(x.slot-1)===previous)?previous:'0';
    selector.disabled=!slots.length;exportButton.disabled=!slots.length;
+   currentButton.disabled=!valid(safeGet(liveKey));
    return slots;
  }
  checkbox.addEventListener('change',()=>{if(!enable(checkbox.checked))refresh();});
  now.addEventListener('click',()=>{capture(true);refresh();});
  exportButton.addEventListener('click',()=>download(Number(selector.value)));
+ currentButton.addEventListener('click',()=>exportCurrent());
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden)capture();
  });
@@ -136,7 +151,7 @@
  capture();refresh();
  window.BFGlobalQoLBackupsV9700=freeze({
    key:backupKey,liveKey,limit,maxBytes,valid,
-   capture,listing,download,enable,refresh,
+   capture,listing,download,exportCurrent,enable,refresh,
    get enabled(){return enabled;}
  });
 })();

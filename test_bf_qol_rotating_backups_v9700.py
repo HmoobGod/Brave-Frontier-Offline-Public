@@ -68,6 +68,35 @@ with sync_playwright() as pw:
  assert exported['name'].startswith('BraveFrontier-v7-backup-')
  assert exported['name'].endswith('.json')
  assert __import__('json').loads(exported['raw'])['questClears']['1']==4
+ # v164: the one-tap CURRENT export must read the exact canonical save, not
+ # the last rotating snapshot (which can lag behind real gameplay).
+ assert p.locator('#bf9700-export-current').count()==1
+ # The preceding corruption test deliberately left an invalid live save.
+ # Restore the in-memory valid player state before exercising live export.
+ p.evaluate("localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P))")
+ previous_raw=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ previous_backups=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")
+ p.evaluate("""()=>{
+   const v=JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'));
+   v.questClears['12']=1;
+   v._bfGemV160={schema:1,balance:0,paidFinales:[],legacyFinales:[12]};
+   v._bfGemV161Pending=[12];
+   localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(v));
+ }""")
+ exact_current=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ p.locator('#bf9700-export-current').click()
+ current_export=p.evaluate('window.__export97')
+ assert current_export['raw']==exact_current
+ assert current_export['name'].startswith('BraveFrontier-v7-current-')
+ assert current_export['name'].endswith('.json')
+ assert __import__('json').loads(current_export['raw'])['_bfGemV161Pending']==[12]
+ assert __import__('json').loads(current_export['raw'])['_bfGemV160']['balance']==0
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==previous_backups
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==exact_current
+ p.evaluate("""()=>localStorage.setItem('bf_global_offline_demo_v7','{"version":7,"roster":null}')""")
+ assert p.evaluate('BFGlobalQoLBackupsV9700.exportCurrent()') is False
+ assert p.evaluate('window.__export97')==current_export
+ p.evaluate("raw=>localStorage.setItem('bf_global_offline_demo_v7',raw)",previous_raw)
  p.locator('#bf9700-auto').uncheck()
  assert p.evaluate(api+'.enabled') is False
  assert p.evaluate("localStorage.getItem('bf_global_offline_qol_backups_enabled_v97')")=='off'
