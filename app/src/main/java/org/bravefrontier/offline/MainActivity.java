@@ -998,6 +998,14 @@ public class MainActivity extends Activity {
                 } catch (IOException englishError) {
                     android.util.Log.w("BraveFrontier", "Optional original leader English unavailable", englishError);
                 }
+                // v166: exact original 2022 type5 elemental protection from six
+                // verified Global leader skills; only known incoming elements.
+                try {
+                    String type5Resist = readPackagedText("bf16600_original_type5_element_resist.js");
+                    view.evaluateJavascript(type5Resist, null);
+                } catch (IOException type5Error) {
+                    android.util.Log.w("BraveFrontier", "Optional original type5 elemental protection unavailable", type5Error);
+                }
                 // v115: enforce exact 2022 original unitMaxLevel only on newly
                 // constructed archive DEMO battle party units, not saved EXP.
                 try {
