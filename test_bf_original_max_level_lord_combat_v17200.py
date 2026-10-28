@@ -100,6 +100,7 @@ with sync_playwright() as pw:
  for id in (10011,20011,50011,10021,20021,10041,60041):
   cap=rows[id]['maxLevel']
   a=p.evaluate("""({id,cap})=>{
+   P.evolutions={};
    let exp=1;
    while(demoLevel(exp)<cap && exp<1000000000000)exp*=2;
    if(demoLevel(exp)<cap)throw Error('DEMO EXP does not reach cap');
