@@ -58,7 +58,7 @@ with zipfile.ZipFile(io.BytesIO(packed)) as z:
  for uid,digest in {
   10023:'baaacec6c344a462a92b384650eae720e204bdab1201a0b83a9bbc67e26c57c1',
   40023:'8f70adee36e64feb15682d6b5722d46325b58049f67d87dc407dd9862cd90dfa',
-  60013:'d556d3f64fe120cd2f9aeac296d92405d140d50860073362244909882bd309cf'
+  60013:'b12bdb2eea55eec3ec6ffe734923ad07ebccda10aca0e8ab5235c6a0d0c0cd40'
  }.items():
   assert sha((A/f'content/more_second_evolution/unit_anime_atlas_{uid}.png').read_bytes())==digest,uid
 source=(R/'prepare_original_more_second_stage.py').read_text('utf8')
