@@ -179,6 +179,14 @@ public class MainActivity extends Activity {
                     } catch (IOException journalError) {
                         android.util.Log.w("BraveFrontier", "Optional quest journal unavailable", journalError);
                     }
+                    // v143: display source-verified 2022 original energy costs
+                    // in quest cards only. No real stamina or save mutation.
+                    try {
+                        String energySource = readPackagedText("bf14300_original_quest_energy.js");
+                        view.evaluateJavascript(energySource, null);
+                    } catch (IOException energyError) {
+                        android.util.Log.w("BraveFrontier", "Optional original quest energy view unavailable", energyError);
+                    }
                     // v20.00: authentic 2022 quest metadata + live existing DEMO battle HUD.
                     // Optional and read-only; no native formula or save-schema changes.
                     try {
