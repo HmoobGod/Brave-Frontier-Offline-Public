@@ -105,6 +105,10 @@ with sync_playwright() as pw:
       simulatedDamage:start-S.enemies[0].hp,
       DEMOBurstGauge:actor.bb,
       saveVersion:P.version};
+   // Restore live canvas actors and invalidate battle epoch before
+   // removing the temporary source-only unit; otherwise rAF can draw it.
+   BF_debug.reset();
+   await new Promise(resolve => requestAnimationFrame(resolve));
    UNIT_BY_ID.delete(20016);
    delete BF_ARCHIVE_NORMAL_HITS['20016'];
    result.temporaryUnitGone=!UNIT_BY_ID.has(20016);
