@@ -101,6 +101,10 @@ with sync_playwright() as pw:
     }''')
     assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
     assert page.evaluate('BFGlobalOptionalImpsV16900.bonus(10011)')==[0,0,0,0]
+    # Claude N3: save-import progression rerender refreshes the Imp status UI.
+    page.evaluate('renderProgress()')
+    assert 'Imp fusion inactive' in page.locator('#bf16900-imp-fusion > p').first.text_content()
+    assert 'Owned Imps:' in page.locator('#bf16900-imp-fusion > p').nth(1).text_content()
     page.evaluate('P._bfImpsV171=window.__firstImp171')
     assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is True
     assert page.evaluate('BFGlobalOptionalImpsV16900.exportState()') is not None
@@ -124,6 +128,12 @@ with sync_playwright() as pw:
       JSON.parse(raw)._bfImpsV171));const next=JSON.parse(raw);
       next._bfImpsV171=null;P=parseProgress(next);}''',exported['raw'])
     assert page.evaluate('BFGlobalOptionalImpsV16900.snapshot().enabled') is False
+    page.evaluate('renderProgress()')
+    # Claude N1: valid old Imps block accidental fresh activation.
+    assert page.evaluate('BFGlobalOptionalImpsV16900.activate()') is False
+    assert page.get_by_text('ENABLE OPTIONAL IMP FUSION',exact=False).first.is_disabled()
+    assert 'Legacy v169 Imp progress detected' in page.locator('#bf16900-imp-fusion > p').first.text_content()
+    assert page.get_by_text('IMPORT LEGACY v169 IMPS',exact=False).first.is_enabled()
     # Explicit owner-controlled legacy migration: quest cursors are clamped
     # to current clears so a swapped save cannot retro-earn Artons.
     assert page.evaluate('BFGlobalOptionalImpsV16900.legacyImport()') is True
