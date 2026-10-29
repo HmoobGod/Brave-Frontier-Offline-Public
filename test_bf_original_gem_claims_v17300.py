@@ -65,6 +65,19 @@ with sync_playwright() as pw:
  assert p.evaluate('P._bfGemV160.paidFinales')==[12,33]
  assert p.evaluate('P._bfGemV160.balance')==2
  assert p.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)')
+ # Claude M3: exercise the v173 cross-wallet guard directly with a valid
+ # source-backed paid state; independent of v170's earlier parser gate.
+ assert p.evaluate("""()=>bf173ValidateOriginalClaims(
+  P._bfGemV160,P._bfGemV161Pending,P._bfGemV170Custom)===P._bfGemV160""") is True
+ for case in ('paid-without-pending','paid-also-custom-first'):
+  assert p.evaluate("""kind=>{
+   const pending=[...P._bfGemV161Pending],custom={
+    ...P._bfGemV170Custom,firstPaid:[...P._bfGemV170Custom.firstPaid]};
+   if(kind==='paid-without-pending')pending.splice(pending.indexOf(12),1);
+   else custom.firstPaid.push(12);
+   try{bf173ValidateOriginalClaims(P._bfGemV160,pending,custom);return false;}
+   catch(_){return true;}
+  }""",case),case
  # Legacy v124 imported clear is NOT an eligible new claim.
  p.evaluate("""()=>{
   const old=JSON.parse(JSON.stringify(P));
@@ -104,9 +117,13 @@ with sync_playwright() as pw:
  assert p.evaluate('BFGlobalOriginalGemClaimsV17300.claim()') is False
  assert p.evaluate('P._bfGemV160.balance')==0
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
- p.evaluate("""raw=>{window.__originalGemQuota=false;P=parseProgress(JSON.parse(raw));
-  saveEnabled=true;}""",saved)
+ assert p.evaluate('saveEnabled') is False
+ assert 'storage unavailable' in p.locator('#bf17300-original-gems p').first.text_content()
+ # Claude M2: retry directly once storage is writable; no unrelated save,
+ # parser reload or manual saveEnabled reset should be needed.
+ p.evaluate('window.__originalGemQuota=false')
  assert p.evaluate('BFGlobalOriginalGemClaimsV17300.claim()')==1
+ assert p.evaluate('saveEnabled') is True
  assert p.evaluate('P._bfGemV160.balance')==1
  assert p.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)')
  assert set(p.evaluate('__originalGemWrites'))=={'bf_global_offline_demo_v7'}
