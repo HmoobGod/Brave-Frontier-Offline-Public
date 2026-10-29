@@ -79,3 +79,50 @@ separate owner Android smoke tests for save compatibility, artwork and
 the v190 Gem shortcut.
 
 **No native original 2022 enemy formation or AI has been reconstructed by this patch.**
+
+## C2 review follow-up — real chain restoration and regression
+
+Claude's review of prior head `5d618307ecaec11938187aa488784e9c02624f6d`
+found a significant coverage gap: v191's first browser test used a v174 mock,
+while the native 2022 reference chain v108 → v109 → v151 → v174 was not
+known to initialize in the actual prepared 2022 app.
+
+**Independent root-cause inspection of the owner-tested v188 compiled APK**
+found the embedded `BF_MORGAN_QUEST_DATA_V080` and
+`BF_STLAMIA_QUEST_DATA_V090` globals had quests and dungeons but **no
+`provenance` property**, whereas the already-existing fail-closed v108 and
+v109 source gates require the original mission-master SHA. This is an old,
+read-only reference integration bug; it does not imply the original quest
+gameplay was missing. It explains why v174 and v191 could silently fail to
+register in live Android WebView.
+
+The feature now includes two tightly scoped **build-preparation-only** changes:
+`prepare_morgan_quests_v080.py` and `prepare_st_lamia_original_v090.py`
+preserve a minimal source-verified `provenance` object in the existing
+embedded frozen record; they include only the previously asserted original
+source ZIP/master SHA hashes and do not change the 36+36 source quest data,
+story progression, battle state or player save.
+
+**Local Chromium proof on the extracted original v188 APK HTML/scripts:**
+once the two missing hash fields were inserted in memory, the actual v108,
+v109, v151 and v174 scripts registered sequentially at 70 → 106 → 142 → 142
+original source missions, with **no** JavaScript page errors. This local probe
+used v188's actual packaged scripts; it is not a rebuilt v191 APK nor an
+owner-device test.
+
+Two additional hard CI gates prevent the same silent failure from recurring:
+- `test_bf_real_original_2022_chain_v19100.py`: loads the actual *prepared
+  106-quest game HTML* and injects the **real** original 2022 source scripts
+  with no mocked v108/v109/v151/v174 global; checks that they all register,
+  validate 29 new exact mission/JPG joins, keep 36 Amdahl research-only, and
+  do not write the v7 save or alter P/S.
+- `test_bf_packaged_real_original_2022_chain_v19100.py`: after Gradle
+  builds the APK, requires that both Morgan/St. Lamia provenance records
+  survive inside the **actual APK index.html**, and independently checks
+  shipped v108/v109/v151/v174/v191 JS bytes and Java loader order.
+
+**Review consequence:** The earlier Claude APPROVE WITH CONDITIONS applies
+only to its old exact head. These preparation changes and new source-chain
+tests require Claude to **re-review the delta on the latest PR head**. The
+revised exact-head Build must pass before merging. Preserve the owner-tested
+v188 APK while v191 release gates remain open.
