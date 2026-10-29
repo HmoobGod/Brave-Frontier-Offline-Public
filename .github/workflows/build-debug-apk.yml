@@ -159,6 +159,7 @@ jobs:
           python test_bf_amdahl_encounter_evidence_v15100.py
           python test_bf_original_2022_encounter_crossrefs_v17400.py
           python test_bf_2022_dungeon_backdrops_v19100.py
+          python test_bf_real_original_2022_chain_v19100.py
           python test_bf_2022_mission_cross_table_v15200.py
           python test_bf_original_2022_wave_source_audit_v17500.py
           python test_bf_original_2022_nested_source_audit_v17600.py
