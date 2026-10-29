@@ -62,6 +62,8 @@ with sync_playwright() as pw:
  assert page.evaluate("BFGlobalUnitArchive.find(10130).thumbnail") is False
  before=page.evaluate("""() => ({player:JSON.stringify(P),game:JSON.stringify(S),
   save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ page.locator(' .bf-navbar [data-bf-goto="units"]'.trim()).click()
+ page.locator('[data-bf-unit-tab="box"]').click()
  page.locator("#bf-unit-encyclopedia summary").click()
  page.locator("#bf-archive-search").fill("10130")
  assert page.locator(".bf-archive-unit").count()==1
