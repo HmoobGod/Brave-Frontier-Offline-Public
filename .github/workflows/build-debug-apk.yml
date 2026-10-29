@@ -64,6 +64,7 @@ jobs:
           python3 patch_bf_save_quarantine.py
           python3 prepare_global_mission_expansion.py
           python3 prepare_global_unit_archive.py
+          python3 prepare_bf_optional_archived_art_v18800.py
           python3 prepare_global_unit_codex.py
           python3 prepare_original_bb_targeting.py
           python3 prepare_original_bb_support.py
@@ -171,6 +172,7 @@ jobs:
           python test_bf_original_real_2022_source_v18600.py
           python test_bf_historical_art_layout_v18700.py
           python audit_bf_historical_art_layout_v18700.py
+          python test_bf_optional_historical_portraits_v18800.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
