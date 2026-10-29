@@ -110,6 +110,7 @@ jobs:
           python3 patch_bf_custom_gem_rewards_v17000.py
           python3 patch_bf_imp_canonical_v17100.py
           python3 patch_bf_original_gem_claims_v17300.py
+          python3 prepare_bf_original_2022_encounter_crossrefs_v174.py
           python3 test_bf_imp_strict_caps_v17100.py
           # Catch JavaScript parser regressions before the long Chromium suite.
           node --check app/src/main/assets/bf_global_unit_archive.js
@@ -118,6 +119,7 @@ jobs:
           node --check app/src/main/assets/bf16800_original_level_one_lord_combat.js
           node --check app/src/main/assets/bf16900_optional_imp_fusion.js
           node --check app/src/main/assets/bf17200_original_max_level_lord_combat.js
+          node --check app/src/main/assets/bf17400_original_2022_encounter_crossrefs.js
           node --check app/src/main/assets/bf17000_personal_gem_rewards_ui.js
           node test_bf_optional_imp_fusion_v16900.js
           node --check test_bf_original_type5_battle_audit_v16700.js
@@ -152,6 +154,7 @@ jobs:
           python test_bf_2022_encounter_reference_ledger_v10800.py
           python test_bf_stlamia_encounter_refs_v10900.py
           python test_bf_amdahl_encounter_evidence_v15100.py
+          python test_bf_original_2022_encounter_crossrefs_v17400.py
           python test_bf_2022_mission_cross_table_v15200.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
@@ -703,6 +706,8 @@ jobs:
         run: python3 test_bf_packaged_stlamia_encounter_refs_v10900.py
       - name: Verify v151 original Amdahl source-only 142-mission ledger in signed APK
         run: python3 test_bf_packaged_amdahl_encounter_evidence_v15100.py
+      - name: Verify v174 2022 encounter crossrefs in signed APK
+        run: python3 test_bf_packaged_original_2022_encounter_crossrefs_v17400.py
       - name: Verify v153 historical Legend Stone Merit listing in signed APK
         run: python3 test_bf_packaged_legend_stone_merit_source_v15300.py
       - name: Verify v154 2022 Merit quest-clear preview in signed APK
