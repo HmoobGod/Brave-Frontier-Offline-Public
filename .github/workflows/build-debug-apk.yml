@@ -330,6 +330,7 @@ jobs:
           python test_bf_original_gem_pending_v16100.py
           python test_bf_personal_gem_rewards_v17000.py
           python test_bf_original_gem_claims_v17300.py
+          python test_bf_original_gem_claims_downgrade_v17300.py
           python test_bf_personal_gem_downgrade_roundtrip_v17000.py
           python test_bf_imp_downgrade_roundtrip_v17100.py
           python test_bf_gem_downgrade_contract_v16200.py
