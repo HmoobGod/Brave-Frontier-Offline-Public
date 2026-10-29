@@ -27,7 +27,7 @@ assert len(list((A/"content/unit_historical_archive").glob("unit_ills_thum_*.png
 js=(A/"bf_global_unit_archive.js").read_text("utf8")
 css=(A/"bf_global_unit_archive.css").read_text("utf8")
 assert "historicalArtOptedIn" in js and "historicalArtIds=new Set([" in js
-assert "id=\\"bf-v188-historical-art\\"" in js
+assert 'id="bf-v188-historical-art"' in js
 assert "bf-v188-art-optin" in css
 assert js.count("content/unit_historical_archive/unit_ills_thum_")==1
 assert "localStorage.setItem(" not in js and "saveProgress(" not in js
