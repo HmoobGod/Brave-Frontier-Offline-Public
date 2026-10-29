@@ -46,7 +46,7 @@ with fake_zip() as z:
     report = nested.scan_nested(z, sample, require_primary_sha=False)
     assert report["sourceMissionCount"] == 3
     assert report["sourceMissionMasterSha256"] == "synthetic-fixture-only"
-    assert report["topLevelCandidateFieldCount"] == 1
+    assert report["topLevelCandidateFieldCount"] == 2
     assert {key: report[key] for key in
             ("nativeFormationDecoded", "nativeEnemyIdsDecoded", "nativeAIDecoded",
              "nativeDropsDecoded", "gameplayMutation", "saveMutation")} == {
