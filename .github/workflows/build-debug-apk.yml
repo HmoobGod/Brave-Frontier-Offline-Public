@@ -113,6 +113,7 @@ jobs:
           python3 patch_bf_imp_canonical_v17100.py
           python3 patch_bf_original_gem_claims_v17300.py
           python3 prepare_bf_original_2022_encounter_crossrefs_v174.py
+          python3 prepare_bf_original_2022_dungeon_backdrops_v19100.py
           python3 test_bf_imp_strict_caps_v17100.py
           # Catch JavaScript parser regressions before the long Chromium suite.
           node --check app/src/main/assets/bf_global_unit_archive.js
@@ -157,6 +158,7 @@ jobs:
           python test_bf_stlamia_encounter_refs_v10900.py
           python test_bf_amdahl_encounter_evidence_v15100.py
           python test_bf_original_2022_encounter_crossrefs_v17400.py
+          python test_bf_2022_dungeon_backdrops_v19100.py
           python test_bf_2022_mission_cross_table_v15200.py
           python test_bf_original_2022_wave_source_audit_v17500.py
           python test_bf_original_2022_nested_source_audit_v17600.py
@@ -732,6 +734,8 @@ jobs:
         run: python3 test_bf_packaged_amdahl_encounter_evidence_v15100.py
       - name: Verify v174 2022 encounter crossrefs in signed APK
         run: python3 test_bf_packaged_original_2022_encounter_crossrefs_v17400.py
+      - name: Verify v191 29 original 2022 mission backgrounds in compiled APK
+        run: python3 test_bf_packaged_2022_dungeon_backdrops_v19100.py
       - name: Verify v153 historical Legend Stone Merit listing in signed APK
         run: python3 test_bf_packaged_legend_stone_merit_source_v15300.py
       - name: Verify v154 2022 Merit quest-clear preview in signed APK
