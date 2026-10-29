@@ -13,7 +13,7 @@ This increment adds an **offline manual claim** for **one original Gem per authe
 - A paid ID must appear in the saved **v161 pending list** and the actual saved quest-clear history. It may **not** appear in the v170 Personal Offline wallet's `firstPaid` list. This prevents double first-clear payment when someone used the custom 100-Gem finale rewards.
 - Already-cleared older v124 quests become **legacy history only**, with no retroactive original claim eligibility. Replays do not create new original pending events.
 - To redeem newly eligible original finale Gems, switch to **Original** mode and use the dedicated claim button. Claims are explicit and not automatically granted on entry or every quest replay.
-- On a failed canonical save, the new original wallet change is rolled back in memory and the previous serialized v7 save is unchanged.
+- On a failed canonical save, the new original wallet change is rolled back in memory and the previous serialized v7 save is unchanged. A user may retry the claim directly after storage becomes writable again; an unrelated game save is not required.
 - Strict parser rejects duplicated, unsorted, unknown, unearned, unbacked, custom-first-paid, incorrect-balance and Amdahl IDs. Other saved fields remain unchanged.
 
 ## Authenticity boundaries
