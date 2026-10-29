@@ -157,6 +157,7 @@ jobs:
           python test_bf_original_2022_encounter_crossrefs_v17400.py
           python test_bf_2022_mission_cross_table_v15200.py
           python test_bf_original_2022_wave_source_audit_v17500.py
+          python test_bf_original_2022_nested_source_audit_v17600.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
