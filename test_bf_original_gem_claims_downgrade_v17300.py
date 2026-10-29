@@ -101,7 +101,9 @@ with sync_playwright() as pw:
  assert previous.evaluate('P.clears')==0
  assert previous.evaluate('saveRecoveryPending') is True
  assert previous.evaluate(f"localStorage.getItem('{KEY}')")==backed
- assert previous.evaluate('__downgrade173Writes')==[]
+ # Recovery can write its separate quarantine evidence; it must never
+ # replace or mutate the user's original canonical save bytes.
+ assert KEY not in previous.evaluate('__downgrade173Writes')
  assert previous.evaluate("""raw=>{
   try{parseProgress(JSON.parse(raw));return false}catch(_){return true}
  }""",backed) is True
