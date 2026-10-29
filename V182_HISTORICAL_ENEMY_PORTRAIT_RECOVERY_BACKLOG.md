@@ -4,7 +4,7 @@ After v181's exact-head Build #773 passed, the research report confirmed **all 6
 
 To make art acquisition actionable, v182 produces a sorted JSON backlog for all 54 missing IDs with source 2022 unit catalog name (when available), ID, number of observed historical placements, affected missions and wave count, and a *candidate* `unit_ills_thum_<id>.png` thumbnail filename. Highest-frequency missing portraits come first. The filename is an archive lookup hint, **not proof that a file already exists**. No images are manufactured or imported.
 
-Run `python test_bf_original_enemy_portrait_recovery_v18200.py`; it creates exactly one machine-readable report under `app/build/outputs/source-audit/BraveFrontier-v182-historical-enemy-portrait-backlog.json`. CI attaches this file as a distinct downloadable GitHub Actions artifact `BraveFrontier-v182-original-portrait-backlog`, **not inside the Android APK**. Verifies source SHA256 against the pinned original 2022 archive, validates 27 historical 2014 missions / 168 waves / 456 placements, detects 67 unique ID matches, preserves 13/54 portrait coverage and 104/352 placement counts.
+Run `python test_bf_original_enemy_portrait_recovery_v18200.py`; it creates exactly one machine-readable report under `source_audit_reports/BraveFrontier-v182-historical-enemy-portrait-backlog.json`. CI attaches this file as a distinct downloadable GitHub Actions artifact `BraveFrontier-v182-original-portrait-backlog`, **not inside the Android APK**. Verifies source SHA256 against the pinned original 2022 archive, validates 27 historical 2014 missions / 168 waves / 456 placements, detects 67 unique ID matches, preserves 13/54 portrait coverage and 104/352 placement counts.
 
 ## Source and mechanics protection
 
