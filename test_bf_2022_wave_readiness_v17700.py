@@ -16,7 +16,7 @@ rows = report["missions"]
 assert len(rows) == 142 and len({row["missionId"] for row in rows}) == 142
 assert len([row for row in rows if row["playability"] == "playable-demo"]) == 106
 assert len([row for row in rows if row["playability"] == "source-only-not-playable"]) == 36
-assert {row["missionId"] for row in rows if row["playability"] == "source-only-not-playable"} == set(range(400, 436))
+assert {row["missionId"] for row in rows if row["playability"] == "source-only-not-playable"} == set([*range(400, 405), *range(410, 415), *range(420, 425), *range(430, 435), *range(440, 445), *range(450, 455), *range(460, 466)])
 assert all(type(row["sourceWaveCount"]) is int and row["sourceWaveCount"] > 0 for row in rows)
 assert all(row["opaqueEncounterReference"].count(":") >= 1 for row in rows)
 for row in rows:
