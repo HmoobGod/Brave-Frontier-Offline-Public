@@ -8,13 +8,13 @@ from pathlib import Path
 import audit_bf_original_2022_wave_sources_v17500 as audit
 R=Path(__file__).resolve().parent
 refs=audit.pinned_refs(R)
-assert len(refs)==142 and refs[1]=="3:10100,0:10101"
+assert len(refs)==142 and refs[1]=="3:10100,1:10101,0:10102"
 assert refs[400]=="3:50100,0:50101"
 assert refs[404]=="3:50100,0:50101"
 assert audit.ZIP_SHA=="69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9"
 assert audit.MISSION_SHA=="d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83"
 
-a="3:10100,0:10101";b="3:50100,0:50101"
+a="3:10100,1:10101,0:10102";b="3:50100,0:50101"
 sample={1:a,400:b,404:b}
 mission=[{"missionId":str(id),"MISSION_8f4NYKxb":raw} for id,raw in sample.items()]
 def fake_zip(primary=None,other=None):
