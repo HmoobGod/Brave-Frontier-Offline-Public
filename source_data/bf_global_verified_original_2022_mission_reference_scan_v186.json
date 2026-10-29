@@ -1,0 +1,49 @@
+{
+  "schema": "bf-global-owner-verified-2022-encounter-source-audit-v186",
+  "sourceZipSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "missionTables": [
+    {
+      "table": "F_MISSION_MST_1_Ver1118.json",
+      "sha256": "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83",
+      "sourceRows": 1717,
+      "rowsWithOpaqueRef": 1700
+    },
+    {
+      "table": "F_MISSION_MST_2_Ver1118.json",
+      "sha256": "48409579dd9e6019aa50825486a17a3945ea1213550bc83e05030c1f17ac0c51",
+      "sourceRows": 1716,
+      "rowsWithOpaqueRef": 1606
+    }
+  ],
+  "totalMissionRows": 3433,
+  "missionRowsWithValidRawReferences": 3306,
+  "distinctOpaqueReferenceStrings": 327,
+  "otherTranslatedTablesScanned": 145,
+  "nonArrayTables": [],
+  "exactSourceTableReferenceReuse": [
+    {
+      "table": "F_GRAND_MISSION_SPOT_MST_Ver92.json",
+      "topLevelRowsWithExactRef": 294,
+      "distinctOpaqueRefStrings": 128,
+      "sourceMissionRowsWithSameRef": 808,
+      "fieldMatches": {
+        "MISSION_8f4NYKxb": 294
+      }
+    },
+    {
+      "table": "F_RAID_POINT_MST_Ver57.json",
+      "topLevelRowsWithExactRef": 315,
+      "distinctOpaqueRefStrings": 94,
+      "sourceMissionRowsWithSameRef": 627,
+      "fieldMatches": {
+        "MISSION_8f4NYKxb": 315
+      }
+    }
+  ],
+  "meaning": "source-level exact text reuse, not a verified encounter formation",
+  "original2022WaveFormationVerified": false,
+  "original2022EnemyAIRecorded": false,
+  "original2022DropRateVerified": false,
+  "changesToAndroid": false,
+  "sourceZipUploaded": false
+}
