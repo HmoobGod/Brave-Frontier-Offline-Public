@@ -12,6 +12,10 @@
   // v188: explicit, archived-history-only art allowlist; metadata remains untouched.
   const historicalArtIds=new Set([10130,20030,20031,20041,20050,20051,20061,20071,20081,20103,20130,30030,30031,30041,30050,30051,30062,30071,30081,30103,40030,40031,40040,40041,40050,40051,40061,40062,40071,40081,40082,40092,40103,40113,40122,40130,40132,50030,50031,50040,50041,50050,50051,50060,50071,50092,50120,60030,60031,60041,60050,60051,60061,60071]);
   const historicalArtNote='Archived BF1 art · exact 2022 Global client revision unverified';
+  // v189: 54 v188 recovered portrait IDs plus 13 v185 already-curated IDs.
+  // These are BF1 historical image IDs, NOT verified 2022 enemy assignments.
+  const historicalBattleArtIds=new Set([...historicalArtIds,10022,10030,10031,10040,10041,10050,10051,10061,10071,10081,10082,10102,10103]);
+  const historicalBattleNote='Historical BF1 battle illustration · exact 2022 Global battlefield assignment unverified';
   const byId=new Map(units.map(u=>[u.id,u]));
   // v123: compact source-verified 2022 Imp *bonus cap metadata* only.
   // 2291 indexed bytes + 147 unique big-endian uint16x4 tuples. No enhancement
@@ -62,6 +66,7 @@
       '<summary>ORIGINAL GLOBAL UNIT ARCHIVE <small>2,291 historic forms · recovered 2022 records</small></summary>',
       '<p class="bf-archive-warning">Browse original Global names, stats, evolution IDs and artwork. This is an <strong>archive viewer</strong>, not your owned Unit Box. Archived characters are not automatically unlocked, recruited or playable.</p>',
       '<label class="bf-v188-art-optin"><input id="bf-v188-historical-art" type="checkbox" />Show 54 additional historical BF1 unit portraits (exact 2022 revision unverified)</label>',
+      '<label class="bf-v189-art-optin"><input id="bf-v189-historical-battle-art" type="checkbox" />Show 67 historical BF1 battle illustrations in unit details (research-only; not verified 2022 sprites)</label>',
       '<div class="bf-archive-filters">',
         '<label>Search by name or unit ID<input id="bf-archive-search" type="search" autocomplete="off" placeholder="Vargas, Miku, 810547…" /></label>',
         '<label>Element<select id="bf-archive-element"><option value="all">All elements</option><option value="1">Fire</option><option value="2">Water</option><option value="3">Earth</option><option value="4">Thunder</option><option value="5">Light</option><option value="6">Dark</option></select></label>',
@@ -79,6 +84,7 @@
   box.append(panel);
   const get=id=>panel.querySelector('#'+id);
   const historicalArtToggle=get('bf-v188-historical-art');
+  const historicalBattleToggle=get('bf-v189-historical-battle-art');
   const search=get('bf-archive-search'),element=get('bf-archive-element'),rarity=get('bf-archive-rarity'),kind=get('bf-archive-type'),sort=get('bf-archive-sort');
   const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail');
   const pageSize=24;
@@ -105,6 +111,24 @@
     close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();});
     detail.append(close,item('h4','',u.name),item('p','','Original unit ID '+u.id+' · '+(elements[u.element]||'Element '+u.element)+' · '+u.rarity+'★'));
     detail.append(item('p','', 'Max level '+fmt(u.unitMaxLevel)+' · Cost '+fmt(u.unitCost)+' · '+(u.nameSource==='2022_Global_English'?'2022 Global English localization':u.nameSource==='master_literal'?'Literal master-table name':'Original English name not recovered')));
+    // v189: exact historical source bytes, independently opted-in, read-only.
+    // A recovered 108x108 battle illustration is NOT an authentic 2022 spawn,
+    // animation frame, enemy AI, formation, drop or playable combat sprite.
+    if(historicalBattleToggle.checked && historicalBattleArtIds.size===67 && historicalBattleArtIds.has(id)){
+      const preview=document.createElement('figure');
+      preview.id='bf-v189-battle-preview';
+      preview.className='bf-v189-battle-preview';
+      const heading=item('figcaption','',historicalBattleNote);
+      const image=document.createElement('img');
+      image.src='content/unit_historical_battle_archive/unit_ills_battle_'+id+'.png';
+      image.alt='Archived historical BF1 battle illustration for source unit '+id;
+      image.width=108;image.height=108;image.loading='eager';
+      image.addEventListener('error',()=>{
+        image.replaceWith(item('span','bf-archive-noart','ART PENDING'));
+      },{once:true});
+      preview.append(heading,image);
+      detail.append(preview);
+    }
     // Original 2022 source Imp cap values are displayed as archival reference;
     // the offline demo does not apply these caps or mutate existing unit stats.
     const imp=originalImpCaps?.get(id);
@@ -304,6 +328,7 @@
   }
   for(const select of [search,element,rarity,kind,sort])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
   historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
+  historicalBattleToggle.addEventListener('change',()=>{detail.hidden=true;detail.replaceChildren();render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});
   next.addEventListener('click',()=>{if(page+1<Math.ceil(matches().length/pageSize)){page++;render();}});
   render();
@@ -312,6 +337,8 @@
     originalImpCaps:id=>originalImpCaps?.get(Number(id))||null,
     get thumbnailCount(){return archive.stats.thumbnailCount;},
     get historicalThumbnailCount(){return historicalArtIds.size;},
+    get historicalBattleIllustrationCount(){return historicalBattleArtIds.size;},
+    get historicalBattleArtOptedIn(){return historicalBattleToggle.checked;},
     get historicalArtOptedIn(){return historicalArtToggle.checked;},
     get loreCount(){return codex ? [...codex.values()].filter(u=>!!u.story).length : 0;},
     get originalCodexAvailable(){return codex!==null;},
