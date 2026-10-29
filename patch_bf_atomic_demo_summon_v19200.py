@@ -24,7 +24,7 @@ old="""E.summonbutton.onclick=()=>{
  // Offline demo only: equal likelihood among currently unowned units; NOT Brave Frontier's actual summon rates.
  const index=Math.floor(Math.random()*choices.length);const id=choices[index];
  P.summonTokens--;P.roster.push(id);P.summonHistory.push(id);
- E.summonresult.textContent=\`Recruited \${UNIT_BY_ID.get(id).name} (\${UNIT_BY_ID.get(id).element})! Unlocked for Squad Setup.\`;
+ E.summonresult.textContent=`Recruited ${UNIT_BY_ID.get(id).name} (${UNIT_BY_ID.get(id).element})! Unlocked for Squad Setup.`;
  saveProgress();renderProgress();
 };"""
 new="""E.summonbutton.onclick=()=>{
@@ -49,7 +49,7 @@ new="""E.summonbutton.onclick=()=>{
    renderProgress();
    return;
  }
- E.summonresult.textContent=\`Recruited \${UNIT_BY_ID.get(id).name} (\${UNIT_BY_ID.get(id).element})! Unlocked for Squad Setup.\`;
+ E.summonresult.textContent=`Recruited ${UNIT_BY_ID.get(id).name} (${UNIT_BY_ID.get(id).element})! Unlocked for Squad Setup.`;
  renderProgress();
 };"""
 assert s.count(old)==1,"Summon action changed; do not patch an unknown handler"
