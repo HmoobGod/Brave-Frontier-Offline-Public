@@ -169,6 +169,8 @@ jobs:
           python test_bf_archived_enemy_battle_visuals_v18400.py
           python test_bf_complete_67_historical_enemy_art_bank_v18500.py
           python test_bf_original_real_2022_source_v18600.py
+          python test_bf_historical_art_layout_v18700.py
+          python audit_bf_historical_art_layout_v18700.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
@@ -768,6 +770,13 @@ jobs:
         with:
           name: BraveFrontier-v182-original-portrait-backlog
           path: source_audit_reports/BraveFrontier-v182-historical-enemy-portrait-backlog.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload v187 source CGG CGS readiness audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-v187-historical-art-readiness
+          path: source_audit_reports/BraveFrontier-v187-archived-art-layout-audit.json
           if-no-files-found: error
           retention-days: 90
       - name: Upload APK
