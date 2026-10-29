@@ -67,7 +67,10 @@ catalog=[{k:q[k] for k in ('missionId','label','missionNameKey','dungeonId','req
     'dungeonNameKey':next(d['nameKey'] for d in dungeons if d['id']==q['dungeonId']),
     'background':next(d['background'] for d in dungeons if d['id']==q['dungeonId'])
     } for q in quests]
-sourceview={'schema':m['schema'],'dungeons':dungeons,
+sourceview={'schema':m['schema'],
+            'provenance':{'mastersZipSha256':p['mastersZipSha256'],
+                          'missionMasterSha256':p['missionMasterSha256']},
+            'dungeons':dungeons,
             'quests':[{'missionId':q['missionId'],'dungeonId':q['dungeonId'],
                        'name':q['name'],'description':q['description'],
                        'rawEncounterRef':q['rawEncounterRef'],

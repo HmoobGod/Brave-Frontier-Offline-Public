@@ -35,6 +35,14 @@
  function lookup(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    if(!q||mode.value!=='archive'||!questUnlocked(q))return null;
+   // v191: strictly proven 2022 mission->image joins for 29 currently
+   // playable missions, with no 2022 enemy/AI/drop interpretation.
+   // Keep the original v38 cinematic/event path as a fallback.
+   const source2022=window.BFGlobalOriginalDungeonBackdropsV19100?.lookup?.(q.missionId);
+   if(source2022?.original2022Background===true){
+     return Object.freeze({missionId:q.missionId,dungeonId:q.dungeonId,
+       scene:'original 2022 mission background reference',background:source2022.image});
+   }
    const a=events.lookup('dungeon',q.dungeonId);
    const filename=a?.source?.split('/').pop();
    const jpg=filename?stage.backgroundFor(filename):null;
