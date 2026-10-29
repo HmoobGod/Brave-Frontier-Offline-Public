@@ -63,7 +63,9 @@ for q in m['quests']:
     info['dungeonNameKey']=dungeon['nameKey']
     info['background']=dungeon['background']
     catalog.append(info)
-records={'schema':m['schema'],'dungeons':m['dungeons'],
+records={'schema':m['schema'],
+         'provenance':{'missionMasterSha256':p['missionMasterSha256']},
+         'dungeons':m['dungeons'],
          'quests':[{'missionId':q['missionId'],'dungeonId':q['dungeonId'],
                     'name':q['name'],'description':q['description']} for q in m['quests']]}
 dump=lambda o:json.dumps(o,separators=(',',':'),ensure_ascii=True).replace('<',r'\u003c')
