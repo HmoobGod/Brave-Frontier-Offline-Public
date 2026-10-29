@@ -1,0 +1,237 @@
+{
+  "id": 330,
+  "name": "The Tarnished Peaks",
+  "sourceEra": "historical-2014-not-2022",
+  "sourcePath": "missions_parsed/The Tarnished Peaks_2014-24-9-17-41.json",
+  "gitBlobSha": "0980dfc03d8f02c62640be978074a59a1e158292",
+  "native2022FormationVerified": false,
+  "native2022EnemyAIVerified": false,
+  "native2022DropRatesVerified": false,
+  "mimicChestsIncluded": false,
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Thunder Idol",
+          "unitId": 40132,
+          "hp": 20000,
+          "atk": 870,
+          "def": 150,
+          "aiId": 32
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "enemies": [
+        {
+          "name": "Djin",
+          "unitId": 40082,
+          "hp": 33000,
+          "atk": 900,
+          "def": 400,
+          "aiId": 31
+        },
+        {
+          "name": "Djin",
+          "unitId": 40082,
+          "hp": 33000,
+          "atk": 900,
+          "def": 400,
+          "aiId": 31
+        }
+      ]
+    }
+  ]
+}
