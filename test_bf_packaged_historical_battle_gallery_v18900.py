@@ -4,7 +4,7 @@ Inspect the actual APK after assembleDebug, not only the staging directory.
 Authentic historic source bytes do NOT certify 2022 opponent assignments.
 """
 from pathlib import Path
-import base64, hashlib, io, json, struct, zipfile
+import base64, hashlib, io, json, re, struct, zipfile
 
 R=Path(__file__).resolve().parent
 APK=R/"app/build/outputs/apk/debug/app-debug.apk"
@@ -62,6 +62,19 @@ with zipfile.ZipFile(APK) as apk:
     css=apk.read("assets/bf_global_unit_archive.css").decode("utf8")
     assert js==(ASSETS/"bf_global_unit_archive.js").read_text("utf8")
     assert css==(ASSETS/"bf_global_unit_archive.css").read_text("utf8")
+    # The runtime allowlists must EXACTLY match the source-provenanced 54+13 IDs.
+    # The source image count alone does not reject a wrong or extra JS asset ID.
+    original_ids=re.search(r"historicalArtIds\\s*=\\s*new Set\\(\\[([0-9,\\s]+)\\]\\)",js)
+    extra_ids=re.search(r"historicalBattleArtIds\\s*=\\s*new Set\\(\\[\\.\\.\\.historicalArtIds,([0-9,\\s]+)\\]\\)",js)
+    assert original_ids and extra_ids, "Expected explicit source-bound static allowlists"
+    original_list=[int(v.strip()) for v in original_ids.group(1).split(",")]
+    extra_list=[int(v.strip()) for v in extra_ids.group(1).split(",")]
+    assert len(original_list)==len(set(original_list))==54
+    assert len(extra_list)==len(set(extra_list))==13
+    assert set(original_list)==set(art)-EARLY13
+    assert set(extra_list)==EARLY13
+    assert set(original_list).isdisjoint(extra_list)
+    assert set(original_list)|set(extra_list)==set(art)
     assert "historicalBattleArtIds=new Set([...historicalArtIds," in js
     assert js.count("bf-v189-historical-battle-art")==2
     assert 'id="bf-v189-historical-battle-art" type="checkbox" />' in js
