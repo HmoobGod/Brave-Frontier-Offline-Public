@@ -965,6 +965,15 @@ public class MainActivity extends Activity {
                 } catch (IOException crossrefsError) {
                     android.util.Log.w("BraveFrontier", "Optional 2022 encounter crossrefs unavailable", crossrefsError);
                 }
+                // v191: source-verified 2022 mission -> seven archived dungeon JPGs
+                // for 29 currently playable quests. Visual-only opt-in via v38.
+                // Must follow original v174 mission source checks. No waves/AI/drops.
+                try {
+                    String sourceBackdrops = readPackagedText("bf19100_original_2022_dungeon_backdrops.js");
+                    view.evaluateJavascript(sourceBackdrops, null);
+                } catch (IOException sourceBackdropsError) {
+                    android.util.Log.w("BraveFrontier", "Optional 2022 mission battle backdrop evidence unavailable", sourceBackdropsError);
+                }
                 // v110: original 2022 starter leader-skill eligibility audit,
                 // read-only until original stat initialization is verified.
                 try {
