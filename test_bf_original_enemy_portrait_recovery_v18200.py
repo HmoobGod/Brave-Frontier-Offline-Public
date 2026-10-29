@@ -96,8 +96,8 @@ report={
  "historicalPlacementsMissingCurated2022Thumbnails":352,
  "rankedMissingPortraitBacklog":missing
 }
-# Place ONLY in Gradle's ignored build tree, not src/main/assets or source_data.
-out=R/"app/build/outputs/source-audit/BraveFrontier-v182-historical-enemy-portrait-backlog.json"
+# Place ONLY in separate build-output report directory, not src/main/assets or source_data.
+out=R/"source_audit_reports/BraveFrontier-v182-historical-enemy-portrait-backlog.json"
 out.parent.mkdir(parents=True,exist_ok=True)
 encoded=json.dumps(report,sort_keys=True,indent=2,ensure_ascii=True)+"\n"
 if out.exists():
