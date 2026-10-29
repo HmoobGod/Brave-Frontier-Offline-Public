@@ -9,6 +9,9 @@
   try{archive=JSON.parse(payload.textContent);}catch(_){return;}
   if(archive.schema!=='bf-global-unit-archive-2022-v1' || archive.units.length!==2291)return;
   const units=archive.units;
+  // v188: explicit, archived-history-only art allowlist; metadata remains untouched.
+  const historicalArtIds=new Set([10130,20030,20031,20041,20050,20051,20061,20071,20081,20103,20130,30030,30031,30041,30050,30051,30062,30071,30081,30103,40030,40031,40040,40041,40050,40051,40061,40062,40071,40081,40082,40092,40103,40113,40122,40130,40132,50030,50031,50040,50041,50050,50051,50060,50071,50092,50120,60030,60031,60041,60050,60051,60061,60071]);
+  const historicalArtNote='Archived BF1 art · exact 2022 Global client revision unverified';
   const byId=new Map(units.map(u=>[u.id,u]));
   // v123: compact source-verified 2022 Imp *bonus cap metadata* only.
   // 2291 indexed bytes + 147 unique big-endian uint16x4 tuples. No enhancement
@@ -58,6 +61,7 @@
     '<details id="bf-unit-encyclopedia">',
       '<summary>ORIGINAL GLOBAL UNIT ARCHIVE <small>2,291 historic forms · recovered 2022 records</small></summary>',
       '<p class="bf-archive-warning">Browse original Global names, stats, evolution IDs and artwork. This is an <strong>archive viewer</strong>, not your owned Unit Box. Archived characters are not automatically unlocked, recruited or playable.</p>',
+      '<label class="bf-v188-art-optin"><input id="bf-v188-historical-art" type="checkbox" />Show 54 additional historical BF1 unit portraits (exact 2022 revision unverified)</label>',
       '<div class="bf-archive-filters">',
         '<label>Search by name or unit ID<input id="bf-archive-search" type="search" autocomplete="off" placeholder="Vargas, Miku, 810547…" /></label>',
         '<label>Element<select id="bf-archive-element"><option value="all">All elements</option><option value="1">Fire</option><option value="2">Water</option><option value="3">Earth</option><option value="4">Thunder</option><option value="5">Light</option><option value="6">Dark</option></select></label>',
@@ -74,6 +78,7 @@
   ].join('');
   box.append(panel);
   const get=id=>panel.querySelector('#'+id);
+  const historicalArtToggle=get('bf-v188-historical-art');
   const search=get('bf-archive-search'),element=get('bf-archive-element'),rarity=get('bf-archive-rarity'),kind=get('bf-archive-type'),sort=get('bf-archive-sort');
   const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail');
   const pageSize=24;
@@ -278,13 +283,18 @@
     for(const u of shown){
       const button=document.createElement('button');button.type='button';button.className='bf-archive-unit';
       button.setAttribute('aria-label',u.name+', original Global unit '+u.id+', view archived statistics');
-      if(u.thumbnail){
+      const optInHistorical=!u.thumbnail && historicalArtToggle.checked && historicalArtIds.has(u.id);
+      if(u.thumbnail || optInHistorical){
         const portrait=document.createElement('img');
-        portrait.src='content/unit_archive/unit_ills_thum_'+u.id+'.png';
-        portrait.alt='';portrait.loading='lazy';button.append(portrait);
+        portrait.src=optInHistorical?'content/unit_historical_archive/unit_ills_thum_'+u.id+'.png':
+                       'content/unit_archive/unit_ills_thum_'+u.id+'.png';
+        portrait.alt='';portrait.loading='lazy';
+        portrait.addEventListener('error',()=>{portrait.replaceWith(item('span','bf-archive-noart','ART PENDING'));},{once:true});
+        button.append(portrait);
       }else button.append(item('span','bf-archive-noart','ART PENDING'));
       const text=document.createElement('span');text.className='bf-archive-unit-text';
       text.append(item('strong','',u.name),item('small','','#'+u.id+' · '+(elements[u.element]||'Unknown')+' · '+u.rarity+'★'));
+      if(optInHistorical)text.append(item('small','bf-v188-art-provenance',historicalArtNote));
       button.append(text);button.addEventListener('click',()=>showDetail(u.id));results.append(button);
     }
     if(!shown.length)results.append(item('p','bf-archive-nohits','No matching original Global unit records.'));
@@ -293,6 +303,7 @@
     prev.disabled=page===0;next.disabled=page>=total-1;
   }
   for(const select of [search,element,rarity,kind,sort])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
+  historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});
   next.addEventListener('click',()=>{if(page+1<Math.ceil(matches().length/pageSize)){page++;render();}});
   render();
@@ -300,6 +311,8 @@
     get count(){return units.length;},
     originalImpCaps:id=>originalImpCaps?.get(Number(id))||null,
     get thumbnailCount(){return archive.stats.thumbnailCount;},
+    get historicalThumbnailCount(){return historicalArtIds.size;},
+    get historicalArtOptedIn(){return historicalArtToggle.checked;},
     get loreCount(){return codex ? [...codex.values()].filter(u=>!!u.story).length : 0;},
     get originalCodexAvailable(){return codex!==null;},
     originalRecord:id=>codex?.get(Number(id))||null,

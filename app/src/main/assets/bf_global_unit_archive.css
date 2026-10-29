@@ -51,3 +51,8 @@
 .bf-codex-bb-power-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:9px}
 .bf-codex-bb-power-grid span{border:1px solid #ffffff20;border-radius:5px;padding:6px;color:#c3d2e4;font-size:11px}
 .bf-codex-bb-power-grid .bf-codex-bb-current{background:#483a2360;border-color:#dcbf7790;color:#ffe4aa;font-weight:bold}
+
+/* v188 opt-in historical BF1 images, separate from verified original unit records. */
+.bf-v188-art-optin{display:flex;align-items:center;gap:8px;margin:9px 0;padding:9px;background:#132c40;border:1px solid #a68b5b;color:#f6dfbd;font:11px/1.45 Arial,sans-serif}
+.bf-v188-art-optin input{width:18px;height:18px;min-width:18px;accent-color:#dcb36a}
+.bf-v188-art-provenance{font:9px/1.35 Arial,sans-serif;color:#c7d3e2;overflow-wrap:anywhere}
