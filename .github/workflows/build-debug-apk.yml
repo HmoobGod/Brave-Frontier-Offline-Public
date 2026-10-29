@@ -161,6 +161,7 @@ jobs:
           python test_bf_2022_wave_readiness_v17700.py
           python test_bf_historical_six_2014_captures_v17800.py
           python test_bf_historical_six_ai_evidence_v17900.py
+          python test_bf_historical_2015_mission_economy_v17900.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
