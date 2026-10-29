@@ -167,6 +167,7 @@ jobs:
           python test_bf_original_enemy_portrait_recovery_v18200.py
           python test_bf_archived_54_original_portraits_v18300.py
           python test_bf_archived_enemy_battle_visuals_v18400.py
+          python test_bf_complete_67_historical_enemy_art_bank_v18500.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
