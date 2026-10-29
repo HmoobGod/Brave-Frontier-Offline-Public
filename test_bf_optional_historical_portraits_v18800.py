@@ -30,6 +30,9 @@ assert "historicalArtOptedIn" in js and "historicalArtIds=new Set([" in js
 assert 'id="bf-v188-historical-art"' in js
 assert "bf-v188-art-optin" in css
 assert js.count("content/unit_historical_archive/unit_ills_thum_")==1
+# Compare the exact runtime allowlist to the archive manifest, not merely its size.
+ids_in_js=js.split("historicalArtIds=new Set([",1)[1].split("])",1)[0]
+assert {int(x.strip()) for x in ids_in_js.split(",")}==ids
 assert "localStorage.setItem(" not in js and "saveProgress(" not in js
 
 with sync_playwright() as pw:
@@ -76,8 +79,18 @@ with sync_playwright() as pw:
  assert "unit_historical_archive" in page.locator(".bf-archive-unit img").get_attribute("src")
  page.wait_for_function("document.querySelector('.bf-archive-unit img')?.naturalWidth>0")
  assert "exact 2022 Global client revision unverified" in page.locator(".bf-v188-art-provenance").inner_text()
+ # Missing/corrupt portrait requests must fail closed rather than leave a broken image.
+ page.locator(".bf-archive-unit img").evaluate(
+    "(img) => {img.src='content/unit_historical_archive/unit_ills_thum_0.png'}")
+ page.wait_for_function(
+    "document.querySelector('.bf-archive-unit .bf-archive-noart')?.textContent === 'ART PENDING'")
+ assert page.locator(".bf-archive-unit img").count()==0
  toggle.uncheck()
  assert page.locator(".bf-archive-unit img").count()==0
+ assert page.evaluate("BFGlobalUnitArchive.historicalArtOptedIn") is False
+ # Re-evaluating the script cannot register another archive panel or listeners.
+ page.add_script_tag(path=str(A/"bf_global_unit_archive.js"))
+ assert page.locator("#bf-unit-encyclopedia").count()==1
  assert page.evaluate("BFGlobalUnitArchive.historicalArtOptedIn") is False
  after=page.evaluate("""() => ({player:JSON.stringify(P),game:JSON.stringify(S),
   save:localStorage.getItem('bf_global_offline_demo_v7')})""")
