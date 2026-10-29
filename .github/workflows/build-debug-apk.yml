@@ -65,6 +65,7 @@ jobs:
           python3 prepare_global_mission_expansion.py
           python3 prepare_global_unit_archive.py
           python3 prepare_bf_optional_archived_art_v18800.py
+          python3 prepare_bf_historical_battle_illustrations_v18900.py
           python3 prepare_global_unit_codex.py
           python3 prepare_original_bb_targeting.py
           python3 prepare_original_bb_support.py
@@ -173,6 +174,7 @@ jobs:
           python test_bf_historical_art_layout_v18700.py
           python audit_bf_historical_art_layout_v18700.py
           python test_bf_optional_historical_portraits_v18800.py
+          python test_bf_historical_battle_gallery_v18900.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
@@ -398,6 +400,8 @@ jobs:
         run: python3 test_bf_packaged_unit_archive.py
       - name: Verify v188 signed APK optional historical art integrity and offline manifest
         run: python3 test_bf_packaged_optional_historical_portraits_v18800.py
+      - name: Verify v189 compiled APK original-byte historical battle illustration gallery
+        run: python3 test_bf_packaged_historical_battle_gallery_v18900.py
       - name: Verify packaged original Global lore and skill records
         run: python3 test_bf_packaged_global_codex.py
       - name: Verify packaged original Global BB target scopes

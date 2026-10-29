@@ -56,3 +56,11 @@
 .bf-v188-art-optin{display:flex;align-items:center;gap:8px;margin:9px 0;padding:9px;background:#132c40;border:1px solid #a68b5b;color:#f6dfbd;font:11px/1.45 Arial,sans-serif}
 .bf-v188-art-optin input{width:18px;height:18px;min-width:18px;accent-color:#dcb36a}
 .bf-v188-art-provenance{font:9px/1.35 Arial,sans-serif;color:#c7d3e2;overflow-wrap:anywhere}
+
+/* v189: separate default-OFF research-only historical battle illustration preview. */
+.bf-v189-art-optin{display:flex;align-items:center;gap:8px;margin:9px 0;padding:9px;background:#132c40;border:1px solid #6b91a9;color:#d5e9f1;font:11px/1.45 Arial,sans-serif}
+.bf-v189-art-optin input{width:18px;height:18px;min-width:18px;accent-color:#86bde1}
+.bf-v189-battle-preview{margin:12px 0;padding:10px;border:1px solid #617b91;border-radius:4px;background:#172a3b;max-width:100%}
+.bf-v189-battle-preview figcaption{color:#c4dce9;font:11px/1.5 Arial,sans-serif;margin-bottom:7px}
+.bf-v189-battle-preview img{width:108px;height:108px;max-width:100%;object-fit:contain;image-rendering:auto;display:block}
+.bf-v189-battle-preview .bf-archive-noart{display:block}
