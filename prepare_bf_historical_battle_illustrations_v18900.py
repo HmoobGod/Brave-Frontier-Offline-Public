@@ -41,7 +41,7 @@ def stage_entry(archive, row):
     assert uid not in images, "Duplicate source battle illustration"
     img = archive.read(path)
     assert len(img) == row["bytes"] and digest(img) == row["sha256"]
-    assert img[:16] == b"\\x89PNG\\r\\n\\x1a\\n\\x00\\x00\\x00\\rIHDR"
+    assert img[:16] == b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
     assert struct.unpack(">II", img[16:24]) == (108, 108), "Not a static battle illustration"
     images[uid] = img
 
