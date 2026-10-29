@@ -75,7 +75,7 @@ function bf173OriginalAvailable(){
     !P._bfGemV170Custom.firstPaid.includes(id));
 }
 function bf173ClaimOriginal(){
- if(typeof P==='undefined'||P?.version!==7||!saveEnabled||
+ if(typeof P==='undefined'||P?.version!==7||
     P._bfGemV170Custom?.mode!=='original')return false;
  const ids=bf173OriginalAvailable();
  if(!ids.length)return false;
@@ -108,7 +108,8 @@ const BF173Panel=(()=>{
  'back-paid; first clears already paid by Personal Offline custom mode '+ 
  'are excluded. This is offline claim delivery, not a verified native '+ 
  '2022 claiming flow. No native Gem spending/summons yet. Back up '+ 
- 'your current v7 save before downgrading.';
+ 'your current v7 save before downgrading. v160–v172 APKs reject '+
+ 'a save with claimed original Gems; v124 drops claim metadata on save.';
  panel.append(heading,status,button,note);
  if(host===document.body)host.append(panel);else host.after(panel);
  button.addEventListener('click',()=>{bf173ClaimOriginal();bf173Refresh();});
@@ -120,8 +121,8 @@ function bf173Refresh(){
  const wallet=P?._bfGemV160;
  BF173Panel.status.textContent='Original earned: '+(wallet?.balance||0)+
   ' Gem(s) · eligible unclaimed: '+available.length+
-  ' · existing original first-clear records: '+(P?._bfGemV161Pending?.length||0);
- BF173Panel.button.disabled=!available.length||!saveEnabled||
+  (!saveEnabled?' · storage unavailable: retry claim when writable':'');
+ BF173Panel.button.disabled=!available.length||
    P?._bfGemV170Custom?.mode!=='original';
  return {balance:wallet?.balance||0,eligible:[...available],
    paid:[...(wallet?.paidFinales||[])]};
