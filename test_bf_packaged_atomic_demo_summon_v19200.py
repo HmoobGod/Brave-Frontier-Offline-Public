@@ -22,7 +22,7 @@ with zipfile.ZipFile(APK) as z:
  assert "BF_GLOBAL_GEMS_PERSONAL_V17000" in html
  assert "BF_GLOBAL_GEMS_ORIGINAL_CLAIM_V17300" in html
  assert "BF_GLOBAL_UNIT_ARCHIVE_BEGIN" in html
- assert "equal likelihood" in html
+ assert "equally likely among unowned recruits" in html
  assert 'Recruited '+chr(36)+'{UNIT_BY_ID.get(id).name}' in html
  assert "S?.busy||saveRecoveryPending||P.summonTokens<1" in html
  assert "P._bfGemV170Custom" in html and "P._bfGemV160" in html
