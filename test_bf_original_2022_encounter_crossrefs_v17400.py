@@ -90,6 +90,7 @@ with sync_playwright() as pw:
  assert page.evaluate(api+'.lookup(12).firstOpaqueRefMatchesBackground') is True
  for id in [70,71,72,73,230,231,232,233,234]:
   assert page.evaluate(api+'.lookup('+str(id)+').firstOpaqueRefMatchesBackground') is False
+ page.locator('#bf10800-encounter-ledger > summary').click()
  for id in [12,70,230,400,465]:
   page.locator('#bf10800-mission').select_option(str(id))
   rendered=page.locator('#bf17400-encounter-crossrefs').inner_text()
