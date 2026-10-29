@@ -1,0 +1,290 @@
+{
+  "id": 332,
+  "name": "Float Like a Butterfly",
+  "sourceEra": "historical-2014-not-2022",
+  "sourcePath": "missions_parsed/Float Like a Butterfly_2014-16-9-23-49.json",
+  "gitBlobSha": "6f6036273974ce618b428038afaa80c13d610e28",
+  "native2022FormationVerified": false,
+  "native2022EnemyAIVerified": false,
+  "native2022DropRatesVerified": false,
+  "mimicChestsIncluded": false,
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 9,
+      "enemies": [
+        {
+          "name": "Emilia",
+          "unitId": 40122,
+          "hp": 78000,
+          "atk": 1200,
+          "def": 150,
+          "aiId": 5011
+        }
+      ]
+    }
+  ]
+}

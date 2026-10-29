@@ -1,0 +1,253 @@
+{
+  "id": 300,
+  "name": "Scorching Trails",
+  "sourceEra": "historical-2014-not-2022",
+  "sourcePath": "missions_parsed/Scorching Trails_2014-18-10-14-41.json",
+  "gitBlobSha": "8fb863b458b52614648a41c18e9ea1682c3050cd",
+  "native2022FormationVerified": false,
+  "native2022EnemyAIVerified": false,
+  "native2022DropRatesVerified": false,
+  "mimicChestsIncluded": false,
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 6200,
+          "atk": 850,
+          "def": 180,
+          "aiId": 20
+        },
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 4300,
+          "atk": 800,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        },
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Witch Liza",
+          "unitId": 10040,
+          "hp": 6500,
+          "atk": 800,
+          "def": 200,
+          "aiId": 31
+        },
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 6200,
+          "atk": 850,
+          "def": 180,
+          "aiId": 20
+        },
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Witch Liza",
+          "unitId": 10040,
+          "hp": 6500,
+          "atk": 800,
+          "def": 200,
+          "aiId": 31
+        },
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 6200,
+          "atk": 850,
+          "def": 180,
+          "aiId": 20
+        },
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        },
+        {
+          "name": "Redcap",
+          "unitId": 10051,
+          "hp": 4500,
+          "atk": 770,
+          "def": 100,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 4300,
+          "atk": 800,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 4300,
+          "atk": 800,
+          "def": 130,
+          "aiId": 1
+        },
+        {
+          "name": "Orthos",
+          "unitId": 10071,
+          "hp": 4300,
+          "atk": 800,
+          "def": 130,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        },
+        {
+          "name": "Thief Leon",
+          "unitId": 10061,
+          "hp": 6200,
+          "atk": 850,
+          "def": 180,
+          "aiId": 20
+        },
+        {
+          "name": "Salamander",
+          "unitId": 10081,
+          "hp": 6000,
+          "atk": 760,
+          "def": 450,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "enemies": [
+        {
+          "name": "Ifrit",
+          "unitId": 10082,
+          "hp": 35000,
+          "atk": 920,
+          "def": 450,
+          "aiId": 31
+        },
+        {
+          "name": "Ifrit",
+          "unitId": 10082,
+          "hp": 35000,
+          "atk": 920,
+          "def": 450,
+          "aiId": 31
+        }
+      ]
+    }
+  ]
+}
