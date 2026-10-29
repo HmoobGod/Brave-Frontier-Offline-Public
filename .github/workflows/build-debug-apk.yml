@@ -165,6 +165,7 @@ jobs:
           python test_bf_27_historical_2022_wave_count_parity_v18000.py
           python test_bf_2014_enemy_2022_unit_catalog_coverage_v18100.py
           python test_bf_original_enemy_portrait_recovery_v18200.py
+          python test_bf_archived_54_original_portraits_v18300.py
           python test_bf_source_starter_leader_skills_v11000.py
           python test_bf_original_starter_leader_combat_v11100.py
           python test_bf_all_playable_leader_source_v11200.py
