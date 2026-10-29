@@ -20,7 +20,7 @@ This increment adds an **offline manual claim** for **one original Gem per authe
 
 The two archival snapshots support **one Gem on a dungeon finale first clear**, but the original 2022 claim interaction, max wallet capacity, spending transactions, native summon rates, true original drops, and prior-owner reimbursement rules remain unverified. Therefore the claim workflow is clearly described as offline reconstruction, and no original Gem spending is implemented.
 
-Users should **export their current canonical v7 save before any APK downgrade**. Older APK versions that do not understand a nonzero original wallet can reject the save or lose those claim fields; no downgrade is performed automatically.
+Users should **export their current canonical v7 save before any APK downgrade**. v160–v172 reject saves with positive original Gem balances; older v124-style parsers can discard Gem-claim metadata on their next save. Restore a backup made before downgrading to recover claims. No downgrade is performed automatically.
 
 ## Verification gates
 
