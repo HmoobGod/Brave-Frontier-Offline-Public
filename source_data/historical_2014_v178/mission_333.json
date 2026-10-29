@@ -1,0 +1,314 @@
+{
+  "id": 333,
+  "name": "The Riotous Thunderbird",
+  "sourceEra": "historical-2014-not-2022",
+  "sourcePath": "missions_parsed/The Riotous Thunderbird_2014-19-10-11-28.json",
+  "gitBlobSha": "ff96f69d7e0bc010c080aabaf7fc28bdd5ecea04",
+  "native2022FormationVerified": false,
+  "native2022EnemyAIVerified": false,
+  "native2022DropRatesVerified": false,
+  "mimicChestsIncluded": false,
+  "waves": [
+    {
+      "wave": 1,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 2,
+      "enemies": [
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 3,
+      "enemies": [
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        }
+      ]
+    },
+    {
+      "wave": 4,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 5,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sky Pirate Grafl",
+          "unitId": 40061,
+          "hp": 6000,
+          "atk": 750,
+          "def": 130,
+          "aiId": 20
+        },
+        {
+          "name": "Dancer May",
+          "unitId": 40040,
+          "hp": 5900,
+          "atk": 770,
+          "def": 150,
+          "aiId": 31
+        }
+      ]
+    },
+    {
+      "wave": 6,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Minotaur",
+          "unitId": 40071,
+          "hp": 4900,
+          "atk": 770,
+          "def": 50,
+          "aiId": 1
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 7,
+      "enemies": [
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        },
+        {
+          "name": "Sylph",
+          "unitId": 40081,
+          "hp": 6500,
+          "atk": 800,
+          "def": 400,
+          "aiId": 20
+        }
+      ]
+    },
+    {
+      "wave": 8,
+      "enemies": [
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        },
+        {
+          "name": "Aero",
+          "unitId": 40051,
+          "hp": 4300,
+          "atk": 720,
+          "def": 60,
+          "aiId": 1
+        }
+      ]
+    },
+    {
+      "wave": 9,
+      "enemies": [
+        {
+          "name": "Thunderbird",
+          "unitId": 40092,
+          "hp": 80000,
+          "atk": 980,
+          "def": 550,
+          "aiId": 32
+        }
+      ]
+    }
+  ]
+}
