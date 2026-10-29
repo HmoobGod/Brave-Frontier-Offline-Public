@@ -43,6 +43,22 @@
  }
  panel.append(header,stat,intro,custom,original,welcome,daily,history,msg,note);
  host.after(panel);
+ // v190: owner-requested discoverability fix. Keep the existing rewards panel
+ // and wallet implementation unchanged; this button only reveals and scrolls.
+ const shortcut=document.createElement('button');
+ shortcut.id='bf19000-open-gem-rewards';
+ shortcut.type='button';
+ shortcut.textContent='GEMS · DAILY REWARDS';
+ shortcut.setAttribute('aria-controls',panel.id);
+ shortcut.style.cssText='display:block;width:100%;min-height:44px;margin:8px 0 10px;'+
+   'padding:10px 12px;border:2px solid #e4c076;border-radius:8px;'+
+   'background:#413658;color:#fff0be;font:800 14px/1.4 system-ui;cursor:pointer';
+ shortcut.addEventListener('click',()=>{
+   panel.open=true;
+   render();
+   panel.scrollIntoView({block:'start',behavior:'smooth'});
+ });
+ host.before(shortcut);
  let message='';
  function render(){
    const s=api.snapshot(),personal=s.mode==='custom';
