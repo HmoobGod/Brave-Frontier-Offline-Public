@@ -64,8 +64,8 @@ with zipfile.ZipFile(APK) as apk:
     assert css==(ASSETS/"bf_global_unit_archive.css").read_text("utf8")
     # The runtime allowlists must EXACTLY match the source-provenanced 54+13 IDs.
     # The source image count alone does not reject a wrong or extra JS asset ID.
-    original_ids=re.search(r"historicalArtIds\\s*=\\s*new Set\\(\\[([0-9,\\s]+)\\]\\)",js)
-    extra_ids=re.search(r"historicalBattleArtIds\\s*=\\s*new Set\\(\\[\\.\\.\\.historicalArtIds,([0-9,\\s]+)\\]\\)",js)
+    original_ids=re.search(r"historicalArtIds\s*=\s*new Set\(\[([0-9,\s]+)\]\)",js)
+    extra_ids=re.search(r"historicalBattleArtIds\s*=\s*new Set\(\[\.\.\.historicalArtIds,([0-9,\s]+)\]\)",js)
     assert original_ids and extra_ids, "Expected explicit source-bound static allowlists"
     original_list=[int(v.strip()) for v in original_ids.group(1).split(",")]
     extra_list=[int(v.strip()) for v in extra_ids.group(1).split(",")]
