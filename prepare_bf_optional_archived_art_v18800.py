@@ -11,7 +11,7 @@ D=R/"source_data"
 ASSETS=R/"app/src/main/assets"
 META=json.loads((D/"bf_global_original_unit_catalog_meta.json").read_text("utf8"))
 def sha(b):return hashlib.sha256(b).hexdigest()
-rawcat=base64.b64decode((D/"bf_global_original_unit_catalog.json.gz.b64").read_text("ascii"),validate=True)
+rawcat=base64.b64decode(("".join((D/"bf_global_original_unit_catalog.json.gz.b64").read_text("ascii").split())),validate=True)
 assert sha(rawcat)==META["catalogGzipSha256"]
 archive=json.loads(gzip.decompress(rawcat))
 assert len(archive["units"])==2291
