@@ -98,9 +98,9 @@ with sync_playwright() as pw:
  assert state["background"]=="dungeon_battle_10700.jpg" and state["applied"]
  assert "dungeon_battle_10700.jpg" in p.locator("#battle").evaluate("(e)=>e.style.backgroundImage")
  assert p.evaluate("BFGlobalBattleBackdropV3800.setEnabled(false)") is True
- p.locator("#mode").select_option("training")
+ p.evaluate("document.getElementById(\"mode\").value=\"training\"")
  assert p.evaluate("BFGlobalBattleBackdropV3800.refresh().available") is False
- p.locator("#mode").select_option("archive")
+ p.evaluate("document.getElementById(\"mode\").value=\"archive\"")
  assert not p.evaluate("BFGlobalBattleBackdropV3800.refresh().applied")
  p.add_script_tag(path=str(A/"bf19100_original_2022_dungeon_backdrops.js"))
  assert p.evaluate("BFGlobalOriginalDungeonBackdropsV19100.source.missionCount")==29
