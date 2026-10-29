@@ -17,7 +17,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert b'BF_GLOBAL_GEMS_PERSONAL_V17000' in apk
  assert b'_bfImpsV171' in apk
  g=(R/'app/build.gradle').read_text('utf8')
- assert "versionName '173.00.0-demo'" in g
+ assert any("versionName '"+str(v)+".00.0-demo'" in g for v in range(173,200))
  assert "applicationId 'org.bravefrontier.offline'" in g
  assert 'bf-development-debug.keystore' in g
  assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')

@@ -957,6 +957,14 @@ public class MainActivity extends Activity {
                 } catch (IOException amdahlRefsError) {
                     android.util.Log.w("BraveFrontier", "Optional Amdahl source refs unavailable", amdahlRefsError);
                 }
+                // v174: read-only original 2022 mission cross-table, after v151.
+                // No enemy IDs, waves, native AI or drops are inferred here.
+                try {
+                    String originalCrossrefs = readPackagedText("bf17400_original_2022_encounter_crossrefs.js");
+                    view.evaluateJavascript(originalCrossrefs, null);
+                } catch (IOException crossrefsError) {
+                    android.util.Log.w("BraveFrontier", "Optional 2022 encounter crossrefs unavailable", crossrefsError);
+                }
                 // v110: original 2022 starter leader-skill eligibility audit,
                 // read-only until original stat initialization is verified.
                 try {
