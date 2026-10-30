@@ -1,0 +1,40 @@
+name: Research source-integrity gates
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/research-source-integrity.yml'
+      - 'audit_bf_original_2022_reference_collisions_v19900.py'
+      - 'test_bf_original_2022_reference_collisions_v19900.py'
+      - 'test_bf_native_2022_encounter_gates_v20100.py'
+      - 'source_data/bf_v201_native_2022_encounter_gate.json'
+      - 'source_data/bf_global_2022_mission_cross_table_v152.json.gz.b64'
+      - 'source_data/bf_global_mistral_raw_mission_evidence_v056.json'
+      - 'source_data/bf_global_morgan_original_v080.json'
+      - 'source_data/bf_global_st_lamia_raw_encounter_refs_v109.json'
+      - 'source_data/bf_global_2022_amdahl_quest_readiness_v147.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bf-source-integrity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-integrity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact tested commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Audit pinned 2022 source references
+        run: python test_bf_original_2022_reference_collisions_v19900.py
+      - name: Reject unsupported native enemy wave promotion
+        run: python test_bf_native_2022_encounter_gates_v20100.py

@@ -1,0 +1,22 @@
+{
+  "schema": "bf-global-v201-native-2022-encounter-evidence-gate",
+  "purpose": "Read-only safety ledger; NOT a decoded enemy formation or gameplay implementation",
+  "observedSource": {
+    "missionCount": 142,
+    "distinctRawReferenceStrings": 29,
+    "sourceArchiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "sourceMissionMasterSha256": "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83",
+    "crossAreaExactReuseGroups": 0
+  },
+  "missingEvidence": [
+    "original2022ReferenceDecoder",
+    "original2022EnemyGroupJoin",
+    "original2022OrderedWaveFormations",
+    "original2022EnemyStatsAndSkills",
+    "original2022EnemyAiAndDrops"
+  ],
+  "native2022FormationsVerified": false,
+  "native2022EnemyAIAndDropsVerified": false,
+  "changesGame": false,
+  "releaseGate": "BLOCKED"
+}
