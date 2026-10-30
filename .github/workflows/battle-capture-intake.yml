@@ -5,6 +5,9 @@ on:
       - '.github/workflows/battle-capture-intake.yml'
       - 'audit_bf_server_battle_capture_fields_v20200.py'
       - 'test_bf_server_battle_capture_fields_v20200.py'
+      - 'audit_bf_server_battle_capture_colocation_v21200.py'
+      - 'test_bf_server_battle_capture_colocation_v21200.py'
+      - 'V212_MISSIONSTART_CAPTURE_COLOCATION_AUDIT.md'
   workflow_dispatch:
 
 permissions:
@@ -23,3 +26,5 @@ jobs:
           python-version: '3.12'
       - name: Test bounded local-only packet field inventory
         run: python test_bf_server_battle_capture_fields_v20200.py
+      - name: Verify candidate battle field co-location without decoding or leaking values
+        run: python test_bf_server_battle_capture_colocation_v21200.py
