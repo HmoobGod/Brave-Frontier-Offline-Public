@@ -55,7 +55,7 @@ def recipe_rows(source=None, manifest=None):
         if any(type(slot) is not dict for slot in evo["materialSlots"]):
             raise ValueError("malformed source material record")
     try:
-        canon = json.dumps(rows, separators=(",", ":"), ensure_ascii=True).encode()
+        canon = json.dumps(rows, separators=(",", ":"), ensure_ascii=True, allow_nan=False).encode()
     except (TypeError, ValueError):
         raise ValueError("source recipe rows are not JSON-serializable") from None
     if hashlib.sha256(canon).hexdigest() != ROWS_SHA:
