@@ -16,6 +16,8 @@ ZIP2022="69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9"
 MISSION2022="d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83"
 BLOB2021="750871aa060478cc674e7d3e02c739f26364ef8e"
 COMMIT2021="7be4ee5ade8023580c83563fb306eb4e2b747256"
+FIXTURE_SOURCE_GIT_BLOB="87fe678b1fe70a041212fdf9050dfa4003072312"
+FIXTURE_HISTORY_GIT_BLOB="321f0f8a2dec81340e23b0069b8f00e5783c9c57"
 ZERO2022="0,0,0:0,0:0"
 CANDIDATE2022="1,10,100:1000,0:0"
 CANDIDATE_2021={
@@ -26,9 +28,17 @@ CANDIDATE_2021={
     "spawn_chance_range_maybe":"10.0~34.0"
 }
 
+def _git_blob_sha(raw):
+    """Anchor in-repository fixtures to their exact reviewed Git bytes."""
+    return hashlib.sha1(b"blob "+str(len(raw)).encode("ascii")+b"\0"+raw).hexdigest()
+
 def compare():
-    original=json.loads(SOURCE.read_text("utf8"))
-    history=json.loads(HIST.read_text("utf8"))
+    source_bytes=SOURCE.read_bytes()
+    history_bytes=HIST.read_bytes()
+    assert _git_blob_sha(source_bytes)==FIXTURE_SOURCE_GIT_BLOB, "2022 fixture bytes changed"
+    assert _git_blob_sha(history_bytes)==FIXTURE_HISTORY_GIT_BLOB, "2021 fixture bytes changed"
+    original=json.loads(source_bytes)
+    history=json.loads(history_bytes)
     assert original["schema"]=="bf-global-2022-mistral-raw-mission-evidence-v056"
     assert original["source"]["archiveSha256"]==ZIP2022
     assert original["source"]["fileSha256"]==MISSION2022
