@@ -1,6 +1,6 @@
 # v201 research — native 2022 encounter decoder evidence gates
 
-**Status:** research-only planning document. No original 2022 enemy waves are authenticated by this document. No gameplay, save, APK, CI, or signing changes.
+**Status:** research-only planning document. No original 2022 enemy waves are authenticated by this document. No gameplay, save, APK, or signing changes. One read-only CI regression is added.
 
 ## Reusable verified foundation
 
@@ -23,3 +23,13 @@
 The next implementation step is **source discovery**, not guessing formations. If no original 2022 decoder or joined enemy-group evidence can be authenticated, keep the native formation gate BLOCKED and report precisely what is missing. Do not repurpose v199's 29 tokens as unique enemy formations. Avoid importing old-era encounter data into playable original-mode code.
 
 This document references the already-merged `V199_ORIGINAL_2022_REFERENCE_COLLISION_AUDIT.md` and its reproducible audit. The work described here is pending; it does not claim new source extraction, emulator tests, or green CI.
+
+## v201 machine-readable safety gate
+
+- `source_data/bf_v201_native_2022_encounter_gate.json` records the v199 source hashes, mission/reference counts and five explicitly **missing** source-to-encounter proofs.
+- `test_bf_native_2022_encounter_gates_v20100.py` imports the v199 SHA-pinned original data audit and fails if any unsupported decoder/formation/AI proof is marked ready. Ten local corruption probes cover false decoder assertions, premature wave/AI promotion, release gate bypass, data hash/count drift, duplicated gates, an unexpected claimed enemy ID field, runtime-change flags and schema changes.
+- GitHub Actions calls the v201 regression after the v199 collision audit. The script is Python standard-library only; no enemy source bytes are inferred, and no Android or WebView test is claimed.
+
+### Candidate-source boundary checked
+
+At publicly readable `decompfrontier/client` commit `1964d51a53adcf330fc9549c75ada565da72ab76`, `src/AIMst.cpp` contains only includes and `src/AIMst.hpp` declares AI priority and AI ID. Those specific files do not decode an original 2022 mission encounter reference and do not close the v201 group-join or wave-order gates. This is a narrow file inspection, **not** a full upstream codebase audit. A later substantive source find must be verified independently and pinned before runtime promotion.
