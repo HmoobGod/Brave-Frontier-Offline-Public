@@ -15,6 +15,9 @@ MANIFEST = ROOT / "source_data/bf_global_2022_starter_7_8_source_readiness_v127.
 ZIP_SHA = "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9"
 ROWS_SHA = "a5b91a61b5101f378fcc2692ca97b601c2034cf150c0716e9b561aebc7a0bed6"
 MANIFEST_SHA = "dcd3fb0f3d57b44880088f42c87409e3588a24a183ec866095ea0dbeae57bcbd"
+# Independently pins the COMPLETE committed v127 manifest bytes, including
+# non-recipe asset/provenance metadata excluded from canonical12SourceSha256.
+MANIFEST_FILE_SHA256 = "2fb14fda2d9a291df756d0e2332b68ded1929d8618e50159e899b68b5829146e"
 
 
 def recipe_rows(source=None, manifest=None):
@@ -22,7 +25,10 @@ def recipe_rows(source=None, manifest=None):
     if source is None:
         source = json.loads(SOURCE.read_text(encoding="utf-8"))
     if manifest is None:
-        manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+        manifest_bytes = MANIFEST.read_bytes()
+        if hashlib.sha256(manifest_bytes).hexdigest() != MANIFEST_FILE_SHA256:
+            raise ValueError("source manifest file checksum mismatch")
+        manifest = json.loads(manifest_bytes)
     if not isinstance(source, dict) or not isinstance(manifest, dict):
         raise ValueError("source manifest type mismatch")
     if not (
