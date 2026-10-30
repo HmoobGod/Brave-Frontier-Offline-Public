@@ -78,6 +78,37 @@ with sync_playwright() as pw:
  assert page.locator("#bf20600-dungeon option").count()==7
  assert page.locator("#bf20600-quest-list li").count()==5
  assert page.evaluate("QUESTS.length")==106
+ # Walk every original dungeon with the real v149/v151/v206 modules.
+ # Verify all 36 source-only rows, exact economy fields, and no playability.
+ observed=[]
+ for dungeon in Q["dungeons"]:
+  dungeon_id=dungeon["id"]
+  page.evaluate("id=>BFAmdahlSourceQuestGuideV20600.preview(id)",dungeon_id)
+  actual=page.locator("#bf20600-quest-list li").evaluate_all("""els=>els.map(li=>({
+    id:Number(li.dataset.missionId),name:li.querySelector('strong').textContent,
+    desc:li.querySelector('p').textContent,
+    economy:li.querySelector('small').textContent
+  }))""")
+  expected=[q for q in Q["quests"] if q["dungeonId"]==dungeon_id]
+  assert len(actual)==len(expected)
+  for item,q in zip(actual,expected):
+   assert item["id"]==q["id"]
+   assert item["name"]==str(q["id"])+" · "+q["name"]
+   assert item["desc"]==q["description"]
+   text=item["economy"]
+   for fragment in ("Requires mission "+str(q["prerequisiteMissionId"]),
+                    str(q["waveCount"])+" source waves (rosters unknown)",
+                    "Energy "+str(q["energy"]),
+                    str(q["exp"])+" EXP",str(q["zel"])+" Zel",
+                    str(q["karma"])+" Karma","NOT PLAYABLE"):
+    assert fragment in text,(q["id"],fragment,text)
+   assert page.evaluate("id=>BFAmdahlSourceQuestGuideV20600.lookup(id)",q["id"])==[
+    q[k] for k in ("id","dungeonId","prerequisiteMissionId","waveCount",
+                   "energy","exp","zel","karma","name","description")]
+   observed.append(q["id"])
+  assert page.evaluate("QUESTS.length")==106
+ assert len(observed)==36 and len(set(observed))==36
+ assert observed==[q["id"] for q in Q["quests"]]
  assert page.evaluate("BFGlobalEncounterReferencesV15100.summary.saveMutation") is False
  page.locator("#bf14900-amdahl-art > summary").click()
  page.locator("#bf20600-amdahl-guide > summary").click()
