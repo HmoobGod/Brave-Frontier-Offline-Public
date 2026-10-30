@@ -193,6 +193,7 @@ jobs:
           python test_bf_optional_imp_browser_v16900.py
           python test_bf_original_playable_stat_catalog_v11700.py
           python test_bf_original_exp_type_source_v11800.py
+          python test_bf_cross_era_exp_candidates_v19300.py
           python test_bf_original_exp_readonly_crosscheck_v11900.py
           python test_bf_original_all_unit_stat_archive_v12000.py
           python test_bf_original_all_unit_exp_ids_v12100.py
