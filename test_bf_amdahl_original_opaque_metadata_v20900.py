@@ -99,7 +99,7 @@ with sync_playwright() as pw:
   did=dungeon["id"]
   page.evaluate("id=>BFAmdahlSourceQuestGuideV20600.preview(id)",did)
   expected=[q for q in Q["quests"] if q["dungeonId"]==did]
-  page.wait_for_function("count=>document.querySelectorAll('#bf20900-source-fields li').length===count",len(expected))
+  page.wait_for_function("count=>document.querySelectorAll('#bf20900-source-fields li').length===count",arg=len(expected))
   texts=page.locator("#bf20900-source-fields li").all_text_contents()
   assert len(texts)==len(expected)
   for q,t in zip(expected,texts):
