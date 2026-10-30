@@ -138,6 +138,20 @@ with sync_playwright() as pw:
  assert page.evaluate("""()=>JSON.stringify(
    parseProgress(JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))))===
    JSON.stringify(P)""") is True
+ # A previously purchased schema-2 owner fixture may still earn the
+ # authentic source-gated 2022 finale's *personal offline* +100 reward.
+ # This closes Claude's optional W6 without changing native Gem claims.
+ page.evaluate('QUEST=QUESTS.find(q=>q.missionId===23);awardDemoRewards()')
+ assert page.evaluate('P._bfGemV170Custom.balance')==900
+ assert page.evaluate('P._bfGemV170Custom.spent')==200
+ assert page.evaluate('P._bfGemV170Custom.firstPaid.includes(23)') is True
+ assert page.evaluate('P._bfGemV170Custom.receipts.map(r=>r.unitId)')==receipts
+ assert page.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)') is True
+ page.evaluate('awardDemoRewards()')
+ assert page.evaluate('P._bfGemV170Custom.balance')==901
+ assert page.evaluate('P._bfGemV170Custom.replaysPaid')==1
+ assert page.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)') is True
+ assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7'))._bfGemV170Custom.balance")==901
  assert not errors,errors
  browser.close()
 
