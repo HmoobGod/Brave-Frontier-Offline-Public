@@ -1,6 +1,6 @@
 # v198 — Opt-in PERSONAL OFFLINE Gem summons (review candidate)
 
-**Feature branch: not merged. Claude review is required before promotion.**
+**Merged v198 (PR #127):** Claude reviewed exact commit `c30277ad` and approved with conditions; merged as `e40924d7`. Android device verification remains pending. v198.02 hardening is separate and requires new CI and Claude delta review before merging.
 This is a player-requested custom offline economy feature, **not** a recovered
 2022 Global summon price, rate table, roster, banner, or Gem spending rule.
 
@@ -63,3 +63,24 @@ This is a player-requested custom offline economy feature, **not** a recovered
 **Scope boundary:** This feature does not solve native 2022 enemy-wave
 formations/AI or original EXP progression. The existing 106-quest demo
 combat and source-only 36 Amdahl quests are unchanged.
+
+## v198.02 Claude review follow-up — persistent receipt eligibility
+
+- **Future developer invariant:** Every unit ID already recorded in any
+  schema-2 `receipts` array must remain eligible under `RECRUIT_IDS` **and**
+  remain valid in the canonical roster across future data updates. Never
+  rename, recycle, remove or reassign purchased recruit IDs without a
+  tested, compatible save migration. The existing `summonHistory` validator
+  has related ID-stability requirements. This is a **documented invariant, not yet pinned by a cross-version fixture**; current CI tests only receipts created within the same build. Before modifying RECRUIT_IDS, add a pinned v198 recruit-pool fixture or a previously saved schema-2 receipt fixture and verify it against the new build.
+- `BFGlobalCustomGemsV17000.snapshot()` must return a detached frozen
+  receipts array containing detached frozen receipt objects, not references
+  to the live canonical wallet. The schema-1 snapshot keeps its prior keys.
+- The v170-v198 economy receipts are **consistency checks**, not anti-cheat.
+  Manual editing of an offline player's JSON is not cryptographically
+  prevented.
+- Local Android Studio / Windows builds are not interchangeable with
+  GitHub Actions APKs; see `BUILD_APK_PC_GUIDE.txt`. A direct Gradle build
+  missing the runtime Gem patch chain is a destructive downgrade risk after
+  any schema-2 purchase.
+- Owner Android upgrade, in-app purchase, first-clear/replay, import/export,
+  Imp actions, original claims, and persistence still need device testing.

@@ -14,6 +14,8 @@ with ZipFile(APK) as z:
  assert "function bf198PersonalSummon()" in html
  assert "bf19800-personal-summon" in html
  assert "BF198_PERSONAL_SUMMON_COST = 100" in html
+ assert "receipts:Object.freeze(P._bfGemV170Custom.receipts.map(r=>Object.freeze({...r})))" in html
+ assert "spent:P._bfGemV170Custom.spent" in html
  assert "P._bfGemV170Custom=bf198ValidateWallet" in html
  assert "out._bfGemV170Custom=bf198ValidateWallet" in html
  assert "BF192_ATOMIC_DEMO_SUMMON" in html
@@ -27,4 +29,4 @@ with ZipFile(APK) as z:
  assert ui==(A/"bf17000_personal_gem_rewards_ui.js").read_text("utf8")
  assert "android.permission.INTERNET" not in (A.parent/"AndroidManifest.xml").read_text("utf8")
  assert "applicationId 'org.bravefrontier.offline'" in (R/"app/build.gradle").read_text("utf8")
-print("PASS v198 APK: 100-Gem personal summons, schema-2 receipts, canonical v7, original Gemini ledger unchanged and original signing ID preserved")
+print("PASS v198 APK: 100-Gem personal summons, schema-2 receipts, canonical v7, original Gem ledger unchanged and original signing ID preserved")

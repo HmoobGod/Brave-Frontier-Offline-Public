@@ -12,7 +12,10 @@ s = A.read_text("utf8")
 tag = "BF198_PERSONAL_GEM_SUMMON_V19800"
 if tag in s:
     assert s.count(tag) == 1
-    print("PASS v198 previously prepared")
+    # v198.02 idempotence: do not silently reuse older unsafe prepared assets.
+    assert "receipts:Object.freeze(P._bfGemV170Custom.receipts.map(r=>Object.freeze({...r})))" in s, "Prepared HTML lacks v198.02 frozen receipts"
+    assert "spent:P._bfGemV170Custom.spent" in s, "Prepared HTML lacks v198.02 spent snapshot"
+    print("PASS v198.02 previously prepared with safe snapshot")
     raise SystemExit(0)
 assert s.count("BF_GLOBAL_GEMS_PERSONAL_V17000") == 1
 assert s.count("BF192_ATOMIC_DEMO_SUMMON") == 1
@@ -125,6 +128,23 @@ new=""" E.summonbutton.textContent=remaining.length?'Summon · 1 token':'Collect
    remaining.length===0;
 }"""
 s=s.replace(old,new,1)
+# v198.02: never hand API callers the mutable canonical schema-2 receipts.
+# Preserve schema-1 snapshot keys exactly for older clients/tests.
+unsafe_snapshot = (" snapshot:()=>Object.freeze(P?{...P._bfGemV170Custom,\\n"
+ "  firstPaid:Object.freeze([...P._bfGemV170Custom.firstPaid]),\\n"
+ "  legacyClears:Object.freeze([...P._bfGemV170Custom.legacyClears])}:{}),")
+# Python escapes above encode the literal newline sequences from the v170 patch.
+unsafe_snapshot = unsafe_snapshot.replace('\\n','\n')
+assert s.count(unsafe_snapshot)==1, 'v170 snapshot source changed'
+safe_snapshot = (" snapshot:()=>Object.freeze(P?{...P._bfGemV170Custom,\n"
+ "  firstPaid:Object.freeze([...P._bfGemV170Custom.firstPaid]),\n"
+ "  legacyClears:Object.freeze([...P._bfGemV170Custom.legacyClears]),\n"
+ "  ...(P._bfGemV170Custom.schema===2?{\n"
+ "    spent:P._bfGemV170Custom.spent,\n"
+ "    receipts:Object.freeze(P._bfGemV170Custom.receipts.map(r=>Object.freeze({...r})))\n"
+ "  }:{})}:{}),")
+s=s.replace(unsafe_snapshot,safe_snapshot,1)
+assert s.count(safe_snapshot)==1
 assert s.count(tag)==1
 assert s.count("localStorage.setItem(SAVE_KEY,JSON.stringify(P))")==1
 A.write_text(s,"utf8")
