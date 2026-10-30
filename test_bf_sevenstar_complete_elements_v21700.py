@@ -89,10 +89,11 @@ expects_message(malformed_source, base_manifest, "malformed source recipe row")
 
 # Python-only callers can send objects not representable in JSON. Normalize
 # their errors as ValueError before checksum verification.
-malformed_source = deepcopy(base_source)
-malformed_source["rows"][0][7][0][2] = {123}
-expects_message(malformed_source, base_manifest,
-                "source recipe rows are not JSON-serializable")
+for invalid in ({123}, float("nan"), float("inf"), -float("inf")):
+    malformed_source = deepcopy(base_source)
+    malformed_source["rows"][0][7][0][2] = invalid
+    expects_message(malformed_source, base_manifest,
+                    "source recipe rows are not JSON-serializable")
 
 # Positive source rows and synthetic no-evolution gates are unchanged.
 rows = audit.recipe_rows()
