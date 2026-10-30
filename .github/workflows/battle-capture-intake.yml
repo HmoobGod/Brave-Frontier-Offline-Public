@@ -1,0 +1,25 @@
+name: Local capture-field research regression
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/battle-capture-intake.yml'
+      - 'audit_bf_server_battle_capture_fields_v20200.py'
+      - 'test_bf_server_battle_capture_fields_v20200.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-intake:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test bounded local-only packet field inventory
+        run: python test_bf_server_battle_capture_fields_v20200.py
