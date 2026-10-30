@@ -73,7 +73,10 @@ with tempfile.TemporaryDirectory() as tmp:
     must_reject("source",lambda v:next(row for row in v["rows"]
         if row["missionId"]==70).update(rawMimicInfo="1,10,100:9999,0:0"))
     must_reject("source",lambda v:v["rows"].pop())
+    # Even non-semantic byte drift in pinned fixtures must fail closed.
+    must_reject("source",lambda v:v["rows"][0].update(rawEncounterRef="tampered-opaque-ref"))
+    must_reject("hist",lambda v:v["observations"][0].update(old2021Name="tampered name"))
 after={str(f):hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
 assert before==after,"Read-only research modified source or game"
 assert "bf_global_offline_demo_v7" in APP.read_text("utf8")
-print("PASS v196: 34 2021/2022 Mistral IDs; 21 zero/13 candidate historical mimic matches; eight negative probes; v7 untouched")
+print("PASS v196: 34 2021/2022 Mistral IDs; 21 zero/13 candidate historical mimic matches; ten negative probes; v7 untouched")
