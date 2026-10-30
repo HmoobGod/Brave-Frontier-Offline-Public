@@ -49,7 +49,8 @@ def recipe_rows(source=None, manifest=None):
         if type(unit) is not dict:
             raise ValueError("malformed source form")
         evo = unit.get("originalEvo")
-        if type(evo) is not dict or type(evo.get("materialSlots")) is not list:
+        if (type(evo) is not dict or type(evo.get("materialSlots")) is not list
+                or not evo["materialSlots"]):
             raise ValueError("malformed original evolution source")
         if any(type(slot) is not dict for slot in evo["materialSlots"]):
             raise ValueError("malformed source material record")
