@@ -1,0 +1,388 @@
+{
+  "schema": "bf-global-v196-2021-mistral-34-mission-historical-comparison",
+  "purpose": "2021 extracted metadata crosscheck against OWNER's 2022 original source. Research only; 2021 fields NOT 2022 proof.",
+  "historicalSource": {
+    "repository": "cheahjs/bravefrontier_data",
+    "commit": "7be4ee5ade8023580c83563fb306eb4e2b747256",
+    "file": "missions.json",
+    "blobGitSha1": "750871aa060478cc674e7d3e02c739f26364ef8e",
+    "sourceYear": 2021,
+    "commitDate": "2021-11-17",
+    "url": "https://github.com/cheahjs/bravefrontier_data/blob/7be4ee5ade8023580c83563fb306eb4e2b747256/missions.json",
+    "totalHistoricalMissionIds": 3146
+  },
+  "original2022Source": {
+    "path": "source_data/bf_global_mistral_raw_mission_evidence_v056.json",
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "missionMasterSha256": "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83",
+    "sourceRows": 34,
+    "field": "rawMimicInfo"
+  },
+  "matchedMissionIds": 34,
+  "original2022MimicClasses": {
+    "empty": 21,
+    "candidate1000": 13
+  },
+  "observations": [
+    {
+      "missionId": 1,
+      "old2021Name": "Basics of Battle",
+      "old2021Dungeon": "Beginner's Prairie",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 3,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 2,
+      "old2021Name": "Element & Skill",
+      "old2021Dungeon": "Beginner's Prairie",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 3,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 10,
+      "old2021Name": "Start of Adventure",
+      "old2021Dungeon": "Adventurer's Prairie",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 11,
+      "old2021Name": "Monsters of the Prairie",
+      "old2021Dungeon": "Adventurer's Prairie",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 12,
+      "old2021Name": "Guardians of the Prairie",
+      "old2021Dungeon": "Adventurer's Prairie",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 20,
+      "old2021Name": "Cave of Dancing Flames",
+      "old2021Dungeon": "Cave of Flames",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 21,
+      "old2021Name": "Wielder of the Fire",
+      "old2021Dungeon": "Cave of Flames",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 22,
+      "old2021Name": "The Thief's Hideout",
+      "old2021Dungeon": "Cave of Flames",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 23,
+      "old2021Name": "The Blazing Beast",
+      "old2021Dungeon": "Cave of Flames",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 30,
+      "old2021Name": "Breath Freezing Snowfields",
+      "old2021Dungeon": "Egor Snowfield",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 31,
+      "old2021Name": "Manipulator of the Water",
+      "old2021Dungeon": "Egor Snowfield",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 32,
+      "old2021Name": "The Pirate on Ice",
+      "old2021Dungeon": "Egor Snowfield",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 33,
+      "old2021Name": "The Dragon Hunting Ice Knight",
+      "old2021Dungeon": "Egor Snowfield",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 40,
+      "old2021Name": "Shadowy Forests",
+      "old2021Dungeon": "Forest of Beasts",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 41,
+      "old2021Name": "Puppeteer of the Trees",
+      "old2021Dungeon": "Forest of Beasts",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 42,
+      "old2021Name": "Bandit of the Forest",
+      "old2021Dungeon": "Forest of Beasts",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 43,
+      "old2021Name": "Hunter from the Forest",
+      "old2021Dungeon": "Forest of Beasts",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 50,
+      "old2021Name": "Thunder Blasting Wetlands",
+      "old2021Dungeon": "Magutagal Wetlands",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 51,
+      "old2021Name": "Commander of the Thunder",
+      "old2021Dungeon": "Magutagal Wetlands",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 52,
+      "old2021Name": "Pirate of the Wetlands",
+      "old2021Dungeon": "Magutagal Wetlands",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 5,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 53,
+      "old2021Name": "The Thundering Strategist",
+      "old2021Dungeon": "Magutagal Wetlands",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {}
+    },
+    {
+      "missionId": 60,
+      "old2021Name": "Sacred Ruins",
+      "old2021Dungeon": "Remains of Mirza",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 61,
+      "old2021Name": "Wielder of the Light",
+      "old2021Dungeon": "Remains of Mirza",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 62,
+      "old2021Name": "The White Horse of Light",
+      "old2021Dungeon": "Remains of Mirza",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 63,
+      "old2021Name": "Moonlit Battle",
+      "old2021Dungeon": "Remains of Mirza",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 70,
+      "old2021Name": "The Heinous Chamber",
+      "old2021Dungeon": "Monster's Nest",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 71,
+      "old2021Name": "Manipulator of the Dark",
+      "old2021Dungeon": "Monster's Nest",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 72,
+      "old2021Name": "The Cursed Snake",
+      "old2021Dungeon": "Monster's Nest",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 6,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 73,
+      "old2021Name": "The Monster Slaying Blade",
+      "old2021Dungeon": "Monster's Nest",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 81,
+      "old2021Name": "The Skyhigh Tower",
+      "old2021Dungeon": "Tower of Mistral",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 82,
+      "old2021Name": "Monsters of the Corridor",
+      "old2021Dungeon": "Tower of Mistral",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 83,
+      "old2021Name": "The Stairs of Trial",
+      "old2021Dungeon": "Tower of Mistral",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 84,
+      "old2021Name": "The Pillars of Force",
+      "old2021Dungeon": "Tower of Mistral",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 7,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    },
+    {
+      "missionId": 85,
+      "old2021Name": "The Forged Gigantor",
+      "old2021Dungeon": "Tower of Mistral",
+      "old2021Area": "Mistral",
+      "old2021BattleCount": 8,
+      "old2021MimicRaw": {
+        "group_1_chance": "100",
+        "group_1_monster_group": "1000",
+        "group_2_chance": "0",
+        "group_2_monster_group": "0",
+        "spawn_chance_range_maybe": "10.0~34.0"
+      }
+    }
+  ],
+  "assumptions": {
+    "native2022WaveAssignmentsDecoded": false,
+    "native2022EnemyIDsVerified": false,
+    "native2022AIRecovered": false,
+    "native2022DropsVerified": false,
+    "historical2021RewardsAuthoritativeFor2022": false,
+    "original2022RawMimicInfoMeaningProved": false
+  },
+  "noPlayerSavesRead": true,
+  "noGameChanges": true
+}
