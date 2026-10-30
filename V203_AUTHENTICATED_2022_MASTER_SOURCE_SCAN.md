@@ -23,6 +23,14 @@ mission 90), 36 Morgan (200), 36 St. Lamia (300) and 36 source-only Amdahl
 strings. The observed reuse frequency 6×4, 20×5 and 3×6 exactly matches
 the previously merged v199 reference-collision profile.
 
+An additional independent local verification decoded the already-committed
+v152 compressed canonical 142-mission fixture (compressed SHA-256
+`cc8aeda4a3f95555985bf4aada5c75f1f1dfdb67f0ee800d36b7aba56327f59a`;
+canonical JSON rows SHA-256
+`2acd1ab29b8a00b3c8804a89fdc9d7b99cba4853f5974f765bc7473c89e7a284`)
+and compared every mission ID and full raw opaque reference directly to the
+SHA-authenticated original mission master: **142 exact matches, zero mismatches**.
+
 **Results:** 147 translated source tables inspected (the primary mission
 master is the reference source), zero skipped tables. Three top-level
 `MISSION_8f4NYKxb` matching columns were observed outside the primary
@@ -57,7 +65,7 @@ source rows, any save data and packet captures are **not** uploaded to GitHub.
 The new standard-library test
 `test_bf_authenticated_2022_local_scan_v20300.py` crosschecks the
 aggregate's stable source identity and 142-mission/29-ref collision profile
-against the merged v199 source audit and runs ten adversarial
+against the merged v199 source audit and runs eleven adversarial
 false-promotion/mutation probes. Public CI cannot re-open the original
 private ZIP and **is not evidence that public runners scanned the original
 archive**.
