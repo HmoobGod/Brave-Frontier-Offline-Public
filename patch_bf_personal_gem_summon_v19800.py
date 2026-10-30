@@ -21,7 +21,7 @@ assert s.count("bf_global_offline_demo_v7") >= 1
 
 helpers = r"""
 // BF198_PERSONAL_GEM_SUMMON_V19800
-// Owner-selected PERSONAL OFFLINE economics: 100 Gem per UNIQUE demo recruit.
+// Proposed PERSONAL OFFLINE economics: 100 Gem per UNIQUE demo recruit.
 // This is not original Global's banner price, probabilities, or Gem ledger.
 const BF198_PERSONAL_SUMMON_COST = 100;
 function bf198ValidateWallet(source, clears, roster) {
