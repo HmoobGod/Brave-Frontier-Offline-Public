@@ -33,7 +33,7 @@ CROSSROWS='2acd1ab29b8a00b3c8804a89fdc9d7b99cba4853f5974f765bc7473c89e7a284'
 
 
 def git_blob(raw):
-    return hashlib.sha1(b'blob '+str(len(raw)).encode('ascii')+b'\\0'+raw).hexdigest()
+    return hashlib.sha1(b'blob '+str(len(raw)).encode('ascii')+b'\0'+raw).hexdigest()
 
 
 def read_original():
@@ -87,7 +87,7 @@ def analyze(rows):
         area,id,ref=row['area'],row['missionId'],row['rawEncounterRef']
         assert area in SOURCES and type(id) is int and id>0
         assert id not in seen
-        assert type(ref) is str and re.fullmatch(r'\\d+:\\d+(?:,\\d+:\\d+)*',ref)
+        assert type(ref) is str and re.fullmatch(r'\d+:\d+(?:,\d+:\d+)*',ref)
         seen.add(id)
         areas[area]+=1
         groups[ref].append((area,id))
@@ -138,7 +138,7 @@ def main():
     target=args.output.resolve()
     assert not target.is_relative_to(ROOT.resolve()),'Repository overwrite forbidden'
     target.parent.mkdir(parents=True,exist_ok=True)
-    target.write_text(json.dumps(report,indent=2)+'\\n',encoding='utf8')
+    target.write_text(json.dumps(report,indent=2)+'\n',encoding='utf8')
 
 
 if __name__=='__main__':
