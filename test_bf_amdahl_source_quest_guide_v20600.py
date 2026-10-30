@@ -18,8 +18,12 @@ assert SOURCE['provenance']['questCanonSha256']=='f35a7b06bc9e6fae6facc1fd77422f
 assert SOURCE['area']['playableNow'] is False and SOURCE['area']['originalEnemyWavesDecoded'] is False
 assert len(SOURCE['quests'])==36 and len(SOURCE['dungeons'])==7
 assert JS.count('BF_AMDAHL_ORIGINAL_2022_STORY_GUIDE_V20600')==1
-assert ("refs.summary?.sha256!=='"+E['missionMasterSha256']+"'") in JS, 'source SHA guard truncated'
-assert ("refs.summary?.amdahlQuestCanonicalSha256!=='"+SOURCE['provenance']['questCanonSha256']+"'") in JS
+assert ("const MASTER_SHA256='"+E['missionMasterSha256']+"'") in JS
+assert ("const QUEST_SHA256='"+SOURCE['provenance']['questCanonSha256']+"'") in JS
+assert 'refs.summary?.sha256!==MASTER_SHA256' in JS
+assert 'refs.summary?.amdahlQuestCanonicalSha256!==QUEST_SHA256' in JS
+assert 'masterSha256:MASTER_SHA256' in JS and 'canonicalQuestSha256:QUEST_SHA256' in JS
+assert JS.count(E['missionMasterSha256'])==1 and JS.count(SOURCE['provenance']['questCanonSha256'])==1
 assert len(JS.encode('utf8'))<65536
 for token in ('localStorage.', 'saveProgress(', 'awardDemoRewards(', 'Math.random(',
               'P.questClears=', 'P.roster=', 'QUESTS.push(', 'startQuest(',
@@ -104,6 +108,10 @@ with sync_playwright() as pw:
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.lookup(99999)') is None
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.playable') is False
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.saveMutation') is False
+ assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.masterSha256')==E['missionMasterSha256']
+ assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256')==SOURCE['provenance']['questCanonSha256']
+ assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.masterSha256.length')==64
+ assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256.length')==64
  page.locator('#bf20600-dungeon').select_option('460')
  assert page.locator('#bf20600-quest-list li').count()==6
  assert 'Malevolent Ceremony' in page.locator('#bf20600-quest-list').inner_text()
@@ -117,9 +125,15 @@ with sync_playwright() as pw:
     quests:JSON.stringify(QUESTS),save:localStorage.getItem('bf_global_offline_demo_v7'),
     writes:__saveWrites()})""")
  assert before==after,(before,after)
- page.evaluate('delete window.BFAmdahlSourceQuestGuideV20600;P.version=8')
+ # Claude N1: remove existing DOM; otherwise duplicate-DOM guard masks v7 gate.
+ page.evaluate('''()=>{delete window.BFAmdahlSourceQuestGuideV20600;
+   document.getElementById("bf20600-amdahl-guide").remove();P.version=8;}''')
  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
- assert page.evaluate('Boolean(window.BFAmdahlSourceQuestGuideV20600)') is False
+ assert page.evaluate('window.BFAmdahlSourceQuestGuideV20600===undefined')
+ assert page.locator('#bf20600-amdahl-guide').count()==0
+ page.evaluate('P.version=7')
+ page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
+ assert page.evaluate('Boolean(window.BFAmdahlSourceQuestGuideV20600)') is True
  assert page.locator('#bf20600-amdahl-guide').count()==1
  assert not errors,errors
  browser.close()
