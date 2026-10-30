@@ -18,6 +18,8 @@ assert SOURCE['provenance']['questCanonSha256']=='f35a7b06bc9e6fae6facc1fd77422f
 assert SOURCE['area']['playableNow'] is False and SOURCE['area']['originalEnemyWavesDecoded'] is False
 assert len(SOURCE['quests'])==36 and len(SOURCE['dungeons'])==7
 assert JS.count('BF_AMDAHL_ORIGINAL_2022_STORY_GUIDE_V20600')==1
+assert ("refs.summary?.sha256!=='"+E['missionMasterSha256']+"'") in JS, 'source SHA guard truncated'
+assert ("refs.summary?.amdahlQuestCanonicalSha256!=='"+SOURCE['provenance']['questCanonSha256']+"'") in JS
 assert len(JS.encode('utf8'))<65536
 for token in ('localStorage.', 'saveProgress(', 'awardDemoRewards(', 'Math.random(',
               'P.questClears=', 'P.roster=', 'QUESTS.push(', 'startQuest(',
