@@ -153,7 +153,10 @@ with sync_playwright() as pw:
      P._bfGemV170Custom.legacyClears.includes(10);
  }""")
  assert page.evaluate("BFGlobalCustomGemsV17000.setMode('custom')") is True
- page.evaluate("QUEST=QUESTS.find(q=>q.missionId===10);for(let i=0;i<99;i++)awardDemoRewards()")
+ page.evaluate("""()=>{
+   QUEST=QUESTS.find(q=>q.missionId===10);
+   for(let i=0;i<99;i++)awardDemoRewards();
+ }""")
  assert page.evaluate('P._bfGemV170Custom.balance')==99
  assert page.evaluate('P._bfGemV170Custom.replaysPaid')==99
  assert page.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)')
