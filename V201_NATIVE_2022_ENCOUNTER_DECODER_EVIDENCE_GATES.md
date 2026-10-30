@@ -35,3 +35,37 @@ This document references the already-merged `V199_ORIGINAL_2022_REFERENCE_COLLIS
 At publicly readable `decompfrontier/client` commit `1964d51a53adcf330fc9549c75ada565da72ab76`, `src/AIMst.cpp` contains only includes and `src/AIMst.hpp` declares AI priority and AI ID. Those specific files do not decode an original 2022 mission encounter reference and do not close the v201 group-join or wave-order gates. This is a narrow file inspection, **not** a full upstream codebase audit. A later substantive source find must be verified independently and pinned before runtime promotion.
 
 At publicly readable `decompfrontier/server` commit `7cc0ebd3be79ca561874f70224c3ed924224583b`, `gimuserver/gme/MissionStart.cpp` implements `HANDLEF(MissionStart)` only as `HandleResult::error("Unsupported")`. It cannot be used as a source-backed implementation of original 2022 mission starts or wave ordering. `gimuserver/drogon/ServerCache.cpp` loads a list of master tables but does not by itself provide the missing mission-reference-to-ordered-enemy join. This finding is likewise limited to the inspected source paths, not a project-wide absence claim.
+
+## Additional candidate source triage (not authenticated 2022 wave data)
+
+The independent community revival repo `joppe2001/bf-private-server` at commit
+`f9d0b5a324ecb517e257d8d0c39413840caa851b` documents:
+- `server/packet-generator/assets/mst/mission.kdl`, Git blob
+  `23245d4affb1c77ae31e816b8eabca260012c640`, calls the
+  `8f4NYKxb` field a **candidate** `order:groupId` pair list. This
+  naming/interpretation comes from a distinct 2026 revival schema; **neither
+  2022 ordering nor which monster records each group resolves to is proven**.
+- `server/gimuserver/gme/common/RaidBattles.hpp`, Git blob
+  `7ff974e3133b1e8288692f5a45b88ec8c03f7769`, comments that its
+  reverse-engineering associates `MonsterParty::entry` with a
+  `BattleGroupMstList` lookup by mission and battle order. This is a clue
+  for independent decoder investigation, not an authenticated owner-source
+  ordered wave.
+- `server/scripts/gen_designed_missions.py`, Git blob
+  `83d1fafbc53a14d2969f9e1c35c12bafd9846454`, openly states that
+  absent capture-backed missions are *designed* from historical templates,
+  scaled, and sometimes repeated. **Never treat those manufactured rows
+  as original 2022 Global formations**, even if stage counts happen to match.
+- The main repo's existing `V175_ORIGINAL_2022_WAVE_SOURCE_AUDIT.md`
+  and `V176_ORIGINAL_2022_NESTED_SOURCE_AUDIT.md` already contain
+  strict SHA-gated local scanners for the genuine owner-provided
+  `mst-decoded.zip`. Their published CI checks are synthetic, not evidence
+  of having scanned the authentic full archive.
+
+**Practical next source gate:** locate and run both scanners on the exact
+owner 2022 ZIP with SHA-256
+`69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9`,
+then verify any candidate joined battle-group table against original 2022
+client parsing and independent group/enemy records. Keep all native readiness
+flags false until then; 2014 captures, 2021 historical metadata, and
+third-party 2026 authored stages cannot substitute.
