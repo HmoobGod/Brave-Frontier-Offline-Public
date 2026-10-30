@@ -156,6 +156,30 @@ with sync_playwright() as pw:
  page.evaluate("""()=>{
    window.BFAmdahlSourceQuestGuideV20600=window.__v211SavedGuide;
    delete window.__v211SavedGuide;}""")
+ page.evaluate("""()=>{
+   window.__v211SavedRefs=window.BFGlobalEncounterReferencesV15100;
+   const prev=window.__v211SavedRefs;
+   window.BFGlobalEncounterReferencesV15100={
+     ...prev,lookup:id=>id===404?{...prev.lookup(id),raw:'tampered'}:prev.lookup(id)};
+ }""")
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==0
+ assert any("BF211 Amdahl source-only pane unavailable: original 36 source" in m
+            for m in console_messages),console_messages
+ page.evaluate("""()=>{
+   window.BFGlobalEncounterReferencesV15100=window.__v211SavedRefs;
+   delete window.__v211SavedRefs;}""")
+ page.evaluate("""()=>{
+   window.__v211RemovedOption=document.querySelector("#bf20600-dungeon").lastElementChild;
+   window.__v211RemovedOption.remove();
+ }""")
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==0
+ assert any("BF211 Amdahl source-only pane unavailable: original Amdahl guide DOM" in m
+            for m in console_messages),console_messages
+ page.evaluate("""()=>{
+   document.getElementById('bf20600-dungeon').append(window.__v211RemovedOption);
+   delete window.__v211RemovedOption;}""")
  before_success_count=sum("BF211 Amdahl" in m for m in console_messages)
  page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
  assert page.locator("#bf20900-raw-mission-fields").count()==1
