@@ -32,7 +32,13 @@ def canonical_digest(rows):
 
 
 def duplicate_form(source_id, duplicate_id, expected_message):
-    """Update both manifests + source SHA so only six-element identity rejects."""
+    """Bypass SHA and cross-manifest equality guards, isolating set completeness.
+
+    Both manifests receive the same duplicate row (identity and recipe join),
+    the declared digest is recalculated (provenance), and ROWS_SHA is patched
+    for this synthetic call only (checksum). Per-row lineage, rarity, costs
+    and typed material validations continue to run unchanged.
+    """
     src, manifest = deepcopy(base_source), deepcopy(base_manifest)
     rows = src["rows"]
     ids = [row[0] for row in rows]
@@ -76,7 +82,7 @@ for bad in (None, [], "bad"):
     malformed = deepcopy(base_manifest)
     malformed["rows"][0]["originalEvo"] = bad
     expects_message(base_source, malformed, "malformed original evolution source")
-for bad in (None, {}, "bad", [None]):
+for bad in (None, {}, "bad", [], [None]):
     malformed = deepcopy(base_manifest)
     malformed["rows"][0]["originalEvo"]["materialSlots"] = bad
     expected = ("malformed source material record" if bad == [None]
