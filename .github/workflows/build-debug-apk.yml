@@ -17,6 +17,7 @@ on:
       - 'test_bf_original_2022_mimic_profiles_v20400.py'
       - 'source_data/bf_v204_2022_mimic_opaque_profiles.json'
       - 'audit_bf_original_2022_mimic_profiles_v20400.py'
+      - 'test_bf_legacy_v7_save_loading_v20500.py'
 
 permissions:
   contents: read
@@ -417,6 +418,7 @@ jobs:
           python test_bf_magutagal_v047.py
           python test_bf_quest_english_data_v048.py
           python test_bf_original_quest_economy_v14200.py
+          python test_bf_legacy_v7_save_loading_v20500.py
           python test_bf_original_quest_energy_visibility_v14300.py
           node --check app/src/main/assets/bf14500_original_global_music.js
           python test_bf_original_quest_music_v14500.py
