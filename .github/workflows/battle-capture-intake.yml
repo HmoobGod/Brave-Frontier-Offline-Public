@@ -7,6 +7,8 @@ on:
       - 'test_bf_server_battle_capture_fields_v20200.py'
       - 'audit_bf_server_battle_capture_colocation_v21200.py'
       - 'test_bf_server_battle_capture_colocation_v21200.py'
+      - 'test_bf_capture_cli_fail_closed_v21300.py'
+      - 'V213_CAPTURE_CLI_SAFETY_FOLLOWUP.md'
       - 'V212_MISSIONSTART_CAPTURE_COLOCATION_AUDIT.md'
   workflow_dispatch:
 
@@ -28,3 +30,5 @@ jobs:
         run: python test_bf_server_battle_capture_fields_v20200.py
       - name: Verify candidate battle field co-location without decoding or leaking values
         run: python test_bf_server_battle_capture_colocation_v21200.py
+      - name: Both local capture auditors reject malformed input without traceback
+        run: python test_bf_capture_cli_fail_closed_v21300.py
