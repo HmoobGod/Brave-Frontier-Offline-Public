@@ -71,7 +71,7 @@ combat and source-only 36 Amdahl quests are unchanged.
   remain valid in the canonical roster across future data updates. Never
   rename, recycle, remove or reassign purchased recruit IDs without a
   tested, compatible save migration. The existing `summonHistory` validator
-  has related ID-stability requirements. CI pins this compatibility guard.
+  has related ID-stability requirements. This is a **documented invariant, not yet pinned by a cross-version fixture**; current CI tests only receipts created within the same build. Before modifying RECRUIT_IDS, add a pinned v198 recruit-pool fixture or a previously saved schema-2 receipt fixture and verify it against the new build.
 - `BFGlobalCustomGemsV17000.snapshot()` must return a detached frozen
   receipts array containing detached frozen receipt objects, not references
   to the live canonical wallet. The schema-1 snapshot keeps its prior keys.
