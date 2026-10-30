@@ -95,6 +95,56 @@ with sync_playwright() as pw:
   assert page.locator('#bf20600-amdahl-guide').count()==0,field
   assert page.evaluate('window.BFAmdahlSourceQuestGuideV20600===undefined'),field
   page.evaluate('([field,old])=>{BFGlobalEncounterReferencesV15100.summary[field]=old}',[field,good])
+ # Claude N2: corrupt every other significant source/identity gate before
+ # initialization, then restore. A negative only passes if both DOM and API
+ # remain ABSENT; no malformed probe may alter the player's saved data.
+ row_change=('()=>{window.__oldLookup=BFGlobalEncounterReferencesV15100.lookup;'
+             'BFGlobalEncounterReferencesV15100.lookup=id=>')
+ row_restore=('()=>{BFGlobalEncounterReferencesV15100.lookup=window.__oldLookup;'
+              'delete window.__oldLookup}')
+ more_negatives=[
+  ('player-version','()=>{P.version=8}','()=>{P.version=7}'),
+  ('art-gameplay-enabled','()=>{BFAmdahlOriginalArtV14900.source.originalGameplayEnabled=true}',
+    '()=>{BFAmdahlOriginalArtV14900.source.originalGameplayEnabled=false}'),
+  ('art-waves-decoded','()=>{BFAmdahlOriginalArtV14900.source.decodedEnemyWaves=true}',
+    '()=>{BFAmdahlOriginalArtV14900.source.decodedEnemyWaves=false}'),
+  ('art-year','()=>{BFAmdahlOriginalArtV14900.source.sourceYear=2021}',
+    '()=>{BFAmdahlOriginalArtV14900.source.sourceYear=2022}'),
+  ('extra-playable-quest','()=>{QUESTS.push({missionId:999})}','()=>{QUESTS.pop()}'),
+  ('465-playable',row_change+
+    'id===465?{...window.__oldLookup(id),playable:true}:window.__oldLookup(id)}',
+    row_restore),
+  ('430-wrong-wave-count',row_change+
+    'id===430?{...window.__oldLookup(id),originalSourceWaveCount:3}:window.__oldLookup(id)}',
+    row_restore),
+  ('441-wrong-name',row_change+
+    'id===441?{...window.__oldLookup(id),name:"WRONG"}:window.__oldLookup(id)}',
+    row_restore),
+  ('401-missing',row_change+
+    'id===401?null:window.__oldLookup(id)}',row_restore),
+  ('wrong-meaning','()=>{BFGlobalEncounterReferencesV15100.summary.meaningDecoded=true}',
+    '()=>{BFGlobalEncounterReferencesV15100.summary.meaningDecoded=false}'),
+  ('wrong-amdahl-count','()=>{BFGlobalEncounterReferencesV15100.summary.amdahlSourceOnlyMissions=35}',
+    '()=>{BFGlobalEncounterReferencesV15100.summary.amdahlSourceOnlyMissions=36}'),
+  ('wrong-playable-count','()=>{BFGlobalEncounterReferencesV15100.summary.playableMissions=105}',
+    '()=>{BFGlobalEncounterReferencesV15100.summary.playableMissions=106}'),
+  ('no-map','()=>{window.__oldMap=document.getElementById("bf14900-amdahl-art");'
+    'window.__oldMap.remove()}',
+    '()=>{document.body.append(window.__oldMap);delete window.__oldMap}'),
+  ('no-art','()=>{window.__oldArt=window.BFAmdahlOriginalArtV14900;'
+    'delete window.BFAmdahlOriginalArtV14900}',
+    '()=>{window.BFAmdahlOriginalArtV14900=window.__oldArt;delete window.__oldArt}'),
+  ('no-refs','()=>{window.__oldRefs=window.BFGlobalEncounterReferencesV15100;'
+    'delete window.BFGlobalEncounterReferencesV15100}',
+    '()=>{window.BFGlobalEncounterReferencesV15100=window.__oldRefs;delete window.__oldRefs}'),
+ ]
+ for label,break_state,restore_state in more_negatives:
+  page.evaluate(break_state)
+  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
+  assert page.locator('#bf20600-amdahl-guide').count()==0,label
+  assert page.evaluate('window.BFAmdahlSourceQuestGuideV20600===undefined'),label
+  page.evaluate(restore_state)
+ assert not errors,errors
  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
  assert page.locator('#bf20600-amdahl-guide').count()==1
  assert page.locator('#bf20600-dungeon option').count()==7
