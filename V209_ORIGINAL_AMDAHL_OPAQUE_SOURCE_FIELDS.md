@@ -16,6 +16,9 @@ Every mission now has a read-only source row showing:
 - The original `rawRewards` token, including the seven Amdahl end-quests
   with `8:0:1:0:0`. This is **uninterpreted archival text**, not a drop,
   reward value or eligibility to claim an item.
+  **For Amdahl, the token is shown only as an uninterpreted original string;
+  no first-clear reward or other payout is applied.** This is distinct from
+  the project's custom first-clear Gem handling for already-playable quests.
 - The original `npcId` (all zero for these 36 source rows). This is not
   a playable NPC or a recovered NPC AI script.
 

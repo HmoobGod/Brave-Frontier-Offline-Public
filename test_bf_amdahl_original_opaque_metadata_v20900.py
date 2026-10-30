@@ -85,6 +85,87 @@ with sync_playwright() as pw:
  page.add_script_tag(path=str(A/"bf20900_amdahl_original_opaque_mission_fields.js"))
  assert page.locator("#bf20900-raw-mission-fields").count()==0
  page.evaluate("window.BFAmdahlSourceQuestGuideV20600=window.__priorGuide;delete window.__priorGuide")
+ # v210 / Claude N1: guard-negative probes run BEFORE any successful v209
+ # initialization; thus the existing DOM/API cannot mask a bad guard.
+ page.evaluate("""()=>{window.__v210Guide=BFAmdahlSourceQuestGuideV20600;
+                       window.__v210Refs=BFGlobalEncounterReferencesV15100;}""")
+ def blocked(label):
+  page.add_script_tag(path=str(A/"bf20900_amdahl_original_opaque_mission_fields.js"))
+  assert page.locator("#bf20900-raw-mission-fields").count()==0,label
+  assert page.evaluate("window.BFAmdahlOriginalOpaqueFieldsV20900===undefined"),label
+ for field,bad in (("masterSha256","bad-master"),
+                   ("canonicalQuestSha256","bad-quest"),
+                   ("playable",True),("missions",35)):
+  page.evaluate("""([key,value])=>{
+   const g=window.__v210Guide;
+   window.BFAmdahlSourceQuestGuideV20600={
+     ...g,source:{...g.source,[key]:value}};
+  }""",[field,bad])
+  blocked("v206-source-"+field)
+  page.evaluate("window.BFAmdahlSourceQuestGuideV20600=window.__v210Guide")
+ for field,bad in (("sha256","bad-master"),
+                   ("meaningDecoded",True),
+                   ("amdahlSourceOnlyMissions",35),
+                   ("playableMissions",105)):
+  page.evaluate("""([key,value])=>{
+   const r=window.__v210Refs;
+   window.BFGlobalEncounterReferencesV15100={
+     ...r,summary:{...r.summary,[key]:value}};
+  }""",[field,bad])
+  blocked("v151-summary-"+field)
+  page.evaluate("window.BFGlobalEncounterReferencesV15100=window.__v210Refs")
+ for field,mission,bad in (("raw",404,"0:99999"),
+                           ("dungeonId",465,400),
+                           ("playable",430,True),
+                           ("missing",401,None)):
+  page.evaluate("""([field,mid,bad])=>{
+   const r=window.__v210Refs;
+   window.BFGlobalEncounterReferencesV15100={
+    ...r,lookup:id=>id!==mid?r.lookup(id):field==="missing"?
+      null:{...r.lookup(id),[field]:bad}};
+  }""",[field,mission,bad])
+  blocked("v151-row-"+field+"-"+str(mission))
+  page.evaluate("window.BFGlobalEncounterReferencesV15100=window.__v210Refs")
+ page.evaluate("""()=>{
+  const g=window.__v210Guide;
+  window.BFAmdahlSourceQuestGuideV20600={
+    ...g,lookup:id=>{const x=g.lookup(id);
+      return id===441?[x[0],999,...x.slice(2)]:x;}};
+ }""")
+ blocked("v206-wrong-dungeon-441")
+ page.evaluate("window.BFAmdahlSourceQuestGuideV20600=window.__v210Guide")
+ page.evaluate("QUESTS.push({missionId:999})")
+ blocked("107-playable-quests")
+ page.evaluate("QUESTS.pop()")
+ page.evaluate("delete window.BFAmdahlSourceQuestGuideV20600")
+ blocked("missing-v206-api")
+ page.evaluate("window.BFAmdahlSourceQuestGuideV20600=window.__v210Guide")
+ page.evaluate("delete window.BFGlobalEncounterReferencesV15100")
+ blocked("missing-v151-api")
+ page.evaluate("window.BFGlobalEncounterReferencesV15100=window.__v210Refs")
+ page.evaluate("""()=>{window.__v210Option=
+   document.querySelector("#bf20600-dungeon").lastElementChild;
+   window.__v210Option.remove();}""")
+ blocked("wrong-dungeon-option-count")
+ page.evaluate("""()=>{document.querySelector("#bf20600-dungeon")
+   .append(window.__v210Option);delete window.__v210Option;}""")
+ for id in ("bf20600-dungeon","bf20600-quest-list","bf20600-amdahl-guide"):
+  page.evaluate("""id=>{
+   const el=document.getElementById(id);
+   window.__v210Removed=el;
+   window.__v210Parent=el.parentElement;
+   window.__v210Next=el.nextSibling;
+   el.remove();
+  }""",id)
+  blocked("missing-dom-"+id)
+  page.evaluate("""()=>{
+   window.__v210Parent.insertBefore(window.__v210Removed,window.__v210Next);
+   delete window.__v210Removed;
+   delete window.__v210Parent;
+   delete window.__v210Next;
+  }""")
+ assert not errors,errors
+ page.evaluate("delete window.__v210Guide;delete window.__v210Refs")
  page.add_script_tag(path=str(A/"bf20900_amdahl_original_opaque_mission_fields.js"))
  page.add_script_tag(path=str(A/"bf17400_original_2022_encounter_crossrefs.js"))
  assert not errors,errors

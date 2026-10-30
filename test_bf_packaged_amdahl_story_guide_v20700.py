@@ -19,9 +19,11 @@ MANIFEST = ROOT / "app/src/main/AndroidManifest.xml"
 SOURCE = ROOT / "source_data/bf_global_2022_amdahl_quest_readiness_v147.json"
 LIVE = ROOT / "source_data/bf_global_original_2022_live_quest_economy_v142.json"
 GUIDE = "bf20600_amdahl_source_quest_guide.js"
+OPAQUE = "bf20900_amdahl_original_opaque_mission_fields.js"
 ORDER = ("bf14900_original_amdahl_art.js",
          "bf15100_amdahl_encounter_evidence.js",
          GUIDE,
+         OPAQUE,
          "bf17400_original_2022_encounter_crossrefs.js")
 MASTER = "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83"
 QUEST = "f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3"
@@ -41,7 +43,9 @@ assert all(java.count('readPackagedText("' + n + '")') == 1 for n in ORDER)
 positions = [java.index('readPackagedText("' + n + '")') for n in ORDER]
 assert positions == sorted(positions), "Source module injection order changed"
 assert 'view.evaluateJavascript(amdahlGuide, null);' in java
+assert 'view.evaluateJavascript(amdahlOriginalFields, null);' in java
 assert 'Optional original Amdahl story guide unavailable' in java
+assert 'Optional original Amdahl source fields unavailable' in java
 assert "applicationId 'org.bravefrontier.offline'" in GRADLE.read_text("utf8")
 assert "android.permission.INTERNET" not in MANIFEST.read_text("utf8")
 source_bytes = (ASSETS / GUIDE).read_bytes()
@@ -55,6 +59,16 @@ assert "masterSha256:MASTER_SHA256" in source_text
 assert "canonicalQuestSha256:QUEST_SHA256" in source_text
 assert "localStorage.setItem" not in source_text
 assert "QUESTS.push" not in source_text
+opaque_bytes = (ASSETS / OPAQUE).read_bytes()
+opaque_text = opaque_bytes.decode("utf8")
+assert len(opaque_bytes) < 65536
+assert opaque_text.count("BF_AMDAHL_ORIGINAL_OPAQUE_MISSION_FIELDS_V20900") == 1
+assert opaque_text.count(MASTER) == opaque_text.count(QUEST) == 1
+assert "const MASTER_SHA256='" + MASTER + "'" in opaque_text
+assert "const QUEST_SHA256='" + QUEST + "'" in opaque_text
+assert "localStorage." not in opaque_text
+assert "QUESTS.push(" not in opaque_text
+assert "8:0:1:0:0" in opaque_text
 
 with ZipFile(APK) as apk:
     assert apk.testzip() is None, "APK archive contains corrupt members"
@@ -64,6 +78,7 @@ with ZipFile(APK) as apk:
         assert key in names, "Missing packaged script: " + key
         assert apk.read(key) == (ASSETS / n).read_bytes(), "Wrong packaged asset bytes: " + n
     assert apk.read("assets/" + GUIDE) == source_bytes
+    assert apk.read("assets/" + OPAQUE) == opaque_bytes
     html = apk.read("assets/index.html")
     assert html == (ASSETS / "index.html").read_bytes()
     assert b"bf_global_offline_demo_v7" in html
@@ -76,8 +91,13 @@ with ZipFile(APK) as apk:
         "Compiled Android DEX missing or duplicates readPackagedText guide name")
     assert any(needle in blob and b"evaluateJavascript" in blob for blob in dex), (
         "Compiled DEX lacks WebView evaluateJavascript near guide reference")
+    opaque_needle = OPAQUE.encode("ascii")
+    assert sum(blob.count(opaque_needle) for blob in dex) == 1, (
+        "Compiled Android DEX missing or duplicates v209 raw-source module name")
+    assert any(opaque_needle in blob and b"evaluateJavascript" in blob for blob in dex), (
+        "Compiled Android DEX lacks WebView evaluateJavascript near v209 reference")
     for n in ORDER:
         assert sum(blob.count(n.encode("ascii")) for blob in dex) >= 1, (
             "Compiled Android DEX lost source dependency: " + n)
 
-print("PASS v207: compiled APK bytes, full 2022 SHA, ordered Android DEX guide reference, 106 quests, v7 save key")
+print("PASS v210: v206 and v209 compiled APK asset bytes, full 2022 source SHAs, Java DEX references, 106 quests, v7 key")
