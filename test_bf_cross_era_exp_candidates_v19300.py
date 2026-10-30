@@ -48,6 +48,12 @@ with tempfile.TemporaryDirectory() as temp:
        text=True,capture_output=True)
     assert "72 source-exact 2022" in out.stdout
     assert "NOT verified 2022 thresholds" in out.stdout
+    blocked=ROOT/"source_data"/"SHOULD_NOT_WRITE_v193.json"
+    assert not blocked.exists()
+    rejected=subprocess.run([sys.executable,str(script),"--output",str(blocked)],
+        cwd=str(ROOT),text=True,capture_output=True)
+    assert rejected.returncode!=0 and not blocked.exists(),(
+        "Research output must never overwrite project source files")
 
     # Negative probes operate in temp files only; never change project sources.
     history=json.loads(evidence.read_text("utf8"))
