@@ -2,6 +2,8 @@
 (() => {
  'use strict';
  // Read-only source-backed 36-mission Amdahl journal; absolutely no battles, wallet, save or unlock.
+ const MASTER_SHA256='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83';
+ const QUEST_SHA256='f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3';
  const art=window.BFAmdahlOriginalArtV14900, refs=window.BFGlobalEncounterReferencesV15100;
  if(window.BFAmdahlSourceQuestGuideV20600 || typeof P==='undefined' || P.version!==7 ||
    typeof QUESTS==='undefined' || !Array.isArray(QUESTS) || QUESTS.length!==106 ||
@@ -9,8 +11,8 @@
    art.source?.originalGameplayEnabled!==false ||
    art.source?.decodedEnemyWaves!==false || !refs ||
    refs.summary?.sourceYear!==2022 ||
-   refs.summary?.sha256!=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83' ||
-   refs.summary?.amdahlQuestCanonicalSha256!=='f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3' ||
+   refs.summary?.sha256!==MASTER_SHA256 ||
+   refs.summary?.amdahlQuestCanonicalSha256!==QUEST_SHA256 ||
    refs.summary?.amdahlSourceOnlyMissions!==36 || refs.summary?.playableMissions!==106 ||
    refs.summary?.meaningDecoded!==false || refs.summary?.gameplayMutation!==false ||
    refs.summary?.saveMutation!==false) return;
@@ -73,8 +75,8 @@
  }
  block.append(heading,disclaimer,label,list);root.append(block);preview(400);
  window.BFAmdahlSourceQuestGuideV20600=Object.freeze({
-   source:Object.freeze({year:2022,masterSha256:'d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9',
-     canonicalQuestSha256:'f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3',
+   source:Object.freeze({year:2022,masterSha256:MASTER_SHA256,
+     canonicalQuestSha256:QUEST_SHA256,
      missions:36,originalEnemyWavesVerified:false,playable:false,saveMutation:false}),
    lookup:id=>Number.isSafeInteger(id)?rows.find(r=>r[0]===id)?.slice()||null:null,preview
  });
