@@ -3,6 +3,12 @@ on:
   workflow_dispatch:
   push:
     branches: ['**']
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-debug-apk.yml'
+      - 'source_data/bf_v201_native_2022_encounter_gate.json'
+      - 'test_bf_native_2022_encounter_gates_v20100.py'
 
 permissions:
   contents: read
@@ -15,6 +21,8 @@ concurrency:
 
 jobs:
   build:
+    # Never expose the signing secret to untrusted fork PR jobs.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout project
