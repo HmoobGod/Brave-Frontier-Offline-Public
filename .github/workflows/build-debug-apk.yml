@@ -363,6 +363,7 @@ jobs:
           python test_bf_personal_gem_rewards_v17000.py
           python test_bf_atomic_demo_summon_v19200.py
           python test_bf_personal_gem_summon_v19800.py
+          python test_bf_personal_gem_v124_upgrade_v19801.py
           python test_bf_personal_gem_quick_access_v19000.py
           python test_bf_original_gem_claims_v17300.py
           python test_bf_original_gem_claims_downgrade_v17300.py
