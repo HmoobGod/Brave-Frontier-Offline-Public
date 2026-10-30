@@ -6,6 +6,8 @@ on:
       - 'audit_bf_original_2022_reference_collisions_v19900.py'
       - 'test_bf_original_2022_reference_collisions_v19900.py'
       - 'test_bf_native_2022_encounter_gates_v20100.py'
+      - 'source_data/bf_v203_authenticated_2022_local_scan_summary.json'
+      - 'test_bf_authenticated_2022_local_scan_v20300.py'
       - 'source_data/bf_v201_native_2022_encounter_gate.json'
       - 'source_data/bf_global_2022_mission_cross_table_v152.json.gz.b64'
       - 'source_data/bf_global_mistral_raw_mission_evidence_v056.json'
@@ -38,3 +40,5 @@ jobs:
         run: python test_bf_original_2022_reference_collisions_v19900.py
       - name: Reject unsupported native enemy wave promotion
         run: python test_bf_native_2022_encounter_gates_v20100.py
+      - name: Verify authenticated 2022 local scan aggregate claims
+        run: python test_bf_authenticated_2022_local_scan_v20300.py

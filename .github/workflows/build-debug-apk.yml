@@ -12,6 +12,8 @@ on:
       - 'source_data/bf_v201_native_2022_encounter_gate.json'
       - 'test_bf_native_2022_encounter_gates_v20100.py'
       - 'test_bf_server_battle_capture_fields_v20200.py'
+      - 'source_data/bf_v203_authenticated_2022_local_scan_summary.json'
+      - 'test_bf_authenticated_2022_local_scan_v20300.py'
 
 permissions:
   contents: read
@@ -213,6 +215,7 @@ jobs:
           python test_bf_mistral_stage_counts_v19700.py
           python test_bf_original_2022_reference_collisions_v19900.py
           python test_bf_native_2022_encounter_gates_v20100.py
+          python test_bf_authenticated_2022_local_scan_v20300.py
           python test_bf_server_battle_capture_fields_v20200.py
           python test_bf_original_exp_readonly_crosscheck_v11900.py
           python test_bf_original_all_unit_stat_archive_v12000.py
