@@ -40,6 +40,8 @@ def validate(value):
         "sourceIncludedInPublicRepository", "sourceVerifiedLocally",
         "scanMethod", "sourceMissionSelection", "sourceMissionCount",
         "areaMissionCounts", "distinctOpaqueReferenceStrings",
+        "v152CanonicalCompressedFixtureSha256", "v152CanonicalMissionRowsSha256",
+        "v152MissionReferencesExactMatchCount", "v152MissionReferencesMismatchCount",
         "referenceReuseHistogram", "scannedTranslatedMasterTableCount",
         "skippedTableCount", "topLevelCandidateFields",
         "nestedExactReferenceCandidatePathCount", "raidBattleGroupTable",
@@ -57,6 +59,12 @@ def validate(value):
     assert "not claimed to have been executed" in value["scanMethod"]
     assert value["sourceMissionSelection"].startswith("area 100 excluding mission 90")
     assert value["sourceMissionCount"] == report["missionCount"] == 142
+    assert value["v152CanonicalCompressedFixtureSha256"] == (
+        "cc8aeda4a3f95555985bf4aada5c75f1f1dfdb67f0ee800d36b7aba56327f59a")
+    assert value["v152CanonicalMissionRowsSha256"] == (
+        "2acd1ab29b8a00b3c8804a89fdc9d7b99cba4853f5974f765bc7473c89e7a284")
+    assert value["v152MissionReferencesExactMatchCount"] == 142
+    assert value["v152MissionReferencesMismatchCount"] == 0
     assert value["distinctOpaqueReferenceStrings"] == report["distinctRawReferenceStrings"] == 29
     assert value["areaMissionCounts"] == report["sourceAreas"]
     assert value["referenceReuseHistogram"] == report["referenceReuseSizeHistogram"]
@@ -111,6 +119,7 @@ def fake_waves(x): x["native2022OrderedWaveFormationsVerified"] = True
 def fake_join(x): x["native2022EncounterGroupJoinDecoded"] = True
 def fake_ai(x): x["native2022EnemyAiAndDropsVerified"] = True
 def fake_nested(x): x["nestedExactReferenceCandidatePathCount"] = 1
+def mismatched_v152(x): x["v152MissionReferencesMismatchCount"] = 1
 def fake_found_table(x): x["topLevelCandidateFields"][0]["matchedMissionIds"] = 142
 def fake_raid_join(x): x["raidBattleGroupTable"]["authenticated2022StoryWaveJoin"] = True
 def changed_game(x): x["changesGameplay"] = True
@@ -118,6 +127,6 @@ def added_enemy_id(x): x["enemyIds"] = [1000]
 def source_in_public(x): x["sourceIncludedInPublicRepository"] = True
 for m in (changed_source, fake_waves, fake_join, fake_ai, fake_nested,
           fake_found_table, fake_raid_join, changed_game, added_enemy_id,
-          source_in_public):
+          source_in_public, mismatched_v152):
     mutation_rejected(m)
-print("PASS v203: SHA-verified local 2022 aggregate gate, 10 negative probes, no native encounter promotion")
+print("PASS v203: SHA-verified local 2022 aggregate gate, 11 negative probes, no native encounter promotion")
