@@ -76,6 +76,8 @@ with sync_playwright() as pw:
  assert page.locator('#bf20600-amdahl-guide').count()==1
  assert page.locator('#bf20600-dungeon option').count()==7
  assert page.locator('#bf20600-quest-list li').count()==5
+ page.locator('#bf14900-amdahl-art > summary').click()
+ page.locator('#bf20600-amdahl-guide > summary').click()
  assert 'The Scars of War' in page.locator('#bf20600-quest-list').inner_text()
  assert 'NOT PLAYABLE' in page.locator('#bf20600-quest-list').inner_text()
  assert '1800 EXP' in page.locator('#bf20600-quest-list').inner_text()
@@ -98,7 +100,7 @@ with sync_playwright() as pw:
  assert before==after,(before,after)
  page.evaluate('delete window.BFAmdahlSourceQuestGuideV20600;P.version=8')
  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
- assert page.evaluate('Boolean(BFAmdahlSourceQuestGuideV20600)') is False
+ assert page.evaluate('Boolean(window.BFAmdahlSourceQuestGuideV20600)') is False
  assert page.locator('#bf20600-amdahl-guide').count()==1
  assert not errors,errors
  browser.close()
