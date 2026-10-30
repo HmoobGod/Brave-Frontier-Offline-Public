@@ -53,13 +53,14 @@ The 2022 `MISSION_8f4NYKxb` encounter strings (e.g.
 - `source_data/bf_global_2021_mistral_mimic_history_v196.json`:
   34 historical records, pinned 2021 Git blob and true 2022 source hashes.
 - `audit_bf_mistral_mimic_cross_era_v19600.py`:
-  source/year and SHA gates, exact 34-ID joins, 21/13 token-class parity,
+  source/year and SHA gates, exact repository Git-blob fixture hashes, 34-ID joins, 21/13 token-class parity,
   fail-closed unknown raw strings; produces optional research-only JSON
   outside the repository.
 - `test_bf_mistral_mimic_cross_era_v19600.py`:
-  exact IDs/candidate groups, eight negative source/provenance probes,
+  exact IDs/candidate groups, ten negative source/provenance/byte-drift probes,
   deterministic report, prevents source mutations and confirms the v7
   canonical save key remains in the unmodified game.
+- Repository fixture Git-blob anchors detect changes to the 34-row source inputs; they do not independently authenticate the upstream 2022 archive or the 2021 history beyond the source provenance stated above.
 - One workflow test registration. No modification of app assets, Gradle,
   `MainActivity`, source game config, saved EXP, Gems, Imps, quests, or
   current 106 DEMO mission battle logic.
