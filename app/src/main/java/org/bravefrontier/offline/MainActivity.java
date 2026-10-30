@@ -964,6 +964,14 @@ public class MainActivity extends Activity {
                 } catch (IOException amdahlGuideError) {
                     android.util.Log.w("BraveFrontier", "Optional original Amdahl story guide unavailable", amdahlGuideError);
                 }
+                // v209: original 2022 Amdahl opaque reward/music/source record preview only.
+                // No real battle enemy decoding, music playback, items, wallets or saves.
+                try {
+                    String amdahlOriginalFields = readPackagedText("bf20900_amdahl_original_opaque_mission_fields.js");
+                    view.evaluateJavascript(amdahlOriginalFields, null);
+                } catch (IOException amdahlFieldsError) {
+                    android.util.Log.w("BraveFrontier", "Optional original Amdahl source fields unavailable", amdahlFieldsError);
+                }
                 // v174: read-only original 2022 mission cross-table, after v151.
                 // No enemy IDs, waves, native AI or drops are inferred here.
                 try {
