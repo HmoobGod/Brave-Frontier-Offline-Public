@@ -70,7 +70,7 @@ def inspect_bytes(raw):
         'original2022OrderedWavesVerified': False,
         'original2022EnemyAiAndDropsVerified': False,
         'mutatesGameOrSave': False,
-        'sourceScope': 'untrusted decoded JSON key co-location only; no field values read',
+        'sourceScope': 'untrusted decoded JSON key co-location only; no field values reported',
     }
 
 
