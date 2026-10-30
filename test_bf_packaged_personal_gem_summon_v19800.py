@@ -27,4 +27,4 @@ with ZipFile(APK) as z:
  assert ui==(A/"bf17000_personal_gem_rewards_ui.js").read_text("utf8")
  assert "android.permission.INTERNET" not in (A.parent/"AndroidManifest.xml").read_text("utf8")
  assert "applicationId 'org.bravefrontier.offline'" in (R/"app/build.gradle").read_text("utf8")
-print("PASS v198 APK: 100-Gem personal summons, schema-2 receipts, canonical v7, original Gemini ledger unchanged and original signing ID preserved")
+print("PASS v198 APK: 100-Gem personal summons, schema-2 receipts, canonical v7, original Gem ledger unchanged and original signing ID preserved")
