@@ -1,0 +1,40 @@
+{
+  "schema": "bf-global-v200-merged-v198-summon-pool-compatibility-baseline",
+  "provenance": {
+    "repository": "HmoobGod/Brave-Frontier-Offline-Public",
+    "baselineVersion": "v198",
+    "baselineMainCommit": "e40924d7b54960ff0ca4d685835c84b5e33ac18a",
+    "unpreparedIndexGitBlob": "4ef5f1a1a4c3c0817828f29c0646a51a98843c77",
+    "definition": "const STARTERS=window.BF_STARTER_UNITS; STARTER_IDS=STARTERS.slice(0,6); RECRUIT_IDS=STARTERS.slice(6)",
+    "caution": "Historical checked-in v198 unit list. It is NOT an original 2022 summon banner, a real owner save, or an independently extracted GitHub Actions build artifact."
+  },
+  "startingUnitIds": [
+    10011,
+    20011,
+    30011,
+    40011,
+    50011,
+    60011
+  ],
+  "historicallyPurchasableDemoIds": [
+    10021,
+    20021,
+    30021,
+    40021,
+    50021,
+    60021,
+    10041,
+    20041,
+    30041,
+    40041,
+    50041,
+    60041
+  ],
+  "syntheticSchema2ReceiptIds": [
+    10021,
+    20021
+  ],
+  "syntheticPersonalEarnedGems": 1000,
+  "syntheticPersonalSpentGems": 200,
+  "changesToGame": false
+}
