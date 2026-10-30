@@ -138,6 +138,10 @@ with sync_playwright() as pw:
     assert page.locator("#bf20600-quest-list li").count() == 6
     assert "Malevolent Ceremony" in page.locator("#bf20600-quest-list").inner_text()
     page.wait_for_function("()=>document.querySelectorAll(\'#bf20900-source-fields li\').length===6")
+    assert page.locator("#bf20900-source-fields li").last.get_attribute("data-source-mission") == "465"
+    # Raw entries intentionally begin in a collapsed <details>. Open the pane
+    # before checking *visible* inner_text() rather than hidden textContent.
+    page.locator("#bf20900-raw-mission-fields > summary").click()
     assert "8:0:1:0:0" in page.locator("#bf20900-source-fields").inner_text()
     assert page.evaluate("__bf208Writes()") == 0
     browser.close()
