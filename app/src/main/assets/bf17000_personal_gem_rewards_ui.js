@@ -35,8 +35,9 @@
    'cannot claim a prior day again. The clock can still be changed offline. '+
    'Already-cleared quests are not paid retroactively, but later replays earn '+
    '1 Gem. All Gem claims and quest counts use the same v7 save transaction. '+
-   'Back up your save before using an older APK; old parsers can drop newer '+
-   'Gem metadata. Gem spending in summons is a separate future mechanic.';
+   'Back up your save before downgrading. After a purchase, older APKs '+
+   'cannot read personal summon receipts. Personal summons cost 100 '+
+   'Gems per unowned DEMO recruit; these are not original 2022 summon rates.';
  for(const button of [custom,original,welcome,daily]){
    button.style.cssText='padding:8px 10px;margin:3px;min-height:40px;'+
      'border-radius:6px;font-weight:700';
