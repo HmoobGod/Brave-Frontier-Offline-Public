@@ -8,6 +8,8 @@ on:
       - 'audit_bf_server_battle_capture_colocation_v21200.py'
       - 'test_bf_server_battle_capture_colocation_v21200.py'
       - 'test_bf_capture_cli_fail_closed_v21300.py'
+      - 'test_bf_capture_cli_error_privacy_v21400.py'
+      - 'V214_CAPTURE_ERROR_PRIVACY.md'
       - 'V213_CAPTURE_CLI_SAFETY_FOLLOWUP.md'
       - 'V212_MISSIONSTART_CAPTURE_COLOCATION_AUDIT.md'
   workflow_dispatch:
@@ -32,3 +34,5 @@ jobs:
         run: python test_bf_server_battle_capture_colocation_v21200.py
       - name: Both local capture auditors reject malformed input without traceback
         run: python test_bf_capture_cli_fail_closed_v21300.py
+      - name: Verify generic privacy-preserving CLI errors and file I/O failures
+        run: python test_bf_capture_cli_error_privacy_v21400.py
