@@ -141,6 +141,26 @@ with sync_playwright() as pw:
    P=real;renderSummonPanel();
    return blocked;
  }""")
+ # Valid insufficient-funds case: a pre-cleared quest yields 99 replay
+ # Gems with welcome unclaimed. This tests the real 99-Gem guard, rather
+ # than a fabricated wallet that the validator would reject immediately.
+ assert page.evaluate("""()=>{
+   const old=defaultProgress();
+   old.questClears={'10':1};
+   P=parseProgress(old);
+   return P._bfGemV170Custom.schema===1 &&
+     P._bfGemV170Custom.balance===0 &&
+     P._bfGemV170Custom.legacyClears.includes(10);
+ }""")
+ assert page.evaluate("BFGlobalCustomGemsV17000.setMode('custom')") is True
+ page.evaluate("QUEST=QUESTS.find(q=>q.missionId===10);for(let i=0;i<99;i++)awardDemoRewards()")
+ assert page.evaluate('P._bfGemV170Custom.balance')==99
+ assert page.evaluate('P._bfGemV170Custom.replaysPaid')==99
+ assert page.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)')
+ assert page.locator('#bf19800-personal-summon').is_disabled()
+ before99=page.evaluate('JSON.stringify(P)')
+ assert page.evaluate('bf198PersonalSummon()') is False
+ assert page.evaluate('JSON.stringify(P)')==before99
  assert not errors,errors
  browser.close()
 print('PASS v198.02: frozen detached receipts, schema1 keys, 2nd quota rollback, post-purchase rewards, 100-history cap and recruit-ID stability')
