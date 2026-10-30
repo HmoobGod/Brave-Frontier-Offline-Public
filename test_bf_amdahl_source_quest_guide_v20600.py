@@ -55,7 +55,7 @@ with sync_playwright() as pw:
   window.QUESTS=data.playable.map(r=>({missionId:r[0]}));
   const ds=data.dungeons.map(d=>({id:d.id,name:d.name,firstMissionId:d.id}));
   window.BFAmdahlOriginalArtV14900={
-   entries:ds,source:{originalGameplayEnabled:false,decodedEnemyWaves:false},
+   entries:ds,source:{sourceYear:2022,originalGameplayEnabled:false,decodedEnemyWaves:false},
    lookup:id=>ds.find(d=>d.id===id)||null,
    preview:id=>(window.__lastArtPreview=id,true)
   };
@@ -64,7 +64,10 @@ with sync_playwright() as pw:
    name:r[8],playable:false
   }));
   window.BFGlobalEncounterReferencesV15100={
-   summary:{amdahlSourceOnlyMissions:36,playableMissions:106,meaningDecoded:false},
+   summary:{sourceYear:2022,sha256:'d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83',
+    amdahlQuestCanonicalSha256:'f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3',
+    amdahlSourceOnlyMissions:36,playableMissions:106,meaningDecoded:false,
+    gameplayMutation:false,saveMutation:false},
    lookup:id=>list.find(r=>r.missionId===id)||null
   };
   window.__initial=JSON.stringify({player:P,battle:S,quests:QUESTS});
@@ -72,6 +75,20 @@ with sync_playwright() as pw:
  before=page.evaluate("""()=>({player:JSON.stringify(P),battle:JSON.stringify(S),
     quests:JSON.stringify(QUESTS),save:localStorage.getItem('bf_global_offline_demo_v7'),
     writes:__saveWrites()})""")
+ # Corrupt provenance or claim a mutation: the guide must fail closed.
+ for field,bad_value in (
+  ('sha256','0'*64),
+  ('amdahlQuestCanonicalSha256','0'*64),
+  ('gameplayMutation',True),
+  ('saveMutation',True),
+  ('sourceYear',2021),
+ ):
+  good=page.evaluate('(field)=>BFGlobalEncounterReferencesV15100.summary[field]',field)
+  page.evaluate('([field,bad])=>{BFGlobalEncounterReferencesV15100.summary[field]=bad}',[field,bad_value])
+  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
+  assert page.locator('#bf20600-amdahl-guide').count()==0,field
+  assert page.evaluate('window.BFAmdahlSourceQuestGuideV20600===undefined'),field
+  page.evaluate('([field,old])=>{BFGlobalEncounterReferencesV15100.summary[field]=old}',[field,good])
  page.add_script_tag(path=str(APP/'bf20600_amdahl_source_quest_guide.js'))
  assert page.locator('#bf20600-amdahl-guide').count()==1
  assert page.locator('#bf20600-dungeon option').count()==7
