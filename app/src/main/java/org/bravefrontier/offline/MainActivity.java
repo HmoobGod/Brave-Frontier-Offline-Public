@@ -957,6 +957,13 @@ public class MainActivity extends Activity {
                 } catch (IOException amdahlRefsError) {
                     android.util.Log.w("BraveFrontier", "Optional Amdahl source refs unavailable", amdahlRefsError);
                 }
+                // v206: read-only original Amdahl quest text/economy, never unlocks 400-series battles.
+                try {
+                    String amdahlGuide = readPackagedText("bf20600_amdahl_source_quest_guide.js");
+                    view.evaluateJavascript(amdahlGuide, null);
+                } catch (IOException amdahlGuideError) {
+                    android.util.Log.w("BraveFrontier", "Optional original Amdahl story guide unavailable", amdahlGuideError);
+                }
                 // v174: read-only original 2022 mission cross-table, after v151.
                 // No enemy IDs, waves, native AI or drops are inferred here.
                 try {
