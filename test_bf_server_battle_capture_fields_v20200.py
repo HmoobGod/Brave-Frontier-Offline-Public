@@ -41,7 +41,7 @@ def rejects(raw):
 
 rejects(b'{"U0v5IeJo":1,"U0v5IeJo":2}')  # duplicate key
 rejects(b'{"data":')  # malformed
-rejects(b'\\xff')  # not UTF-8
+rejects(bytes([255]))  # non-UTF8 input
 rejects(b'1234')  # not an object/array
 rejects(b'[' + b'0,' * (audit.MAX_BYTES // 2) + b'0]')  # size
 rejects(b'[' * (audit.MAX_DEPTH + 2) + b'0' + b']' * (audit.MAX_DEPTH + 2))
