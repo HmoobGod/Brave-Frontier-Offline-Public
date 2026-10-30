@@ -1,5 +1,5 @@
-BRAVE FRONTIER OFFLINE v0.13 — WINDOWS
-1. Extract ZIP, open Brave_Frontier_Android_Offline_v0.13 in Android Studio.
+BRAVE FRONTIER OFFLINE — WINDOWS / LEGACY BUILD GUIDE
+1. Open the checked-out repository in Android Studio. (Old ZIP instructions applied to v0.13 only.)
 2. Ensure Android SDK API 35 and JDK 17 are configured.
 3. Sync Gradle and use Build > Build APK(s); or run BUILD_APK_WINDOWS.bat.
 4. On success find app\build\outputs\apk\debug\app-debug.apk.
@@ -12,8 +12,8 @@ build-time v160-v198 Gem patches. Running Build APK(s) or BUILD_APK_WINDOWS.bat
 directly can produce an APK missing the newer Gem and receipt validators.
 Do not install that locally built APK over an app that has purchased a
 PERSONAL OFFLINE 100-Gem summon (schema-2 wallet). It is effectively an
-unsupported downgrade and can quarantine or overwrite the active v7 save.
+unsupported downgrade. The checked-in unpatched HTML does not have the Gem wallet validator: it may silently ignore the unknown schema-2 wallet and discard its Gems and purchase receipts on the next save, while keeping recruited roster units. Do NOT use it on the live save.
 Use the successful GitHub Actions APK for current feature coverage.
 Before any change, export CURRENT SAVE and Download Save File to storage
-outside the app. Never uninstall or clear app data to install an update.
+outside the app. Never uninstall or clear app data BEFORE exporting and verifying external backups. See APK_UPDATE_SAFETY.md for any signing-key mismatch procedures.
 Android-device compatibility still requires actual owner testing.
