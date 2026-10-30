@@ -63,5 +63,9 @@
   "native2022EnemyAiAndDropsVerified": false,
   "changesGameplay": false,
   "changesSaves": false,
-  "changesAndroid": false
+  "changesAndroid": false,
+  "v152CanonicalCompressedFixtureSha256": "cc8aeda4a3f95555985bf4aada5c75f1f1dfdb67f0ee800d36b7aba56327f59a",
+  "v152CanonicalMissionRowsSha256": "2acd1ab29b8a00b3c8804a89fdc9d7b99cba4853f5974f765bc7473c89e7a284",
+  "v152MissionReferencesExactMatchCount": 142,
+  "v152MissionReferencesMismatchCount": 0
 }
