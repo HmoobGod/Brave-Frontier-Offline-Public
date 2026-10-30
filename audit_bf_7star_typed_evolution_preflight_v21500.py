@@ -43,6 +43,16 @@ def recipe_rows(source=None, manifest=None):
         raise ValueError("missing source recipes")
     if len(rows) != 12 or len(source_forms) != 12:
         raise ValueError("must have twelve source forms")
+    if any(type(row) is not list or len(row) != 8 for row in rows):
+        raise ValueError("malformed source recipe row")
+    for unit in source_forms:
+        if type(unit) is not dict:
+            raise ValueError("malformed source form")
+        evo = unit.get("originalEvo")
+        if type(evo) is not dict or type(evo.get("materialSlots")) is not list:
+            raise ValueError("malformed original evolution source")
+        if any(type(slot) is not dict for slot in evo["materialSlots"]):
+            raise ValueError("malformed source material record")
     canon = json.dumps(rows, separators=(",", ":"), ensure_ascii=True).encode()
     if hashlib.sha256(canon).hexdigest() != ROWS_SHA:
         raise ValueError("source recipe checksum mismatch")

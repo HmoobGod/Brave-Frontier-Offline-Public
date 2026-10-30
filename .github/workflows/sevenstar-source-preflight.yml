@@ -5,6 +5,8 @@ on:
       - '.github/workflows/sevenstar-source-preflight.yml'
       - 'audit_bf_7star_typed_evolution_preflight_v21500.py'
       - 'test_bf_7star_typed_evolution_preflight_v21500.py'
+      - 'test_bf_sevenstar_source_adversarial_v21600.py'
+      - 'V216_SEVENSTAR_SOURCE_INTEGRITY_FOLLOWUP.md'
       - 'V215_SEVENSTAR_TYPED_EVOLUTION_SYNTHETIC_PREFLIGHT.md'
       - 'source_data/bf_global_2022_starter_7_8_source_readiness_v127.json'
       - 'source_data/bf_global_2022_starter_typed_evolution_v130.json'
@@ -28,3 +30,5 @@ jobs:
           python-version: '3.12'
       - name: Reject unsourced typed evolution and synthetic save mutations
         run: python test_bf_7star_typed_evolution_preflight_v21500.py
+      - name: Probe pinned SHA and complete 8-star lineup independently
+        run: python test_bf_sevenstar_source_adversarial_v21600.py
