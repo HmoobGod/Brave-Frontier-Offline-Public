@@ -1,0 +1,89 @@
+{
+  "schema": "bf-global-2022-vs-historical-exp-candidates-v193",
+  "purpose": "Read-only source comparison; NOT verified 2022 level thresholds, save migration or playable EXP curves.",
+  "original2022": {
+    "archiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+    "catalog": "source_data/bf_global_2022_playable_lord_stat_endpoints_v116.json",
+    "unitMaster1Sha256": "1146f09489a07b9187cd3f04bf7dc3ef3bb74e35385869534671af95bf8ea645",
+    "unitMaster2Sha256": "0696ccda59fccf48598c5267eaeb8a306e994618384151cead38cec6a9195b2b",
+    "observedPatternIds": [
+      10,
+      15,
+      20
+    ],
+    "patternCounts": {
+      "10": 42,
+      "15": 24,
+      "20": 6
+    },
+    "xpThresholdsRecovered": false
+  },
+  "historicalNot2022": [
+    {
+      "source": "https://bravefrontier.gorillawiki.jp/entry/9810",
+      "year": 2019,
+      "description": "Historical Brave Frontier leveling chart for three initial EXP classes; not verified against user's 2022 Global client."
+    },
+    {
+      "source": "https://bravefrontierglobal.fandom.com/wiki/Unit_Leveling:Unit_List",
+      "year": null,
+      "description": "Community classification of Base 10, 15 and 21 EXP groups; undated, unverified original client calculations."
+    },
+    {
+      "source": "https://www.online-station.net/mobile-game/153035",
+      "year": 2014,
+      "description": "Independent historical table for initial 10 and 15 cost classes; Thai-language archive, not 2022 evidence."
+    }
+  ],
+  "historicalSampleCumulativeExpAtLevels1To5": {
+    "initial10": [
+      0,
+      10,
+      58,
+      160,
+      329
+    ],
+    "initial15": [
+      0,
+      15,
+      87,
+      240,
+      492
+    ],
+    "initial21": [
+      0,
+      21,
+      117,
+      321,
+      658
+    ]
+  },
+  "hypothesesNotEstablished": [
+    {
+      "original2022PatternId": 10,
+      "historicalClass": "initial10",
+      "status": "unverified-cross-era-candidate"
+    },
+    {
+      "original2022PatternId": 15,
+      "historicalClass": "initial15",
+      "status": "unverified-cross-era-candidate"
+    },
+    {
+      "original2022PatternId": 20,
+      "historicalClass": "initial21",
+      "status": "unverified-cross-era-candidate-despite-different-number"
+    }
+  ],
+  "acceptanceBeforeRuntimeUse": [
+    "Recover or independently verify original 2022 cumulative XP threshold tables by pattern ID, including the 2022 pattern-20 versus historical 21 discrepancy.",
+    "Verify enough exact 2022 level checkpoints (including caps 12, 30, 40, 60, 80 and 100) to exclude cross-version drift.",
+    "Verify original six unit-type stat growth and rounding independently of EXP thresholds.",
+    "Design a safe migration for legacy P.unitExp and owner v124/v188/v192 save persistence before changing live XP or battle stats.",
+    "Keep all historical curves read-only and all native2022 threshold claims false until independently reviewed."
+  ],
+  "native2022CurvesVerified": false,
+  "modifiesPlayerSave": false,
+  "modifiesGame": false,
+  "authorizesXpMigration": false
+}
