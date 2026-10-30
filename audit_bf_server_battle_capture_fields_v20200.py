@@ -84,12 +84,12 @@ def main():
                         help='local decoded JSON export; never upload raw captures')
     args = parser.parse_args()
     source = args.input
-    if not source.is_file() or source.stat().st_size > MAX_BYTES:
-        parser.error('input missing or exceeds size bound')
     try:
+        if not source.is_file() or source.stat().st_size > MAX_BYTES:
+            parser.error('input missing or exceeds size bound')
         report = inspect_bytes(source.read_bytes())
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
-        parser.error('invalid input or unsafe source: ' + str(exc))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError):
+        parser.error('invalid input or unsafe source')
     print(json.dumps(report, sort_keys=True, indent=2))
 
 
