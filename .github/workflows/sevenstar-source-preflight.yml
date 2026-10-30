@@ -9,6 +9,8 @@ on:
       - 'test_bf_7star_typed_evolution_preflight_v21500.py'
       - 'test_bf_sevenstar_source_adversarial_v21600.py'
       - 'test_bf_sevenstar_complete_elements_v21700.py'
+      - 'test_bf_sevenstar_manifest_file_pin_v21900.py'
+      - 'V219_SEVENSTAR_V127_MANIFEST_BYTE_PIN.md'
       - 'V217_SEVENSTAR_SOURCE_MAIN_CI.md'
       - 'V216_SEVENSTAR_SOURCE_INTEGRITY_FOLLOWUP.md'
       - 'V215_SEVENSTAR_TYPED_EVOLUTION_SYNTHETIC_PREFLIGHT.md'
@@ -39,3 +41,5 @@ jobs:
         run: python test_bf_sevenstar_source_adversarial_v21600.py
       - name: Independently verify six-element 7-star and 8-star identities
         run: python test_bf_sevenstar_complete_elements_v21700.py
+      - name: Verify complete v127 original source manifest byte pin
+        run: python test_bf_sevenstar_manifest_file_pin_v21900.py
