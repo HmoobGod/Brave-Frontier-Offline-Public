@@ -70,7 +70,7 @@ def inspect_bytes(raw):
         'original2022OrderedWavesVerified': False,
         'original2022EnemyAiAndDropsVerified': False,
         'mutatesGameOrSave': False,
-        'sourceScope': 'untrusted decoded JSON key co-location only; no field values read',
+        'sourceScope': 'untrusted decoded JSON key co-location only; no field values reported',
     }
 
 
@@ -83,7 +83,7 @@ def main():
         parser.error('input missing or exceeds size limit')
     try:
         report = inspect_bytes(args.input.read_bytes())
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError):
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError):
         parser.error('input invalid or exceeds safety bounds')
     print(json.dumps(report, indent=2, sort_keys=True))
 

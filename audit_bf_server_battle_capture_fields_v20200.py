@@ -88,7 +88,7 @@ def main():
         parser.error('input missing or exceeds size bound')
     try:
         report = inspect_bytes(source.read_bytes())
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError) as exc:
         parser.error('invalid input or unsafe source: ' + str(exc))
     print(json.dumps(report, sort_keys=True, indent=2))
 
