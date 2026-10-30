@@ -21,6 +21,7 @@ on:
       - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
       - 'test_bf_amdahl_source_quest_guide_v20600.py'
       - 'test_bf_amdahl_guide_real_modules_v20600.py'
+      - 'test_bf_prepared_amdahl_full_android_chain_v20800.py'
       - 'test_bf_packaged_amdahl_story_guide_v20700.py'
       - 'test_bf_legacy_v7_save_loading_v20500.py'
 
@@ -185,6 +186,7 @@ jobs:
           python test_bf_amdahl_encounter_evidence_v15100.py
           python test_bf_amdahl_source_quest_guide_v20600.py
           python test_bf_amdahl_guide_real_modules_v20600.py
+          python test_bf_prepared_amdahl_full_android_chain_v20800.py
           python test_bf_original_2022_encounter_crossrefs_v17400.py
           python test_bf_2022_dungeon_backdrops_v19100.py
           python test_bf_real_original_2022_chain_v19100.py
