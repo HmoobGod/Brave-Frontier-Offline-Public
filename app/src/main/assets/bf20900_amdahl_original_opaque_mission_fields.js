@@ -6,21 +6,33 @@
  const refs=window.BFGlobalEncounterReferencesV15100;
  const MASTER_SHA256='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83';
  const QUEST_SHA256='f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3';
- if(window.BFAmdahlOriginalOpaqueFieldsV20900 ||
-   typeof P==='undefined'||P.version!==7 ||
-   typeof QUESTS==='undefined'||!Array.isArray(QUESTS)||QUESTS.length!==106 ||
-   !guide||guide.source?.year!==2022||guide.source?.playable!==false||
-   guide.source?.saveMutation!==false||guide.source?.missions!==36||
-   guide.source?.masterSha256!==MASTER_SHA256||
-   guide.source?.canonicalQuestSha256!==QUEST_SHA256||
-   !refs||refs.summary?.sourceYear!==2022||
+ const diagnostic=reason=>{
+   // No player/save details or source row bodies: only stable reason labels.
+   if(typeof console!=='undefined' && typeof console.warn==='function')
+     console.warn('BF211 Amdahl source-only pane unavailable: '+reason);
+ };
+ // Expected onPageFinished repetitions are silent and idempotent.
+ if(window.BFAmdahlOriginalOpaqueFieldsV20900)return;
+ if(typeof P==='undefined'||P.version!==7||
+   typeof QUESTS==='undefined'||!Array.isArray(QUESTS)||QUESTS.length!==106){
+   diagnostic('unsupported v7 player or playable-quest catalog');return;
+ }
+ if(!guide||typeof guide.lookup!=='function'||guide.source?.year!==2022||
+   guide.source?.playable!==false||guide.source?.saveMutation!==false||
+   guide.source?.missions!==36||guide.source?.masterSha256!==MASTER_SHA256||
+   guide.source?.canonicalQuestSha256!==QUEST_SHA256){
+   diagnostic('v206 original guide missing or source provenance mismatch');return;
+ }
+ if(!refs||typeof refs.lookup!=='function'||refs.summary?.sourceYear!==2022||
    refs.summary?.sha256!==MASTER_SHA256||
    refs.summary?.amdahlQuestCanonicalSha256!==QUEST_SHA256||
    refs.summary?.amdahlSourceOnlyMissions!==36||
    refs.summary?.playableMissions!==106||
    refs.summary?.meaningDecoded!==false||
    refs.summary?.gameplayMutation!==false||
-   refs.summary?.saveMutation!==false)return;
+   refs.summary?.saveMutation!==false){
+   diagnostic('v151 encounter evidence missing or source provenance mismatch');return;
+ }
  const rows=[[400,"3:50100,0:50101","bf041_map_jewrel.mp3","bf006_btl_boss.mp3","",0],[401,"3:50100,0:50101","bf041_map_jewrel.mp3","bf006_btl_boss.mp3","",0],[402,"3:50100,0:50101","bf041_map_jewrel.mp3","bf006_btl_boss.mp3","",0],[403,"3:50100,0:50101","bf041_map_jewrel.mp3","bf006_btl_boss.mp3","",0],[404,"3:50100,0:50101","bf041_map_jewrel.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[410,"3:50200,1:50201,0:50202","bf016_map_ghost.mp3","bf006_btl_boss.mp3","",0],[411,"3:50200,1:50201,0:50202","bf016_map_ghost.mp3","bf006_btl_boss.mp3","",0],[412,"3:50200,1:50201,0:50202","bf016_map_ghost.mp3","bf006_btl_boss.mp3","",0],[413,"3:50200,1:50201,0:50202","bf016_map_ghost.mp3","bf006_btl_boss.mp3","",0],[414,"3:50200,1:50201,0:50202","bf016_map_ghost.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[420,"3:50300,1:50301,1:50302","bf010_map_grass.mp3","bf006_btl_boss.mp3","",0],[421,"3:50300,1:50301,1:50302","bf010_map_grass.mp3","bf006_btl_boss.mp3","",0],[422,"3:50300,1:50301,1:50302","bf010_map_grass.mp3","bf006_btl_boss.mp3","",0],[423,"3:50300,1:50301,1:50302","bf010_map_grass.mp3","bf006_btl_boss.mp3","",0],[424,"3:50300,1:50301,1:50302","bf010_map_grass.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[430,"2:50400,1:50401","bf038_map_cordelica.mp3","bf006_btl_boss.mp3","",0],[431,"2:50400,1:50401","bf038_map_cordelica.mp3","bf006_btl_boss.mp3","",0],[432,"2:50400,1:50401","bf038_map_cordelica.mp3","bf006_btl_boss.mp3","",0],[433,"2:50400,1:50401","bf038_map_cordelica.mp3","bf006_btl_boss.mp3","",0],[434,"2:50400,1:50401","bf038_map_cordelica.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[440,"1:50500","bf035_map_romaus.mp3","bf006_btl_boss.mp3","",0],[441,"1:50500","bf035_map_romaus.mp3","bf006_btl_boss.mp3","",0],[442,"1:50500","bf035_map_romaus.mp3","bf006_btl_boss.mp3","",0],[443,"1:50500","bf035_map_romaus.mp3","bf006_btl_boss.mp3","",0],[444,"1:50500","bf035_map_romaus.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[450,"0:50600,1:50601","bf023_map_ruins.mp3","bf006_btl_boss.mp3","",0],[451,"0:50600,1:50601","bf023_map_ruins.mp3","bf006_btl_boss.mp3","",0],[452,"0:50600,1:50601","bf023_map_ruins.mp3","bf006_btl_boss.mp3","",0],[453,"0:50600,1:50601","bf023_map_ruins.mp3","bf006_btl_boss.mp3","",0],[454,"0:50600,1:50601","bf023_map_ruins.mp3","bf006_btl_boss.mp3","8:0:1:0:0",0],[460,"1:50700","bf036_map_vadan.mp3","bf006_btl_boss.mp3","",0],[461,"1:50700","bf036_map_vadan.mp3","bf006_btl_boss.mp3","",0],[462,"1:50700","bf036_map_vadan.mp3","bf006_btl_boss.mp3","",0],[463,"1:50700","bf036_map_vadan.mp3","bf006_btl_boss.mp3","",0],[464,"1:50700","bf036_map_vadan.mp3","bf006_btl_boss.mp3","",0],[465,"1:50700","bf036_map_vadan.mp3","bf028_map_space.mp3","8:0:1:0:0",0]];
  const seen=new Set();
  if(rows.length!==36 || rows.some(r=>{
@@ -35,12 +47,16 @@
    if(!source||!old||old.playable!==false||old.raw!==r[1]||
       source[0]!==r[0]||old.dungeonId!==source[1])return true;
    seen.add(r[0]);return false;
- }))return;
+ })){
+   diagnostic('original 36 source mission records or joins invalid');return;
+ }
  const host=document.getElementById('bf20600-amdahl-guide');
  const select=document.getElementById('bf20600-dungeon');
  const questList=document.getElementById('bf20600-quest-list');
- if(!host||!select||!questList||document.getElementById('bf20900-raw-mission-fields')||
-    select.options.length!==7)return;
+ if(document.getElementById('bf20900-raw-mission-fields'))return;
+ if(!host||!select||!questList||select.options.length!==7){
+   diagnostic('original Amdahl guide DOM controls missing or incomplete');return;
+ }
  const block=document.createElement('details');block.id='bf20900-raw-mission-fields';
  block.style.cssText='margin:9px 0;padding:9px;border:1px solid #7c91a1;border-radius:5px;background:#192d40';
  const header=document.createElement('summary');
