@@ -69,3 +69,14 @@ then verify any candidate joined battle-group table against original 2022
 client parsing and independent group/enemy records. Keep all native readiness
 flags false until then; 2014 captures, 2021 historical metadata, and
 third-party 2026 authored stages cannot substitute.
+
+## Fast PR integrity checks (not a substitute for Android CI)
+
+The secret-free `.github/workflows/research-source-integrity.yml`
+provides a small `pull_request`/manual-dispatch workflow for
+the v199 source hash and corruption checks followed by the v201
+native-encounter fail-closed regression. It needs no Android SDK,
+signing secret, historical ZIP, downloaded assets or browser.
+The existing full APK workflow continues to run on branch pushes;
+**both exact-head source and full Android CI results are still required**
+before merge, followed by the fresh merged-main full build.
