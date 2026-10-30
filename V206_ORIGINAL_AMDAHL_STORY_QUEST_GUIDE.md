@@ -53,6 +53,17 @@ injection, map-pin navigation, and no mutations to P, S, QUESTS or
 a legacy `bf_global_offline_demo_v7` save. Node syntax and Chromium
 tests are registered in the full Android CI.
 
+**Additional fail-closed hardening:** The v206 guide now requires the exact
+v151 original 2022 mission master SHA-256, canonical v147 Amdahl quest
+SHA-256, source year, and explicit no-gameplay/no-save-mutation flags.
+Five synthetic adversarial probes reject altered SHA, year and mutation
+claims. A separate `test_bf_amdahl_guide_real_modules_v20600.py`
+loads the actual v149→v151→v206 JavaScript modules together in Chromium
+with a simulated 106-quest game state, and checks Amdahl pin/dropdown
+navigation, 142 archival records, 36 source-only quests and no local-save,
+player, battle or playable-quest mutation. This is integration test coverage,
+not an Android physical-device test.
+
 ## Merge gates
 
 The exact-head APK CI must pass. Because this changes user-visible
