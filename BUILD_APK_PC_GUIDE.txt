@@ -5,3 +5,15 @@ BRAVE FRONTIER OFFLINE v0.13 — WINDOWS
 4. On success find app\build\outputs\apk\debug\app-debug.apk.
 5. Export your previous JSON save before installing; browser and APK share the same save format.
 APK not built or verified on Android in this environment.
+
+IMPORTANT — LOCAL APK DOWNGRADE HAZARD (v160-v198+)
+The original Windows/PC Gradle instructions do NOT run the GitHub Actions
+build-time v160-v198 Gem patches. Running Build APK(s) or BUILD_APK_WINDOWS.bat
+directly can produce an APK missing the newer Gem and receipt validators.
+Do not install that locally built APK over an app that has purchased a
+PERSONAL OFFLINE 100-Gem summon (schema-2 wallet). It is effectively an
+unsupported downgrade and can quarantine or overwrite the active v7 save.
+Use the successful GitHub Actions APK for current feature coverage.
+Before any change, export CURRENT SAVE and Download Save File to storage
+outside the app. Never uninstall or clear app data to install an update.
+Android-device compatibility still requires actual owner testing.
