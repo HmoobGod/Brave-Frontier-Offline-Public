@@ -9,7 +9,7 @@
    art.source?.originalGameplayEnabled!==false ||
    art.source?.decodedEnemyWaves!==false || !refs ||
    refs.summary?.sourceYear!==2022 ||
-   refs.summary?.sha256!=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9' ||
+   refs.summary?.sha256!=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83' ||
    refs.summary?.amdahlQuestCanonicalSha256!=='f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3' ||
    refs.summary?.amdahlSourceOnlyMissions!==36 || refs.summary?.playableMissions!==106 ||
    refs.summary?.meaningDecoded!==false || refs.summary?.gameplayMutation!==false ||
