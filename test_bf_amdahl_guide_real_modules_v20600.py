@@ -27,6 +27,8 @@ with sync_playwright() as pw:
  page=browser.new_page(viewport={"width":390,"height":844})
  errors=[]
  page.on("pageerror",lambda error:errors.append(str(error)))
+ console_messages=[]
+ page.on("console",lambda msg:console_messages.append(msg.text))
  page.set_content(html,wait_until="load")
  page.evaluate("""data=>{
   const store={'bf_global_offline_demo_v7':'preexisting-data-untouched'};
@@ -123,6 +125,46 @@ with sync_playwright() as pw:
  assert "Ghost Ship Legnia" in page.locator("#bf14900-selected").inner_text()
  page.add_script_tag(path=str(ASSETS/"bf20600_amdahl_source_quest_guide.js"))
  assert page.locator("#bf20600-amdahl-guide").count()==1
+ # v211: structured reason-only warnings; never log player or save contents.
+ page.evaluate("P.version=8")
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==0
+ assert any("BF211 Amdahl source-only pane unavailable: unsupported v7" in m
+            for m in console_messages),console_messages
+ page.evaluate("P.version=7")
+ page.evaluate("""()=>{
+  window.__v211SavedRefs=window.BFGlobalEncounterReferencesV15100;
+  window.BFGlobalEncounterReferencesV15100={
+    ...window.__v211SavedRefs,lookup:null};
+ }""")
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==0
+ assert any("BF211 Amdahl source-only pane unavailable: v151 encounter evidence" in m
+            for m in console_messages),console_messages
+ page.evaluate("""()=>{
+   window.BFGlobalEncounterReferencesV15100=window.__v211SavedRefs;
+   delete window.__v211SavedRefs;}""")
+ page.evaluate("""()=>{
+   window.__v211SavedGuide=window.BFAmdahlSourceQuestGuideV20600;
+   window.BFAmdahlSourceQuestGuideV20600={
+     ...window.__v211SavedGuide,
+     source:{...window.__v211SavedGuide.source,canonicalQuestSha256:'invalid'}};}""")
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==0
+ assert any("BF211 Amdahl source-only pane unavailable: v206 original guide" in m
+            for m in console_messages),console_messages
+ page.evaluate("""()=>{
+   window.BFAmdahlSourceQuestGuideV20600=window.__v211SavedGuide;
+   delete window.__v211SavedGuide;}""")
+ before_success_count=sum("BF211 Amdahl" in m for m in console_messages)
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==1
+ assert page.locator("#bf20900-source-fields li").count()==5
+ assert page.evaluate("BFAmdahlOriginalOpaqueFieldsV20900.lookup(465)")[4]=="8:0:1:0:0"
+ page.add_script_tag(path=str(ASSETS/"bf20900_amdahl_original_opaque_mission_fields.js"))
+ assert page.locator("#bf20900-raw-mission-fields").count()==1
+ assert sum("BF211 Amdahl" in m for m in console_messages)==before_success_count
+ assert all("preexisting-data-untouched" not in m for m in console_messages)
  after=page.evaluate("""()=>({
   p:JSON.stringify(P),s:JSON.stringify(S),quests:JSON.stringify(QUESTS),
   stored:localStorage.getItem('bf_global_offline_demo_v7'),writes:__writes()
