@@ -58,12 +58,14 @@ with sync_playwright() as pw:
  assert page.evaluate("""()=>{
    const s=BFGlobalCustomGemsV17000.snapshot();
    const live=P._bfGemV170Custom;
+   const before=JSON.stringify(live);
    if(!Object.isFrozen(s)||!Object.isFrozen(s.receipts)||s.spent!==100)return false;
    if(s.receipts===live.receipts||s.receipts[0]===live.receipts[0])return false;
    if(!Object.isFrozen(s.receipts[0]))return false;
    try{s.receipts.push({unitId:1,cost:1})}catch(_){}
    try{s.receipts[0].unitId=1}catch(_){}
-   return live.receipts.length===1&&live.receipts[0].unitId===s.receipts[0].unitId;
+   return live.receipts.length===1&&live.receipts[0].unitId===s.receipts[0].unitId&&
+          JSON.stringify(live)===before;
  }""")
  assert page.evaluate('saveProgress()') is True
  assert page.evaluate('BFGlobalCustomGemsV17000.snapshot().receipts.length')==1
@@ -84,6 +86,7 @@ with sync_playwright() as pw:
  assert page.evaluate('P._bfGemV170Custom.spent')==200
  assert page.evaluate('P._bfGemV170Custom.balance')==800
  assert page.evaluate('P._bfGemV170Custom.receipts.length')==2
+ assert page.evaluate('P._bfGemV170Custom.receipts.at(-1).unitId')==baseline['next']
 
  # Quest earn logic continues after schema conversion: first clear +25,
  # the same mission replay +1; no second welcome claim.
@@ -102,6 +105,10 @@ with sync_playwright() as pw:
  assert page.evaluate('P.summonHistory.length')==100
  assert page.evaluate('P._bfGemV170Custom.receipts.length')==3
  assert page.evaluate('P.summonHistory.at(-1)')==page.evaluate('P._bfGemV170Custom.receipts.at(-1).unitId')
+ assert page.evaluate("""()=>{
+   const ids=P._bfGemV170Custom.receipts.map(r=>r.unitId);
+   return new Set(ids).size===ids.length;
+ }""")
 
  # Purchased receipt IDs must never be removed or changed in RECRUIT_IDS:
  # this invariant protects all existing and future schema-2 saved players.
@@ -114,32 +121,40 @@ with sync_playwright() as pw:
  assert page.evaluate("""()=>{
    const bad=JSON.parse(JSON.stringify(P));
    bad._bfGemV170Custom.receipts[0].unitId=-1;
-   try{parseProgress(bad);return false}catch(_){return true}
+   try{parseProgress(bad);return false}
+   catch(err){return err.message==='Invalid personal Gem summon receipt'}
  }""")
  assert page.evaluate("""()=>{
    const bad=JSON.parse(JSON.stringify(P));
    bad.roster=bad.roster.filter(id=>id!==bad._bfGemV170Custom.receipts[0].unitId);
-   try{parseProgress(bad);return false}catch(_){return true}
+   try{parseProgress(bad);return false}
+   catch(err){return err.message==='Invalid personal Gem summon receipt'}
  }""")
  assert page.evaluate("""()=>{
    const starter=P.roster.find(id=>!RECRUIT_IDS.includes(id));
-   if(starter===undefined)return true;
+   if(starter===undefined)return false;
    const bad=JSON.parse(JSON.stringify(P));
    bad._bfGemV170Custom.receipts[0].unitId=starter;
-   try{parseProgress(bad);return false}catch(_){return true}
+   try{parseProgress(bad);return false}
+   catch(err){return err.message==='Invalid personal Gem summon receipt'}
  }""")
 
  # At zero eligible recruits, no purchase is possible regardless of funds.
  # Never serialize this synthetic all-owned test state as a production save.
  assert page.evaluate("""()=>{
-   const real=P;
+   const real=P, prior=JSON.stringify(P), oldRandom=Math.random;
    const synthetic=JSON.parse(JSON.stringify(real));
    synthetic.roster=[...new Set([...synthetic.roster,...RECRUIT_IDS])];
-   P=synthetic;renderSummonPanel();
-   const blocked=document.getElementById('bf19800-personal-summon').disabled &&
-                 bf198PersonalSummon()===false;
-   P=real;renderSummonPanel();
-   return blocked;
+   let rngCalls=0, blocked=false;
+   try{
+     P=synthetic;renderSummonPanel();
+     Math.random=()=>{rngCalls++;return 0};
+     blocked=document.getElementById('bf19800-personal-summon').disabled &&
+              bf198PersonalSummon()===false;
+   } finally {
+     P=real;Math.random=oldRandom;renderSummonPanel();
+   }
+   return blocked && rngCalls===0 && JSON.stringify(real)===prior;
  }""")
  # Valid insufficient-funds case: a pre-cleared quest yields 99 replay
  # Gems with welcome unclaimed. This tests the real 99-Gem guard, rather
@@ -164,6 +179,23 @@ with sync_playwright() as pw:
  before99=page.evaluate('JSON.stringify(P)')
  assert page.evaluate('bf198PersonalSummon()') is False
  assert page.evaluate('JSON.stringify(P)')==before99
+
+ # Exact spending boundary: one legitimate replay takes 99 to 100;
+ # a purchase then consumes all funds atomically without a second welcome.
+ page.evaluate('awardDemoRewards()')
+ assert page.evaluate('P._bfGemV170Custom.balance')==100
+ assert page.locator('#bf19800-personal-summon').is_enabled()
+ assert page.evaluate('bf198PersonalSummon()') is True
+ assert page.evaluate('P._bfGemV170Custom.schema')==2
+ assert page.evaluate('P._bfGemV170Custom.balance')==0
+ assert page.evaluate('P._bfGemV170Custom.spent')==100
+ assert page.evaluate('P._bfGemV170Custom.receipts.length')==1
+ assert page.evaluate('P._bfGemV170Custom.receipts[0].cost')==100
+ assert page.evaluate('JSON.stringify(parseProgress(P))===JSON.stringify(P)')
+ assert page.locator('#bf19800-personal-summon').is_disabled()
+ exact_zero=page.evaluate('JSON.stringify(P)')
+ assert page.evaluate('bf198PersonalSummon()') is False
+ assert page.evaluate('JSON.stringify(P)')==exact_zero
  assert not errors,errors
  browser.close()
 print('PASS v198.02: frozen detached receipts, schema1 keys, 2nd quota rollback, post-purchase rewards, 100-history cap and recruit-ID stability')
