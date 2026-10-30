@@ -79,12 +79,12 @@ def main():
     parser.add_argument('--input', required=True, type=Path,
                         help='local sanitized decoded JSON; never upload raw captures')
     args = parser.parse_args()
-    if not args.input.is_file() or args.input.stat().st_size > v202.MAX_BYTES:
-        parser.error('input missing or exceeds size limit')
     try:
+        if not args.input.is_file() or args.input.stat().st_size > v202.MAX_BYTES:
+            parser.error('input missing or exceeds size limit')
         report = inspect_bytes(args.input.read_bytes())
-    except (UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError):
-        parser.error('input invalid or exceeds safety bounds')
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError, RecursionError):
+        parser.error('invalid input or unsafe source')
     print(json.dumps(report, indent=2, sort_keys=True))
 
 
