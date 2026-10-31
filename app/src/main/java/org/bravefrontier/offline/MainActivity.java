@@ -39,13 +39,21 @@ public class MainActivity extends Activity {
     private static final int CREATE_SAVE_FILE = 1003;
     private static final int MAX_SAVE_BYTES = 1024 * 1024;
 
-    // Small, bounded local UI resources; never read files outside this APK.
+    // Keep optional scripts bounded; allow modest growth only for the two
+    // packaged navigation assets, which are already close to the old 64 KiB cap.
+    private static final int UI_RESOURCE_LIMIT_BYTES = 64 * 1024;
+    private static final int NAV_RESOURCE_LIMIT_BYTES = 128 * 1024;
+    private static int packagedUiResourceLimit(String file) {
+        return "bf_home_nav.js".equals(file) || "bf_home_nav.css".equals(file)
+                ? NAV_RESOURCE_LIMIT_BYTES : UI_RESOURCE_LIMIT_BYTES;
+    }
     private String readPackagedText(String file) throws IOException {
+        final int maxBytes = packagedUiResourceLimit(file);
         try (InputStream in = getAssets().open(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[4096];
             int count;
             while ((count = in.read(buffer)) != -1) {
-                if (out.size() + count > 64 * 1024) throw new IOException("Oversized UI resource");
+                if (out.size() + count > maxBytes) throw new IOException("Oversized UI resource");
                 out.write(buffer, 0, count);
             }
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
