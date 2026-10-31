@@ -40,6 +40,20 @@ public class MainActivity extends Activity {
     private static final int MAX_SAVE_BYTES = 1024 * 1024;
     // v225: route-only Android Back handling. Do not mutate P, S, or v7 saves.
     private boolean backNavigationPending = false;
+    private int backDispatchToken = 0;
+    private Runnable backTimeout;
+    private static final long UI_BACK_TIMEOUT_MS = 2500L;
+    private final android.os.Handler uiHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+
+    private void clearPendingBack() {
+        backNavigationPending = false;
+        backDispatchToken++;
+        if (backTimeout != null) {
+            uiHandler.removeCallbacks(backTimeout);
+            backTimeout = null;
+        }
+    }
     private static final String UI_BACK_JS =
             "(function(){try{var n=window.BF_homeNav;return !!(n&&n.current!=='home'&&typeof n.go==='function'&&n.go('home'));}catch(e){return false;}})();";
 
