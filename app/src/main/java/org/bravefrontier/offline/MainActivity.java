@@ -1132,6 +1132,14 @@ public class MainActivity extends Activity {
                 } catch (IOException meritStoneRefError) {
                     android.util.Log.w("BraveFrontier", "Optional Legend Stone historical exchange source unavailable", meritStoneRefError);
                 }
+                // v223: optional read-only gallery of original 2022 type-2
+                // evolution item artwork. No inventory or evolution unlock.
+                try {
+                    String itemGallery = readPackagedText("bf22300_original_2022_evolution_item_gallery.js");
+                    view.evaluateJavascript(itemGallery, null);
+                } catch (IOException itemGalleryError) {
+                    android.util.Log.w("BraveFrontier", "Optional 2022 item artwork reference unavailable", itemGalleryError);
+                }
                 // v154: original 2022 quest-clear Merit achievement source
                 // preview only. Reads local v7 clears, grants no Merit Points.
                 try {
