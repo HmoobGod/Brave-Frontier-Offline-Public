@@ -375,6 +375,7 @@ jobs:
           python3 test_bf_renderer_dialog_lifecycle_v23100.py
           python3 test_bf_offline_page_reload_v23200.py
           python3 test_bf_stale_webview_finish_guard_v23300.py
+          python3 test_bf_offline_main_navigation_token_v23400.py
           python test_bf_global_home_scene.py
           python test_bf_inner_screens.py
           python test_bf_unit_box_quest_details.py

@@ -11,6 +11,8 @@ on:
       - 'test_bf_renderer_dialog_lifecycle_v23100.py'
       - 'test_bf_offline_page_reload_v23200.py'
       - 'test_bf_stale_webview_finish_guard_v23300.py'
+      - 'test_bf_offline_main_navigation_token_v23400.py'
+      - 'V234_OFFLINE_MAIN_NAVIGATION_TOKEN.md'
       - 'V233_STALE_WEBVIEW_FINISH_GUARD.md'
       - 'V232_OFFLINE_MAIN_RELOAD_STATE.md'
       - 'V231_RENDERER_DIALOG_LIFECYCLE.md'
@@ -47,3 +49,5 @@ jobs:
         run: python3 test_bf_offline_page_reload_v23200.py
       - name: Verify late finishing callbacks cannot inject into stale WebViews
         run: python3 test_bf_stale_webview_finish_guard_v23300.py
+      - name: Verify only explicit native load starts can reset main-page failure
+        run: python3 test_bf_offline_main_navigation_token_v23400.py
