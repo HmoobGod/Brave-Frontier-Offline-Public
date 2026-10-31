@@ -501,3 +501,29 @@ body.bf-menu-mode .squad-panel .tools .bf-original-auto-action[aria-pressed="tru
   line-height:1.35;
   letter-spacing:.01em;
 }
+
+/* v227: Home/route touch and focus accessibility, presentation-only.
+   Never modify battle animation speed, gameplay timers or save state. */
+body.bf-menu-mode .bf-navbar button,
+body.bf-menu-mode #bf-home button {
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(184,235,255,.20);
+}
+body.bf-menu-mode .bf-navbar button {
+  min-height:58px;
+  min-width:0;
+}
+body.bf-menu-mode .bf-navbar button:focus-visible,
+body.bf-menu-mode #bf-home button:focus-visible {
+  outline:3px solid #b8ebff;
+  outline-offset:2px;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.bf-menu-mode .bf-navbar button,
+  body.bf-menu-mode #bf-home button,
+  body.bf-menu-mode .bf-route-title {
+    transition-duration:0.01ms!important;
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
