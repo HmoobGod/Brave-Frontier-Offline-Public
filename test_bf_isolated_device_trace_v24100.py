@@ -30,7 +30,7 @@ def validate_isolation(src):
     end = "private void clearPendingBack() {"
     whole = part(src, start, end)
     gate = uncomment(part(src, start,
-                         "private void appendIsolatedTrace("))
+                         "private void appendIsolatedTrace(")).rsplit("}", 1)[0]
     # Match the whole gate body: no early return or || fallback, and
     # no operand may be moved into a comment to bypass identity isolation.
     assert re.fullmatch(
@@ -57,7 +57,7 @@ def validate_isolation(src):
     must_start(button, r'\s*if\s*\(!isIsolatedTraceApp\(\)\s*\|\|\s*gameContainer\s*==\s*null\)\s*return\s*;')
     assert re.fullmatch(
         r'\s*return\s+isIsolatedTraceApp\(\)\s*\?\s*"\\n\\nDiagnostic events:\\n"\s*\+\s*isolatedTraceText\(\)\s*:\s*""\s*;\s*',
-        uncomment(suffix)
+        uncomment(suffix).rsplit("}", 1)[0]
     ), "Non-diagnostic dialog suffix must be empty"
     assert len(re.findall(r'\bcase "', capture)) == 11
     for name in ("initialRequested","retryRequested","onPageStarted","startAccepted",
@@ -138,8 +138,8 @@ def reject(name, changed):
     raise AssertionError("Rejected-source test accepted unsafe change: " + name)
 
 mutations = {
-    "OR bypass": change('".diagnostic".equals(getPackageName()) &&',
-                        '".diagnostic".equals(getPackageName()) ||'),
+    "OR bypass": change('"org.bravefrontier.offline.diagnostic".equals(getPackageName()) &&',
+                        '"org.bravefrontier.offline.diagnostic".equals(getPackageName()) ||'),
     "inverted package": change(
         '"org.bravefrontier.offline.diagnostic".equals(getPackageName()) &&',
         '!"org.bravefrontier.offline.diagnostic".equals(getPackageName()) &&'),
