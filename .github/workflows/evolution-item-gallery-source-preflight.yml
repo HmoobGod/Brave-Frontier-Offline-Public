@@ -1,0 +1,33 @@
+name: Original 2022 evolution item artwork gallery source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/evolution-item-gallery-source-preflight.yml'
+      - 'source_assets/bf1/item/BF1_2022_30_Evolution_Item_Thumbnails_v223.zip'
+      - 'source_data/bf_global_2022_evolution_item_art_catalog_v222.json'
+      - 'prepare_bf_original_2022_evolution_item_art_v22300.py'
+      - 'test_bf_original_2022_evolution_item_art_source_v22300.py'
+      - 'test_bf_original_2022_evolution_item_art_browser_v22300.py'
+      - 'test_bf_packaged_original_2022_evolution_item_art_v22300.py'
+      - 'V223_ORIGINAL_2022_EVOLUTION_ITEM_ART_GALLERY.md'
+      - '.github/workflows/build-debug-apk.yml'
+      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-original-item-art:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Authenticate original 31 item sources and 30 exact archived PNGs
+        run: python3 test_bf_original_2022_evolution_item_art_source_v22300.py
