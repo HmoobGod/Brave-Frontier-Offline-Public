@@ -9,6 +9,8 @@ on:
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
       - 'test_bf_renderer_dialog_lifecycle_v23100.py'
+      - 'test_bf_offline_page_reload_v23200.py'
+      - 'V232_OFFLINE_MAIN_RELOAD_STATE.md'
       - 'V231_RENDERER_DIALOG_LIFECYCLE.md'
       - 'test_bf_offline_page_recovery_v22900.py'
       - 'V229_OFFLINE_STARTUP_ERROR_RECOVERY.md'
@@ -39,3 +41,5 @@ jobs:
         run: python3 test_bf_renderer_dialog_lifecycle_v23100.py
       - name: Verify offline main-page failure recovery guards
         run: python3 test_bf_offline_page_recovery_v22900.py
+      - name: Verify new exact packaged-page load resets a stale error state
+        run: python3 test_bf_offline_page_reload_v23200.py

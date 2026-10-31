@@ -184,6 +184,15 @@ public class MainActivity extends Activity {
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         game.setWebViewClient(new WebViewClient() {
+            // v232: reset error state only when this WebView starts a fresh
+            // load of the exact bundled main page (not a subresource or URL).
+            @Override public void onPageStarted(WebView view, String url,
+                    android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                if (view != game || !OFFLINE_MAIN_PAGE.equals(url)) return;
+                offlinePageLoadFailed = false;
+                dismissOfflinePageError();
+            }
             @Override public void onReceivedError(WebView view,
                     android.webkit.WebResourceRequest request,
                     android.webkit.WebResourceError error) {
