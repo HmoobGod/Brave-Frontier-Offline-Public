@@ -1309,6 +1309,7 @@ public class MainActivity extends Activity {
         }
     }
     @Override protected void onPause() {
+        clearPendingBack();
         if (game != null) game.onPause();
         super.onPause();
     }
@@ -1317,6 +1318,7 @@ public class MainActivity extends Activity {
         if (game != null) game.onResume();
     }
     @Override protected void onDestroy() {
+        clearPendingBack();
         if (game != null) {game.removeJavascriptInterface("BFAndroid");game.destroy();game = null;}
         super.onDestroy();
     }
