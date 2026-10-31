@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
     }
     private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
     // v236: diagnostic breadcrumbs, restricted to a debuggable APK.
-    // Never write a URL, player state, save data, or WebView contents to logcat.
+    // Never write a URL, player state, private data, or WebView contents to logcat.
     private void traceOfflinePage(String event, WebView view, boolean mainPage) {
         if ((getApplicationInfo().flags &
                 android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0) return;
