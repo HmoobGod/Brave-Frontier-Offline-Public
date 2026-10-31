@@ -510,7 +510,7 @@ body.bf-menu-mode #bf-home button {
   -webkit-tap-highlight-color:rgba(184,235,255,.20);
 }
 body.bf-menu-mode .bf-navbar button {
-  min-height:58px;
+  min-height:60px;
   min-width:0;
 }
 body.bf-menu-mode .bf-navbar button:focus-visible,
