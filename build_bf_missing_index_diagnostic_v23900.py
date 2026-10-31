@@ -119,7 +119,11 @@ def verify_structure(aapt: str, apksigner: str, original_hash: str, diagnostic_h
         old_contents = {n for n in old_files if not SIGNATURE_ENTRY.match(n)}
         new_contents = {n for n in new_files if not SIGNATURE_ENTRY.match(n)}
         assert MISSING in old_contents and MISSING not in new_contents
-        assert new_contents == old_contents - {MISSING}, "Non-signature entry added/removed"
+        expected_contents = old_contents - {MISSING}
+        assert new_contents == expected_contents, (
+            "Non-signature ZIP entry mismatch; added=%r removed=%r" %
+            (sorted(new_contents - expected_contents),
+             sorted(expected_contents - new_contents)))
         assert "resources.arsc" in old_contents
         assert before.getinfo("resources.arsc").compress_type == zipfile.ZIP_STORED
         assert after.getinfo("resources.arsc").compress_type == zipfile.ZIP_STORED
@@ -147,7 +151,10 @@ def build() -> None:
                     continue
                 dst.writestr(info, src.read(info.filename))
         run([zipalign, "-f", "-p", "4", str(raw), str(aligned)])
-        run([apksigner, "sign", "--ks", str(KEYSTORE), "--ks-pass", "pass:android",
+        # Disable v1 signatures explicitly: apksigner may otherwise insert
+        # META-INF/MANIFEST.MF, which is not an original game file.
+        run([apksigner, "sign", "--v1-signing-enabled", "false",
+             "--ks", str(KEYSTORE), "--ks-pass", "pass:android",
              "--ks-key-alias", "androiddebugkey", "--key-pass", "pass:android",
              "--out", str(OUTPUT), str(aligned)])
     verify_structure(aapt, apksigner, original_hash, diagnostic_hash)
