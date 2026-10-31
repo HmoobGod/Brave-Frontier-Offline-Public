@@ -30,7 +30,7 @@ require("view.destroy();")
 require("game = null;")
 require('.setPositiveButton("Restart interface", (dialog, which) -> recreate())')
 require(".setNegativeButton(\"Close\", (dialog, which) -> finish())")
-require("Unsaved actions" .lower().replace("unsaved actions","unsaved actions") if False else "unsaved actions may be lost")
+require("unsaved actions may be lost")
 require("Your saved data is not erased.")
 assert len(re.findall(r'@Override protected void on(?:Pause|Destroy)\(\)',java))==2
 assert java.count("clearPendingBack();")>=6
