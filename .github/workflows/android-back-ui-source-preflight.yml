@@ -8,6 +8,8 @@ on:
       - 'app/src/main/assets/bf_home_nav.js'
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
+      - 'test_bf_offline_page_recovery_v22900.py'
+      - 'V229_OFFLINE_STARTUP_ERROR_RECOVERY.md'
       - 'V226_WEBVIEW_BACK_RECOVERY.md'
       - 'V225_ANDROID_BACK_ENGINE_UI.md'
   push:
@@ -31,3 +33,5 @@ jobs:
         run: python3 test_bf_android_back_home_v22500.py --source-only
       - name: Verify lost callbacks, renderer-crash UI, and save-safety boundaries
         run: python3 test_bf_engine_webview_recovery_v22600.py
+      - name: Verify offline main-page failure recovery guards
+        run: python3 test_bf_offline_page_recovery_v22900.py
