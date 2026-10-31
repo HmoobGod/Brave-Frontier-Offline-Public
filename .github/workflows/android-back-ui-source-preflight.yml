@@ -7,6 +7,8 @@ on:
       - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
       - 'app/src/main/assets/bf_home_nav.js'
       - 'test_bf_android_back_home_v22500.py'
+      - 'test_bf_engine_webview_recovery_v22600.py'
+      - 'V226_WEBVIEW_BACK_RECOVERY.md'
       - 'V225_ANDROID_BACK_ENGINE_UI.md'
   push:
     branches: [main]
@@ -27,3 +29,5 @@ jobs:
           python-version: '3.12'
       - name: Verify Android Back UI routing without save changes
         run: python3 test_bf_android_back_home_v22500.py --source-only
+      - name: Verify lost callbacks, renderer-crash UI, and save-safety boundaries
+        run: python3 test_bf_engine_webview_recovery_v22600.py
