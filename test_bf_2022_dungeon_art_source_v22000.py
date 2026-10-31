@@ -33,7 +33,7 @@ with zipfile.ZipFile(audit.ART) as z:
             b = z.read("content/dungeon/" + asset["file"])
         assert len(b) == asset["sizeBytes"], asset["file"]
         assert hashlib.sha256(b).hexdigest() == asset["sha256"], asset["file"]
-        assert b[:2] == b"\\xff\\xd8" and b[-2:] == b"\\xff\\xd9", asset["file"]
+        assert b[:2] == b"\xff\xd8" and b[-2:] == b"\xff\xd9", asset["file"]
 
 # Tamper metadata-only catalog contents in temporary files, not production.
 for mutation in ("duplicate", "wrong-background", "invented-runtime", "wrong-source"):
