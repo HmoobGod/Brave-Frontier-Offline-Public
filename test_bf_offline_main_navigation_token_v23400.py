@@ -107,8 +107,9 @@ reject(mutate_section(java, ERROR, RENDERER, TOKEN_FALSE, "/* " + TOKEN_FALSE + 
 reject(mutate_section(java, ERROR, RENDERER, "offlinePageLoadFailed = true;",
                       TOKEN_TRUE + "\n                offlinePageLoadFailed = true;"))
 # T4: an onPageFinished callback cannot re-arm the token.
-reject(mutate_section(java, FINISHED, "// v0.54:", "view.evaluateJavascript(",
-                      TOKEN_TRUE + "\n                    view.evaluateJavascript("))
+reject(mutate_section(java, FINISHED, "// v0.54:",
+                      "if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;",
+                      "if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;\n                " + TOKEN_TRUE))
 # T5: extra native page loads without a token are rejected.
 reject(mutate_section(java, CREATE, CONTAINER, MAIN_LOAD,
                       MAIN_LOAD + "\n        game.loadUrl(OFFLINE_MAIN_PAGE);"))
