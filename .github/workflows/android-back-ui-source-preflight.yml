@@ -10,6 +10,8 @@ on:
       - 'test_bf_isolated_diagnostic_build_v23700.py'
       - 'V237_ISOLATED_ANDROID_DIAGNOSTIC_APK.md'
       - 'V238_DIAGNOSTIC_IDENTITY_AND_CI_GATES.md'
+      - 'build_bf_missing_index_diagnostic_v23900.py'
+      - 'V239_ISOLATED_MISSING_INDEX_FAILURE_TEST.md'
       - 'app/src/main/assets/bf_home_nav.js'
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
@@ -63,3 +65,5 @@ jobs:
         run: python3 test_bf_android_offline_callback_trace_v23600.py
       - name: Verify isolated diagnostic build does not reuse Current's app ID
         run: python3 test_bf_isolated_diagnostic_build_v23700.py
+      - name: Verify missing-index fault APK never targets Current
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --source-only

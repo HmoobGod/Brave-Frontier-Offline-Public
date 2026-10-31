@@ -896,3 +896,14 @@ jobs:
           path: app/build/outputs/apk/diagnostic/app-diagnostic.apk
           if-no-files-found: error
           retention-days: 90
+      - name: Create isolated packaged-page failure APK (diagnostic ID only)
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --build
+      - name: Verify signed fault APK, untouched diagnostic APK and isolated identity
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --verify
+      - name: Upload missing-index failure test APK (never install over Current)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-isolated-missing-index-test-apk
+          path: app/build/outputs/apk/diagnostic-fault/app-diagnostic-missing-index.apk
+          if-no-files-found: error
+          retention-days: 90
