@@ -36,6 +36,9 @@ public class MainActivity extends Activity {
     private String saveToWrite;
     // v229: distinguish a failed packaged main document from failed subresources.
     private boolean offlinePageLoadFailed = false;
+    // v234: consume exactly one native main-page load request, never a second
+    // onPageStarted callback for the same failed navigation.
+    private boolean nativeMainLoadRequested = false;
     private android.app.AlertDialog offlinePageFailureDialog;
     // v231: keep the renderer-recovery window owned by this Activity lifecycle.
     private android.app.AlertDialog rendererFailureDialog;
@@ -60,6 +63,7 @@ public class MainActivity extends Activity {
                     offlinePageFailureDialog = null;
                     if (game == failedView && !isFinishing() && !isDestroyed()) {
                         offlinePageLoadFailed = false;
+                        nativeMainLoadRequested = true;
                         failedView.loadUrl(OFFLINE_MAIN_PAGE);
                     }
                 })
@@ -184,12 +188,14 @@ public class MainActivity extends Activity {
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         game.setWebViewClient(new WebViewClient() {
-            // v232: reset error state only when this WebView starts a fresh
-            // load of the exact bundled main page (not a subresource or URL).
+            // v234: only the first start for an explicit native main-page
+            // load can clear a prior failure. A duplicate start cannot.
             @Override public void onPageStarted(WebView view, String url,
                     android.graphics.Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
                 if (view != game || !OFFLINE_MAIN_PAGE.equals(url)) return;
+                if (!nativeMainLoadRequested) return;
+                nativeMainLoadRequested = false;
                 offlinePageLoadFailed = false;
                 dismissOfflinePageError();
             }
@@ -199,6 +205,7 @@ public class MainActivity extends Activity {
                 super.onReceivedError(view, request, error);
                 if (view != game || request == null || !request.isForMainFrame() ||
                         !OFFLINE_MAIN_PAGE.equals(String.valueOf(request.getUrl()))) return;
+                nativeMainLoadRequested = false;
                 offlinePageLoadFailed = true;
                 android.util.Log.e("BraveFrontier", "Packaged offline main page failed to load");
                 offerOfflinePageRetry(view);
@@ -206,6 +213,7 @@ public class MainActivity extends Activity {
             @Override public boolean onRenderProcessGone(
                     WebView view, android.webkit.RenderProcessGoneDetail detail) {
                 if (view != game) return false;
+                nativeMainLoadRequested = false;
                 clearPendingBack();
                 dismissOfflinePageError();
                 android.util.Log.e("BraveFrontier", "Offline WebView renderer exited");
@@ -1291,6 +1299,7 @@ public class MainActivity extends Activity {
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         game.addJavascriptInterface(new SaveBridge(), "BFAndroid");
+        nativeMainLoadRequested = true;
         game.loadUrl("file:///android_asset/index.html");
         gameContainer.addView(game, new FrameLayout.LayoutParams(-1, -1));
         setContentView(gameContainer);
@@ -1387,6 +1396,7 @@ public class MainActivity extends Activity {
         if (game != null) game.onResume();
     }
     @Override protected void onDestroy() {
+        nativeMainLoadRequested = false;
         dismissRendererFailureDialog();
         dismissOfflinePageError();
         clearPendingBack();
