@@ -27,6 +27,11 @@ TOKEN_GUARD = "if (!nativeMainLoadRequested) return;"
 URL_GUARD = "if (view != game || !OFFLINE_MAIN_PAGE.equals(url)) return;"
 MAIN_LOAD = 'game.loadUrl("file:///android_asset/index.html");'
 RETRY_LOAD = "failedView.loadUrl(OFFLINE_MAIN_PAGE);"
+# N1/N2: accept formatting variation, forbid all unreviewed reset locations.
+CLEAR_ASSIGNMENT = re.compile(r"\bofflinePageLoadFailed\s*=\s*false\s*;")
+FIELD_INITIALIZER = re.compile(r"\bprivate\s+boolean\s+offlinePageLoadFailed\s*=\s*false\s*;")
+# N3: extra native navigation methods would need a deliberate token audit.
+ALTERNATE_LOAD = re.compile(r"\.(?:reload|loadData|loadDataWithBaseURL)\s*\(")
 
 def span(source, start, end):
     assert source.count(start) == 1, f"Missing/nonunique anchor: {start}"
@@ -64,8 +69,12 @@ def validate(source):
     assert error.index("!OFFLINE_MAIN_PAGE.equals(String.valueOf(request.getUrl()))") < error.index(TOKEN_FALSE)
     assert error.index(TOKEN_FALSE) < error.index("offlinePageLoadFailed = true;")
 
-    # R1: tap does not clear the error; the first verified new page-start does.
-    assert FAILED_FALSE not in retry
+    # N1/N2: only the field initializer and token-verified page-start clear failure.
+    # Reject both "flag = false" and "flag=false" in Retry or any callback/method.
+    assert len(FIELD_INITIALIZER.findall(source)) == 1
+    assert len(CLEAR_ASSIGNMENT.findall(source)) == 2
+    assert len(CLEAR_ASSIGNMENT.findall(start)) == 1
+    assert not CLEAR_ASSIGNMENT.search(retry)
     assert statement(retry, TOKEN_TRUE) and RETRY_LOAD in retry
     assert retry.index(TOKEN_TRUE) < retry.index(RETRY_LOAD)
     assert statement(create, TOKEN_TRUE) and MAIN_LOAD in create
@@ -82,6 +91,11 @@ def validate(source):
     # T5: exactly two explicit native requests (onCreate and Try again).
     assert len(re.findall(r"(?m)^[ \t]*" + re.escape(TOKEN_TRUE) + r"[ \t]*$", source)) == 2
     assert len(re.findall(r"\.loadUrl\s*\(", source)) == 2
+    # N3: no hidden second navigation through another WebView load API.
+    assert not ALTERNATE_LOAD.search(source)
+    # Android Back's established single game.goBack() is intentionally preserved;
+    # it is unrelated navigation and cannot clear a latched failure token.
+    assert len(re.findall(r"\.goBack\s*\(", source)) == 1
 
 validate(java)
 
@@ -115,6 +129,27 @@ reject(mutate_section(java, CREATE, CONTAINER, MAIN_LOAD,
                       MAIN_LOAD + "\n        game.loadUrl(OFFLINE_MAIN_PAGE);"))
 # R1 regression: no failure clearing before a new page-start.
 reject(mutate_section(java, RETRY, CLOSE, TOKEN_TRUE, FAILED_FALSE + "\n                        " + TOKEN_TRUE))
+
+# N1: whitespace-only mutations of the same Retry bug must be rejected.
+reject(mutate_section(java, RETRY, CLOSE, TOKEN_TRUE,
+                      "offlinePageLoadFailed=false;\n                        " + TOKEN_TRUE))
+# N2/N4: clearing failure outside a token-consumed start is prohibited.
+reject(mutate_section(java, FINISHED, "// v0.54:",
+                      "if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;",
+                      "offlinePageLoadFailed=false;\n                " +
+                      "if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;"))
+reject(mutate_section(java, RENDERER, "// Load the independent navigation layer",
+                      TOKEN_FALSE, TOKEN_FALSE + "\n                offlinePageLoadFailed = false;"))
+reject(mutate_section(java, "private void dismissRendererFailureDialog() {",
+                      "private static final String OFFLINE_MAIN_PAGE",
+                      "rendererFailureDialog = null;",
+                      "rendererFailureDialog = null;\n        offlinePageLoadFailed=false;"))
+# N3: alternate APIs can silently produce extra page navigations.
+for extra_call in ("game.reload();",
+                   'game.loadData("<html></html>", "text/html", "utf-8");',
+                   'game.loadDataWithBaseURL(null, "<html></html>", "text/html", "utf-8", null);'):
+    reject(mutate_section(java, CREATE, CONTAINER, MAIN_LOAD,
+                          MAIN_LOAD + "\n        " + extra_call))
 
 # The model is illustrative: it cannot simulate WebView scheduling/races.
 class Navigation:
