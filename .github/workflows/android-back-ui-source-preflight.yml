@@ -10,6 +10,8 @@ on:
       - 'test_bf_engine_webview_recovery_v22600.py'
       - 'test_bf_renderer_dialog_lifecycle_v23100.py'
       - 'test_bf_offline_page_reload_v23200.py'
+      - 'test_bf_stale_webview_finish_guard_v23300.py'
+      - 'V233_STALE_WEBVIEW_FINISH_GUARD.md'
       - 'V232_OFFLINE_MAIN_RELOAD_STATE.md'
       - 'V231_RENDERER_DIALOG_LIFECYCLE.md'
       - 'test_bf_offline_page_recovery_v22900.py'
@@ -43,3 +45,5 @@ jobs:
         run: python3 test_bf_offline_page_recovery_v22900.py
       - name: Verify new exact packaged-page load resets a stale error state
         run: python3 test_bf_offline_page_reload_v23200.py
+      - name: Verify late finishing callbacks cannot inject into stale WebViews
+        run: python3 test_bf_stale_webview_finish_guard_v23300.py
