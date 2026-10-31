@@ -527,3 +527,49 @@ body.bf-menu-mode #bf-home button:focus-visible {
     animation-iteration-count:1!important;
   }
 }
+
+
+/* v242: visual-first Home hierarchy. Archived Global location sprites stay
+   unchanged; active Quest/Summon appear ahead of read-only location art. */
+.bf-scene-places{gap:8px}
+.bf-scene-available-label,.bf-scene-archive-label{
+  grid-column:1/-1;display:flex;align-items:baseline;flex-wrap:wrap;
+  justify-content:space-between;gap:4px 8px;min-width:0;
+  padding:7px 5px 5px;color:#f5d99d;border-bottom:1px solid #aa8b54;
+}
+.bf-scene-available-label strong,.bf-scene-archive-label strong{
+  font:900 12px/1.25 Georgia,serif;letter-spacing:.04em;
+}
+.bf-scene-available-label small,.bf-scene-archive-label small{
+  color:#c8d6e6;font:10px/1.25 Arial,sans-serif;
+}
+.bf-scene-archive-label{margin-top:5px;color:#b9c7d8;border-color:#637189}
+.bf-scene-places button.bf-scene-featured{
+  box-sizing:border-box;min-height:159px;border:2px ridge #e3b96c;
+  background:radial-gradient(ellipse at 50% 38%,#675675,#243750 70%,#141f31);
+  box-shadow:inset 0 1px 2px #ffefb04a,0 5px 11px #000a;
+  touch-action:manipulation;
+}
+.bf-scene-places .bf-scene-featured img{height:112px}
+.bf-scene-places .bf-scene-featured .bf-scene-status{
+  min-height:18px;padding:7px 5px;font-size:11px;letter-spacing:.035em;
+  background:linear-gradient(#d8a65a,#774e27);border-color:#efc881;
+}
+.bf-scene-places .bf-scene-locked{
+  min-height:89px;padding:4px 4px 7px;opacity:.62;
+  background:linear-gradient(#2d3849,#172334);
+}
+.bf-scene-places .bf-scene-locked img{height:69px}
+.bf-scene-places .bf-scene-locked .bf-scene-status{
+  font-size:8px;min-height:13px;padding:3px 2px;
+}
+.bf-scene-places button.bf-scene-featured:active{filter:brightness(1.15)}
+.bf-scene-places button.bf-scene-featured:focus-visible{
+  outline:3px solid #b8ebff;outline-offset:2px;
+}
+@media(max-width:359px){
+  .bf-scene-places button.bf-scene-featured{min-height:136px}
+  .bf-scene-places .bf-scene-featured img{height:89px}
+  .bf-scene-places .bf-scene-locked img{height:57px}
+  .bf-scene-available-label strong,.bf-scene-archive-label strong{font-size:11px}
+}
