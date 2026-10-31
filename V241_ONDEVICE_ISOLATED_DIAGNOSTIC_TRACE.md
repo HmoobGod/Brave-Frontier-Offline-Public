@@ -1,0 +1,9 @@
+# v241 — Native on-device trace viewer, isolated diagnostic APK only
+
+**DRAFT until exact-head Android CI and independent Claude review.** v236 already logs bounded startup callbacks to logcat, and v237–v240 established an isolated diagnostic Android package and a signed intentionally missing-index test APK. An Android owner can now view coarse callback events **without ADB** using a small TRACE button in the lower-right of the independent `org.bravefrontier.offline.diagnostic` app.
+
+The optional **Copy event text** action copies only up to the most recent **16** fixed-label callback events and boolean flags to the device clipboard on owner request; there are no full URLs, user/unit identifiers, game data, save content, file access, network access, persistent trace files, or generated tokens. The trace is in RAM only. The exact diagnostic package identity **AND Android FLAG_DEBUGGABLE** must match; normal `org.bravefrontier.offline` never gets this button or appended dialog text, even if installed as an ordinary debug APK.
+
+On the deliberately broken missing-index diagnostic APK, the existing Retry/Close dialog includes the latest trace text, allowing screenshots without ADB; a renderer-failure dialog includes the same suffix. There are no changes to existing dialog action callbacks, their lifecycle, WebView navigation guards, saved progress, original assets, Gradle identities, signing, manifest, original combat, quests, Gem/Imp economy, or user saves.
+
+**Gates:** new Python native-source test is wired into both Android Back source preflight and full Android APK workflow; exact-head real Java/Gradle build and existing v236 WebView callbacks regressions must pass; Claude independent exact-head review required before merge. Compilation and source checks do **not** prove on-device events or owner v7 save compatibility. This is for the eventual **v250 checkpoint** and does not install or update the owner's Current v124 build.
