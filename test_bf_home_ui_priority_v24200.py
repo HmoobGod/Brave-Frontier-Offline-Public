@@ -27,7 +27,6 @@ for path in ("home_win_quest.png","home_win_akras_smn_hall.png",
              "home_win_gate.png","home_win_arena.png",
              "home_win_raid_open.png","home_win_randall.png"):
     assert path in home
-    assert (A/"content/home"/path).is_file(), path
 assert "window.BFGlobalHome = {refreshParty};" in home
 assert 'data-bf-goto="menu"' in home
 assert "window.BF_homeNav = {go,get current()" in J
@@ -52,6 +51,13 @@ assert len(J.encode("utf8"))<128*1024 and len(C.encode("utf8"))<128*1024
 print("PASS v242 source: active Home destinations first, original art intact, no game/save changes")
 if "--source-only" in sys.argv:
     raise SystemExit(0)
+
+# The original Global sprites are staged by the normal asset-preparation
+# step before full browser/Android tests, not present at source-only checkout.
+for name in ("home_win_quest.png","home_win_akras_smn_hall.png",
+             "home_win_gate.png","home_win_arena.png",
+             "home_win_raid_open.png","home_win_randall.png"):
+    assert (A/"content/home"/name).is_file(), name
 
 import shutil
 from playwright.sync_api import sync_playwright
