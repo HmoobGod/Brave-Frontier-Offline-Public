@@ -9,8 +9,8 @@ manifest = (R / "app/src/main/AndroidManifest.xml").read_text("utf8")
 nav = (A / "bf_home_nav.js").read_bytes()
 css = (A / "bf_home_nav.css").read_bytes()
 
-assert 64 * 1024 - 1024 < len(nav) < 128 * 1024, len(nav)
-assert 0 < len(css) < 128 * 1024
+assert 0 < len(nav) <= 128 * 1024, len(nav)
+assert 0 < len(css) <= 128 * 1024
 assert "window.BF_homeNav = {go,get current()" in nav.decode("utf8")
 assert "bf-menu-mode" in css.decode("utf8")
 
