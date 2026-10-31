@@ -50,6 +50,7 @@ public class MainActivity extends Activity {
     private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
     // v241 RAM-only bounded, coarse events. No player data or persistence.
     private final java.util.ArrayDeque<String> isolatedTrace = new java.util.ArrayDeque<>();
+    private android.app.AlertDialog isolatedTraceDialog;
     // v236: diagnostic breadcrumbs, restricted to a debuggable APK.
     // Never write a URL, player state, private data, or WebView contents to logcat.
     private void traceOfflinePage(String event, WebView view, boolean mainPage) {
@@ -137,11 +138,17 @@ public class MainActivity extends Activity {
         }
         return text.length() == 0 ? "No events yet" : text.toString();
     }
+    private void dismissIsolatedTraceDialog() {
+        if (isolatedTraceDialog == null) return;
+        isolatedTraceDialog.dismiss();
+        isolatedTraceDialog = null;
+    }
     private void showIsolatedTrace() {
         if (!isIsolatedTraceApp() || isFinishing() || isDestroyed()) return;
+        dismissIsolatedTraceDialog();
         final String report = "BF Offline Diagnostic / coarse events only\n" +
                 isolatedTraceText();
-        new android.app.AlertDialog.Builder(this)
+        final android.app.AlertDialog shown = new android.app.AlertDialog.Builder(this)
                 .setTitle("Diagnostic launch trace")
                 .setMessage(report)
                 .setPositiveButton("Copy event text", (dialog, which) -> {
@@ -153,7 +160,12 @@ public class MainActivity extends Activity {
                                     "BF Offline Diagnostic", report));
                 })
                 .setNegativeButton("Close", null)
-                .show();
+                .create();
+        isolatedTraceDialog = shown;
+        shown.setOnDismissListener(dialog -> {
+            if (isolatedTraceDialog == shown) isolatedTraceDialog = null;
+        });
+        shown.show();
     }
     private String isolatedFailureSuffix() {
         return isIsolatedTraceApp() ? "\n\nDiagnostic events:\n" + isolatedTraceText() : "";
@@ -172,7 +184,8 @@ public class MainActivity extends Activity {
                 FrameLayout.LayoutParams.WRAP_CONTENT,
                 android.view.Gravity.BOTTOM | android.view.Gravity.END);
         final float density = getResources().getDisplayMetrics().density;
-        bounds.setMargins(0, 0, (int) (8 * density), (int) (8 * density));
+        // Bottom navigation is approximately 70dp; avoid covering MENU / SAVES.
+        bounds.setMargins(0, 0, (int) (8 * density), (int) (84 * density));
         gameContainer.addView(button, bounds);
     }
     private void clearPendingBack() {
@@ -1497,6 +1510,7 @@ public class MainActivity extends Activity {
     @Override protected void onDestroy() {
         traceOfflinePage("activityDestroy", game, true);
         nativeMainLoadRequested = false;
+        dismissIsolatedTraceDialog();
         dismissRendererFailureDialog();
         dismissOfflinePageError();
         clearPendingBack();
