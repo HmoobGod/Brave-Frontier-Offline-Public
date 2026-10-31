@@ -1263,7 +1263,7 @@ public class MainActivity extends Activity {
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         game.addJavascriptInterface(new SaveBridge(), "BFAndroid");
-        game.loadUrl(OFFLINE_MAIN_PAGE);
+        game.loadUrl("file:///android_asset/index.html");
         gameContainer.addView(game, new FrameLayout.LayoutParams(-1, -1));
         setContentView(gameContainer);
         if (state != null) saveToWrite = state.getString("pending_save_to_write");
