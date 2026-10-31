@@ -989,6 +989,14 @@ public class MainActivity extends Activity {
                 } catch (IOException sourceBackdropsError) {
                     android.util.Log.w("BraveFrontier", "Optional 2022 mission battle backdrop evidence unavailable", sourceBackdropsError);
                 }
+                // v220: exact 2022 backdrop artwork for 77 additional quests.
+                // Cosmetic-only; opt-in remains OFF via v38, no save/gameplay changes.
+                try {
+                    String additionalBackdrops = readPackagedText("bf22000_original_2022_additional_dungeon_backdrops.js");
+                    view.evaluateJavascript(additionalBackdrops, null);
+                } catch (IOException additionalBackdropsError) {
+                    android.util.Log.w("BraveFrontier", "Optional additional original 2022 dungeon backgrounds unavailable", additionalBackdropsError);
+                }
                 // v110: original 2022 starter leader-skill eligibility audit,
                 // read-only until original stat initialization is verified.
                 try {
