@@ -1,0 +1,36 @@
+name: Original 2022 Legend Stone item artwork source preflight
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '.github/workflows/legend-stone-item-art-source-preflight.yml'
+      - 'app/src/main/assets/content/item/item_thum_111000.png'
+      - 'app/src/main/assets/bf15300_legend_stone_merit_source.js'
+      - 'source_data/bf_global_2022_legend_stone_item_art_v221.json'
+      - 'source_data/bf_global_2022_legend_stone_exchange_v137.json'
+      - 'test_bf_original_legend_stone_item_art_source_v22100.py'
+      - 'test_bf_original_legend_stone_item_art_browser_v22100.py'
+      - 'test_bf_packaged_original_legend_stone_item_art_v22100.py'
+      - 'V221_ORIGINAL_LEGEND_STONE_ITEM_THUMBNAIL.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  item-thumbnail-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact PR head or pushed main
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify archived 2022 Legend Stone item and byte-original PNG
+        run: python test_bf_original_legend_stone_item_art_source_v22100.py
