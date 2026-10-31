@@ -37,8 +37,8 @@ assert 'game.loadUrl("file:///android_asset/index.html");' in java
 # This narrow callback prefix contains no Java string literal with comment markers.
 def check_order(sample):
     section = sample.split(signature, 1)[1].split("// v0.54:", 1)[0]
-    executable = re.sub(r"/\\*.*?\\*/|//[^\\n]*", "", section, flags=re.S)
-    guard_statement = r"(?m)^[ \\t]*if \\(view != game\\) return;[ \\t]*$"
+    executable = re.sub(r"/\*.*?\*/|//[^\n]*", "", section, flags=re.S)
+    guard_statement = r"(?m)^[ \t]*if \(view != game\) return;[ \t]*$"
     if not re.search(guard_statement, executable):
         return False
     return (executable.index(super_call) < executable.index(identity_guard) <
