@@ -7,6 +7,7 @@ This prepares a test artifact, NOT a physical Android callback test.
 """
 from __future__ import annotations
 import hashlib
+import json
 import os
 from pathlib import Path
 import re
@@ -19,6 +20,8 @@ ROOT = Path(__file__).resolve().parent
 NORMAL = ROOT / "app/build/outputs/apk/debug/app-debug.apk"
 DIAGNOSTIC = ROOT / "app/build/outputs/apk/diagnostic/app-diagnostic.apk"
 OUTPUT = ROOT / "app/build/outputs/apk/diagnostic-fault/app-diagnostic-missing-index.apk"
+# Persist cross-step hashes so --verify cannot compare each input to itself.
+HASH_RECORD = OUTPUT.parent / "v240-fault-apk-input-digests.json"
 KEYSTORE = ROOT / ".github/debug/bf-development-debug.keystore"
 WORKFLOW = (ROOT / ".github/workflows/build-debug-apk.yml").read_text("utf-8")
 PREFLIGHT = (ROOT / ".github/workflows/android-back-ui-source-preflight.yml").read_text("utf-8")
@@ -37,7 +40,12 @@ def tool(name: str) -> str:
     return str(candidate)
 
 def run(args: list[str]) -> str:
-    return subprocess.run(args, capture_output=True, text=True, check=True).stdout
+    proc = subprocess.run(args, capture_output=True, text=True)
+    if proc.returncode:
+        raise RuntimeError(
+            "Android SDK command failed (exit %s): %s\n%s" %
+            (proc.returncode, args[0:2], proc.stderr[-3000:]))
+    return proc.stdout
 
 def badge(aapt: str, apk: Path) -> str:
     return run([aapt, "dump", "badging", str(apk)])
@@ -70,6 +78,10 @@ def source_gate() -> None:
     assert WORKFLOW.count("build_bf_missing_index_diagnostic_v23900.py --verify") == 1
     assert PREFLIGHT.count("build_bf_missing_index_diagnostic_v23900.py") == 2
     assert "continue-on-error: true" not in WORKFLOW
+    assert "if-no-files-found: error" in WORKFLOW.split(
+        "      - name: Upload missing-index failure test APK", 1)[1]
+    assert "zipalign" in script and "resources.arsc" in script
+    assert "HASH_RECORD.write_text" in script and "HASH_RECORD.read_text" in script
     for step in (
         "Create isolated packaged-page failure APK (diagnostic ID only)",
         "Verify signed fault APK, untouched diagnostic APK and isolated identity",
@@ -96,14 +108,25 @@ def verify_structure(aapt: str, apksigner: str, original_hash: str, diagnostic_h
     assert signature(apksigner, OUTPUT) == signature(apksigner, DIAGNOSTIC)
     assert "application-debuggable" in badge(aapt, OUTPUT)
     assert "android.permission.INTERNET" not in run([aapt, "dump", "permissions", str(OUTPUT)])
+    # Installability gate: compressed or misaligned resources.arsc can be
+    # rejected by modern Android even when aapt/signer accept the package.
+    assert run([tool("zipalign"), "-c", "-p", "4", str(OUTPUT)]) is not None
     with zipfile.ZipFile(DIAGNOSTIC) as before, zipfile.ZipFile(OUTPUT) as after:
-        old_assets = {n for n in before.namelist() if n.startswith("assets/") and not n.endswith("/")}
-        new_assets = {n for n in after.namelist() if n.startswith("assets/") and not n.endswith("/")}
-        assert MISSING in old_assets and MISSING not in new_assets
-        assert new_assets == old_assets - {MISSING}
+        old_files = [x.filename for x in before.infolist() if not x.is_dir()]
+        new_files = [x.filename for x in after.infolist() if not x.is_dir()]
+        assert len(old_files) == len(set(old_files)), "Duplicate original ZIP entries"
+        assert len(new_files) == len(set(new_files)), "Duplicate output ZIP entries"
+        old_contents = {n for n in old_files if not SIGNATURE_ENTRY.match(n)}
+        new_contents = {n for n in new_files if not SIGNATURE_ENTRY.match(n)}
+        assert MISSING in old_contents and MISSING not in new_contents
+        assert new_contents == old_contents - {MISSING}, "Non-signature entry added/removed"
+        assert "resources.arsc" in old_contents
+        assert before.getinfo("resources.arsc").compress_type == zipfile.ZIP_STORED
+        assert after.getinfo("resources.arsc").compress_type == zipfile.ZIP_STORED
         assert all(hashlib.sha256(before.read(n)).digest() ==
-                   hashlib.sha256(after.read(n)).digest() for n in new_assets)
-        # Android component and permissions are inherited; no manifest patch.
+                   hashlib.sha256(after.read(n)).digest() for n in new_contents), (
+                   "Non-signature contents changed")
+        # The full manifest and dex/native resources also remain untouched.
         assert before.read("AndroidManifest.xml") == after.read("AndroidManifest.xml")
 
 def build() -> None:
@@ -128,13 +151,25 @@ def build() -> None:
              "--ks-key-alias", "androiddebugkey", "--key-pass", "pass:android",
              "--out", str(OUTPUT), str(aligned)])
     verify_structure(aapt, apksigner, original_hash, diagnostic_hash)
-    print("PASS v239 built: signed isolated missing-index APK; Current + diagnostic inputs untouched")
+    record = {"normal_sha256": original_hash,
+              "diagnostic_sha256": diagnostic_hash,
+              "fault_sha256": sha(OUTPUT)}
+    HASH_RECORD.write_text(json.dumps(record, sort_keys=True) + "\n", encoding="utf-8")
+    print("PASS v240 built: signed aligned missing-index APK; input SHA-256 baseline persisted")
 
 def verify() -> None:
     aapt, apksigner = tool("aapt"), tool("apksigner")
-    original_hash, diagnostic_hash = sha(NORMAL), sha(DIAGNOSTIC)
+    assert HASH_RECORD.is_file(), "Build-step hash baseline missing"
+    record = json.loads(HASH_RECORD.read_text("utf-8"))
+    assert set(record) == {"normal_sha256", "diagnostic_sha256", "fault_sha256"}
+    original_hash = record["normal_sha256"]
+    diagnostic_hash = record["diagnostic_sha256"]
+    assert re.fullmatch(r"[a-f0-9]{64}", original_hash)
+    assert re.fullmatch(r"[a-f0-9]{64}", diagnostic_hash)
+    assert re.fullmatch(r"[a-f0-9]{64}", record["fault_sha256"])
+    assert sha(OUTPUT) == record["fault_sha256"], "Fault APK mutated after build"
     verify_structure(aapt, apksigner, original_hash, diagnostic_hash)
-    print("PASS v239 packaged: same diagnostic ID/signing, index missing only, no original files changed")
+    print("PASS v240 packaged: aligned+signed isolated fault APK, all ZIP files preserved except index/signatures, cross-step hashes unchanged")
 
 if __name__ == "__main__":
     args = sys.argv[1:]
@@ -145,4 +180,4 @@ if __name__ == "__main__":
     elif args == ["--verify"]:
         verify()
     else:
-        print("PASS v239 source: isolated fault-only APK wiring and immutable input checks")
+        print("PASS v240 source: isolated fault-only APK with complete file and cross-step hash checks")

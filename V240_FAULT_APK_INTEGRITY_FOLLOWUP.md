@@ -1,0 +1,11 @@
+# v240 — Binary completeness and cross-step integrity of isolated missing-index APK
+
+**DRAFT and awaiting exact-head CI plus Claude review.** This follows Claude's v239 APPROVE at facde5ce6df2b35b954b607f0cad16925075c786 and addresses O1–O3/O5/O6 without editing source app Java, Gradle, game assets, manifest, original APK build steps, signing configuration or v7 save code.
+
+- **O1 Android installability**: after re-signing, run actual Android SDK `zipalign -c -p 4` on the signed fault APK; require `resources.arsc` to be ZIP_STORED in source and output (Android 9+ requirement). APK signature and AAPT checks from v239 are retained.
+- **O2 no missing executable/resources**: compare ALL non-directory ZIP entry names after excluding only the intentionally removed `assets/index.html` and old/new APK v1 signature entries; content SHA-256 for every retained entry. This covers `classes.dex`, `resources.arsc`, native libraries and manifest, not only `assets/`.
+- **O3 real cross-step hash baseline**: during `--build` (after successful signed-APK verification), write `v240-fault-apk-input-digests.json` alongside the fault APK, containing SHA-256 for the normal, diagnostic and fault APKs. In separate `--verify` CI step read that baseline, confirm exact input hashes and unmodified fault output; fail if missing. Baseline is CI-internal and not uploaded to owner.
+- **O5 diagnostic output**: Android SDK subprocess failures now display bounded stderr in CI rather than an opaque CalledProcessError.
+- **O6 owner test restore**: clarify that same-run diagnostic APK update with `adb install -r` restores the bundled index, while optional uninstall removes only diagnostic data.
+
+Both artifact identities remain different: normal Current `org.bravefrontier.offline`, isolated test `org.bravefrontier.offline.diagnostic`. No physical-device testing, failure-to-success Retry path, original 2022 encounter gameplay recovery or real v7 owner-save migration is claimed. Any owner physical test must opt in and use only the separately named fault-test artifact after exact-head Android build, independent Claude approval, and merge acceptance.
