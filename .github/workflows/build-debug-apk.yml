@@ -367,6 +367,7 @@ jobs:
           python test_bf_v0131.py
           python test_bf_home_nav.py
           python test_bf_android_back_home_v22500.py
+          python test_bf_engine_webview_recovery_v22600.py
           python test_bf_global_home_scene.py
           python test_bf_inner_screens.py
           python test_bf_unit_box_quest_details.py
