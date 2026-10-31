@@ -33,12 +33,16 @@ assert "dismissRendererFailureDialog();" in java
 assert 'failedView.loadUrl(OFFLINE_MAIN_PAGE);' in java
 assert 'game.loadUrl("file:///android_asset/index.html");' in java
 
-# The source gate catches a missing, inverted, or post-injection identity check.
+# Reject comments masquerading as the required executable guard.
+# This narrow callback prefix contains no Java string literal with comment markers.
 def check_order(sample):
     section = sample.split(signature, 1)[1].split("// v0.54:", 1)[0]
-    return (identity_guard in section and
-            section.index(super_call) < section.index(identity_guard) <
-            section.index(url_guard) < section.index(injection))
+    executable = re.sub(r"/\\*.*?\\*/|//[^\\n]*", "", section, flags=re.S)
+    guard_statement = r"(?m)^[ \\t]*if \\(view != game\\) return;[ \\t]*$"
+    if not re.search(guard_statement, executable):
+        return False
+    return (executable.index(super_call) < executable.index(identity_guard) <
+            executable.index(url_guard) < executable.index(injection))
 
 assert check_order(java)
 def mutate_finished(new_guard):
@@ -49,6 +53,8 @@ def mutate_finished(new_guard):
 assert not check_order(mutate_finished(""))
 assert not check_order(mutate_finished("if (view == game) return;"))
 assert not check_order(mutate_finished("if (view != game) { /* missing return */ }"))
+assert not check_order(mutate_finished("// " + identity_guard))
+assert not check_order(mutate_finished("/* " + identity_guard + " */"))
 
 assert len(re.findall(r"^\s*python3 test_bf_stale_webview_finish_guard_v23300.py$", workflow, re.M)) == 1
 assert preflight.count("test_bf_stale_webview_finish_guard_v23300.py") == 2
