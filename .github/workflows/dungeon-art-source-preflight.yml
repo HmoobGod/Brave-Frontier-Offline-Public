@@ -1,0 +1,35 @@
+name: Original 2022 dungeon artwork source preflight
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - '.github/workflows/dungeon-art-source-preflight.yml'
+      - '.github/workflows/build-debug-apk.yml'
+      - 'prepare_bf_original_2022_dungeon_backdrops_v22000.py'
+      - 'test_bf_2022_dungeon_art_source_v22000.py'
+      - 'test_bf_2022_additional_dungeon_backdrops_v22000.py'
+      - 'test_bf_packaged_2022_additional_dungeon_backdrops_v22000.py'
+      - 'source_data/bf_global_2022_dungeon_art_v220.json'
+      - 'source_assets/bf1/dungeon/BF1_Global_2022_15_Dungeon_Backdrops_v220.zip'
+      - 'V220_ALL_106_ORIGINAL_DUNGEON_BACKDROPS.md'
+      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-dungeon-art-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact PR head or pushed commit
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify byte-pinned original dungeon art and 106 mission joins
+        run: python test_bf_2022_dungeon_art_source_v22000.py
