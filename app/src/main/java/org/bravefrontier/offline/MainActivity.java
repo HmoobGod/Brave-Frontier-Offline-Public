@@ -1256,17 +1256,32 @@ public class MainActivity extends Activity {
         if (backNavigationPending) return;
         if (game == null) {super.onBackPressed();return;}
         backNavigationPending = true;
+        final int token = ++backDispatchToken;
+        backTimeout = () -> {
+            if (!backNavigationPending || token != backDispatchToken) return;
+            android.util.Log.w("BraveFrontier", "Android Back JS callback timed out");
+            clearPendingBack();
+            if (!isFinishing() && !isDestroyed()) fallbackAndroidBack();
+        };
+        if (!uiHandler.postDelayed(backTimeout, UI_BACK_TIMEOUT_MS)) {
+            clearPendingBack();
+            fallbackAndroidBack();
+            return;
+        }
         try {
             game.evaluateJavascript(UI_BACK_JS, handled -> {
-                backNavigationPending = false;
+                if (!backNavigationPending || token != backDispatchToken) return;
+                clearPendingBack();
                 if (isFinishing() || isDestroyed()) return;
                 if ("true".equals(handled)) return;
                 fallbackAndroidBack();
             });
         } catch (RuntimeException error) {
-            backNavigationPending = false;
-            android.util.Log.w("BraveFrontier", "Android back route dispatch unavailable", error);
-            fallbackAndroidBack();
+            if (backNavigationPending && token == backDispatchToken) {
+                clearPendingBack();
+                android.util.Log.w("BraveFrontier", "Android back route dispatch unavailable", error);
+                if (!isFinishing() && !isDestroyed()) fallbackAndroidBack();
+            }
         }
     }
     @Override protected void onPause() {
