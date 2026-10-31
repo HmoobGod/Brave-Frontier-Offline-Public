@@ -37,6 +37,13 @@ public class MainActivity extends Activity {
     // v229: distinguish a failed packaged main document from failed subresources.
     private boolean offlinePageLoadFailed = false;
     private android.app.AlertDialog offlinePageFailureDialog;
+    // v231: keep the renderer-recovery window owned by this Activity lifecycle.
+    private android.app.AlertDialog rendererFailureDialog;
+    private void dismissRendererFailureDialog() {
+        if (rendererFailureDialog == null) return;
+        rendererFailureDialog.dismiss();
+        rendererFailureDialog = null;
+    }
     private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
     private void dismissOfflinePageError() {
         if (offlinePageFailureDialog == null) return;
@@ -202,13 +209,16 @@ public class MainActivity extends Activity {
                 view.destroy();
                 game = null;
                 if (!isFinishing() && !isDestroyed()) {
-                    new android.app.AlertDialog.Builder(MainActivity.this)
+                    // Keep the dialog referenced until Activity destruction so it cannot leak a window.
+                    dismissRendererFailureDialog();
+                    rendererFailureDialog = new android.app.AlertDialog.Builder(MainActivity.this)
                             .setTitle("Offline display stopped")
                             .setMessage("The game display stopped responding. Restarting it reloads your last saved progress; unsaved actions may be lost. Your saved data is not erased.")
                             .setPositiveButton("Restart interface", (dialog, which) -> recreate())
                             .setNegativeButton("Close", (dialog, which) -> finish())
                             .setCancelable(false)
-                            .show();
+                            .create();
+                    rendererFailureDialog.show();
                 }
                 return true;
             }
@@ -1366,6 +1376,7 @@ public class MainActivity extends Activity {
         if (game != null) game.onResume();
     }
     @Override protected void onDestroy() {
+        dismissRendererFailureDialog();
         dismissOfflinePageError();
         clearPendingBack();
         if (game != null) {game.removeJavascriptInterface("BFAndroid");game.destroy();game = null;}
