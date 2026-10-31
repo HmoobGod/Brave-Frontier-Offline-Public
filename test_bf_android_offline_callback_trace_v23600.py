@@ -40,7 +40,7 @@ assert all(secret not in method for secret in (
     "localStorage", "SaveBridge", "saveToWrite", "pendingUpload",
     "P.", "S.", "getUrl(", "JSONObject", "Uri", "request",
     "exception", "error.get", "getIntent()"))
-assert 'event + " current="' in method and ' + " dialog="' in method
+assert 'event + " current="' in method and '" dialog=" + (offlinePageFailureDialog != null)' in method
 assert 'android.permission.INTERNET' not in manifest
 assert "bf_global_offline_demo_v7" not in method
 
