@@ -29,6 +29,8 @@ android {
         // alongside the owner's existing app, with separate Android app data.
         diagnostic {
             initWith debug
+            // v238: guarantee native debug callback tracing is enabled.
+            debuggable true
             applicationIdSuffix '.diagnostic'
             versionNameSuffix '-diagnostic'
             signingConfig signingConfigs.debug

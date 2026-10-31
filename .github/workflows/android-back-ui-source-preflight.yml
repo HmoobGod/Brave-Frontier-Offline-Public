@@ -9,6 +9,7 @@ on:
       - 'app/src/diagnostic/res/values/strings.xml'
       - 'test_bf_isolated_diagnostic_build_v23700.py'
       - 'V237_ISOLATED_ANDROID_DIAGNOSTIC_APK.md'
+      - 'V238_DIAGNOSTIC_IDENTITY_AND_CI_GATES.md'
       - 'app/src/main/assets/bf_home_nav.js'
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
