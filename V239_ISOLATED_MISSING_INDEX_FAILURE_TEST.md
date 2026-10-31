@@ -1,0 +1,17 @@
+# v239 — Deliberately missing index.html in an isolated Android test APK
+
+**Draft, opt-in device error-path test only.** Build a separate *faulted diagnostic* artifact that cannot overwrite the owner's ordinary Current app. It retains the verified diagnostic application ID `org.bravefrontier.offline.diagnostic`; compared with its normal diagnostic APK, only the packaged **`assets/index.html` is removed**. The normal/debug APK and normal diagnostic APK remain unchanged. It is **not** a playable game and **must not be installed as Current**.
+
+The v239 Python build script opens only `app/build/outputs/apk/diagnostic/app-diagnostic.apk` as input, rewrites into a temporary APK without index.html, strips old ZIP signature records, runs Android SDK zipalign and apksigner with the CI-provided persistent debug certificate, then writes **only** `app/build/outputs/apk/diagnostic-fault/app-diagnostic-missing-index.apk`. It verifies cryptographic signer match, diagnostic package ID, debuggability, no INTERNET, unchanged compiled manifest, byte-identical **all remaining assets**, and original normal and diagnostic APK input hashes. It never touches Java, original game files, saves, owner devices or signing configuration.
+
+The new CI upload `BraveFrontierOffline-isolated-missing-index-test-apk` is distinct from both regular `BraveFrontierOffline-demo-debug-apk` and normal `BraveFrontierOffline-isolated-diagnostic-apk`; its file is `app-diagnostic-missing-index.apk`. Full normal+diagnostic builds, existing v238 binary check, and diagnostic uploads finish first. Source preflight is non-destructive. CI cannot prove WebView runtime callback order; physical Android testing required.
+
+## Owner acceptance scenario
+
+1. Preserve the owner's normal Current `org.bravefrontier.offline` and old v7 save untouched. Use an emulator or isolated phone environment, preferably one with no diagnostic progress to lose. **Do not use `adb install` on a package unless verifying its package ID.**
+2. Install only the faulted `.diagnostic` APK. It updates/replaces a preexisting `org.bravefrontier.offline.diagnostic` app, **not Current**; it does not install as a third app. If a newer diagnostic version is installed, Android may refuse a lower versionCode.
+3. In Windows Terminal: `adb logcat -c`, `adb logcat -s BFOfflineTrace:D`, launch **BF Offline Diagnostic**. Record main-page `onReceivedErrorMain`, `failureLatched`, dialog Retry and Close, duplicate/late starts, and ensure **no `injectionAttempt` while failed=true**.
+4. Tap Retry while the asset remains absent: it should fail and re-offer the dialog, without user save mutation. Tap Close: the fault test app exits.
+5. Reinstall the normal `BraveFrontierOffline-isolated-diagnostic-apk` afterward, then cold-start. A regular APK reinstall is necessary to restore the packaged index; **Retry cannot restore an absent APK asset in place**. Check original Current app remains installed and its before/after exported save is unchanged.
+
+Do not infer the old owner v7 save or full game parity is verified from this faulted app. Original 2022 native story enemy encounter source remains a separate blocker. Independent Claude exact-head review, exact-head Android CI + source gate success, and SHA-guarded merge are required before treating this test APK as owner-ready.
