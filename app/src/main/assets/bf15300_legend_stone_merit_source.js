@@ -46,6 +46,20 @@
  const paragraph=document.createElement('p');paragraph.id='bf15300-price';
  paragraph.textContent='Legend Stone (original item #110100) · '+source.originalPrice.toLocaleString('en-US')+
    ' Merit Points per stone · original per-period offer limit 99.';
+ // v221: the 98x98 source-authentic item thumbnail, read-only.
+ // Original item master #110100 references item_thum_111000.png.
+ const visual=document.createElement('figure');
+ visual.id='bf22100-legend-stone-original-icon';
+ visual.style.cssText='display:flex;align-items:center;gap:10px;margin:8px 0';
+ const icon=document.createElement('img');
+ icon.id='bf22100-legend-stone-item-icon';
+ icon.src='content/item/item_thum_111000.png';
+ icon.alt='Original 2022 Legend Stone item icon';
+ icon.width=64;icon.height=64;
+ icon.style.cssText='width:64px;height:64px;object-fit:contain;flex-shrink:0';
+ const iconCaption=document.createElement('figcaption');
+ iconCaption.textContent='Original item artwork · reference only · no item awarded.';
+ visual.append(icon,iconCaption);
  const history=document.createElement('p');
  history.textContent='Original source lists four consecutive monthly offer windows (January–April 2022), '+
    'ending May 1, 2022. These are historical source records, NOT a restriction on offline play.';
@@ -54,7 +68,7 @@
    'documentation, not an explicit currency field in this archived table. '+
    'No Merit Points balance, earning rules, spending, item inventory or 7★/8★ '+
    'evolution purchase is enabled. Existing DEMO progression and saved data are untouched.';
- panel.append(title,paragraph,history,notice);
+ panel.append(title,visual,paragraph,history,notice);
  host.after(panel);
  window.BFGlobalOriginalLegendStoneExchangeV15300=freeze({
    source,offers:rows,
