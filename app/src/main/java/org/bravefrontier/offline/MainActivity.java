@@ -38,6 +38,10 @@ public class MainActivity extends Activity {
     private static final int PICK_SAVE_FILE = 1002;
     private static final int CREATE_SAVE_FILE = 1003;
     private static final int MAX_SAVE_BYTES = 1024 * 1024;
+    // v225: route-only Android Back handling. Do not mutate P, S, or v7 saves.
+    private boolean backNavigationPending = false;
+    private static final String UI_BACK_JS =
+            "(function(){try{var n=window.BF_homeNav;return !!(n&&n.current!=='home'&&typeof n.go==='function'&&n.go('home'));}catch(e){return false;}})();";
 
     // Small, bounded local UI resources; never read files outside this APK.
     private String readPackagedText(String file) throws IOException {
@@ -1230,9 +1234,26 @@ public class MainActivity extends Activity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    @Override public void onBackPressed() {
+    private void fallbackAndroidBack() {
         if (game != null && game.canGoBack()) game.goBack();
         else super.onBackPressed();
+    }
+    @Override public void onBackPressed() {
+        if (backNavigationPending) return;
+        if (game == null) {super.onBackPressed();return;}
+        backNavigationPending = true;
+        try {
+            game.evaluateJavascript(UI_BACK_JS, handled -> {
+                backNavigationPending = false;
+                if (isFinishing() || isDestroyed()) return;
+                if ("true".equals(handled)) return;
+                fallbackAndroidBack();
+            });
+        } catch (RuntimeException error) {
+            backNavigationPending = false;
+            android.util.Log.w("BraveFrontier", "Android back route dispatch unavailable", error);
+            fallbackAndroidBack();
+        }
     }
     @Override protected void onPause() {
         if (game != null) game.onPause();
