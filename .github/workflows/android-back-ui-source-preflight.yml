@@ -21,6 +21,8 @@ on:
       - 'test_bf_stale_webview_finish_guard_v23300.py'
       - 'test_bf_offline_main_navigation_token_v23400.py'
       - 'test_bf_android_offline_callback_trace_v23600.py'
+      - 'test_bf_isolated_device_trace_v24100.py'
+      - 'V241_ONDEVICE_ISOLATED_DIAGNOSTIC_TRACE.md'
       - 'V236_ANDROID_OFFLINE_CALLBACK_TRACE.md'
       - 'V235_MAIN_NAVIGATION_FAIL_CLOSED_TEST_FOLLOWUP.md'
       - 'V234_OFFLINE_MAIN_NAVIGATION_TOKEN.md'
@@ -68,3 +70,5 @@ jobs:
         run: python3 test_bf_isolated_diagnostic_build_v23700.py
       - name: Verify missing-index fault APK never targets Current
         run: python3 build_bf_missing_index_diagnostic_v23900.py --source-only
+      - name: Verify bounded diagnostic trace viewer is unavailable in Current
+        run: python3 test_bf_isolated_device_trace_v24100.py

@@ -48,6 +48,9 @@ public class MainActivity extends Activity {
         rendererFailureDialog = null;
     }
     private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
+    // v241 RAM-only bounded, coarse events. No player data or persistence.
+    private final java.util.ArrayDeque<String> isolatedTrace = new java.util.ArrayDeque<>();
+    private android.app.AlertDialog isolatedTraceDialog;
     // v236: diagnostic breadcrumbs, restricted to a debuggable APK.
     // Never write a URL, player state, private data, or WebView contents to logcat.
     private void traceOfflinePage(String event, WebView view, boolean mainPage) {
@@ -59,6 +62,7 @@ public class MainActivity extends Activity {
                 " pending=" + nativeMainLoadRequested +
                 " failed=" + offlinePageLoadFailed +
                 " dialog=" + (offlinePageFailureDialog != null));
+        appendIsolatedTrace(event, view, mainPage);
     }
     private void dismissOfflinePageError() {
         if (offlinePageFailureDialog == null) return;
@@ -70,7 +74,7 @@ public class MainActivity extends Activity {
                 isFinishing() || isDestroyed()) return;
         offlinePageFailureDialog = new android.app.AlertDialog.Builder(this)
                 .setTitle("Offline game could not start")
-                .setMessage("The packaged game page could not be opened. Try again or close the app. Your saved progress is not erased.")
+                .setMessage("The packaged game page could not be opened. Try again or close the app. Your saved progress is not erased." + isolatedFailureSuffix())
                 .setPositiveButton("Try again", (dialog, which) -> {
                     offlinePageFailureDialog = null;
                     if (game == failedView && !isFinishing() && !isDestroyed()) {
@@ -100,6 +104,90 @@ public class MainActivity extends Activity {
     private final android.os.Handler uiHandler =
             new android.os.Handler(android.os.Looper.getMainLooper());
 
+    // The separate diagnostic app alone may expose recent event names.
+    private boolean isIsolatedTraceApp() {
+        return "org.bravefrontier.offline.diagnostic".equals(getPackageName()) &&
+                (getApplicationInfo().flags &
+                 android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+    private void appendIsolatedTrace(String event, WebView view, boolean mainPage) {
+        if (!isIsolatedTraceApp()) return;
+        switch (event) {
+            case "initialRequested": case "retryRequested":
+            case "onPageStarted": case "startAccepted":
+            case "onReceivedErrorMain": case "onReceivedErrorSubresource":
+            case "failureLatched": case "rendererGone":
+            case "onPageFinished": case "injectionAttempt":
+            case "activityDestroy": break;
+            default: return;
+        }
+        String line = event + " main=" + mainPage +
+                " current=" + (view == game) +
+                " pending=" + nativeMainLoadRequested +
+                " failed=" + offlinePageLoadFailed +
+                " dialog=" + (offlinePageFailureDialog != null);
+        if (isolatedTrace.size() >= 16) isolatedTrace.removeFirst();
+        isolatedTrace.addLast(line);
+    }
+    private String isolatedTraceText() {
+        if (!isIsolatedTraceApp()) return "";
+        StringBuilder text = new StringBuilder();
+        for (String event : isolatedTrace) {
+            if (text.length() > 0) text.append('\n');
+            text.append(event);
+        }
+        return text.length() == 0 ? "No events yet" : text.toString();
+    }
+    private void dismissIsolatedTraceDialog() {
+        if (isolatedTraceDialog == null) return;
+        isolatedTraceDialog.dismiss();
+        isolatedTraceDialog = null;
+    }
+    private void showIsolatedTrace() {
+        if (!isIsolatedTraceApp() || isFinishing() || isDestroyed()) return;
+        dismissIsolatedTraceDialog();
+        final String report = "BF Offline Diagnostic / coarse events only\n" +
+                isolatedTraceText();
+        final android.app.AlertDialog shown = new android.app.AlertDialog.Builder(this)
+                .setTitle("Diagnostic launch trace")
+                .setMessage(report)
+                .setPositiveButton("Copy event text", (dialog, which) -> {
+                    android.content.ClipboardManager clipboard =
+                            (android.content.ClipboardManager)
+                            getSystemService(CLIPBOARD_SERVICE);
+                    if (clipboard != null) clipboard.setPrimaryClip(
+                            android.content.ClipData.newPlainText(
+                                    "BF Offline Diagnostic", report));
+                })
+                .setNegativeButton("Close", null)
+                .create();
+        isolatedTraceDialog = shown;
+        shown.setOnDismissListener(dialog -> {
+            if (isolatedTraceDialog == shown) isolatedTraceDialog = null;
+        });
+        shown.show();
+    }
+    private String isolatedFailureSuffix() {
+        return isIsolatedTraceApp() ? "\n\nDiagnostic events:\n" + isolatedTraceText() : "";
+    }
+    private void addIsolatedTraceControl() {
+        if (!isIsolatedTraceApp() || gameContainer == null) return;
+        android.widget.Button button = new android.widget.Button(this);
+        button.setText("TRACE");
+        button.setTextSize(11f);
+        button.setContentDescription("View diagnostic launch events");
+        button.setAlpha(0.85f);
+        button.setAllCaps(false);
+        button.setOnClickListener(v -> showIsolatedTrace());
+        FrameLayout.LayoutParams bounds = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.BOTTOM | android.view.Gravity.END);
+        final float density = getResources().getDisplayMetrics().density;
+        // Bottom navigation is approximately 70dp; avoid covering MENU / SAVES.
+        bounds.setMargins(0, 0, (int) (8 * density), (int) (84 * density));
+        gameContainer.addView(button, bounds);
+    }
     private void clearPendingBack() {
         backNavigationPending = false;
         backDispatchToken++;
@@ -250,7 +338,7 @@ public class MainActivity extends Activity {
                     dismissRendererFailureDialog();
                     rendererFailureDialog = new android.app.AlertDialog.Builder(MainActivity.this)
                             .setTitle("Offline display stopped")
-                            .setMessage("The game display stopped responding. Restarting it reloads your last saved progress; unsaved actions may be lost. Your saved data is not erased.")
+                            .setMessage("The game display stopped responding. Restarting it reloads your last saved progress; unsaved actions may be lost. Your saved data is not erased." + isolatedFailureSuffix())
                             .setPositiveButton("Restart interface", (dialog, which) -> recreate())
                             .setNegativeButton("Close", (dialog, which) -> finish())
                             .setCancelable(false)
@@ -1325,6 +1413,7 @@ public class MainActivity extends Activity {
         traceOfflinePage("initialRequested", game, true);
         game.loadUrl("file:///android_asset/index.html");
         gameContainer.addView(game, new FrameLayout.LayoutParams(-1, -1));
+        addIsolatedTraceControl();
         setContentView(gameContainer);
         if (state != null) saveToWrite = state.getString("pending_save_to_write");
     }
@@ -1421,6 +1510,7 @@ public class MainActivity extends Activity {
     @Override protected void onDestroy() {
         traceOfflinePage("activityDestroy", game, true);
         nativeMainLoadRequested = false;
+        dismissIsolatedTraceDialog();
         dismissRendererFailureDialog();
         dismissOfflinePageError();
         clearPendingBack();
