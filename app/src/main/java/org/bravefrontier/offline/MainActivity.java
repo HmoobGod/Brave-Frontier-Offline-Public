@@ -140,6 +140,30 @@ public class MainActivity extends Activity {
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         game.setWebViewClient(new WebViewClient() {
+            @Override public boolean onRenderProcessGone(
+                    WebView view, android.webkit.RenderProcessGoneDetail detail) {
+                if (view != game) return false;
+                clearPendingBack();
+                android.util.Log.e("BraveFrontier", "Offline WebView renderer exited");
+                if (pendingUpload != null) {
+                    pendingUpload.onReceiveValue(null);
+                    pendingUpload = null;
+                }
+                if (gameContainer != null) gameContainer.removeView(view);
+                view.removeJavascriptInterface("BFAndroid");
+                view.destroy();
+                game = null;
+                if (!isFinishing() && !isDestroyed()) {
+                    new android.app.AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Offline display stopped")
+                            .setMessage("The game display stopped responding. Restarting it reloads your last saved progress; unsaved actions may be lost. Your saved data is not erased.")
+                            .setPositiveButton("Restart interface", (dialog, which) -> recreate())
+                            .setNegativeButton("Close", (dialog, which) -> finish())
+                            .setCancelable(false)
+                            .show();
+                }
+                return true;
+            }
             // Load the independent navigation layer after the original page completes.
             // Inline injection avoids file:// cross-file script restrictions.
             @Override public void onPageFinished(WebView view, String url) {
