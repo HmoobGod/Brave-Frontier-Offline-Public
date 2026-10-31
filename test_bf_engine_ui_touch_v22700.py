@@ -9,7 +9,7 @@ nav = (ROOT / "app/src/main/assets/bf_home_nav.js").read_text("utf-8")
 manifest = (ROOT / "app/src/main/AndroidManifest.xml").read_text("utf-8")
 assert "v227: Home/route touch and focus accessibility" in css
 assert "touch-action:manipulation;" in css
-assert "min-height:58px;" in css
+assert "min-height:60px;" in css[css.index("/* v227: Home/route touch"): ]
 assert "prefers-reduced-motion:reduce" in css
 assert "focus-visible" in css
 assert "window.BF_homeNav = {go,get current()" in nav
@@ -59,7 +59,7 @@ with sync_playwright() as p:
         bounds=page.evaluate("""() => [...document.querySelectorAll('.bf-navbar button')].map(
           e => {const b=e.getBoundingClientRect();return {w:b.width,h:b.height,left:b.left,right:b.right}}
         )""")
-        assert all(b["w"]>=44 and b["h"]>=44 and b["left"]>=0 and b["right"]<=width+1 for b in bounds), (width,bounds)
+        assert all(b["w"]>=44 and b["h"]>=60 and b["left"]>=0 and b["right"]<=width+1 for b in bounds), (width,bounds)
         assert page.evaluate("""() => getComputedStyle(document.querySelector('.bf-navbar button')).touchAction""")=="manipulation"
         for route in ("units","quest","summon","menu","home"):
             page.locator('.bf-navbar button[data-bf-goto="'+route+'"]').click()
