@@ -29,7 +29,17 @@ CANON = "f35a7b06bc9e6fae6facc1fd77422f74c04798da4fb87f64a2737a0483a572c3"
 java = JAVA.read_text("utf8")
 assert "onPageFinished(WebView view, String url)" in java
 finish = java.split("onPageFinished(WebView view, String url)", 1)[1]
-assert 'if (!"file:///android_asset/index.html".equals(url)) return;' in finish
+# v229 retains exact packaged-page matching and adds a fail-closed
+# native error state. Preserve the older strict URL guard as an alternative.
+legacy_guard = 'if (!"file:///android_asset/index.html".equals(url)) return;'
+recovery_guard = 'if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;'
+assert legacy_guard in finish or (
+    recovery_guard in finish
+    and 'private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";' in java
+    and "onReceivedError(WebView view," in java
+    and "request.isForMainFrame()" in java
+    and "offlinePageLoadFailed = true;" in java
+), "Expected strict packaged main-page guard and optional fail-closed native error state"
 chain = re.findall(r'readPackagedText\("([^"]+\.js)"\)', finish)
 assert 130 <= len(chain) <= 160, ("Java injection chain changed", len(chain))
 assert len(set(chain)) == len(chain), "Duplicate Java asset load"
