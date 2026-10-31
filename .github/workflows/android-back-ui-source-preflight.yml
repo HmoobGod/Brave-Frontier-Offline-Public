@@ -14,6 +14,9 @@ on:
       - 'V239_ISOLATED_MISSING_INDEX_FAILURE_TEST.md'
       - 'V240_FAULT_APK_INTEGRITY_FOLLOWUP.md'
       - 'app/src/main/assets/bf_home_nav.js'
+      - 'app/src/main/assets/bf_home_nav.css'
+      - 'test_bf_home_ui_priority_v24200.py'
+      - 'V242_ORIGINAL_HOME_UI_PRIORITY.md'
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
       - 'test_bf_renderer_dialog_lifecycle_v23100.py'
@@ -52,6 +55,8 @@ jobs:
           python-version: '3.12'
       - name: Verify Android Back UI routing without save changes
         run: python3 test_bf_android_back_home_v22500.py --source-only
+      - name: Verify visible v242 Home hierarchy, original source art and no save edits
+        run: python3 test_bf_home_ui_priority_v24200.py --source-only
       - name: Verify lost callbacks, renderer-crash UI, and save-safety boundaries
         run: python3 test_bf_engine_webview_recovery_v22600.py
       - name: Verify renderer recovery dialog is dismissed on Activity destruction
