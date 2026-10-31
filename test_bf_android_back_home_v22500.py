@@ -2,6 +2,7 @@
 from pathlib import Path
 import re
 import sys
+import shutil
 
 ROOT = Path(__file__).resolve().parent
 java = (ROOT / "app/src/main/java/org/bravefrontier/offline/MainActivity.java").read_text("utf-8")
@@ -39,7 +40,7 @@ html = """<!doctype html><html><head><meta charset="utf-8"></head><body>
 <section class="summonpanel">Summon screen</section>
 </main></body></html>"""
 with sync_playwright() as p:
-    browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
+    browser = p.chromium.launch(headless=True, executable_path=(shutil.which("google-chrome") or shutil.which("google-chrome-stable") or shutil.which("chromium")), args=["--no-sandbox"])
     page = browser.new_page()
     page.route("https://bf-v225-ui.test/", lambda route: route.fulfill(
         status=200, content_type="text/html", body=html))
