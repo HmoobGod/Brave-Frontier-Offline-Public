@@ -39,8 +39,8 @@ assert metadata["sourceAssetPath"] == "content/item/item_thum_111000.png"
 data = icon.read_bytes()
 assert len(data) == metadata["pngByteLength"] == 6370
 assert hashlib.sha256(data).hexdigest() == metadata["pngSha256"] == icon_sha
-assert hashlib.sha1(b"blob " + str(len(data)).encode() + b"\\x00" + data).hexdigest() == metadata["pngGitBlobSha1"] == git_blob_sha
-assert data[:8] == b"\\x89PNG\\r\\n\\x1a\\n" and data[12:16] == b"IHDR"
+assert hashlib.sha1(b"blob " + str(len(data)).encode() + b"\x00" + data).hexdigest() == metadata["pngGitBlobSha1"] == git_blob_sha
+assert data[:8] == b"\x89PNG\r\n\x1a\n" and data[12:16] == b"IHDR"
 assert struct.unpack(">II", data[16:24]) == (98, 98)
 assert (metadata["pixelWidth"], metadata["pixelHeight"]) == (98, 98)
 
