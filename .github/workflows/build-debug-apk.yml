@@ -366,6 +366,7 @@ jobs:
           python test_bf_morgan_original_v080.py
           python test_bf_v0131.py
           python test_bf_home_nav.py
+          python3 test_bf_engine_ui_asset_budget_v22800.py
           python test_bf_global_home_scene.py
           python test_bf_inner_screens.py
           python test_bf_unit_box_quest_details.py
