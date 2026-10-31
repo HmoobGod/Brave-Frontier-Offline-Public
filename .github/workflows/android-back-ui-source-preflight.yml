@@ -5,6 +5,10 @@ on:
       - '.github/workflows/android-back-ui-source-preflight.yml'
       - '.github/workflows/build-debug-apk.yml'
       - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+      - 'app/build.gradle'
+      - 'app/src/diagnostic/res/values/strings.xml'
+      - 'test_bf_isolated_diagnostic_build_v23700.py'
+      - 'V237_ISOLATED_ANDROID_DIAGNOSTIC_APK.md'
       - 'app/src/main/assets/bf_home_nav.js'
       - 'test_bf_android_back_home_v22500.py'
       - 'test_bf_engine_webview_recovery_v22600.py'
@@ -56,3 +60,5 @@ jobs:
         run: python3 test_bf_offline_main_navigation_token_v23400.py
       - name: Verify debuggable-only privacy-safe native callback trace
         run: python3 test_bf_android_offline_callback_trace_v23600.py
+      - name: Verify isolated diagnostic build does not reuse Current's app ID
+        run: python3 test_bf_isolated_diagnostic_build_v23700.py

@@ -377,6 +377,7 @@ jobs:
           python3 test_bf_stale_webview_finish_guard_v23300.py
           python3 test_bf_offline_main_navigation_token_v23400.py
           python3 test_bf_android_offline_callback_trace_v23600.py
+          python3 test_bf_isolated_diagnostic_build_v23700.py
           python test_bf_global_home_scene.py
           python test_bf_inner_screens.py
           python test_bf_unit_box_quest_details.py
@@ -882,5 +883,16 @@ jobs:
         with:
           name: BraveFrontierOffline-demo-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 90
+      - name: Build separate-app diagnostic APK (must not overwrite Current build)
+        run: gradle --no-daemon assembleDiagnostic -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify built APK IDs, original assets, and offline permissions
+        run: python3 test_bf_isolated_diagnostic_build_v23700.py --packaged
+      - name: Upload distinct diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-isolated-diagnostic-apk
+          path: app/build/outputs/apk/diagnostic/app-diagnostic.apk
           if-no-files-found: error
           retention-days: 90
