@@ -1,0 +1,274 @@
+{
+  "schema": "bf-global-2022-original-evolution-item-material-art-catalog-v222",
+  "sourceArchiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "sourceItemMaster": "3-mst-translated/F_ITEM_MST_Ver1027.json",
+  "sourceItemMasterSha256": "0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474",
+  "sourceEvolutionMaster": "3-mst-translated/F_UNIT_EVO_MST_Ver597.json",
+  "sourceEvolutionMasterSha256": "fbaae982125b78e5a203095d0bb6d8892d210c4a632aa9e2e24f70ba0e480deb",
+  "sourceBF1ItemPackSha256": "735c50613f55a84d8a3717a4ee53ef513c694031aa44963c43e24b597f134e2c",
+  "originalEvolutionTransitions": 1342,
+  "unitMaterialSlotsType1": 7107,
+  "distinctUnitMaterialIdsType1": 85,
+  "itemMaterialSlotsType2": 333,
+  "distinctItemMaterialIdsType2": 31,
+  "legendStoneItemId": 110100,
+  "legendStoneSlotCount": 279,
+  "originalItemImageTotalBytes": 180761,
+  "canonicalRowsSha256": "3c96e0a37f8fb9cf11b924f6ebb487edd2034f02c7c11f27d9991c6efd13065c",
+  "rows": [
+    [
+      110000,
+      "MST_EVOITEM_110000_NAME",
+      "item_thum_110000.png",
+      1,
+      6999,
+      "35f92155143987aeb081eda5fbc03dba4a5a66db5e58ac5ddc88f7d03ffc442d"
+    ],
+    [
+      110001,
+      "紅輝英晶",
+      "item_thum_110100.png",
+      1,
+      8563,
+      "015129dae01efbabcf0addd19a1cf72181146e8f8965d73e9b511d6eba2172ff"
+    ],
+    [
+      110010,
+      "MST_EVOITEM_110010_NAME",
+      "item_thum_110010.png",
+      1,
+      6880,
+      "0bf36f6d66329fe1c033b24d096a02b832e441d7e427e4963c9bd04eef5209aa"
+    ],
+    [
+      110011,
+      "蒼輝英晶",
+      "item_thum_110110.png",
+      1,
+      8545,
+      "282c25b719d875487efed6116394040d9f4705147558b84c9c73f8195e52ea66"
+    ],
+    [
+      110020,
+      "MST_EVOITEM_110020_NAME",
+      "item_thum_110020.png",
+      1,
+      6734,
+      "f3ed6459a8bc24c11f4a7aea584a9a06741d100e1fde28143f02dc35096c7498"
+    ],
+    [
+      110021,
+      "MST_EVOITEM_110021_NAME",
+      "item_thum_110120.png",
+      1,
+      8465,
+      "8cedbdbbaff6413858fab9013262e5dbff9a2b1d288fc82879b58c667650de27"
+    ],
+    [
+      110030,
+      "MST_EVOITEM_110030_NAME",
+      "item_thum_110030.png",
+      1,
+      6871,
+      "8ebf0d89868369d1bc952b7e539c1271a533dbad4d3810f936b6f736d2442017"
+    ],
+    [
+      110031,
+      "MST_EVOITEM_110031_NAME",
+      "item_thum_110130.png",
+      1,
+      8450,
+      "a77524662becd10f657371d75cba381364015e635efc9f920be8395cc077bef4"
+    ],
+    [
+      110040,
+      "虹魂晶",
+      "item_thum_110040.png",
+      1,
+      6320,
+      "a2152fa03a3c2000908cfb0876ab5e85005c41409b5f484f57f23c7882a61a2c"
+    ],
+    [
+      110041,
+      "虹輝英晶",
+      "item_thum_110140.png",
+      1,
+      7984,
+      "5c4dc52c03d44625f94337b8a2fa0cbd66608bb10e65f65c7a49a72d8fb9a994"
+    ],
+    [
+      110050,
+      "紫魂晶",
+      "item_thum_110050.png",
+      1,
+      6877,
+      "bb2150bac33814f3da0a544cba30c6c1566ccf893300870d16a67fd7c29d233c"
+    ],
+    [
+      110051,
+      "紫輝英晶",
+      "item_thum_110150.png",
+      1,
+      8518,
+      "0dae4510c3c0f5b5ecf996e881402afc75c139427426dd35abe8fdc8e747df92"
+    ],
+    [
+      110060,
+      "煌輝英晶",
+      "item_thum_110160.png",
+      1,
+      8476,
+      "837c0ba77dfd4c496944520ed89e2ec01e9d414c494f27fa858840ade5212fc0"
+    ],
+    [
+      110070,
+      "幻翼双晶",
+      "item_thum_110190.png",
+      1,
+      8333,
+      "c3f553635aaa9c033f45d95faa6aa0353d914462df60c918315664859f24df25"
+    ],
+    [
+      110100,
+      "神越の魂石",
+      "item_thum_111000.png",
+      279,
+      6370,
+      "c3decdc9ce4403cf12bf022b0ff233f802b11883105d125a6c0877d85135e0e7"
+    ],
+    [
+      800104,
+      "Memory Fragment",
+      "item_thum_800104.png",
+      1,
+      4659,
+      "2b4cc7d6ccfff8e56f16aca54c893c03e393d81af24d9df8b2abffb262743350"
+    ],
+    [
+      800105,
+      "Scroll of Black Arts",
+      "item_thum_800105.png",
+      1,
+      5627,
+      "f8daaab78e5850ed78de08881f67b2f3725fb1b0f5ecc39803082965043918e3"
+    ],
+    [
+      800106,
+      "Radiant Quartz",
+      "item_thum_800106.png",
+      1,
+      3975,
+      "019908a25621ae80aff3bbae204c18f414bb70ff13d4be4b57c1481e9a8d7704"
+    ],
+    [
+      800409,
+      "Bunny Core",
+      "item_thum_800409.png",
+      1,
+      3736,
+      "4651c50e6e0a53dfb0062f7e94443410144454078356344e29ad8943c65b22fe"
+    ],
+    [
+      800606,
+      "Love Pendant",
+      "item_thum_800606.png",
+      1,
+      4552,
+      "8958940800da6ebc9f093e9a6dd66c601a2e738f8c824151f74fe0f9ab209e4a"
+    ],
+    [
+      801900,
+      "Light Goddess Jar",
+      "item_thum_801900.png",
+      1,
+      4157,
+      "73c02d841ce8cb5c769371ec78dc8b90b746225afb19c13002a834412dbbe585"
+    ],
+    [
+      801901,
+      "Godsblood",
+      "item_thum_801901.png",
+      1,
+      3289,
+      "44a763ded9c6d0a2e95093d1595ebde24b1afebb6c31c810d48e8f2011542c2a"
+    ],
+    [
+      801902,
+      "Mannag's Howl",
+      "item_thum_880101.png",
+      1,
+      3928,
+      "a8e8483c69e28f6537a08e366233b258862a69fda48cbec8e616969b04788e4a"
+    ],
+    [
+      880001,
+      "Ruby Relic",
+      "item_thum_880001.png",
+      1,
+      3819,
+      "dcb2c374b9ab7c9d3ffc9bbf06c79763295546fd173a2cb01ba17dab8fc67343"
+    ],
+    [
+      880003,
+      "Emerald Relic",
+      "item_thum_880003.png",
+      1,
+      3749,
+      "c79175cdb06a3b4f6a236b65f155a2fa3a87dafb299d3a2fb6d41f615100d112"
+    ],
+    [
+      880011,
+      "Sanguine Relic",
+      "item_thum_880011.png",
+      1,
+      4940,
+      "5de037411ac191d7f770359e71cef58d2429054d430c1b796ce70dafb9e3110a"
+    ],
+    [
+      880013,
+      "Verdant Relic",
+      "item_thum_880013.png",
+      1,
+      4775,
+      "bec140c72c21a2ea45c785480d4b63d67feca48928ba003211c3b5f8b07c51e3"
+    ],
+    [
+      880020,
+      "Toy Medal",
+      "item_thum_880020.png",
+      1,
+      3255,
+      "4e7746cdf95249e41a583f7dca81c4d8120ba47aa2a53be9afe9bf0d7fc734be"
+    ],
+    [
+      880243,
+      "Distilled Ether",
+      "item_thum_880243.png",
+      6,
+      4453,
+      "79b01d3f2863bcdcbddaf483f16b3d7a1ad55323667850f16ef177b2c0b19b8d"
+    ],
+    [
+      880244,
+      "Amber Butterfly",
+      "item_thum_880244.png",
+      3,
+      4450,
+      "1131c28cba22b182e96145f70c9ea69cd1557dc68172b175b0834a808af7d522"
+    ],
+    [
+      890033,
+      "Whispering Shard",
+      "item_thum_890033.png",
+      18,
+      3012,
+      "940a1d9aaef914b715c8f7511c68af36ebb5d8e86088f233c5e540a4810c4fe0"
+    ]
+  ],
+  "readOnlySourceCatalog": true,
+  "other30ImagesPackagedInApp": false,
+  "changesGameplay": false,
+  "changesInventory": false,
+  "changesSaves": false,
+  "unlocksPlayableEvolutions": false
+}
