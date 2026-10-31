@@ -9,7 +9,7 @@ assert M['schema'] == 'bf-global-2022-original-evolution-item-material-art-catal
 assert M['sourceArchiveSha256'] == '69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9'
 assert M['sourceItemMasterSha256'] == '0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474'
 assert M['sourceEvolutionMasterSha256'] == 'fbaae982125b78e5a203095d0bb6d8892d210c4a632aa9e2e24f70ba0e480deb'
-assert M['sourceBF1ItemPackSha256'] == '735c50613f55a84d8a3717a4ee53ef513c694031aa44963c43e24b597f134e2c
+assert M['sourceBF1ItemPackSha256'] == '735c50613f55a84d8a3717a4ee53ef513c694031aa44963c43e24b597f134e2c'
 assert (M['originalEvolutionTransitions'],M['unitMaterialSlotsType1'],M['distinctUnitMaterialIdsType1'])==(1342,7107,85)
 assert (M['itemMaterialSlotsType2'],M['distinctItemMaterialIdsType2'],M['legendStoneSlotCount'])==(333,31,279)
 rows=M['rows']
