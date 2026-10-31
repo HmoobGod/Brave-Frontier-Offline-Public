@@ -1,0 +1,26 @@
+name: Original 2022 evolution item art source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/evolution-item-art-source-preflight.yml'
+      - 'source_data/bf_global_2022_evolution_item_art_catalog_v222.json'
+      - 'test_bf_original_2022_evolution_item_art_v22200.py'
+      - 'V222_ORIGINAL_2022_EVOLUTION_ITEM_ART_CATALOG.md'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Authenticate 31 original material item records and refuse type mixing
+        run: python3 test_bf_original_2022_evolution_item_art_v22200.py
