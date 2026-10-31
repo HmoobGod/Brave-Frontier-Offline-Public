@@ -29,6 +29,11 @@ for mid,name,token,rewards in missions:
  assert type(mid) is int and mid>0 and type(name) is str and name and token in rewards.split(',')
  parts=token.split(':');assert len(parts)==5 and parts[0]=='4' and int(parts[1]) in items
 assert len({r[0] for r in missions})==9
+playable=json.loads((ROOT/CAT['currentlyPlayableMissionLedger']).read_text('utf8'))
+assert playable['schema']=='bf-global-original-2022-live-quest-economy-v142'
+assert (playable['canonicalTupleSha256'],len(playable['records']))==(CAT['currentlyPlayableLedgerTupleSha256'],CAT['currentlyPlayableMissionCount'])==('a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66',106)
+assert sorted({r[0] for r in playable['records']} & {r[0] for r in missions})==CAT['currentlyPlayableRewardMissionIds']==[]
+
 counts=CAT['exchangeItemOfferCounts']
 assert counts==sorted(counts) and len(counts)==15 and sum(q for _,q in counts)==152 and all(k in items and q>0 for k,q in counts)
 assert [k for k,v in counts if k==110100 and v==124]==[110100]
