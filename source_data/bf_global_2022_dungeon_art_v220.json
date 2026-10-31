@@ -1,0 +1,299 @@
+{
+  "schema": "bf-global-2022-source-only-106-playable-dungeon-art-coverage-v220",
+  "sourceArchiveSha256": "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9",
+  "sourceDungeonTableSha256": "16f090514d65846f6bd4a9998b50d6c810bc806a79858c0ff766cdb1a22536fc",
+  "sourceDungeonTablePath": "3-mst-translated/F_DUNGEON_MST_Ver1002.json",
+  "sourceArtPackSha256": "a748f675fd8271c0f41bb0b9244c83ffc5d23b4051cfd757494d16735c506644",
+  "previouslyPackagedOriginalJpgCount": 7,
+  "additionalSourceJpgCount": 15,
+  "playableMissionCount": 106,
+  "distinctDungeonIds": 23,
+  "distinctOriginalJpgCount": 22,
+  "areaMissionCounts": {
+    "mistral": 34,
+    "morgan": 36,
+    "stlamia": 36
+  },
+  "dungeonToBackground": [
+    [
+      1,
+      "dungeon_battle_10100.jpg"
+    ],
+    [
+      10,
+      "dungeon_battle_10100.jpg"
+    ],
+    [
+      20,
+      "dungeon_battle_10200.jpg"
+    ],
+    [
+      30,
+      "dungeon_battle_10300.jpg"
+    ],
+    [
+      40,
+      "dungeon_battle_10400.jpg"
+    ],
+    [
+      50,
+      "dungeon_battle_10500.jpg"
+    ],
+    [
+      60,
+      "dungeon_battle_10600.jpg"
+    ],
+    [
+      70,
+      "dungeon_battle_10700.jpg"
+    ],
+    [
+      80,
+      "dungeon_battle_10800.jpg"
+    ],
+    [
+      200,
+      "dungeon_battle_20100.jpg"
+    ],
+    [
+      210,
+      "dungeon_battle_20200.jpg"
+    ],
+    [
+      220,
+      "dungeon_battle_20300.jpg"
+    ],
+    [
+      230,
+      "dungeon_battle_20400.jpg"
+    ],
+    [
+      240,
+      "dungeon_battle_20500.jpg"
+    ],
+    [
+      250,
+      "dungeon_battle_20600.jpg"
+    ],
+    [
+      260,
+      "dungeon_battle_20700.jpg"
+    ],
+    [
+      300,
+      "dungeon_battle_30100.jpg"
+    ],
+    [
+      310,
+      "dungeon_battle_30200.jpg"
+    ],
+    [
+      320,
+      "dungeon_battle_30300.jpg"
+    ],
+    [
+      330,
+      "dungeon_battle_30400.jpg"
+    ],
+    [
+      340,
+      "dungeon_battle_30500.jpg"
+    ],
+    [
+      350,
+      "dungeon_battle_30600.jpg"
+    ],
+    [
+      360,
+      "dungeon_battle_30700.jpg"
+    ]
+  ],
+  "imageSources": [
+    {
+      "file": "dungeon_battle_10100.jpg",
+      "sizeBytes": 38959,
+      "sha256": "16bbcc5631b9c6812f5f36a9a446e4b89a35e7e600e515133a4f23f79d27169a",
+      "gitBlobSha1": "56220866a9cbaee13cc41d2c5e019b5e1be85037",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_10200.jpg",
+      "sizeBytes": 36820,
+      "sha256": "50b7833e5045b5ffbf23056d33ee13d1e96654e9665e6b4d770fe6f8baef473b",
+      "gitBlobSha1": "f5feca0464a8553f4f6ddd84b5095a088422867c",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10300.jpg",
+      "sizeBytes": 27958,
+      "sha256": "9938feefc0407062420170d0ad40f9602dc0ce07b349aac0430ff13ef0c6dfc4",
+      "gitBlobSha1": "1aee08986b144ea5f4873fb077a25b7a4a96f9fe",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10400.jpg",
+      "sizeBytes": 55278,
+      "sha256": "5de95afe07c72cc7685f70507f01f84d262aa0cee8b32bc191f6d26ef85ac212",
+      "gitBlobSha1": "bd4f819ab828b7a1699723ab900d3a4027e789ec",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10500.jpg",
+      "sizeBytes": 43940,
+      "sha256": "db81dbe675c15ffc4ca0e46ca0ed862f36489f22197e06bb3281d8512c9dd923",
+      "gitBlobSha1": "feb206bbb549f846824203c2477b6ea53553ddda",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10600.jpg",
+      "sizeBytes": 66699,
+      "sha256": "7864a64a1c0aca9d3c59d33f9c84b0494bbac848a49f628d46b64b2a4f8881f2",
+      "gitBlobSha1": "7dbd52ce75671b968a957715768c587ff0e65f6d",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10700.jpg",
+      "sizeBytes": 32032,
+      "sha256": "cd903558b2c14eae745962b856df01d639a1d15eb0803a9fb496c6f6e432407b",
+      "gitBlobSha1": "15a260eb75bf17954f4bc90c375fad840149638e",
+      "missions": 4,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_10800.jpg",
+      "sizeBytes": 46410,
+      "sha256": "a0c322ef5677b21c2f04039650c39766df390d2ffd5c025c82f4f6034e23b137",
+      "gitBlobSha1": "eb2a7732d88483aaef0d74712c7569103d538252",
+      "missions": 5,
+      "alreadyPackagedByV191": true
+    },
+    {
+      "file": "dungeon_battle_20100.jpg",
+      "sizeBytes": 17575,
+      "sha256": "8022d3c52fa5b92b15df3fb8b5a920a1e8b55aa03fef8d37ec44fd975db91e3b",
+      "gitBlobSha1": "5fc977711ee5ace50159ff1124921965b28fd49b",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20200.jpg",
+      "sizeBytes": 37560,
+      "sha256": "89284711b54e4f0356f06f35ddfcc8324efd5cc286bcf30644674a5675ee48fd",
+      "gitBlobSha1": "d47f92ca7da17a5aac54e252a332286c7c422925",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20300.jpg",
+      "sizeBytes": 48542,
+      "sha256": "b8142efd065a32ca1ecc5f520d2fed17062bf738dd634b7330cad885b783af08",
+      "gitBlobSha1": "826e16603c4e863a8ad5f717a5fa92fdc03382e2",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20400.jpg",
+      "sizeBytes": 48948,
+      "sha256": "ef69fd506be1512b36cfc79c285e9af801c2a8db1759aa148ddf5b08ba954407",
+      "gitBlobSha1": "25c018af684f084d24d9c99531648091ac95a3a3",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20500.jpg",
+      "sizeBytes": 62562,
+      "sha256": "8102d9925ba419d40aa40941a5ecf36472fdf139f94055374af065a1053599c2",
+      "gitBlobSha1": "44ba3307f49ee3a59334b354e1b9e19d1ef44f59",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20600.jpg",
+      "sizeBytes": 41243,
+      "sha256": "7975ad650395ab328460ac433b0b20a0d7cc1762480f5a0b80d10d48d706bfea",
+      "gitBlobSha1": "fdee098e1f1bbbe6a6356fc6228c2054fd6a1f80",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_20700.jpg",
+      "sizeBytes": 45325,
+      "sha256": "bc209a048acf084eef30949266ab6449ce2a933a59f896cebeeb11cc183f1d78",
+      "gitBlobSha1": "96233018cf6143b3664f13e55bc46289facddb63",
+      "missions": 6,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30100.jpg",
+      "sizeBytes": 36829,
+      "sha256": "69e58704be71b460e8f04e5f4f24e4961ea969eb3864e05aef53efa08bd56e60",
+      "gitBlobSha1": "4eb8061901eb420a0e0333228fa73341bf9f0cbd",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30200.jpg",
+      "sizeBytes": 29412,
+      "sha256": "ba0f8f6a1949574eebb0f50342d4a937eb96c8762b6faabc4f755554be1cf065",
+      "gitBlobSha1": "9759a0803aa97b6803964eb312392ff0edf6c71d",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30300.jpg",
+      "sizeBytes": 42692,
+      "sha256": "2b55931ac9ceed0594e7ba0bf67428d150549d5183a31fdcccd8b006f50524af",
+      "gitBlobSha1": "6b25bc62653efea022ee08ea984646a708d3fddf",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30400.jpg",
+      "sizeBytes": 49120,
+      "sha256": "baf32fb8e4d81e588ff48351ef51fc7f299e01ec8580e38af838a7e4342739d6",
+      "gitBlobSha1": "0288bb2891f9f319d7e524afeb94c05d53c86694",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30500.jpg",
+      "sizeBytes": 38619,
+      "sha256": "3ff36c8429c7465c73ba0162493ef4ff3b72fd6beea58179d7c475b3c935bdc0",
+      "gitBlobSha1": "5243cdbd60f6288dfbfecd51f02456b44e005608",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30600.jpg",
+      "sizeBytes": 48345,
+      "sha256": "573f1cbb24bd92947bffe7f2b27be73d195a37a6242104bbfd8121900e133b43",
+      "gitBlobSha1": "9cd780f764fd3e614426f213365d03ab26ff2597",
+      "missions": 5,
+      "alreadyPackagedByV191": false
+    },
+    {
+      "file": "dungeon_battle_30700.jpg",
+      "sizeBytes": 45611,
+      "sha256": "1ff1fcaceb1fbb36452714c7ea5012a50682a85ca62a3bee59cefdddaa2ca077",
+      "gitBlobSha1": "8271534cc5a254c453b1368ec8b830621c464722",
+      "missions": 6,
+      "alreadyPackagedByV191": false
+    }
+  ],
+  "sourceOnly": false,
+  "visualFeatureOptIn": true,
+  "changesRuntime": true,
+  "changesCombat": false,
+  "changesSaves": false,
+  "nativeEnemyWavesAuthenticated": false,
+  "archiveBytePayloadInRepository": false,
+  "readyForPlayableVisualPromotion": false,
+  "scope": "Source-authenticated original 2022 dungeon backdrop mapping. Cosmetic visuals OPTIONAL default OFF; all 15 original JPEGs must be bundled into APK before release. No gameplay/save changes.",
+  "canonical106MissionTriplesSha256": "efdaf2c44abacb2d939d42a24631af8b16fd175b78e3c27f298f872dba5fe4ce"
+}
