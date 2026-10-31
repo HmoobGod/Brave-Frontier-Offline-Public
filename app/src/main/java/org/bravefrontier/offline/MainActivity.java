@@ -62,7 +62,7 @@ public class MainActivity extends Activity {
                 .setPositiveButton("Try again", (dialog, which) -> {
                     offlinePageFailureDialog = null;
                     if (game == failedView && !isFinishing() && !isDestroyed()) {
-                        offlinePageLoadFailed = false;
+                        // Keep the prior failure latched until this retry actually starts.
                         nativeMainLoadRequested = true;
                         failedView.loadUrl(OFFLINE_MAIN_PAGE);
                     }
