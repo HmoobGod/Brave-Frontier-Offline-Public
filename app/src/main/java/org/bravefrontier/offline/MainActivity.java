@@ -170,10 +170,21 @@ public class MainActivity extends Activity {
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         game.setWebViewClient(new WebViewClient() {
+            @Override public void onReceivedError(WebView view,
+                    android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                if (view != game || request == null || !request.isForMainFrame() ||
+                        !OFFLINE_MAIN_PAGE.equals(String.valueOf(request.getUrl()))) return;
+                offlinePageLoadFailed = true;
+                android.util.Log.e("BraveFrontier", "Packaged offline main page failed to load");
+                offerOfflinePageRetry(view);
+            }
             @Override public boolean onRenderProcessGone(
                     WebView view, android.webkit.RenderProcessGoneDetail detail) {
                 if (view != game) return false;
                 clearPendingBack();
+                dismissOfflinePageError();
                 android.util.Log.e("BraveFrontier", "Offline WebView renderer exited");
                 if (pendingUpload != null) {
                     pendingUpload.onReceiveValue(null);
@@ -198,7 +209,7 @@ public class MainActivity extends Activity {
             // Inline injection avoids file:// cross-file script restrictions.
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (!"file:///android_asset/index.html".equals(url)) return;
+                if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;
                 try {
                     String css = readPackagedText("bf_home_nav.css");
                     String js = readPackagedText("bf_home_nav.js");
@@ -1252,7 +1263,7 @@ public class MainActivity extends Activity {
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         game.addJavascriptInterface(new SaveBridge(), "BFAndroid");
-        game.loadUrl("file:///android_asset/index.html");
+        game.loadUrl(OFFLINE_MAIN_PAGE);
         gameContainer.addView(game, new FrameLayout.LayoutParams(-1, -1));
         setContentView(gameContainer);
         if (state != null) saveToWrite = state.getString("pending_save_to_write");
@@ -1348,6 +1359,7 @@ public class MainActivity extends Activity {
         if (game != null) game.onResume();
     }
     @Override protected void onDestroy() {
+        dismissOfflinePageError();
         clearPendingBack();
         if (game != null) {game.removeJavascriptInterface("BFAndroid");game.destroy();game = null;}
         super.onDestroy();
