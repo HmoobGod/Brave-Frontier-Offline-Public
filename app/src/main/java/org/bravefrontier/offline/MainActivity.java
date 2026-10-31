@@ -88,12 +88,19 @@ public class MainActivity extends Activity {
             "(function(){try{var n=window.BF_homeNav;return !!(n&&n.current!=='home'&&typeof n.go==='function'&&n.go('home'));}catch(e){return false;}})();";
 
     // Small, bounded local UI resources; never read files outside this APK.
+    private static final int UI_RESOURCE_LIMIT_BYTES = 64 * 1024;
+    private static final int NAV_RESOURCE_LIMIT_BYTES = 128 * 1024;
+    private static int packagedUiResourceLimit(String file) {
+        return "bf_home_nav.js".equals(file) || "bf_home_nav.css".equals(file)
+                ? NAV_RESOURCE_LIMIT_BYTES : UI_RESOURCE_LIMIT_BYTES;
+    }
     private String readPackagedText(String file) throws IOException {
+        final int maxBytes = packagedUiResourceLimit(file);
         try (InputStream in = getAssets().open(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[4096];
             int count;
             while ((count = in.read(buffer)) != -1) {
-                if (out.size() + count > 64 * 1024) throw new IOException("Oversized UI resource");
+                if (out.size() + count > maxBytes) throw new IOException("Oversized UI resource");
                 out.write(buffer, 0, count);
             }
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
