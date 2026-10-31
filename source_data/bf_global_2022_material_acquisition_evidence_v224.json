@@ -848,5 +848,9 @@
   "changesSaveSchema": false,
   "grantsItems": false,
   "enablesPurchases": false,
-  "enablesEvolution": false
+  "enablesEvolution": false,
+  "currentlyPlayableMissionLedger": "source_data/bf_global_original_2022_live_quest_economy_v142.json",
+  "currentlyPlayableLedgerTupleSha256": "a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66",
+  "currentlyPlayableMissionCount": 106,
+  "currentlyPlayableRewardMissionIds": []
 }
