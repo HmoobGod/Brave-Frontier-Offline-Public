@@ -235,6 +235,8 @@ public class MainActivity extends Activity {
             // Inline injection avoids file:// cross-file script restrictions.
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
+                // v233: a destroyed or replaced WebView must never receive late UI injection.
+                if (view != game) return;
                 if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;
                 try {
                     String css = readPackagedText("bf_home_nav.css");
