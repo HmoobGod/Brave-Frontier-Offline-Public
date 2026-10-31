@@ -34,6 +34,36 @@ public class MainActivity extends Activity {
     private FrameLayout gameContainer;
     private ValueCallback<Uri[]> pendingUpload;
     private String saveToWrite;
+    // v229: distinguish a failed packaged main document from failed subresources.
+    private boolean offlinePageLoadFailed = false;
+    private android.app.AlertDialog offlinePageFailureDialog;
+    private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
+    private void dismissOfflinePageError() {
+        if (offlinePageFailureDialog == null) return;
+        offlinePageFailureDialog.dismiss();
+        offlinePageFailureDialog = null;
+    }
+    private void offerOfflinePageRetry(WebView failedView) {
+        if (offlinePageFailureDialog != null || game != failedView ||
+                isFinishing() || isDestroyed()) return;
+        offlinePageFailureDialog = new android.app.AlertDialog.Builder(this)
+                .setTitle("Offline game could not start")
+                .setMessage("The packaged game page could not be opened. Try again or close the app. Your saved progress is not erased.")
+                .setPositiveButton("Try again", (dialog, which) -> {
+                    offlinePageFailureDialog = null;
+                    if (game == failedView && !isFinishing() && !isDestroyed()) {
+                        offlinePageLoadFailed = false;
+                        failedView.loadUrl(OFFLINE_MAIN_PAGE);
+                    }
+                })
+                .setNegativeButton("Close", (dialog, which) -> {
+                    offlinePageFailureDialog = null;
+                    finish();
+                })
+                .setCancelable(false)
+                .create();
+        offlinePageFailureDialog.show();
+    }
     private static final int PICK_BACKGROUND = 1001;
     private static final int PICK_SAVE_FILE = 1002;
     private static final int CREATE_SAVE_FILE = 1003;
