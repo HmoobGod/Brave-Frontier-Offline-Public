@@ -69,7 +69,8 @@ def nav_aliases(tree):
     for node in ast.walk(tree):
         if isinstance(node, (ast.Assign, ast.AnnAssign, ast.NamedExpr)):
             targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            assignments.append((set().union(*(names_targeted(t) for t in targets)), node.value))
+            if node.value is not None:
+                assignments.append((set().union(*(names_targeted(t) for t in targets)), node.value))
     aliases = set()
     for _ in range(len(assignments) + 1):
         before = len(aliases)
