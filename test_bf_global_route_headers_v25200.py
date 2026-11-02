@@ -27,7 +27,9 @@ assert "heading.hidden = route === 'home';" in PREFIX
 assert "/* v252 UI focus:" in C
 assert "body.bf-menu-mode .bf-route-title:not([hidden])" in C
 assert "content/battle/battle_dungeon_name_deco.png" in C
-assert (A / "content/battle/battle_dungeon_name_deco.png").is_file()
+# Original sprite is generated into the packaged asset tree by the full build.
+# Source-only preflights must not require a not-yet-prepared image file.
+assert C.count('url("content/battle/battle_dungeon_name_deco.png")') >= 2
 assert "aria-current','page'" in PREFIX
 assert "test_bf_global_route_headers_v25200.py --source-only" in PRE
 assert WF.count("python3 test_bf_global_route_headers_v25200.py") == 1
