@@ -1,0 +1,9 @@
+# v249 — Original Global Home UI release-readiness regression
+
+**Stacked dependency:** source branch based on v248 PR #182 exact HEAD `3b593a82327042bbf1948739932ac3ee2bed0eb0`; that branch includes v247 PR #181 and merged v246 PR #180. No early merge: v247 and v248 must each pass exact-head Android CI and merge in order, then retarget v249 onto main and verify its own full Android build.
+
+This is a **test-only milestone** before the intended v250 independently reviewed APK. It introduces no runtime/UI code change. The new consolidated `test_bf_home_ui_release_readiness_v24900.py` tests the actual Home navigation bootstrap source and headless Chromium at 320, 360, 393, 412 and 540px. Coverage includes semantic heading levels 1/2/3, original Quest/Summon active controls, all four named but unavailable archived Global destinations, unchanged original-image paths, explicit disabled roles and lack of interactive children, Exchange Hall unavailable semantics, all six squad preview slots, responsive squad 3/6 columns and shortcut 3/5 columns, no grid overflow and navigation to Quest, Summon, Units and Saves.
+
+It checks source budgets against the unchanged 128 KiB nav-only Android loader and ensures no Internet permission or save/reward writes were added to the Home bootstrap. Dedicated source preflight and full Android build/browser stages execute the checks, alongside all existing legacy gameplay/save/source art/packaged APK gates.
+
+**Limitations:** Headless Chromium, source and signed Android CI do not prove accurate original 2022 server/gameplay parity, correct physical-device rendering, or compatibility with the owner's current data in the field. Keep v7 save compatibility and user's Current untouched. v250 requires independent Claude exact-head review and owner APK/device acceptance planning.
