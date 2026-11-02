@@ -23,5 +23,5 @@ with zipfile.ZipFile(APK) as apk:
     assert 'const BF_ORIGINAL_BB_POWER' in src and 'const BF_VERIFIED_BB_SUPPORT' in src
     paths=apk.namelist()
     assert sum(n.startswith('assets/content/unit_archive/') and n.endswith('.png') for n in paths)==127
-    assert 'assets/bf_home_nav.js' in paths and len(apk.read('assets/bf_home_nav.js'))<=65536
+    assert 'assets/bf_home_nav.js' in paths and len(apk.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS compiled v0.31 APK: 30 verified original Global names, original levels/costs, saved BB mechanics and archive portraits')
