@@ -32,8 +32,14 @@ PACKAGED = tuple("test_bf_packaged_" + part + ".py" for part in (
     "squad_training_v250", "story_continue_v101", "tactical_rounds_v300",
     "tactical_undo_v350", "tower_formations_v055",
 ))
-EXPECTED = set(LEGACY + PACKAGED)
-assert len(EXPECTED) == 27
+ADDITIONAL_PACKAGED = tuple("test_bf_packaged_" + part + ".py" for part in (
+    "global_codex", "grand_gaia_campaign_v100", "monsters_nest_v050",
+    "morgan_source_v080", "morgan_v080", "original_bb_power",
+    "quest_english_data_v048", "remains_mirza_v049", "st_lamia_v090",
+    "tower_of_mistral_v051",
+))
+EXPECTED = set(LEGACY + PACKAGED + ADDITIONAL_PACKAGED)
+assert len(EXPECTED) == 37
 
 # Verify the actual exact-name Android selector, not just a substring that could
 # become a broader OR condition, while preserving the separate general UI limit.
