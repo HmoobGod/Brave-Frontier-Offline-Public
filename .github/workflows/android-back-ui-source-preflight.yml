@@ -27,6 +27,7 @@ on:
       - 'test_bf_quest_mission_cards_v25300.py'
       - 'test_bf_unit_box_mobile_v25400.py'
       - 'test_bf_summon_hall_mobile_v25500.py'
+      - 'test_bf_save_controls_mobile_v25600.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -36,6 +37,7 @@ on:
       - 'V253_QUEST_MISSION_CARD_UI.md'
       - 'V254_UNIT_BOX_MOBILE_UI.md'
       - 'V255_SUMMON_HALL_MOBILE_UI.md'
+      - 'V256_SAVE_CONTROLS_MOBILE_UI.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -108,6 +110,8 @@ jobs:
         run: python3 test_bf_unit_box_mobile_v25400.py --source-only
       - name: Verify archived Summoning Hall label and responsive safety
         run: python3 test_bf_summon_hall_mobile_v25500.py --source-only
+      - name: Verify save backup versus destructive reset presentation without save writes
+        run: python3 test_bf_save_controls_mobile_v25600.py --source-only
       - name: Verify owner APK identity, signing and historical-save regression gates
         run: python3 test_bf_v250_release_readiness_v25000.py --source-only
       - name: Verify signed APK fingerprint/installed update evidence is fail-closed
