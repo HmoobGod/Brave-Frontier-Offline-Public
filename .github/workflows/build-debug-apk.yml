@@ -11,6 +11,8 @@ on:
       - 'V253_QUEST_MISSION_CARD_UI.md'
       - 'test_bf_unit_box_mobile_v25400.py'
       - 'V254_UNIT_BOX_MOBILE_UI.md'
+      - 'test_bf_summon_hall_mobile_v25500.py'
+      - 'V255_SUMMON_HALL_MOBILE_UI.md'
       - 'test_bf_owner_apk_identity_v25100.py'
       - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
       - 'source_data/bf_v198_recruit_id_compat_baseline_v200.json'
@@ -386,6 +388,7 @@ jobs:
           python3 test_bf_global_route_headers_v25200.py
           python3 test_bf_quest_mission_cards_v25300.py
           python3 test_bf_unit_box_mobile_v25400.py
+          python3 test_bf_summon_hall_mobile_v25500.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
