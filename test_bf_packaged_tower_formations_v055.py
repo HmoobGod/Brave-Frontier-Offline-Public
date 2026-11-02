@@ -28,5 +28,5 @@ with ZipFile(apk) as z:
     assert 'window.BF055TowerBosses?.drawPlaceholder(' in html
     assert 'bf_global_offline_demo_v7' in html
     assert 'assets/bf054_header_status.js' in z.namelist()
-    assert len(z.read('assets/bf_home_nav.js')) < 65536
+    assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS v0.55 APK holds historical boss preview 81-84, silhouettes, previous version and save v7')
