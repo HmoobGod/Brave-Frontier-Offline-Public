@@ -288,7 +288,7 @@
   summonTop.className = 'bf-summon-archive-head';
   summonTop.innerHTML = [
     '<img src="content/home/home_win_akras_smn_hall.png" alt="Akras Summoning Hall" />',
-    '<div><strong>SUMMONING HALL</strong>',
+    '<div><strong role="heading" aria-level="2">SUMMONING HALL</strong>',
       '<span>Offline recruitment prototype</span>',
       '<small>Archived Global art. No original rates or gacha system are claimed.</small></div>'
   ].join('');
