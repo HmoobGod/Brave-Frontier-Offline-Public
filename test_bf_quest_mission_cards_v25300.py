@@ -78,8 +78,7 @@ with sync_playwright() as pw:
             assert values["art"] and values["wrap"]=="anywhere", (width,values)
             assert values["left"] >= -1 and values["right"] <= width+1, (width,values)
         assert float(locked.evaluate("e=>getComputedStyle(e).opacity")) < .8
-        active.focus()
-        assert active.evaluate("e=>getComputedStyle(e).outlineStyle") != "none"
+        # Keyboard navigation enables the browser\'s :focus-visible heuristic.\n        page.keyboard.press("Tab")\n        active.focus()\n        assert active.evaluate("e=>e.matches(\':focus-visible\')"), width\n        assert active.evaluate("e=>getComputedStyle(e).outlineStyle") != "none"
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth+1"), width
         page.locator('.bf-navbar button[data-bf-goto="home"]').click()
         assert active.is_hidden() and page.locator("#bf-home").is_visible(), width
