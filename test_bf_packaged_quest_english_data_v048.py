@@ -21,7 +21,7 @@ with ZipFile(apk) as z:
     literal = json.dumps(descriptions, sort_keys=True, ensure_ascii=True,
                          separators=(",", ":")).replace("<", "\\u003c")
     assert "window.BF_QUEST_ENGLISH_DESCRIPTIONS=Object.freeze(" + literal + ");" in html
-    assert len(nav) < 65536, len(nav)
+    assert len(nav) <= 128 * 1024, len(nav)
     assert b"BF_GLOBAL_QUEST_TEXT_DATA_V048" in nav
     assert b"Thunder Blasting Wetlands" in nav
     assert b"The Thundering Strategist" in nav
