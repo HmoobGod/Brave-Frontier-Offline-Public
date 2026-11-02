@@ -2,7 +2,7 @@
 
 **Owner UI priority:** hard-focus original Brave Frontier Global offline interface to a measured 100% while preserving the real installed v251 and its locally backed-up progress. Current UI/engine estimate ~65% provisional, not a claim of original 2022 screenshot fidelity.
 
-**Stacking:** v256 is based on v255 PR #189, which depends on v254 PR #188, then v253 PR #187, following merged v252 PR #186. **Do not merge v256 before upstream PRs are merged and this PR is retargeted to current main with fresh exact-head Android CI.**
+**Current verified base:** v255 PR #189 MERGED into main at `96708699e3f956c47d6a6d23f69a0ec5c46d635e` after six preflights SUCCESS and signed Android Build #1549 SUCCESS (226 steps). Earlier UI PRs #186–#188 also merged. v256 PR #190 is now retargeted to merged `main` for a clean save-control CSS/test-only diff. **Do not merge until six new exact-head source preflights, full signed Android CI, independent Claude review of save-reset UI, and unchanged owner-install safety gates are satisfied.**
 
 ## Why the UI needs this patch
 

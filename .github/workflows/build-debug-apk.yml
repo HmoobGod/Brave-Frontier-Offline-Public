@@ -1,61 +1,21 @@
 name: Build Offline Android APK
+# Heavy signed builds run for the PR merge-tree (including stacked PRs),
+# for commits actually merged to main, or when explicitly dispatched.
+# Source-only preflight workflows still run on PRs.
 on:
   workflow_dispatch:
   push:
-    branches: ['**']
-  pull_request:
     branches: [main]
-    paths:
-      - '.github/workflows/build-debug-apk.yml'
-      - 'test_bf_quest_mission_cards_v25300.py'
-      - 'V253_QUEST_MISSION_CARD_UI.md'
-      - 'test_bf_unit_box_mobile_v25400.py'
-      - 'V254_UNIT_BOX_MOBILE_UI.md'
-      - 'test_bf_summon_hall_mobile_v25500.py'
-      - 'V255_SUMMON_HALL_MOBILE_UI.md'
-      - 'test_bf_save_controls_mobile_v25600.py'
-      - 'V256_SAVE_CONTROLS_MOBILE_UI.md'
-      - 'test_bf_squad_editor_mobile_v25700.py'
-      - 'V257_SQUAD_EDITOR_MOBILE_UI.md'
-      - 'test_bf_ui_asset_paths_v25800.py'
-      - 'V258_UI_IMAGE_ASSET_AUDIT.md'
-      - 'test_bf_ui_screen_inventory_v25900.py'
-      - 'V259_UI_SCREEN_ACCEPTANCE_INVENTORY.md'
-      - 'test_bf_battle_mobile_controls_v26000.py'
-      - 'V260_BATTLE_MOBILE_COMMAND_CONTROLS.md'
-      - 'test_bf_battle_results_mobile_v26100.py'
-      - 'V261_BATTLE_RESULTS_MOBILE_UI.md'
-      - 'test_bf_focus_status_mobile_v26200.py'
-      - 'V262_TACTICAL_FOCUS_STATUS_MOBILE_UI.md'
-      - 'test_bf_ui_screen_capture_v26300.py'
-      - 'V263_UI_SCREEN_CAPTURE_EVIDENCE.md'
-      - 'test_bf_owner_apk_identity_v25100.py'
-      - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
-      - 'source_data/bf_v198_recruit_id_compat_baseline_v200.json'
-      - 'test_bf_v198_recruit_save_compat_v20000.py'
-      - 'source_data/bf_v201_native_2022_encounter_gate.json'
-      - 'test_bf_native_2022_encounter_gates_v20100.py'
-      - 'test_bf_server_battle_capture_fields_v20200.py'
-      - 'source_data/bf_v203_authenticated_2022_local_scan_summary.json'
-      - 'test_bf_authenticated_2022_local_scan_v20300.py'
-      - 'test_bf_original_2022_mimic_profiles_v20400.py'
-      - 'source_data/bf_v204_2022_mimic_opaque_profiles.json'
-      - 'audit_bf_original_2022_mimic_profiles_v20400.py'
-      - 'app/src/main/assets/bf20600_amdahl_source_quest_guide.js'
-      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
-      - 'test_bf_amdahl_source_quest_guide_v20600.py'
-      - 'test_bf_amdahl_guide_real_modules_v20600.py'
-      - 'app/src/main/assets/bf20900_amdahl_original_opaque_mission_fields.js'
-      - 'test_bf_amdahl_original_opaque_metadata_v20900.py'
-      - 'test_bf_prepared_amdahl_full_android_chain_v20800.py'
-      - 'test_bf_packaged_amdahl_story_guide_v20700.py'
-      - 'test_bf_legacy_v7_save_loading_v20500.py'
+  # No path allow-list: signed CI must cover ANY changed dependency, including
+  # source_assets/, tools/, research/, nested scripts, manifests and root JS.
+  pull_request:
+    branches: ['**']
 
 permissions:
   contents: read
 
-# Prevent outdated feature-branch pushes from consuming parallel CI runners.
-# Main and each feature branch keep their own independent run group.
+# Cancel superseded runs on the same pull request or main branch.
+# PR merge-tree and main-merge build groups remain separate.
 concurrency:
   group: bf-offline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
