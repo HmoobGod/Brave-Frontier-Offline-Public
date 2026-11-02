@@ -50,7 +50,10 @@ for surface, guard in SURFACES.items():
     assert (ROOT / guard).is_file(), guard
 assert "PENDING for the full screen inventory" in DOC
 assert "2022 archive screenshot comparison" in DOC
-assert "Claude independent exact-head review" in DOC
+# Verify the ledger records the actual approved HEAD instead of requiring
+# obsolete pre-merge wording. This is a documentation consistency guard,
+# not an independent CI certification of Claude's review.
+assert "v264 exact head" in DOC and "Claude APPROVED" in DOC
 
 # Registered as both a short source check and an Android build source gate.
 assert "test_bf_ui_screen_inventory_v25900.py --source-only" in PRE

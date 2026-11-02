@@ -25,12 +25,13 @@
 | UNAVAILABLE LOCATIONS | `test_bf_home_semantic_hierarchy_v24500.py` | Vortex Gate, Arena, Raid Battle, Capital Randall, Exchange Hall: **art previews only** | Truthful disabled affordances with no action/reward paths, original source comparison |
 | STATIC UI ART | `test_bf_ui_asset_paths_v25800.py` | Referenced original artwork built from source packs | CI-verifiable bytes, dynamic portrait coverage, actual screen image capture and positioning |
 
-## Current merge/CI gates
+## Current merge/CI gates (November 2, 2026; source-only tracking)
 
-1. **v256 PR #190:** exact head `75ba3cf00e868313b2fc4d7c51fe6e439c3e2230`, six source preflights and Android run **41440301032** observed successful. **Claude independent exact-head review still required** before ready/merge; no prior review was found in PR comments at this checkpoint.
-2. **v257 PR #191:** draft; base on the v256 line. Rebase/retarget to merged main after v256 and get fresh current-head full Android CI; existing six source-preflight runs were green on original head.
-3. **v258 PR #192:** draft; base on the v257 line. Rebase/retarget after v257 and run full source + Android image-byte assertions. Six source-preflight runs were green on original head; **full Android on current main not yet verified**.
-4. **v259:** this test/documentation-only inventory PR must remain draft while upstream gates are open. Fresh exact-head CI is required for its own source changes and any subsequent rebase.
+1. **v256 PR #190:** Claude exact-head review APPROVE and merge confirmed; merged main SHA `5dc9de6f1ca3ba4a354bfad1d4591e86a6ffbaca`.
+2. **v257 PR #191:** merged to main at `72fca1091c95780ddc20bbe50b13f903980ac304`, source and signed Android CI verified. Owner installation is separate.
+3. **v258 PR #192:** merged to main at `80b004f037cdc96a189289f2abf4369f3d05af60`; source checks and PR merge-tree signed CI passed. The branch-push CI eventually completed successfully. The merge occurred while that branch run was still reported in progress; preserve this chronological exception in the master tracker rather than claiming that gate had already completed when merged.
+4. **v259 PR #193:** retargeted to the v258 main merge, retaining only the original four-file evidence-guard scope. This documentation update refreshes stale review/CI information and triggers fresh exact-head source and signed Android CI. **Remain draft; do not merge until new checks are verified.**
+5. **v260–v265:** still stacked drafts; v264 exact head `3bd812efe84a23e4452339e587762a0b9127e508` independently Claude APPROVED. v265 test-only PR #199 is under CI repair at updated head `ffe9c205d7c91cfa8ab89d253498a07846798f62` after an opaque-origin browser storage exception. Neither may leapfrog an upstream draft.
 
 ## Acceptance capture instructions (owner-controlled, no automatic install)
 
