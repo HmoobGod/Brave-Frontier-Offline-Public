@@ -1,7 +1,4 @@
-/* Offline home navigation pilot: additive view over the unchanged v0.13.1 demo.
- * Archive sprites and exact original layout are NOT yet wired in.
- * No save fields or combat logic are introduced here.
- */
+/* Offline home navigation pilot: display only; no save/engine changes. */
 (() => {
   'use strict';
   const wrap = document.querySelector('main.wrap');
