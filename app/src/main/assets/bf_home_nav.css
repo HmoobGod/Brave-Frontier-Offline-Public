@@ -865,10 +865,13 @@ body.bf-menu-mode .progresspanel #recoverycontinue:focus-visible{
 /* v257 UI-only: readable, touch-safe actual owned squad roster at phone
    widths. No changes to player state, checkbox selection or original units. */
 body.bf-menu-mode .squadsetup .squadpicker{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   min-width:0;
   gap:8px;
 }
 body.bf-menu-mode .squadsetup .squadpicker .squadpick{
+  display:flex;
   box-sizing:border-box;
   min-width:0;
   min-height:100px;
