@@ -119,14 +119,17 @@ def nav_limits(tree):
     return found
 
 seen = {}
+violations = []
 for path in sorted(ROOT.glob("test_*.py")):
     tree = ast.parse(path.read_text("utf8"), filename=path.name)
     limits = nav_limits(tree)
     for lineno, limit, inclusive in limits:
-        assert 65536 < limit <= CAP, (
-            path.name, lineno, "nav asset size ceiling must exceed stale 64KiB and stay <=128KiB", limit)
+        if not 65536 < limit <= CAP:
+            violations.append((path.name, lineno, limit, inclusive))
     if limits:
         seen[path.name] = limits
+
+assert not violations, ("stale or unsafe nav asset size assertions across all tests", violations)
 
 for filename in EXPECTED:
     assert filename in seen and len(seen[filename]) == 1, (
