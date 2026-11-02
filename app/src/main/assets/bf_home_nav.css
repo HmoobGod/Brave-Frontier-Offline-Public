@@ -861,3 +861,59 @@ body.bf-menu-mode .progresspanel #recoverycontinue:focus-visible{
     min-height:50px;
   }
 }
+
+/* v257 UI-only: readable, touch-safe actual owned squad roster at phone
+   widths. No changes to player state, checkbox selection or original units. */
+body.bf-menu-mode .squadsetup .squadpicker{
+  min-width:0;
+  gap:8px;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick{
+  box-sizing:border-box;
+  min-width:0;
+  min-height:100px;
+  padding:10px 8px;
+  gap:8px;
+  align-items:center;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick img{
+  width:42px;
+  height:46px;
+  object-fit:contain;
+  flex:0 0 auto;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick span{
+  min-width:0;
+  max-width:100%;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick strong{
+  display:block;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:12px;
+  line-height:1.3;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick small{
+  display:block;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:10px;
+  line-height:1.35;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick:focus-within{
+  outline:3px solid #b7e9ff;
+  outline-offset:1px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .squadsetup .squadpicker{
+    grid-template-columns:minmax(0,1fr);
+    gap:8px;
+  }
+  body.bf-menu-mode .squadsetup .squadpicker .squadpick{min-height:85px}
+}
+@media(min-width:520px){
+  body.bf-menu-mode .squadsetup .squadpicker{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
