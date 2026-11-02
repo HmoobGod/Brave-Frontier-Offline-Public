@@ -7,6 +7,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/build-debug-apk.yml'
+      - 'test_bf_owner_apk_identity_v25100.py'
+      - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
       - 'source_data/bf_v198_recruit_id_compat_baseline_v200.json'
       - 'test_bf_v198_recruit_save_compat_v20000.py'
       - 'source_data/bf_v201_native_2022_encounter_gate.json'
@@ -888,11 +890,23 @@ jobs:
           path: source_audit_reports/BraveFrontier-v187-archived-art-layout-audit.json
           if-no-files-found: error
           retention-days: 90
+      - name: Verify standard signed owner APK identity and emit upgrade evidence
+        env:
+          BF_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BF_EVENT_NAME: ${{ github.event_name }}
+        run: python3 test_bf_owner_apk_identity_v25100.py --packaged
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: BraveFrontierOffline-demo-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload separate v251 owner APK certificate and version evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-v251-owner-apk-identity
+          path: source_audit_reports/BraveFrontier-v251-owner-apk-identity.json
           if-no-files-found: error
           retention-days: 90
       - name: Build separate-app diagnostic APK (must not overwrite Current build)
