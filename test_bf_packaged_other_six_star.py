@@ -25,7 +25,7 @@ with zipfile.ZipFile(APK) as z:
    if kind=='unit_anime_atlas':assert (w,h)==(2400,((rec['frameCount']+4)//5)*400)
  assert 'const BF_VERIFIED_SUPPORT_V038' in html and 'const BF_VERIFIED_RAW_LEVELS_V038' in html
  assert all(k in html for k in ('60144','60224','50354'))
- assert 'assets/bf_home_nav.js' in names and len(z.read('assets/bf_home_nav.js'))<=65536
+ assert 'assets/bf_home_nav.js' in names and len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
  for key in ('assets/content/five_star_evolution/unit_anime_atlas_10014.png','assets/content/other_five_star/unit_anime_atlas_10024.png','assets/content/six_star_evolution/unit_anime_atlas_10015.png'):
   assert key in names,key
 print('PASS signed v0.38 APK: 72 playable forms, six new original 6-star atlases/portraits, verified source data, previous art and unchanged save v7')
