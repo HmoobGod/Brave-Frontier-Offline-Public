@@ -114,9 +114,10 @@ with sync_playwright() as pw:
         for selector, target in (
             ('.bf-scene-featured[data-bf-goto="quest"]', "quest"),
             ('.bf-scene-featured[data-bf-goto="summon"]', "summon"),
-            ('.bf-scene-toolrow button[data-bf-goto="units"]', "units"),
+            ('.bf-scene-toolrow button[data-bf-goto="units"]:not([data-bf-open-box])', "units"),
             ('.bf-scene-toolrow button[data-bf-goto="menu"]', "menu"),
         ):
+            assert page.locator(selector).count() == 1, (width, selector)
             page.locator(selector).click()
             assert page.evaluate("BF_homeNav.current") == target, (width, target)
             page.locator('.bf-navbar button[data-bf-goto="home"]').click()
