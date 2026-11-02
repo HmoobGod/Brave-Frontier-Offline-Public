@@ -20,12 +20,13 @@ assert "applicationId 'org.bravefrontier.offline'" in GRADLE
 assert "applicationIdSuffix '.diagnostic'" in GRADLE
 assert "storeFile file(" in GRADLE and "bf-development-debug.keystore" in GRADLE
 assert "signingConfig signingConfigs.debug" in GRADLE
-# B1 (Claude): legacy signed-APK regression tests currently pin 174 and
-# numerous historical acceptance windows stop at 199. Keep the historical
-# display label until those tests are deliberately migrated together.
+# B1 (Claude): legacy signed-APK tests pin the historical display version.
+# The CI-derived versionCode, not versionName, controls Android upgrade order.
 assert "project.findProperty('ciVersionCode')" in GRADLE
 assert "versionCode ciBuildCode ? ciBuildCode.toString().toInteger() : 15" in GRADLE
-assert re.search(r"(?m)^\\s*versionName '174\\.00\\.0-demo'\\s*$", GRADLE), (\n    "B1: packaged legacy tests require 174.00.0-demo; audit/migrate every pinned test before changing it"\n)
+assert re.search(r"(?m)^\s*versionName '174\.00\.0-demo'\s*$", GRADLE), (
+    "B1: legacy packaged tests require 174.00.0-demo; migrate their pins before changing it"
+)
 assert "versionName '250.00.0-demo'" not in GRADLE
 assert "-PciVersionCode=$((100000 + ${{ github.run_number }}))" in WF
 legacy_v174 = (ROOT / "test_bf_packaged_original_2022_encounter_crossrefs_v17400.py").read_text("utf8")
