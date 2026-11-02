@@ -375,6 +375,7 @@ jobs:
           python3 test_bf_home_semantic_hierarchy_v24500.py
           python3 test_bf_home_preview_nameplates_v24600.py
           python3 test_bf_home_shortcuts_mobile_v24700.py
+          python3 test_bf_home_squad_mobile_v24800.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
           python3 test_bf_engine_ui_integrated_v23000.py

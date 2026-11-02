@@ -607,3 +607,13 @@ body.bf-menu-mode #bf-home button:focus-visible {
   .bf-scene-toolrow img{height:60px}
   .bf-scene-toolrow>button span,.bf-scene-toolrow>.bf-scene-tool-locked span{font-size:11px}
 }
+
+/* v248: original six-unit Home squad preview, readable on narrow phones.
+   Reflow only; squad roster, original portraits, levels and save data untouched. */
+@media(max-width:412px){
+  .bf-scene-party{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .bf-scene-member{box-sizing:border-box;min-height:130px;padding:7px 4px}
+  .bf-scene-member img{height:84px}
+  .bf-scene-member strong{font-size:11px;line-height:1.25}
+  .bf-scene-member small{font-size:10px;line-height:1.25}
+}
