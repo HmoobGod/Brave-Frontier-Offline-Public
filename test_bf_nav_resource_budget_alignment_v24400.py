@@ -108,7 +108,7 @@ def nav_measure(expr, aliases):
     return False
 
 
-def inspect_test(expr, aliases, constants, found, line):
+def inspect_test(expr, aliases, constants, found, line, guard=False):
     """Inspect comparisons in asserts, ifs, loops and unittest methods."""
     checks = []
     for node in ast.walk(expr):
@@ -118,6 +118,15 @@ def inspect_test(expr, aliases, constants, found, line):
                 is_left = nav_measure(left, aliases)
                 is_right = nav_measure(right, aliases)
                 if is_left == is_right:
+                    continue
+                # A lower-bound health check (0 < len(nav)) is not a size cap.
+                # In an if/while guard, >= may be a fail-closed oversized check.
+                upper = (is_left and isinstance(op, (ast.Lt, ast.LtE))
+                         or is_right and isinstance(op, (ast.Gt, ast.GtE)))
+                rejecting_guard = (guard and
+                                   (is_left and isinstance(op, (ast.Gt, ast.GtE))
+                                    or is_right and isinstance(op, (ast.Lt, ast.LtE))))
+                if not (upper or rejecting_guard):
                     continue
                 bound = integer_value(right if is_left else left, constants)
                 if bound is not None:
@@ -181,7 +190,7 @@ def analyze_statements(statements, aliases=None, constants=None):
                         constants[name] = number
             continue
         if isinstance(stmt, (ast.If, ast.While)):
-            inspect_test(stmt.test, aliases, constants, found, stmt.lineno)
+            inspect_test(stmt.test, aliases, constants, found, stmt.lineno, guard=True)
             found.extend(analyze_statements(stmt.body, aliases, constants))
             found.extend(analyze_statements(stmt.orelse, aliases, constants))
             continue
