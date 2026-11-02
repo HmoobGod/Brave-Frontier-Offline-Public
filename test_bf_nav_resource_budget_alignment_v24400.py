@@ -123,15 +123,16 @@ for path in sorted(ROOT.glob("test_*.py")):
     tree = ast.parse(path.read_text("utf8"), filename=path.name)
     limits = nav_limits(tree)
     for lineno, limit, inclusive in limits:
-        assert limit >= CAP, (path.name, lineno, "nav asset capped below actual 128KiB loader", limit)
-        assert limit <= CAP and inclusive, (
-            path.name, lineno, "nav size assertion must enforce <=128KiB", limit, inclusive)
+        assert 65536 < limit <= CAP, (
+            path.name, lineno, "nav asset size ceiling must exceed stale 64KiB and stay <=128KiB", limit)
     if limits:
         seen[path.name] = limits
 
 for filename in EXPECTED:
     assert filename in seen and len(seen[filename]) == 1, (
         filename, "missing or ambiguous nav JS 128KiB assertion", seen.get(filename))
+    assert seen[filename][0][1:] == (CAP, True), (
+        filename, "known historical nav check must be exactly <=128KiB", seen[filename])
     assert re.search(r"\bpython3?\s+" + re.escape(filename) + r"\b", WORKFLOW), (
         filename, "not run by full Android build")
 
