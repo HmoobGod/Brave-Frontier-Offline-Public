@@ -20,6 +20,7 @@ on:
       - 'test_bf_home_ui_accessibility_v24300.py'
       - 'V243_HOME_ACCESSIBILITY_MENU_ICON.md'
       - 'test_bf_nav_resource_budget_alignment_v24400.py'
+      - 'prepare_quest_english_data_v048.py'
       - 'V244_NAV_RESOURCE_BUDGET_ALIGNMENT.md'
       - 'test_bf_quest_english_data_v048.py'
       - 'test_bf_remains_mirza_v049.py'
