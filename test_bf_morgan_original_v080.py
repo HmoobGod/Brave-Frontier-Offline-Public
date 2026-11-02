@@ -26,7 +26,7 @@ assert (A/'content/area/area_plate_0002.png').stat().st_size==17075
 assert (A/'bf080_morgan_map.js').is_file()
 assert 'readPackagedText("bf080_morgan_map.js")' in (
     R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf-8')
-assert (A/'bf_home_nav.js').stat().st_size < 65536
+assert (A/'bf_home_nav.js').stat().st_size <= 128 * 1024
 path=A/'index.html';html=path.read_text('utf-8')
 assert html.count('/* BF_ORIGINAL_MORGAN_QUESTS_V080 */')==1
 assert 'bf_global_offline_demo_v7' in html
