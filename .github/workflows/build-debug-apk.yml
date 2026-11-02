@@ -370,6 +370,7 @@ jobs:
           python test_bf_engine_webview_recovery_v22600.py
           python3 test_bf_offline_page_recovery_v22900.py
           python3 test_bf_engine_ui_touch_v22700.py
+          python3 test_bf_home_ui_priority_v24200.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_engine_ui_integrated_v23000.py
           python3 test_bf_renderer_dialog_lifecycle_v23100.py
