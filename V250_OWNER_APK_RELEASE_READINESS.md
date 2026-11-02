@@ -8,24 +8,24 @@ Before offering the next owner-installable offline debug APK, verify all release
 ### Mandatory source/CI checks
 - Default installable APK keeps `org.bravefrontier.offline`, not `org.bravefrontier.offline.diagnostic`. The diagnostic app remains separate and must **never** be used to update the user's Current.
 - Existing **persistent development debug keystore** restored from Actions secret is required for in-place upgrades; verify the certificate match to the owner's currently installed APK before installing. Never export/share the keystore or bypass signing checks.
-- Gradle versionName is updated from stale `174.00.0-demo` to **`250.00.0-demo`** so the owner-facing Android display version matches this checkpoint; `applicationId`, signing configuration and CI-derived versionCode are unchanged. This does **not** prove the app is complete or safe to upgrade by itself.
+- **B1 fix (Claude REQUEST CHANGES):** Preserve the historical `versionName '174.00.0-demo'`. Build #1480 failed the v90 signed-APK test (`AssertionError: v90+ app version required`) because roughly 30 packaged regression checks accept versions 100–199 and a v174 check pins the literal `174.00.0-demo`. The display-name bump to `250.00.0-demo` was reverted; the source release gate now asserts the required legacy label and two representative historical test expectations. Future display-name migration requires coordinated updates to all pinned tests. This historical label is not an indicator of the actual feature set.
 - Gradle versionCode is CI-generated, and the same-signature / higher-versionCode update must be checked against the user's actual installed build. A green CI run **does not prove** an in-place update can install.
 - Manifest stays offline (no INTERNET permission; cleartext traffic disabled).
 - Existing v7/v124 save compatibility and full packaged migration/backup tests must pass at exact head; owner should back up/export data before test installation.
 - All original-art Home UI tests v242–v249 and nav resource-budget tests remain enabled. Exact-head source-only checks and full Android signed APK build must pass.
 - Android Actions `BraveFrontierOffline-demo-debug-apk` is the standard app update artifact, **not** either of the two isolated diagnostic APK artifacts. The artifact normally contains `app-debug.apk` and is accessible through GitHub Actions when run permissions permit it.
 
-New test `test_bf_v250_release_readiness_v25000.py` audits these configuration and workflow guards in source CI and full Android workflow. It is not a device emulator test or a release approval.
+New test `test_bf_v250_release_readiness_v25000.py` checks configured values and workflow inclusion, the historical display-name regression pins, and the CI versionCode rule; unchanged signing/runtime status requires independent exact-HEAD diff review. It runs in source CI and full Android workflow. It is not a device emulator test or a release approval.
 
 ## Strict merge sequence
 1. v247 PR #181 — MERGED after Android Build #1455 SUCCESS.
 2. v248 PR #182 — MERGED after Android Build #1468 SUCCESS.
 3. v249 PR #183 — MERGED after corrected exact-head Android Build #1476 SUCCESS; the original browser selector ambiguity was corrected without runtime changes.
-4. v250 PR #184 — now targeting merged `main`; require fresh exact-head source and full Android CI SUCCESS, then obtain **Claude independent milestone review** on the final SHA, artifact and preservation evidence; do not merge until approved.
+4. v250 PR #184 — Claude reviewed prior HEAD `2f4c12a28e5d10f25d20deb9cabc0f87acfcf87e` and returned **REQUEST CHANGES, B1**. Reverted its display version change and hardened source gates; require a new exact-head source and full Android CI SUCCESS, followed by **fresh independent Claude delta review** before promotion. Never merge based on the prior reviewed SHA.
 5. Obtain owner device feedback and real save backup/upgrade checks. Keep current installation unchanged until the user deliberately installs the verified standard APK; never distribute diagnostic fault APK as an update.
 
 ### Evidence to capture for Claude
 Exact source HEAD/base/merge-base, build run ID/conclusion, source preflights, owner-installable artifact name and hash (if obtained), source/packaged save migration tests, persistent signing identity check, unchanged app ID/versionCode and no network permission, original Home art fidelity/limitations and remaining original-gameplay blockers. Clearly distinguish source/CI tests from physical phone testing.
 
 ## Scope
-New test, CI registration, documentation and **only the Gradle display `versionName`**. Zero Android Java/asset/sprite/gameplay/reward/save-runtime, package ID, signing key, or versionCode behavior changes. Overall full-game reconstruction remains estimated at ~30% (low-confidence), not a claim of a complete original 2022 Brave Frontier Global.
+New release guard test, CI registration and documentation; the temporary Gradle `versionName` change has been **reverted**, so `app/build.gradle` should match the merged base. Zero Android Java/asset/sprite/gameplay/reward/save-runtime, package ID, signing key or versionCode behavior changes. Overall full-game reconstruction remains estimated at ~30% (low-confidence), not a claim of a complete original 2022 Brave Frontier Global.
