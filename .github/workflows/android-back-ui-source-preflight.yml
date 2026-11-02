@@ -25,6 +25,8 @@ on:
       - 'test_bf_home_ui_release_readiness_v24900.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
+      - 'test_bf_owner_apk_identity_v25100.py'
+      - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
       - 'V249_HOME_UI_RELEASE_READINESS.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
@@ -92,6 +94,8 @@ jobs:
         run: python3 test_bf_home_ui_release_readiness_v24900.py --source-only
       - name: Verify owner APK identity, signing and historical-save regression gates
         run: python3 test_bf_v250_release_readiness_v25000.py --source-only
+      - name: Verify signed APK fingerprint/installed update evidence is fail-closed
+        run: python3 test_bf_owner_apk_identity_v25100.py --source-only
       - name: Verify original quest and dungeon tests use nav-only Android size cap
         run: python3 test_bf_nav_resource_budget_alignment_v24400.py --source-only
       - name: Verify lost callbacks, renderer-crash UI, and save-safety boundaries
