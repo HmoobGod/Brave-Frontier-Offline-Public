@@ -31,7 +31,10 @@ assert "window.BFGlobalHome = {refreshParty};" in home
 assert 'data-bf-goto="menu"' in home
 assert "window.BF_homeNav = {go,get current()" in J
 assert "/* v242: visual-first Home hierarchy" in C
-sty=C.split("/* v242: visual-first Home hierarchy",1)[1]
+assert C.count("/* v246: readable nameplates for original Global art-only") == 1
+sty=C.split("/* v242: visual-first Home hierarchy",1)[1].split(
+    "/* v246: readable nameplates for original Global art-only",1
+)[0]
 for selector in (".bf-scene-places button.bf-scene-featured",
                  ".bf-scene-places .bf-scene-locked",
                  ".bf-scene-available-label",
