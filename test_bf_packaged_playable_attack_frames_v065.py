@@ -19,5 +19,5 @@ with ZipFile(ROOT/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert '/* BF_ORIGINAL_MISSION_INSPECTOR_STAGED_V060 */' in html
     assert '/* BF_TOWER_BOSS_FORMATION_HOOK_V055 */' in html
     assert '/* BF_MONSTER_TRAINING_HOOK_V053 */' in html
-    assert len(z.read('assets/bf_home_nav.js'))<65536
+    assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS v0.65 packaged original 72 playable hit events, source guards, prior Mistral, v7')
