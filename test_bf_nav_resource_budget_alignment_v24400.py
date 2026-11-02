@@ -247,13 +247,25 @@ def self_test_detector():
     )
     for src in invalid_cases:
         tree = ast.parse(src)
-        try:
-            limits = nav_limits(tree)
-            assert limits, ("detector missed source", src)
-            check_limits("mutation", limits)
-        except AssertionError:
+        if "or True" in src:
+            try:
+                nav_limits(tree)
+            except AssertionError as err:
+                assert "OR bypass" in str(err), ("unexpected probe failure", src, err)
+            else:
+                raise AssertionError(("OR-bypass mutation not detected", src))
             continue
-        raise AssertionError(("mutation unexpectedly accepted", src))
+        limits = nav_limits(tree)
+        assert limits, ("detector missed source", src)
+        assert any(value <= 65536 for _line, value, _inclusive, _kind in limits), (
+            "stale byte cap not located", src, limits)
+        try:
+            check_limits("mutation", limits)
+        except AssertionError as err:
+            assert "stale or unsafe navigation byte cap" in str(err), (
+                "unexpected mutation test failure", src, err)
+        else:
+            raise AssertionError(("stale byte-cap mutation accepted", src))
 
     valid_cases = (
         "nav=(A/'bf_home_nav.js').read_bytes()\nassert len(nav)<=128*1024",
