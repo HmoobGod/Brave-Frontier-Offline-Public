@@ -14,6 +14,7 @@ assert CSS.count(MARKER)==1
 PATCH=CSS.split(MARKER,1)[1]
 for token in (".squadsetup .squadpicker .squadpick", ".squadpick strong",
               ".squadpick small", "overflow-wrap:anywhere",
+              "display:grid", "display:flex",
               "white-space:normal", "min-height:100px",
               "min-height:85px", "@media(max-width:359px)",
               "grid-template-columns:minmax(0,1fr)",
@@ -65,6 +66,7 @@ with sync_playwright() as pw:
         page.add_script_tag(content=bootstrap)
         page.locator('.bf-navbar button[data-bf-goto="units"]').click()
         picker=page.locator("#squadpicker")
+        assert picker.evaluate("e=>getComputedStyle(e).display")=="grid",width
         cards=picker.locator(".squadpick")
         assert cards.count()==3 and cards.first.is_visible(),width
         columns=picker.evaluate("e=>getComputedStyle(e).gridTemplateColumns.trim().split(/\\s+/).length")
