@@ -9,6 +9,19 @@ on:
   pull_request:
     branches: ['**']
     paths:
+      # Match ALL application/source/CI changes, not just a legacy list
+      # of specific versioned tests. Documentation-only PRs stay cheap.
+      - 'app/**'
+      - 'source_data/**'
+      - '.github/workflows/**'
+      - 'scripts/**'
+      - 'gradle/**'
+      - '*.py'
+      - '*.sh'
+      - '*.gradle'
+      - '*.properties'
+      - 'gradlew'
+      - 'gradlew.bat'
       - '.github/workflows/build-debug-apk.yml'
       - 'test_bf_quest_mission_cards_v25300.py'
       - 'V253_QUEST_MISSION_CARD_UI.md'
