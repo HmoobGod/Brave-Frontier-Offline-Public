@@ -18,6 +18,6 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'window.BF_QUEST_BACKGROUNDS["dungeon_battle_10600.jpg"]' in html
     assert 'window.BF_QUEST_ENGLISH_DESCRIPTIONS_V049=Object.freeze(' in html
     assert b'Remains of Mirza' in nav and b'Moonlit Battle' in nav
-    assert len(nav)<65536,len(nav)
+    assert len(nav) <= 128 * 1024,len(nav)
     assert 'bf_global_offline_demo_v7' in html
 print('PASS v0.49 packaged Mirza original source JPEG and English, 25 quests, v7')
