@@ -891,6 +891,9 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Verify standard signed owner APK identity and emit upgrade evidence
+        env:
+          BF_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BF_EVENT_NAME: ${{ github.event_name }}
         run: python3 test_bf_owner_apk_identity_v25100.py --packaged
       - name: Upload APK
         uses: actions/upload-artifact@v4
