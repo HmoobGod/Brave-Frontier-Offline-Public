@@ -1,6 +1,6 @@
-"""v244: audit every test's Home-nav byte ceiling against Android's loader.
+"""v244: audit all root Python source files for Home-nav byte ceilings.
 
-This source-only gate scans *all* test_*.py files (not just the historical 27),
+This source-only gate scans *all* root .py files, including build preparation,
 tracks nav JS/CSS variables, and guards the exact nav-only loader allowance.
 Actual packaged/gameplay tests remain in the full Android workflow.
 """
@@ -39,8 +39,10 @@ ADDITIONAL_PACKAGED = tuple("test_bf_packaged_" + part + ".py" for part in (
     "quest_english_data_v048", "remains_mirza_v049", "st_lamia_v090",
     "tower_of_mistral_v051",
 ))
-EXPECTED = set(LEGACY + PACKAGED + ADDITIONAL_PACKAGED)
-assert len(EXPECTED) == 38
+EXPECTED = set(LEGACY + PACKAGED + ADDITIONAL_PACKAGED + (
+    "prepare_quest_english_data_v048.py",
+))
+assert len(EXPECTED) == 39
 
 # Verify the actual exact-name Android selector, not just a substring that could
 # become a broader OR condition, while preserving the separate general UI limit.
@@ -243,6 +245,7 @@ def self_test_detector():
         "nav = (A/'bf_home_nav.js').read_bytes()\nn = len(nav)\nassert n <= 65536",
         "p = A/'bf_home_nav.js'\ndata = p.read_bytes()\nn = len(data)\nassert n < 65536",
         "assert len((A/'bf_home_nav.css').read_bytes()) < 65536",
+        "nav = (ASSETS/'bf_home_nav.js').read_text('utf-8')\nassert len(nav.encode('utf-8')) < 65536",
         "nav = (A/'bf_home_nav.js').read_bytes()\nassert len(nav)<=128*1024 or True",
     )
     for src in invalid_cases:
@@ -280,7 +283,7 @@ def self_test_detector():
 self_test_detector()
 seen = {}
 violations = []
-for path in sorted(ROOT.glob("test_*.py")):
+for path in sorted(ROOT.glob("*.py")):
     tree = ast.parse(path.read_text("utf8"), filename=path.name)
     limits = nav_limits(tree)
     for lineno, value, inclusive, mechanism in limits:
@@ -289,7 +292,7 @@ for path in sorted(ROOT.glob("test_*.py")):
     if limits:
         seen[path.name] = limits
 
-assert not violations, ("stale or unsafe nav size assertions across all tests", violations)
+assert not violations, ("stale or unsafe nav size assertions across all Python scripts", violations)
 
 for filename in EXPECTED:
     assert filename in seen and len(seen[filename]) == 1, (
@@ -305,5 +308,5 @@ assert "test_bf_engine_ui_asset_budget_v22800.py" in WORKFLOW
 for filename in ("bf_home_nav.js", "bf_home_nav.css"):
     count = (ASSETS / filename).stat().st_size
     assert 0 < count <= CAP, (filename, count)
-print(f"PASS v244: audited {len(list(ROOT.glob('test_*.py')))} tests; "
+print(f"PASS v244: audited {len(list(ROOT.glob('*.py')))} Python scripts; "
       f"{len(EXPECTED)} nav assertions <=128KiB; exact-name Java loader; save untouched")
