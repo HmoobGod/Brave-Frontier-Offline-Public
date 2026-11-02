@@ -31,6 +31,8 @@ on:
       - 'V263_UI_SCREEN_CAPTURE_EVIDENCE.md'
       - 'test_bf_recovery_backup_hierarchy_v26400.py'
       - 'V264_RECOVERY_BACKUP_VISUAL_PRIORITY.md'
+      - 'test_bf_real_save_page_v26500.py'
+      - 'V265_REAL_SAVE_LAYOUT_EVIDENCE.md'
       - 'test_bf_owner_apk_identity_v25100.py'
       - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
       - 'source_data/bf_v198_recruit_id_compat_baseline_v200.json'
@@ -415,6 +417,7 @@ jobs:
           python3 test_bf_battle_results_mobile_v26100.py
           python3 test_bf_focus_status_mobile_v26200.py
           python3 test_bf_recovery_backup_hierarchy_v26400.py
+          python3 test_bf_real_save_page_v26500.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
