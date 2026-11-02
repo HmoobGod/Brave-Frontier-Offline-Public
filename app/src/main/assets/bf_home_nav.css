@@ -575,3 +575,17 @@ body.bf-menu-mode #bf-home button:focus-visible {
   .bf-scene-places .bf-scene-locked img{height:57px}
   .bf-scene-available-label strong,.bf-scene-archive-label strong{font-size:11px}
 }
+
+/* v246: readable nameplates for original Global art-only location previews.
+   Labels duplicate existing accessible group names, so hidden from speech. */
+.bf-scene-places .bf-scene-locked .bf-scene-location-name{
+  display:block;max-width:100%;padding:3px 2px 2px;
+  text-align:center;overflow-wrap:anywhere;color:#f0d8ac;
+  font:900 11px/1.2 Georgia,serif;letter-spacing:.025em;
+}
+.bf-scene-places .bf-scene-locked .bf-scene-status{
+  font-size:10px;line-height:1.25;max-width:100%;
+}
+@media(max-width:359px){
+  .bf-scene-places .bf-scene-locked .bf-scene-location-name{font-size:10px}
+}
