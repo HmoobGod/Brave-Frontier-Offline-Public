@@ -920,3 +920,55 @@ body.bf-menu-mode .squadsetup .squadpicker .squadpick:focus-within{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+
+/* v260 battle commands mobile touch/readability, visual-only. The optional
+   v21.00 tray inserts its own CSS after this file; these scoped selectors
+   intentionally outrank its 37/44px defaults without changing any actions. */
+body.bf-menu-mode #bf2100-tray{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button,
+body.bf-menu-mode #bf2100-tray #bf2100-targets button,
+body.bf-menu-mode #bf2000-actions button{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:48px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+  touch-action:manipulation;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button{
+  min-height:50px;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button:focus-visible,
+body.bf-menu-mode #bf2100-tray #bf2100-targets button:focus-visible,
+body.bf-menu-mode #bf2000-actions button:focus-visible{
+  outline:3px solid #bcefff;
+  outline-offset:2px;
+}
+/* Preserve the real original-art buttons and their disabled/focus states. */
+body.bf-menu-mode .squad-panel .actionrow .bf-original-action{
+  min-width:0;
+  min-height:50px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode #bf2100-tray{
+    padding:8px;
+    margin:8px 0;
+  }
+  body.bf-menu-mode #bf2100-tray #bf2100-buttons{
+    grid-template-columns:minmax(0,1fr);
+    gap:6px;
+  }
+}

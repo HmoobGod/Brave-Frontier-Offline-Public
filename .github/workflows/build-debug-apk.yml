@@ -369,6 +369,7 @@ jobs:
           python3 test_bf_squad_editor_mobile_v25700.py
           python3 test_bf_ui_asset_paths_v25800.py
           python3 test_bf_ui_screen_inventory_v25900.py
+          python3 test_bf_battle_mobile_controls_v26000.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
