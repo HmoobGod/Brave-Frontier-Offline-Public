@@ -1,6 +1,6 @@
 # v247 — Readable, finger-sized Original Global Home shortcuts on small phones
 
-**Dependency:** v246 PR #180 (`0a6adbeebe4a94ff905ee7983177386123167a94`) is the starting head. The v247 branch is intentionally stacked on v246 until v246 merges after its exact-head full Android CI. Do not treat the v247 branch as based on merged main until confirmed.
+**Base checkpoint:** v246 PR #180 merged to `main` as `ab3e9965ed1b52afd2a81548dac1c5c752442575` after successful exact-head Android Build #1440 and six source preflights. PR #181 is now retargeted to `main`. The v247 branch still includes the original v246 head as its ancestor, and this documentation update intentionally triggers a fresh exact-head Android run before v247 can merge.
 
 ## UI-only change
 The existing five Home shortcut tiles (QUESTS, UNITS, SAVES, UNIT BOX and unavailable EXCHANGE · LATER) currently occupy five narrow columns even on 320px phones. At viewport widths **320–412px** the same original Global art tiles display in three columns, giving readable 11px captions and ample finger targets. At larger widths the existing five-column arrangement stays. All shortcut routes, the read-only Exchange state, original art bytes, and native controls remain unchanged.
