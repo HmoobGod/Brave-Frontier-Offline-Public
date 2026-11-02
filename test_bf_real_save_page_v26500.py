@@ -3,9 +3,10 @@
 N1 follow-up: previous v256/v264 tests used hand-written markup; here the DOM,
 inline styles, labels and original handlers come from the repository index.html.
 No click is sent to a destructive/backup/import control, no owner profile loads.
-The browser's set_content document has an opaque origin, so persistent
-localStorage is not readable. The test checks P's in-memory values and records
-this limitation explicitly; it does not claim real-save persistence coverage.
+An isolated in-memory localStorage shim is installed before loading the real
+page, matching the repository's existing navigation browser test. This checks
+route-induced state/storage changes without touching real browser/user saves.
+It does not claim real-device persistence coverage.
 """
 from pathlib import Path
 import sys
@@ -55,6 +56,22 @@ with sync_playwright() as pw:
         page.on("dialog", lambda dlg: dlg.dismiss())
         page.route("http://**/*", lambda route: route.abort())
         page.route("https://**/*", lambda route: route.abort())
+        # Match the established test_bf_home_nav.py isolation method.
+        # All reads/writes are confined to this disposable page's memory.
+        page.evaluate("""() => {
+          const saved = Object.create(null);
+          window.__bf265Storage = saved;
+          Object.defineProperty(window, 'localStorage', {
+            configurable:true, value:{
+              getItem(k){return Object.prototype.hasOwnProperty.call(saved,k) ? saved[k] : null;},
+              setItem(k,v){saved[String(k)] = String(v);},
+              removeItem(k){delete saved[String(k)];},
+              clear(){for (const k of Object.keys(saved)) delete saved[k];},
+              key(n){return Object.keys(saved)[n] ?? null;},
+              get length(){return Object.keys(saved).length;}
+            }
+          });
+        }""")
         page.set_content(HTML, wait_until="load", timeout=90000)
         page.add_style_tag(content=CSS)
         page.add_script_tag(content=NAV)
@@ -63,12 +80,8 @@ with sync_playwright() as pw:
         before = page.evaluate("""() => ({
            squad: JSON.stringify(P.squad),
            gems: P.gems, zel: P.zel,
-           // about:blank set_content has an opaque origin in Chromium. No
-           // persistent storage can be read or written there; report that
-           // explicitly rather than letting a SecurityError mask UI results.
-           save: (() => { try { return localStorage.getItem('bf_global_offline_demo_v7'); }
-             catch (e) { if (e.name !== 'SecurityError') throw e;
-               return '__OPAQUE_ORIGIN_NO_STORAGE__'; } })()
+           save: localStorage.getItem('bf_global_offline_demo_v7'),
+           storage: JSON.stringify(window.__bf265Storage)
         })""")
         nav.click()
         assert page.evaluate("BF_homeNav.current") == "menu", width
@@ -127,12 +140,8 @@ with sync_playwright() as pw:
         after = page.evaluate("""() => ({
            squad: JSON.stringify(P.squad),
            gems: P.gems, zel: P.zel,
-           // about:blank set_content has an opaque origin in Chromium. No
-           // persistent storage can be read or written there; report that
-           // explicitly rather than letting a SecurityError mask UI results.
-           save: (() => { try { return localStorage.getItem('bf_global_offline_demo_v7'); }
-             catch (e) { if (e.name !== 'SecurityError') throw e;
-               return '__OPAQUE_ORIGIN_NO_STORAGE__'; } })()
+           save: localStorage.getItem('bf_global_offline_demo_v7'),
+           storage: JSON.stringify(window.__bf265Storage)
         })""")
         assert before == after, (width, "route/visual inspection changed demo save")
         assert not errors, (width,errors[:5])
