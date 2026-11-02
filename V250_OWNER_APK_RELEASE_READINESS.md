@@ -1,6 +1,6 @@
 # v250 — Owner APK release checkpoint (preparation only)
 
-**Not released, not merged, no device acceptance yet.** This source-only guard is intentionally stacked after v249 PR #183 `09f943c4c0a063e881c39afe14160e0f76a95dca`, itself dependent on v248 and v247. Original Global game parity remains incomplete. No user Current APK or saves have been changed or installed by this work.
+**Not released, not merged, no device acceptance yet.** The release metadata and source guard are intentionally stacked after v249 PR #183 `09f943c4c0a063e881c39afe14160e0f76a95dca`, itself dependent on v248 and v247. Original Global game parity remains incomplete. No user Current APK or saves have been changed or installed by this work.
 
 ## Purpose
 Before offering the next owner-installable offline debug APK, verify all release gates while protecting the actual app identity and existing save migration.
@@ -8,6 +8,7 @@ Before offering the next owner-installable offline debug APK, verify all release
 ### Mandatory source/CI checks
 - Default installable APK keeps `org.bravefrontier.offline`, not `org.bravefrontier.offline.diagnostic`. The diagnostic app remains separate and must **never** be used to update the user's Current.
 - Existing **persistent development debug keystore** restored from Actions secret is required for in-place upgrades; verify the certificate match to the owner's currently installed APK before installing. Never export/share the keystore or bypass signing checks.
+- Gradle versionName is updated from stale `174.00.0-demo` to **`250.00.0-demo`** so the owner-facing Android display version matches this checkpoint; `applicationId`, signing configuration and CI-derived versionCode are unchanged. This does **not** prove the app is complete or safe to upgrade by itself.
 - Gradle versionCode is CI-generated, and the same-signature / higher-versionCode update must be checked against the user's actual installed build. A green CI run **does not prove** an in-place update can install.
 - Manifest stays offline (no INTERNET permission; cleartext traffic disabled).
 - Existing v7/v124 save compatibility and full packaged migration/backup tests must pass at exact head; owner should back up/export data before test installation.
@@ -27,4 +28,4 @@ New test `test_bf_v250_release_readiness_v25000.py` audits these configuration a
 Exact source HEAD/base/merge-base, build run ID/conclusion, source preflights, owner-installable artifact name and hash (if obtained), source/packaged save migration tests, persistent signing identity check, unchanged app ID/versionCode and no network permission, original Home art fidelity/limitations and remaining original-gameplay blockers. Clearly distinguish source/CI tests from physical phone testing.
 
 ## Scope
-New test, CI registration, and documentation only. Zero Android Java/asset/sprite/gameplay/reward/save-runtime changes. Overall full-game reconstruction remains estimated at ~30% (low-confidence), not a claim of a complete original 2022 Brave Frontier Global.
+New test, CI registration, documentation and **only the Gradle display `versionName`**. Zero Android Java/asset/sprite/gameplay/reward/save-runtime, package ID, signing key, or versionCode behavior changes. Overall full-game reconstruction remains estimated at ~30% (low-confidence), not a claim of a complete original 2022 Brave Frontier Global.
