@@ -647,3 +647,59 @@ body.bf-menu-mode .bf-route-title:not([hidden]){
     font-size:14px;
   }
 }
+
+/* v253 UI-only: original-art Quest mission cards stay readable and
+   touch-accessible on 320px phones. Core quest selection/unlocks are unchanged. */
+body.bf-menu-mode .questpanel #questlist button.questcard{
+  box-sizing:border-box;
+  max-width:100%;
+  min-width:0;
+  min-height:68px;
+  padding:10px 12px;
+  margin-block:4px;
+  border:2px ridge #9d865e;
+  border-radius:5px;
+  background-image:linear-gradient(110deg,rgba(18,31,50,.73),rgba(26,39,57,.61)),
+    url("content/mission_select/mission_frame_off.png");
+  background-size:100% 100%;
+  color:#f5e7c8;
+  text-align:left;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard strong{
+  display:block;
+  max-width:100%;
+  color:#ffe4ac;
+  font:900 13px/1.35 Georgia,serif;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard small{
+  display:block;
+  max-width:100%;
+  margin-top:4px;
+  color:#d0ddec;
+  font:11px/1.4 Arial,sans-serif;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:disabled{
+  opacity:.53;
+  filter:grayscale(.50);
+  cursor:not-allowed;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:focus-visible{
+  outline:3px solid #b4eaff;
+  outline-offset:2px;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:active:not(:disabled){
+  filter:brightness(1.15);
+}
+@media(max-width:359px){
+  body.bf-menu-mode .questpanel #questlist button.questcard{
+    min-height:76px;
+    padding:9px 8px;
+  }
+  body.bf-menu-mode .questpanel #questlist button.questcard strong{font-size:12px}
+  body.bf-menu-mode .questpanel #questlist button.questcard small{font-size:10px}
+}
