@@ -16,7 +16,10 @@ PRE = (ROOT / ".github/workflows/android-back-ui-source-preflight.yml").read_tex
 MAN = (ROOT / "app/src/main/AndroidManifest.xml").read_text("utf8")
 
 assert "/* v247: preserve original Home shortcut sprites" in CSS
-section = CSS.split("/* v247: preserve original Home shortcut sprites", 1)[1]
+assert CSS.count("/* v248: original six-unit Home squad preview") == 1
+section = CSS.split("/* v247: preserve original Home shortcut sprites", 1)[1].split(
+    "/* v248: original six-unit Home squad preview", 1
+)[0]
 assert re.search(r"@media\s*\(max-width:412px\)\s*\{", section)
 assert re.search(r"\.bf-scene-toolrow\s*\{\s*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)", section)
 assert re.search(r"\.bf-scene-toolrow>button,.bf-scene-toolrow>\.bf-scene-tool-locked\s*\{[^}]*min-height:96px", section)
