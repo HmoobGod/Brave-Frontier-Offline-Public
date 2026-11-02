@@ -1,6 +1,6 @@
 # v249 — Original Global Home UI release-readiness regression
 
-**Stacked dependency:** source branch based on v248 PR #182 exact HEAD `3b593a82327042bbf1948739932ac3ee2bed0eb0`; that branch includes v247 PR #181 and merged v246 PR #180. No early merge: v247 and v248 must each pass exact-head Android CI and merge in order, then retarget v249 onto main and verify its own full Android build.
+**Verified merge checkpoint:** v248 PR #182 has merged into `main` at `e409befca7cda734f7208bc159569b150755d0af`, with Build #1468 and all six source preflights SUCCESS. Earlier v247 and v246 also merged successfully. PR #183 has now been retargeted to `main`. The new exact-head documentation commit triggers fresh source and Android CI; do not merge v249 without full exact-head Android SUCCESS.
 
 This is a **test-only milestone** before the intended v250 independently reviewed APK. It introduces no runtime/UI code change. The new consolidated `test_bf_home_ui_release_readiness_v24900.py` tests the actual Home navigation bootstrap source and headless Chromium at 320, 360, 393, 412 and 540px. Coverage includes semantic heading levels 1/2/3, original Quest/Summon active controls, all four named but unavailable archived Global destinations, unchanged original-image paths, explicit disabled roles and lack of interactive children, Exchange Hall unavailable semantics, all six squad preview slots, responsive squad 3/6 columns and shortcut 3/5 columns, no grid overflow and navigation to Quest, Summon, Units and Saves.
 
