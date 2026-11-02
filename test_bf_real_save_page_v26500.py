@@ -3,6 +3,9 @@
 N1 follow-up: previous v256/v264 tests used hand-written markup; here the DOM,
 inline styles, labels and original handlers come from the repository index.html.
 No click is sent to a destructive/backup/import control, no owner profile loads.
+The browser's set_content document has an opaque origin, so persistent
+localStorage is not readable. The test checks P's in-memory values and records
+this limitation explicitly; it does not claim real-save persistence coverage.
 """
 from pathlib import Path
 import sys
@@ -60,7 +63,12 @@ with sync_playwright() as pw:
         before = page.evaluate("""() => ({
            squad: JSON.stringify(P.squad),
            gems: P.gems, zel: P.zel,
-           save: localStorage.getItem('bf_global_offline_demo_v7')
+           // about:blank set_content has an opaque origin in Chromium. No
+           // persistent storage can be read or written there; report that
+           // explicitly rather than letting a SecurityError mask UI results.
+           save: (() => { try { return localStorage.getItem('bf_global_offline_demo_v7'); }
+             catch (e) { if (e.name !== 'SecurityError') throw e;
+               return '__OPAQUE_ORIGIN_NO_STORAGE__'; } })()
         })""")
         nav.click()
         assert page.evaluate("BF_homeNav.current") == "menu", width
@@ -119,7 +127,12 @@ with sync_playwright() as pw:
         after = page.evaluate("""() => ({
            squad: JSON.stringify(P.squad),
            gems: P.gems, zel: P.zel,
-           save: localStorage.getItem('bf_global_offline_demo_v7')
+           // about:blank set_content has an opaque origin in Chromium. No
+           // persistent storage can be read or written there; report that
+           // explicitly rather than letting a SecurityError mask UI results.
+           save: (() => { try { return localStorage.getItem('bf_global_offline_demo_v7'); }
+             catch (e) { if (e.name !== 'SecurityError') throw e;
+               return '__OPAQUE_ORIGIN_NO_STORAGE__'; } })()
         })""")
         assert before == after, (width, "route/visual inspection changed demo save")
         assert not errors, (width,errors[:5])
