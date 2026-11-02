@@ -703,3 +703,53 @@ body.bf-menu-mode .questpanel #questlist button.questcard:active:not(:disabled){
   body.bf-menu-mode .questpanel #questlist button.questcard strong{font-size:12px}
   body.bf-menu-mode .questpanel #questlist button.questcard small{font-size:10px}
 }
+
+/* v254 UI-only: readable Unit Box portraits, long owned-unit names and
+   selection state. The existing owned roster and detail/selection handlers
+   are untouched; all new behavior is responsive presentation. */
+body.bf-menu-mode .bf-owned-box .bf-box-card{
+  box-sizing:border-box;
+  min-width:0;
+  min-height:146px;
+  padding:7px 5px 9px;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card strong{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  white-space:normal;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+  line-height:1.22;
+  min-height:2.44em;
+  max-width:100%;
+  text-align:center;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card span,
+body.bf-menu-mode .bf-owned-box .bf-box-card small{
+  overflow-wrap:anywhere;
+  max-width:100%;
+  text-align:center;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card[aria-pressed="true"]{
+  border-color:#f5d18d;
+  box-shadow:inset 0 0 0 2px #e5be75,0 0 10px #dba85b55;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card:focus-visible{
+  outline:3px solid #c1ebff;
+  outline-offset:2px;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-detail{
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .bf-owned-box .bf-box-results{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  body.bf-menu-mode .bf-owned-box .bf-box-card{min-height:154px}
+  body.bf-menu-mode .bf-owned-box .bf-box-card img{height:73px}
+}
