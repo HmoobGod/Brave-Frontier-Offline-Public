@@ -589,3 +589,21 @@ body.bf-menu-mode #bf-home button:focus-visible {
 @media(max-width:359px){
   .bf-scene-places .bf-scene-locked .bf-scene-location-name{font-size:10px}
 }
+
+/* v247: preserve original Home shortcut sprites while making five entries
+   readable and finger-sized on 320–412px phones; no route/style script edits. */
+.bf-scene-toolrow>button,.bf-scene-toolrow>.bf-scene-tool-locked{
+  box-sizing:border-box;min-height:88px;
+}
+.bf-scene-toolrow>button span,.bf-scene-toolrow>.bf-scene-tool-locked span{
+  display:block;max-width:100%;overflow-wrap:anywhere;
+  font-size:10px;line-height:1.3;
+}
+@media(max-width:412px){
+  .bf-scene-toolrow{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .bf-scene-toolrow>button,.bf-scene-toolrow>.bf-scene-tool-locked{
+    min-height:96px;padding:6px 4px 8px;
+  }
+  .bf-scene-toolrow img{height:60px}
+  .bf-scene-toolrow>button span,.bf-scene-toolrow>.bf-scene-tool-locked span{font-size:11px}
+}
