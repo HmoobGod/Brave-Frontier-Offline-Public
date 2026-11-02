@@ -20,9 +20,19 @@ assert "applicationId 'org.bravefrontier.offline'" in GRADLE
 assert "applicationIdSuffix '.diagnostic'" in GRADLE
 assert "storeFile file(" in GRADLE and "bf-development-debug.keystore" in GRADLE
 assert "signingConfig signingConfigs.debug" in GRADLE
+# B1 (Claude): legacy signed-APK regression tests currently pin 174 and
+# numerous historical acceptance windows stop at 199. Keep the historical
+# display label until those tests are deliberately migrated together.
 assert "project.findProperty('ciVersionCode')" in GRADLE
-assert "versionName '250.00.0-demo'" in GRADLE
-assert "versionName '174.00.0-demo'" not in GRADLE
+assert "versionCode ciBuildCode ? ciBuildCode.toString().toInteger() : 15" in GRADLE
+assert re.search(r"(?m)^\\s*versionName '174\\.00\\.0-demo'\\s*$", GRADLE), (\n    "B1: packaged legacy tests require 174.00.0-demo; audit/migrate every pinned test before changing it"\n)
+assert "versionName '250.00.0-demo'" not in GRADLE
+assert "-PciVersionCode=$((100000 + ${{ github.run_number }}))" in WF
+legacy_v174 = (ROOT / "test_bf_packaged_original_2022_encounter_crossrefs_v17400.py").read_text("utf8")
+legacy_v171 = (ROOT / "test_bf_packaged_imp_canonical_v17100.py").read_text("utf8")
+assert """assert "versionName '174.00.0-demo'" in gradle""" in legacy_v174
+assert "range(171,200)" in legacy_v171 and "versionName" in legacy_v171
+assert "test_bf_packaged_original_2022_encounter_crossrefs_v17400.py" in WF
 assert "BF_DEBUG_KEYSTORE_B64" in WF
 assert "printf '%s' " in WF and "base64 --decode" in WF
 assert "android.permission.INTERNET" not in MAN
@@ -67,7 +77,7 @@ assert "if-no-files-found: error" in WF
 assert "gradle --no-daemon" in WF
 assert WF.count("python3 test_bf_v250_release_readiness_v25000.py") == 1
 assert PRE.count("test_bf_v250_release_readiness_v25000.py") == 2
-print("PASS v250 source: unchanged app identity/signing, offline manifest, save tests, Home UI gates and named APK artifacts")
+print("PASS v250 source: configured app ID/signing, legacy versionName pin, CI versionCode, offline/save/APK workflows")
 
 if "--source-only" in sys.argv:
     raise SystemExit(0)
