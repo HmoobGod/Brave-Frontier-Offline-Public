@@ -836,6 +836,10 @@ body.bf-menu-mode .progresspanel .transferactions #wipesave{
   font-weight:900;
 }
 body.bf-menu-mode .progresspanel #recoverycontinue{
+  box-sizing:border-box;
+  min-height:48px;
+  white-space:normal;
+  overflow-wrap:anywhere;
   border:2px solid #d78a81;
   background:linear-gradient(#72403f,#392635);
   color:#ffe4dc;
