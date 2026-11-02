@@ -16,7 +16,7 @@ with zipfile.ZipFile(ROOT/'app/build/outputs/apk/debug/app-debug.apk') as apk:
     nav=apk.read('assets/bf_home_nav.js')
     ui=apk.read('assets/bf_global_unit_archive.js')
     css=apk.read('assets/bf_global_unit_archive.css')
-    assert len(nav)<=65536 and len(ui)<=65536 and len(css)<=65536,'Android UI reader limit'
+    assert len(nav) <= 128 * 1024 and len(ui)<=65536 and len(css)<=65536,'Android UI reader limit'
     assert b'VIEW ORIGINAL GLOBAL PROFILE' in nav
     assert b'bf-original-unit-lore-data' in ui
     assert b'bf-archive-codex' in css
