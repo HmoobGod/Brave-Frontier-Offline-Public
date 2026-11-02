@@ -1,6 +1,6 @@
 # v248 — Original Global Home squad preview, readable on small phones
 
-**Stacked dependency:** based on v247 PR #181 HEAD `40e43e3820c385808d82aec34cbfd92c174c0a5d`, which itself includes v246 PR #180. This is an experimental UI branch; **do not merge v248 before v246 and v247 are merged with exact-head Android CI green**.
+**Merge checkpoint:** v246 PR #180 and v247 PR #181 are now merged into `main` (v247 main SHA `29f899000c912a84f9edbcf847b5380fa0ce30ed`, exact-head Build #1455 SUCCESS). PR #182 is retargeted to `main`, with this documentation update triggering a fresh exact-head full Android workflow before any v248 merge. The branch originally forked at the earlier v247 commit `40e43e3820c385808d82aec34cbfd92c174c0a5d`; the v247 main merge remains the authoritative checkpoint.
 
 At 320–412px widths, retain all six original Home squad preview slots but display them in three columns over two rows, giving portraits and names meaningful room. Show each unit name at 11px and level at 10px. On wider screens retain the original six-column layout. The existing six-slot render logic, saved squad data, unit order, level values, sprite bytes and game routes are unchanged.
 
