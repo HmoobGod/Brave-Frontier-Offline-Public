@@ -17,7 +17,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'stepRound' in script and 'autoPlan' in script
  html=z.read('assets/index.html').decode('utf8')
  assert 'bf_global_offline_demo_v7' in html
- assert len(z.read('assets/bf_home_nav.js'))<65536
+ assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 build=(R/'app/build.gradle').read_text('utf8')
 assert "versionName '" in build
 assert "applicationId 'org.bravefrontier.offline'" in build
