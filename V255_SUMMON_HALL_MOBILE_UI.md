@@ -1,6 +1,6 @@
 # v255 — Archived Summoning Hall mobile UI polish
 
-**Stacked base:** v254 PR #188 (head `e7ada79e25067fcbe7d679986f48933ad2e1234c` at the time v255 branched) is stacked on v253 PR #187, which in turn follows merged v252 PR #186. **Do not merge v255 before both v253 and v254 are merged**. After each upstream merge, retarget and recheck the new main-based diff and exact-head source/full Android build.
+**Current main base:** v254 PR #188 MERGED at `9b20af564ef872fb01c81d23a891be25c701e621` after six source preflights SUCCESS and Android Build #1546 SUCCESS (226 steps); upstream v253 #187 was merged previously. v255 PR #189 is retargeted to merged `main`. The prior stacked v255 source checks were green, but **fresh exact-head six preflights and full signed Android CI are required on the main-based v255 head** before merge. The remaining downstream v256 PR #190 is still draft and stacked on v255.
 
 **Owner directive:** Hard-focus Brave Frontier Global offline UI through a measured 100%. UI progress ~65% provisional; real 2022 source-art visual fidelity is not proven by passing web-browser tests. Owner's v251 APK and save remain untouched.
 

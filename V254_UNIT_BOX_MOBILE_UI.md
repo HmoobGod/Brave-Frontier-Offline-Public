@@ -1,6 +1,6 @@
 # v254 — Unit Box original Global UI mobile clarity
 
-**Development dependency:** v253 PR #187 source head `d2313ad9375dea84ea7a4b69b5308b31bcc6c839` (draft; based on merged v252 main `ac8796fcf7c72c6c22b1eef21cf157596f617de0`). v254 is **stacked on v253**, not on independently merged main. Wait for v253 to finish fresh full Android CI and merge before retargeting v254 to main; then recheck exact head and all CI gates.
+**Verified merged base:** v253 PR #187 source head `d2313ad9375dea84ea7a4b69b5308b31bcc6c839` MERGED into main at `bd39fd94ffeb8a855d5c400ef02ab6370f64dcd5` after six green source preflights and full signed Android Build #1522 SUCCESS (226 successful steps). v254 PR #188 was initially stacked but has now been **retargeted to the current v253 main merge**, preserving its five-file Unit Box-only diff. A fresh exact-head Android CI run is required after this doc change; earlier stacked source checks alone do not authorize merge.
 
 **Owner directive:** Hard-focus UI to 100% before additional original Global content and gameplay changes. UI/engine completion ~65% is provisional, not visual fidelity certification.
 
