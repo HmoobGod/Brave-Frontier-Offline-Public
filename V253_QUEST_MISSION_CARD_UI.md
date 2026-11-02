@@ -1,6 +1,6 @@
 # v253 — Quest mission-card mobile UI follow-up
 
-**Stacked dependency:** v252 PR #186 exact head `ab5c48b76ff87f055acf8047ff11d6159b8ce0e7` (not yet merged when v253 was authored). v253 must not merge until v252 is reviewed, fully CI-green, and merged; then retarget/revalidate v253 on current main.
+**Base:** v252 PR #186 merged to main after all six source preflights and signed Android Build #1511 SUCCESS (226 successful workflow steps). Merge SHA `ac8796fcf7c72c6c22b1eef21cf157596f617de0`. v253 PR #187 was initially stacked on exact v252 head `ab5c48b76ff87f055acf8047ff11d6159b8ce0e7` and is now **retargeted to main**. Reverify the entire five-file v253-only diff and obtain fresh exact-head source/browser/Android CI before merge.
 
 **Owner directive:** UI only, target 100% **audited offline UI**, not original 2022 gameplay parity.
 
