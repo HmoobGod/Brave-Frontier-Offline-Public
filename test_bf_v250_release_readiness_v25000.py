@@ -21,6 +21,8 @@ assert "applicationIdSuffix '.diagnostic'" in GRADLE
 assert "storeFile file(" in GRADLE and "bf-development-debug.keystore" in GRADLE
 assert "signingConfig signingConfigs.debug" in GRADLE
 assert "project.findProperty('ciVersionCode')" in GRADLE
+assert "versionName '250.00.0-demo'" in GRADLE
+assert "versionName '174.00.0-demo'" not in GRADLE
 assert "BF_DEBUG_KEYSTORE_B64" in WF
 assert "printf '%s' " in WF and "base64 --decode" in WF
 assert "android.permission.INTERNET" not in MAN
