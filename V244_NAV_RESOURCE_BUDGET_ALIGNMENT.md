@@ -1,20 +1,24 @@
-# v244 — Align all legacy Home navigation byte caps with Android runtime
+# v244 — Repository-wide Home navigation asset budget alignment
 
-**Claude review follow-up (B1 remediation) to v244 draft PR #178.** Base: merged v243 main `304bc302cc2bc0fe965f79bca9d4da9ca6cef501`. Re-review exact newest PR HEAD and exact-head CI before merging. Original reviewed head `c27ce514...` received REQUEST CHANGES, superseded by this patch.
+**Status: draft, pending renewed exact-head Claude approval and successful exact-head Android CI.** Parent/base remains merged v243 main `304bc302cc2bc0fe965f79bca9d4da9ca6cef501`. The previous Claude reviews at `c27ce514` and `b73e6cf` both REQUEST CHANGES; neither authorizes merging a newer head.
 
-## Problem and complete fix
-The Android packaged loader already permits up to **128 * 1024 bytes** for `bf_home_nav.js` and `bf_home_nav.css`, and retains a **64 * 1024 byte** limit for all other local UI files. The initial v244 patch updated only four v048–v051 source tests. Claude found 23 more test assertions still imposing the old 64 KiB cap: one source test for original BB power and 22 packaged APK tests, plus 10 additional packaged tests found by the full AST audit. All 37 constrain the navigation asset to the genuine runtime bound `<= 128 * 1024` after this review follow-up. The original BB-power test still retains its independent 64 KiB cap on `archive`; unrelated HTML/script limits are unchanged.
+## Why this patch exists
+The already-implemented Android packaged loader allows **128 × 1024 bytes** for precisely `bf_home_nav.js` and `bf_home_nav.css`. Other packaged UI resources still have a **64 × 1024-byte** limit. Source and packaged APK tests had obsolete caps of 65,536 bytes for navigation JavaScript; the nav JS is 65,436 bytes (only 99 bytes below the old test limit).
 
-## Regression protection
-The v244 source-only gate now parses **every** `test_*.py` file with Python AST. It identifies direct navigation JS/CSS size assertions and assigned variable aliases (e.g. `nav` and APK zip reads), rejects old or too-small ceilings and `or` bypasses, and requires each of the known 37 updated source/packaged tests to retain exactly one 128 KiB assertion and remain included in the full APK CI workflow. New test files are also scanned. It validates the precise whole Java method selecting **only** the two expected nav filenames for the higher cap, plus existing oversize rejection and unchanged 64 KiB general UI limit. Both full Android and dedicated source preflight run the regression gate.
+Claude's first v244 review identified 23 more stale assertions beyond the initial four. A repository-wide AST scan then found 10 additional packaged tests. Claude's second review identified a 38th test, `test_bf_morgan_original_v080.py`, using `(A/'bf_home_nav.js').stat().st_size < 65536`, which the earlier scan missed. That test's bound now uses `<= 128 * 1024`. **All 38 known nav JavaScript size assertions** now match the existing loader cap. No other archive, source, UI or CSS file's 64 KiB cap was broadened.
 
-## Safety
-Source/test-only patch. No changes to Java, assets, game/quest/battle logic, Gems/rewards, app ID, signing, original images, v7 save compatibility, or Current. It does not change the actual Android loader or promote a device-tested APK. The 37 historical tests still execute in full APK CI with their original gameplay/asset assertions; only the obsolete nav size checks change.
+## Guard against recurrence
+`test_bf_nav_resource_budget_alignment_v24400.py` scans every root `test_*.py` file with Python AST and uses scope-aware sequential aliases to distinguish unrelated resource variables. Recognized nav size measurements include `len(nav)`, `len(nav.encode())`, `Path.stat().st_size`, `os.path.getsize(...)`, ZIP `getinfo(...).file_size`, and named size aliases. It resolves simple named integer constants, detects comparisons in `assert`, `if` / `while`, and `unittest.assertLess` or `assertLessEqual`, rejects old limits and OR bypasses, and verifies all 38 known test files still contain the exact `<= 128 * 1024` nav check and remain wired into full APK CI.
+
+The gate includes in-file adversarial probes for these previously omitted syntaxes and preserves valid lower-bound checks such as `0 < len(nav)`. It also validates the **complete exact two-name Java loader selector**, the 128 KiB nav-only cap, the 64 KiB general limit and fail-closed > maxBytes behavior. The v228 gate continues to run alongside it.
+
+## Scope / safeguards
+Only existing test files, the v244 test gate, CI workflow registrations and this documentation change. No app/, Java runtime, HTML, CSS, JS, art, Gradle, signing, gameplay, Gems, rewards, save or user Current changes. This is source/test safety work, not a visual or device-accepted gameplay release.
 
 ## Merge requirements
-- Independent Claude exact-head re-review of **the new head**, including the 23 added test deltas and AST gate, plus adversarial mutation probes for new alias-based tests, `or True`, swapped asset filename, and extra permitted loader names.
-- All dedicated source preflights green and full exact-head Android build green, including the old v048–v051 and 22 packaged APK tests.
-- Do not merge if PR head moves without re-review. Keep draft pending approval.
-- v250 remains the planned owner APK checkpoint; v245 can resume visible Home accessibility UI changes after v244 merge.
+1. Reverify PR #178 HEAD and base; previous review reports on different SHAs are not approvals for the current head.
+2. Independently review the Morgan one-line change and new gate's measurement syntax, alias scope and adversarial checks. Preserve 64 KiB restrictions for non-navigation UI.
+3. Require the exact-head source preflight and full Android APK build to pass, including packaged and asset-dependent legacy tests. A green build on an older SHA does not count.
+4. Do not merge until Claude returns APPROVE for the exact current SHA and CI is green. v245 remains next visible UI work; v250 remains the owner's planned APK install checkpoint.
 
-Owner's personal Current v124 is historical/not independently rechecked and has not been modified.
+Current personal APK and v7 save have not been edited or independently retested by this change.
