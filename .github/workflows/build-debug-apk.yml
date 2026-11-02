@@ -1,10 +1,13 @@
 name: Build Offline Android APK
+# Heavy signed builds run for the PR merge-tree (including stacked PRs),
+# for commits actually merged to main, or when explicitly dispatched.
+# Source-only preflight workflows still run on PRs.
 on:
   workflow_dispatch:
   push:
-    branches: ['**']
-  pull_request:
     branches: [main]
+  pull_request:
+    branches: ['**']
     paths:
       - '.github/workflows/build-debug-apk.yml'
       - 'test_bf_quest_mission_cards_v25300.py'
@@ -44,8 +47,8 @@ on:
 permissions:
   contents: read
 
-# Prevent outdated feature-branch pushes from consuming parallel CI runners.
-# Main and each feature branch keep their own independent run group.
+# Cancel superseded runs on the same pull request or main branch.
+# PR merge-tree and main-merge build groups remain separate.
 concurrency:
   group: bf-offline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
