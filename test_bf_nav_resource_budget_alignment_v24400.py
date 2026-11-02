@@ -21,6 +21,7 @@ LEGACY = (
     "test_bf_monsters_nest_v050.py",
     "test_bf_tower_of_mistral_v051.py",
     "test_bf_original_bb_power.py",
+    "test_bf_morgan_original_v080.py",
 )
 PACKAGED = tuple("test_bf_packaged_" + part + ".py" for part in (
     "five_star_starters", "header_status_v054", "historical_encounters_v120",
@@ -39,7 +40,7 @@ ADDITIONAL_PACKAGED = tuple("test_bf_packaged_" + part + ".py" for part in (
     "tower_of_mistral_v051",
 ))
 EXPECTED = set(LEGACY + PACKAGED + ADDITIONAL_PACKAGED)
-assert len(EXPECTED) == 37
+assert len(EXPECTED) == 38
 
 # Verify the actual exact-name Android selector, not just a substring that could
 # become a broader OR condition, while preserving the separate general UI limit.
@@ -55,92 +56,224 @@ assert re.search(
 assert 'final int maxBytes = packagedUiResourceLimit(file);' in JAVA
 assert 'if (out.size() + count > maxBytes) throw new IOException("Oversized UI resource");' in JAVA
 
-def integer_value(expr):
+
+def integer_value(expr, constants):
+    """Resolve simple literal or named integer limits without executing source."""
     if isinstance(expr, ast.Constant) and type(expr.value) is int:
         return expr.value
-    if isinstance(expr, ast.BinOp) and isinstance(expr.op, ast.Mult):
-        a, b = integer_value(expr.left), integer_value(expr.right)
-        return a * b if a is not None and b is not None else None
-    if isinstance(expr, ast.BinOp) and isinstance(expr.op, ast.Pow):
-        a, b = integer_value(expr.left), integer_value(expr.right)
-        return a ** b if a is not None and b is not None and b < 20 else None
+    if isinstance(expr, ast.Name):
+        return constants.get(expr.id)
+    if isinstance(expr, ast.BinOp) and isinstance(expr.op, (ast.Mult, ast.Add, ast.Sub, ast.Pow)):
+        a, b = integer_value(expr.left, constants), integer_value(expr.right, constants)
+        if a is None or b is None:
+            return None
+        if isinstance(expr.op, ast.Mult):
+            return a * b
+        if isinstance(expr.op, ast.Add):
+            return a + b
+        if isinstance(expr.op, ast.Sub):
+            return a - b
+        return a ** b if 0 <= b < 20 else None
     return None
 
-def names_targeted(target):
+
+def target_names(target):
     return {node.id for node in ast.walk(target) if isinstance(node, ast.Name)}
 
-def nav_aliases(tree):
-    """Track assigned aliases for assets or nav-derived sizes, including in functions."""
-    assignments = []
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.Assign, ast.AnnAssign, ast.NamedExpr)):
-            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-            if node.value is not None:
-                assignments.append((set().union(*(names_targeted(t) for t in targets)), node.value))
-    aliases = set()
-    for _ in range(len(assignments) + 1):
-        before = len(aliases)
-        for targets, value in assignments:
-            source = ast.unparse(value)
-            direct = any(name in source for name in ("bf_home_nav.js", "bf_home_nav.css"))
-            refers = any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(value))
-            if direct or refers:
-                aliases.update(targets)
-        if len(aliases) == before:
-            break
-    return aliases
 
-def references_nav_length(expr, aliases):
+def nav_reference(expr, aliases):
+    """Recognize only actual nav paths and in-scope derived values."""
+    return any(
+        (isinstance(node, ast.Name) and node.id in aliases)
+        or (isinstance(node, ast.Constant) and isinstance(node.value, str)
+            and (node.value == "bf_home_nav.js" or node.value == "bf_home_nav.css"
+                 or node.value.endswith("/bf_home_nav.js")
+                 or node.value.endswith("/bf_home_nav.css")))
+        for node in ast.walk(expr)
+    )
+
+
+def nav_measure(expr, aliases):
+    """Identify length, filesystem stat, ZIP member size and their aliases."""
     if isinstance(expr, ast.Name):
-        return expr.id in aliases
-    if not isinstance(expr, ast.Call) or not isinstance(expr.func, ast.Name) or expr.func.id != "len":
-        return False
-    if len(expr.args) != 1:
-        return False
-    arg = expr.args[0]
-    return ("bf_home_nav.js" in ast.unparse(arg)
-            or "bf_home_nav.css" in ast.unparse(arg)
-            or any(isinstance(n, ast.Name) and n.id in aliases for n in ast.walk(arg)))
+        return aliases.get(expr.id) == "size"
+    if isinstance(expr, ast.Call):
+        func = expr.func
+        name = func.id if isinstance(func, ast.Name) else (
+            func.attr if isinstance(func, ast.Attribute) else "")
+        if name in ("len", "getsize") and len(expr.args) == 1:
+            return nav_reference(expr.args[0], aliases)
+    if isinstance(expr, ast.Attribute) and expr.attr in ("st_size", "file_size"):
+        return nav_reference(expr.value, aliases)
+    return False
 
-def nav_limits(tree):
-    aliases = nav_aliases(tree)
-    found = []
-    for statement in ast.walk(tree):
-        if not isinstance(statement, ast.Assert):
-            continue
-        for compare in (n for n in ast.walk(statement.test) if isinstance(n, ast.Compare)):
-            terms = [compare.left] + compare.comparators
-            for left, op, right in zip(terms, compare.ops, terms[1:]):
-                if references_nav_length(left, aliases) and isinstance(op, (ast.Lt, ast.LtE)):
-                    limit, inclusive = integer_value(right), isinstance(op, ast.LtE)
-                elif references_nav_length(right, aliases) and isinstance(op, (ast.Gt, ast.GtE)):
-                    limit, inclusive = integer_value(left), isinstance(op, ast.GtE)
-                else:
+
+def inspect_test(expr, aliases, constants, found, line):
+    """Inspect comparisons in asserts, ifs, loops and unittest methods."""
+    checks = []
+    for node in ast.walk(expr):
+        if isinstance(node, ast.Compare):
+            values = [node.left] + node.comparators
+            for left, op, right in zip(values, node.ops, values[1:]):
+                is_left = nav_measure(left, aliases)
+                is_right = nav_measure(right, aliases)
+                if is_left == is_right:
                     continue
-                if limit is not None:
-                    assert not any(isinstance(n, ast.BoolOp) and isinstance(n.op, ast.Or)
-                                   for n in ast.walk(statement.test)), (
-                        "nav size assertion has OR bypass", statement.lineno)
-                    found.append((statement.lineno, limit, inclusive))
+                bound = integer_value(right if is_left else left, constants)
+                if bound is not None:
+                    checks.append((line, bound,
+                                   isinstance(op, (ast.LtE, ast.GtE)),
+                                   "comparison"))
+        elif isinstance(node, ast.Call):
+            method = node.func.attr if isinstance(node.func, ast.Attribute) else ""
+            if method in ("assertLess", "assertLessEqual",
+                          "assertGreater", "assertGreaterEqual") and len(node.args) >= 2:
+                a, b = node.args[:2]
+                if nav_measure(a, aliases) != nav_measure(b, aliases):
+                    bound = integer_value(b if nav_measure(a, aliases) else a, constants)
+                    if bound is not None:
+                        checks.append((line, bound,
+                                       method in ("assertLessEqual", "assertGreaterEqual"),
+                                       method))
+    if checks:
+        assert not any(isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or)
+                       for node in ast.walk(expr)), ("nav assertion OR bypass", line)
+        found.extend(checks)
+
+
+def analyze_statements(statements, aliases=None, constants=None):
+    """Sequential, scope-aware dataflow; reassignment clears old nav aliases."""
+    aliases = dict(aliases or {})
+    constants = dict(constants or {})
+    found = []
+    for stmt in statements:
+        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            local_alias = aliases.copy()
+            local_const = constants.copy()
+            for arg in stmt.args.posonlyargs + stmt.args.args + stmt.args.kwonlyargs:
+                local_alias.pop(arg.arg, None)
+                local_const.pop(arg.arg, None)
+            if stmt.args.vararg:
+                local_alias.pop(stmt.args.vararg.arg, None)
+            if stmt.args.kwarg:
+                local_alias.pop(stmt.args.kwarg.arg, None)
+            found.extend(analyze_statements(stmt.body, local_alias, local_const))
+            continue
+        if isinstance(stmt, ast.ClassDef):
+            found.extend(analyze_statements(stmt.body, aliases, constants))
+            continue
+        if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.NamedExpr)):
+            targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+            val = stmt.value
+            if val is None:
+                continue
+            inspect_test(val, aliases, constants, found, stmt.lineno)
+            is_size = nav_measure(val, aliases)
+            is_nav = is_size or nav_reference(val, aliases)
+            number = integer_value(val, constants)
+            for target in targets:
+                for name in target_names(target):
+                    aliases.pop(name, None)
+                    constants.pop(name, None)
+                    if is_nav:
+                        aliases[name] = "size" if is_size else "resource"
+                    if number is not None:
+                        constants[name] = number
+            continue
+        if isinstance(stmt, (ast.If, ast.While)):
+            inspect_test(stmt.test, aliases, constants, found, stmt.lineno)
+            found.extend(analyze_statements(stmt.body, aliases, constants))
+            found.extend(analyze_statements(stmt.orelse, aliases, constants))
+            continue
+        if isinstance(stmt, (ast.For, ast.AsyncFor)):
+            inspect_test(stmt.iter, aliases, constants, found, stmt.lineno)
+            found.extend(analyze_statements(stmt.body, aliases, constants))
+            found.extend(analyze_statements(stmt.orelse, aliases, constants))
+            continue
+        if isinstance(stmt, (ast.With, ast.AsyncWith)):
+            for item in stmt.items:
+                inspect_test(item.context_expr, aliases, constants, found, stmt.lineno)
+            found.extend(analyze_statements(stmt.body, aliases, constants))
+            continue
+        if isinstance(stmt, ast.Try):
+            found.extend(analyze_statements(stmt.body, aliases, constants))
+            for handler in stmt.handlers:
+                found.extend(analyze_statements(handler.body, aliases, constants))
+            found.extend(analyze_statements(stmt.orelse, aliases, constants))
+            found.extend(analyze_statements(stmt.finalbody, aliases, constants))
+            continue
+        if isinstance(stmt, ast.Assert):
+            inspect_test(stmt.test, aliases, constants, found, stmt.lineno)
+        elif isinstance(stmt, (ast.Expr, ast.Raise, ast.Return)):
+            expr = (stmt.value if isinstance(stmt, (ast.Expr, ast.Return))
+                    else stmt.exc)
+            if expr is not None:
+                inspect_test(expr, aliases, constants, found, stmt.lineno)
     return found
 
+
+def nav_limits(tree):
+    return analyze_statements(tree.body)
+
+
+def check_limits(label, limits):
+    for lineno, value, inclusive, mechanism in limits:
+        assert 65536 < value <= CAP, (
+            label, lineno, mechanism, "stale or unsafe navigation byte cap", value)
+
+
+def self_test_detector():
+    """Mutation probes run every time in both source-only and full CI."""
+    invalid_cases = (
+        "assert (A/'bf_home_nav.js').stat().st_size < 65536",
+        "import os\nassert os.path.getsize(A/'bf_home_nav.js') <= 65536",
+        "info = apk.getinfo('assets/bf_home_nav.js')\nassert info.file_size < 65536",
+        "LIMIT = 65536\nnav = (A/'bf_home_nav.js').read_bytes()\nassert len(nav) <= LIMIT",
+        "nav = (A/'bf_home_nav.js').read_bytes()\nif len(nav) >= 65536:\n    raise RuntimeError()",
+        "nav = (A/'bf_home_nav.js').read_bytes()\nself.assertLess(len(nav), 65536)",
+        "nav = (A/'bf_home_nav.js').read_bytes()\nn = len(nav)\nassert n <= 65536",
+        "p = A/'bf_home_nav.js'\ndata = p.read_bytes()\nn = len(data)\nassert n < 65536",
+        "assert len((A/'bf_home_nav.css').read_bytes()) < 65536",
+        "nav = (A/'bf_home_nav.js').read_bytes()\nassert len(nav)<=128*1024 or True",
+    )
+    for src in invalid_cases:
+        tree = ast.parse(src)
+        try:
+            limits = nav_limits(tree)
+            assert limits, ("detector missed source", src)
+            check_limits("mutation", limits)
+        except AssertionError:
+            continue
+        raise AssertionError(("mutation unexpectedly accepted", src))
+
+    valid_cases = (
+        "nav=(A/'bf_home_nav.js').read_bytes()\nassert len(nav)<=128*1024",
+        "nav=(A/'bf_home_nav.js').read_bytes()\nnav=(A/'other.js').read_bytes()\nassert len(nav)<=65536",
+        "def one():\n    nav=(A/'bf_home_nav.js').read_bytes()\ndef two():\n    nav=(A/'other.js').read_bytes()\n    assert len(nav)<=65536",
+        "nav=(A/'bf_home_nav.js').read_bytes()\narchive=(A/'bf_global_unit_archive.js').read_bytes()\nassert len(nav)<=128*1024 and len(archive)<=65536",
+    )
+    for src in valid_cases:
+        check_limits("valid", nav_limits(ast.parse(src)))
+
+
+self_test_detector()
 seen = {}
 violations = []
 for path in sorted(ROOT.glob("test_*.py")):
     tree = ast.parse(path.read_text("utf8"), filename=path.name)
     limits = nav_limits(tree)
-    for lineno, limit, inclusive in limits:
-        if not 65536 < limit <= CAP:
-            violations.append((path.name, lineno, limit, inclusive))
+    for lineno, value, inclusive, mechanism in limits:
+        if not 65536 < value <= CAP:
+            violations.append((path.name, lineno, value, inclusive, mechanism))
     if limits:
         seen[path.name] = limits
 
-assert not violations, ("stale or unsafe nav asset size assertions across all tests", violations)
+assert not violations, ("stale or unsafe nav size assertions across all tests", violations)
 
 for filename in EXPECTED:
     assert filename in seen and len(seen[filename]) == 1, (
         filename, "missing or ambiguous nav JS 128KiB assertion", seen.get(filename))
-    assert seen[filename][0][1:] == (CAP, True), (
+    assert seen[filename][0][1:3] == (CAP, True), (
         filename, "known historical nav check must be exactly <=128KiB", seen[filename])
     assert re.search(r"\bpython3?\s+" + re.escape(filename) + r"\b", WORKFLOW), (
         filename, "not run by full Android build")
@@ -152,4 +285,4 @@ for filename in ("bf_home_nav.js", "bf_home_nav.css"):
     count = (ASSETS / filename).stat().st_size
     assert 0 < count <= CAP, (filename, count)
 print(f"PASS v244: audited {len(list(ROOT.glob('test_*.py')))} tests; "
-      f"{len(EXPECTED)} legacy nav assertions <=128KiB; exact-name Java loader; save untouched")
+      f"{len(EXPECTED)} nav assertions <=128KiB; exact-name Java loader; save untouched")
