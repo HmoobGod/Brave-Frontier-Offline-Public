@@ -1,6 +1,6 @@
 # v250 — Owner APK release checkpoint (preparation only)
 
-**Not released, not merged, no device acceptance yet.** The release metadata and source guard are intentionally stacked after v249 PR #183 `09f943c4c0a063e881c39afe14160e0f76a95dca`, itself dependent on v248 and v247. Original Global game parity remains incomplete. No user Current APK or saves have been changed or installed by this work.
+**Not released, not merged, no device acceptance yet.** v249 PR #183 is now independently verified and merged into `main` at `f7437271e0913030eed83de412fb6961acdfb21a` (Android Build #1476 SUCCESS and all six source preflights SUCCESS). v250 PR #184 is now retargeted to merged `main`. This checkpoint update triggers a **fresh exact-head Android build**, not a release or device acceptance. Original Global game parity remains incomplete. No user Current APK or saves have been changed or installed by this work.
 
 ## Purpose
 Before offering the next owner-installable offline debug APK, verify all release gates while protecting the actual app identity and existing save migration.
@@ -18,10 +18,10 @@ Before offering the next owner-installable offline debug APK, verify all release
 New test `test_bf_v250_release_readiness_v25000.py` audits these configuration and workflow guards in source CI and full Android workflow. It is not a device emulator test or a release approval.
 
 ## Strict merge sequence
-1. v247 PR #181 — confirm exact-head Android Build #1455 success; merge only after green.
-2. v248 PR #182 — retarget `main`, make a fresh exact-head CI run, confirm every required gate including signed Android APK, then merge.
-3. v249 PR #183 — retarget `main`, fresh exact-head full Android UI regression/build, then merge.
-4. v250 release-candidate PR — retarget `main`, exact-head source and full Android CI green; prepare **Claude independent milestone review** with exact SHA, artifact and preservation evidence; do not merge until approved.
+1. v247 PR #181 — MERGED after Android Build #1455 SUCCESS.
+2. v248 PR #182 — MERGED after Android Build #1468 SUCCESS.
+3. v249 PR #183 — MERGED after corrected exact-head Android Build #1476 SUCCESS; the original browser selector ambiguity was corrected without runtime changes.
+4. v250 PR #184 — now targeting merged `main`; require fresh exact-head source and full Android CI SUCCESS, then obtain **Claude independent milestone review** on the final SHA, artifact and preservation evidence; do not merge until approved.
 5. Obtain owner device feedback and real save backup/upgrade checks. Keep current installation unchanged until the user deliberately installs the verified standard APK; never distribute diagnostic fault APK as an update.
 
 ### Evidence to capture for Claude
