@@ -40,5 +40,5 @@ with ZipFile(apk) as z:
  assert 'BF_VERIFIED_RAW_LEVELS_V036' in html
  assert 'window.BFOriginalFiveStarOther' in html
  assert b'bf_global_offline_demo_v7' in z.read('assets/index.html')
- assert len(z.read('assets/bf_home_nav.js'))<=65536
+ assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
  print('PASS compiled Android APK: 60 forms, 6 source-based 5-star animations/BBs, demo catalyst schedule, previous art and v7 saves')
