@@ -19,7 +19,7 @@ for token in (".bf-owned-box .bf-box-card", ".bf-box-card strong",
               "grid-template-columns:repeat(2,minmax(0,1fr))",
               "touch-action:manipulation"):
     assert token in PATCH, token
-assert "className='bf-owned-box'" in J
+assert "unitBox.className = 'bf-owned-box'" in J
 assert "className='bf-box-card'" in J
 assert "test_bf_unit_box_mobile_v25400.py --source-only" in PRE
 assert WF.count("python3 test_bf_unit_box_mobile_v25400.py") == 1
