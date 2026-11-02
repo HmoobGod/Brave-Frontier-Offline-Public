@@ -119,6 +119,8 @@ body.bf-menu-mode .wrap{max-width:540px}
   .bf-nav-art-units{background-position:-120px 0}
   .bf-nav-art-quest{background-position:-40px -77px}
   .bf-nav-art-summon{background-position:-79px -193px}
+  /* Menu uses a standalone original button PNG, not a cell in footer_btn2. */
+  .bf-nav-art-menu{background-size:contain;background-position:center}
 }
 
 
@@ -556,12 +558,12 @@ body.bf-menu-mode #bf-home button:focus-visible {
   background:linear-gradient(#d8a65a,#774e27);border-color:#efc881;
 }
 .bf-scene-places .bf-scene-locked{
-  min-height:89px;padding:4px 4px 7px;opacity:.62;
+  min-height:89px;padding:4px 4px 7px;opacity:.76;
   background:linear-gradient(#2d3849,#172334);
 }
 .bf-scene-places .bf-scene-locked img{height:69px}
 .bf-scene-places .bf-scene-locked .bf-scene-status{
-  font-size:8px;min-height:13px;padding:3px 2px;
+  font-size:10px;min-height:16px;padding:4px 2px;
 }
 .bf-scene-places button.bf-scene-featured:active{filter:brightness(1.15)}
 .bf-scene-places button.bf-scene-featured:focus-visible{
