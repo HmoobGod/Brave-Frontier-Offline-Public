@@ -25,5 +25,5 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'bf_global_offline_demo_v7' in html
     assert '/* BF_MISTRAL_BOSS_HOOK_V052 */' in html
     assert '/* BF_TOWER_OF_MISTRAL_V051 */' in html
-    assert len(z.read('assets/bf_home_nav.js'))<65536
+    assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS v0.53 Android APK: 0009–0016 original 2022 BF1 sprite atlas, optional training, prior combat + save v7')

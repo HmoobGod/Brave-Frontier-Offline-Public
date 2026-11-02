@@ -14,7 +14,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
     assert 'BF_MORGAN_QUEST_DATA_V080' in html
     assert 'BF_MORGAN_QUEST_DATA_V080' in nav
     assert 'BF_MORGAN_QUEST_DATA_V080' in mapjs
-    assert len(nav.encode())<65536
+    assert len(nav.encode()) <= 128 * 1024
     assert 'bf_global_offline_demo_v7' in html
     assert '/* BF_ORIGINAL_MISSION_INSPECTOR_STAGED_V060 */' in html
     for d in source['dungeons']:

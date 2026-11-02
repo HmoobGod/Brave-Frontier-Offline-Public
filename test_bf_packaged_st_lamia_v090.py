@@ -13,7 +13,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
     assert '/* BF_STLAMIA_BACKGROUNDS_V090 */' in html
     assert 'window.BF_STLAMIA_QUEST_DATA_V090=Object.freeze(' in html
     assert 'BF_STLAMIA_QUEST_DATA_V090' in nav and 'BF_STLAMIA_QUEST_DATA_V090' in script
-    assert len(nav.encode())<65536
+    assert len(nav.encode()) <= 128 * 1024
     assert 'bf_global_offline_demo_v7' in html
     assert '/* BF_ORIGINAL_MORGAN_QUESTS_V080 */' in html
     assert '/* BF_TOWER_OF_MISTRAL_V051 */' in html

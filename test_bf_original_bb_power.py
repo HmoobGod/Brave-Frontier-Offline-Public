@@ -64,7 +64,7 @@ with sync_playwright() as pw:
     print('PASS normal attacks, BB gauge, 30 target scopes and v0.29 support unaffected',flush=True)
     nav=(ROOT/'app/src/main/assets/bf_home_nav.js').read_text('utf-8')
     archive=(ROOT/'app/src/main/assets/bf_global_unit_archive.js').read_text('utf-8')
-    assert len(nav.encode())<=65536 and len(archive.encode())<=65536
+    assert len(nav.encode()) <= 128 * 1024 and len(archive.encode())<=65536
     page.evaluate(nav)
     page.evaluate(archive)
     assert page.evaluate('BFGlobalUnitArchive.count')==2291

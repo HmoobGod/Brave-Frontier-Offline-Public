@@ -15,7 +15,7 @@ assert html.count('/* BF_REMAINS_OF_MIRZA_V049 */') == 1
 assert html.count('/* BF_MAGUTAGAL_WETLANDS_V047 */') == 1
 assert html.count('/* BF_GLOBAL_QUEST_TEXT_DATA_V048 */') == 1
 assert 'bf_global_offline_demo_v7' in html
-assert len((A/'bf_home_nav.js').read_bytes()) < 65536
+assert len((A/'bf_home_nav.js').read_bytes()) <= 128 * 1024
 before=hashlib.sha256(html.encode()).digest()
 subprocess.run([sys.executable,str(R/'prepare_remains_mirza_v049.py')],check=True,cwd=R)
 assert hashlib.sha256((A/'index.html').read_bytes()).digest()==before

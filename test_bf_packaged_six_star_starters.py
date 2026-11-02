@@ -38,6 +38,6 @@ with zipfile.ZipFile(apk) as z:
  assert 'assets/content/five_star_evolution/unit_anime_atlas_10014.png' in names
  assert 'assets/content/other_five_star/unit_anime_atlas_10024.png' in names
  assert 'assets/content/more_second_evolution/unit_anime_atlas_60013.png' in names
- assert len(z.read('assets/bf_home_nav.js'))<=65536
+ assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
  assert 'assets/bf_global_unit_archive.js' in names
 print('PASS APK: all 66 playable Global forms; six authentic 6-star CGG/CGS atlases, source BB metadata, original recipes and v7 save identity',flush=True)

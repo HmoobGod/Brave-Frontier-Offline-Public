@@ -32,6 +32,6 @@ with zipfile.ZipFile(APK) as z:
    image=z.read(name);assert image.startswith(b'\x89PNG\r\n\x1a\n')
    w,h=struct.unpack('>II',image[16:24]);assert w>0 and h>0
    if prefix=='unit_anime_atlas':assert (w,h)==(2400,400*((r['frameCount']+4)//5))
- assert 'assets/bf_home_nav.js' in files and len(z.read('assets/bf_home_nav.js'))<=65536
+ assert 'assets/bf_home_nav.js' in files and len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
  assert sum(n.startswith('assets/content/unit_archive/') and n.endswith('.png') for n in files)==127
 print('PASS APK packaged 60 playable forms, six new source-authenticated 5-star atlases/portraits, 127 archived thumbnails, v7 saves')

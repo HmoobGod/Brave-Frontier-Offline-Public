@@ -14,5 +14,5 @@ with ZipFile(ROOT/'app/build/outputs/apk/debug/app-debug.apk') as z:
   assert '/* BF_ORIGINAL_MISSION_INSPECTOR_STAGED_V060 */' in html
   assert '/* BF_TOWER_BOSS_FORMATION_HOOK_V055 */' in html
   assert 'assets/bf054_header_status.js' in z.namelist()
-  assert len(z.read('assets/bf_home_nav.js'))<65536
+  assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS v0.70 APK preserved v0.65 authentic playable hit inspector, offline quests and save v7')

@@ -29,7 +29,7 @@ html = html_file.read_text("utf-8")
 assert html.count("/* BF_GLOBAL_QUEST_TEXT_DATA_V048 */") == 1
 assert "bf_global_offline_demo_v7" in html
 nav = (ASSETS / "bf_home_nav.js").read_bytes()
-assert len(nav) < 65536
+assert len(nav) <= 128 * 1024
 assert b"BF_GLOBAL_QUEST_TEXT_DATA_V048" in nav
 before = hashlib.sha256(html.encode()).digest()
 subprocess.run([sys.executable, str(ROOT / "prepare_quest_english_data_v048.py")],

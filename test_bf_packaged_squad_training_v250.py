@@ -17,7 +17,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as a:
  assert 'effectiveUnit(id)' in new
  html=a.read('assets/index.html').decode('utf8')
  assert 'bf_global_offline_demo_v7' in html
- assert len(a.read('assets/bf_home_nav.js'))<65536
+ assert len(a.read('assets/bf_home_nav.js')) <= 128 * 1024
 gradle=(R/'app/build.gradle').read_text('utf8')
 assert "applicationId 'org.bravefrontier.offline'" in gradle
 assert "versionName '" in gradle

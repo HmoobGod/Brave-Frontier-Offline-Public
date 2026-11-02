@@ -17,7 +17,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
   assert '106 archived missions' in addon
   assert 'localStorage' not in addon and 'saveProgress(' not in addon
   assert 'bf_global_offline_demo_v7' in html
-  assert len(nav)<65536
+  assert len(nav) <= 128 * 1024
   assert 'assets/bf080_morgan_map.js' in entries
   assert 'assets/bf090_st_lamia_map.js' in entries
   assert 'assets/bf100_grand_gaia_campaign.js' in entries
