@@ -37,6 +37,32 @@ def certificate_digest(text):
     assert len(digests) == 1, "Exactly one signer SHA-256 certificate digest is required"
     return digests[0].lower()
 
+def provenance(event_name, github_sha, pr_head_sha):
+    """Differentiate the checked-out workflow commit from the logical PR head.
+
+    On pull_request, Actions normally checks out a synthetic merge SHA; the
+    distinct PR head is recorded for independent exact-head review.
+    """
+    assert event_name in ("push", "pull_request", "workflow_dispatch"), "Unknown GitHub event"
+    assert isinstance(github_sha, str) and re.fullmatch(r"[0-9a-f]{40}", github_sha), (
+        "Missing/invalid GitHub build SHA"
+    )
+    assert isinstance(pr_head_sha, str), "Missing PR-head environment value"
+    if event_name == "pull_request":
+        assert re.fullmatch(r"[0-9a-f]{40}", pr_head_sha), (
+            "PR event requires an exact 40-hex pull request head SHA"
+        )
+        logical_head = pr_head_sha
+    else:
+        assert not pr_head_sha, "Non-PR event must not claim a PR head"
+        logical_head = github_sha
+    return {
+        "github_sha": github_sha,
+        "github_event_name": event_name,
+        "pull_request_head_sha": pr_head_sha if event_name == "pull_request" else None,
+        "source_head_sha": logical_head,
+    }
+
 def sdk_tool(name):
     home = os.environ.get("ANDROID_HOME") or os.environ.get("ANDROID_SDK_ROOT")
     assert home, "Android SDK path unavailable"
@@ -62,10 +88,21 @@ def inspect_artifact():
         [signer, "verify", "--verbose", "--print-certs", str(APK)], text=True,
     )
     cert = certificate_digest(verification)
-    digest = hashlib.file_digest(APK.open("rb"), "sha256").hexdigest()
+    with APK.open("rb") as apk_file:
+        digest = hashlib.file_digest(apk_file, "sha256").hexdigest()
+    source = provenance(
+        os.environ["BF_EVENT_NAME"],
+        os.environ["GITHUB_SHA"],
+        os.environ["BF_PR_HEAD_SHA"],
+    )
+    assert source["github_event_name"] == os.environ["GITHUB_EVENT_NAME"], "Event mismatch"
+    checkout_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    assert re.fullmatch(r"[0-9a-f]{40}", checkout_sha), "Invalid checked-out commit"
+    assert checkout_sha == source["github_sha"], "GitHub event SHA disagrees with checked-out build"
     result = {
-        "schema": "bf-offline-v251-owner-apk-identity-v1",
-        "source_commit": os.environ["GITHUB_SHA"],
+        "schema": "bf-offline-v251-owner-apk-identity-v2",
+        **source,
+        "checked_out_commit_sha": checkout_sha,
         "build_run_number": run_number,
         "apk_filename": APK.name,
         "apk_sha256": digest,
@@ -94,6 +131,15 @@ assert "versionName '174.00.0-demo'" in GRADLE
 assert "android.permission.INTERNET" not in MANIFEST
 assert "BF_DEBUG_KEYSTORE_B64" in WORKFLOW
 assert "test_bf_owner_apk_identity_v25100.py --packaged" in WORKFLOW
+assert re.search(
+    r"(?m)^\s*BF_PR_HEAD_SHA:\s*\$\{\{\s*github\.event\.pull_request\.head\.sha\s*\}\}\s*$",
+    WORKFLOW,
+), "Workflow must pass the exact PR head SHA"
+assert re.search(
+    r"(?m)^\s*BF_EVENT_NAME:\s*\$\{\{\s*github\.event_name\s*\}\}\s*$",
+    WORKFLOW,
+), "Workflow must pass the GitHub event name"
+
 assert "test_bf_owner_apk_identity_v25100.py --source-only" in PREFLIGHT
 assert "BraveFrontierOffline-demo-debug-apk" in WORKFLOW
 assert ARTIFACT in WORKFLOW
@@ -120,6 +166,37 @@ for invalid in ("", good_cert + good_cert, "Signer #1 certificate SHA-256 digest
         pass
     else:
         raise AssertionError("Malformed/multiple signing certificates accepted")
+# Attestation provenance must distinguish PR merge builds from PR head commits.
+assert provenance("pull_request", "a" * 40, "b" * 40) == {
+    "github_sha": "a" * 40,
+    "github_event_name": "pull_request",
+    "pull_request_head_sha": "b" * 40,
+    "source_head_sha": "b" * 40,
+}
+for event_name in ("push", "workflow_dispatch"):
+    assert provenance(event_name, "c" * 40, "") == {
+        "github_sha": "c" * 40,
+        "github_event_name": event_name,
+        "pull_request_head_sha": None,
+        "source_head_sha": "c" * 40,
+    }
+for invalid in (
+    ("pull_request", "a" * 40, ""),
+    ("pull_request", "a" * 40, "x" * 40),
+    ("pull_request", "a" * 40, "B" * 40),
+    ("pull_request", "a" * 39, "b" * 40),
+    ("pull_request", "A" * 40, "b" * 40),
+    ("push", "a" * 40, "b" * 40),
+    ("workflow_dispatch", "", ""),
+    ("unsupported_event", "a" * 40, ""),
+):
+    try:
+        provenance(*invalid)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("Unsafe or misleading source provenance was accepted")
+
 print("PASS v251 source: attestation must target standard signed APK, not diagnostic, with fail-closed identity parsing")
 
 if "--packaged" in sys.argv[1:]:
