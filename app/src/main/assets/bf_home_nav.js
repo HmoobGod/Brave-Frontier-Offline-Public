@@ -36,6 +36,9 @@
   const heading = document.createElement('div');
   heading.id = 'bf-route-title';
   heading.className = 'bf-route-title';
+  heading.setAttribute('role', 'heading');
+  heading.setAttribute('aria-level', '1');
+  heading.setAttribute('aria-live', 'polite');
   heading.hidden = true;
   home.insertAdjacentElement('afterend', heading);
   const nav = document.createElement('nav');
