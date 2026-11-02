@@ -753,3 +753,58 @@ body.bf-menu-mode .bf-owned-box .bf-box-detail{
   body.bf-menu-mode .bf-owned-box .bf-box-card{min-height:154px}
   body.bf-menu-mode .bf-owned-box .bf-box-card img{height:73px}
 }
+
+/* v255 UI: archived Akras Summoning Hall banner stays readable and accurately
+   labeled as an offline demo. This is not original-rate summon gameplay. */
+body.bf-menu-mode .summonpanel .bf-summon-archive-head{
+  box-sizing:border-box;
+  max-width:100%;
+  min-width:0;
+  gap:12px;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head img{
+  box-sizing:border-box;
+  flex:0 0 38%;
+  width:38%;
+  max-width:100%;
+  height:clamp(92px,30vw,150px);
+  object-fit:contain;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head>div{
+  flex:1 1 0;
+  min-width:0;
+  max-width:100%;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head strong[role="heading"]{
+  display:block;
+  font-size:clamp(15px,4vw,19px);
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head span,
+body.bf-menu-mode .summonpanel .bf-summon-archive-head small{
+  display:block;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  line-height:1.4;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head{
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:6px;
+    padding:10px 8px;
+  }
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head img{
+    flex:none;
+    width:min(84%,240px);
+    height:118px;
+  }
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head>div{
+    flex:none;
+    width:100%;
+    gap:4px;
+  }
+}
