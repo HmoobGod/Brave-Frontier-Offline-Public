@@ -70,7 +70,7 @@ with sync_playwright() as pw:
         assert results.locator(".bf-box-card").count()==6,(width,"mixed cards")
         assert note.is_visible() and note.get_attribute("role")=="note"
         assert note.inner_text()=="1 saved unit ID cannot be displayed from this offline archive. Your roster is unchanged."
-        assert count.inner_text().endswith("1 unresolved")
+        assert "6 resolved" in count.inner_text() and count.inner_text().endswith("1 unresolved")
         page.locator("#bf-box-search").fill("not_a_real_unit_999_v271")
         assert results.locator(".bf-box-card").count()==0
         assert results.locator(".bf-box-empty p").inner_text()=="No owned units match the current filters."
@@ -84,7 +84,7 @@ with sync_playwright() as pw:
         assert note.inner_text()=="2 saved unit IDs cannot be displayed from this offline archive. Your roster is unchanged."
         assert results.locator(".bf-box-empty p").inner_text()=="Saved units are present, but their archived profiles are unavailable."
         assert results.locator(".bf-box-clear-filters").count()==0
-        assert count.inner_text().endswith("2 unresolved")
+        assert "0 resolved" in count.inner_text() and count.inner_text().endswith("2 unresolved")
         page.evaluate("BFUnitBox.refresh()")
         assert all_unresolved==page.evaluate(state),(width,"unresolved render changed roster")
         page.evaluate("()=>{P.roster=[];P.squad=[];BFUnitBox.refresh()}")
