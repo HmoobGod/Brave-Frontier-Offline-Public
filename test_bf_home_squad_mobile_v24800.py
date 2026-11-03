@@ -14,7 +14,10 @@ HOME=JS.split("/* Build #9: original Global home location hub",1)[1].split(
     "/* Build #11 - recovered BF1 Global artwork",1)[0]
 
 assert "/* v248: original six-unit Home squad preview" in CSS
-s=CSS.split("/* v248: original six-unit Home squad preview",1)[1]
+assert CSS.count("/* v252 UI focus:") == 1
+s=CSS.split("/* v248: original six-unit Home squad preview",1)[1].split(
+    "/* v252 UI focus:",1
+)[0]
 assert re.search(r"@media\(max-width:412px\)\s*\{",s)
 assert re.search(r"\.bf-scene-party\s*\{\s*grid-template-columns:repeat\(3,minmax\(0,1fr\)\)",s)
 assert re.search(r"\.bf-scene-member strong\s*\{\s*font-size:11px",s)
