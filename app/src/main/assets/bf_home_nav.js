@@ -6,7 +6,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   fallback.className = 'bf-portrait-fallback';
   fallback.setAttribute('role', 'img');
   fallback.setAttribute('aria-label', 'Portrait unavailable for ' + String(name || 'Unit'));
-  fallback.textContent = 'ART UNAVAILABLE';
+  fallback.textContent = 'NO ART';
   if (typeof source !== 'string' || !source.trim()) return fallback;
   const image = document.createElement('img');
   image.alt = '';

@@ -1172,3 +1172,22 @@ body.bf-menu-mode .bf-evo-preview>.bf-portrait-fallback{width:88px;height:92px;f
 @media(min-width:510px){
   body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{height:90px}
 }
+
+/* v267 narrow-screen fallback readability; full unit-specific accessible
+   description remains available through the v266 aria-label. */
+body.bf-menu-mode .bf-portrait-fallback{
+  font-size:11px;
+  letter-spacing:0;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{
+  font-size:11px;
+  line-height:1.15;
+  padding:3px 1px;
+}
+body.bf-menu-mode .bf-evo-preview>.bf-portrait-fallback{
+  font-size:11px;
+  line-height:1.3;
+  padding:4px 2px;
+}
