@@ -321,6 +321,7 @@ function bfOfflineUnitPortraitV266(source, name) {
 
   box.innerHTML = [
     '<div class="bf-box-head"><strong>UNIT BOX</strong><span id="bf-box-count" role="status" aria-live="polite"></span></div>',
+    '<p id="bf-box-unresolved" class="bf-box-unresolved" role="note" hidden></p>',
     '<p class="bf-box-hint">Your owned archived characters. Demo collection only; no selling, locking, duplicates or original capacity mechanics.</p>',
     '<div class="bf-box-filters">',
       '<label>Find unit<input id="bf-box-search" type="search" autocomplete="off" placeholder="Name or ID" /></label>',
