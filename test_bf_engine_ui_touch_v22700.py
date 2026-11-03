@@ -14,7 +14,10 @@ assert "prefers-reduced-motion:reduce" in css
 assert "focus-visible" in css
 assert "window.BF_homeNav = {go,get current()" in nav
 assert "android.permission.INTERNET" not in manifest
-new_css = css[css.index("/* v227: Home/route touch"): ]
+assert css.count("/* v242: visual-first Home hierarchy") == 1
+new_css = css[css.index("/* v227: Home/route touch"):css.index(
+    "/* v242: visual-first Home hierarchy"
+)]
 for forbidden in ("#battle", "localStorage", "saveProgress", "P.", "S."):
     assert forbidden not in new_css, forbidden
 if "--source-only" in sys.argv:
