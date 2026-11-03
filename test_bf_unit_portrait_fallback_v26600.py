@@ -19,7 +19,7 @@ assert NAV.count("bfOfflineUnitPortraitV266(") == 5
 assert "image.addEventListener('error'" in NAV
 assert "image.replaceWith(fallback)" in NAV
 assert "fallback.setAttribute('aria-label'" in NAV
-assert "fallback.textContent = 'ART UNAVAILABLE'" in NAV
+assert "fallback.textContent = 'NO ART'" in NAV
 assert "unit.portrait" in NAV and "evolved.portrait" in NAV
 assert "/* v266:" in CSS and ".bf-portrait-fallback" in CSS
 assert "bf_global_offline_demo_v7" in HTML
