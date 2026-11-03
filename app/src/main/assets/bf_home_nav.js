@@ -449,7 +449,6 @@ function bfOfflineUnitPortraitV266(source, name) {
     results.replaceChildren();
     if (!filtered.length) {
       const empty=document.createElement('div');empty.className='bf-box-empty';
-      empty.setAttribute('role','status');
       const note=document.createElement('p');
       note.textContent=owned.length ? 'No owned units match the current filters.' :
         'No owned units are available in this offline save.';
