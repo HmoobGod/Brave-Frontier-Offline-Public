@@ -375,6 +375,7 @@ jobs:
           python3 test_bf_recovery_backup_hierarchy_v26400.py
           python3 test_bf_real_save_page_v26500.py
           python3 test_bf_unit_portrait_fallback_v26600.py
+          python3 test_bf_unit_portrait_readability_v26700.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
