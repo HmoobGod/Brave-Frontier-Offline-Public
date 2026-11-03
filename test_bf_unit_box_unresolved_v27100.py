@@ -20,7 +20,8 @@ assert "unresolvedNote.textContent = unresolved.length ?" in J
 assert "Your roster is unchanged." in J
 assert "Saved units are present, but their archived profiles are unavailable." in J
 assert "No owned units are available in this offline save." in J
-assert ".bf-box-unresolved[hidden]{display:none!important}" in C
+assert "body.bf-menu-mode .bf-owned-box .bf-box-unresolved{" in C
+assert "display:none" not in C.split("/* v271 archived-profile availability:",1)[1]
 assert "test_bf_unit_box_unresolved_v27100.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_unit_box_unresolved_v27100.py")==1
 assert "android.permission.INTERNET" not in MAN
