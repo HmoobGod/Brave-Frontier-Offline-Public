@@ -320,7 +320,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   if (!box || !questPanel || window.BFUnitBox) return;
 
   box.innerHTML = [
-    '<div class="bf-box-head"><strong>UNIT BOX</strong><span id="bf-box-count"></span></div>',
+    '<div class="bf-box-head"><strong>UNIT BOX</strong><span id="bf-box-count" role="status" aria-live="polite"></span></div>',
     '<p class="bf-box-hint">Your owned archived characters. Demo collection only; no selling, locking, duplicates or original capacity mechanics.</p>',
     '<div class="bf-box-filters">',
       '<label>Find unit<input id="bf-box-search" type="search" autocomplete="off" placeholder="Name or ID" /></label>',
@@ -448,8 +448,23 @@ function bfOfflineUnitPortraitV266(source, name) {
     count.textContent=filtered.length+' shown / '+owned.length+' owned · '+P.squad.length+' active';
     results.replaceChildren();
     if (!filtered.length) {
-      const empty=document.createElement('p');empty.className='bf-box-empty';
-      empty.textContent='No owned units match this filter.';results.append(empty);
+      const empty=document.createElement('div');empty.className='bf-box-empty';
+      empty.setAttribute('role','status');
+      const note=document.createElement('p');
+      note.textContent=owned.length ? 'No owned units match the current filters.' :
+        'No owned units are available in this offline save.';
+      empty.append(note);
+      if (owned.length) {
+        const clear=document.createElement('button');
+        clear.type='button';clear.className='bf-box-clear-filters';
+        clear.textContent='CLEAR FILTERS';
+        clear.addEventListener('click',()=>{
+          search.value='';filter.value='all';elementFilter.value='all';rarityFilter.value='all';
+          refresh();search.focus();
+        });
+        empty.append(clear);
+      }
+      results.append(empty);
     }
     for(const {id,unit} of filtered){
       const card=document.createElement('button');card.type='button';card.className='bf-box-card';
