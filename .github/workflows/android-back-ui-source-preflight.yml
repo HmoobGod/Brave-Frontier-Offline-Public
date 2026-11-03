@@ -40,6 +40,7 @@ on:
       - 'test_bf_unit_portrait_fallback_v26600.py'
       - 'test_bf_unit_portrait_readability_v26700.py'
       - 'test_bf_portrait_readability_matrix_v26800.py'
+      - 'test_bf_unit_box_empty_state_v26900.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -62,6 +63,7 @@ on:
       - 'V266_UNIT_PORTRAIT_FALLBACK_UI.md'
       - 'V267_UNIT_PORTRAIT_READABILITY.md'
       - 'V268_PORTRAIT_READABILITY_MATRIX.md'
+      - 'V269_UNIT_BOX_EMPTY_STATES.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -160,6 +162,8 @@ jobs:
         run: python3 test_bf_unit_portrait_readability_v26700.py --source-only
       - name: Check all missing-art surfaces under valid and corrupt scenarios
         run: python3 test_bf_portrait_readability_matrix_v26800.py --source-only
+      - name: Verify Unit Box empty and filtered UI states
+        run: python3 test_bf_unit_box_empty_state_v26900.py --source-only
       - name: Verify owner APK identity, signing and historical-save regression gates
         run: python3 test_bf_v250_release_readiness_v25000.py --source-only
       - name: Verify signed APK fingerprint/installed update evidence is fail-closed
