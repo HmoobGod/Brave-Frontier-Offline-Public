@@ -44,6 +44,7 @@ on:
       - 'test_bf_unit_box_live_regions_v27000.py'
       - 'test_bf_unit_box_unresolved_v27100.py'
       - 'test_bf_nested_ui_capture_v27200.py'
+      - 'test_bf_training_affordability_v27300.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -70,6 +71,7 @@ on:
       - 'V270_UNIT_BOX_LIVE_REGION_AUDIT.md'
       - 'V271_UNIT_BOX_UNRESOLVED_ROSTER.md'
       - 'V272_NESTED_UI_CAPTURE_EVIDENCE.md'
+      - 'V273_TRAINING_AFFORDABILITY_STATUS.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -160,6 +162,8 @@ jobs:
         run: python3 test_bf_ui_screen_capture_v26300.py --source-only
       - name: Verify nested-screen source capture remains read-only
         run: python3 test_bf_nested_ui_capture_v27200.py --source-only
+      - name: Verify Demo Training affordability status remains read-only
+        run: python3 test_bf_training_affordability_v27300.py --source-only
       - name: Check safe recovery backup visual hierarchy without save writes
         run: python3 test_bf_recovery_backup_hierarchy_v26400.py --source-only
       - name: Verify real packaged save HTML and inline-style browser regression registration
