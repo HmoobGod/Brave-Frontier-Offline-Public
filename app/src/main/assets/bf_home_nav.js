@@ -337,6 +337,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   ].join('');
   const results = box.querySelector('#bf-box-results');
   const count = box.querySelector('#bf-box-count');
+  const unresolvedNote = box.querySelector('#bf-box-unresolved');
   const detail = box.querySelector('#bf-box-detail');
   const search = box.querySelector('#bf-box-search');
   const filter = box.querySelector('#bf-box-filter');
@@ -345,8 +346,10 @@ function bfOfflineUnitPortraitV266(source, name) {
   const rarityFilter = box.querySelector('#bf-box-rarity');
   let activeId = null;
   function ownedUnits() {
-    if (typeof P === 'undefined' || !P || !Array.isArray(P.roster)) return {owned:[],filtered:[]};
-    const owned = P.roster.map(id => ({id, unit: typeof effectiveUnit === 'function' ? effectiveUnit(id) : null})).filter(row => row.unit);
+    if (typeof P === 'undefined' || !P || !Array.isArray(P.roster)) return {owned:[],filtered:[],unresolved:[]};
+    const rows = P.roster.map(id => ({id, unit: typeof effectiveUnit === 'function' ? effectiveUnit(id) : null}));
+    const owned = rows.filter(row => row.unit);
+    const unresolved = rows.filter(row => !row.unit);
     const term = search.value.trim().toLocaleLowerCase();
     const filtered = owned.filter(({id,unit}) =>
       (!term || unit.name.toLocaleLowerCase().includes(term) || String(id).includes(term) || String(unit.id).includes(term) || unit.element.toLocaleLowerCase().includes(term)) &&
@@ -360,7 +363,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       if (sort.value === 'squad') return Number(P.squad.includes(b.id))-Number(P.squad.includes(a.id)) || a.unit.name.localeCompare(b.unit.name) || a.id-b.id;
       return a.unit.name.localeCompare(b.unit.name) || a.id-b.id;
     });
-    return {owned, filtered};
+    return {owned, filtered, unresolved};
   }
   function showDetail(id) {
     detail.replaceChildren();
@@ -435,7 +438,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     for (const card of results.querySelectorAll('button[data-bf-unit-id]')) card.setAttribute('aria-pressed', String(Number(card.dataset.bfUnitId) === id));
   }
   function refresh() {
-    const {owned, filtered}=ownedUnits();
+    const {owned, filtered, unresolved}=ownedUnits();
     const uniqElements=[...new Set(owned.map(({unit})=>unit.element))].sort();
     const uniqRarities=[...new Set(owned.map(({unit})=>unit.rarity))].sort((a,b)=>a-b);
     const syncOptions=(control,values,label)=>{
@@ -446,13 +449,19 @@ function bfOfflineUnitPortraitV266(source, name) {
     };
     syncOptions(elementFilter,uniqElements,'All elements');
     syncOptions(rarityFilter,uniqRarities,'All rarities');
-    count.textContent=filtered.length+' shown / '+owned.length+' owned · '+P.squad.length+' active';
+    count.textContent=filtered.length+' shown / '+owned.length+' owned · '+P.squad.length+' active'+
+      (unresolved.length ? ' · '+unresolved.length+' unresolved' : '');
+    unresolvedNote.hidden = !unresolved.length;
+    unresolvedNote.textContent = unresolved.length ?
+      unresolved.length+' saved unit ID'+(unresolved.length===1?'':'s')+
+      ' cannot be displayed from this offline archive. Your roster is unchanged.' : '';
     results.replaceChildren();
     if (!filtered.length) {
       const empty=document.createElement('div');empty.className='bf-box-empty';
       empty.setAttribute('role','status');
       const note=document.createElement('p');
       note.textContent=owned.length ? 'No owned units match the current filters.' :
+        unresolved.length ? 'Saved units are present, but their archived profiles are unavailable.' :
         'No owned units are available in this offline save.';
       empty.append(note);
       if (owned.length) {
