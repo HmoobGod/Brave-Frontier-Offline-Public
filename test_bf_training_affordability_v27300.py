@@ -89,7 +89,7 @@ with sync_playwright() as pw:
         page.evaluate("()=>{P.trainingShards=0;P.zel=0;P.trainingSpent=0}")
         before=page.evaluate(state)
         page.locator("#trainingbalance").evaluate("(e)=>e.textContent='Training Shards: 0 · Used: 0 · Zel: 0'")
-        note.get_by_text("Training unavailable with current resources").wait_for(timeout=2000)
+        page.wait_for_function("document.querySelector('.training-panel .bf-training-cost-note')?.textContent?.includes('Training unavailable with current resources')",timeout=2000)
         assert "1 Training Shard and 150 Zel" in note.inner_text()
         assert before==page.evaluate(state),(width,"balance status mutated save")
         assert page.evaluate("document.documentElement.scrollWidth<=innerWidth+1"),(width,"overflow")
