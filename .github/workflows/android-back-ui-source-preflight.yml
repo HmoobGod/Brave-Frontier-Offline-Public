@@ -35,6 +35,7 @@ on:
       - 'test_bf_battle_results_mobile_v26100.py'
       - 'test_bf_focus_status_mobile_v26200.py'
       - 'test_bf_ui_screen_capture_v26300.py'
+      - 'test_bf_recovery_backup_hierarchy_v26400.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -52,6 +53,7 @@ on:
       - 'V261_BATTLE_RESULTS_MOBILE_UI.md'
       - 'V262_TACTICAL_FOCUS_STATUS_MOBILE_UI.md'
       - 'V263_UI_SCREEN_CAPTURE_EVIDENCE.md'
+      - 'V264_RECOVERY_BACKUP_VISUAL_PRIORITY.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -140,6 +142,8 @@ jobs:
         run: python3 test_bf_focus_status_mobile_v26200.py --source-only
       - name: Check read-only navigation screenshot evidence capture configuration
         run: python3 test_bf_ui_screen_capture_v26300.py --source-only
+      - name: Check safe recovery backup visual hierarchy without save writes
+        run: python3 test_bf_recovery_backup_hierarchy_v26400.py --source-only
       - name: Verify owner APK identity, signing and historical-save regression gates
         run: python3 test_bf_v250_release_readiness_v25000.py --source-only
       - name: Verify signed APK fingerprint/installed update evidence is fail-closed
