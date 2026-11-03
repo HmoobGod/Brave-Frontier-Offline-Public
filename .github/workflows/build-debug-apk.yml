@@ -380,6 +380,7 @@ jobs:
           python3 test_bf_unit_box_empty_state_v26900.py
           python3 test_bf_unit_box_live_regions_v27000.py
           python3 test_bf_unit_box_unresolved_v27100.py
+          python3 test_bf_training_cost_guidance_v27300.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
