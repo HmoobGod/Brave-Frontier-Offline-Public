@@ -1217,3 +1217,11 @@ body.bf-menu-mode .bf-owned-box .bf-box-unresolved{
   background:linear-gradient(#393528,#222235);color:#f1dfb9;
   font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
 }
+
+/* v273 read-only Demo Training current-affordability status. */
+body.bf-menu-mode .training-panel .training-toolbar .bf-training-cost-note {
+  box-sizing:border-box;flex:1 0 100%;min-width:0;max-width:100%;margin:0;
+  padding:7px 9px;border:1px solid #807153;border-radius:5px;
+  background:linear-gradient(#27354a,#1b293c);color:#e8deca;
+  font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
+}
