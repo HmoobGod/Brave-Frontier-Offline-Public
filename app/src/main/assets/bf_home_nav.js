@@ -329,7 +329,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       '<label>Rarity<select id="bf-box-rarity"><option value="all">All rarities</option></select></label>',
       '<label>Sort<select id="bf-box-sort"><option value="name">Name</option><option value="rarity">Rarity</option><option value="level">Level</option><option value="element">Element</option><option value="squad">Squad first</option></select></label>',
     '</div>',
-    '<div id="bf-box-results" class="bf-box-results" aria-live="polite"></div>',
+    '<div id="bf-box-results" class="bf-box-results"></div>',
     '<section id="bf-box-detail" class="bf-box-detail" aria-label="Unit details">',
       '<p>Select a unit above to inspect its archived base statistics.</p>',
     '</section>'
