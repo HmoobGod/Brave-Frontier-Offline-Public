@@ -1151,3 +1151,24 @@ body.bf-menu-mode .progresspanel #quarantineexport:focus-visible{
     margin-top:8px;
   }
 }
+
+/* v266: source-portrait failure is visible and accessible, never a blank or
+   broken-image icon. No substitute artwork is presented as 2022 original art. */
+body.bf-menu-mode .bf-portrait-fallback{
+  box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+  min-width:0;max-width:100%;padding:5px 3px;text-align:center;
+  overflow-wrap:anywhere;font:800 9px/1.3 Arial,sans-serif;letter-spacing:.03em;
+  color:#f2dba7;background:linear-gradient(#27374b,#111d2d);
+  border:1px dashed #a28b63;border-radius:4px;
+}
+body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{width:100%;height:63px}
+body.bf-menu-mode .bf-box-card .bf-portrait-fallback{width:100%;height:70px}
+body.bf-menu-mode .bf-box-detail>.bf-portrait-fallback{flex:0 0 87px;width:87px;height:94px}
+body.bf-menu-mode .bf-evo-preview>.bf-portrait-fallback{width:88px;height:92px;flex-shrink:0}
+@media(max-width:359px){
+  body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{height:49px;font-size:8px}
+  body.bf-menu-mode .bf-box-card .bf-portrait-fallback{height:73px}
+}
+@media(min-width:510px){
+  body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{height:90px}
+}

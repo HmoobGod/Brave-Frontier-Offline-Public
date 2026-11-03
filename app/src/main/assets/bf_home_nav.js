@@ -1,4 +1,20 @@
 /* Offline home navigation pilot: display only; no save/engine changes. */
+/* v266 presentation-only: preserve a readable owned-unit card when an
+ * archival portrait is unavailable. No unit or save state is changed. */
+function bfOfflineUnitPortraitV266(source, name) {
+  const fallback = document.createElement('span');
+  fallback.className = 'bf-portrait-fallback';
+  fallback.setAttribute('role', 'img');
+  fallback.setAttribute('aria-label', 'Portrait unavailable for ' + String(name || 'Unit'));
+  fallback.textContent = 'ART UNAVAILABLE';
+  if (typeof source !== 'string' || !source.trim()) return fallback;
+  const image = document.createElement('img');
+  image.alt = '';
+  image.addEventListener('error', () => image.replaceWith(fallback), {once: true});
+  image.src = source;
+  return image;
+}
+
 (() => {
   'use strict';
   const wrap = document.querySelector('main.wrap');
@@ -151,9 +167,7 @@
       const card = document.createElement('div');
       card.className = 'bf-scene-member' + (unit ? '' : ' bf-scene-empty');
       if (unit) {
-        const img = document.createElement('img');
-        img.src = unit.portrait || '';
-        img.alt = '';
+        const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
@@ -356,7 +370,7 @@
       detail.append(note); activeId=null; return;
     }
     activeId=id;
-    const img=document.createElement('img');img.src=unit.portrait;img.alt='';
+    const img=bfOfflineUnitPortraitV266(unit.portrait, unit.name);
     const content=document.createElement('div');
     const heading=document.createElement('h3');heading.textContent=unit.name+' · ★'+unit.rarity;
     const sub=document.createElement('p');
@@ -395,8 +409,7 @@
       const preview=document.createElement('section');
       preview.className='bf-evo-preview';
       preview.setAttribute('aria-label','Recovered evolution preview');
-      const figure=document.createElement('img');
-      figure.src=evolved.portrait;figure.alt='';
+      const figure=bfOfflineUnitPortraitV266(evolved.portrait, evolved.name);
       const body=document.createElement('div');
       const title=document.createElement('strong');
       const completed=!!P.evolutions[id];
@@ -442,7 +455,7 @@
       const card=document.createElement('button');card.type='button';card.className='bf-box-card';
       card.dataset.bfUnitId=String(id);
       card.setAttribute('aria-label',unit.name+', level '+demoLevel(P.unitExp[id]||0));
-      const img=document.createElement('img');img.src=unit.portrait;img.alt='';
+      const img=bfOfflineUnitPortraitV266(unit.portrait, unit.name);
       const name=document.createElement('strong');name.textContent=unit.name;
       const info=document.createElement('span');info.textContent='★'+unit.rarity+' · Lv.'+demoLevel(P.unitExp[id]||0);
       const state=document.createElement('small');state.textContent=P.squad.includes(id)?'ACTIVE':'RESERVE';
