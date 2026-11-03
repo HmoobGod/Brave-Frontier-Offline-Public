@@ -1217,4 +1217,3 @@ body.bf-menu-mode .bf-owned-box .bf-box-unresolved{
   background:linear-gradient(#393528,#222235);color:#f1dfb9;
   font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
 }
-body.bf-menu-mode .bf-owned-box .bf-box-unresolved[hidden]{display:none!important}
