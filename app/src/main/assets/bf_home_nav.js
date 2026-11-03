@@ -449,7 +449,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     };
     syncOptions(elementFilter,uniqElements,'All elements');
     syncOptions(rarityFilter,uniqRarities,'All rarities');
-    count.textContent=filtered.length+' shown / '+owned.length+' owned · '+P.squad.length+' active'+
+    count.textContent=filtered.length+' shown / '+owned.length+(unresolved.length?' resolved':' owned')+' · '+P.squad.length+' active'+
       (unresolved.length ? ' · '+unresolved.length+' unresolved' : '');
     unresolvedNote.hidden = !unresolved.length;
     unresolvedNote.textContent = unresolved.length ?
