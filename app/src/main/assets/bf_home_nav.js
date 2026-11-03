@@ -264,6 +264,16 @@ function bfOfflineUnitPortraitV266(source, name) {
     document.getElementById('bf-unit-tab-detail').textContent = names[next][1];
     return true;
   }
+  // v273 read-only training demo cost guidance; game and save logic untouched.
+  const trainingToolbar = training.querySelector('.training-toolbar');
+  if (trainingToolbar && !training.querySelector('.bf-training-cost-note')) {
+    const note = document.createElement('p');
+    note.className = 'bf-training-cost-note';
+    note.setAttribute('role', 'note');
+    note.textContent = 'DEMO COSTS: +10 EXP uses 1 Training Shard and 150 Zel. +50 EXP uses 5 Shards and 750 Zel. Training also requires an eligible unit below the level and spending limits.';
+    trainingToolbar.after(note);
+  }
+
   hub.addEventListener('click', event => {
     const button = event.target.closest('button[data-bf-unit-tab]');
     if (button && setTab(button.dataset.bfUnitTab)) {
