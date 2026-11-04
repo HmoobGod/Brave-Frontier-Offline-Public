@@ -1209,3 +1209,11 @@ body.bf-menu-mode .bf-owned-box .bf-box-clear-filters{
 body.bf-menu-mode .bf-owned-box .bf-box-clear-filters:focus-visible{
   outline:3px solid #b2e8ff;outline-offset:2px;
 }
+
+/* v271 archived-profile availability: read-only, never changes roster or save. */
+body.bf-menu-mode .bf-owned-box .bf-box-unresolved{
+  box-sizing:border-box;min-width:0;max-width:100%;margin:8px 2px;
+  padding:10px 9px;border:1px solid #ae9064;border-radius:5px;
+  background:linear-gradient(#393528,#222235);color:#f1dfb9;
+  font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
+}
