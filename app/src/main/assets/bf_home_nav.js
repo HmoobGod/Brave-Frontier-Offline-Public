@@ -253,6 +253,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     if (next === 'box') window.BFUnitBox?.refresh();
     evo.classList.toggle('bf-units-subhidden', next !== 'evolve');
     training.classList.toggle('bf-units-subhidden', next !== 'training');
+    if (next === 'training') refreshTrainingAffordability();
     if (window.BF_homeNav.current === 'units') {
       evo.setAttribute('aria-hidden', String(next !== 'evolve'));
       training.setAttribute('aria-hidden', String(next !== 'training'));
@@ -264,6 +265,39 @@ function bfOfflineUnitPortraitV266(source, name) {
     document.getElementById('bf-unit-tab-detail').textContent = names[next][1];
     return true;
   }
+  // v273 read-only Training affordability status; original buttons and saves untouched.
+  const trainingToolbar = training.querySelector('.training-toolbar');
+  const trainingBalance = trainingToolbar?.querySelector('#trainingbalance');
+  let refreshTrainingAffordability = () => {};
+  if (trainingBalance && !training.querySelector('.bf-training-cost-note')) {
+    const note = document.createElement('p');
+    note.className = 'bf-training-cost-note';
+    note.setAttribute('role', 'status');
+    note.setAttribute('aria-live', 'polite');
+    note.setAttribute('aria-atomic', 'true');
+    refreshTrainingAffordability = () => {
+      if (typeof P === 'undefined' || !P) return;
+      const shards = Number(P.trainingShards) || 0;
+      const zel = Number(P.zel) || 0;
+      const spent = Number(P.trainingSpent) || 0;
+      let message = '';
+      if (spent > 99999) {
+        message = 'Demo Training spending limit reached.';
+      } else if (shards < 1 || zel < 150) {
+        const need = [shards < 1 ? '1 Training Shard' : '', zel < 150 ? '150 Zel' : ''].filter(Boolean);
+        message = 'Training unavailable with current resources: need at least ' + need.join(' and ') + '.';
+      } else if (shards < 5 || zel < 750 || spent > 99995) {
+        message = 'Resources support +10 EXP. +50 EXP ×5 requires 5 Shards, 750 Zel and available spending capacity. Unit limits still apply.';
+      } else {
+        message = 'Resources support +10 or +50 EXP training. Unit level, EXP and battle limits still apply.';
+      }
+      if (note.textContent !== message) note.textContent = message;
+    };
+    trainingBalance.after(note);
+    refreshTrainingAffordability();
+    new MutationObserver(refreshTrainingAffordability).observe(trainingBalance, {childList:true,characterData:true,subtree:true});
+  }
+
   hub.addEventListener('click', event => {
     const button = event.target.closest('button[data-bf-unit-tab]');
     if (button && setTab(button.dataset.bfUnitTab)) {
