@@ -1245,3 +1245,9 @@ body.bf-menu-mode .training-panel .training-toolbar input:focus-visible,
 body.bf-menu-mode .training-panel .training-toolbar select:focus-visible {
   outline:3px solid #b6e9ff;outline-offset:2px;
 }
+
+/* v276 Unit Box toolbar: five 44px phone controls without changing filter logic. */
+body.bf-menu-mode .bf-owned-box .bf-box-filters input,
+body.bf-menu-mode .bf-owned-box .bf-box-filters select {
+  box-sizing:border-box;min-height:44px;
+}
