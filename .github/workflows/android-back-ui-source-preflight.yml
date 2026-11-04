@@ -49,6 +49,7 @@ on:
       - 'test_bf_training_form_targets_v27500.py'
       - 'test_bf_unit_box_toolbar_targets_v27600.py'
       - 'test_bf_unit_box_detail_actions_v27700.py'
+      - 'test_bf_unit_box_active_counts_v27800.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -80,6 +81,7 @@ on:
       - 'V275_TRAINING_FORM_TARGETS.md'
       - 'V276_UNIT_BOX_TOOLBAR_TARGETS.md'
       - 'V277_UNIT_BOX_DETAIL_ACTIONS.md'
+      - 'V278_UNIT_BOX_ACTIVE_COUNTS.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -180,6 +182,8 @@ jobs:
         run: python3 test_bf_unit_box_toolbar_targets_v27600.py --source-only
       - name: Verify Unit Box detail navigation touch sizes and keyboard focus
         run: python3 test_bf_unit_box_detail_actions_v27700.py --source-only
+      - name: Verify Unit Box truthful active squad count and no-profile detail
+        run: python3 test_bf_unit_box_active_counts_v27800.py --source-only
       - name: Check safe recovery backup visual hierarchy without save writes
         run: python3 test_bf_recovery_backup_hierarchy_v26400.py --source-only
       - name: Verify real packaged save HTML and inline-style browser regression registration
