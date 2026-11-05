@@ -1,0 +1,29 @@
+name: Smart Auto disabled support source check
+on:
+  pull_request:
+    paths:
+      - 'prepare_coordinated_auto_v042.py'
+      - 'app/src/main/assets/bf5900_curse_bb_lock.js'
+      - 'app/src/main/assets/bf6000_paralysis_action_lock.js'
+      - 'test_bf_auto_disabled_support.py'
+      - 'test_bf_packaged_coordinated_auto_v042.py'
+      - 'AUTO_DISABLED_SUPPORT.md'
+      - '.github/workflows/auto-disabled-support.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  auto-disabled-support:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_auto_disabled_support.py --source-only

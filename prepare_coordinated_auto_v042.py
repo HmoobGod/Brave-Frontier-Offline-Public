@@ -47,6 +47,10 @@ JS=r"""
       actions.set(p,kind);
       if(kind!=='burst' || typeof bfOriginalBB!=='function' ||
          typeof originalSupport!=='function')continue;
+      // A blocked caster cannot supply the round's coordinated ATK buff.
+      // Leave its queued action to the existing execution/status handlers.
+      if(window.BFGlobalParalysisActionLockV6000?.paralyzed(p.id) ||
+         window.BFGlobalCurseBBLockV5900?.cursed(p.id))continue;
       if(bfOriginalBB(p.unitId)?.target!=='support')continue;
       const source=originalSupport(p.unitId);
       if(source?.kind!=='atk_buff_all' || !Number.isFinite(source.pct))continue;
@@ -74,6 +78,8 @@ JS=r"""
 if MARK in s:
     assert s.count(MARK)==1 and s.count(new)==1 and s.count(old)==0
     assert s.count('window.BF041SmartAuto?.kindFor(p)')==1
+    assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p.id)' in s
+    assert 'BFGlobalCurseBBLockV5900?.cursed(p.id)' in s
     print('PASS existing v0.42 coordinated source-aware Auto Battle patch unchanged')
 else:
     assert s.count(old)==1,('Auto queue site missing or duplicated',s.count(old))
