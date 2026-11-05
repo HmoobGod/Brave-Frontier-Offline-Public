@@ -1559,3 +1559,30 @@ function bfOfflineUnitPortraitV266(source, name) {
     '<p class="bf-menu-help-note">A finished screen does not mean its game system is ready. Preview and demo labels show what is currently available.</p></div>';
   menu.prepend(help);
 })();
+
+/* Menu inventory reads existing demo catalyst counts; never edits progress. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-menu-materials')||typeof ALL_MATERIAL_IDS==='undefined')return;
+  const panel=document.createElement('details');panel.id='bf-menu-materials';
+  panel.innerHTML='<summary>MATERIAL INVENTORY <small>DEMO STOCK</small></summary><div class="bf-menu-material-body"><p>Recorded catalysts from this demo save. Original item ownership and drop rules are not reconstructed.</p><label><input type="checkbox" id="bf-menu-material-all" /> Show all known catalyst IDs</label><p id="bf-menu-material-count" role="status" aria-live="polite"></p><div class="bf-menu-material-grid"></div></div>';
+  menu.prepend(panel);
+  const all=panel.querySelector('input'),grid=panel.querySelector('.bf-menu-material-grid'),status=panel.querySelector('[role="status"]');
+  function refresh(){
+    const ids=[...new Set(ALL_MATERIAL_IDS)].map(String);
+    const rows=ids.map(id=>{const value=typeof P!=='undefined'?P.materials?.[id]:null;return {id,count:Number.isSafeInteger(value)&&value>0?value:0};});
+    const owned=rows.filter(r=>r.count>0),shown=all.checked?rows:owned;
+    status.textContent=owned.reduce((n,r)=>n+r.count,0)+' catalysts recorded · '+owned.length+' types owned';
+    grid.replaceChildren();
+    for(const row of shown){
+      const card=document.createElement('div'),name=document.createElement('strong'),count=document.createElement('span');
+      name.textContent='Catalyst #'+row.id;count.textContent='Owned: '+row.count;card.append(name,count);grid.append(card);
+    }
+    if(!shown.length){const empty=document.createElement('p');empty.className='bf-menu-material-empty';empty.textContent='No catalysts recorded. Choose “Show all known catalyst IDs” to browse the list.';grid.append(empty);}
+  }
+  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});all.addEventListener('change',refresh);
+  const inventory=document.getElementById('inventoryitems');
+  if(inventory)new MutationObserver(()=>{if(panel.open)refresh();}).observe(inventory,{childList:true});
+  refresh();
+})();

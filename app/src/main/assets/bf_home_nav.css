@@ -1353,3 +1353,15 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-menu-help-body details p{padding:0 12px 12px;margin:0;color:#d0dce3}
 #bf-menu-help summary:focus-visible{outline:3px solid #fff0bc;outline-offset:2px}
 .bf-menu-help-note{padding-top:12px;border-top:1px solid #6f8190;color:#bacdd7;font-size:12px}
+
+#bf-menu-materials{margin:12px;border:1px solid #ac9465;border-radius:8px;background:#182e3e;color:#e9e4d7;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-materials>summary{padding:13px;min-height:48px;color:#f6ddaa;font:700 15px/1.5 Georgia,serif;cursor:pointer}
+#bf-menu-materials summary small{font:700 10px system-ui,sans-serif;color:#bfd1db;margin-left:8px}
+#bf-menu-materials summary:focus-visible,#bf-menu-materials input:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+.bf-menu-material-body{padding:0 13px 14px;overflow-wrap:anywhere}
+.bf-menu-material-body label{display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;color:#ecd5a8}
+.bf-menu-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.bf-menu-material-grid>div{padding:12px;border:1px solid #688295;border-radius:6px;background:#102332;display:grid;gap:5px}
+.bf-menu-material-grid strong{font-size:13px;color:#f3d9a5}
+.bf-menu-material-grid span{font-size:13px;color:#d3e0e5}
+.bf-menu-material-empty{grid-column:1/-1;color:#c4d4dc}
