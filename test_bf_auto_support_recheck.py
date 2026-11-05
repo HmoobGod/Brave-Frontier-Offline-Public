@@ -11,6 +11,7 @@ if '--source-only' in sys.argv:
     src=(ROOT/'prepare_source_aware_auto_v041.py').read_text()
     assert 'window.BF041SmartAuto?.reconsider?.(p);' in src
     assert 'function reconsider(p)' in src
+    assert 'break;window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);' in src
     assert 'python3 test_bf_auto_support_recheck.py' in (ROOT/'.github/workflows/build-debug-apk.yml').read_text()
     print('PASS source: optional Auto support execution recheck registered')
     raise SystemExit(0)
@@ -42,6 +43,11 @@ with sync_playwright() as pw:
     page.add_style_tag(path=str(A/'bf_home_nav.css'))
     for name in modules:page.add_script_tag(path=str(A/name))
     page.add_script_tag(path=str(A/'bf10500_qol_advanced_smart_auto.js'))
+    for name in ('bf700_original_normal_hits.js','bf8100_original_crystal_drop_core.js',
+                 'bf8200_original_normal_crystal_checks.js','bf8300_original_burst_crystal_checks.js',
+                 'bf8400_original_normal_crystal_checks.js','bf8800_live_normal_crystal_events.js',
+                 'bf9300_single_hit_critical_combat.js','bf9500_multihit_critical_combat.js'):
+        page.add_script_tag(path=str(A/name))
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     page.evaluate("""()=>{
       S.party[0].unitId=20041;S.party[1].unitId=30041;
@@ -57,12 +63,12 @@ with sync_playwright() as pw:
     before=page.evaluate(state)
     planned=page.evaluate("()=>{const plan=BF042AutoCoordination.plan(liveParty());for(const p of S.party.slice(0,2))p.action={kind:plan.get(p),target:0};return S.party.slice(0,2).map(p=>p.action.kind)}")
     assert planned==['burst','burst']
-    page.evaluate('async()=>{await window.performUnit(S.party[0],epoch)}')
+    page.evaluate('async()=>{BF041SmartAuto.reconsider(S.party[0]);await window.performUnit(S.party[0],epoch)}')
     assert page.evaluate('liveParty().every(p=>p.hp===p.maxHp)')
     assert page.evaluate('S.party[0].bb')==0
     enemy_before=page.evaluate('S.enemies[0].hp')
     page.evaluate('S.target=1')
-    page.evaluate('async()=>{await window.performUnit(S.party[1],epoch)}')
+    page.evaluate('async()=>{BF041SmartAuto.reconsider(S.party[1]);await window.performUnit(S.party[1],epoch)}')
     gauge=page.evaluate('S.party[1].bb')
     assert gauge==100,('Auto wasted second healer BB after full recovery',gauge)
     assert page.evaluate('S.party[1].action.kind')=='attack'
@@ -74,7 +80,7 @@ with sync_playwright() as pw:
     assert page.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(0,6)')
     page.evaluate("""async()=>{
       const plan=BF042AutoCoordination.plan(liveParty());
-      for(const p of S.party.slice(0,2)){p.action={kind:plan.get(p),target:0};await window.performUnit(p,epoch);}
+      for(const p of S.party.slice(0,2)){p.action={kind:plan.get(p),target:0};BF041SmartAuto.reconsider(p);await window.performUnit(p,epoch);}
     }""")
     assert page.evaluate('S.party[0].bb')==100
     assert page.evaluate('S.party[1].bb')==0
@@ -84,7 +90,7 @@ with sync_playwright() as pw:
     for automatic,smart in ((False,True),(True,False)):
         page.evaluate('([automatic,smart])=>{S=JSON.parse(window.__recheckFresh);S.auto=automatic;document.getElementById("auto").checked=automatic;document.getElementById("bf041-smart-auto").checked=smart}',[automatic,smart])
         page.evaluate("""async()=>{
-          for(const p of S.party.slice(0,2)){p.action={kind:'burst',target:0};await window.performUnit(p,epoch);}
+          for(const p of S.party.slice(0,2)){p.action={kind:'burst',target:0};BF041SmartAuto.reconsider(p);await window.performUnit(p,epoch);}
         }""")
         assert page.evaluate('S.party.slice(0,2).map(p=>p.bb)')==[0,0]
         assert page.evaluate(state)==before
@@ -97,11 +103,40 @@ with sync_playwright() as pw:
         assert checked['player']==prior['player'] and checked['writes']==prior['writes']+1
         pref='bf_global_offline_qol_advanced_auto_v105'
         assert {k:v for k,v in checked['storage'].items() if k!=pref}=={k:v for k,v in prior['storage'].items() if k!=pref}
-        page.evaluate("async()=>{S.party[1].action={kind:'burst',target:0};await window.performUnit(S.party[1],epoch)}")
+        page.evaluate("async()=>{S.party[1].action={kind:'burst',target:0};BF041SmartAuto.reconsider(S.party[1]);await window.performUnit(S.party[1],epoch)}")
         assert page.evaluate('S.party[1].bb')==expected_gauge
         assert page.evaluate('liveParty().every(p=>p.hp==='+str(700 if expected_gauge else 1000)+')')
         assert page.evaluate(state)==setup
-    page.evaluate('S.auto=false;document.getElementById("auto").checked=false')
+    # Run the real scheduler and whole turn. Reconsideration must precede
+    # outer normal-attack observers, not occur deep inside performUnit.
+    native_before=page.evaluate(state)
+    page.evaluate("""()=>{
+      S=JSON.parse(window.__recheckFresh);S.auto=true;
+      document.getElementById('auto').checked=true;
+      document.getElementById('bf041-smart-auto').checked=true;
+      document.getElementById('speed').value='4';
+      for(const enemy of S.enemies)enemy.atk=1;
+      window.__recheckRandom=Math.random;Math.random=()=>0;
+      window.__recheckEnemyPhaseSeen=false;
+      window.__recheckStop=new MutationObserver(()=>{
+        if(E.phase.textContent==='Enemy phase'){
+          S.auto=false;document.getElementById('auto').checked=false;
+          window.__recheckEnemyPhaseSeen=true;window.__recheckStop.disconnect();
+        }
+      });
+      window.__recheckStop.observe(E.phase,{childList:true,characterData:true,subtree:true});
+      scheduleAuto();
+    }""")
+    page.wait_for_function('()=>window.__recheckEnemyPhaseSeen&&!S.busy',timeout=30000)
+    page.evaluate('Math.random=window.__recheckRandom')
+    assert page.evaluate('S.round===JSON.parse(window.__recheckFresh).round+1')
+    assert page.evaluate('S.party[0].bb')==0
+    assert page.evaluate('S.party[1].bb')==100
+    critical=page.evaluate('BFGlobalSingleHitCriticalV9300.snapshot().recent.concat(BFGlobalMultiHitCriticalV9500.snapshot().recent)')
+    assert any(e['unitId']==30041 and (e.get('critical') is True or e.get('criticals',0)>0) for e in critical), 'Converted heal missed normal critical processing'
+    crystals=page.evaluate('BFGlobalLiveNormalCrystalEventsV8800.snapshot().recent')
+    assert any(e['unitId']==30041 for e in crystals), 'Converted heal missed normal crystal processing'
+    assert page.evaluate(state)==native_before
     assert not errors,errors
-    print('PASS real Auto rechecks heals, disabled caster, Advanced thresholds, manual/default-OFF and progress intact',flush=True)
+    print('PASS actual Auto turn, critical/crystal observers, heal recheck, disabled caster, Advanced/manual/default-OFF and progress intact',flush=True)
     browser.close()

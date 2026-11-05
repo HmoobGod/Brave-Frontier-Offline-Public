@@ -4,6 +4,9 @@ on:
     paths:
       - 'prepare_source_aware_auto_v041.py'
       - 'app/src/main/assets/bf10500_qol_advanced_smart_auto.js'
+      - 'app/src/main/assets/bf8800_live_normal_crystal_events.js'
+      - 'app/src/main/assets/bf9300_single_hit_critical_combat.js'
+      - 'app/src/main/assets/bf9500_multihit_critical_combat.js'
       - 'test_bf_auto_support_recheck.py'
       - 'test_bf_packaged_source_aware_auto_v041.py'
       - 'AUTO_SUPPORT_RECHECK.md'

@@ -10,6 +10,10 @@ action that the policy now considers unnecessary becomes a normal attack with
 the same target. A still-needed heal or stronger buff remains queued. The lookup
 uses the current public policy, so Advanced Auto thresholds and the verified
 BB-level preview keep working. The original start-of-turn plan is unchanged.
+The hook runs in the turn executor before calling the attack-handler chain,
+so converted attacks retain existing critical-hit and crystal-event handling.
+Putting it inside the inner attack implementation was too late for those
+handlers; a full-turn integration test reproduced that failure before correction.
 
 Manual BB actions and default Smart-OFF Auto retain their previous behavior.
 Offensive BBs and experimental SBBs are not reconsidered by this support-only
@@ -24,7 +28,9 @@ Smart-OFF controls still execute both explicitly queued BBs. At 70% ally HP,
 Advanced thresholds 35/75 respectively preserve/spend gauge through real
 execution. Control setup writes exactly one isolated QoL preference key; player
 and other storage stay unchanged, and combat leaves the full synthetic
-player/storage/write count unchanged. Existing Smart/Advanced Auto,
+player/storage/write count unchanged. A real scheduled Auto turn also requires
+the converted healer's normal critical and uncollected crystal records; the
+fixture pauses Auto in enemy phase to isolate a single round. Existing Smart/Advanced Auto,
 coordination, status and BB-level tests remain required; the APK gate checks the
 hook and public method in packaged HTML.
 
