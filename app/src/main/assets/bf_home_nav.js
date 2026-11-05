@@ -61,7 +61,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   nav.className = 'bf-navbar';
   nav.setAttribute('aria-label', 'Main navigation');
   nav.innerHTML = [
-    ['home','Home'],['units','Units'],['quest','Quest'],['summon','Summon'],['menu','Menu']
+    ['quest','Quest'],['units','Units'],['home','Home'],['summon','Summon'],['menu','Menu']
   ].map(([route,label]) => '<button type="button" data-bf-goto="' + route + '" aria-label="' + label + '"><span class="bf-nav-art bf-nav-art-' + route + '" aria-hidden="true"></span>' + label + '</button>').join('');
   document.body.append(nav);
   const routes = new Map();
@@ -1573,7 +1573,13 @@ function bfOfflineUnitPortraitV266(source, name) {
     const ids=[...new Set(ALL_MATERIAL_IDS)].map(String);
     const rows=ids.map(id=>{const value=typeof P!=='undefined'?P.materials?.[id]:null;return {id,count:Number.isSafeInteger(value)&&value>0?value:0};});
     const owned=rows.filter(r=>r.count>0),shown=all.checked?rows:owned;
-    status.textContent=owned.reduce((n,r)=>n+r.count,0)+' catalysts recorded · '+owned.length+' types owned';
+    let total=0,overflow=false;
+    for(const row of owned){
+      if(row.count>Number.MAX_SAFE_INTEGER-total){overflow=true;break;}
+      total+=row.count;
+    }
+    const totalLabel=overflow?'More than '+Number.MAX_SAFE_INTEGER.toLocaleString('en-US'):String(total);
+    status.textContent=totalLabel+' catalysts recorded · '+owned.length+' types owned';
     grid.replaceChildren();
     for(const row of shown){
       const card=document.createElement('div'),name=document.createElement('strong'),count=document.createElement('span');
