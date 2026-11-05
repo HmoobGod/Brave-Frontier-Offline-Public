@@ -61,7 +61,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   nav.className = 'bf-navbar';
   nav.setAttribute('aria-label', 'Main navigation');
   nav.innerHTML = [
-    ['home','Home'],['units','Units'],['quest','Quest'],['summon','Summon'],['menu','Menu']
+    ['quest','Quest'],['units','Units'],['home','Home'],['summon','Summon'],['menu','Menu']
   ].map(([route,label]) => '<button type="button" data-bf-goto="' + route + '" aria-label="' + label + '"><span class="bf-nav-art bf-nav-art-' + route + '" aria-hidden="true"></span>' + label + '</button>').join('');
   document.body.append(nav);
   const routes = new Map();
