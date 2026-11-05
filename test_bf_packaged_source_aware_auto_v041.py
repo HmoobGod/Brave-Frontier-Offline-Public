@@ -10,6 +10,8 @@ with ZipFile(p) as z:
         assert html.count(m)==1,m
     assert html.count('id="bf041-smart-auto-style"')==1
     assert 'window.BF041SmartAuto?.kindFor(p)' in html
+    assert html.count('window.BF041SmartAuto?.reconsider?.(p);')==1
+    assert 'Object.freeze({kindFor,enabled,reconsider})' in html
     assert 'bf_global_offline_demo_v7' in html
     assert 'unit_anime_atlas_10025.png' in html
 print('PASS v0.41 APK source-aware Auto Battle optional; all previous content and v7')

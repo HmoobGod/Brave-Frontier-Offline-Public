@@ -23,6 +23,8 @@ assert other['records']['40025']['bb']['levels'][0]['params']==[0,94,0,0,0,3,170
 marker='/* BF_SOURCE_AWARE_AUTO_V041 */'
 prior="p.action={kind:p.bb>=100?'burst':'attack',target:target.slot}"
 next="p.action={kind:window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'attack'),target:target.slot}"
+perform_old='async function performUnit(p,token){'
+perform_new=perform_old+'\n window.BF041SmartAuto?.reconsider?.(p);'
 ui=r"""
 <style id="bf041-smart-auto-style">
 #bf041-smart-auto-label { display:inline-flex; align-items:center; flex-wrap:wrap;
@@ -60,6 +62,15 @@ ui=r"""
     }
     return fallback;
   }
+  function reconsider(p) {
+    // Earlier allies may already have supplied the planned heal/buff.
+    // Reuse the current optional policy, including Advanced Auto overrides.
+    if(!S.auto || S.over || !enabled() || p?.action?.kind!=='burst' ||
+       bfOriginalBB(Number(p.unitId))?.target!=='support' ||
+       window.BF041SmartAuto.kindFor(p)!=='attack')return false;
+    p.action={...p.action,kind:'attack'};
+    return true;
+  }
   function mount() {
     const old=document.getElementById(toggleId);
     if(old)return;
@@ -79,7 +90,7 @@ ui=r"""
   if(document.readyState==='loading')
     document.addEventListener('DOMContentLoaded',mount,{once:true});
   else mount();
-  window.BF041SmartAuto=Object.freeze({kindFor,enabled});
+  window.BF041SmartAuto=Object.freeze({kindFor,enabled,reconsider});
 })();
 </script>
 """
@@ -91,13 +102,16 @@ if s.count(marker)==1:
                 s.count('window.BF042AutoCoordination?.plan(liveParty())')==1)
     assert (s.count(next)==1 or upgraded) and s.count('id="bf041-smart-auto-style"')==1
     assert s.count(prior)==0
+    assert s.count(perform_new)==1
     assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in s
     print('PASS v0.41 idempotent source-aware Auto Battle patch intact')
 else:
     assert s.count(marker)==0
     assert s.count(prior)==1,('Unexpected auto-battle anchor',s.count(prior))
     assert s.count('</body>')==1
+    assert s.count(perform_old)==1
     s=s.replace(prior,next,1).replace('</body>',ui+'\n</body>',1)
+    s=s.replace(perform_old,perform_new,1)
     assert s.count(marker)==1 and s.count(next)==1
     HTML.write_text(s,'utf-8')
     print('PASS v0.41 optional source-aware Auto Battle; default original DEMO actions and v7 save unchanged')
