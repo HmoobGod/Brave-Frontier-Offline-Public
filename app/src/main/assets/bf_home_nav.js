@@ -399,12 +399,14 @@ function bfOfflineUnitPortraitV266(source, name) {
     });
     return {owned, filtered, unresolved};
   }
-  function showDetail(id) {
+  function showDetail(id, noAvailableProfiles = false) {
     detail.replaceChildren();
     const unit = effectiveUnit(id);
     if (!unit || !P.roster.includes(id)) {
       const note=document.createElement('p');
-      note.textContent='Select an owned unit to view its archived base statistics.';
+      note.textContent=noAvailableProfiles ?
+        'Saved unit profiles are unavailable in this offline archive; there is no unit to select.' :
+        'Select an owned unit to view its archived base statistics.';
       detail.append(note); activeId=null; return;
     }
     activeId=id;
@@ -483,7 +485,11 @@ function bfOfflineUnitPortraitV266(source, name) {
     };
     syncOptions(elementFilter,uniqElements,'All elements');
     syncOptions(rarityFilter,uniqRarities,'All rarities');
-    count.textContent=filtered.length+' shown / '+owned.length+(unresolved.length?' resolved':' owned')+' · '+P.squad.length+' active'+
+    const resolvedIds = new Set(owned.map(row => row.id));
+    const activeSquad = P.squad.filter(id => resolvedIds.has(id)).length;
+    const missingSquad = P.squad.length - activeSquad;
+    count.textContent=filtered.length+' shown / '+owned.length+(unresolved.length?' resolved':' owned')+' · '+activeSquad+' active'+
+      (missingSquad ? ' · '+missingSquad+' squad profile'+(missingSquad===1?'':'s')+' unavailable' : '')+
       (unresolved.length ? ' · '+unresolved.length+' unresolved' : '');
     unresolvedNote.hidden = !unresolved.length;
     unresolvedNote.textContent = unresolved.length ?
@@ -524,7 +530,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     }
     if (activeId != null && filtered.some(row => row.id === activeId)) showDetail(activeId);
     else if(filtered.length) showDetail(filtered[0].id);
-    else showDetail(null);
+    else showDetail(null, !owned.length && unresolved.length>0);
   }
   results.addEventListener('click',event => {
     const card=event.target.closest('button[data-bf-unit-id]');

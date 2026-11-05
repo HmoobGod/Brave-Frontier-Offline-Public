@@ -1,0 +1,13 @@
+# v277 — Unit Box detail navigation 44px touch targets
+
+## Parent and duplicate safety
+Stack this **DRAFT** only on exact v276 PR #213 head `a504e17129d91ab046b2e2d11cc778af905948ed`. Earlier canonical chain stays v271 #206 → v272 #207 → v273 #208 → v274 #209 → v275 #212 → v276 #213 → **v277**. Merged main remains v270 `9ea08f2d46413caae09637aa5dbbe84805e140bf`. No upstream independent Claude approval for v271 has been recorded. Do not merge early or change the owner's installed APK and save.
+
+## Scoped UI problem
+Unit Box detail navigation buttons are not consistently 44px. Existing `.bf-evo-open` has an explicit 35px minimum height. Existing `.bf-box-manage` has no declared minimum height, and the archive-profile shortcut has no consistent explicit touch/focus styling in navigation CSS. This patch adjusts **presentation only** with scoped 44×44 minimum touch targets and wrapped long labels, preserving all existing callbacks, archived data, evolution preview semantics and in-game saves. Add a keyboard-visible 3px focus outline to the original-profile shortcut; existing squad/evolution focus styling remains.
+
+## Test plan
+The new `test_bf_unit_box_detail_actions_v27700.py --source-only` verifies CSS scope, source-workflow registration, zero save/network/code effects and asset-size budgets. The packaged browser mode uses original current HTML+nav JS/CSS in isolated no-network Chromium at **320, 359, 393, 540px**, first selecting real Unit Box cards and observing the nonmutating detail-navigation controls. Where the default six units do not offer an evolution preview, a disposable noninteractive visual fixture verifies only the evolution button CSS; this does **not** establish gameplay evolution acceptance. Verify 44px sizing, focus outlines, absence of overflow/exceptions and identical in-memory roster/squad/EXP/evolutions/Gems/Zel/Karma/v7 storage. Do not click the management/evolution/profile callbacks.
+
+## Change and promotion boundaries
+Exactly five changed files: appended CSS, new Python source/browser regression, this note and two source/signed Android workflow registrations. Zero edits to JavaScript, HTML, art, units, game engine, equipment, resources, battle, quests, Gem/Zel, persistent save schema, Android/Gradle/manifest or signing. Keep DRAFT until upstream PRs have separate independent Claude exact-head approvals and successful merges, rebase onto the final main, then rerun all six source preflights and signed Android CI/identity/diagnostic artifacts plus a fresh Claude exact-head review. Physical Android device and original 2022 Global image parity remain untested. UI ~65%, full game ~30% provisional, no increase from this source UI patch.
