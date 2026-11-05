@@ -485,7 +485,9 @@ jobs:
           python test_bf_header_status_v054.py
           python test_bf_tower_formations_v055.py
       - name: Capture source-navigation UI screens at two Android phone widths
-        run: python3 test_bf_ui_screen_capture_v26300.py --capture
+        run: |
+          python3 test_bf_capture_progress_audit.py --browser
+          python3 test_bf_ui_screen_capture_v26300.py --capture
       - name: Upload navigation-only UI screenshot evidence
         uses: actions/upload-artifact@v4
         with:
@@ -494,7 +496,9 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Capture nested reconstructed UI screens at two phone widths
-        run: python3 test_bf_nested_ui_capture_v27200.py --capture
+        run: |
+          python3 test_bf_nested_ui_capture_v27200.py --capture
+          python3 test_bf_capture_distinctness_v27810.py --validate --adversarial
       - name: Upload nested source UI screenshot evidence
         uses: actions/upload-artifact@v4
         with:

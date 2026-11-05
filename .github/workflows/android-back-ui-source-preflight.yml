@@ -44,6 +44,10 @@ on:
       - 'test_bf_unit_box_live_regions_v27000.py'
       - 'test_bf_unit_box_unresolved_v27100.py'
       - 'test_bf_nested_ui_capture_v27200.py'
+      - 'bf_capture_progress_audit.py'
+      - 'test_bf_capture_progress_audit.py'
+      - 'test_bf_capture_distinctness_v27810.py'
+      - 'CAPTURE_PROGRESS_AUDIT.md'
       - 'test_bf_training_cost_guidance_v27300.py'
       - 'test_bf_training_touch_focus_v27400.py'
       - 'test_bf_training_form_targets_v27500.py'
@@ -130,6 +134,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify reconciled v278.1 screenshot visibility and distinctness gate
+        run: python3 test_bf_capture_distinctness_v27810.py --source-only
+      - name: Verify complete screenshot progress audit and restored-write detection
+        run: python3 test_bf_capture_progress_audit.py --source-only
       - name: Verify Android Back UI routing without save changes
         run: python3 test_bf_android_back_home_v22500.py --source-only
       - name: Verify visible v242 Home hierarchy, original source art and no save edits
