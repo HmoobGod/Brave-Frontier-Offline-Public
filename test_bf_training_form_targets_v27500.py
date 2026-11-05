@@ -1,5 +1,6 @@
 """v275 — Training search/filter minimum touch targets, focus and save isolation."""
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -17,7 +18,13 @@ block=CSS.split(MARK,1)[1]
 assert "training-panel .training-toolbar input" in block
 assert "training-panel .training-toolbar select" in block
 assert "min-height:44px" in block and ":focus-visible" in block
-assert "outline:3px solid" in block and "display:none" not in block
+assert "outline:3px solid" in block
+# Scope visibility checks to these controls, including later CSS overrides.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}', CSS)
+                  if '.training-toolbar input' in selectors or '.training-toolbar select' in selectors]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in visibility_rules)
 assert "/* v274 Training controls: 44px touch targets" in CSS
 assert "test_bf_training_form_targets_v27500.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_training_form_targets_v27500.py")==1

@@ -48,6 +48,8 @@ on:
       - 'test_bf_capture_progress_audit.py'
       - 'test_bf_capture_distinctness_v27810.py'
       - 'CAPTURE_PROGRESS_AUDIT.md'
+      - 'test_bf_location_previews.py'
+      - 'UI_LOCATION_PREVIEWS.md'
       - 'test_bf_training_cost_guidance_v27300.py'
       - 'test_bf_training_touch_focus_v27400.py'
       - 'test_bf_training_form_targets_v27500.py'
@@ -234,3 +236,6 @@ jobs:
         run: python3 build_bf_missing_index_diagnostic_v23900.py --source-only
       - name: Verify bounded diagnostic trace viewer is unavailable in Current
         run: python3 test_bf_isolated_device_trace_v24100.py
+
+      - name: Verify UI-only location preview source
+        run: python3 test_bf_location_previews.py --source-only

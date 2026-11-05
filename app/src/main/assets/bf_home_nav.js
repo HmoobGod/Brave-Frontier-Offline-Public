@@ -88,6 +88,10 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   function go(route) {
     if (!Object.prototype.hasOwnProperty.call(names,route)) return false;
+    if (window.BFLocationPreview?.isOpen) {
+      if (route === 'home') return window.BFLocationPreview.back();
+      window.BFLocationPreview.close();
+    }
     current = route;
     home.classList.toggle('bf-hidden',route !== 'home');
     home.setAttribute('aria-hidden',String(route !== 'home'));
@@ -113,7 +117,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   home.addEventListener('click',navigate);
   nav.addEventListener('click',navigate);
   document.body.classList.add('bf-menu-mode');
-  window.BF_homeNav = {go,get current(){return current;},get routedPanels(){return routes.size;}};
+  window.BF_homeNav = {go,get current(){return window.BFLocationPreview?.isOpen ? 'location-preview' : current;},get routedPanels(){return routes.size;}};
   go('home');
 })();
 
@@ -1287,4 +1291,147 @@ function bfOfflineUnitPortraitV266(source, name) {
     },
     refresh:render
   });
+})();
+
+/* UI-first location screens: reconstructed presentation, no game services. */
+(() => {
+  'use strict';
+  const home = document.getElementById('bf-home');
+  if (!home || !window.BF_homeNav || window.BFLocationPreview) return;
+  const locations = Object.freeze([
+    {id:'vortex',name:'Vortex Gate',art:'home_win_gate.png',intro:'Beyond the gate',
+      description:'Explore the interface for special quests and events.',
+      rows:[['Event quests','Event listings are not available yet.'],['Daily quests','Daily quest listings are not available yet.']],action:'ENTER VORTEX GATE'},
+    {id:'arena',name:'Arena',art:'home_win_arena.png',intro:'The challenger’s hall',
+      description:'A place for the Arena battle and ranking screens.',
+      rows:[['Opponents','Opponent selection is not available yet.'],['Battle record','Arena records are not available yet.'],['Rankings','Rankings are not available offline.']],action:'FIND AN OPPONENT'},
+    {id:'raid',name:'Raid Battle',art:'home_win_raid_open.png',intro:'Prepare for a greater challenge',
+      description:'Explore the interface for raid missions and party preparation.',
+      rows:[['Raid missions','Raid mission listings are not available yet.'],['Party preparation','Raid parties are not available yet.'],['Rewards','Raid rewards are not available yet.']],action:'SELECT RAID MISSION'},
+    {id:'randall',name:'Capital Randall',art:'home_win_randall.png',intro:'Welcome to the capital',
+      description:'A preview of the capital’s facilities and services.',
+      rows:[['Facilities','Capital facilities are not available yet.'],['Services','Capital services are not available yet.']],action:'VISIT FACILITIES'},
+    {id:'exchange',name:'Exchange Hall',art:'home_new_btn_exchange1.png',intro:'The exchange counter',
+      description:'A place to browse future exchange services.',
+      rows:[['Exchange items','There are no exchange listings available.'],['Exchange balance','Balance unavailable — this service is not implemented.']],action:'EXCHANGE ITEMS'}
+  ].map(item => Object.freeze({...item,rows:Object.freeze(item.rows.map(row => Object.freeze(row)))})));
+  const launch = document.createElement('section');
+  launch.className = 'bf-location-launch';
+  launch.setAttribute('aria-label','Explore unfinished location interfaces');
+  launch.innerHTML = '<div><strong>MORE OF GRAND GAIA</strong><p>Explore five location screens while their game systems are being rebuilt.</p></div>'+
+    '<button type="button" id="bf-location-launch" aria-haspopup="dialog">EXPLORE UI PREVIEWS ›</button>';
+  home.querySelector('.bf-scene-note')?.before(launch);
+  if (!launch.isConnected) home.append(launch);
+  const dialog = document.createElement('dialog');
+  dialog.id = 'bf-location-dialog';
+  dialog.setAttribute('aria-labelledby','bf-location-title');
+  dialog.innerHTML = '<header class="bf-location-header"><button type="button" id="bf-location-back" aria-label="Back to location previews">‹ BACK</button>'+
+    '<span>GRAND GAIA</span><button type="button" id="bf-location-close" aria-label="Close location preview">CLOSE ×</button></header>'+
+    '<div class="bf-location-body"><p class="bf-location-kicker">INTERFACE PREVIEW</p>'+
+    '<h1 id="bf-location-title" tabindex="-1">Global Locations</h1><div id="bf-location-content"></div>'+
+    '<p class="bf-location-disclaimer">UI preview only. Battles, events and services in these locations are not implemented yet.</p></div>';
+  document.body.append(dialog);
+  const title = dialog.querySelector('#bf-location-title');
+  const content = dialog.querySelector('#bf-location-content');
+  const backButton = dialog.querySelector('#bf-location-back');
+  let trail = [], opener = null;
+  function render() {
+    const id = trail[trail.length-1];
+    const item = locations.find(row => row.id === id);
+    backButton.hidden = !item;
+    backButton.setAttribute('aria-label',trail.length>2?'Back to Capital Randall':'Back to location previews');
+    title.textContent = item ? item.name : 'Global Locations';
+    content.replaceChildren();
+    if (!item) {
+      const intro = document.createElement('p');
+      intro.textContent = 'Choose a location to preview its interface. Gameplay actions remain unavailable.';
+      const grid = document.createElement('div');
+      grid.className = 'bf-location-directory';
+      for (const row of locations) {
+        const button = document.createElement('button');
+        button.type = 'button';button.dataset.bfLocation = row.id;
+        const image = document.createElement('img');image.src = 'content/home/'+row.art;image.alt = '';
+        const name = document.createElement('strong');name.textContent = row.name;
+        const status = document.createElement('span');status.textContent = 'VIEW UI PREVIEW ›';
+        button.append(image,name,status);grid.append(button);
+      }
+      content.append(intro,grid);
+    } else {
+      const hero = document.createElement('div');hero.className = 'bf-location-hero';
+      if (item.id === 'exchange') hero.classList.add('bf-location-hero-small');
+      const image = document.createElement('img');image.src = 'content/home/'+item.art;image.alt = '';
+      const caption = document.createElement('p');caption.textContent = item.intro;
+      hero.append(image,caption);
+      const description = document.createElement('p');description.textContent = item.description;
+      const rows = document.createElement('div');rows.className = 'bf-location-services';
+      for (const [name,note] of item.rows) {
+        const card = document.createElement('section');
+        const heading = document.createElement('h2');heading.textContent = name;
+        const text = document.createElement('p');text.textContent = note;
+        card.append(heading,text);rows.append(card);
+      }
+      const unavailable = document.createElement('button');unavailable.type = 'button';
+      unavailable.className = 'bf-location-unavailable';unavailable.disabled = true;
+      unavailable.textContent = item.action+' · NOT IMPLEMENTED';
+      content.append(hero,description,rows);
+      if (item.id === 'randall') {
+        const exchange = document.createElement('button');exchange.type = 'button';
+        exchange.className = 'bf-location-exchange';exchange.dataset.bfLocation = 'exchange';
+        exchange.textContent = 'VIEW EXCHANGE HALL UI ›';content.append(exchange);
+      }
+      content.append(unavailable);
+    }
+    dialog.scrollTop = 0;
+    if (dialog.open) title.focus({preventScroll:true});
+  }
+  function open(id) {
+    if (id !== undefined && !locations.some(item => item.id === id)) return false;
+    if (typeof dialog.showModal !== 'function') return false;
+    if (!dialog.open) {
+      opener = document.activeElement;
+      trail = [null];
+      if (id !== undefined) trail.push(id);
+      render();dialog.showModal();
+      document.body.classList.add('bf-location-preview-open');
+      title.focus({preventScroll:true});
+    } else if (id !== undefined) {
+      trail.push(id);render();
+    }
+    return true;
+  }
+  function close() {
+    if (!dialog.open) return false;
+    dialog.close();return true;
+  }
+  function back() {
+    if (!dialog.open) return false;
+    if (trail.length>1) {trail.pop();render();return true;}
+    return close();
+  }
+  dialog.addEventListener('close',() => {
+    document.body.classList.remove('bf-location-preview-open');
+    trail = [];
+    if (opener?.isConnected) opener.focus({preventScroll:true});
+  });
+  dialog.addEventListener('click',event => {
+    const link = event.target.closest('button[data-bf-location]');
+    if (link) open(link.dataset.bfLocation);
+  });
+  dialog.addEventListener('keydown',event => {
+    if (event.key !== 'Tab') return;
+    const buttons = Array.from(dialog.querySelectorAll('button:not(:disabled)'))
+      .filter(button => button.getClientRects().length);
+    if (!buttons.length) return;
+    const first = buttons[0], last = buttons[buttons.length-1];
+    if (!buttons.includes(document.activeElement) ||
+        (event.shiftKey && document.activeElement === first) ||
+        (!event.shiftKey && document.activeElement === last)) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+    }
+  });
+  backButton.addEventListener('click',back);
+  dialog.querySelector('#bf-location-close').addEventListener('click',close);
+  launch.querySelector('button').addEventListener('click',() => open());
+  window.BFLocationPreview = Object.freeze({open,close,back,get isOpen(){return dialog.open;}});
 })();

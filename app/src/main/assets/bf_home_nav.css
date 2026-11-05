@@ -1263,3 +1263,42 @@ body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-evo-open {
 body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-original-profile:focus-visible {
   outline:3px solid #b8ebff;outline-offset:2px;
 }
+
+/* UI-first location directory and unavailable-service screens. */
+.bf-location-launch{margin:14px 0;padding:16px;border:1px solid #ad8d50;border-radius:12px;background:linear-gradient(145deg,#253c45,#14232f);color:#f4ead2}
+.bf-location-launch strong{font:700 17px Georgia,serif;letter-spacing:.05em}
+.bf-location-launch p{margin:8px 0 14px;font:14px/1.5 system-ui,sans-serif;color:#e0e5de}
+.bf-location-launch button,.bf-location-exchange{width:100%;min-height:48px;padding:12px;border:1px solid #dfc17c;border-radius:7px;background:linear-gradient(#5b4931,#30291f);color:#fff0c9;font-weight:800;white-space:normal}
+body.bf-location-preview-open{overflow:hidden}
+#bf-location-dialog{box-sizing:border-box;width:calc(100% - 20px);max-width:540px;max-height:calc(100% - 24px);max-height:calc(100dvh - 24px);margin:auto;padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid #cba963;border-radius:14px;background:linear-gradient(160deg,#243d48,#13202e 65%);color:#f7efdb;box-shadow:0 12px 45px #000a;font:15px/1.5 system-ui,sans-serif}
+#bf-location-dialog::backdrop{background:#050d18df}
+#bf-location-dialog *{box-sizing:border-box;min-width:0}
+#bf-location-dialog button{font:700 12px/1.4 system-ui,sans-serif;cursor:pointer}
+#bf-location-dialog button:disabled{cursor:default}
+#bf-location-dialog button:focus-visible,#bf-location-title:focus-visible,.bf-location-launch button:focus-visible{outline:3px solid #fff3b6;outline-offset:3px}
+.bf-location-header{display:flex;align-items:center;justify-content:space-between;gap:6px;position:sticky;top:0;z-index:1;padding:8px;background:#172a36;border-bottom:1px solid #8b7952}
+.bf-location-header span{font:700 12px Georgia,serif;letter-spacing:.08em;text-align:center}
+.bf-location-header button{min-height:44px;padding:8px;border:1px solid #a48e60;border-radius:5px;background:#283b45;color:#fce6b1}
+.bf-location-header button[hidden]{display:none!important}
+.bf-location-body{padding:18px 16px 20px}
+.bf-location-kicker{margin:0 0 6px;color:#ead19a;font-size:11px;font-weight:800;letter-spacing:.15em}
+#bf-location-title{margin:0 0 12px;font:700 27px/1.2 Georgia,serif;color:#ffedbe;overflow-wrap:anywhere}
+.bf-location-body p{overflow-wrap:anywhere}
+.bf-location-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.bf-location-directory button{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;padding:10px 8px;border:1px solid #93815b;border-radius:9px;background:linear-gradient(#30434b,#1a2d39);color:#f6e4bb;text-align:center;min-height:156px}
+.bf-location-directory img{width:100%;max-width:170px;height:76px;object-fit:contain;filter:drop-shadow(0 3px 4px #0008)}
+.bf-location-directory strong{font:700 16px/1.25 Georgia,serif}
+.bf-location-directory span{font-size:10px;color:#dde8e6}
+.bf-location-hero{border:1px solid #8d7c55;border-radius:9px;background:radial-gradient(ellipse at center,#42565a,#172b38);padding:15px 12px;text-align:center}
+.bf-location-hero img{display:block;margin:auto;max-width:100%;width:245px;height:130px;object-fit:contain;filter:drop-shadow(0 5px 5px #0009)}
+.bf-location-hero-small img{width:100px;height:80px}
+.bf-location-hero p{margin:12px 0 0;color:#f2d8a3;font:italic 17px/1.4 Georgia,serif}
+.bf-location-services{display:grid;gap:10px;margin:16px 0}
+.bf-location-services section{padding:13px;border-left:3px solid #c1a15e;border-radius:4px;background:#0c1b2880}
+.bf-location-services h2{margin:0 0 5px;font:700 17px/1.3 Georgia,serif;color:#f0dbb3}
+.bf-location-services p{margin:0;color:#d1dddf;font-size:14px}
+.bf-location-exchange{margin-bottom:12px}
+#bf-location-dialog .bf-location-unavailable{width:100%;min-height:48px;padding:12px;border:1px solid #65717a;border-radius:6px;background:#26343e;color:#c5cdd2;white-space:normal}
+.bf-location-disclaimer{margin:18px 0 0;padding-top:12px;border-top:1px solid #62717a;color:#c7d4d9;font-size:12px}
+@media(min-width:480px){.bf-location-body{padding:22px 24px}.bf-location-directory button{min-height:174px}.bf-location-directory img{height:90px}}
+@media(prefers-reduced-motion:reduce){#bf-location-dialog{scroll-behavior:auto}}

@@ -506,6 +506,15 @@ jobs:
           path: source_audit_reports/v272_nested_ui_capture/
           if-no-files-found: error
           retention-days: 90
+      - name: Verify and capture UI-only location screens
+        run: python3 test_bf_location_previews.py --capture
+      - name: Upload location UI previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-location-ui-previews
+          path: source_audit_reports/location-ui-previews/
+          if-no-files-found: error
+          retention-days: 90
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))

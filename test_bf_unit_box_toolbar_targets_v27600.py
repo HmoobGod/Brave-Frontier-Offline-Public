@@ -3,6 +3,7 @@
 No owner phone or persistent game save is accessed; all browser state is disposable.
 """
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -18,7 +19,13 @@ assert CSS.count(MARK)==1
 DELTA=CSS.split(MARK,1)[1]
 assert "body.bf-menu-mode .bf-owned-box .bf-box-filters input" in DELTA
 assert "body.bf-menu-mode .bf-owned-box .bf-box-filters select" in DELTA
-assert "min-height:44px" in DELTA and "display:none" not in DELTA
+assert "min-height:44px" in DELTA
+# Scope visibility checks to these controls, including later CSS overrides.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}', CSS)
+                  if '.bf-box-filters' in selectors]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in visibility_rules)
 assert ".bf-box-filters input:focus-visible,.bf-box-filters select:focus-visible" in CSS
 assert "test_bf_unit_box_toolbar_targets_v27600.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_unit_box_toolbar_targets_v27600.py")==1
