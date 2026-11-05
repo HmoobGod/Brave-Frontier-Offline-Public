@@ -1593,6 +1593,34 @@ function bfOfflineUnitPortraitV266(source, name) {
   refresh();
 })();
 
+/* Session-only Quest preview audio settings; no saved preferences or autoplay. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-menu-settings'))return;
+  const panel=document.createElement('details');panel.id='bf-menu-settings';
+  panel.innerHTML='<summary>SETTINGS <small>CURRENT SESSION</small></summary><div class="bf-session-settings-body"><h2>Quest preview music</h2><p>Adjust the existing Quest music preview player. These settings reset when the app reloads.</p><label for="bf-session-volume">Volume <output id="bf-session-volume-value" for="bf-session-volume">Unavailable</output></label><input id="bf-session-volume" aria-label="Quest preview music volume" type="range" min="0" max="100" step="1" /><label class="bf-session-mute"><input id="bf-session-mute" type="checkbox" /> Mute quest preview music</label><p id="bf-session-audio-state" role="status" aria-live="polite"></p><p>To play a track, open Quest and use Original Global Music. Changing settings does not start playback.</p><section><h3>Sound effects</h3><p>Sound-effect settings are not implemented yet.</p><button type="button" disabled>SOUND EFFECTS · UNAVAILABLE</button></section></div>';
+  menu.prepend(panel);
+  const volume=panel.querySelector('#bf-session-volume'),mute=panel.querySelector('#bf-session-mute'),value=panel.querySelector('output'),status=panel.querySelector('[role="status"]');
+  const audio=document.querySelector('.bf-global-audio audio');
+  function sync(){
+    volume.disabled=!audio;mute.disabled=!audio;
+    if(!audio){value.textContent='Unavailable';status.textContent='The Quest preview player is unavailable in this view.';return;}
+    volume.value=String(Math.round(audio.volume*100));mute.checked=audio.muted;
+    value.textContent=volume.value+'%';
+    status.textContent=audio.muted?'Quest preview music is muted.':'Quest preview volume: '+volume.value+'%.';
+  }
+  volume.addEventListener('input',()=>{
+    const next=Number(volume.value);
+    if(audio&&Number.isInteger(next)&&next>=0&&next<=100)audio.volume=next/100;
+    sync();
+  });
+  mute.addEventListener('change',()=>{if(audio)audio.muted=mute.checked;sync();});
+  if(audio)audio.addEventListener('volumechange',sync);
+  panel.addEventListener('toggle',()=>{if(panel.open)sync();});
+  sync();
+})();
+
 /* Keep raw battle diagnostics available without crowding the player Menu. */
 (() => {
   'use strict';
