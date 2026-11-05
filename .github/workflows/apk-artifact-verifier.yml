@@ -1,0 +1,26 @@
+name: Offline APK artifact verifier tests
+on:
+  pull_request:
+    paths:
+      - 'tools/verify_ci_apk.py'
+      - 'test_ci_apk_verifier.py'
+      - '.github/workflows/apk-artifact-verifier.yml'
+      - 'APK_ARTIFACT_VERIFICATION.md'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verifier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_ci_apk_verifier.py

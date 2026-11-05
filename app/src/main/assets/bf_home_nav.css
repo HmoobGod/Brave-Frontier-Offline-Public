@@ -1245,3 +1245,21 @@ body.bf-menu-mode .training-panel .training-toolbar input:focus-visible,
 body.bf-menu-mode .training-panel .training-toolbar select:focus-visible {
   outline:3px solid #b6e9ff;outline-offset:2px;
 }
+
+/* v276 Unit Box toolbar: five 44px phone controls without changing filter logic. */
+body.bf-menu-mode .bf-owned-box .bf-box-filters input,
+body.bf-menu-mode .bf-owned-box .bf-box-filters select {
+  box-sizing:border-box;min-height:44px;
+}
+
+/* v277 Unit Box detail navigation: accessible touch targets, no changed actions. */
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-manage,
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-original-profile,
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-evo-open {
+  box-sizing:border-box;min-width:44px;min-height:44px;max-width:100%;
+  padding:10px 9px;line-height:1.35;white-space:normal;
+  overflow-wrap:anywhere;touch-action:manipulation;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-original-profile:focus-visible {
+  outline:3px solid #b8ebff;outline-offset:2px;
+}
