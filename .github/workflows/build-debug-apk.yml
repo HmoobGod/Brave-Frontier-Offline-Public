@@ -309,6 +309,7 @@ jobs:
           python test_bf_original_ailment_state_v5700.py
           python test_bf_poison_turn_v5800.py
           python test_bf_curse_bb_lock_v5900.py
+          python3 test_bf_queued_curse_dispatch.py
           python test_bf_paralysis_action_lock_v6000.py
           python3 test_bf_auto_disabled_support.py
           python3 test_bf_auto_support_strength.py
