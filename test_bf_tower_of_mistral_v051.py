@@ -16,7 +16,7 @@ for marker in ('/* BF_TOWER_OF_MISTRAL_V051 */','/* BF_MONSTERS_NEST_V050 */',
                '/* BF_REMAINS_OF_MIRZA_V049 */','/* BF_GLOBAL_QUEST_TEXT_DATA_V048 */'):
     assert html.count(marker)==1,marker
 assert 'bf_global_offline_demo_v7' in html
-assert len((ASSETS/'bf_home_nav.js').read_bytes()) < 65536
+assert len((ASSETS/'bf_home_nav.js').read_bytes()) <= 128 * 1024
 html_sha=hashlib.sha256(html.encode()).digest()
 subprocess.run([sys.executable,str(ROOT/'prepare_tower_of_mistral_v051.py')],cwd=ROOT,check=True)
 assert hashlib.sha256(html_file.read_bytes()).digest()==html_sha

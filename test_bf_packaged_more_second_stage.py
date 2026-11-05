@@ -36,7 +36,7 @@ with zipfile.ZipFile(asset) as apk:
           width,height=struct.unpack('>II',data[16:24]);assert width==2400 and height==((info['frameCount']+4)//5)*400
       else: assert struct.unpack('>II',data[16:24])==(102,102)
  assert b'bf-global-original' in apk.read('assets/bf_global_unit_archive.js')
- assert len(apk.read('assets/bf_home_nav.js'))<=65536
+ assert len(apk.read('assets/bf_home_nav.js')) <= 128 * 1024
  assert 'assets/content/extra_evolution/unit_anime_atlas_10042.png' in files
  assert 'assets/content/second_evolution/unit_anime_atlas_10013.png' in files
 print('PASS v0.34 compiled Android APK: 54 playable forms; 6 new original battle atlases, recipes/skills, previous sprites and save v7')

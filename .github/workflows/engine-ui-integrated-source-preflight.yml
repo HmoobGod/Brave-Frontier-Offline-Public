@@ -1,0 +1,35 @@
+name: Integrated engine UI source preflight v230
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/engine-ui-integrated-source-preflight.yml'
+      - '.github/workflows/build-debug-apk.yml'
+      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+      - 'app/src/main/assets/bf_home_nav.css'
+      - 'app/src/main/assets/bf_home_nav.js'
+      - 'test_bf_engine_ui_integrated_v23000.py'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated-engine-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate all five engine/UI source features
+        run: |
+          python3 test_bf_android_back_home_v22500.py --source-only
+          python3 test_bf_engine_webview_recovery_v22600.py
+          python3 test_bf_engine_ui_touch_v22700.py --source-only
+          python3 test_bf_engine_ui_asset_budget_v22800.py
+          python3 test_bf_offline_page_recovery_v22900.py
+          python3 test_bf_engine_ui_integrated_v23000.py

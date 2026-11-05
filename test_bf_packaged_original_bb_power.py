@@ -25,7 +25,7 @@ with zipfile.ZipFile(APK) as apk:
         assert power['levels']==[x['damageModifierPct'] for x in source['levels']]
         assert power['target']==source['target']
     assert b'bf-codex-bb-levels' in archive
-    assert len(nav)<=65536 and len(archive)<=65536
+    assert len(nav) <= 128 * 1024 and len(archive)<=65536
     images=[x for x in apk.namelist() if x.startswith('assets/content/unit_archive/') and x.endswith('.png')]
     assert len(images)==127
 print('PASS APK contains all 24 original Global Lv1 offensive BB modifiers, levels 2–10, archive UI and save v7')

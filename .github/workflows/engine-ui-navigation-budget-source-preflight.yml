@@ -1,0 +1,30 @@
+name: Engine UI navigation asset size source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/engine-ui-navigation-budget-source-preflight.yml'
+      - '.github/workflows/build-debug-apk.yml'
+      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+      - 'app/src/main/assets/bf_home_nav.js'
+      - 'app/src/main/assets/bf_home_nav.css'
+      - 'test_bf_engine_ui_asset_budget_v22800.py'
+      - 'V228_ENGINE_UI_NAVIGATION_ASSET_BUDGET.md'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui-navigation-budget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify bounded local navigation assets and save isolation
+        run: python3 test_bf_engine_ui_asset_budget_v22800.py

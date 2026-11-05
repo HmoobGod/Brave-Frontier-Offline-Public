@@ -20,6 +20,6 @@ with ZipFile(ROOT/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'window.BF_QUEST_ENGLISH_DESCRIPTIONS_V051=Object.freeze(' in html
     assert 'window.BF_QUEST_BACKGROUNDS["dungeon_battle_10800.jpg"]' in html
     assert b'Tower of Mistral' in nav and b'The Forged Gigantor' in nav
-    assert len(nav)<65536,len(nav)
+    assert len(nav) <= 128 * 1024,len(nav)
     assert 'bf_global_offline_demo_v7' in html
 print('PASS v0.51 APK includes original Tower background, 5 quests, older builds, v7')

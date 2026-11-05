@@ -34,18 +34,185 @@ public class MainActivity extends Activity {
     private FrameLayout gameContainer;
     private ValueCallback<Uri[]> pendingUpload;
     private String saveToWrite;
+    // v229: distinguish a failed packaged main document from failed subresources.
+    private boolean offlinePageLoadFailed = false;
+    // v234: consume exactly one native main-page load request, never a second
+    // onPageStarted callback for the same failed navigation.
+    private boolean nativeMainLoadRequested = false;
+    private android.app.AlertDialog offlinePageFailureDialog;
+    // v231: keep the renderer-recovery window owned by this Activity lifecycle.
+    private android.app.AlertDialog rendererFailureDialog;
+    private void dismissRendererFailureDialog() {
+        if (rendererFailureDialog == null) return;
+        rendererFailureDialog.dismiss();
+        rendererFailureDialog = null;
+    }
+    private static final String OFFLINE_MAIN_PAGE = "file:///android_asset/index.html";
+    // v241 RAM-only bounded, coarse events. No player data or persistence.
+    private final java.util.ArrayDeque<String> isolatedTrace = new java.util.ArrayDeque<>();
+    private android.app.AlertDialog isolatedTraceDialog;
+    // v236: diagnostic breadcrumbs, restricted to a debuggable APK.
+    // Never write a URL, player state, private data, or WebView contents to logcat.
+    private void traceOfflinePage(String event, WebView view, boolean mainPage) {
+        if ((getApplicationInfo().flags &
+                android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) == 0) return;
+        android.util.Log.d("BFOfflineTrace",
+                event + " current=" + (view == game) +
+                " main=" + mainPage +
+                " pending=" + nativeMainLoadRequested +
+                " failed=" + offlinePageLoadFailed +
+                " dialog=" + (offlinePageFailureDialog != null));
+        appendIsolatedTrace(event, view, mainPage);
+    }
+    private void dismissOfflinePageError() {
+        if (offlinePageFailureDialog == null) return;
+        offlinePageFailureDialog.dismiss();
+        offlinePageFailureDialog = null;
+    }
+    private void offerOfflinePageRetry(WebView failedView) {
+        if (offlinePageFailureDialog != null || game != failedView ||
+                isFinishing() || isDestroyed()) return;
+        offlinePageFailureDialog = new android.app.AlertDialog.Builder(this)
+                .setTitle("Offline game could not start")
+                .setMessage("The packaged game page could not be opened. Try again or close the app. Your saved progress is not erased." + isolatedFailureSuffix())
+                .setPositiveButton("Try again", (dialog, which) -> {
+                    offlinePageFailureDialog = null;
+                    if (game == failedView && !isFinishing() && !isDestroyed()) {
+                        // Keep the prior failure latched until this retry actually starts.
+                        nativeMainLoadRequested = true;
+                        traceOfflinePage("retryRequested", failedView, true);
+                        failedView.loadUrl(OFFLINE_MAIN_PAGE);
+                    }
+                })
+                .setNegativeButton("Close", (dialog, which) -> {
+                    offlinePageFailureDialog = null;
+                    finish();
+                })
+                .setCancelable(false)
+                .create();
+        offlinePageFailureDialog.show();
+    }
     private static final int PICK_BACKGROUND = 1001;
     private static final int PICK_SAVE_FILE = 1002;
     private static final int CREATE_SAVE_FILE = 1003;
     private static final int MAX_SAVE_BYTES = 1024 * 1024;
+    // v225: route-only Android Back handling. Do not mutate P, S, or v7 saves.
+    private boolean backNavigationPending = false;
+    private int backDispatchToken = 0;
+    private Runnable backTimeout;
+    private static final long UI_BACK_TIMEOUT_MS = 2500L;
+    private final android.os.Handler uiHandler =
+            new android.os.Handler(android.os.Looper.getMainLooper());
+
+    // The separate diagnostic app alone may expose recent event names.
+    private boolean isIsolatedTraceApp() {
+        return "org.bravefrontier.offline.diagnostic".equals(getPackageName()) &&
+                (getApplicationInfo().flags &
+                 android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+    private void appendIsolatedTrace(String event, WebView view, boolean mainPage) {
+        if (!isIsolatedTraceApp()) return;
+        switch (event) {
+            case "initialRequested": case "retryRequested":
+            case "onPageStarted": case "startAccepted":
+            case "onReceivedErrorMain": case "onReceivedErrorSubresource":
+            case "failureLatched": case "rendererGone":
+            case "onPageFinished": case "injectionAttempt":
+            case "activityDestroy": break;
+            default: return;
+        }
+        String line = event + " main=" + mainPage +
+                " current=" + (view == game) +
+                " pending=" + nativeMainLoadRequested +
+                " failed=" + offlinePageLoadFailed +
+                " dialog=" + (offlinePageFailureDialog != null);
+        if (isolatedTrace.size() >= 16) isolatedTrace.removeFirst();
+        isolatedTrace.addLast(line);
+    }
+    private String isolatedTraceText() {
+        if (!isIsolatedTraceApp()) return "";
+        StringBuilder text = new StringBuilder();
+        for (String event : isolatedTrace) {
+            if (text.length() > 0) text.append('\n');
+            text.append(event);
+        }
+        return text.length() == 0 ? "No events yet" : text.toString();
+    }
+    private void dismissIsolatedTraceDialog() {
+        if (isolatedTraceDialog == null) return;
+        isolatedTraceDialog.dismiss();
+        isolatedTraceDialog = null;
+    }
+    private void showIsolatedTrace() {
+        if (!isIsolatedTraceApp() || isFinishing() || isDestroyed()) return;
+        dismissIsolatedTraceDialog();
+        final String report = "BF Offline Diagnostic / coarse events only\n" +
+                isolatedTraceText();
+        final android.app.AlertDialog shown = new android.app.AlertDialog.Builder(this)
+                .setTitle("Diagnostic launch trace")
+                .setMessage(report)
+                .setPositiveButton("Copy event text", (dialog, which) -> {
+                    android.content.ClipboardManager clipboard =
+                            (android.content.ClipboardManager)
+                            getSystemService(CLIPBOARD_SERVICE);
+                    if (clipboard != null) clipboard.setPrimaryClip(
+                            android.content.ClipData.newPlainText(
+                                    "BF Offline Diagnostic", report));
+                })
+                .setNegativeButton("Close", null)
+                .create();
+        isolatedTraceDialog = shown;
+        shown.setOnDismissListener(dialog -> {
+            if (isolatedTraceDialog == shown) isolatedTraceDialog = null;
+        });
+        shown.show();
+    }
+    private String isolatedFailureSuffix() {
+        return isIsolatedTraceApp() ? "\n\nDiagnostic events:\n" + isolatedTraceText() : "";
+    }
+    private void addIsolatedTraceControl() {
+        if (!isIsolatedTraceApp() || gameContainer == null) return;
+        android.widget.Button button = new android.widget.Button(this);
+        button.setText("TRACE");
+        button.setTextSize(11f);
+        button.setContentDescription("View diagnostic launch events");
+        button.setAlpha(0.85f);
+        button.setAllCaps(false);
+        button.setOnClickListener(v -> showIsolatedTrace());
+        FrameLayout.LayoutParams bounds = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                android.view.Gravity.BOTTOM | android.view.Gravity.END);
+        final float density = getResources().getDisplayMetrics().density;
+        // Bottom navigation is approximately 70dp; avoid covering MENU / SAVES.
+        bounds.setMargins(0, 0, (int) (8 * density), (int) (84 * density));
+        gameContainer.addView(button, bounds);
+    }
+    private void clearPendingBack() {
+        backNavigationPending = false;
+        backDispatchToken++;
+        if (backTimeout != null) {
+            uiHandler.removeCallbacks(backTimeout);
+            backTimeout = null;
+        }
+    }
+    private static final String UI_BACK_JS =
+            "(function(){try{var n=window.BF_homeNav;return !!(n&&n.current!=='home'&&typeof n.go==='function'&&n.go('home'));}catch(e){return false;}})();";
 
     // Small, bounded local UI resources; never read files outside this APK.
+    private static final int UI_RESOURCE_LIMIT_BYTES = 64 * 1024;
+    private static final int NAV_RESOURCE_LIMIT_BYTES = 128 * 1024;
+    private static int packagedUiResourceLimit(String file) {
+        return "bf_home_nav.js".equals(file) || "bf_home_nav.css".equals(file)
+                ? NAV_RESOURCE_LIMIT_BYTES : UI_RESOURCE_LIMIT_BYTES;
+    }
     private String readPackagedText(String file) throws IOException {
+        final int maxBytes = packagedUiResourceLimit(file);
         try (InputStream in = getAssets().open(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[4096];
             int count;
             while ((count = in.read(buffer)) != -1) {
-                if (out.size() + count > 64 * 1024) throw new IOException("Oversized UI resource");
+                if (out.size() + count > maxBytes) throw new IOException("Oversized UI resource");
                 out.write(buffer, 0, count);
             }
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
@@ -122,11 +289,73 @@ public class MainActivity extends Activity {
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         game.setWebViewClient(new WebViewClient() {
+            // v234: only the first start for an explicit native main-page
+            // load can clear a prior failure. A duplicate start cannot.
+            @Override public void onPageStarted(WebView view, String url,
+                    android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                traceOfflinePage("onPageStarted", view, OFFLINE_MAIN_PAGE.equals(url));
+                if (view != game || !OFFLINE_MAIN_PAGE.equals(url)) return;
+                if (!nativeMainLoadRequested) return;
+                nativeMainLoadRequested = false;
+                offlinePageLoadFailed = false;
+                dismissOfflinePageError();
+                traceOfflinePage("startAccepted", view, true);
+            }
+            @Override public void onReceivedError(WebView view,
+                    android.webkit.WebResourceRequest request,
+                    android.webkit.WebResourceError error) {
+                super.onReceivedError(view, request, error);
+                traceOfflinePage(request != null && request.isForMainFrame() ?
+                        "onReceivedErrorMain" : "onReceivedErrorSubresource", view,
+                        request != null && OFFLINE_MAIN_PAGE.equals(String.valueOf(request.getUrl())));
+                if (view != game || request == null || !request.isForMainFrame() ||
+                        !OFFLINE_MAIN_PAGE.equals(String.valueOf(request.getUrl()))) return;
+                nativeMainLoadRequested = false;
+                offlinePageLoadFailed = true;
+                traceOfflinePage("failureLatched", view, true);
+                android.util.Log.e("BraveFrontier", "Packaged offline main page failed to load");
+                offerOfflinePageRetry(view);
+            }
+            @Override public boolean onRenderProcessGone(
+                    WebView view, android.webkit.RenderProcessGoneDetail detail) {
+                if (view != game) return false;
+                traceOfflinePage("rendererGone", view, true);
+                nativeMainLoadRequested = false;
+                clearPendingBack();
+                dismissOfflinePageError();
+                android.util.Log.e("BraveFrontier", "Offline WebView renderer exited");
+                if (pendingUpload != null) {
+                    pendingUpload.onReceiveValue(null);
+                    pendingUpload = null;
+                }
+                if (gameContainer != null) gameContainer.removeView(view);
+                view.removeJavascriptInterface("BFAndroid");
+                view.destroy();
+                game = null;
+                if (!isFinishing() && !isDestroyed()) {
+                    // Keep the dialog referenced until Activity destruction so it cannot leak a window.
+                    dismissRendererFailureDialog();
+                    rendererFailureDialog = new android.app.AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Offline display stopped")
+                            .setMessage("The game display stopped responding. Restarting it reloads your last saved progress; unsaved actions may be lost. Your saved data is not erased." + isolatedFailureSuffix())
+                            .setPositiveButton("Restart interface", (dialog, which) -> recreate())
+                            .setNegativeButton("Close", (dialog, which) -> finish())
+                            .setCancelable(false)
+                            .create();
+                    rendererFailureDialog.show();
+                }
+                return true;
+            }
             // Load the independent navigation layer after the original page completes.
             // Inline injection avoids file:// cross-file script restrictions.
             @Override public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                if (!"file:///android_asset/index.html".equals(url)) return;
+                traceOfflinePage("onPageFinished", view, OFFLINE_MAIN_PAGE.equals(url));
+                // v233: a destroyed or replaced WebView must never receive late UI injection.
+                if (view != game) return;
+                if (!OFFLINE_MAIN_PAGE.equals(url) || offlinePageLoadFailed) return;
+                traceOfflinePage("injectionAttempt", view, true);
                 try {
                     String css = readPackagedText("bf_home_nav.css");
                     String js = readPackagedText("bf_home_nav.js");
@@ -1180,8 +1409,11 @@ public class MainActivity extends Activity {
         settings.setAllowUniversalAccessFromFileURLs(false);
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         game.addJavascriptInterface(new SaveBridge(), "BFAndroid");
+        nativeMainLoadRequested = true;
+        traceOfflinePage("initialRequested", game, true);
         game.loadUrl("file:///android_asset/index.html");
         gameContainer.addView(game, new FrameLayout.LayoutParams(-1, -1));
+        addIsolatedTraceControl();
         setContentView(gameContainer);
         if (state != null) saveToWrite = state.getString("pending_save_to_write");
     }
@@ -1230,11 +1462,44 @@ public class MainActivity extends Activity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-    @Override public void onBackPressed() {
+    private void fallbackAndroidBack() {
         if (game != null && game.canGoBack()) game.goBack();
         else super.onBackPressed();
     }
+    @Override public void onBackPressed() {
+        if (backNavigationPending) return;
+        if (game == null) {super.onBackPressed();return;}
+        backNavigationPending = true;
+        final int token = ++backDispatchToken;
+        backTimeout = () -> {
+            if (!backNavigationPending || token != backDispatchToken) return;
+            android.util.Log.w("BraveFrontier", "Android Back JS callback timed out");
+            clearPendingBack();
+            if (!isFinishing() && !isDestroyed()) fallbackAndroidBack();
+        };
+        if (!uiHandler.postDelayed(backTimeout, UI_BACK_TIMEOUT_MS)) {
+            clearPendingBack();
+            fallbackAndroidBack();
+            return;
+        }
+        try {
+            game.evaluateJavascript(UI_BACK_JS, handled -> {
+                if (!backNavigationPending || token != backDispatchToken) return;
+                clearPendingBack();
+                if (isFinishing() || isDestroyed()) return;
+                if ("true".equals(handled)) return;
+                fallbackAndroidBack();
+            });
+        } catch (RuntimeException error) {
+            if (backNavigationPending && token == backDispatchToken) {
+                clearPendingBack();
+                android.util.Log.w("BraveFrontier", "Android back route dispatch unavailable", error);
+                if (!isFinishing() && !isDestroyed()) fallbackAndroidBack();
+            }
+        }
+    }
     @Override protected void onPause() {
+        clearPendingBack();
         if (game != null) game.onPause();
         super.onPause();
     }
@@ -1243,6 +1508,12 @@ public class MainActivity extends Activity {
         if (game != null) game.onResume();
     }
     @Override protected void onDestroy() {
+        traceOfflinePage("activityDestroy", game, true);
+        nativeMainLoadRequested = false;
+        dismissIsolatedTraceDialog();
+        dismissRendererFailureDialog();
+        dismissOfflinePageError();
+        clearPendingBack();
         if (game != null) {game.removeJavascriptInterface("BFAndroid");game.destroy();game = null;}
         super.onDestroy();
     }

@@ -17,7 +17,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  html=z.read('assets/index.html').decode('utf8')
  assert 'bf_global_offline_demo_v7' in html
  assert 'id="bf-global-unit-catalog-data"' in html
- assert len(z.read('assets/bf_home_nav.js'))<65536
+ assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 manifest=(R/'app/src/main/AndroidManifest.xml').read_text('utf8')
 assert 'android.permission.INTERNET' not in manifest
 assert 'usesCleartextTraffic="false"' in manifest

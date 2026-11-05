@@ -119,6 +119,8 @@ body.bf-menu-mode .wrap{max-width:540px}
   .bf-nav-art-units{background-position:-120px 0}
   .bf-nav-art-quest{background-position:-40px -77px}
   .bf-nav-art-summon{background-position:-79px -193px}
+  /* Menu uses a standalone original button PNG, not a cell in footer_btn2. */
+  .bf-nav-art-menu{background-size:contain;background-position:center}
 }
 
 
@@ -501,3 +503,887 @@ body.bf-menu-mode .squad-panel .tools .bf-original-auto-action[aria-pressed="tru
   line-height:1.35;
   letter-spacing:.01em;
 }
+
+/* v227: Home/route touch and focus accessibility, presentation-only.
+   Never modify battle animation speed, gameplay timers or save state. */
+body.bf-menu-mode .bf-navbar button,
+body.bf-menu-mode #bf-home button {
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:rgba(184,235,255,.20);
+}
+body.bf-menu-mode .bf-navbar button {
+  min-height:60px;
+  min-width:0;
+}
+body.bf-menu-mode .bf-navbar button:focus-visible,
+body.bf-menu-mode #bf-home button:focus-visible {
+  outline:3px solid #b8ebff;
+  outline-offset:2px;
+}
+@media (prefers-reduced-motion:reduce) {
+  body.bf-menu-mode .bf-navbar button,
+  body.bf-menu-mode #bf-home button,
+  body.bf-menu-mode .bf-route-title {
+    transition-duration:0.01ms!important;
+    animation-duration:0.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
+
+
+/* v242: visual-first Home hierarchy. Archived Global location sprites stay
+   unchanged; active Quest/Summon appear ahead of read-only location art. */
+.bf-scene-places{gap:8px}
+.bf-scene-available-label,.bf-scene-archive-label{
+  grid-column:1/-1;display:flex;align-items:baseline;flex-wrap:wrap;
+  justify-content:space-between;gap:4px 8px;min-width:0;
+  padding:7px 5px 5px;color:#f5d99d;border-bottom:1px solid #aa8b54;
+}
+.bf-scene-available-label strong,.bf-scene-archive-label strong{
+  font:900 12px/1.25 Georgia,serif;letter-spacing:.04em;
+}
+.bf-scene-available-label small,.bf-scene-archive-label small{
+  color:#c8d6e6;font:10px/1.25 Arial,sans-serif;
+}
+.bf-scene-archive-label{margin-top:5px;color:#b9c7d8;border-color:#637189}
+.bf-scene-places button.bf-scene-featured{
+  box-sizing:border-box;min-height:159px;border:2px ridge #e3b96c;
+  background:radial-gradient(ellipse at 50% 38%,#675675,#243750 70%,#141f31);
+  box-shadow:inset 0 1px 2px #ffefb04a,0 5px 11px #000a;
+  touch-action:manipulation;
+}
+.bf-scene-places .bf-scene-featured img{height:112px}
+.bf-scene-places .bf-scene-featured .bf-scene-status{
+  min-height:18px;padding:7px 5px;font-size:11px;letter-spacing:.035em;
+  background:linear-gradient(#d8a65a,#774e27);border-color:#efc881;
+}
+.bf-scene-places .bf-scene-locked{
+  min-height:89px;padding:4px 4px 7px;opacity:.76;
+  background:linear-gradient(#2d3849,#172334);
+}
+.bf-scene-places .bf-scene-locked img{height:69px}
+.bf-scene-places .bf-scene-locked .bf-scene-status{
+  font-size:10px;min-height:16px;padding:4px 2px;
+}
+.bf-scene-places button.bf-scene-featured:active{filter:brightness(1.15)}
+.bf-scene-places button.bf-scene-featured:focus-visible{
+  outline:3px solid #b8ebff;outline-offset:2px;
+}
+@media(max-width:359px){
+  .bf-scene-places button.bf-scene-featured{min-height:136px}
+  .bf-scene-places .bf-scene-featured img{height:89px}
+  .bf-scene-places .bf-scene-locked img{height:57px}
+  .bf-scene-available-label strong,.bf-scene-archive-label strong{font-size:11px}
+}
+
+/* v246: readable nameplates for original Global art-only location previews.
+   Labels duplicate existing accessible group names, so hidden from speech. */
+.bf-scene-places .bf-scene-locked .bf-scene-location-name{
+  display:block;max-width:100%;padding:3px 2px 2px;
+  text-align:center;overflow-wrap:anywhere;color:#f0d8ac;
+  font:900 11px/1.2 Georgia,serif;letter-spacing:.025em;
+}
+.bf-scene-places .bf-scene-locked .bf-scene-status{
+  font-size:10px;line-height:1.25;max-width:100%;
+}
+@media(max-width:359px){
+  .bf-scene-places .bf-scene-locked .bf-scene-location-name{font-size:10px}
+}
+
+/* v247: preserve original Home shortcut sprites while making five entries
+   readable and finger-sized on 320–412px phones; no route/style script edits. */
+.bf-scene-toolrow>button,.bf-scene-toolrow>.bf-scene-tool-locked{
+  box-sizing:border-box;min-height:88px;
+}
+.bf-scene-toolrow>button span,.bf-scene-toolrow>.bf-scene-tool-locked span{
+  display:block;max-width:100%;overflow-wrap:anywhere;
+  font-size:10px;line-height:1.3;
+}
+@media(max-width:412px){
+  .bf-scene-toolrow{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .bf-scene-toolrow>button,.bf-scene-toolrow>.bf-scene-tool-locked{
+    min-height:96px;padding:6px 4px 8px;
+  }
+  .bf-scene-toolrow img{height:60px}
+  .bf-scene-toolrow>button span,.bf-scene-toolrow>.bf-scene-tool-locked span{font-size:11px}
+}
+
+/* v248: original six-unit Home squad preview, readable on narrow phones.
+   Reflow only; squad roster, original portraits, levels and save data untouched. */
+@media(max-width:412px){
+  .bf-scene-party{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .bf-scene-member{box-sizing:border-box;min-height:130px;padding:7px 4px}
+  .bf-scene-member img{height:84px}
+  .bf-scene-member strong{font-size:11px;line-height:1.25}
+  .bf-scene-member small{font-size:10px;line-height:1.25}
+}
+
+/* v252 UI focus: consistent, readable original-art route headings across
+   Quest, Units, Summon and Menu. The existing navigation and save DOM stay
+   unchanged; the battle frame is a preserved original archive sprite. */
+body.bf-menu-mode .bf-route-title:not([hidden]){
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  min-height:55px;
+  max-width:100%;
+  margin:6px 0 9px;
+  padding:11px 15px;
+  border:1px solid #ac8e59;
+  border-radius:3px;
+  background:linear-gradient(90deg,rgba(10,19,33,.72),rgba(21,34,51,.62)),
+    url("content/battle/battle_dungeon_name_deco.png") center/100% 100% no-repeat;
+  color:#ffe7b5;
+  font:900 clamp(14px,4.4vw,19px)/1.3 Georgia,serif;
+  letter-spacing:.045em;
+  text-shadow:0 2px 3px #05080d;
+  overflow-wrap:anywhere;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .bf-route-title:not([hidden]){
+    min-height:49px;
+    padding:9px 10px;
+    margin:4px 0 7px;
+    font-size:14px;
+  }
+}
+
+/* v253 UI-only: original-art Quest mission cards stay readable and
+   touch-accessible on 320px phones. Core quest selection/unlocks are unchanged. */
+body.bf-menu-mode .questpanel #questlist button.questcard{
+  box-sizing:border-box;
+  max-width:100%;
+  min-width:0;
+  min-height:68px;
+  padding:10px 12px;
+  margin-block:4px;
+  border:2px ridge #9d865e;
+  border-radius:5px;
+  background-image:linear-gradient(110deg,rgba(18,31,50,.73),rgba(26,39,57,.61)),
+    url("content/mission_select/mission_frame_off.png");
+  background-size:100% 100%;
+  color:#f5e7c8;
+  text-align:left;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard strong{
+  display:block;
+  max-width:100%;
+  color:#ffe4ac;
+  font:900 13px/1.35 Georgia,serif;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard small{
+  display:block;
+  max-width:100%;
+  margin-top:4px;
+  color:#d0ddec;
+  font:11px/1.4 Arial,sans-serif;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:disabled{
+  opacity:.53;
+  filter:grayscale(.50);
+  cursor:not-allowed;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:focus-visible{
+  outline:3px solid #b4eaff;
+  outline-offset:2px;
+}
+body.bf-menu-mode .questpanel #questlist button.questcard:active:not(:disabled){
+  filter:brightness(1.15);
+}
+@media(max-width:359px){
+  body.bf-menu-mode .questpanel #questlist button.questcard{
+    min-height:76px;
+    padding:9px 8px;
+  }
+  body.bf-menu-mode .questpanel #questlist button.questcard strong{font-size:12px}
+  body.bf-menu-mode .questpanel #questlist button.questcard small{font-size:10px}
+}
+
+/* v254 UI-only: readable Unit Box portraits, long owned-unit names and
+   selection state. The existing owned roster and detail/selection handlers
+   are untouched; all new behavior is responsive presentation. */
+body.bf-menu-mode .bf-owned-box .bf-box-card{
+  box-sizing:border-box;
+  min-width:0;
+  min-height:146px;
+  padding:7px 5px 9px;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card strong{
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  white-space:normal;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+  line-height:1.22;
+  min-height:2.44em;
+  max-width:100%;
+  text-align:center;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card span,
+body.bf-menu-mode .bf-owned-box .bf-box-card small{
+  overflow-wrap:anywhere;
+  max-width:100%;
+  text-align:center;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card[aria-pressed="true"]{
+  border-color:#f5d18d;
+  box-shadow:inset 0 0 0 2px #e5be75,0 0 10px #dba85b55;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-card:focus-visible{
+  outline:3px solid #c1ebff;
+  outline-offset:2px;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-detail{
+  max-width:100%;
+  box-sizing:border-box;
+  overflow-wrap:anywhere;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .bf-owned-box .bf-box-results{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  body.bf-menu-mode .bf-owned-box .bf-box-card{min-height:154px}
+  body.bf-menu-mode .bf-owned-box .bf-box-card img{height:73px}
+}
+
+/* v255 UI: archived Akras Summoning Hall banner stays readable and accurately
+   labeled as an offline demo. This is not original-rate summon gameplay. */
+body.bf-menu-mode .summonpanel .bf-summon-archive-head{
+  box-sizing:border-box;
+  max-width:100%;
+  min-width:0;
+  gap:12px;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head img{
+  box-sizing:border-box;
+  flex:0 0 38%;
+  width:38%;
+  max-width:100%;
+  height:clamp(92px,30vw,150px);
+  object-fit:contain;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head>div{
+  flex:1 1 0;
+  min-width:0;
+  max-width:100%;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head strong[role="heading"]{
+  display:block;
+  font-size:clamp(15px,4vw,19px);
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode .summonpanel .bf-summon-archive-head span,
+body.bf-menu-mode .summonpanel .bf-summon-archive-head small{
+  display:block;
+  max-width:100%;
+  overflow-wrap:anywhere;
+  line-height:1.4;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head{
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:6px;
+    padding:10px 8px;
+  }
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head img{
+    flex:none;
+    width:min(84%,240px);
+    height:118px;
+  }
+  body.bf-menu-mode .summonpanel .bf-summon-archive-head>div{
+    flex:none;
+    width:100%;
+    gap:4px;
+  }
+}
+
+/* v256 UI safeguard: distinguish export/backup from destructive save reset
+   in the existing Menu/Saves panel. Keep all original click handlers, text,
+   save schema, recovery guards, import behavior and data unchanged. */
+body.bf-menu-mode .progresspanel .transferactions button{
+  box-sizing:border-box;
+  min-width:0;
+  min-height:48px;
+  max-width:100%;
+  padding:10px 9px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.3;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .progresspanel .transferactions #downloadsave{
+  border:2px ridge #e9c47a;
+  background:linear-gradient(#8b763f,#3f4d42);
+  color:#fff4cf;
+  font-weight:900;
+}
+body.bf-menu-mode .progresspanel .transferactions #wipesave{
+  border:2px solid #d78a81;
+  background:linear-gradient(#72403f,#392635);
+  color:#ffe4dc;
+  font-weight:900;
+}
+body.bf-menu-mode .progresspanel #recoverycontinue{
+  box-sizing:border-box;
+  min-height:48px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  border:2px solid #d78a81;
+  background:linear-gradient(#72403f,#392635);
+  color:#ffe4dc;
+  font-weight:900;
+}
+body.bf-menu-mode .progresspanel .transferactions button:focus-visible,
+body.bf-menu-mode .progresspanel #recoverycontinue:focus-visible{
+  outline:3px solid #bdeaff;
+  outline-offset:2px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .progresspanel .transferactions{
+    display:grid;
+    grid-template-columns:minmax(0,1fr);
+    gap:7px;
+  }
+  body.bf-menu-mode .progresspanel .transferactions button{
+    width:100%;
+    min-height:50px;
+  }
+}
+
+/* v257 UI-only: readable, touch-safe actual owned squad roster at phone
+   widths. No changes to player state, checkbox selection or original units. */
+body.bf-menu-mode .squadsetup .squadpicker{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  min-width:0;
+  gap:8px;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick{
+  display:flex;
+  box-sizing:border-box;
+  min-width:0;
+  min-height:100px;
+  padding:10px 8px;
+  gap:8px;
+  align-items:center;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick img{
+  width:42px;
+  height:46px;
+  object-fit:contain;
+  flex:0 0 auto;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick span{
+  min-width:0;
+  max-width:100%;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick strong{
+  display:block;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:12px;
+  line-height:1.3;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick small{
+  display:block;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  font-size:10px;
+  line-height:1.35;
+}
+body.bf-menu-mode .squadsetup .squadpicker .squadpick:focus-within{
+  outline:3px solid #b7e9ff;
+  outline-offset:1px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .squadsetup .squadpicker{
+    grid-template-columns:minmax(0,1fr);
+    gap:8px;
+  }
+  body.bf-menu-mode .squadsetup .squadpicker .squadpick{min-height:85px}
+}
+@media(min-width:520px){
+  body.bf-menu-mode .squadsetup .squadpicker{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+
+/* v260 battle commands mobile touch/readability, visual-only. The optional
+   v21.00 tray inserts its own CSS after this file; these scoped selectors
+   intentionally outrank its 37/44px defaults without changing any actions. */
+body.bf-menu-mode #bf2100-tray{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button,
+body.bf-menu-mode #bf2100-tray #bf2100-targets button,
+body.bf-menu-mode #bf2000-actions button{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:48px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+  touch-action:manipulation;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button{
+  min-height:50px;
+}
+body.bf-menu-mode #bf2100-tray #bf2100-buttons button:focus-visible,
+body.bf-menu-mode #bf2100-tray #bf2100-targets button:focus-visible,
+body.bf-menu-mode #bf2000-actions button:focus-visible{
+  outline:3px solid #bcefff;
+  outline-offset:2px;
+}
+/* Preserve the real original-art buttons and their disabled/focus states. */
+body.bf-menu-mode .squad-panel .actionrow .bf-original-action{
+  min-width:0;
+  min-height:50px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode #bf2100-tray{
+    padding:8px;
+    margin:8px 0;
+  }
+  body.bf-menu-mode #bf2100-tray #bf2100-buttons{
+    grid-template-columns:minmax(0,1fr);
+    gap:6px;
+  }
+}
+
+
+/* v261 battle results mobile presentation. The v30.00 result panel injects
+   default 44px button styles later; these selectors deliberately outrank
+   that rule without changing replay, next, clear-scene, or save behavior. */
+body.bf-menu-mode #resultpanel #bf3000-result{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  padding:12px 8px 10px;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #resultpanel #bf3000-result #bf3000-heading,
+body.bf-menu-mode #resultpanel #bf3000-result #bf3000-reward,
+body.bf-menu-mode #resultpanel #bf3000-result #bf3000-meta,
+body.bf-menu-mode #resultpanel #bf3000-result #bf3000-note{
+  display:block;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.45;
+}
+body.bf-menu-mode #resultpanel #bf3000-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  min-width:0;
+}
+body.bf-menu-mode #resultpanel #bf3000-actions button{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:50px;
+  padding:9px 7px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+  touch-action:manipulation;
+}
+body.bf-menu-mode #resultpanel #bf3000-actions button:focus-visible{
+  outline:3px solid #bcefff;
+  outline-offset:2px;
+}
+body.bf-menu-mode #resultpanel #bf3000-actions button:disabled{
+  cursor:default;
+}
+body.bf-menu-mode #resultpanel #bf3000-actions button[hidden],
+body.bf-menu-mode #resultpanel #bf3000-result[hidden]{
+  display:none!important;
+}
+@media(max-width:359px){
+  body.bf-menu-mode #resultpanel #bf3000-actions{
+    grid-template-columns:minmax(0,1fr);
+    gap:7px;
+  }
+}
+
+
+/* v262 battle tactical focus/status mobile controls. The v31.00/v78.00
+   optional DEMO widgets inject 42px focus and 34px status summary defaults
+   after navigation CSS. Scoped selectors outrank those defaults without
+   touching target priority, status duration or active combat commands. */
+body.bf-menu-mode #bf2100-tray #bf3100-focus{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #bf2100-tray #bf3100-options{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  min-width:0;
+}
+body.bf-menu-mode #bf2100-tray #bf3100-focus button{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:50px;
+  padding:8px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+  touch-action:manipulation;
+}
+body.bf-menu-mode #bf2100-tray #bf3100-focus button:focus-visible{
+  outline:3px solid #bcefff;
+  outline-offset:2px;
+}
+body.bf-menu-mode #bf2100-tray #bf3100-status{
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.45;
+}
+body.bf-menu-mode #bf7800-status{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #bf7800-status[hidden]{
+  display:none!important;
+}
+body.bf-menu-mode #bf7800-status #bf7800-heading{
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  min-height:48px;
+  max-width:100%;
+  padding:8px 9px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.35;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+body.bf-menu-mode #bf7800-status #bf7800-heading:focus-visible{
+  outline:3px solid #bcefff;
+  outline-offset:2px;
+}
+body.bf-menu-mode #bf7800-status .bf7800-row,
+body.bf-menu-mode #bf7800-status .bf7800-unit,
+body.bf-menu-mode #bf7800-status .bf7800-chip{
+  box-sizing:border-box;
+  max-width:100%;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+body.bf-menu-mode #bf7800-status .bf7800-chip{
+  line-height:1.4;
+  padding:6px 8px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode #bf2100-tray #bf3100-options{
+    grid-template-columns:minmax(0,1fr);
+    gap:7px;
+  }
+  body.bf-menu-mode #bf7800-status{
+    margin:8px 4px;
+  }
+}
+
+
+/* v264 safe-save visual hierarchy: recovery backup first, reset separated.
+   Correct only Claude's non-blocking v256 presentation findings. The existing
+   confirmation and recovery handlers, labels, save data and routes are intact. */
+body.bf-menu-mode .progresspanel .transferactions #downloadsave,
+body.bf-menu-mode .progresspanel #quarantineexport{
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+  min-height:48px;
+  padding:10px 9px;
+  border:2px ridge #e9c47a;
+  background:linear-gradient(#6b592d,#253e34);
+  color:#fff4cf;
+  font-weight:900;
+  line-height:1.35;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .progresspanel #quarantineexport:focus-visible{
+  outline:3px solid #bdeaff;
+  outline-offset:2px;
+}
+@media(max-width:359px){
+  body.bf-menu-mode .progresspanel #quarantineexport{
+    min-height:50px;
+    width:100%;
+  }
+}
+@media(min-width:360px){
+  body.bf-menu-mode .progresspanel .transferactions #wipesave{
+    flex:1 1 100%;
+    margin-top:8px;
+  }
+}
+
+/* v266: source-portrait failure is visible and accessible, never a blank or
+   broken-image icon. No substitute artwork is presented as 2022 original art. */
+body.bf-menu-mode .bf-portrait-fallback{
+  box-sizing:border-box;display:flex;align-items:center;justify-content:center;
+  min-width:0;max-width:100%;padding:5px 3px;text-align:center;
+  overflow-wrap:anywhere;font:800 9px/1.3 Arial,sans-serif;letter-spacing:.03em;
+  color:#f2dba7;background:linear-gradient(#27374b,#111d2d);
+  border:1px dashed #a28b63;border-radius:4px;
+}
+body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{width:100%;height:63px}
+body.bf-menu-mode .bf-box-card .bf-portrait-fallback{width:100%;height:70px}
+body.bf-menu-mode .bf-box-detail>.bf-portrait-fallback{flex:0 0 87px;width:87px;height:94px}
+body.bf-menu-mode .bf-evo-preview>.bf-portrait-fallback{width:88px;height:92px;flex-shrink:0}
+@media(max-width:359px){
+  body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{height:49px;font-size:8px}
+  body.bf-menu-mode .bf-box-card .bf-portrait-fallback{height:73px}
+}
+@media(min-width:510px){
+  body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{height:90px}
+}
+
+/* v267 narrow-screen fallback readability; full unit-specific accessible
+   description remains available through the v266 aria-label. */
+body.bf-menu-mode .bf-portrait-fallback{
+  font-size:11px;
+  letter-spacing:0;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+body.bf-menu-mode .bf-scene-member .bf-portrait-fallback{
+  font-size:11px;
+  line-height:1.15;
+  padding:3px 1px;
+}
+body.bf-menu-mode .bf-evo-preview>.bf-portrait-fallback{
+  font-size:11px;
+  line-height:1.3;
+  padding:4px 2px;
+}
+
+/* v269 read-only Unit Box empty/filter-result clarity on narrow phones. */
+body.bf-menu-mode .bf-owned-box .bf-box-empty{
+  box-sizing:border-box;min-width:0;max-width:100%;margin:5px 1px 10px;
+  padding:13px 10px;border:1px dashed #a58b61;border-radius:6px;
+  background:linear-gradient(#25354b,#142235);text-align:center;
+  color:#e5deca;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-empty p{margin:0 0 8px}
+body.bf-menu-mode .bf-owned-box .bf-box-clear-filters{
+  box-sizing:border-box;min-height:44px;max-width:100%;padding:10px 15px;
+  border:2px ridge #c39e60;border-radius:5px;touch-action:manipulation;
+  background:linear-gradient(#685132,#35291e);color:#fff0d0;
+  font:900 11px/1.3 Arial,sans-serif;cursor:pointer;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-clear-filters:focus-visible{
+  outline:3px solid #b2e8ff;outline-offset:2px;
+}
+
+/* v271 archived-profile availability: read-only, never changes roster or save. */
+body.bf-menu-mode .bf-owned-box .bf-box-unresolved{
+  box-sizing:border-box;min-width:0;max-width:100%;margin:8px 2px;
+  padding:10px 9px;border:1px solid #ae9064;border-radius:5px;
+  background:linear-gradient(#393528,#222235);color:#f1dfb9;
+  font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
+}
+
+/* v273 read-only Training current-affordability feedback. */
+body.bf-menu-mode .training-panel .training-toolbar .bf-training-cost-note {
+  box-sizing:border-box;flex:1 0 100%;min-width:0;max-width:100%;margin:0;
+  padding:7px 9px;border:1px solid #807153;border-radius:5px;
+  background:linear-gradient(#27354a,#1b293c);color:#e8deca;
+  font:12px/1.4 Arial,sans-serif;overflow-wrap:anywhere;
+}
+
+/* v274 Training controls: 44px touch targets and visible keyboard focus. */
+body.bf-menu-mode .training-panel .train-actions button {
+  box-sizing:border-box;min-height:44px;min-width:0;
+  padding:9px 6px;font:700 12px/1.3 Arial,sans-serif;
+  touch-action:manipulation;
+}
+body.bf-menu-mode .training-panel .train-actions button:focus-visible {
+  outline:3px solid #b6e9ff;outline-offset:2px;
+}
+
+/* v275 Training search and filters: 44px mobile hit targets and keyboard focus. */
+body.bf-menu-mode .training-panel .training-toolbar input,
+body.bf-menu-mode .training-panel .training-toolbar select {
+  box-sizing:border-box;min-height:44px;
+}
+body.bf-menu-mode .training-panel .training-toolbar input:focus-visible,
+body.bf-menu-mode .training-panel .training-toolbar select:focus-visible {
+  outline:3px solid #b6e9ff;outline-offset:2px;
+}
+
+/* v276 Unit Box toolbar: five 44px phone controls without changing filter logic. */
+body.bf-menu-mode .bf-owned-box .bf-box-filters input,
+body.bf-menu-mode .bf-owned-box .bf-box-filters select {
+  box-sizing:border-box;min-height:44px;
+}
+
+/* v277 Unit Box detail navigation: accessible touch targets, no changed actions. */
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-manage,
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-original-profile,
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-evo-open {
+  box-sizing:border-box;min-width:44px;min-height:44px;max-width:100%;
+  padding:10px 9px;line-height:1.35;white-space:normal;
+  overflow-wrap:anywhere;touch-action:manipulation;
+}
+body.bf-menu-mode .bf-owned-box .bf-box-detail .bf-box-original-profile:focus-visible {
+  outline:3px solid #b8ebff;outline-offset:2px;
+}
+
+/* UI-first location directory and unavailable-service screens. */
+.bf-location-launch{margin:14px 0;padding:16px;border:1px solid #ad8d50;border-radius:12px;background:linear-gradient(145deg,#253c45,#14232f);color:#f4ead2}
+.bf-location-launch strong{font:700 17px Georgia,serif;letter-spacing:.05em}
+.bf-location-launch p{margin:8px 0 14px;font:14px/1.5 system-ui,sans-serif;color:#e0e5de}
+.bf-location-launch button,.bf-location-exchange{width:100%;min-height:48px;padding:12px;border:1px solid #dfc17c;border-radius:7px;background:linear-gradient(#5b4931,#30291f);color:#fff0c9;font-weight:800;white-space:normal}
+body.bf-location-preview-open{overflow:hidden}
+#bf-location-dialog{box-sizing:border-box;width:calc(100% - 20px);max-width:540px;max-height:calc(100% - 24px);max-height:calc(100dvh - 24px);margin:auto;padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid #cba963;border-radius:14px;background:linear-gradient(160deg,#243d48,#13202e 65%);color:#f7efdb;box-shadow:0 12px 45px #000a;font:15px/1.5 system-ui,sans-serif}
+#bf-location-dialog::backdrop{background:#050d18df}
+#bf-location-dialog *{box-sizing:border-box;min-width:0}
+#bf-location-dialog button{font:700 12px/1.4 system-ui,sans-serif;cursor:pointer}
+#bf-location-dialog button:disabled{cursor:default}
+#bf-location-dialog button:focus-visible,#bf-location-title:focus-visible,.bf-location-launch button:focus-visible{outline:3px solid #fff3b6;outline-offset:3px}
+.bf-location-header{display:flex;align-items:center;justify-content:space-between;gap:6px;position:sticky;top:0;z-index:1;padding:8px;background:#172a36;border-bottom:1px solid #8b7952}
+.bf-location-header span{font:700 12px Georgia,serif;letter-spacing:.08em;text-align:center}
+.bf-location-header button{min-height:44px;padding:8px;border:1px solid #a48e60;border-radius:5px;background:#283b45;color:#fce6b1}
+.bf-location-header button[hidden]{display:none!important}
+.bf-location-body{padding:18px 16px 20px}
+.bf-location-kicker{margin:0 0 6px;color:#ead19a;font-size:11px;font-weight:800;letter-spacing:.15em}
+#bf-location-title{margin:0 0 12px;font:700 27px/1.2 Georgia,serif;color:#ffedbe;overflow-wrap:anywhere}
+.bf-location-body p{overflow-wrap:anywhere}
+.bf-location-directory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:18px 0}
+.bf-location-directory button{display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;padding:10px 8px;border:1px solid #93815b;border-radius:9px;background:linear-gradient(#30434b,#1a2d39);color:#f6e4bb;text-align:center;min-height:156px}
+.bf-location-directory img{width:100%;max-width:170px;height:76px;object-fit:contain;filter:drop-shadow(0 3px 4px #0008)}
+.bf-location-directory strong{font:700 16px/1.25 Georgia,serif}
+.bf-location-directory span{font-size:10px;color:#dde8e6}
+.bf-location-hero{border:1px solid #8d7c55;border-radius:9px;background:radial-gradient(ellipse at center,#42565a,#172b38);padding:15px 12px;text-align:center}
+.bf-location-hero img{display:block;margin:auto;max-width:100%;width:245px;height:130px;object-fit:contain;filter:drop-shadow(0 5px 5px #0009)}
+.bf-location-hero-small img{width:100px;height:80px}
+.bf-location-hero p{margin:12px 0 0;color:#f2d8a3;font:italic 17px/1.4 Georgia,serif}
+.bf-location-services{display:grid;gap:10px;margin:16px 0}
+.bf-location-services section{padding:13px;border-left:3px solid #c1a15e;border-radius:4px;background:#0c1b2880}
+.bf-location-services h2{margin:0 0 5px;font:700 17px/1.3 Georgia,serif;color:#f0dbb3}
+.bf-location-services p{margin:0;color:#d1dddf;font-size:14px}
+.bf-location-exchange{margin-bottom:12px}
+#bf-location-dialog .bf-location-unavailable{width:100%;min-height:48px;padding:12px;border:1px solid #65717a;border-radius:6px;background:#26343e;color:#c5cdd2;white-space:normal}
+.bf-location-disclaimer{margin:18px 0 0;padding-top:12px;border-top:1px solid #62717a;color:#c7d4d9;font-size:12px}
+@media(min-width:480px){.bf-location-body{padding:22px 24px}.bf-location-directory button{min-height:174px}.bf-location-directory img{height:90px}}
+@media(prefers-reduced-motion:reduce){#bf-location-dialog{scroll-behavior:auto}}
+
+/* UI-first read-only equipment screen; unavailable services never transact. */
+.bf-unit-actions .bf-equipment-tab{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:9px;font:800 13px/1.4 Georgia,serif}
+.bf-unit-actions .bf-equipment-tab span{font-size:24px;min-height:0!important}
+.bf-unit-actions .bf-equipment-tab small{font:700 10px system-ui,sans-serif;color:#c8d6dc}
+.bf-menu-mode .squadsetup[data-bf-unit-tab="equipment"] > :not(.bf-units-hub):not(#bf-equipment-screen){display:none!important}
+#bf-equipment-screen[hidden],#bf-equipment-slots[hidden]{display:none!important}
+#bf-equipment-screen{padding:14px;background:linear-gradient(150deg,#263d49,#152334);color:#eee4cd;font:14px/1.5 system-ui,sans-serif;overflow-wrap:anywhere;scroll-margin-top:calc(var(--bf-equipment-shell-height,180px) + 10px)}
+#bf-equipment-screen *{box-sizing:border-box;min-width:0}
+.bf-equipment-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid #a68c58}
+.bf-equipment-header p{margin:0;color:#cfba8d;font:700 10px system-ui,sans-serif;letter-spacing:.12em}
+.bf-equipment-header h2{margin:4px 0 0;font:700 24px/1.3 Georgia,serif;color:#ffdf9d}
+.bf-equipment-header>span{border:1px solid #9b8454;border-radius:5px;padding:5px;color:#ecd5a1;font-size:10px;white-space:nowrap}
+.bf-equipment-intro{margin:14px 0;color:#d3dce1}
+.bf-equipment-filters{display:grid;gap:12px}
+.bf-equipment-filters label{display:grid;gap:6px;font-weight:700;color:#f2d7a5}
+#bf-equipment-screen input,#bf-equipment-screen select{width:100%;max-width:100%;min-height:44px;border:1px solid #8299a7;border-radius:5px;padding:9px;background:#122638;color:#f7f0dc;font:14px system-ui,sans-serif}
+#bf-equipment-status{font-size:12px;color:#c8d9df;margin:10px 0}
+#bf-equipment-unit-card{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid #ad925c;border-radius:9px;background:#102333;min-height:104px}
+#bf-equipment-unit-card>img,#bf-equipment-unit-card>.bf-portrait-fallback{flex:0 0 72px;width:72px;height:72px;object-fit:contain}
+#bf-equipment-unit-card h3{margin:0;color:#ffe3ab;font:700 20px/1.3 Georgia,serif}
+#bf-equipment-unit-card p{margin:5px 0}
+#bf-equipment-unit-card small{font-size:11px;color:#bccfd9}
+#bf-equipment-slots{display:grid;gap:12px;margin:16px 0}
+.bf-equipment-slot{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:14px;border:1px solid #697f91;border-radius:8px;background:#192c3e}
+.bf-equipment-socket{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border:1px dashed #b0a078;border-radius:50%;font-size:30px;color:#cfb97c;background:#0f2031}
+.bf-equipment-slot h3,.bf-equipment-inventory h3{margin:0 0 5px;font:700 17px Georgia,serif;color:#efd5a0}
+.bf-equipment-slot strong{font-size:13px;color:#c3d1db}
+.bf-equipment-slot p{margin:5px 0 0;color:#bacbd8;font-size:12px}
+#bf-equipment-screen button{min-height:44px;padding:10px;border:1px solid #b39a64;border-radius:6px;background:linear-gradient(#514730,#273642);color:#fff0c6;font:700 11px/1.4 system-ui,sans-serif;white-space:normal}
+.bf-equipment-slot button{grid-column:1/-1}
+#bf-equipment-screen button:disabled{background:#263745;border-color:#667b89;color:#bcc9d1;cursor:default}
+#bf-equipment-screen button:focus-visible,#bf-equipment-screen input:focus-visible,#bf-equipment-screen select:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+.bf-equipment-inventory{padding:16px;border:1px solid #647989;border-radius:8px;background:#102333}
+.bf-equipment-inventory p{color:#cbd8df;margin:9px 0 14px}
+.bf-equipment-inventory button{width:100%}
+.bf-equipment-footer{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.bf-equipment-empty{color:#cedbe2;margin:0}
+@media(min-width:480px){.bf-equipment-filters{grid-template-columns:1fr 1fr}}
+
+/* Compact Menu guide; save controls and their handlers remain unchanged. */
+#bf-menu-help{margin:12px;border:1px solid #b09862;border-radius:8px;background:linear-gradient(145deg,#283d4a,#152638);color:#e9e4d7;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-help>summary{padding:13px;min-height:48px;color:#f6ddaa;font:700 15px/1.5 Georgia,serif;cursor:pointer}
+.bf-menu-help-body{padding:0 13px 14px}
+.bf-menu-help-body h2{margin:5px 0 10px;font:700 20px/1.3 Georgia,serif;color:#ffe5b0}
+.bf-menu-help-body p{margin:10px 0;overflow-wrap:anywhere}
+.bf-menu-help-body details{margin-top:10px;border:1px solid #607a8d;border-radius:6px;background:#102332}
+.bf-menu-help-body summary{min-height:48px;padding:12px;color:#f1d6a6;cursor:pointer;font-weight:700}
+.bf-menu-help-body details p{padding:0 12px 12px;margin:0;color:#d0dce3}
+#bf-menu-help summary:focus-visible{outline:3px solid #fff0bc;outline-offset:2px}
+.bf-menu-help-note{padding-top:12px;border-top:1px solid #6f8190;color:#bacdd7;font-size:12px}
+
+#bf-menu-materials{margin:12px;border:1px solid #ac9465;border-radius:8px;background:#182e3e;color:#e9e4d7;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-materials>summary{padding:13px;min-height:48px;color:#f6ddaa;font:700 15px/1.5 Georgia,serif;cursor:pointer}
+#bf-menu-materials summary small{font:700 10px system-ui,sans-serif;color:#bfd1db;margin-left:8px}
+#bf-menu-materials summary:focus-visible,#bf-menu-materials input:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+.bf-menu-material-body{padding:0 13px 14px;overflow-wrap:anywhere}
+.bf-menu-material-body label{display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;color:#ecd5a8}
+.bf-menu-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.bf-menu-material-grid>div{padding:12px;border:1px solid #688295;border-radius:6px;background:#102332;display:grid;gap:5px}
+.bf-menu-material-grid strong{font-size:13px;color:#f3d9a5}
+.bf-menu-material-grid span{font-size:13px;color:#d3e0e5}
+.bf-menu-material-empty{grid-column:1/-1;color:#c4d4dc}
+
+#bf-menu-settings{margin:12px;border:1px solid #aa9468;border-radius:8px;background:linear-gradient(145deg,#283c49,#152738);color:#e8e3d5;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-settings>summary{min-height:48px;padding:13px;cursor:pointer;color:#f7dda8;font:700 15px/1.5 Georgia,serif}
+#bf-menu-settings summary small{margin-left:8px;color:#bed2dd;font:700 10px system-ui,sans-serif}
+.bf-session-settings-body{padding:0 14px 15px;overflow-wrap:anywhere}
+.bf-session-settings-body h2{font:700 21px Georgia,serif;color:#ffe3a5;margin:8px 0 12px}
+.bf-session-settings-body h3{font:700 17px Georgia,serif;color:#efd5a3;margin:0}
+.bf-session-settings-body>label{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;font-weight:700}
+#bf-menu-settings input[type=range]{width:100%;min-height:44px;margin:0;accent-color:#e5c581}
+#bf-menu-settings .bf-session-mute{justify-content:flex-start}
+#bf-menu-settings input[type=checkbox]{width:20px;height:20px;accent-color:#e5c581}
+#bf-menu-settings output{color:#ffe4ad}
+#bf-session-audio-state{padding:10px;background:#102332;border:1px solid #607a8f;border-radius:5px}
+.bf-session-settings-body section{padding:14px;border-top:1px solid #718491;margin-top:16px;background:#122535}
+.bf-session-settings-body button{width:100%;min-height:44px;padding:10px;border:1px solid #62798b;border-radius:5px;background:#283946;color:#bacbd6;font:700 11px system-ui,sans-serif}
+#bf-menu-settings summary:focus-visible,#bf-menu-settings input:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
+
+#bf-advanced-tools{margin:12px;border:1px solid #718799;border-radius:8px;background:#172a3b;color:#d8e2e8;font:14px/1.5 system-ui,sans-serif}
+#bf-advanced-tools>summary{min-height:48px;padding:13px;font:700 14px/1.5 Georgia,serif;cursor:pointer;color:#d8c69e}
+#bf-advanced-tools>summary:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
+.bf-advanced-note{padding:0 12px;color:#bed0dd;overflow-wrap:anywhere}
+#bf-advanced-tools>.hit-panel{margin:0;border:0;border-top:1px solid #526f85;border-radius:0 0 7px 7px;box-shadow:none}

@@ -1,0 +1,254 @@
+name: Android Back and in-page engine UI source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/android-back-ui-source-preflight.yml'
+      - '.github/workflows/build-debug-apk.yml'
+      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
+      - 'app/build.gradle'
+      - 'app/src/diagnostic/res/values/strings.xml'
+      - 'test_bf_isolated_diagnostic_build_v23700.py'
+      - 'V237_ISOLATED_ANDROID_DIAGNOSTIC_APK.md'
+      - 'V238_DIAGNOSTIC_IDENTITY_AND_CI_GATES.md'
+      - 'build_bf_missing_index_diagnostic_v23900.py'
+      - 'V239_ISOLATED_MISSING_INDEX_FAILURE_TEST.md'
+      - 'V240_FAULT_APK_INTEGRITY_FOLLOWUP.md'
+      - 'app/src/main/assets/bf_home_nav.js'
+      - 'app/src/main/assets/bf_home_nav.css'
+      - 'test_bf_home_ui_priority_v24200.py'
+      - 'V242_ORIGINAL_HOME_UI_PRIORITY.md'
+      - 'test_bf_home_ui_accessibility_v24300.py'
+      - 'test_bf_home_semantic_hierarchy_v24500.py'
+      - 'test_bf_home_preview_nameplates_v24600.py'
+      - 'test_bf_home_shortcuts_mobile_v24700.py'
+      - 'test_bf_home_squad_mobile_v24800.py'
+      - 'test_bf_home_ui_release_readiness_v24900.py'
+      - 'test_bf_global_route_headers_v25200.py'
+      - 'test_bf_quest_mission_cards_v25300.py'
+      - 'test_bf_unit_box_mobile_v25400.py'
+      - 'test_bf_summon_hall_mobile_v25500.py'
+      - 'test_bf_save_controls_mobile_v25600.py'
+      - 'test_bf_squad_editor_mobile_v25700.py'
+      - 'test_bf_ui_asset_paths_v25800.py'
+      - 'test_bf_ui_screen_inventory_v25900.py'
+      - 'test_bf_battle_mobile_controls_v26000.py'
+      - 'test_bf_battle_results_mobile_v26100.py'
+      - 'test_bf_focus_status_mobile_v26200.py'
+      - 'test_bf_ui_screen_capture_v26300.py'
+      - 'test_bf_recovery_backup_hierarchy_v26400.py'
+      - 'test_bf_real_save_page_v26500.py'
+      - 'test_bf_unit_portrait_fallback_v26600.py'
+      - 'test_bf_unit_portrait_readability_v26700.py'
+      - 'test_bf_portrait_readability_matrix_v26800.py'
+      - 'test_bf_unit_box_empty_state_v26900.py'
+      - 'test_bf_unit_box_live_regions_v27000.py'
+      - 'test_bf_unit_box_unresolved_v27100.py'
+      - 'test_bf_nested_ui_capture_v27200.py'
+      - 'bf_capture_progress_audit.py'
+      - 'test_bf_capture_progress_audit.py'
+      - 'test_bf_capture_distinctness_v27810.py'
+      - 'CAPTURE_PROGRESS_AUDIT.md'
+      - 'test_bf_location_previews.py'
+      - 'test_bf_equipment_ui.py'
+      - 'test_bf_session_settings.py'
+      - 'test_bf_advanced_tools.py'
+      - 'UI_EQUIPMENT_PREVIEW.md'
+      - 'UI_LOCATION_PREVIEWS.md'
+      - 'test_bf_training_cost_guidance_v27300.py'
+      - 'test_bf_training_touch_focus_v27400.py'
+      - 'test_bf_training_form_targets_v27500.py'
+      - 'test_bf_unit_box_toolbar_targets_v27600.py'
+      - 'test_bf_unit_box_detail_actions_v27700.py'
+      - 'test_bf_unit_box_active_counts_v27800.py'
+      - 'test_bf_v250_release_readiness_v25000.py'
+      - 'V250_OWNER_APK_RELEASE_READINESS.md'
+      - 'test_bf_owner_apk_identity_v25100.py'
+      - 'V251_OWNER_APK_IDENTITY_ATTESTATION.md'
+      - 'V249_HOME_UI_RELEASE_READINESS.md'
+      - 'V252_UI_100_PERCENT_ROADMAP.md'
+      - 'V253_QUEST_MISSION_CARD_UI.md'
+      - 'V254_UNIT_BOX_MOBILE_UI.md'
+      - 'V255_SUMMON_HALL_MOBILE_UI.md'
+      - 'V256_SAVE_CONTROLS_MOBILE_UI.md'
+      - 'V257_SQUAD_EDITOR_MOBILE_UI.md'
+      - 'V258_UI_IMAGE_ASSET_AUDIT.md'
+      - 'V259_UI_SCREEN_ACCEPTANCE_INVENTORY.md'
+      - 'V260_BATTLE_MOBILE_COMMAND_CONTROLS.md'
+      - 'V261_BATTLE_RESULTS_MOBILE_UI.md'
+      - 'V262_TACTICAL_FOCUS_STATUS_MOBILE_UI.md'
+      - 'V263_UI_SCREEN_CAPTURE_EVIDENCE.md'
+      - 'V264_RECOVERY_BACKUP_VISUAL_PRIORITY.md'
+      - 'V265_REAL_SAVE_LAYOUT_EVIDENCE.md'
+      - 'V266_UNIT_PORTRAIT_FALLBACK_UI.md'
+      - 'V267_UNIT_PORTRAIT_READABILITY.md'
+      - 'V268_PORTRAIT_READABILITY_MATRIX.md'
+      - 'V269_UNIT_BOX_EMPTY_STATES.md'
+      - 'V270_UNIT_BOX_LIVE_REGION_AUDIT.md'
+      - 'V271_UNIT_BOX_UNRESOLVED_ROSTER.md'
+      - 'V272_NESTED_UI_CAPTURE_EVIDENCE.md'
+      - 'V273_TRAINING_COST_GUIDANCE.md'
+      - 'V274_TRAINING_TOUCH_FOCUS.md'
+      - 'V275_TRAINING_FORM_TARGETS.md'
+      - 'V276_UNIT_BOX_TOOLBAR_TARGETS.md'
+      - 'V277_UNIT_BOX_DETAIL_ACTIONS.md'
+      - 'V278_UNIT_BOX_ACTIVE_COUNTS.md'
+      - 'V248_HOME_SQUAD_MOBILE.md'
+      - 'V247_HOME_SHORTCUTS_MOBILE.md'
+      - 'V246_HOME_PREVIEW_NAMEPLATES.md'
+      - 'V245_HOME_SEMANTIC_HEADINGS.md'
+      - 'V243_HOME_ACCESSIBILITY_MENU_ICON.md'
+      - 'test_bf_nav_resource_budget_alignment_v24400.py'
+      - 'prepare_quest_english_data_v048.py'
+      - 'V244_NAV_RESOURCE_BUDGET_ALIGNMENT.md'
+      - 'test_bf_quest_english_data_v048.py'
+      - 'test_bf_remains_mirza_v049.py'
+      - 'test_bf_monsters_nest_v050.py'
+      - 'test_bf_tower_of_mistral_v051.py'
+      - 'test_bf_android_back_home_v22500.py'
+      - 'test_bf_engine_webview_recovery_v22600.py'
+      - 'test_bf_renderer_dialog_lifecycle_v23100.py'
+      - 'test_bf_offline_page_reload_v23200.py'
+      - 'test_bf_stale_webview_finish_guard_v23300.py'
+      - 'test_bf_offline_main_navigation_token_v23400.py'
+      - 'test_bf_android_offline_callback_trace_v23600.py'
+      - 'test_bf_isolated_device_trace_v24100.py'
+      - 'V241_ONDEVICE_ISOLATED_DIAGNOSTIC_TRACE.md'
+      - 'V236_ANDROID_OFFLINE_CALLBACK_TRACE.md'
+      - 'V235_MAIN_NAVIGATION_FAIL_CLOSED_TEST_FOLLOWUP.md'
+      - 'V234_OFFLINE_MAIN_NAVIGATION_TOKEN.md'
+      - 'V233_STALE_WEBVIEW_FINISH_GUARD.md'
+      - 'V232_OFFLINE_MAIN_RELOAD_STATE.md'
+      - 'V231_RENDERER_DIALOG_LIFECYCLE.md'
+      - 'test_bf_offline_page_recovery_v22900.py'
+      - 'V229_OFFLINE_STARTUP_ERROR_RECOVERY.md'
+      - 'V226_WEBVIEW_BACK_RECOVERY.md'
+      - 'V225_ANDROID_BACK_ENGINE_UI.md'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-ui-back:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify reconciled v278.1 screenshot visibility and distinctness gate
+        run: python3 test_bf_capture_distinctness_v27810.py --source-only
+      - name: Verify complete screenshot progress audit and restored-write detection
+        run: python3 test_bf_capture_progress_audit.py --source-only
+      - name: Verify Android Back UI routing without save changes
+        run: python3 test_bf_android_back_home_v22500.py --source-only
+      - name: Verify visible v242 Home hierarchy, original source art and no save edits
+        run: python3 test_bf_home_ui_priority_v24200.py --source-only
+      - name: Verify narrow-screen Menu icon and Home accessible locations
+        run: python3 test_bf_home_ui_accessibility_v24300.py --source-only
+      - name: Verify Home heading hierarchy and genuinely disabled Global previews
+        run: python3 test_bf_home_semantic_hierarchy_v24500.py --source-only
+      - name: Verify visibly named, disabled Global Home artwork previews
+        run: python3 test_bf_home_preview_nameplates_v24600.py --source-only
+      - name: Verify responsive Home shortcut targets and offline route safety
+        run: python3 test_bf_home_shortcuts_mobile_v24700.py --source-only
+      - name: Verify six-unit original Home squad preview stays usable on small phones
+        run: python3 test_bf_home_squad_mobile_v24800.py --source-only
+      - name: Verify combined Home UI layout, previews and safe offline routes
+        run: python3 test_bf_home_ui_release_readiness_v24900.py --source-only
+      - name: Verify original-art route headings and all five non-destructive screen routes
+        run: python3 test_bf_global_route_headers_v25200.py --source-only
+      - name: Verify Quest card source art, touch sizes and safe locked-state styling
+        run: python3 test_bf_quest_mission_cards_v25300.py --source-only
+      - name: Verify Unit Box card source/selection/responsive safety
+        run: python3 test_bf_unit_box_mobile_v25400.py --source-only
+      - name: Verify archived Summoning Hall label and responsive safety
+        run: python3 test_bf_summon_hall_mobile_v25500.py --source-only
+      - name: Verify save backup versus destructive reset presentation without save writes
+        run: python3 test_bf_save_controls_mobile_v25600.py --source-only
+      - name: Verify squad picker text readability and safe mobile layout
+        run: python3 test_bf_squad_editor_mobile_v25700.py --source-only
+      - name: Verify Global original-art UI references have safe paths
+        run: python3 test_bf_ui_asset_paths_v25800.py --source-only
+      - name: Verify five offline routes and nine-screen UI acceptance ledger
+        run: python3 test_bf_ui_screen_inventory_v25900.py --source-only
+      - name: Verify Battle command touch heights, wrapping and offline safety
+        run: python3 test_bf_battle_mobile_controls_v26000.py --source-only
+      - name: Verify battle results touch targets and safe hidden actions
+        run: python3 test_bf_battle_results_mobile_v26100.py --source-only
+      - name: Verify Tactical Focus and live Battle Status mobile controls
+        run: python3 test_bf_focus_status_mobile_v26200.py --source-only
+      - name: Check read-only navigation screenshot evidence capture configuration
+        run: python3 test_bf_ui_screen_capture_v26300.py --source-only
+      - name: Verify nested-screen source capture remains read-only
+        run: python3 test_bf_nested_ui_capture_v27200.py --source-only
+      - name: Verify Training demo costs are clear and read-only
+        run: python3 test_bf_training_cost_guidance_v27300.py --source-only
+      - name: Verify Training 44px touch and keyboard focus source guard
+        run: python3 test_bf_training_touch_focus_v27400.py --source-only
+      - name: Verify Training search and filter mobile touch/focus targets
+        run: python3 test_bf_training_form_targets_v27500.py --source-only
+      - name: Verify Unit Box toolbar field touch heights and keyboard focus
+        run: python3 test_bf_unit_box_toolbar_targets_v27600.py --source-only
+      - name: Verify Unit Box detail navigation touch sizes and keyboard focus
+        run: python3 test_bf_unit_box_detail_actions_v27700.py --source-only
+      - name: Verify Unit Box truthful active squad count and no-profile detail
+        run: python3 test_bf_unit_box_active_counts_v27800.py --source-only
+      - name: Check safe recovery backup visual hierarchy without save writes
+        run: python3 test_bf_recovery_backup_hierarchy_v26400.py --source-only
+      - name: Verify real packaged save HTML and inline-style browser regression registration
+        run: python3 test_bf_real_save_page_v26500.py --source-only
+      - name: Verify missing/invalid unit portrait UI without player writes
+        run: python3 test_bf_unit_portrait_fallback_v26600.py --source-only
+      - name: Verify portrait readability on mobile
+        run: python3 test_bf_unit_portrait_readability_v26700.py --source-only
+      - name: Check all missing-art surfaces under valid and corrupt scenarios
+        run: python3 test_bf_portrait_readability_matrix_v26800.py --source-only
+      - name: Verify Unit Box empty and filtered UI states
+        run: python3 test_bf_unit_box_empty_state_v26900.py --source-only
+      - name: Verify Unit Box live-region dedup and keyboard flow
+        run: python3 test_bf_unit_box_live_regions_v27000.py --source-only
+      - name: Verify unresolved Unit Box roster remains read-only
+        run: python3 test_bf_unit_box_unresolved_v27100.py --source-only
+      - name: Verify owner APK identity, signing and historical-save regression gates
+        run: python3 test_bf_v250_release_readiness_v25000.py --source-only
+      - name: Verify signed APK fingerprint/installed update evidence is fail-closed
+        run: python3 test_bf_owner_apk_identity_v25100.py --source-only
+      - name: Verify original quest and dungeon tests use nav-only Android size cap
+        run: python3 test_bf_nav_resource_budget_alignment_v24400.py --source-only
+      - name: Verify lost callbacks, renderer-crash UI, and save-safety boundaries
+        run: python3 test_bf_engine_webview_recovery_v22600.py
+      - name: Verify renderer recovery dialog is dismissed on Activity destruction
+        run: python3 test_bf_renderer_dialog_lifecycle_v23100.py
+      - name: Verify offline main-page failure recovery guards
+        run: python3 test_bf_offline_page_recovery_v22900.py
+      - name: Verify new exact packaged-page load resets a stale error state
+        run: python3 test_bf_offline_page_reload_v23200.py
+      - name: Verify late finishing callbacks cannot inject into stale WebViews
+        run: python3 test_bf_stale_webview_finish_guard_v23300.py
+      - name: Verify only explicit native load starts can reset main-page failure
+        run: python3 test_bf_offline_main_navigation_token_v23400.py
+      - name: Verify debuggable-only privacy-safe native callback trace
+        run: python3 test_bf_android_offline_callback_trace_v23600.py
+      - name: Verify isolated diagnostic build does not reuse Current's app ID
+        run: python3 test_bf_isolated_diagnostic_build_v23700.py
+      - name: Verify missing-index fault APK never targets Current
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --source-only
+      - name: Verify bounded diagnostic trace viewer is unavailable in Current
+        run: python3 test_bf_isolated_device_trace_v24100.py
+
+      - name: Verify UI-only location preview source
+        run: python3 test_bf_location_previews.py --source-only
+
+      - name: Verify read-only Equipment screen source
+        run: python3 test_bf_equipment_ui.py --source-only
+
+      - name: Verify session audio settings source
+        run: python3 test_bf_session_settings.py --source-only
+
+      - name: Verify Advanced Tools source
+        run: python3 test_bf_advanced_tools.py --source-only

@@ -1,0 +1,28 @@
+name: Engine UI touch and reduced-motion source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/engine-ui-touch-source-preflight.yml'
+      - 'app/src/main/assets/bf_home_nav.css'
+      - 'test_bf_engine_ui_touch_v22700.py'
+      - 'V227_ENGINE_UI_TOUCH_ACCESSIBILITY.md'
+      - '.github/workflows/build-debug-apk.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui-touch-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check touch and reduced-motion UI without altering save or battle
+        run: python3 test_bf_engine_ui_touch_v22700.py --source-only

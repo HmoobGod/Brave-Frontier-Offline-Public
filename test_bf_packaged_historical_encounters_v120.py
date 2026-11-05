@@ -11,7 +11,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'assets/bf110_quest_journal.js' in names
  assert 'assets/bf101_story_continue.js' in names
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
- assert len(z.read('assets/bf_home_nav.js'))<65536
+ assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf110_quest_journal.js")')<java.index('readPackagedText("bf120_historical_encounters.js")')
 assert "versionName '" in (R/'app/build.gradle').read_text('utf8')

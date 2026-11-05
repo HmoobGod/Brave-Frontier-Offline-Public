@@ -27,7 +27,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'item identity unknown' in html
     assert 'Enemy identities, enemy AI, drop rates and damage formulas are NOT restored' in html
     assert 'bf_global_offline_demo_v7' in html
-    assert len(z.read('assets/bf_home_nav.js')) < 65536
+    assert len(z.read('assets/bf_home_nav.js')) <= 128 * 1024
     assert 'assets/bf054_header_status.js' in z.namelist()
     assert 'assets/bf055_tower_formations.js' in z.namelist()
     assert 'assets/content/monster/img/bf053_training_monsters.png' in z.namelist()

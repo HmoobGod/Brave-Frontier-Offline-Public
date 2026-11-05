@@ -1,0 +1,11 @@
+# v238 — Debuggability and isolation gates for the separate diagnostic APK
+
+**Draft, no Current APK promotion.** Source-only hardening of the merged v237 side-by-side `org.bravefrontier.offline.diagnostic` build. Address Claude's non-blocking observations N1, N2 and N3, without altering normal debug build, signed identity, native WebView code, game assets, original 2022 mechanics, v7 save behavior or installed owner data.
+
+- **N1 / trace availability:** `diagnostic { debuggable true }` explicitly enables v236's `FLAG_DEBUGGABLE`-gated `BFOfflineTrace`. The source gate requires this and the real packaged gate checks `aapt dump badging` for `application-debuggable` on the diagnostic APK.
+- **N2 / private-data isolation:** The original manifest must not declare Android `sharedUserId`, provider authorities or custom permission elements; there is no diagnostic manifest overlay. Both packaged manifests are checked for sharedUserId or provider/custom permission elements. Package identity is still verified with aapt, and normal and diagnostic assets must match byte-for-byte.
+- **N3 / fail-closed workflow:** The three final diagnostic build/verify/upload steps are source-scanned to reject `if:`, `continue-on-error:`, `|| true`, absent real `assembleDiagnostic` or packaged test command, or upload without `if-no-files-found: error`. Source-only synthetic mutations test bypass attempts. Exact-head full Android CI must actually compile both variants and perform all binary checks.
+
+Static tests and CI **do not** establish device callback order, side-by-side installation on the owner's hardware, or save migration. The diagnostic app has separate local storage; copying an old exported v7 save into it, if supported, must be owner initiated and is not evidence of an in-place update working. Any later real Current APK promotion still requires explicit approval and a verified prior backup.
+
+Independent Claude exact-head code review, native preflight and full Android CI are required before merge.

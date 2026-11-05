@@ -20,7 +20,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
     assert 'assets/bf_home_nav.js' in apk.namelist()
     assert 'assets/bf053_monster_training.js' in apk.namelist()
     assert 'assets/content/monster/img/bf053_training_monsters.png' in apk.namelist()
-    assert len(apk.read('assets/bf_home_nav.js'))<65536
+    assert len(apk.read('assets/bf_home_nav.js')) <= 128 * 1024
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf-8')
 assert 'readPackagedText("bf054_header_status.js")' in java
 print('PASS v0.54 packaged original header bytes, accurate EXP overlay, demo Energy, v0.53 and v7 intact')

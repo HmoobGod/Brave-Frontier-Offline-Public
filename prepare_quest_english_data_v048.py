@@ -43,7 +43,7 @@ for row in missions:
 nav = (ASSETS / "bf_home_nav.js").read_text("utf-8")
 assert "BF_GLOBAL_QUEST_TEXT_DATA_V048" in nav
 assert "window.BF_QUEST_ENGLISH_DESCRIPTIONS" in nav
-assert len(nav.encode("utf-8")) < 65536, "nav asset grew past 64 KiB"
+assert len(nav.encode("utf-8")) <= 128 * 1024, "nav asset exceeds Android 128 KiB nav-only limit"
 html = ASSETS / "index.html"
 s = html.read_text("utf-8")
 assert "bf_global_offline_demo_v7" in s

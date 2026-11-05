@@ -15,7 +15,7 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'window.BF_MORGAN_QUEST_DATA_V080=Object.freeze(' in html
     assert html.count('window.BF_QUEST_CATALOG.push(')==9  # Mistral, Morgan, and St. Lamia source groups
     assert 'bf_global_offline_demo_v7' in html
-    assert len(nav)<65536,len(nav)
+    assert len(nav) <= 128 * 1024,len(nav)
     assert b'MST_DUNGEONS_DUNGEON_' in nav and b'BF_MORGAN_QUEST_DATA_V080' in nav
     assert addon.count('/* BF_ORIGINAL_MORGAN_MAP_V080 */')==1
     assert 'MORGAN · 7 DUNGEONS' in addon

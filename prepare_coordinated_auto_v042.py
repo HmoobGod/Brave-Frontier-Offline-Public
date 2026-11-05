@@ -47,13 +47,19 @@ JS=r"""
       actions.set(p,kind);
       if(kind!=='burst' || typeof bfOriginalBB!=='function' ||
          typeof originalSupport!=='function')continue;
+      // A blocked caster cannot supply the round's coordinated ATK buff.
+      // Leave its queued action to the existing execution/status handlers.
+      if(window.BFGlobalParalysisActionLockV6000?.paralyzed(p.id) ||
+         window.BFGlobalCurseBBLockV5900?.cursed(p.id))continue;
       if(bfOriginalBB(p.unitId)?.target!=='support')continue;
       const source=originalSupport(p.unitId);
       if(source?.kind!=='atk_buff_all' || !Number.isFinite(source.pct))continue;
-      buffs.push({p,pct:source.pct});
+      const pct=window.BFGlobalOriginalAtkBBLevelsV7100?.boostFor(Number(p.unitId))??source.pct;
+      buffs.push({p,pct});
     }
     // Do not spend several BBs on overlapping party-wide ATK buffs.
-    // Retain strongest source-recorded Lv1 buff; tie -> earlier squad slot.
+    // Use the same verified level-preview strength as combat, or Lv1 fallback.
+    // Retain strongest buff; tie -> earlier squad slot.
     buffs.sort((a,b)=>b.pct-a.pct || a.p.id-b.p.id);
     for(const entry of buffs.slice(1))actions.set(entry.p,'attack');
     return actions;
@@ -74,6 +80,9 @@ JS=r"""
 if MARK in s:
     assert s.count(MARK)==1 and s.count(new)==1 and s.count(old)==0
     assert s.count('window.BF041SmartAuto?.kindFor(p)')==1
+    assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p.id)' in s
+    assert 'BFGlobalCurseBBLockV5900?.cursed(p.id)' in s
+    assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(Number(p.unitId))' in s
     print('PASS existing v0.42 coordinated source-aware Auto Battle patch unchanged')
 else:
     assert s.count(old)==1,('Auto queue site missing or duplicated',s.count(old))

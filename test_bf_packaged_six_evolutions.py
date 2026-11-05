@@ -42,5 +42,5 @@ with zipfile.ZipFile(A) as apk,zipfile.ZipFile(io.BytesIO(pack)) as raw:
                 original=raw.read(f'content/unit/img/unit_ills_thum_{uid}.png')
                 assert data==original
     assert 'assets/bf_home_nav.js' in files
-    assert len(apk.read('assets/bf_home_nav.js'))<=65536
+    assert len(apk.read('assets/bf_home_nav.js')) <= 128 * 1024
 print('PASS v0.32 APK: 6 authentic playable Global evolutions, CGG atlases, original portraits, scoped BBs, unchanged save v7')

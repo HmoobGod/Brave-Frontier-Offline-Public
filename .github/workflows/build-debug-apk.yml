@@ -1,37 +1,21 @@
 name: Build Offline Android APK
+# Heavy signed builds run for the PR merge-tree (including stacked PRs),
+# for commits actually merged to main, or when explicitly dispatched.
+# Source-only preflight workflows still run on PRs.
 on:
   workflow_dispatch:
   push:
-    branches: ['**']
-  pull_request:
     branches: [main]
-    paths:
-      - '.github/workflows/build-debug-apk.yml'
-      - 'source_data/bf_v198_recruit_id_compat_baseline_v200.json'
-      - 'test_bf_v198_recruit_save_compat_v20000.py'
-      - 'source_data/bf_v201_native_2022_encounter_gate.json'
-      - 'test_bf_native_2022_encounter_gates_v20100.py'
-      - 'test_bf_server_battle_capture_fields_v20200.py'
-      - 'source_data/bf_v203_authenticated_2022_local_scan_summary.json'
-      - 'test_bf_authenticated_2022_local_scan_v20300.py'
-      - 'test_bf_original_2022_mimic_profiles_v20400.py'
-      - 'source_data/bf_v204_2022_mimic_opaque_profiles.json'
-      - 'audit_bf_original_2022_mimic_profiles_v20400.py'
-      - 'app/src/main/assets/bf20600_amdahl_source_quest_guide.js'
-      - 'app/src/main/java/org/bravefrontier/offline/MainActivity.java'
-      - 'test_bf_amdahl_source_quest_guide_v20600.py'
-      - 'test_bf_amdahl_guide_real_modules_v20600.py'
-      - 'app/src/main/assets/bf20900_amdahl_original_opaque_mission_fields.js'
-      - 'test_bf_amdahl_original_opaque_metadata_v20900.py'
-      - 'test_bf_prepared_amdahl_full_android_chain_v20800.py'
-      - 'test_bf_packaged_amdahl_story_guide_v20700.py'
-      - 'test_bf_legacy_v7_save_loading_v20500.py'
+  # No path allow-list: signed CI must cover ANY changed dependency, including
+  # source_assets/, tools/, research/, nested scripts, manifests and root JS.
+  pull_request:
+    branches: ['**']
 
 permissions:
   contents: read
 
-# Prevent outdated feature-branch pushes from consuming parallel CI runners.
-# Main and each feature branch keep their own independent run group.
+# Cancel superseded runs on the same pull request or main branch.
+# PR merge-tree and main-merge build groups remain separate.
 concurrency:
   group: bf-offline-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -326,6 +310,9 @@ jobs:
           python test_bf_poison_turn_v5800.py
           python test_bf_curse_bb_lock_v5900.py
           python test_bf_paralysis_action_lock_v6000.py
+          python3 test_bf_auto_disabled_support.py
+          python3 test_bf_auto_support_strength.py
+          python3 test_bf_auto_support_recheck.py
           python test_bf_weakness_defense_v6100.py
           python test_bf_injury_attack_v6200.py
           python test_bf_status_reinfliction_v6300.py
@@ -366,6 +353,53 @@ jobs:
           python test_bf_morgan_original_v080.py
           python test_bf_v0131.py
           python test_bf_home_nav.py
+          python test_bf_android_back_home_v22500.py
+          python test_bf_engine_webview_recovery_v22600.py
+          python3 test_bf_offline_page_recovery_v22900.py
+          python3 test_bf_engine_ui_touch_v22700.py
+          python3 test_bf_home_ui_priority_v24200.py
+          python3 test_bf_home_ui_accessibility_v24300.py
+          python3 test_bf_home_semantic_hierarchy_v24500.py
+          python3 test_bf_home_preview_nameplates_v24600.py
+          python3 test_bf_home_shortcuts_mobile_v24700.py
+          python3 test_bf_home_squad_mobile_v24800.py
+          python3 test_bf_home_ui_release_readiness_v24900.py
+          python3 test_bf_global_route_headers_v25200.py
+          python3 test_bf_quest_mission_cards_v25300.py
+          python3 test_bf_unit_box_mobile_v25400.py
+          python3 test_bf_summon_hall_mobile_v25500.py
+          python3 test_bf_save_controls_mobile_v25600.py
+          python3 test_bf_squad_editor_mobile_v25700.py
+          python3 test_bf_ui_asset_paths_v25800.py
+          python3 test_bf_ui_screen_inventory_v25900.py
+          python3 test_bf_battle_mobile_controls_v26000.py
+          python3 test_bf_battle_results_mobile_v26100.py
+          python3 test_bf_focus_status_mobile_v26200.py
+          python3 test_bf_recovery_backup_hierarchy_v26400.py
+          python3 test_bf_real_save_page_v26500.py
+          python3 test_bf_unit_portrait_fallback_v26600.py
+          python3 test_bf_unit_portrait_readability_v26700.py
+          python3 test_bf_portrait_readability_matrix_v26800.py
+          python3 test_bf_unit_box_empty_state_v26900.py
+          python3 test_bf_unit_box_live_regions_v27000.py
+          python3 test_bf_unit_box_unresolved_v27100.py
+          python3 test_bf_training_cost_guidance_v27300.py
+          python3 test_bf_training_touch_focus_v27400.py
+          python3 test_bf_training_form_targets_v27500.py
+          python3 test_bf_unit_box_toolbar_targets_v27600.py
+          python3 test_bf_unit_box_detail_actions_v27700.py
+          python3 test_bf_unit_box_active_counts_v27800.py
+          python3 test_bf_v250_release_readiness_v25000.py
+          python3 test_bf_engine_ui_asset_budget_v22800.py
+          python3 test_bf_nav_resource_budget_alignment_v24400.py
+          python3 test_bf_engine_ui_integrated_v23000.py
+          python3 test_bf_renderer_dialog_lifecycle_v23100.py
+          python3 test_bf_offline_page_reload_v23200.py
+          python3 test_bf_stale_webview_finish_guard_v23300.py
+          python3 test_bf_offline_main_navigation_token_v23400.py
+          python3 test_bf_android_offline_callback_trace_v23600.py
+          python3 test_bf_isolated_device_trace_v24100.py
+          python3 test_bf_isolated_diagnostic_build_v23700.py
           python test_bf_global_home_scene.py
           python test_bf_inner_screens.py
           python test_bf_unit_box_quest_details.py
@@ -450,6 +484,50 @@ jobs:
           python test_bf_monster_training_v053.py
           python test_bf_header_status_v054.py
           python test_bf_tower_formations_v055.py
+      - name: Capture source-navigation UI screens at two Android phone widths
+        run: |
+          python3 test_bf_capture_progress_audit.py --browser
+          python3 test_bf_ui_screen_capture_v26300.py --capture
+      - name: Upload navigation-only UI screenshot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-v263-navigation-screen-receipts
+          path: source_audit_reports/v263_ui_screen_capture/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Capture nested reconstructed UI screens at two phone widths
+        run: |
+          python3 test_bf_nested_ui_capture_v27200.py --capture
+          python3 test_bf_capture_distinctness_v27810.py --validate --adversarial
+      - name: Upload nested source UI screenshot evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-v272-nested-ui-screen-receipts
+          path: source_audit_reports/v272_nested_ui_capture/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Verify and capture UI-only location screens
+        run: python3 test_bf_location_previews.py --capture
+      - name: Upload location UI previews
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-location-ui-previews
+          path: source_audit_reports/location-ui-previews/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Verify and capture read-only Equipment UI
+        run: python3 test_bf_equipment_ui.py --capture
+      - name: Upload Equipment UI evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-equipment-ui-previews
+          path: source_audit_reports/equipment-ui/
+          if-no-files-found: error
+          retention-days: 90
+      - name: Verify session-only Quest audio settings
+        run: python3 test_bf_session_settings.py
+      - name: Verify live Advanced Tools controls and Menu routing
+        run: python3 test_bf_advanced_tools.py
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
@@ -866,10 +944,44 @@ jobs:
           path: source_audit_reports/BraveFrontier-v187-archived-art-layout-audit.json
           if-no-files-found: error
           retention-days: 90
+      - name: Verify standard signed owner APK identity and emit upgrade evidence
+        env:
+          BF_PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BF_EVENT_NAME: ${{ github.event_name }}
+        run: python3 test_bf_owner_apk_identity_v25100.py --packaged
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: BraveFrontierOffline-demo-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 90
+      - name: Upload separate v251 owner APK certificate and version evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-v251-owner-apk-identity
+          path: source_audit_reports/BraveFrontier-v251-owner-apk-identity.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Build separate-app diagnostic APK (must not overwrite Current build)
+        run: gradle --no-daemon assembleDiagnostic -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify built APK IDs, original assets, and offline permissions
+        run: python3 test_bf_isolated_diagnostic_build_v23700.py --packaged
+      - name: Upload distinct diagnostic APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-isolated-diagnostic-apk
+          path: app/build/outputs/apk/diagnostic/app-diagnostic.apk
+          if-no-files-found: error
+          retention-days: 90
+      - name: Create isolated packaged-page failure APK (diagnostic ID only)
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --build
+      - name: Verify signed fault APK, untouched diagnostic APK and isolated identity
+        run: python3 build_bf_missing_index_diagnostic_v23900.py --verify
+      - name: Upload missing-index failure test APK (never install over Current)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontierOffline-isolated-missing-index-test-apk
+          path: app/build/outputs/apk/diagnostic-fault/app-diagnostic-missing-index.apk
           if-no-files-found: error
           retention-days: 90
