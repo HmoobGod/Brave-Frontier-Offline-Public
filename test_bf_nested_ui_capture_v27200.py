@@ -4,6 +4,7 @@ Disposable browser sessions, intercepted local source assets, no owner save acce
 """
 from pathlib import Path
 import sys
+from bf_capture_progress_audit import INSTALL_STORAGE, SNAPSHOT, assert_unchanged
 import hashlib
 import json
 import mimetypes
@@ -70,6 +71,7 @@ def serve(route):
                   content_type=mimetypes.guess_type(str(path))[0] or "application/octet-stream",
                   body=path.read_bytes())
 
+SAVE_CONTROLS=('downloadsave','uploadsave','exportsave','importsave','undosave','wipesave')
 receipts=[]
 with sync_playwright() as pw:
     browser=pw.chromium.launch(headless=True,executable_path=chrome,
@@ -84,25 +86,12 @@ with sync_playwright() as pw:
         page.on("pageerror",lambda err:errors.append(str(err)))
         page.on("dialog",lambda dialog:dialog.dismiss())
         page.route("**/*",serve)
-        page.evaluate("""() => {
-          const map=Object.create(null);
-          Object.defineProperty(window,"localStorage",{configurable:true,value:{
-            getItem:k=>map[k]??null,setItem:(k,v)=>{map[k]=String(v)},
-            removeItem:k=>delete map[k],clear:()=>Object.keys(map).forEach(k=>delete map[k]),
-            key:i=>Object.keys(map)[i]??null,get length(){return Object.keys(map).length}
-          }});
-        }""")
+        page.evaluate(INSTALL_STORAGE)
         page.set_content(html,wait_until="load",timeout=120000)
         page.add_style_tag(content=CSS)
         page.add_script_tag(content=NAV)
         page.locator("#bf-home").wait_for(state="visible",timeout=15000)
-        state="""() => ({
-          roster:JSON.stringify(P.roster),squad:JSON.stringify(P.squad),
-          exp:JSON.stringify(P.unitExp),evolutions:JSON.stringify(P.evolutions),
-          gems:P.gems,zel:P.zel,karma:P.karma,
-          save:localStorage.getItem('bf_global_offline_demo_v7')
-        })"""
-        baseline=page.evaluate(state)
+        baseline=page.evaluate(SNAPSHOT)
         for name,route,tab,selector in VIEWS:
             assert page.evaluate("(r)=>BF_homeNav.go(r)",route)
             if tab is not None:page.evaluate("(t)=>BFInnerScreens.setTab(t)",tab)
@@ -111,6 +100,27 @@ with sync_playwright() as pw:
             assert page.evaluate("BF_homeNav.current")==route
             if tab is not None:assert page.evaluate("BFInnerScreens.unitTab")==tab
             subject.scroll_into_view_if_needed(timeout=12000)
+            save_visibility=[]
+            if name=='save-controls':
+                # Reconcile the tracked v278.1 defect: menu top is not a save-control view.
+                # Find an unobscured position without clicking any save action.
+                first_top=page.locator('#downloadsave').evaluate('(e)=>e.getBoundingClientRect().top+scrollY')
+                for safe_top in range(16,273,16):
+                    page.evaluate('(y)=>window.scrollTo({top:y,behavior:"instant"})',max(0,first_top-safe_top))
+                    page.wait_for_timeout(80)
+                    save_visibility=page.evaluate("""ids=>ids.map(id=>{
+                      const e=document.getElementById(id),r=e.getBoundingClientRect();
+                      const points=[[r.x+4,r.y+4],[r.right-4,r.y+4],
+                                    [r.x+4,r.bottom-4],[r.right-4,r.bottom-4],
+                                    [r.x+r.width/2,r.y+r.height/2]];
+                      const clear=points.every(([x,y])=>{
+                        const hit=document.elementFromPoint(x,y);return hit===e||e.contains(hit);
+                      });
+                      return {id,visible:r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,
+                              unobscured:clear,sampleCount:points.length};
+                    })""",list(SAVE_CONTROLS))
+                    if all(x['visible'] and x['unobscured'] for x in save_visibility):break
+                assert all(x['visible'] and x['unobscured'] for x in save_visibility),(width,save_visibility)
             page.wait_for_timeout(120)
             bounds=page.evaluate("""() => ({
                scrollWidth:document.documentElement.scrollWidth,
@@ -121,12 +131,12 @@ with sync_playwright() as pw:
             shot=OUTPUT/file
             page.screenshot(path=str(shot),full_page=False,animations="disabled",
                             caret="hide",timeout=20000)
-            assert page.evaluate(state)==baseline,(width,name,"player state changed")
+            audit=assert_unchanged(page,baseline,(width,name))
             assert not errors,(width,name,errors[:3])
             receipts.append(dict(file=file,screen=name,route=route,unitTab=tab,
                 viewport=[width,height],scrollY=bounds["scrollY"],
                 scrollWidth=bounds["scrollWidth"],bytes=shot.stat().st_size,
-                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True))
+                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True,saveControlsVisibility=save_visibility,**audit))
         ctx.close()
     browser.close()
 assert not external,sorted(external)
