@@ -57,3 +57,18 @@ correction, the complete four-viewport browser matrix passed again and all
 Fresh GitHub exact-head Android CI and independent Codex review are separate
 pending requirements. Browser rendering is not physical-device acceptance or
 proof that gameplay systems work. Preserve all APKs and owner progress.
+
+## CI compatibility follow-up
+
+The first GitHub UI source preflight failed because inherited v264/v271/v273–277
+checks searched every later CSS section for `display:none`, including this
+unrelated preview's hidden directory Back button. Seven visibility assertions
+now inspect the relevant save/Training/Unit Box selectors across the stylesheet,
+including later overrides; no runtime styling was changed to silence the guard.
+All 51 Python commands from the complete UI preflight pass locally. All seven
+affected legacy browser suites pass, including backup/reset visual distinction,
+unresolved Unit Box profiles, Training feedback/actions/forms and Box toolbar/
+detail controls. Seven late-hidden-control negative mutations are rejected,
+including a spaced `display : none` declaration. The initial failing CI and
+old-head Android run are historical, not current-head approval. Fresh CI must
+pass again after the append-only correction commit.

@@ -3,6 +3,7 @@
 Packaged offline index and navigation assets, synthetic browser storage only.
 """
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -20,7 +21,12 @@ assert "body.bf-menu-mode .training-panel .train-actions button {" in patch[1]
 assert "min-height:44px" in patch[1] and "touch-action:manipulation" in patch[1]
 assert ".train-actions button:focus-visible {" in patch[1]
 assert "outline:3px solid" in patch[1]
-assert "display:none" not in patch[1]
+# Scope visibility checks to these controls, including later CSS overrides.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}', CSS)
+                  if '.train-actions button' in selectors]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in visibility_rules)
 assert "test_bf_training_touch_focus_v27400.py --source-only" in SOURCE
 assert BUILD.count("python3 test_bf_training_touch_focus_v27400.py")==1
 assert "android.permission.INTERNET" not in MANIFEST
