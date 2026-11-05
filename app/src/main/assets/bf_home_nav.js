@@ -1542,3 +1542,53 @@ function bfOfflineUnitPortraitV266(source, name) {
   window.BFEquipmentUI = Object.freeze({refresh});
   refresh();
 })();
+
+/* UI-first Menu help: static player guidance; no game or storage access. */
+(() => {
+  'use strict';
+  const menu = document.querySelector('.progresspanel');
+  if (!menu || document.getElementById('bf-menu-help')) return;
+  const help = document.createElement('details');
+  help.id = 'bf-menu-help';
+  help.innerHTML = '<summary>HELP &amp; APP GUIDE</summary><div class="bf-menu-help-body">'+
+    '<h2>Welcome to the offline reconstruction</h2><p>The interface is being completed first. Original gameplay systems are still being rebuilt.</p>'+
+    '<details><summary>What can I use today?</summary><p>Browse your units, edit your squad and explore the current demo quests and battles. Training and summoning use demo rules.</p></details>'+
+    '<details><summary>What does UI preview mean?</summary><p>Equipment and the five Global location previews let you explore unfinished interfaces. Their unavailable actions stay disabled; previewing does not equip items or grant rewards.</p></details>'+
+    '<details><summary>Where can I back up my progress?</summary><p>Use the save controls in this Menu to export a backup file. Keep your exported file somewhere you can find it again.</p></details>'+
+    '<details><summary>Does the app need a connection?</summary><p>The bundled interface and current demo work offline. Arena rankings, raid services and event listings are not implemented in this build.</p></details>'+
+    '<p class="bf-menu-help-note">A finished screen does not mean its game system is ready. Preview and demo labels show what is currently available.</p></div>';
+  menu.prepend(help);
+})();
+
+/* Menu inventory reads existing demo catalyst counts; never edits progress. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-menu-materials')||typeof ALL_MATERIAL_IDS==='undefined')return;
+  const panel=document.createElement('details');panel.id='bf-menu-materials';
+  panel.innerHTML='<summary>MATERIAL INVENTORY <small>DEMO STOCK</small></summary><div class="bf-menu-material-body"><p>Recorded catalysts from this demo save. Original item ownership and drop rules are not reconstructed.</p><label><input type="checkbox" id="bf-menu-material-all" /> Show all known catalyst IDs</label><p id="bf-menu-material-count" role="status" aria-live="polite"></p><div class="bf-menu-material-grid"></div></div>';
+  menu.prepend(panel);
+  const all=panel.querySelector('input'),grid=panel.querySelector('.bf-menu-material-grid'),status=panel.querySelector('[role="status"]');
+  function refresh(){
+    const ids=[...new Set(ALL_MATERIAL_IDS)].map(String);
+    const rows=ids.map(id=>{const value=typeof P!=='undefined'?P.materials?.[id]:null;return {id,count:Number.isSafeInteger(value)&&value>0?value:0};});
+    const owned=rows.filter(r=>r.count>0),shown=all.checked?rows:owned;
+    let total=0,overflow=false;
+    for(const row of owned){
+      if(row.count>Number.MAX_SAFE_INTEGER-total){overflow=true;break;}
+      total+=row.count;
+    }
+    const totalLabel=overflow?'More than '+Number.MAX_SAFE_INTEGER.toLocaleString('en-US'):String(total);
+    status.textContent=totalLabel+' catalysts recorded · '+owned.length+' types owned';
+    grid.replaceChildren();
+    for(const row of shown){
+      const card=document.createElement('div'),name=document.createElement('strong'),count=document.createElement('span');
+      name.textContent='Catalyst #'+row.id;count.textContent='Owned: '+row.count;card.append(name,count);grid.append(card);
+    }
+    if(!shown.length){const empty=document.createElement('p');empty.className='bf-menu-material-empty';empty.textContent='No catalysts recorded. Choose “Show all known catalyst IDs” to browse the list.';grid.append(empty);}
+  }
+  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});all.addEventListener('change',refresh);
+  const inventory=document.getElementById('inventoryitems');
+  if(inventory)new MutationObserver(()=>{if(panel.open)refresh();}).observe(inventory,{childList:true});
+  refresh();
+})();
