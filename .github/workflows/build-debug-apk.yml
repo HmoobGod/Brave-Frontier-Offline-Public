@@ -311,6 +311,7 @@ jobs:
           python test_bf_curse_bb_lock_v5900.py
           python test_bf_paralysis_action_lock_v6000.py
           python3 test_bf_auto_disabled_support.py
+          python3 test_bf_auto_support_strength.py
           python test_bf_weakness_defense_v6100.py
           python test_bf_injury_attack_v6200.py
           python test_bf_status_reinfliction_v6300.py

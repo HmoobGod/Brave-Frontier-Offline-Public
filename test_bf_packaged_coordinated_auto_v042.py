@@ -13,6 +13,8 @@ with ZipFile(apk) as z:
     assert 'window.BF041SmartAuto?.kindFor(p)' in html
     assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p.id)' in html
     assert 'BFGlobalCurseBBLockV5900?.cursed(p.id)' in html
+    assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in html
+    assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(Number(p.unitId))' in html
     assert 'bf_global_offline_demo_v7' in html
     assert 'unit_anime_atlas_10025.png' in html
 print('PASS v0.42 packaged: coordinated optional support AI; original evolution/source BB; save v7')

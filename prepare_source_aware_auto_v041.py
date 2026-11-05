@@ -55,7 +55,8 @@ ui=r"""
     }
     if(support.kind==='atk_buff_all' && Number.isFinite(support.pct)){
       // DEMO heuristic: source ATK buff worth casting if any ally lacks its strength.
-      return liveParty().some(a=>currentAtkBoost(a)<support.pct)?'burst':'attack';
+      const pct=window.BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)??support.pct;
+      return liveParty().some(a=>currentAtkBoost(a)<pct)?'burst':'attack';
     }
     return fallback;
   }
@@ -90,6 +91,7 @@ if s.count(marker)==1:
                 s.count('window.BF042AutoCoordination?.plan(liveParty())')==1)
     assert (s.count(next)==1 or upgraded) and s.count('id="bf041-smart-auto-style"')==1
     assert s.count(prior)==0
+    assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in s
     print('PASS v0.41 idempotent source-aware Auto Battle patch intact')
 else:
     assert s.count(marker)==0
