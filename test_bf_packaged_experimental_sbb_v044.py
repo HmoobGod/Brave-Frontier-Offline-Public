@@ -12,4 +12,6 @@ with ZipFile(p) as z:
  assert 'bf_global_offline_demo_v7' in s
  assert "if(action.kind==='sbb_demo' && window.BF044SBBDemo?.perform)" in s
  assert 'unit_anime_atlas_10025.png' in s
+ assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
+ assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p?.id)' in s
 print('PASS v0.44 APK original v0.38–v0.43 assets and v7; optional SBB DEMO only')

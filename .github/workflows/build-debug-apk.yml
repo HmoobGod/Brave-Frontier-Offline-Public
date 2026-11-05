@@ -465,6 +465,7 @@ jobs:
           python test_bf_coordinated_auto_v042.py
           python test_bf_original_sbb_preview_v043.py
           python test_bf_experimental_sbb_v044.py
+          python3 test_bf_sbb_status_safety.py
           python test_bf_egor_snowfield_v045.py
           python test_bf_forest_of_beasts_v046.py
           python test_bf_magutagal_v047.py
