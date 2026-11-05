@@ -1365,3 +1365,19 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-menu-material-grid strong{font-size:13px;color:#f3d9a5}
 .bf-menu-material-grid span{font-size:13px;color:#d3e0e5}
 .bf-menu-material-empty{grid-column:1/-1;color:#c4d4dc}
+
+#bf-menu-settings{margin:12px;border:1px solid #aa9468;border-radius:8px;background:linear-gradient(145deg,#283c49,#152738);color:#e8e3d5;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-settings>summary{min-height:48px;padding:13px;cursor:pointer;color:#f7dda8;font:700 15px/1.5 Georgia,serif}
+#bf-menu-settings summary small{margin-left:8px;color:#bed2dd;font:700 10px system-ui,sans-serif}
+.bf-session-settings-body{padding:0 14px 15px;overflow-wrap:anywhere}
+.bf-session-settings-body h2{font:700 21px Georgia,serif;color:#ffe3a5;margin:8px 0 12px}
+.bf-session-settings-body h3{font:700 17px Georgia,serif;color:#efd5a3;margin:0}
+.bf-session-settings-body>label{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:48px;font-weight:700}
+#bf-menu-settings input[type=range]{width:100%;min-height:44px;margin:0;accent-color:#e5c581}
+#bf-menu-settings .bf-session-mute{justify-content:flex-start}
+#bf-menu-settings input[type=checkbox]{width:20px;height:20px;accent-color:#e5c581}
+#bf-menu-settings output{color:#ffe4ad}
+#bf-session-audio-state{padding:10px;background:#102332;border:1px solid #607a8f;border-radius:5px}
+.bf-session-settings-body section{padding:14px;border-top:1px solid #718491;margin-top:16px;background:#122535}
+.bf-session-settings-body button{width:100%;min-height:44px;padding:10px;border:1px solid #62798b;border-radius:5px;background:#283946;color:#bacbd6;font:700 11px system-ui,sans-serif}
+#bf-menu-settings summary:focus-visible,#bf-menu-settings input:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
