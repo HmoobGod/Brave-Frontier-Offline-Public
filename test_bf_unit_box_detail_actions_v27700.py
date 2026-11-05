@@ -1,5 +1,6 @@
 """v277 Unit Box detail navigation is readable and touch accessible, without data writes."""
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -19,8 +20,14 @@ for token in (".bf-owned-box .bf-box-detail .bf-box-manage",
               "min-height:44px","min-width:44px","overflow-wrap:anywhere",
               ".bf-box-original-profile:focus-visible","outline:3px solid"):
     assert token in DELTA,token
-for token in ("display:none","localStorage.","saveProgress(","P.roster","P.gems","fetch("):
+for token in ("localStorage.","saveProgress(","P.roster","P.gems","fetch("):
     assert token not in DELTA,token
+# Check detail-control visibility across the stylesheet, not unrelated panels.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}',CSS)
+                  if '.bf-box-detail' in selectors]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in visibility_rules)
 assert "test_bf_unit_box_detail_actions_v27700.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_unit_box_detail_actions_v27700.py")==1
 assert "android.permission.INTERNET" not in MAN
