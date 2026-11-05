@@ -4,6 +4,7 @@ Disposable browser sessions, intercepted local source assets, no owner save acce
 """
 from pathlib import Path
 import sys
+from bf_capture_progress_audit import INSTALL_STORAGE, SNAPSHOT, assert_unchanged
 import hashlib
 import json
 import mimetypes
@@ -84,25 +85,12 @@ with sync_playwright() as pw:
         page.on("pageerror",lambda err:errors.append(str(err)))
         page.on("dialog",lambda dialog:dialog.dismiss())
         page.route("**/*",serve)
-        page.evaluate("""() => {
-          const map=Object.create(null);
-          Object.defineProperty(window,"localStorage",{configurable:true,value:{
-            getItem:k=>map[k]??null,setItem:(k,v)=>{map[k]=String(v)},
-            removeItem:k=>delete map[k],clear:()=>Object.keys(map).forEach(k=>delete map[k]),
-            key:i=>Object.keys(map)[i]??null,get length(){return Object.keys(map).length}
-          }});
-        }""")
+        page.evaluate(INSTALL_STORAGE)
         page.set_content(html,wait_until="load",timeout=120000)
         page.add_style_tag(content=CSS)
         page.add_script_tag(content=NAV)
         page.locator("#bf-home").wait_for(state="visible",timeout=15000)
-        state="""() => ({
-          roster:JSON.stringify(P.roster),squad:JSON.stringify(P.squad),
-          exp:JSON.stringify(P.unitExp),evolutions:JSON.stringify(P.evolutions),
-          gems:P.gems,zel:P.zel,karma:P.karma,
-          save:localStorage.getItem('bf_global_offline_demo_v7')
-        })"""
-        baseline=page.evaluate(state)
+        baseline=page.evaluate(SNAPSHOT)
         for name,route,tab,selector in VIEWS:
             assert page.evaluate("(r)=>BF_homeNav.go(r)",route)
             if tab is not None:page.evaluate("(t)=>BFInnerScreens.setTab(t)",tab)
@@ -121,12 +109,12 @@ with sync_playwright() as pw:
             shot=OUTPUT/file
             page.screenshot(path=str(shot),full_page=False,animations="disabled",
                             caret="hide",timeout=20000)
-            assert page.evaluate(state)==baseline,(width,name,"player state changed")
+            audit=assert_unchanged(page,baseline,(width,name))
             assert not errors,(width,name,errors[:3])
             receipts.append(dict(file=file,screen=name,route=route,unitTab=tab,
                 viewport=[width,height],scrollY=bounds["scrollY"],
                 scrollWidth=bounds["scrollWidth"],bytes=shot.stat().st_size,
-                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True))
+                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True,**audit))
         ctx.close()
     browser.close()
 assert not external,sorted(external)
