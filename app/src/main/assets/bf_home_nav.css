@@ -1342,6 +1342,30 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-equipment-empty{color:#cedbe2;margin:0}
 @media(min-width:480px){.bf-equipment-filters{grid-template-columns:1fr 1fr}}
 
+/* Compact Menu guide; save controls and their handlers remain unchanged. */
+#bf-menu-help{margin:12px;border:1px solid #b09862;border-radius:8px;background:linear-gradient(145deg,#283d4a,#152638);color:#e9e4d7;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-help>summary{padding:13px;min-height:48px;color:#f6ddaa;font:700 15px/1.5 Georgia,serif;cursor:pointer}
+.bf-menu-help-body{padding:0 13px 14px}
+.bf-menu-help-body h2{margin:5px 0 10px;font:700 20px/1.3 Georgia,serif;color:#ffe5b0}
+.bf-menu-help-body p{margin:10px 0;overflow-wrap:anywhere}
+.bf-menu-help-body details{margin-top:10px;border:1px solid #607a8d;border-radius:6px;background:#102332}
+.bf-menu-help-body summary{min-height:48px;padding:12px;color:#f1d6a6;cursor:pointer;font-weight:700}
+.bf-menu-help-body details p{padding:0 12px 12px;margin:0;color:#d0dce3}
+#bf-menu-help summary:focus-visible{outline:3px solid #fff0bc;outline-offset:2px}
+.bf-menu-help-note{padding-top:12px;border-top:1px solid #6f8190;color:#bacdd7;font-size:12px}
+
+#bf-menu-materials{margin:12px;border:1px solid #ac9465;border-radius:8px;background:#182e3e;color:#e9e4d7;font:14px/1.5 system-ui,sans-serif}
+#bf-menu-materials>summary{padding:13px;min-height:48px;color:#f6ddaa;font:700 15px/1.5 Georgia,serif;cursor:pointer}
+#bf-menu-materials summary small{font:700 10px system-ui,sans-serif;color:#bfd1db;margin-left:8px}
+#bf-menu-materials summary:focus-visible,#bf-menu-materials input:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+.bf-menu-material-body{padding:0 13px 14px;overflow-wrap:anywhere}
+.bf-menu-material-body label{display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;color:#ecd5a8}
+.bf-menu-material-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.bf-menu-material-grid>div{padding:12px;border:1px solid #688295;border-radius:6px;background:#102332;display:grid;gap:5px}
+.bf-menu-material-grid strong{font-size:13px;color:#f3d9a5}
+.bf-menu-material-grid span{font-size:13px;color:#d3e0e5}
+.bf-menu-material-empty{grid-column:1/-1;color:#c4d4dc}
+
 #bf-menu-settings{margin:12px;border:1px solid #aa9468;border-radius:8px;background:linear-gradient(145deg,#283c49,#152738);color:#e8e3d5;font:14px/1.5 system-ui,sans-serif}
 #bf-menu-settings>summary{min-height:48px;padding:13px;cursor:pointer;color:#f7dda8;font:700 15px/1.5 Georgia,serif}
 #bf-menu-settings summary small{margin-left:8px;color:#bed2dd;font:700 10px system-ui,sans-serif}
