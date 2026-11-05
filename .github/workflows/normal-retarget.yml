@@ -1,0 +1,28 @@
+name: Normal attack target fallback source check
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/assets/bf8800_live_normal_crystal_events.js'
+      - 'app/src/main/assets/bf9300_single_hit_critical_combat.js'
+      - 'app/src/main/assets/bf9500_multihit_critical_combat.js'
+      - 'test_bf_normal_retarget.py'
+      - 'NORMAL_RETARGET.md'
+      - '.github/workflows/normal-retarget.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  normal-retarget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_normal_retarget.py --source-only

@@ -34,7 +34,8 @@
       !Number.isSafeInteger(unit.unitId)||unit.action?.kind!=='attack'||
       !Number.isSafeInteger(unit.action.target))return null;
    const p=source.lookup(unit.unitId);
-   const target=S.enemies?.find(e=>e?.slot===unit.action.target&&e.hp>0);
+   // Follow the engine's existing living-target fallback after an earlier KO.
+   const target=typeof pickTarget==='function'?pickTarget(unit.action.target):null;
    if(!p||p.normalHits!==1||!target)return null;
    return {unit,slot:unit.id,unitId:unit.unitId,target,
      hp:target.hp,wave:S.wave+1,turn:S.round,battle:S,attempted:false,critical:false};
