@@ -1592,3 +1592,16 @@ function bfOfflineUnitPortraitV266(source, name) {
   if(inventory)new MutationObserver(()=>{if(panel.open)refresh();}).observe(inventory,{childList:true});
   refresh();
 })();
+
+/* Keep raw battle diagnostics available without crowding the player Menu. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('section.progresspanel');
+  const inspector=document.querySelector('section.hit-panel');
+  if(!menu||!inspector||document.getElementById('bf-advanced-tools'))return;
+  const tools=document.createElement('details');tools.id='bf-advanced-tools';
+  const title=document.createElement('summary');title.textContent='ADVANCED TOOLS';
+  const note=document.createElement('p');note.className='bf-advanced-note';
+  note.textContent='Inspect prototype battle events and archived hit data. These diagnostics do not establish original damage or gameplay accuracy.';
+  tools.append(title,note,inspector);menu.append(tools);
+})();
