@@ -381,6 +381,8 @@ jobs:
           python3 test_bf_unit_box_live_regions_v27000.py
           python3 test_bf_unit_box_unresolved_v27100.py
           python3 test_bf_training_cost_guidance_v27300.py
+          python3 test_bf_training_touch_focus_v27400.py
+          python3 test_bf_training_form_targets_v27500.py
           python3 test_bf_v250_release_readiness_v25000.py
           python3 test_bf_engine_ui_asset_budget_v22800.py
           python3 test_bf_nav_resource_budget_alignment_v24400.py
@@ -488,7 +490,9 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Capture nested reconstructed UI screens at two phone widths
-        run: python3 test_bf_nested_ui_capture_v27200.py --capture
+        run: |
+          python3 test_bf_nested_ui_capture_v27200.py --capture
+          python3 test_bf_capture_distinctness_v27810.py --validate --adversarial
       - name: Upload nested source UI screenshot evidence
         uses: actions/upload-artifact@v4
         with:

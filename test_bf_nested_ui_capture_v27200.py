@@ -71,6 +71,7 @@ def serve(route):
                   content_type=mimetypes.guess_type(str(path))[0] or "application/octet-stream",
                   body=path.read_bytes())
 
+SAVE_CONTROLS=('downloadsave','uploadsave','exportsave','importsave','undosave','wipesave')
 receipts=[]
 with sync_playwright() as pw:
     browser=pw.chromium.launch(headless=True,executable_path=chrome,
@@ -99,6 +100,27 @@ with sync_playwright() as pw:
             assert page.evaluate("BF_homeNav.current")==route
             if tab is not None:assert page.evaluate("BFInnerScreens.unitTab")==tab
             subject.scroll_into_view_if_needed(timeout=12000)
+            save_visibility=[]
+            if name=='save-controls':
+                # Reconcile the tracked v278.1 defect: menu top is not a save-control view.
+                # Find an unobscured position without clicking any save action.
+                first_top=page.locator('#downloadsave').evaluate('(e)=>e.getBoundingClientRect().top+scrollY')
+                for safe_top in range(16,273,16):
+                    page.evaluate('(y)=>window.scrollTo({top:y,behavior:"instant"})',max(0,first_top-safe_top))
+                    page.wait_for_timeout(80)
+                    save_visibility=page.evaluate("""ids=>ids.map(id=>{
+                      const e=document.getElementById(id),r=e.getBoundingClientRect();
+                      const points=[[r.x+4,r.y+4],[r.right-4,r.y+4],
+                                    [r.x+4,r.bottom-4],[r.right-4,r.bottom-4],
+                                    [r.x+r.width/2,r.y+r.height/2]];
+                      const clear=points.every(([x,y])=>{
+                        const hit=document.elementFromPoint(x,y);return hit===e||e.contains(hit);
+                      });
+                      return {id,visible:r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth,
+                              unobscured:clear,sampleCount:points.length};
+                    })""",list(SAVE_CONTROLS))
+                    if all(x['visible'] and x['unobscured'] for x in save_visibility):break
+                assert all(x['visible'] and x['unobscured'] for x in save_visibility),(width,save_visibility)
             page.wait_for_timeout(120)
             bounds=page.evaluate("""() => ({
                scrollWidth:document.documentElement.scrollWidth,
@@ -114,7 +136,7 @@ with sync_playwright() as pw:
             receipts.append(dict(file=file,screen=name,route=route,unitTab=tab,
                 viewport=[width,height],scrollY=bounds["scrollY"],
                 scrollWidth=bounds["scrollWidth"],bytes=shot.stat().st_size,
-                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True,**audit))
+                sha256=hashlib.sha256(shot.read_bytes()).hexdigest(),saveUnchanged=True,saveControlsVisibility=save_visibility,**audit))
         ctx.close()
     browser.close()
 assert not external,sorted(external)

@@ -46,8 +46,11 @@ on:
       - 'test_bf_nested_ui_capture_v27200.py'
       - 'bf_capture_progress_audit.py'
       - 'test_bf_capture_progress_audit.py'
+      - 'test_bf_capture_distinctness_v27810.py'
       - 'CAPTURE_PROGRESS_AUDIT.md'
       - 'test_bf_training_cost_guidance_v27300.py'
+      - 'test_bf_training_touch_focus_v27400.py'
+      - 'test_bf_training_form_targets_v27500.py'
       - 'test_bf_v250_release_readiness_v25000.py'
       - 'V250_OWNER_APK_RELEASE_READINESS.md'
       - 'test_bf_owner_apk_identity_v25100.py'
@@ -75,6 +78,8 @@ on:
       - 'V271_UNIT_BOX_UNRESOLVED_ROSTER.md'
       - 'V272_NESTED_UI_CAPTURE_EVIDENCE.md'
       - 'V273_TRAINING_COST_GUIDANCE.md'
+      - 'V274_TRAINING_TOUCH_FOCUS.md'
+      - 'V275_TRAINING_FORM_TARGETS.md'
       - 'V248_HOME_SQUAD_MOBILE.md'
       - 'V247_HOME_SHORTCUTS_MOBILE.md'
       - 'V246_HOME_PREVIEW_NAMEPLATES.md'
@@ -123,6 +128,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Verify reconciled v278.1 screenshot visibility and distinctness gate
+        run: python3 test_bf_capture_distinctness_v27810.py --source-only
       - name: Verify complete screenshot progress audit and restored-write detection
         run: python3 test_bf_capture_progress_audit.py --source-only
       - name: Verify Android Back UI routing without save changes
@@ -169,6 +176,10 @@ jobs:
         run: python3 test_bf_nested_ui_capture_v27200.py --source-only
       - name: Verify Training demo costs are clear and read-only
         run: python3 test_bf_training_cost_guidance_v27300.py --source-only
+      - name: Verify Training 44px touch and keyboard focus source guard
+        run: python3 test_bf_training_touch_focus_v27400.py --source-only
+      - name: Verify Training search and filter mobile touch/focus targets
+        run: python3 test_bf_training_form_targets_v27500.py --source-only
       - name: Check safe recovery backup visual hierarchy without save writes
         run: python3 test_bf_recovery_backup_hierarchy_v26400.py --source-only
       - name: Verify real packaged save HTML and inline-style browser regression registration

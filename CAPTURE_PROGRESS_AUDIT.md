@@ -76,3 +76,33 @@ one workflow's `python` spelling after 52 successful commands. The two remaining
 source checks were then run directly and passed; this was runner discovery,
 not a failing product test. Evidence logs and manifests live outside the branch
 under `/workspace/work/`.
+
+## v278.1 reconciliation — November 5, 2026 (local continuation)
+
+This continuation incorporates the tracked R2 screenshot defect into this existing
+audit branch instead of creating another overlapping PR. The historical R2 ZIP
+is not present in this workspace; this implements its documented acceptance
+requirements and does not claim byte identity to that packet.
+
+The nested Save Controls view now searches safe scroll positions and requires
+all six controls to fit within the viewport and pass hit-tests at five points
+(four inner corners and center). Initial center-only checks passed while the
+first label remained partly covered by the header; actual image inspection
+caught that gap. Five-point checks and a new capture rerun show all labels clear
+at both phone sizes. No save action is clicked.
+
+`test_bf_capture_distinctness_v27810.py` requires the exact 22 named scenes,
+routes/tabs/viewports, 2x PNG dimensions/header, per-image SHA256/length, no stray
+or missing PNGs, no external/missing requests or personal-save load, all full-state
+audit flags/zero writes, six-control visibility receipts and 22 distinct hashes.
+It runs after both capture commands in Android CI. Source mode checks its wiring.
+Four negative controls reject personal-save flags, missing resources, external
+requests and a copied/rehashed Menu PNG substituted for Save Controls. These are
+new tests, not a claim to have rerun the historical packet's 13 mutations.
+
+Local validation: 22/22 distinct images and correct receipts, four adversarial
+mutations rejected, all controls visually inspected at both sizes, existing
+progress guard source tests passed. No new signed CI has tested this continuation
+and no runtime code/assets changed. Keep the local commit for final-base update
+and separate review before integrating #216; existing completed #216 CI applies
+to its earlier published head only. R4.1 Home work remains separate.
