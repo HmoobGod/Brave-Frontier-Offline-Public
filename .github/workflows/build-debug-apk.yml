@@ -526,6 +526,8 @@ jobs:
           retention-days: 90
       - name: Verify session-only Quest audio settings
         run: python3 test_bf_session_settings.py
+      - name: Verify live Advanced Tools controls and Menu routing
+        run: python3 test_bf_advanced_tools.py
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
