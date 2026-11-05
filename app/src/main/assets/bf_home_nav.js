@@ -1620,3 +1620,27 @@ function bfOfflineUnitPortraitV266(source, name) {
   panel.addEventListener('toggle',()=>{if(panel.open)sync();});
   sync();
 })();
+
+/* About uses public installed-app metadata only, never save or signer data. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-about-build'))return;
+  const panel=document.createElement('details');panel.id='bf-about-build';
+  panel.innerHTML='<summary>ABOUT THIS BUILD</summary><div class="bf-about-body"><h2>Brave Frontier Offline</h2><p>Brave Frontier Global interface reconstruction. The UI is being completed first; gameplay remains incomplete.</p><dl><div><dt>Version</dt><dd id="bf-about-version">Unavailable</dd></div><div><dt>Version code</dt><dd id="bf-about-code">Unavailable</dd></div><div><dt>Package</dt><dd id="bf-about-package">Unavailable</dd></div></dl><p id="bf-about-status" role="status" aria-live="polite">Open this panel to read build information.</p><p>Use these details when identifying the build you are testing.</p></div>';
+  menu.append(panel);
+  function refresh(){
+    let info=null;
+    try {
+      if(typeof window.BFAndroid?.getBuildInfo==='function')info=JSON.parse(window.BFAndroid.getBuildInfo());
+    } catch(error) {info=null;}
+    const valid=info&&typeof info.packageName==='string'&&/^[A-Za-z0-9_.]{1,160}$/.test(info.packageName)&&
+      typeof info.versionName==='string'&&info.versionName.length>0&&info.versionName.length<=80&&
+      Number.isSafeInteger(info.versionCode)&&info.versionCode>0;
+    panel.querySelector('#bf-about-version').textContent=valid?info.versionName:'Unavailable';
+    panel.querySelector('#bf-about-code').textContent=valid?String(info.versionCode):'Unavailable';
+    panel.querySelector('#bf-about-package').textContent=valid?info.packageName:'Unavailable';
+    panel.querySelector('#bf-about-status').textContent=valid?'Public metadata from this installed app.':'Build information unavailable here. Browser previews cannot identify an installed Android build.';
+  }
+  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
+})();
