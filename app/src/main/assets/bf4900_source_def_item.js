@@ -20,6 +20,8 @@
    itemMaxEquipped:10,itemMaxStack:99,defPercent:30,duration:3,
    effect:'One ally DEF +30% for three turns'
  });
+ // file/sha256 identify the complete original F_ITEM table, not a #20600
+ // row digest. Both records are covered by the shared v4900 provenance.
  const sources=Object.freeze({20600:source,20601:Object.freeze({
    file:source.file,sha256:source.sha256,itemId:20601,name:'堅牢薬',
    battleEffectGroupId:410,targetType:1,itemTargetArea:1,skillTypeId:5,

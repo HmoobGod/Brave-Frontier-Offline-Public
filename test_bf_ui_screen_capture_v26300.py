@@ -6,6 +6,7 @@ is a subset of Android's additional injected modules, not full APK parity.
 """
 from pathlib import Path
 import sys
+from bf_capture_progress_audit import INSTALL_STORAGE, SNAPSHOT, assert_unchanged
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "app/src/main/assets"
@@ -95,15 +96,13 @@ with sync_playwright() as pw:
         page.on("pageerror", lambda exc: errors.append(str(exc)))
         page.on("dialog", lambda dialog: dialog.dismiss())
         page.route("**/*", serve)
+        page.add_init_script(INSTALL_STORAGE)
         page.goto(BASE + "index.html", wait_until="load", timeout=90000)
         page.add_style_tag(path=str(ASSETS / "bf_home_nav.css"))
         page.add_script_tag(path=str(ASSETS / "bf_home_nav.js"))
         page.locator("#bf-home").wait_for(state="visible", timeout=15000)
         assert page.locator(".bf-navbar button").count() == 5
-        initial = page.evaluate("""() => ({
-            squad: JSON.stringify(P.squad), zel: P.zel, gems: P.gems,
-            save: localStorage.getItem('bf_global_offline_demo_v7')
-        })""")
+        initial = page.evaluate(SNAPSHOT)
         # The source app may create a synthetic default save on first boot.
         # It is isolated to this new CI context, never an owner-provided save.
         for screen, selector in SCREENS:
@@ -123,11 +122,7 @@ with sync_playwright() as pw:
             page.screenshot(path=str(path), full_page=False,
                             animations="disabled", caret="hide", timeout=15000)
             digest = hashlib.sha256(path.read_bytes()).hexdigest()
-            current = page.evaluate("""() => ({
-                squad: JSON.stringify(P.squad), zel:P.zel, gems:P.gems,
-                save:localStorage.getItem('bf_global_offline_demo_v7')
-            })""")
-            assert current == initial, (width, screen, "Navigation changed demo state")
+            audit = assert_unchanged(page, initial, (width, screen))
             assert bounds["scrollWidth"] <= width + 2, (width, screen, bounds)
             receipts.append({
                 "screen": screen,
@@ -137,6 +132,7 @@ with sync_playwright() as pw:
                 "documentScrollWidth": bounds["scrollWidth"],
                 "navigatorCurrent": screen,
                 "saveUnchanged": True,
+                **audit,
             })
         assert not errors, (width, errors)
         context.close()

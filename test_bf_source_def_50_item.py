@@ -9,6 +9,10 @@ import sys
 ROOT=Path(__file__).resolve().parent
 A=ROOT/'app/src/main/assets'
 ref=json.loads((ROOT/'source_data/bf_global_2022_def_item_evidence_v4900.json').read_text())
+provenance=ref['provenance']
+assert provenance['sourceTable']=='3-mst-translated/F_ITEM_MST_Ver1027.json'
+assert provenance['sourceSha256']=='0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474'
+assert {20600,20601}.issubset({row['itemId'] for row in ref['items']})
 item=next(x for x in ref['items'] if x['itemId']==20601)
 assert item['rawName']=='堅牢薬'
 assert (item['battleEffectGroupId'],item['targetType'],item['itemTargetArea'],item['skillTypeId'])==(410,1,1,5)
@@ -67,6 +71,11 @@ with sync_playwright() as pw:
         assert page.evaluate('BFGlobalSourceDefItemV4900.source.itemId')==20600
         assert page.evaluate('BFGlobalSourceDefItemV4900.snapshot().selectedSource.itemId')==20600
         profile=page.evaluate('BFGlobalSourceDefItemV4900.sources[20601]')
+        # This is the complete table's hash, shared by both original rows.
+        for item_id in (20600,20601):
+            origin=page.evaluate('(id)=>BFGlobalSourceDefItemV4900.sources[id]',item_id)
+            assert origin['file']==provenance['sourceTable']
+            assert origin['sha256']==provenance['sourceSha256']
         for key in ('itemId','battleEffectGroupId','targetType','itemTargetArea','skillTypeId','passiveSkillInfo','itemMaxEquipped'):
             assert profile[key]==item[key],key
         assert page.evaluate('Object.isFrozen(BFGlobalSourceDefItemV4900.sources[20601])')

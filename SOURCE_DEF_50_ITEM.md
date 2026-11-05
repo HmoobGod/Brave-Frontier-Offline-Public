@@ -12,6 +12,15 @@ and v5100 compressed battle-item effect catalog. No canonical English name, shop
 price, enemy drop, native inventory or RNG is invented. This does not complete
 original inventory/equipment reconstruction.
 
+The shared `file` and `sha256` on profiles #20600 and #20601 identify the
+**complete** `3-mst-translated/F_ITEM_MST_Ver1027.json` table, SHA-256
+`0286402bad6071687a698665e4a12cafdf7aaf9bbc6c131816cd5c2235857474`.
+They are not per-item digests. The committed v4900 evidence lists both rows
+under that single table-level provenance. The regression pins that identity
+and compares both live profiles against it; the independent effect catalog
+separately corroborates #20601's exact tuple. The private archive was not
+freshly downloaded or rehashed for this clarification.
+
 The existing DEMO interpretation remains authoritative: current battle DEF is
 rounded with Math.round(baseDEF*1.5), actor uses Guard and reserves its turn,
 cast turn counts in the three-round window, stronger/party DEF effects cannot
@@ -39,7 +48,7 @@ regressions must also pass, plus fresh signed Android CI and independent review.
 
 Preserve signing, package ID, original source assets/data, v7 schema, existing
 APKs, authentic saves and custom Gem/Imp behavior. Keep this gameplay candidate
-isolated from the unmerged UI/capture queue; no install or release is authorized.
+isolated from unmerged dependencies; no install or release is authorized.
 
 Local evidence, November 5, 2026: all 63 source-preparation steps passed in a
 disposable copy. The new four-width source/actual-DEMO-enemy-phase regression
