@@ -526,6 +526,8 @@ jobs:
           retention-days: 90
       - name: Verify session-only Quest audio settings
         run: python3 test_bf_session_settings.py
+      - name: Verify live Advanced Tools controls and Menu routing
+        run: python3 test_bf_advanced_tools.py
       - name: Verify About public build metadata UI
         run: python3 test_bf_about_build.py
       - name: Build debug APK

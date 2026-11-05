@@ -1382,6 +1382,12 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-session-settings-body button{width:100%;min-height:44px;padding:10px;border:1px solid #62798b;border-radius:5px;background:#283946;color:#bacbd6;font:700 11px system-ui,sans-serif}
 #bf-menu-settings summary:focus-visible,#bf-menu-settings input:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
 
+#bf-advanced-tools{margin:12px;border:1px solid #718799;border-radius:8px;background:#172a3b;color:#d8e2e8;font:14px/1.5 system-ui,sans-serif}
+#bf-advanced-tools>summary{min-height:48px;padding:13px;font:700 14px/1.5 Georgia,serif;cursor:pointer;color:#d8c69e}
+#bf-advanced-tools>summary:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
+.bf-advanced-note{padding:0 12px;color:#bed0dd;overflow-wrap:anywhere}
+#bf-advanced-tools>.hit-panel{margin:0;border:0;border-top:1px solid #526f85;border-radius:0 0 7px 7px;box-shadow:none}
+
 #bf-about-build{margin:12px;border:1px solid #8490a1;border-radius:8px;background:#182b3c;color:#dbe4e9;font:14px/1.5 system-ui,sans-serif}
 #bf-about-build>summary{padding:13px;min-height:48px;cursor:pointer;color:#ecd7ac;font:700 14px/1.5 Georgia,serif}
 #bf-about-build>summary:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
