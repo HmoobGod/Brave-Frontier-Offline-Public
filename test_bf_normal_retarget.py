@@ -46,7 +46,8 @@ with sync_playwright() as pw:
     page.locator('.bf-navbar [data-bf-goto="quest"]').click()
     page.evaluate('window.__retargetStart=JSON.stringify(S)')
     for unit in (10011, 40011):  # source multi-hit and single-hit normal profiles
-        for case in ('queued-ko', 'already-dead', 'live-target', 'paralyzed'):
+        for case in (('auto-ko',) if '--auto-only' in sys.argv else
+                     ('queued-ko', 'already-dead', 'live-target', 'paralyzed', 'auto-ko')):
             page.evaluate('''({unit,scenario})=>{
               S=JSON.parse(__retargetStart);
               for(const u of S.party){u.active=u.id<2;u.action=null;u.hp=1000;u.maxHp=1000;u.bb=0}
@@ -56,20 +57,38 @@ with sync_playwright() as pw:
                 {...e,slot:1,name:'Survivor',hp:100000,maxHp:100000}];
               S.selected=0;S.target=0;document.getElementById('speed').value='4';update();
             }''', {'unit': unit, 'scenario': case})
-            page.locator('#attack' if case in ('queued-ko', 'paralyzed') else '#guard').click()
+            if case != 'auto-ko':
+                page.locator('#attack' if case in ('queued-ko', 'paralyzed') else '#guard').click()
             if case == 'live-target':
                 page.evaluate('()=>{S.target=1;update()}')
-            page.locator('#attack').click()
+            if case != 'auto-ko':
+                page.locator('#attack').click()
             if case == 'already-dead':
                 # Queue() already repairs dead targets. Model a queued action whose
                 # target subsequently died, while the preceding ally only guards.
                 page.evaluate('S.party[1].action.target=0')
             if case == 'paralyzed':
                 assert page.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(1,6)')
-            assert page.evaluate('S.party[1].action.target') == (1 if case == 'live-target' else 0)
+            if case != 'auto-ko':
+                assert page.evaluate('S.party[1].action.target') == (1 if case == 'live-target' else 0)
             before = page.evaluate(SNAPSHOT)
-            page.evaluate('''async()=>{const old=Math.random;Math.random=()=>0;
-              try{await BF_debug.execute()}finally{Math.random=old}}''')
+            if case == 'auto-ko':
+                # Exercise real default Auto scheduling/queue/dispatch. Stop only
+                # after the real first turn returns, before its scheduled repeat.
+                page.evaluate('''async()=>{const random=Math.random,original=execute;
+                  Math.random=()=>0;
+                  try{await new Promise((resolve,reject)=>{
+                    execute=async function(...args){
+                      try{const result=await original.apply(this,args);resolve(result);return result}
+                      catch(error){reject(error);throw error}
+                      finally{S.auto=false;if(timer){clearTimeout(timer);timer=null}execute=original}
+                    };
+                    S.auto=true;scheduleAuto();
+                  })}finally{Math.random=random;execute=original}
+                }''')
+            else:
+                page.evaluate('''async()=>{const old=Math.random;Math.random=()=>0;
+                  try{await BF_debug.execute()}finally{Math.random=old}}''')
             events = page.evaluate('''BFGlobalSingleHitCriticalV9300.snapshot().recent
               .concat(BFGlobalMultiHitCriticalV9500.snapshot().recent).filter(e=>e.slot===1)''')
             crystals = page.evaluate('BFGlobalLiveNormalCrystalEventsV8800.snapshot().recent')

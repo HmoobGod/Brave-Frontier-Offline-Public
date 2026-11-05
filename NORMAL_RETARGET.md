@@ -16,7 +16,7 @@ without native collection, gauge distribution or healing.
 
 The actual-turn regression covers source multi-hit10011 and single-hit40011:
 an earlier ally KO, a previously dead queued slot, a still-living target,
-and a paralyzed actor. It checks the surviving enemy's exact observed HP loss,
+a paralyzed actor, and an actual default Auto-scheduled turn. It checks the surviving enemy's exact observed HP loss,
 one matching critical record, reference-event target, and full synthetic
 progress/storage/write-count preservation. Paralysis must still skip damage
 and events. Enemies survive and no earned reward is granted.
