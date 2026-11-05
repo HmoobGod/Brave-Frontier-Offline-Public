@@ -13,7 +13,7 @@ ROOT=Path(__file__).resolve().parent
 A=ROOT/'app/src/main/assets'
 NAV=(A/'bf_home_nav.js').read_text()
 CSS=(A/'bf_home_nav.css').read_text()
-MODULE=NAV.split('/* UI-first location screens:',1)[1]
+MODULE=NAV.split('/* UI-first location screens:',1)[1].split('\n})();',1)[0]+'\n})();'
 assert len(NAV.encode())<128*1024 and len(CSS.encode())<128*1024
 assert not any(x in MODULE for x in ('localStorage','saveProgress','awardDemoRewards','fetch(','BFAndroid','P.','S.'))
 assert "return window.BFLocationPreview.back()" in NAV

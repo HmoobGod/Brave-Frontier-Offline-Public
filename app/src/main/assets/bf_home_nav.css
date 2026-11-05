@@ -1302,3 +1302,42 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-location-disclaimer{margin:18px 0 0;padding-top:12px;border-top:1px solid #62717a;color:#c7d4d9;font-size:12px}
 @media(min-width:480px){.bf-location-body{padding:22px 24px}.bf-location-directory button{min-height:174px}.bf-location-directory img{height:90px}}
 @media(prefers-reduced-motion:reduce){#bf-location-dialog{scroll-behavior:auto}}
+
+/* UI-first read-only equipment screen; unavailable services never transact. */
+.bf-unit-actions .bf-equipment-tab{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:9px;font:800 13px/1.4 Georgia,serif}
+.bf-unit-actions .bf-equipment-tab span{font-size:24px;min-height:0!important}
+.bf-unit-actions .bf-equipment-tab small{font:700 10px system-ui,sans-serif;color:#c8d6dc}
+.bf-menu-mode .squadsetup[data-bf-unit-tab="equipment"] > :not(.bf-units-hub):not(#bf-equipment-screen){display:none!important}
+#bf-equipment-screen[hidden],#bf-equipment-slots[hidden]{display:none!important}
+#bf-equipment-screen{padding:14px;background:linear-gradient(150deg,#263d49,#152334);color:#eee4cd;font:14px/1.5 system-ui,sans-serif;overflow-wrap:anywhere;scroll-margin-top:calc(var(--bf-equipment-shell-height,180px) + 10px)}
+#bf-equipment-screen *{box-sizing:border-box;min-width:0}
+.bf-equipment-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:12px;border-bottom:1px solid #a68c58}
+.bf-equipment-header p{margin:0;color:#cfba8d;font:700 10px system-ui,sans-serif;letter-spacing:.12em}
+.bf-equipment-header h2{margin:4px 0 0;font:700 24px/1.3 Georgia,serif;color:#ffdf9d}
+.bf-equipment-header>span{border:1px solid #9b8454;border-radius:5px;padding:5px;color:#ecd5a1;font-size:10px;white-space:nowrap}
+.bf-equipment-intro{margin:14px 0;color:#d3dce1}
+.bf-equipment-filters{display:grid;gap:12px}
+.bf-equipment-filters label{display:grid;gap:6px;font-weight:700;color:#f2d7a5}
+#bf-equipment-screen input,#bf-equipment-screen select{width:100%;max-width:100%;min-height:44px;border:1px solid #8299a7;border-radius:5px;padding:9px;background:#122638;color:#f7f0dc;font:14px system-ui,sans-serif}
+#bf-equipment-status{font-size:12px;color:#c8d9df;margin:10px 0}
+#bf-equipment-unit-card{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid #ad925c;border-radius:9px;background:#102333;min-height:104px}
+#bf-equipment-unit-card>img,#bf-equipment-unit-card>.bf-portrait-fallback{flex:0 0 72px;width:72px;height:72px;object-fit:contain}
+#bf-equipment-unit-card h3{margin:0;color:#ffe3ab;font:700 20px/1.3 Georgia,serif}
+#bf-equipment-unit-card p{margin:5px 0}
+#bf-equipment-unit-card small{font-size:11px;color:#bccfd9}
+#bf-equipment-slots{display:grid;gap:12px;margin:16px 0}
+.bf-equipment-slot{display:grid;grid-template-columns:52px minmax(0,1fr);gap:12px;padding:14px;border:1px solid #697f91;border-radius:8px;background:#192c3e}
+.bf-equipment-socket{display:flex;align-items:center;justify-content:center;width:52px;height:52px;border:1px dashed #b0a078;border-radius:50%;font-size:30px;color:#cfb97c;background:#0f2031}
+.bf-equipment-slot h3,.bf-equipment-inventory h3{margin:0 0 5px;font:700 17px Georgia,serif;color:#efd5a0}
+.bf-equipment-slot strong{font-size:13px;color:#c3d1db}
+.bf-equipment-slot p{margin:5px 0 0;color:#bacbd8;font-size:12px}
+#bf-equipment-screen button{min-height:44px;padding:10px;border:1px solid #b39a64;border-radius:6px;background:linear-gradient(#514730,#273642);color:#fff0c6;font:700 11px/1.4 system-ui,sans-serif;white-space:normal}
+.bf-equipment-slot button{grid-column:1/-1}
+#bf-equipment-screen button:disabled{background:#263745;border-color:#667b89;color:#bcc9d1;cursor:default}
+#bf-equipment-screen button:focus-visible,#bf-equipment-screen input:focus-visible,#bf-equipment-screen select:focus-visible{outline:3px solid #fff0bc;outline-offset:3px}
+.bf-equipment-inventory{padding:16px;border:1px solid #647989;border-radius:8px;background:#102333}
+.bf-equipment-inventory p{color:#cbd8df;margin:9px 0 14px}
+.bf-equipment-inventory button{width:100%}
+.bf-equipment-footer{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.bf-equipment-empty{color:#cedbe2;margin:0}
+@media(min-width:480px){.bf-equipment-filters{grid-template-columns:1fr 1fr}}

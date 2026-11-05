@@ -15,7 +15,9 @@ PREFLIGHT = (ROOT / ".github/workflows/android-back-ui-source-preflight.yml").re
 BUILD = (ROOT / ".github/workflows/build-debug-apk.yml").read_text("utf8")
 MANIFEST = (ROOT / "app/src/main/AndroidManifest.xml").read_text("utf8")
 
-assert NAV.count("bfOfflineUnitPortraitV266(") == 5
+# Definition plus five audited views, including the read-only Equipment card.
+assert NAV.count("bfOfflineUnitPortraitV266(") == 6
+assert "bfOfflineUnitPortraitV266(row.unit.portrait,row.unit.name)" in NAV
 assert "image.addEventListener('error'" in NAV
 assert "image.replaceWith(fallback)" in NAV
 assert "fallback.setAttribute('aria-label'" in NAV

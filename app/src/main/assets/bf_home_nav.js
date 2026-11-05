@@ -227,6 +227,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       '<button type="button" data-bf-unit-tab="training" aria-pressed="false">',
         '<span class="bf-training-art" aria-hidden="true">EXP</span>',
         '<span>TRAINING · DEMO</span></button>',
+      '<button type="button" class="bf-equipment-tab" data-bf-unit-tab="equipment" aria-pressed="false"><span aria-hidden="true">◇</span> EQUIPMENT <small>UI PREVIEW</small></button>',
     '</div>',
     '<div class="bf-unit-selected" aria-live="polite">',
       '<span id="bf-unit-tab-label">ACTIVE SQUAD</span>',
@@ -240,9 +241,15 @@ function bfOfflineUnitPortraitV266(source, name) {
   unitBox.setAttribute('aria-label', 'Owned Unit Box');
   unitBox.hidden = true;
   hub.after(unitBox);
+  const equipment = document.createElement('section');
+  equipment.id = 'bf-equipment-screen';
+  equipment.setAttribute('aria-label','Unit equipment preview');
+  equipment.hidden = true;
+  unitBox.after(equipment);
 
   let selected = 'squad';
   const names = {
+    equipment: ['EQUIPMENT PREVIEW', 'Inspect owned units; sphere assignment is not implemented.'],
     box: ['UNIT BOX', 'Browse and inspect your actual owned units, no changes to the save.'],
     squad: ['ACTIVE SQUAD', 'Select 1–6 owned characters. Your current save is preserved.'],
     evolve: ['EVOLUTION LAB', 'Archived forms and recipes; material drops and payable costs are demo.'],
@@ -252,6 +259,9 @@ function bfOfflineUnitPortraitV266(source, name) {
     if (!Object.prototype.hasOwnProperty.call(names, next)) return false;
     selected = next;
     squad.dataset.bfUnitTab = next;
+    equipment.hidden = next !== 'equipment';
+    equipment.setAttribute('aria-hidden', String(next !== 'equipment'));
+    if (next === 'equipment') window.BFEquipmentUI?.refresh();
     unitBox.hidden = next !== 'box';
     unitBox.setAttribute('aria-hidden', String(next !== 'box'));
     if (next === 'box') window.BFUnitBox?.refresh();
@@ -1434,4 +1444,101 @@ function bfOfflineUnitPortraitV266(source, name) {
   dialog.querySelector('#bf-location-close').addEventListener('click',close);
   launch.querySelector('button').addEventListener('click',() => open());
   window.BFLocationPreview = Object.freeze({open,close,back,get isOpen(){return dialog.open;}});
+})();
+
+/* UI-first equipment inspector: reads roster only; never assigns spheres. */
+(() => {
+  'use strict';
+  const panel = document.getElementById('bf-equipment-screen');
+  if (!panel || window.BFEquipmentUI || !window.BFInnerScreens) return;
+  panel.innerHTML = '<header class="bf-equipment-header"><div><p>UNIT MANAGEMENT</p><h2>EQUIPMENT</h2></div><span>UI PREVIEW</span></header>'+
+    '<p class="bf-equipment-intro">Inspect a unit and explore the equipment screen. Sphere assignment and effects are not implemented yet.</p>'+
+    '<div class="bf-equipment-filters"><label>Find an owned unit<input id="bf-equipment-search" type="search" placeholder="Search unit name or ID" autocomplete="off" /></label>'+
+    '<label>Preview unit<select id="bf-equipment-unit"></select></label></div>'+
+    '<p id="bf-equipment-status" role="status" aria-live="polite"></p>'+
+    '<section id="bf-equipment-unit-card" aria-label="Selected unit"></section>'+
+    '<div id="bf-equipment-slots"><section class="bf-equipment-slot"><span class="bf-equipment-socket" aria-hidden="true">◇</span><div><h3>Sphere slot 1</h3><strong>Equipment data unavailable</strong><p>No equipped sphere can be shown yet.</p></div><button type="button" disabled>CHOOSE SPHERE · UNAVAILABLE</button></section>'+
+    '<section class="bf-equipment-slot"><span class="bf-equipment-socket" aria-hidden="true">◇</span><div><h3>Sphere slot 2</h3><strong>Unlock status unavailable</strong><p>This preview does not determine whether the second slot is unlocked.</p></div><button type="button" disabled>UNLOCK SLOT · UNAVAILABLE</button></section></div>'+
+    '<section class="bf-equipment-inventory"><h3>Sphere inventory</h3><p>Equipment inventory is not available in this build. No owned spheres or quantities are shown.</p><button type="button" disabled>BROWSE SPHERES · UNAVAILABLE</button></section>'+
+    '<div class="bf-equipment-footer"><button type="button" id="bf-equipment-clear">CLEAR SEARCH</button><button type="button" id="bf-equipment-box">RETURN TO UNIT BOX</button></div>';
+  const search = panel.querySelector('#bf-equipment-search');
+  const select = panel.querySelector('#bf-equipment-unit');
+  const status = panel.querySelector('#bf-equipment-status');
+  const card = panel.querySelector('#bf-equipment-unit-card');
+  const slots = panel.querySelector('#bf-equipment-slots');
+  const shell = document.querySelector('.bf-shell-head');
+  function measureHeader() {
+    const height = shell?.getBoundingClientRect().height || 0;
+    panel.style.setProperty('--bf-equipment-shell-height',Math.ceil(height)+'px');
+  }
+  measureHeader();
+  if (shell && typeof ResizeObserver === 'function') new ResizeObserver(measureHeader).observe(shell);
+  window.addEventListener('resize',measureHeader);
+  let selected = null;
+  function entries() {
+    if (typeof P === 'undefined' || !Array.isArray(P.roster) || typeof effectiveUnit !== 'function') return {owned:[],unresolved:0};
+    const owned = [], ids = [...new Set(P.roster)];
+    let unresolved = 0;
+    for (const id of ids) {
+      const unit = Number.isSafeInteger(id) ? effectiveUnit(id) : null;
+      if (unit) owned.push({id,unit}); else unresolved++;
+    }
+    return {owned,unresolved};
+  }
+  function showUnit(rows) {
+    const row = rows.find(item => item.id === selected);
+    card.replaceChildren();slots.hidden = !row;
+    if (!row) {
+      const empty = document.createElement('p');empty.className = 'bf-equipment-empty';
+      empty.textContent = rows.length ? 'Choose a unit to preview.' : 'No matching unit to preview. Your roster is unchanged.';
+      card.append(empty);return;
+    }
+    const image = bfOfflineUnitPortraitV266(row.unit.portrait,row.unit.name);
+    const body = document.createElement('div');
+    const name = document.createElement('h3');name.textContent = row.unit.name || 'Unit';
+    const info = document.createElement('p');
+    info.textContent = '★'+row.unit.rarity+' · '+row.unit.element+' · Unit #'+row.unit.id;
+    const note = document.createElement('small');note.textContent = 'Owned unit preview · equipment effects unavailable';
+    body.append(name,info,note);card.append(image,body);
+  }
+  function refresh() {
+    measureHeader();
+    const {owned,unresolved} = entries();
+    const query = search.value.trim().toLocaleLowerCase();
+    const rows = owned.filter(({id,unit}) => [id,unit.id,unit.name].some(value => String(value).toLocaleLowerCase().includes(query)));
+    if (!rows.some(row => row.id === selected)) {
+      const active = typeof P !== 'undefined' && Array.isArray(P.squad) ? P.squad.find(id => rows.some(row => row.id === id)) : null;
+      selected = active ?? rows[0]?.id ?? null;
+    }
+    select.replaceChildren();
+    for (const row of rows) {
+      const option = document.createElement('option');option.value = String(row.id);
+      option.textContent = row.unit.name+' · #'+row.unit.id;select.append(option);
+    }
+    if (!rows.length) {
+      const option = document.createElement('option');option.textContent = 'No units available';select.append(option);
+    } else select.value = String(selected);
+    select.disabled = !rows.length;
+    panel.querySelector('#bf-equipment-clear').disabled = !search.value;
+    status.textContent = rows.length+' of '+owned.length+' owned unit profiles'+
+      (unresolved ? ' · '+unresolved+' saved profile'+(unresolved===1?'':'s')+' unavailable' : '')+
+      ' · Equipment preview only';
+    showUnit(rows);return rows.length;
+  }
+  search.addEventListener('input',refresh);
+  select.addEventListener('change',() => {
+    const id = Number(select.value), {owned} = entries();
+    if (!owned.some(row => row.id === id)) return;
+    selected = id;showUnit(owned);
+  });
+  panel.querySelector('#bf-equipment-clear').addEventListener('click',() => {search.value='';refresh();search.focus();});
+  panel.querySelector('#bf-equipment-box').addEventListener('click',() => {
+    if (window.BFInnerScreens.setTab('box')) document.getElementById('bf-owned-box')?.scrollIntoView({block:'start'});
+  });
+  const picker = document.getElementById('squadpicker');
+  if (picker) new MutationObserver(() => {
+    if (window.BFInnerScreens.unitTab === 'equipment') refresh();
+  }).observe(picker,{childList:true});
+  window.BFEquipmentUI = Object.freeze({refresh});
+  refresh();
 })();
