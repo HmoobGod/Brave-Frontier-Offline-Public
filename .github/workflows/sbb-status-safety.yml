@@ -1,0 +1,29 @@
+name: Experimental SBB status safety source check
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/assets/bf5900_curse_bb_lock.js'
+      - 'prepare_experimental_sbb_v044.py'
+      - 'test_bf_sbb_status_safety.py'
+      - 'test_bf_packaged_experimental_sbb_v044.py'
+      - 'test_bf_packaged_curse_bb_lock_v5900.py'
+      - 'SBB_STATUS_SAFETY.md'
+      - '.github/workflows/sbb-status-safety.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sbb-status-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_sbb_status_safety.py --source-only

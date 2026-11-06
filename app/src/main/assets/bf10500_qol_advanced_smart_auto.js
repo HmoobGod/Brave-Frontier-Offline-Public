@@ -46,6 +46,7 @@
  function active(){return config.on&&smart.enabled()===true}
  function kindFor(unit){
    const previous=baseKind(unit);
+   if(window.BFGlobalCurseBBLockV5900?.cursed(unit?.id))return 'attack';
    if(!active()||!unit||!unit.active||!(unit.hp>0)||
      !(Number(unit.bb)>=100))return previous;
    const source=Number.isSafeInteger(unit.unitId)?

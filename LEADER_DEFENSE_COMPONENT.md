@@ -36,7 +36,10 @@ idempotence checks apply. No owner progress, inventory or save fields change.
 
 The existing v166 leader runtime job invokes the new regression, and its APK
 gate requires byte-exact new-module packaging and native loader order. No new
-workflow rules/triggers, Gradle, signing or permissions. Prepared unchanged main
-core is reused; no dependent unmerged module is loaded. Fresh exact-head Android
-Java compilation/packaging and independent review are required before integration.
+workflow rules/triggers, Gradle, signing or permissions. Selected-base prepared
+core and isolated combined-module probes are recorded separately: the latter
+load the Intense Edge and outer SBB modules to check wrapper coexistence, without
+claiming those prospective sources are already integrated. Fresh exact-head
+Android Java compilation/packaging and independent review are required before
+integration; historical builds do not qualify later heads or bases.
 Browser results do not establish physical-device or real-save compatibility.

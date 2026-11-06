@@ -15,6 +15,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'bf9400-critical-notice' in src
  assert 'bf9400-critical-banner' in src
  assert 'CRITICAL HIT!' in src
+ for module in ('bf_leader_critical_bonus.js','bf9300_single_hit_critical_combat.js','bf9500_multihit_critical_combat.js'):
+  assert z.read('assets/'+module)==(R/'app/src/main/assets'/module).read_bytes(),module
+ assert 'BFGlobalLeaderCriticalBonus?.scale?.(' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text()
 assert java.index('readPackagedText("bf9200_source_offensive_bb_levels.js")')<java.index('readPackagedText("bf9300_single_hit_critical_combat.js")')

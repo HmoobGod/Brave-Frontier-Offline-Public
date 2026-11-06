@@ -1,0 +1,29 @@
+name: Auto Curse action choice source check
+on:
+  pull_request:
+    paths:
+      - 'prepare_source_aware_auto_v041.py'
+      - 'app/src/main/assets/bf10500_qol_advanced_smart_auto.js'
+      - 'app/src/main/assets/bf5900_curse_bb_lock.js'
+      - 'test_bf_auto_curse_choice.py'
+      - 'test_bf_packaged_auto_curse_choice.py'
+      - 'AUTO_CURSE_CHOICE.md'
+      - '.github/workflows/auto-curse-choice.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  auto-curse-choice:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_auto_curse_choice.py --source-only
