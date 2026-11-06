@@ -34,7 +34,8 @@
      !Number.isSafeInteger(unit.unitId)||!Number.isSafeInteger(unit.action.target))return null;
    const profile=source.lookup(unit.unitId);
    const original=window.BF_ARCHIVE_NORMAL_HITS?.[String(unit.unitId)];
-   const target=S.enemies?.find(e=>e?.slot===unit.action.target&&e.hp>0);
+   // Follow the engine's existing living-target fallback after an earlier KO.
+   const target=typeof pickTarget==='function'?pickTarget(unit.action.target):null;
    if(!profile||!Number.isSafeInteger(profile.normalHits)||profile.normalHits<2||
      profile.normalHits>64||!original||original.weightsTotal!==100||
      !Array.isArray(original.events)||original.events.length!==profile.normalHits||
