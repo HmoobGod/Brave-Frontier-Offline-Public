@@ -1640,7 +1640,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   const menu=document.querySelector('.progresspanel');
   if(!menu||document.getElementById('bf-about-build'))return;
   const panel=document.createElement('details');panel.id='bf-about-build';
-  panel.innerHTML='<summary>ABOUT THIS BUILD</summary><div class="bf-about-body"><h2>Brave Frontier Offline</h2><p>Brave Frontier Global interface reconstruction. The UI is being completed first; gameplay remains incomplete.</p><dl><div><dt>Version</dt><dd id="bf-about-version">Unavailable</dd></div><div><dt>Version code</dt><dd id="bf-about-code">Unavailable</dd></div><div><dt>Package</dt><dd id="bf-about-package">Unavailable</dd></div></dl><p id="bf-about-status" role="status" aria-live="polite">Open this panel to read build information.</p><p>Use these details when identifying the build you are testing.</p></div>';
+  panel.innerHTML='<summary>ABOUT THIS BUILD</summary><div class="bf-about-body"><h2>Brave Frontier Offline</h2><p>Offline Brave Frontier Global reconstruction in development. Gameplay and original content remain incomplete.</p><dl><div><dt>Version</dt><dd id="bf-about-version">Unavailable</dd></div><div><dt>Version code</dt><dd id="bf-about-code">Unavailable</dd></div><div><dt>Package</dt><dd id="bf-about-package">Unavailable</dd></div></dl><p id="bf-about-status" role="status" aria-live="polite">Open this panel to read build information.</p><p>Use these details when identifying the build you are testing.</p></div>';
   menu.append(panel);
   function refresh(){
     let info=null;

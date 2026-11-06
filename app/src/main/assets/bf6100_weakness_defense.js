@@ -53,8 +53,12 @@
    for(const [api,pct] of candidates){
      if(!api||typeof api.snapshot!=='function')continue;
      const entry=api.snapshot().activeBuffs?.find(b=>b.slot===slot);
-     if(entry&&Number.isFinite(entry.baseDef)&&entry.baseDef>=0)
-       return {baseDef:entry.baseDef,pct};
+     if(entry&&Number.isFinite(entry.baseDef)&&entry.baseDef>=0){
+       // #20601 uses the same single-ally item ledger as #20600.
+       const percent=api===window.BFGlobalSourceDefItemV4900&&
+         entry.itemId===20601&&entry.defPercent===50 ? 50 : pct;
+       return {baseDef:entry.baseDef,pct:percent};
+     }
    }
    return null;
  }

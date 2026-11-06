@@ -51,10 +51,12 @@ script=r"""
   const enabled=()=>document.getElementById(toggleId)?.checked===true;
   const sourceFor=id=>window.BF043SBBSource?.infoFor(id)||null;
   const selected=()=>typeof S!=='undefined' && Array.isArray(S.party)?S.party[S.selected]:null;
+  const blocked=p=>!!(window.BFGlobalCurseBBLockV5900?.cursed(p?.id) ||
+    window.BFGlobalParalysisActionLockV6000?.paralyzed(p?.id));
   function canQueue(){
     const p=selected();
     return !!(enabled() && p?.active && p.hp>0 && p.bb>=100 &&
-      !p.action && !S.busy && !S.over && sourceFor(p.unitId));
+      !p.action && !S.busy && !S.over && !blocked(p) && sourceFor(p.unitId));
   }
   function queue(){
     if(!canQueue())return false;
@@ -68,7 +70,7 @@ script=r"""
   }
   async function perform(p,token){
     const src=sourceFor(p?.unitId);
-    if(!enabled() || !p?.active || !(p.hp>0) || !(p.bb>=100) ||
+    if(!enabled() || !p?.active || !(p.hp>0) || !(p.bb>=100) || blocked(p) ||
        src?.target!=='all_enemies'){
       // Fail closed to ordinary attack if the prototype was disabled or invalid
       // after queueing. Never spend gauge on a missing/unverified SBB.
@@ -155,6 +157,8 @@ script=r"""
 """
 if MARK in s:
     assert s.count(MARK)==1 and s.count(new)==1
+    assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
+    assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p?.id)' in s
     assert s.count('id="bf044-experimental-sbb-style"')==1
     print('PASS v0.44 existing SBB prototype intact')
 else:

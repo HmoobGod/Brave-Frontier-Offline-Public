@@ -1,0 +1,29 @@
+name: Archived single-ally DEF 50 item source check
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/assets/bf4900_source_def_item.js'
+      - 'app/src/main/assets/bf6100_weakness_defense.js'
+      - 'source_data/bf_global_2022_def_item_evidence_v4900.json'
+      - 'source_data/bf_global_2022_battle_item_effect_catalog_v5000.json.gz'
+      - 'test_bf_source_def_50_item.py'
+      - 'SOURCE_DEF_50_ITEM.md'
+      - '.github/workflows/source-def-50-item.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-def-50:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_source_def_50_item.py --source-only
