@@ -7,6 +7,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'BF_GLOBAL_QOL_BATTLE_SPEED_V9900' in data
     assert 'window.wait=function(ms)' in data
     assert 'nativeWait.call(this,40)' in data
+    assert data==(R/'app/src/main/assets/bf9900_qol_battle_speed.js').read_text('utf8')
+    assert 'canvas.getClientRects().length===0' in data
+    assert 'return nativeDraw.apply(this,arguments)' in data
     assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
     assert 'assets/bf9800_qol_cleared_quest_repeat.js' in z.namelist()
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
