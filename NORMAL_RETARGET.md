@@ -21,10 +21,15 @@ one matching critical record, reference-event target, and full synthetic
 progress/storage/write-count preservation. Paralysis must still skip damage
 and events. Enemies survive and no earned reward is granted.
 
-Local tests reuse an unchanged prepared core with current main GUI and the
-three candidate modules. The unmerged queued-Curse dispatch hook was removed
-from that disposable snapshot to match main; this patch does not depend on
-that PR. Baseline runtime failure and candidate results are recorded separately.
+The original baseline isolated this fix from the then-unmerged queued-Curse
+dispatch hook. Current prospective integration preserves the now-merged Curse
+and SBB dispatch fixes and the queued Auto/Intense Edge candidates. An additional
+actual-turn probe queues valid SBB before Curse, while an earlier ally defeats
+the queued enemy. The fallback now matches a normal attack on the surviving
+target: identical critical records, crystal-reference events and observed HP
+loss, with unchanged gauge and synthetic progress. This is combined browser
+source validation; it does not replace fresh native checks for each selected
+head/base. Baseline failures and candidate results are recorded separately.
 Fresh GitHub Android packaging, independent exact-head review and tested
 merge-checkout identity are required before integration. Local browser results
 do not establish native Global damage parity, device or real-save acceptance.

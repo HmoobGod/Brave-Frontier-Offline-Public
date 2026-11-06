@@ -8,8 +8,14 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  js=z.read('assets/bf5900_curse_bb_lock.js').decode('utf8')
  assert 'BF_GLOBAL_CURSE_BB_LOCK_V5900' in js and len(js.encode('utf8'))<65536
  assert 'preventGaugeGain' in js and 'blockBurst' in js
+ assert "['burst','sbb_demo'].includes(p?.action?.kind)" in js
+ assert z.read('assets/bf5900_curse_bb_lock.js')==(R/'app/src/main/assets/bf5900_curse_bb_lock.js').read_bytes()
  assert all(x not in js for x in ('localStorage','saveProgress(', 'BFAndroid'))
- assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
+ html=z.read('assets/index.html').decode('utf8')
+ assert 'bf_global_offline_demo_v7' in html
+ hook='window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);'
+ assert html.count(hook)==1
+ assert hook+'window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);' in html
 j=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert j.index('readPackagedText("bf5800_poison_turn.js")')<j.index('readPackagedText("bf5900_curse_bb_lock.js")')
 g=(R/'app/build.gradle').read_text('utf8')

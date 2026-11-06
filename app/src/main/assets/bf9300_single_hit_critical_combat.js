@@ -61,7 +61,9 @@
    const critical=roll();
    current.critical=critical===true;
    current.baseDamage=damage;
-   const outcome=criticalDamage(damage,current.critical);
+   const ordinary=criticalDamage(damage,current.critical);
+   const outcome=window.BFGlobalLeaderCriticalBonus?.scale?.(
+     damage,ordinary,current.unit,current.critical)??ordinary;
    current.resultDamage=outcome;
    return outcome;
  };
@@ -125,7 +127,7 @@
  const line=document.createElement('p');line.id='bf9300-critical-counts';
  const rows=document.createElement('ol');rows.id='bf9300-critical-events';
  const note=document.createElement('small');
- note.textContent='10% base critical chance; 150% damage on a critical. Gameplay-active only for sourced one-hit normal attacks. Multi-hit attacks, Brave Bursts, synthetic enemy attacks, critical buffs/resistances and full native damage remain unimplemented.';
+ note.textContent='10% base critical chance; 150% base critical damage before source-qualified leader bonuses. This handler covers sourced one-hit normal attacks. Brave Bursts, synthetic enemy criticals, other critical buffs/resistances and full native damage remain unimplemented.';
  panel.append(heading,line,rows,note);host.append(panel);
  function snapshot(){
    sync();
