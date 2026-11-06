@@ -1,6 +1,9 @@
 # Isolated Android lifecycle acceptance
 
-The existing diagnostic APK verification step can explicitly run `--emulator`.
+The emulator check is prepared but NOT enabled in CI. The owner's standing
+no-APK-install rule requires explicit approval before installation, including on
+a disposable emulator. After that approval, the existing diagnostic verification
+command can explicitly add `--emulator`; no approval is assumed from elapsed time.
 It boots a newly created Android35 AVD on CI, with KVM and a bounded boot timeout,
 and installs only `org.bravefrontier.offline.diagnostic` on `emulator-5556` after
 checking the guest's QEMU property. Any existing ADB device aborts the test.

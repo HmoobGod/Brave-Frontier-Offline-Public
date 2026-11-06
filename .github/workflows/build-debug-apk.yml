@@ -976,7 +976,7 @@ jobs:
       - name: Build separate-app diagnostic APK (must not overwrite Current build)
         run: gradle --no-daemon assembleDiagnostic -PciVersionCode=$((100000 + ${{ github.run_number }}))
       - name: Verify built APK IDs, original assets, and offline permissions
-        run: python3 test_bf_isolated_diagnostic_build_v23700.py --packaged --emulator
+        run: python3 test_bf_isolated_diagnostic_build_v23700.py --packaged
       - name: Upload distinct diagnostic APK
         uses: actions/upload-artifact@v4
         with:
