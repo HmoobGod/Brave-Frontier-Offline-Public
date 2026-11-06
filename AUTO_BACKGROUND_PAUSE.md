@@ -4,6 +4,10 @@ When the page receives a hidden visibility signal, Auto turns off and its pendin
 timer is cancelled. An already running round finishes through the existing
 executor. Returning to the page leaves Auto off; the player can enable it again.
 The scheduler also rejects hidden-page calls and delayed timer callbacks.
+Both guards use the same pause operation as the visibility listener, including
+stopping an active repeat controller. A guard that observes a hidden page turns
+the controls off even if the hidden event is not delivered before returning.
+This also stops a repeat session waiting at a completed result with Auto already off.
 
 The existing battle-speed presentation module also skips painting a canvas
 hidden by Home/Menu navigation. Its animation-frame chain remains active and

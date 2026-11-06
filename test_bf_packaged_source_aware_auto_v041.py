@@ -14,9 +14,9 @@ with ZipFile(p) as z:
     dispatch = ('break;window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);'
                 'window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);')
     assert html.count(dispatch) == 1
-    assert 'Object.freeze({kindFor,enabled,reconsider})' in html
-    assert html.count('function scheduleAuto(){if(document.hidden||!S.auto||S.busy||S.over)return;') == 1
-    assert html.count('if(document.hidden||token!==epoch||S.busy||S.over||!S.auto)return;') == 1
+    assert 'Object.freeze({kindFor,enabled,reconsider,pauseForBackground})' in html
+    assert html.count('function scheduleAuto(){if(document.hidden){window.BF041SmartAuto?.pauseForBackground?.();return}if(!S.auto||S.busy||S.over)return;') == 1
+    assert html.count('if(document.hidden){window.BF041SmartAuto?.pauseForBackground?.();return}if(token!==epoch||S.busy||S.over||!S.auto)return;') == 1
     # Verify the complete generated lifecycle handler, not only its marker.
     import ast
     source = Path(__file__).resolve().parent/'prepare_source_aware_auto_v041.py'

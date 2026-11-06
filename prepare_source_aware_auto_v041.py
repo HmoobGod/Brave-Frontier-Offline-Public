@@ -27,9 +27,9 @@ execute_old='if(!livingEnemies().length)break;await performUnit(p,token);'
 # Normalize the existing Curse fallback before outer normal-hit handlers inspect it.
 execute_new='if(!livingEnemies().length)break;window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);'
 schedule_old='function scheduleAuto(){if(!S.auto||S.busy||S.over)return;'
-schedule_new='function scheduleAuto(){if(document.hidden||!S.auto||S.busy||S.over)return;'
+schedule_new='function scheduleAuto(){if(document.hidden){window.BF041SmartAuto?.pauseForBackground?.();return}if(!S.auto||S.busy||S.over)return;'
 timer_old='if(token!==epoch||S.busy||S.over||!S.auto)return;'
-timer_new='if(document.hidden||token!==epoch||S.busy||S.over||!S.auto)return;'
+timer_new='if(document.hidden){window.BF041SmartAuto?.pauseForBackground?.();return}if(token!==epoch||S.busy||S.over||!S.auto)return;'
 ui=r"""
 <style id="bf041-smart-auto-style">
 #bf041-smart-auto-label { display:inline-flex; align-items:center; flex-wrap:wrap;
@@ -46,13 +46,19 @@ ui=r"""
   const toggleId='bf041-smart-auto';
   const enabled=()=>document.getElementById(toggleId)?.checked===true;
   function pauseForBackground() {
-    if(!document.hidden || typeof S==='undefined' || !S.auto)return;
+    if(!document.hidden || typeof S==='undefined' || !S)return false;
+    const repeat=window.BFGlobalQoLQuestRepeatV9800;
+    const repeating=repeat?.statusSnapshot?.()?.active===true;
+    if(!S.auto && !repeating)return false;
     S.auto=false;
     const auto=document.getElementById('auto');
     if(auto)auto.checked=false;
     if(timer){clearTimeout(timer);timer=null;}
+    if(repeating)
+      repeat.stop?.('Stopped: app left foreground',false);
     msg('Auto Battle paused while the game is hidden. Any current round will finish; enable Auto again to resume.');
     update();
+    return true;
   }
   document.addEventListener('visibilitychange',pauseForBackground);
   function kindFor(p) {
@@ -106,7 +112,7 @@ ui=r"""
   if(document.readyState==='loading')
     document.addEventListener('DOMContentLoaded',mount,{once:true});
   else mount();
-  window.BF041SmartAuto=Object.freeze({kindFor,enabled,reconsider});
+  window.BF041SmartAuto=Object.freeze({kindFor,enabled,reconsider,pauseForBackground});
 })();
 </script>
 """

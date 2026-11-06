@@ -26,6 +26,11 @@ with sync_playwright() as pw:
         Object.defineProperty(document,'hidden',{get:()=>__autoHidden});
     }''')
     page.set_content((ASSETS/'index.html').read_text())
+    # Production optional planners replace the frozen Auto API using spreads;
+    # the shared lifecycle operation must survive both replacements.
+    for module in ('bf10500_qol_advanced_smart_auto.js','bf_auto_sbb_demo.js'):
+        page.add_script_tag(path=str(ASSETS/module))
+        assert page.evaluate("typeof BF041SmartAuto.pauseForBackground==='function'")
     page.evaluate('''() => {
         document.getElementById('mode').value='archive';BF_debug.reset();
         for(const unit of S.party){
@@ -46,6 +51,7 @@ with sync_playwright() as pw:
         };
     }''')
     baseline = page.evaluate(SNAPSHOT)
+    assert page.evaluate('BF041SmartAuto.pauseForBackground()') is False
     # Pending timers cancel without queueing any actions, with Smart on or off.
     for smart in (False, True):
         page.evaluate('''smart => {
@@ -68,18 +74,21 @@ with sync_playwright() as pw:
         assert_unchanged(page, baseline, f'pending/foreground smart={smart}')
     # Scheduler guards also fail closed if lifecycle event delivery is delayed.
     page.evaluate('''() => {
-        __setAutoHidden(true,false);S.auto=true;scheduleAuto();
+        __setAutoHidden(true,false);S.auto=true;E.auto.checked=true;scheduleAuto();
     }''')
-    assert page.evaluate('timer===null')
+    assert page.evaluate('timer===null && !S.auto && !E.auto.checked')
     page.evaluate('''() => {
-        __setAutoHidden(false,false);scheduleAuto();
+        __setAutoHidden(false,false);S.auto=true;E.auto.checked=true;scheduleAuto();
         __setAutoHidden(true,false);
     }''')
     page.wait_for_timeout(500)
     assert page.evaluate('__backgroundCalls') == 0
     assert page.evaluate('timer===null && S.party.every(unit=>unit.action===null)')
-    page.evaluate('__setAutoHidden(true)')
-    assert page.evaluate('!S.auto')
+    # Return directly without ever notifying the hidden transition. Controls
+    # must already be off, rather than checked with no timer and no execution.
+    page.evaluate('__setAutoHidden(false)')
+    page.wait_for_timeout(500)
+    assert page.evaluate('!S.auto && !E.auto.checked && timer===null')
     assert_unchanged(page, baseline, 'delayed visibility signal')
     # A running round finishes normally, then cannot schedule another round.
     page.evaluate('''() => {
@@ -128,7 +137,8 @@ with sync_playwright() as pw:
     page.add_script_tag(path=str(ASSETS/'bf9800_qol_cleared_quest_repeat.js'))
     assert page.evaluate('BFGlobalQoLQuestRepeatV9800.start(2)')
     page.wait_for_function('S.busy && __backgroundCalls===3')
-    page.evaluate('__setAutoHidden(true)')
+    # With repeat active, exercise the scheduler fallback without a hidden event.
+    page.evaluate('__setAutoHidden(true,false);scheduleAuto()')
     assert page.evaluate('!BFGlobalQoLQuestRepeatV9800.statusSnapshot().active')
     assert page.evaluate('!S.auto && !E.auto.checked')
     page.wait_for_function('!S.busy', timeout=30000)
@@ -138,6 +148,22 @@ with sync_playwright() as pw:
     assert page.evaluate('!BFGlobalQoLQuestRepeatV9800.statusSnapshot().active')
     assert page.evaluate('!S.auto && !E.auto.checked && timer===null')
     assert_unchanged(page, baseline, 'repeat interruption')
+    # A completed result normally turns Auto off before repeat's next poll.
+    # A hidden scheduler guard must still stop that waiting repeat session.
+    page.evaluate("()=>{S.over=true;S.phase='Victory'}")
+    assert page.evaluate('BFGlobalQoLQuestRepeatV9800.start(2)')
+    page.evaluate('''() => {
+        if(timer){clearTimeout(timer);timer=null;}
+        S.auto=false;E.auto.checked=false;S.over=true;S.phase='Victory';
+        __setAutoHidden(true,false);scheduleAuto();
+    }''')
+    assert page.evaluate('!BFGlobalQoLQuestRepeatV9800.statusSnapshot().active')
+    assert page.evaluate("BFGlobalQoLQuestRepeatV9800.statusSnapshot().reason") == 'Stopped: app left foreground'
+    page.evaluate('__setAutoHidden(false)')
+    page.wait_for_timeout(1100)
+    assert page.evaluate('__backgroundCalls===3 && __repeatReplayCalls===2')
+    assert page.evaluate('!S.auto && !E.auto.checked && timer===null')
+    assert_unchanged(page, baseline, 'repeat waiting at completed result')
     assert not errors, errors
     browser.close()
 print('PASS Auto hidden-page timer cancellation, delayed signals, in-flight round, explicit resume, repeat interruption and P/storage isolation')
