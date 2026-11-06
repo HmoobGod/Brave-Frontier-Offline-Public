@@ -1,0 +1,32 @@
+name: Archived single-ally ATK 50 item source check
+on:
+  pull_request:
+    paths:
+      - 'app/src/main/assets/bf4400_source_atk_item.js'
+      - 'source_data/bf_global_2022_party_atk_item_evidence_v5000.json'
+      - 'source_data/bf_global_2022_battle_item_effect_catalog_v5000.json.gz'
+      - 'test_bf_source_atk_50_item.py'
+      - 'test_bf_source_atk_item_v4400.py'
+      - 'test_bf_source_party_atk_item_v5000.py'
+      - 'test_bf_source_double_atk_item_v5100.py'
+      - 'test_bf_packaged_source_atk_item_v4400.py'
+      - 'SOURCE_ATK_50_ITEM.md'
+      - '.github/workflows/source-atk-50-item.yml'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-atk-50:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 test_bf_source_atk_50_item.py --source-only

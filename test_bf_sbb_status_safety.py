@@ -42,13 +42,21 @@ with sync_playwright() as pw:
     page.set_content((A/'index.html').read_text(),wait_until='load',timeout=90000)
     page.add_style_tag(path=str(A/'bf_home_nav.css'))
     for name in modules:page.add_script_tag(path=str(A/name))
+    for name in ('bf700_original_normal_hits.js','bf8100_original_crystal_drop_core.js',
+                 'bf8200_original_normal_crystal_checks.js','bf8300_original_burst_crystal_checks.js',
+                 'bf8400_original_normal_crystal_checks.js','bf8800_live_normal_crystal_events.js',
+                 'bf9300_single_hit_critical_combat.js','bf9500_multihit_critical_combat.js',
+                 'bf_sbb_fallback_dispatch.js'):
+        page.add_script_tag(path=str(A/name))
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     page.evaluate("""()=>{
       document.getElementById('bf044-enable').checked=true;
+      for(const u of S.party){u.active=u.id===0;u.action=null;}
+      document.getElementById('speed').value='4';
       S.selected=0;S.party[0].unitId=10015;S.party[0].bb=100;
       S.party[0].hp=S.party[0].maxHp;S.party[0].action=null;
-      S.enemies=[{...S.enemies[0],slot:0,hp:100000,maxHp:100000,def:100},
-                 {...S.enemies[0],slot:1,hp:100000,maxHp:100000,def:100}];
+      S.enemies=[{...S.enemies[0],slot:0,hp:100000,maxHp:100000,def:100,atk:1},
+                 {...S.enemies[0],slot:1,hp:100000,maxHp:100000,def:100,atk:1}];
       window.__sbbLockFresh=JSON.stringify(S);
     }""")
     state='()=>JSON.stringify({player:P,storage:window.__sbbLockStorage,writes:window.__sbbLockWrites})'
@@ -73,12 +81,21 @@ with sync_playwright() as pw:
         page.evaluate('S=JSON.parse(window.__sbbLockFresh)')
         assert page.evaluate('BF044SBBDemo.queue()') is True
         assert page.evaluate('(code)=>BFGlobalOriginalAilmentStateV5700.inflict(0,code)',code)
-        page.evaluate('async()=>{await window.performUnit(S.party[0],epoch)}')
+        observations='()=>JSON.stringify({critical:BFGlobalSingleHitCriticalV9300.snapshot().recent.concat(BFGlobalMultiHitCriticalV9500.snapshot().recent),crystal:BFGlobalLiveNormalCrystalEventsV8800.snapshot().recent})'
+        prior_observations=page.evaluate(observations)
+        round_before=page.evaluate('S.round')
+        page.evaluate('async()=>{await BF_debug.execute()}')
+        assert page.evaluate('S.round')==round_before+1
+        assert page.evaluate('S.party[0].action') is None
+        if code==5:
+            assert page.evaluate('BFGlobalSingleHitCriticalV9300.snapshot().recent.concat(BFGlobalMultiHitCriticalV9500.snapshot().recent).some(e=>e.unitId===10015)')
+            assert page.evaluate('BFGlobalLiveNormalCrystalEventsV8800.snapshot().recent.some(e=>e.unitId===10015)')
+        else:
+            assert page.evaluate(observations)==prior_observations
         assert page.evaluate('S.party[0].bb')==100
         hp=page.evaluate('S.enemies.map(e=>e.hp)')
         assert hp[1]==100000
         assert (hp[0]<100000) if code==5 else (hp[0]==100000)
-        if code==5:assert page.evaluate('S.party[0].action.kind')=='attack'
         assert page.evaluate(state)==before
         # Cure restores the actual all-enemy prototype and normal gauge cost.
         assert page.evaluate('(id)=>BFGlobalOriginalAilmentStateV5700.cure(0,id).removed',cure)==[code]
@@ -89,7 +106,7 @@ with sync_playwright() as pw:
         assert page.evaluate('S.party[0].bb')==0
         assert all(hp<100000 for hp in page.evaluate('S.enemies.map(e=>e.hp)'))
         assert page.evaluate(state)==before
-        print('PASS',code,'SBB queue/direct/late execution blocked; cure restores actual all-enemy SBB; progress unchanged',flush=True)
+        print('PASS',code,'SBB queue/direct/actual queued turn respects status and normal observers; cure restores all-enemy SBB; progress unchanged',flush=True)
     page.evaluate("document.getElementById('bf044-enable').checked=false;S.party[0].action=null;S.selected=0;S.party[0].bb=100")
     assert page.evaluate('BF044SBBDemo.canQueue()') is False
     assert page.evaluate(state)==before

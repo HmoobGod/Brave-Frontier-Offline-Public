@@ -14,4 +14,5 @@ with ZipFile(p) as z:
  assert 'unit_anime_atlas_10025.png' in s
  assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
  assert 'BFGlobalParalysisActionLockV6000?.paralyzed(p?.id)' in s
+ assert z.read('assets/bf_sbb_fallback_dispatch.js')==(Path(__file__).resolve().parent/'app/src/main/assets/bf_sbb_fallback_dispatch.js').read_bytes()
 print('PASS v0.44 APK original v0.38–v0.43 assets and v7; optional SBB DEMO only')

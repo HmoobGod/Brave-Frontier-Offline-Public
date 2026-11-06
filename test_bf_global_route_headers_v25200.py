@@ -24,6 +24,7 @@ assert "heading.setAttribute('aria-live', 'polite');" in HEADER
 assert "heading.hidden = true;" in HEADER
 assert "heading.textContent = names[route];" in PREFIX
 assert "heading.hidden = route === 'home';" in PREFIX
+assert "['quest','Quest'],['units','Units'],['home','Home'],['summon','Summon'],['menu','Menu']" in PREFIX
 assert "/* v252 UI focus:" in C
 assert "body.bf-menu-mode .bf-route-title:not([hidden])" in C
 assert "content/battle/battle_dungeon_name_deco.png" in C
@@ -73,6 +74,17 @@ with sync_playwright() as pw:
         page.set_content(html)
         page.add_style_tag(content=C)
         page.add_script_tag(content=bootstrap)
+        buttons = page.locator('.bf-navbar button')
+        order = ['quest','units','home','summon','menu']
+        assert buttons.evaluate_all('(es)=>es.map(e=>e.dataset.bfGoto)') == order
+        centers = buttons.evaluate_all('(es)=>es.map(e=>{const r=e.getBoundingClientRect();return r.x+r.width/2})')
+        assert centers == sorted(centers), (width,centers)
+        nav_center = page.locator('.bf-navbar').evaluate('(e)=>{const r=e.getBoundingClientRect();return r.x+r.width/2}')
+        assert abs(centers[2]-nav_center) <= 1, (width,centers,nav_center)
+        buttons.first.focus()
+        for expected_route in order[1:]:
+            page.keyboard.press('Tab')
+            assert page.evaluate('document.activeElement.dataset.bfGoto') == expected_route
         title = page.locator("#bf-route-title")
         assert title.get_attribute("role") == "heading"
         assert title.get_attribute("aria-level") == "1"

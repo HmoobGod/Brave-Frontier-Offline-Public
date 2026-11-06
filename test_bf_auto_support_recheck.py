@@ -11,7 +11,9 @@ if '--source-only' in sys.argv:
     src=(ROOT/'prepare_source_aware_auto_v041.py').read_text()
     assert 'window.BF041SmartAuto?.reconsider?.(p);' in src
     assert 'function reconsider(p)' in src
-    assert 'break;window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);' in src
+    dispatch = ('break;window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);'
+                'window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);')
+    assert src.count(dispatch) == 1
     assert 'python3 test_bf_auto_support_recheck.py' in (ROOT/'.github/workflows/build-debug-apk.yml').read_text()
     print('PASS source: optional Auto support execution recheck registered')
     raise SystemExit(0)
