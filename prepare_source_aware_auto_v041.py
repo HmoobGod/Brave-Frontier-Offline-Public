@@ -42,7 +42,8 @@ ui=r"""
   const toggleId='bf041-smart-auto';
   const enabled=()=>document.getElementById(toggleId)?.checked===true;
   function kindFor(p) {
-    const fallback=p && Number(p.bb)>=100?'burst':'attack';
+    const cursed=window.BFGlobalCurseBBLockV5900?.cursed(p?.id)===true;
+    const fallback=p && Number(p.bb)>=100 && !cursed?'burst':'attack';
     if(!enabled() || !p || !p.active || p.hp<=0 || fallback==='attack')return fallback;
     const unitId=Number(p.unitId);
     if(!Number.isSafeInteger(unitId) || !UNIT_BY_ID.has(unitId) ||
@@ -105,6 +106,7 @@ if s.count(marker)==1:
     assert s.count(prior)==0
     assert s.count(execute_new)==1
     assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in s
+    assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
     print('PASS v0.41 idempotent source-aware Auto Battle patch intact')
 else:
     assert s.count(marker)==0
