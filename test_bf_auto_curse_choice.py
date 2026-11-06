@@ -46,7 +46,7 @@ with sync_playwright() as pw:
                  'bf8200_original_normal_crystal_checks.js','bf8300_original_burst_crystal_checks.js',
                  'bf8400_original_normal_crystal_checks.js','bf8800_live_normal_crystal_events.js',
                  'bf9300_single_hit_critical_combat.js','bf9500_multihit_critical_combat.js',
-                 'bf10500_qol_advanced_smart_auto.js'):
+                 'bf10500_qol_advanced_smart_auto.js','bf_sbb_fallback_dispatch.js'):
         page.add_script_tag(path=str(A/name))
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     page.evaluate("""()=>{

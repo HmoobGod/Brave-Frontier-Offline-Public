@@ -24,7 +24,8 @@ marker='/* BF_SOURCE_AWARE_AUTO_V041 */'
 prior="p.action={kind:p.bb>=100?'burst':'attack',target:target.slot}"
 next="p.action={kind:window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'attack'),target:target.slot}"
 execute_old='if(!livingEnemies().length)break;await performUnit(p,token);'
-execute_new='if(!livingEnemies().length)break;window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);'
+# Normalize the existing Curse fallback before outer normal-hit handlers inspect it.
+execute_new='if(!livingEnemies().length)break;window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);'
 ui=r"""
 <style id="bf041-smart-auto-style">
 #bf041-smart-auto-label { display:inline-flex; align-items:center; flex-wrap:wrap;

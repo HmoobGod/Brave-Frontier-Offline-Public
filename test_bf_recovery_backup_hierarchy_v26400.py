@@ -4,6 +4,7 @@ No reset, export, confirm, import, local storage or Android code is changed.
 An isolated Chromium fixture includes the real inherited flex CSS declaration.
 """
 from pathlib import Path
+import re
 import sys
 
 ROOT=Path(__file__).resolve().parent
@@ -32,9 +33,15 @@ for forbidden in (
     "localStorage.", "saveProgress(", "P.gems", "P.squad",
     "P.questClears", "S.", "window.", "document.",
     "confirm(", "fetch(", "XMLHttpRequest(", "onclick=",
-    "visibility:hidden", "display:none", "pointer-events:none",
 ):
     assert forbidden not in PATCH,forbidden
+# Visibility safeguards apply to save controls, not unrelated hidden UI.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}',CSS)
+                  if any('#'+control in selectors
+                         for control in ('downloadsave','quarantineexport','wipesave'))]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden|pointer-events\s*:\s*none)',body)
+               for body in visibility_rules)
 for element in ("quarantineexport","recoverycontinue","downloadsave","wipesave","undosave"):
     assert ('id="'+element+'"') in HTML,element
 assert "test_bf_recovery_backup_hierarchy_v26400.py --source-only" in PRE

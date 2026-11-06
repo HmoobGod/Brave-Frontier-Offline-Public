@@ -3,6 +3,7 @@
 Real index.html + current navigation JS/CSS, disposable synthetic storage only.
 """
 from pathlib import Path
+import re
 import shutil
 import sys
 
@@ -21,7 +22,12 @@ assert "Your roster is unchanged." in J
 assert "Saved units are present, but their archived profiles are unavailable." in J
 assert "No owned units are available in this offline save." in J
 assert "body.bf-menu-mode .bf-owned-box .bf-box-unresolved{" in C
-assert "display:none" not in C.split("/* v271 archived-profile availability:",1)[1]
+# Scope visibility checks to these controls, including later CSS overrides.
+visibility_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}', C)
+                  if '.bf-box-unresolved' in selectors]
+assert visibility_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in visibility_rules)
 assert "test_bf_unit_box_unresolved_v27100.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_unit_box_unresolved_v27100.py")==1
 assert "android.permission.INTERNET" not in MAN

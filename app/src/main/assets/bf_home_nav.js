@@ -61,7 +61,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   nav.className = 'bf-navbar';
   nav.setAttribute('aria-label', 'Main navigation');
   nav.innerHTML = [
-    ['home','Home'],['units','Units'],['quest','Quest'],['summon','Summon'],['menu','Menu']
+    ['quest','Quest'],['units','Units'],['home','Home'],['summon','Summon'],['menu','Menu']
   ].map(([route,label]) => '<button type="button" data-bf-goto="' + route + '" aria-label="' + label + '"><span class="bf-nav-art bf-nav-art-' + route + '" aria-hidden="true"></span>' + label + '</button>').join('');
   document.body.append(nav);
   const routes = new Map();
@@ -88,6 +88,10 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   function go(route) {
     if (!Object.prototype.hasOwnProperty.call(names,route)) return false;
+    if (window.BFLocationPreview?.isOpen) {
+      if (route === 'home') return window.BFLocationPreview.back();
+      window.BFLocationPreview.close();
+    }
     current = route;
     home.classList.toggle('bf-hidden',route !== 'home');
     home.setAttribute('aria-hidden',String(route !== 'home'));
@@ -113,7 +117,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   home.addEventListener('click',navigate);
   nav.addEventListener('click',navigate);
   document.body.classList.add('bf-menu-mode');
-  window.BF_homeNav = {go,get current(){return current;},get routedPanels(){return routes.size;}};
+  window.BF_homeNav = {go,get current(){return window.BFLocationPreview?.isOpen ? 'location-preview' : current;},get routedPanels(){return routes.size;}};
   go('home');
 })();
 
@@ -223,6 +227,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       '<button type="button" data-bf-unit-tab="training" aria-pressed="false">',
         '<span class="bf-training-art" aria-hidden="true">EXP</span>',
         '<span>TRAINING · DEMO</span></button>',
+      '<button type="button" class="bf-equipment-tab" data-bf-unit-tab="equipment" aria-pressed="false"><span aria-hidden="true">◇</span> EQUIPMENT <small>UI PREVIEW</small></button>',
     '</div>',
     '<div class="bf-unit-selected" aria-live="polite">',
       '<span id="bf-unit-tab-label">ACTIVE SQUAD</span>',
@@ -236,9 +241,15 @@ function bfOfflineUnitPortraitV266(source, name) {
   unitBox.setAttribute('aria-label', 'Owned Unit Box');
   unitBox.hidden = true;
   hub.after(unitBox);
+  const equipment = document.createElement('section');
+  equipment.id = 'bf-equipment-screen';
+  equipment.setAttribute('aria-label','Unit equipment preview');
+  equipment.hidden = true;
+  unitBox.after(equipment);
 
   let selected = 'squad';
   const names = {
+    equipment: ['EQUIPMENT PREVIEW', 'Inspect owned units; sphere assignment is not implemented.'],
     box: ['UNIT BOX', 'Browse and inspect your actual owned units, no changes to the save.'],
     squad: ['ACTIVE SQUAD', 'Select 1–6 owned characters. Your current save is preserved.'],
     evolve: ['EVOLUTION LAB', 'Archived forms and recipes; material drops and payable costs are demo.'],
@@ -248,6 +259,9 @@ function bfOfflineUnitPortraitV266(source, name) {
     if (!Object.prototype.hasOwnProperty.call(names, next)) return false;
     selected = next;
     squad.dataset.bfUnitTab = next;
+    equipment.hidden = next !== 'equipment';
+    equipment.setAttribute('aria-hidden', String(next !== 'equipment'));
+    if (next === 'equipment') window.BFEquipmentUI?.refresh();
     unitBox.hidden = next !== 'box';
     unitBox.setAttribute('aria-hidden', String(next !== 'box'));
     if (next === 'box') window.BFUnitBox?.refresh();
@@ -1287,4 +1301,335 @@ function bfOfflineUnitPortraitV266(source, name) {
     },
     refresh:render
   });
+})();
+
+/* UI-first location screens: reconstructed presentation, no game services. */
+(() => {
+  'use strict';
+  const home = document.getElementById('bf-home');
+  if (!home || !window.BF_homeNav || window.BFLocationPreview) return;
+  const locations = Object.freeze([
+    {id:'vortex',name:'Vortex Gate',art:'home_win_gate.png',intro:'Beyond the gate',
+      description:'Explore the interface for special quests and events.',
+      rows:[['Event quests','Event listings are not available yet.'],['Daily quests','Daily quest listings are not available yet.']],action:'ENTER VORTEX GATE'},
+    {id:'arena',name:'Arena',art:'home_win_arena.png',intro:'The challenger’s hall',
+      description:'A place for the Arena battle and ranking screens.',
+      rows:[['Opponents','Opponent selection is not available yet.'],['Battle record','Arena records are not available yet.'],['Rankings','Rankings are not available offline.']],action:'FIND AN OPPONENT'},
+    {id:'raid',name:'Raid Battle',art:'home_win_raid_open.png',intro:'Prepare for a greater challenge',
+      description:'Explore the interface for raid missions and party preparation.',
+      rows:[['Raid missions','Raid mission listings are not available yet.'],['Party preparation','Raid parties are not available yet.'],['Rewards','Raid rewards are not available yet.']],action:'SELECT RAID MISSION'},
+    {id:'randall',name:'Capital Randall',art:'home_win_randall.png',intro:'Welcome to the capital',
+      description:'A preview of the capital’s facilities and services.',
+      rows:[['Facilities','Capital facilities are not available yet.'],['Services','Capital services are not available yet.']],action:'VISIT FACILITIES'},
+    {id:'exchange',name:'Exchange Hall',art:'home_new_btn_exchange1.png',intro:'The exchange counter',
+      description:'A place to browse future exchange services.',
+      rows:[['Exchange items','There are no exchange listings available.'],['Exchange balance','Balance unavailable — this service is not implemented.']],action:'EXCHANGE ITEMS'}
+  ].map(item => Object.freeze({...item,rows:Object.freeze(item.rows.map(row => Object.freeze(row)))})));
+  const launch = document.createElement('section');
+  launch.className = 'bf-location-launch';
+  launch.setAttribute('aria-label','Explore unfinished location interfaces');
+  launch.innerHTML = '<div><strong>MORE OF GRAND GAIA</strong><p>Explore five location screens while their game systems are being rebuilt.</p></div>'+
+    '<button type="button" id="bf-location-launch" aria-haspopup="dialog">EXPLORE UI PREVIEWS ›</button>';
+  home.querySelector('.bf-scene-note')?.before(launch);
+  if (!launch.isConnected) home.append(launch);
+  const dialog = document.createElement('dialog');
+  dialog.id = 'bf-location-dialog';
+  dialog.setAttribute('aria-labelledby','bf-location-title');
+  dialog.innerHTML = '<header class="bf-location-header"><button type="button" id="bf-location-back" aria-label="Back to location previews">‹ BACK</button>'+
+    '<span>GRAND GAIA</span><button type="button" id="bf-location-close" aria-label="Close location preview">CLOSE ×</button></header>'+
+    '<div class="bf-location-body"><p class="bf-location-kicker">INTERFACE PREVIEW</p>'+
+    '<h1 id="bf-location-title" tabindex="-1">Global Locations</h1><div id="bf-location-content"></div>'+
+    '<p class="bf-location-disclaimer">UI preview only. Battles, events and services in these locations are not implemented yet.</p></div>';
+  document.body.append(dialog);
+  const title = dialog.querySelector('#bf-location-title');
+  const content = dialog.querySelector('#bf-location-content');
+  const backButton = dialog.querySelector('#bf-location-back');
+  let trail = [], opener = null;
+  function render() {
+    const id = trail[trail.length-1];
+    const item = locations.find(row => row.id === id);
+    backButton.hidden = !item;
+    backButton.setAttribute('aria-label',trail.length>2?'Back to Capital Randall':'Back to location previews');
+    title.textContent = item ? item.name : 'Global Locations';
+    content.replaceChildren();
+    if (!item) {
+      const intro = document.createElement('p');
+      intro.textContent = 'Choose a location to preview its interface. Gameplay actions remain unavailable.';
+      const grid = document.createElement('div');
+      grid.className = 'bf-location-directory';
+      for (const row of locations) {
+        const button = document.createElement('button');
+        button.type = 'button';button.dataset.bfLocation = row.id;
+        const image = document.createElement('img');image.src = 'content/home/'+row.art;image.alt = '';
+        const name = document.createElement('strong');name.textContent = row.name;
+        const status = document.createElement('span');status.textContent = 'VIEW UI PREVIEW ›';
+        button.append(image,name,status);grid.append(button);
+      }
+      content.append(intro,grid);
+    } else {
+      const hero = document.createElement('div');hero.className = 'bf-location-hero';
+      if (item.id === 'exchange') hero.classList.add('bf-location-hero-small');
+      const image = document.createElement('img');image.src = 'content/home/'+item.art;image.alt = '';
+      const caption = document.createElement('p');caption.textContent = item.intro;
+      hero.append(image,caption);
+      const description = document.createElement('p');description.textContent = item.description;
+      const rows = document.createElement('div');rows.className = 'bf-location-services';
+      for (const [name,note] of item.rows) {
+        const card = document.createElement('section');
+        const heading = document.createElement('h2');heading.textContent = name;
+        const text = document.createElement('p');text.textContent = note;
+        card.append(heading,text);rows.append(card);
+      }
+      const unavailable = document.createElement('button');unavailable.type = 'button';
+      unavailable.className = 'bf-location-unavailable';unavailable.disabled = true;
+      unavailable.textContent = item.action+' · NOT IMPLEMENTED';
+      content.append(hero,description,rows);
+      if (item.id === 'randall') {
+        const exchange = document.createElement('button');exchange.type = 'button';
+        exchange.className = 'bf-location-exchange';exchange.dataset.bfLocation = 'exchange';
+        exchange.textContent = 'VIEW EXCHANGE HALL UI ›';content.append(exchange);
+      }
+      content.append(unavailable);
+    }
+    dialog.scrollTop = 0;
+    if (dialog.open) title.focus({preventScroll:true});
+  }
+  function open(id) {
+    if (id !== undefined && !locations.some(item => item.id === id)) return false;
+    if (typeof dialog.showModal !== 'function') return false;
+    if (!dialog.open) {
+      opener = document.activeElement;
+      trail = [null];
+      if (id !== undefined) trail.push(id);
+      render();dialog.showModal();
+      document.body.classList.add('bf-location-preview-open');
+      title.focus({preventScroll:true});
+    } else if (id !== undefined) {
+      trail.push(id);render();
+    }
+    return true;
+  }
+  function close() {
+    if (!dialog.open) return false;
+    dialog.close();return true;
+  }
+  function back() {
+    if (!dialog.open) return false;
+    if (trail.length>1) {trail.pop();render();return true;}
+    return close();
+  }
+  dialog.addEventListener('close',() => {
+    document.body.classList.remove('bf-location-preview-open');
+    trail = [];
+    if (opener?.isConnected) opener.focus({preventScroll:true});
+  });
+  dialog.addEventListener('click',event => {
+    const link = event.target.closest('button[data-bf-location]');
+    if (link) open(link.dataset.bfLocation);
+  });
+  dialog.addEventListener('keydown',event => {
+    if (event.key !== 'Tab') return;
+    const buttons = Array.from(dialog.querySelectorAll('button:not(:disabled)'))
+      .filter(button => button.getClientRects().length);
+    if (!buttons.length) return;
+    const first = buttons[0], last = buttons[buttons.length-1];
+    if (!buttons.includes(document.activeElement) ||
+        (event.shiftKey && document.activeElement === first) ||
+        (!event.shiftKey && document.activeElement === last)) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+    }
+  });
+  backButton.addEventListener('click',back);
+  dialog.querySelector('#bf-location-close').addEventListener('click',close);
+  launch.querySelector('button').addEventListener('click',() => open());
+  window.BFLocationPreview = Object.freeze({open,close,back,get isOpen(){return dialog.open;}});
+})();
+
+/* UI-first equipment inspector: reads roster only; never assigns spheres. */
+(() => {
+  'use strict';
+  const panel = document.getElementById('bf-equipment-screen');
+  if (!panel || window.BFEquipmentUI || !window.BFInnerScreens) return;
+  panel.innerHTML = '<header class="bf-equipment-header"><div><p>UNIT MANAGEMENT</p><h2>EQUIPMENT</h2></div><span>UI PREVIEW</span></header>'+
+    '<p class="bf-equipment-intro">Inspect a unit and explore the equipment screen. Sphere assignment and effects are not implemented yet.</p>'+
+    '<div class="bf-equipment-filters"><label>Find an owned unit<input id="bf-equipment-search" type="search" placeholder="Search unit name or ID" autocomplete="off" /></label>'+
+    '<label>Preview unit<select id="bf-equipment-unit"></select></label></div>'+
+    '<p id="bf-equipment-status" role="status" aria-live="polite"></p>'+
+    '<section id="bf-equipment-unit-card" aria-label="Selected unit"></section>'+
+    '<div id="bf-equipment-slots"><section class="bf-equipment-slot"><span class="bf-equipment-socket" aria-hidden="true">◇</span><div><h3>Sphere slot 1</h3><strong>Equipment data unavailable</strong><p>No equipped sphere can be shown yet.</p></div><button type="button" disabled>CHOOSE SPHERE · UNAVAILABLE</button></section>'+
+    '<section class="bf-equipment-slot"><span class="bf-equipment-socket" aria-hidden="true">◇</span><div><h3>Sphere slot 2</h3><strong>Unlock status unavailable</strong><p>This preview does not determine whether the second slot is unlocked.</p></div><button type="button" disabled>UNLOCK SLOT · UNAVAILABLE</button></section></div>'+
+    '<section class="bf-equipment-inventory"><h3>Sphere inventory</h3><p>Equipment inventory is not available in this build. No owned spheres or quantities are shown.</p><button type="button" disabled>BROWSE SPHERES · UNAVAILABLE</button></section>'+
+    '<div class="bf-equipment-footer"><button type="button" id="bf-equipment-clear">CLEAR SEARCH</button><button type="button" id="bf-equipment-box">RETURN TO UNIT BOX</button></div>';
+  const search = panel.querySelector('#bf-equipment-search');
+  const select = panel.querySelector('#bf-equipment-unit');
+  const status = panel.querySelector('#bf-equipment-status');
+  const card = panel.querySelector('#bf-equipment-unit-card');
+  const slots = panel.querySelector('#bf-equipment-slots');
+  const shell = document.querySelector('.bf-shell-head');
+  function measureHeader() {
+    const height = shell?.getBoundingClientRect().height || 0;
+    panel.style.setProperty('--bf-equipment-shell-height',Math.ceil(height)+'px');
+  }
+  measureHeader();
+  if (shell && typeof ResizeObserver === 'function') new ResizeObserver(measureHeader).observe(shell);
+  window.addEventListener('resize',measureHeader);
+  let selected = null;
+  function entries() {
+    if (typeof P === 'undefined' || !Array.isArray(P.roster) || typeof effectiveUnit !== 'function') return {owned:[],unresolved:0};
+    const owned = [], ids = [...new Set(P.roster)];
+    let unresolved = 0;
+    for (const id of ids) {
+      const unit = Number.isSafeInteger(id) ? effectiveUnit(id) : null;
+      if (unit) owned.push({id,unit}); else unresolved++;
+    }
+    return {owned,unresolved};
+  }
+  function showUnit(rows) {
+    const row = rows.find(item => item.id === selected);
+    card.replaceChildren();slots.hidden = !row;
+    if (!row) {
+      const empty = document.createElement('p');empty.className = 'bf-equipment-empty';
+      empty.textContent = rows.length ? 'Choose a unit to preview.' : 'No matching unit to preview. Your roster is unchanged.';
+      card.append(empty);return;
+    }
+    const image = bfOfflineUnitPortraitV266(row.unit.portrait,row.unit.name);
+    const body = document.createElement('div');
+    const name = document.createElement('h3');name.textContent = row.unit.name || 'Unit';
+    const info = document.createElement('p');
+    info.textContent = '★'+row.unit.rarity+' · '+row.unit.element+' · Unit #'+row.unit.id;
+    const note = document.createElement('small');note.textContent = 'Owned unit preview · equipment effects unavailable';
+    body.append(name,info,note);card.append(image,body);
+  }
+  function refresh() {
+    measureHeader();
+    const {owned,unresolved} = entries();
+    const query = search.value.trim().toLocaleLowerCase();
+    const rows = owned.filter(({id,unit}) => [id,unit.id,unit.name].some(value => String(value).toLocaleLowerCase().includes(query)));
+    if (!rows.some(row => row.id === selected)) {
+      const active = typeof P !== 'undefined' && Array.isArray(P.squad) ? P.squad.find(id => rows.some(row => row.id === id)) : null;
+      selected = active ?? rows[0]?.id ?? null;
+    }
+    select.replaceChildren();
+    for (const row of rows) {
+      const option = document.createElement('option');option.value = String(row.id);
+      option.textContent = row.unit.name+' · #'+row.unit.id;select.append(option);
+    }
+    if (!rows.length) {
+      const option = document.createElement('option');option.textContent = 'No units available';select.append(option);
+    } else select.value = String(selected);
+    select.disabled = !rows.length;
+    panel.querySelector('#bf-equipment-clear').disabled = !search.value;
+    status.textContent = rows.length+' of '+owned.length+' owned unit profiles'+
+      (unresolved ? ' · '+unresolved+' saved profile'+(unresolved===1?'':'s')+' unavailable' : '')+
+      ' · Equipment preview only';
+    showUnit(rows);return rows.length;
+  }
+  search.addEventListener('input',refresh);
+  select.addEventListener('change',() => {
+    const id = Number(select.value), {owned} = entries();
+    if (!owned.some(row => row.id === id)) return;
+    selected = id;showUnit(owned);
+  });
+  panel.querySelector('#bf-equipment-clear').addEventListener('click',() => {search.value='';refresh();search.focus();});
+  panel.querySelector('#bf-equipment-box').addEventListener('click',() => {
+    if (window.BFInnerScreens.setTab('box')) document.getElementById('bf-owned-box')?.scrollIntoView({block:'start'});
+  });
+  const picker = document.getElementById('squadpicker');
+  if (picker) new MutationObserver(() => {
+    if (window.BFInnerScreens.unitTab === 'equipment') refresh();
+  }).observe(picker,{childList:true});
+  window.BFEquipmentUI = Object.freeze({refresh});
+  refresh();
+})();
+
+/* UI-first Menu help: static player guidance; no game or storage access. */
+(() => {
+  'use strict';
+  const menu = document.querySelector('.progresspanel');
+  if (!menu || document.getElementById('bf-menu-help')) return;
+  const help = document.createElement('details');
+  help.id = 'bf-menu-help';
+  help.innerHTML = '<summary>HELP &amp; APP GUIDE</summary><div class="bf-menu-help-body">'+
+    '<h2>Welcome to the offline reconstruction</h2><p>The interface is being completed first. Original gameplay systems are still being rebuilt.</p>'+
+    '<details><summary>What can I use today?</summary><p>Browse your units, edit your squad and explore the current demo quests and battles. Training and summoning use demo rules.</p></details>'+
+    '<details><summary>What does UI preview mean?</summary><p>Equipment and the five Global location previews let you explore unfinished interfaces. Their unavailable actions stay disabled; previewing does not equip items or grant rewards.</p></details>'+
+    '<details><summary>Where can I back up my progress?</summary><p>Use the save controls in this Menu to export a backup file. Keep your exported file somewhere you can find it again.</p></details>'+
+    '<details><summary>Does the app need a connection?</summary><p>The bundled interface and current demo work offline. Arena rankings, raid services and event listings are not implemented in this build.</p></details>'+
+    '<p class="bf-menu-help-note">A finished screen does not mean its game system is ready. Preview and demo labels show what is currently available.</p></div>';
+  menu.prepend(help);
+})();
+
+/* Menu inventory reads existing demo catalyst counts; never edits progress. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-menu-materials')||typeof ALL_MATERIAL_IDS==='undefined')return;
+  const panel=document.createElement('details');panel.id='bf-menu-materials';
+  panel.innerHTML='<summary>MATERIAL INVENTORY <small>DEMO STOCK</small></summary><div class="bf-menu-material-body"><p>Recorded catalysts from this demo save. Original item ownership and drop rules are not reconstructed.</p><label><input type="checkbox" id="bf-menu-material-all" /> Show all known catalyst IDs</label><p id="bf-menu-material-count" role="status" aria-live="polite"></p><div class="bf-menu-material-grid"></div></div>';
+  menu.prepend(panel);
+  const all=panel.querySelector('input'),grid=panel.querySelector('.bf-menu-material-grid'),status=panel.querySelector('[role="status"]');
+  function refresh(){
+    const ids=[...new Set(ALL_MATERIAL_IDS)].map(String);
+    const rows=ids.map(id=>{const value=typeof P!=='undefined'?P.materials?.[id]:null;return {id,count:Number.isSafeInteger(value)&&value>0?value:0};});
+    const owned=rows.filter(r=>r.count>0),shown=all.checked?rows:owned;
+    let total=0,overflow=false;
+    for(const row of owned){
+      if(row.count>Number.MAX_SAFE_INTEGER-total){overflow=true;break;}
+      total+=row.count;
+    }
+    const totalLabel=overflow?'More than '+Number.MAX_SAFE_INTEGER.toLocaleString('en-US'):String(total);
+    status.textContent=totalLabel+' catalysts recorded · '+owned.length+' types owned';
+    grid.replaceChildren();
+    for(const row of shown){
+      const card=document.createElement('div'),name=document.createElement('strong'),count=document.createElement('span');
+      name.textContent='Catalyst #'+row.id;count.textContent='Owned: '+row.count;card.append(name,count);grid.append(card);
+    }
+    if(!shown.length){const empty=document.createElement('p');empty.className='bf-menu-material-empty';empty.textContent='No catalysts recorded. Choose “Show all known catalyst IDs” to browse the list.';grid.append(empty);}
+  }
+  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});all.addEventListener('change',refresh);
+  const inventory=document.getElementById('inventoryitems');
+  if(inventory)new MutationObserver(()=>{if(panel.open)refresh();}).observe(inventory,{childList:true});
+  refresh();
+})();
+
+/* Session-only Quest preview audio settings; no saved preferences or autoplay. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('.progresspanel');
+  if(!menu||document.getElementById('bf-menu-settings'))return;
+  const panel=document.createElement('details');panel.id='bf-menu-settings';
+  panel.innerHTML='<summary>SETTINGS <small>CURRENT SESSION</small></summary><div class="bf-session-settings-body"><h2>Quest preview music</h2><p>Adjust the existing Quest music preview player. These settings reset when the app reloads.</p><label for="bf-session-volume">Volume <output id="bf-session-volume-value" for="bf-session-volume">Unavailable</output></label><input id="bf-session-volume" aria-label="Quest preview music volume" type="range" min="0" max="100" step="1" /><label class="bf-session-mute"><input id="bf-session-mute" type="checkbox" /> Mute quest preview music</label><p id="bf-session-audio-state" role="status" aria-live="polite"></p><p>To play a track, open Quest and use Original Global Music. Changing settings does not start playback.</p><section><h3>Sound effects</h3><p>Sound-effect settings are not implemented yet.</p><button type="button" disabled>SOUND EFFECTS · UNAVAILABLE</button></section></div>';
+  menu.prepend(panel);
+  const volume=panel.querySelector('#bf-session-volume'),mute=panel.querySelector('#bf-session-mute'),value=panel.querySelector('output'),status=panel.querySelector('[role="status"]');
+  const audio=document.querySelector('.bf-global-audio audio');
+  function sync(){
+    volume.disabled=!audio;mute.disabled=!audio;
+    if(!audio){value.textContent='Unavailable';status.textContent='The Quest preview player is unavailable in this view.';return;}
+    volume.value=String(Math.round(audio.volume*100));mute.checked=audio.muted;
+    value.textContent=volume.value+'%';
+    status.textContent=audio.muted?'Quest preview music is muted.':'Quest preview volume: '+volume.value+'%.';
+  }
+  volume.addEventListener('input',()=>{
+    const next=Number(volume.value);
+    if(audio&&Number.isInteger(next)&&next>=0&&next<=100)audio.volume=next/100;
+    sync();
+  });
+  mute.addEventListener('change',()=>{if(audio)audio.muted=mute.checked;sync();});
+  if(audio)audio.addEventListener('volumechange',sync);
+  panel.addEventListener('toggle',()=>{if(panel.open)sync();});
+  sync();
+})();
+
+/* Keep raw battle diagnostics available without crowding the player Menu. */
+(() => {
+  'use strict';
+  const menu=document.querySelector('section.progresspanel');
+  const inspector=document.querySelector('section.hit-panel');
+  if(!menu||!inspector||document.getElementById('bf-advanced-tools'))return;
+  const tools=document.createElement('details');tools.id='bf-advanced-tools';
+  const title=document.createElement('summary');title.textContent='ADVANCED TOOLS';
+  const note=document.createElement('p');note.className='bf-advanced-note';
+  note.textContent='Inspect prototype battle events and archived hit data. These diagnostics do not establish original damage or gameplay accuracy.';
+  tools.append(title,note,inspector);menu.append(tools);
 })();

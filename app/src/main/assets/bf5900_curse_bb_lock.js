@@ -36,7 +36,7 @@
   if(!cursed(slot))return false;
   const p=S.party[slot];
   track(slot);
-  if(p?.action?.kind!=='burst')return false;
+  if(!['burst','sbb_demo'].includes(p?.action?.kind))return false;
   p.action={kind:'attack',target:p.action.target};
   return true;
  }
