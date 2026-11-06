@@ -73,3 +73,7 @@ with sync_playwright() as pw:
     assert not errors,errors
     print('PASS v0.44 opt-in 12 SBB IDs, all-enemy prototype, honest demo labeling, old BB and v7 untouched')
     b.close()
+
+# Exercise fallback through the complete status/normal-hit chain in Android CI.
+import subprocess, sys
+subprocess.run([sys.executable, str(R / 'test_bf_sbb_fallback_dispatch.py')], check=True)
