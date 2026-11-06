@@ -15,6 +15,8 @@ state is temporary; enemies survive, so there are no quest rewards. Real Android
 HOME and Activity return must deliver a hidden event, stop Auto, permit at most
 the active round to finish, and leave Auto off after returning. Whole player and
 canonical v7 storage values must stay unchanged; only hashes are compared/logged.
+Actual Android BACK key dispatch must also return Quest, Units, Summon and Menu
+to Home through the existing Java/WebView route bridge without exiting the app.
 No owner phone, user save, signing key or real progression participates.
 
 WebView debugging is explicitly enabled only for the existing debuggable,

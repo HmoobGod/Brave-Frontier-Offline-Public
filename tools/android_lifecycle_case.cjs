@@ -62,10 +62,18 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     assert.ok(state.round>=round && state.round<=round+1,'Unexpected extra Auto rounds');
     await new Promise(resolve=>setTimeout(resolve,1500));
     assert.equal(await page.evaluate(()=>S.round),state.round,'Auto resumed without input');
+    // Exercise the real Android key dispatch and Java-to-WebView route bridge.
+    const backRoutes=['quest','units','summon','menu'];
+    for(const route of backRoutes){
+      assert.equal(await page.evaluate(route=>BF_homeNav.go(route),route),true);
+      adb('shell','input','keyevent','KEYCODE_BACK');
+      await page.waitForFunction(()=>BF_homeNav.current==='home',null,{polling:100});
+    }
     assert.equal(hash(await snapshot()),before,'Player/canonical save changed');
     console.log(JSON.stringify({result:'PASS',scope:'isolated Android35 emulator',
       package:pkg,browserVersion:state.sdkBrowser,nativeHiddenEventObserved:true,
-      foregroundAutoRemainsOff:true,playerAndCanonicalSaveUnchanged:true,
+      foregroundAutoRemainsOff:true,nativeBackRoutesReturnedHome:backRoutes,
+      playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));
   } finally {
     await device.close();
