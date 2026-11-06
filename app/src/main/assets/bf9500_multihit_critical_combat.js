@@ -75,7 +75,9 @@
      const critical=landed&&roll()===true;
      if(landed)local.rolls++;
      if(critical)local.criticals++;
-     const result=criticalDamage(damage,critical);
+     const ordinary=criticalDamage(damage,critical);
+     const result=window.BFGlobalLeaderCriticalBonus?.scale?.(
+       damage,ordinary,local.unit,critical)??ordinary;
      const appliedDamage=landed?Math.min(remaining,result):0;
      remaining=Math.max(0,remaining-appliedDamage);
      local.hits.push(freeze({index:i+1,baseDamage:damage,
@@ -130,7 +132,7 @@
  const counts=document.createElement('p');counts.id='bf9500-critical-counts';
  const list=document.createElement('ol');list.id='bf9500-critical-events';
  const note=document.createElement('small');
- note.textContent='Each positive-damage source-verified normal hit rolls the base 10% critical chance and deals 150% of that hit’s DEMO damage if critical. Normal attack weights are archived. Native full damage, enemy attacks, BB/SBB, buffs, resistance and unsupported profiles remain unchanged.';
+ note.textContent='Each positive-damage source-verified normal hit rolls the base 10% critical chance and deals 150% base critical damage before source-qualified leader bonuses. Normal attack weights are archived. Native full damage, enemy attacks, BB/SBB, other buffs, resistance and unsupported profiles remain unchanged.';
  panel.append(heading,counts,list,note);host.append(panel);
  function render(){
    panel.hidden=S.mode!=='archive';

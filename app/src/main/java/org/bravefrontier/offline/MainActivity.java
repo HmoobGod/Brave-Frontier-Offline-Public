@@ -1275,6 +1275,13 @@ public class MainActivity extends Activity {
                 } catch (IOException type5Error) {
                     android.util.Log.w("BraveFrontier", "Optional original type5 elemental protection unavailable", type5Error);
                 }
+                // Intense Edge: source-qualified critical component; no Spark effect.
+                try {
+                    String leaderCritical = readPackagedText("bf_leader_critical_bonus.js");
+                    view.evaluateJavascript(leaderCritical, null);
+                } catch (IOException criticalLeaderError) {
+                    android.util.Log.w("BraveFrontier", "Optional Intense Edge critical component unavailable", criticalLeaderError);
+                }
                 // v115: enforce exact 2022 original unitMaxLevel only on newly
                 // constructed archive DEMO battle party units, not saved EXP.
                 try {
