@@ -75,6 +75,8 @@
    const info=snapshot();
    panel.hidden=S.mode!=='archive';
    const key=JSON.stringify({mode:S.mode,round:S.round,remain:remaining,
+     // Curse eligibility can change without changing HP, gauge or actions.
+     recipients:info.eligibleRecipients,
      busy:S.busy,auto:S.auto,over:S.over,party:S.party?.map(p=>[
        p.name,p.active,p.hp,p.bb,p.action?.kind||null
      ]),locked:turns.snapshot().reservations});
