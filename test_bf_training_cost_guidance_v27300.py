@@ -1,5 +1,6 @@
 """v273: current Training affordability feedback without gameplay/save writes."""
 from pathlib import Path
+import re
 import shutil
 import sys
 ROOT=Path(__file__).resolve().parent
@@ -17,7 +18,13 @@ assert "new MutationObserver(refreshTrainingAffordability)" in J
 assert "'1 Training Shard'" in J and "'150 Zel'" in J
 assert "Resources support +10 EXP" in J and "Resources support +10 or +50 EXP" in J
 assert "/* v273 read-only Training current-affordability feedback" in C
-assert "display:none" not in C.split("/* v273 read-only Training current-affordability feedback",1)[1]
+# Check every rule targeting the note, including later overrides. Unrelated
+# hidden controls (for example a preview's directory Back button) are allowed.
+training_rules=[body for selectors,body in re.findall(r'([^{}]+)\{([^{}]*)\}',C)
+                if '.bf-training-cost-note' in selectors]
+assert training_rules
+assert not any(re.search(r'(?:display\s*:\s*none|visibility\s*:\s*hidden)',body)
+               for body in training_rules)
 assert "test_bf_training_cost_guidance_v27300.py --source-only" in PRE
 assert BUILD.count("python3 test_bf_training_cost_guidance_v27300.py")==1
 assert "android.permission.INTERNET" not in MAN
