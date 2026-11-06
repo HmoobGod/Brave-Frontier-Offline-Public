@@ -1387,3 +1387,14 @@ body.bf-location-preview-open{overflow:hidden}
 #bf-advanced-tools>summary:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
 .bf-advanced-note{padding:0 12px;color:#bed0dd;overflow-wrap:anywhere}
 #bf-advanced-tools>.hit-panel{margin:0;border:0;border-top:1px solid #526f85;border-radius:0 0 7px 7px;box-shadow:none}
+
+#bf-about-build{margin:12px;border:1px solid #8490a1;border-radius:8px;background:#182b3c;color:#dbe4e9;font:14px/1.5 system-ui,sans-serif}
+#bf-about-build>summary{padding:13px;min-height:48px;cursor:pointer;color:#ecd7ac;font:700 14px/1.5 Georgia,serif}
+#bf-about-build>summary:focus-visible{outline:3px solid #fff0bb;outline-offset:3px}
+.bf-about-body{padding:0 14px 14px;overflow-wrap:anywhere}
+.bf-about-body h2{font:700 21px Georgia,serif;color:#ffe1a5}
+.bf-about-body dl{margin:14px 0;display:grid;gap:10px}
+.bf-about-body dl>div{padding:12px;background:#0e2131;border:1px solid #627b90;border-radius:5px}
+.bf-about-body dt{font-weight:700;color:#e7cea0}
+.bf-about-body dd{margin:5px 0 0;overflow-wrap:anywhere}
+#bf-about-status{color:#c7d8e2}

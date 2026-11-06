@@ -230,6 +230,19 @@ public class MainActivity extends Activity {
         game.evaluateJavascript(call.toString(), null);
     }
     public final class SaveBridge {
+        // Public app identity only; never reads a save, signer or device ID.
+        @JavascriptInterface public String getBuildInfo() {
+            try {
+                android.content.pm.PackageInfo info = getPackageManager()
+                        .getPackageInfo(getPackageName(), 0);
+                return new JSONObject()
+                        .put("packageName", getPackageName())
+                        .put("versionName", info.versionName)
+                        .put("versionCode", info.versionCode).toString();
+            } catch (org.json.JSONException | android.content.pm.PackageManager.NameNotFoundException unavailable) {
+                return "{}";
+            }
+        }
         @JavascriptInterface public void importSaveFile() {
             runOnUiThread(() -> {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
