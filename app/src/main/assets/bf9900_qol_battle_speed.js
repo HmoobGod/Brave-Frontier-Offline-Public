@@ -50,6 +50,22 @@
    // This is not a turn-skip, battle-skip or damage simulation shortcut.
    return nativeWait.call(this,40);
  };
+ // Navigation hides the battle canvas without stopping combat. Keep its RAF
+ // chain alive, but avoid painting an invisible canvas. Expire presentation
+ // effects as the original renderer does, so offscreen battles cannot retain
+ // an ever-growing list of expired effects.
+ const canvas=document.getElementById('battle'),nativeDraw=window.draw;
+ if(canvas&&typeof nativeDraw==='function'){
+   window.draw=function(now){
+     if(!canvas.isConnected||canvas.getClientRects().length===0){
+       if(typeof effects!=='undefined'&&Array.isArray(effects))
+         effects=effects.filter(fx=>now-fx.at<fx.life);
+       requestAnimationFrame(window.draw);
+       return;
+     }
+     return nativeDraw.apply(this,arguments);
+   };
+ }
  const panel=document.createElement('details');
  panel.id='bf9900-speed';
  panel.style.cssText='margin:10px 2px;padding:10px;border:1px solid #92abc8;'+

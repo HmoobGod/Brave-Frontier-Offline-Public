@@ -73,3 +73,7 @@ with sync_playwright() as pw:
  assert not errors,errors
  b.close()
 print('PASS v99 extended round speed and animation skip are optional, save-safe, archive-only and idempotent')
+
+if __name__ == '__main__':
+ import subprocess,sys
+ subprocess.run([sys.executable,str(R/'test_bf_hidden_battle_render.py')],check=True)
