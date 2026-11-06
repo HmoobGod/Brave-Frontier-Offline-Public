@@ -8,6 +8,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  js=z.read('assets/bf4400_source_atk_item.js').decode('utf8')
  assert 'BF_GLOBAL_SOURCE_ATK_ITEM_V4400' in js and len(js.encode('utf8'))<65536
  assert 'itemId:20400' in js and 'atkPercent:30' in js and 'durationTurns:3' in js
+ assert z.read('assets/bf4400_source_atk_item.js')==(R/'app/src/main/assets/bf4400_source_atk_item.js').read_bytes()
+ assert "itemId:20401,name:'強靭薬'" in js and 'atkPercent:50' in js
+ assert "passiveSkillInfo:'0,50,0,0,0,3'" in js and 'bf4400-strength' in js
  assert all(x not in js for x in ('localStorage','saveProgress(', 'BFAndroid'))
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 g=(R/'app/build.gradle').read_text('utf8')
