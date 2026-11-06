@@ -1,0 +1,27 @@
+name: Original 2022 evolution material acquisition evidence source preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/material-acquisition-source-preflight.yml'
+      - 'source_data/bf_global_2022_material_acquisition_evidence_v224.json'
+      - 'test_bf_original_material_acquisition_source_v22400.py'
+      - 'V224_ORIGINAL_MATERIAL_ACQUISITION_SOURCE_EVIDENCE.md'
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-source-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate source-only mission and exchange item evidence
+        run: python3 test_bf_original_material_acquisition_source_v22400.py
