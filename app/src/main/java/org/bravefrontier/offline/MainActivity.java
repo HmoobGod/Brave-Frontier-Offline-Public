@@ -1392,6 +1392,13 @@ public class MainActivity extends Activity {
                 } catch (IOException firstClearRefError) {
                     android.util.Log.w("BraveFrontier", "Optional original Gem reward source unavailable", firstClearRefError);
                 }
+                // Normalize invalid experimental SBB before every status/hit handler.
+                try {
+                    String sbbFallback = readPackagedText("bf_sbb_fallback_dispatch.js");
+                    view.evaluateJavascript(sbbFallback, null);
+                } catch (IOException sbbFallbackError) {
+                    android.util.Log.w("BraveFrontier", "Optional SBB fallback normalization unavailable", sbbFallbackError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {

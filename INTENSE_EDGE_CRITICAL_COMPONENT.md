@@ -38,12 +38,15 @@ component does not write P, storage, stats, action targets or save schemas.
 
 `test_bf_leader_critical_bonus.py` exercises actual queued turns for one-hit40011
 and multi-hit10011 with matching/wrong leaders and critical/noncritical rolls,
-exact per-hit multipliers/HP loss, a KO/landed-crystal audit, negative eligibility controls and full
-synthetic P/storage/write preservation. The existing v93 runtime job invokes it;
+exact per-hit multipliers/HP loss, disabled queued-SBB normal fallback for both
+profiles, a KO/landed-crystal audit, negative eligibility controls and full
+synthetic P/storage/write preservation. The merged SBB fallback wrapper loads
+after the normal observers in the combined regression, matching native order. The existing v93 runtime job invokes it;
 the existing v93 APK gate requires byte-exact packaging of all three modules.
 No new workflow rules/triggers, signing, permissions or Gradle changes.
 
-Prepared unchanged current-main core is reused with unmerged ATK50 restored to
-main before applying this candidate. Native Java loader compilation/packaging,
-fresh exact-head Android CI and independent review remain required. No actual
+Fresh workflow asset preparation on the selected integration base is verified
+in an isolated stage. Native Java loader compilation/packaging, fresh exact-head
+Android CI and independent review must qualify the selected head/base; older
+builds and reviews do not authorize later refreshes. No actual
 device, real-save, native full damage or complete leader-skill parity claim.

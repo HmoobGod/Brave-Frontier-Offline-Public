@@ -46,12 +46,13 @@ with sync_playwright() as pw:
                  'bf9500_multihit_critical_combat.js', 'bf10700_source_landed_crystal_eligibility.js',
                  'bf11000_source_starter_leader_skills.js',
                  'bf11200_all_playable_leader_source.js', 'bf11400_original_global_leader_english.js',
-                 'bf_leader_critical_bonus.js'):
+                 'bf_leader_critical_bonus.js','bf_sbb_fallback_dispatch.js'):
         page.add_script_tag(path=str(A / name))
     page.locator('.bf-navbar [data-bf-goto="quest"]').click()
     page.evaluate('window.__edgeBattle=JSON.stringify(S)')
     for unit in (40011, 10011):
-        for form, random in ((10025, 0), (10024, 0), (10025, 0.95)):
+        for form, random, action in ((10025, 0, 'attack'), (10024, 0, 'attack'),
+                                     (10025, 0.95, 'attack'), (10025, 0, 'sbb_demo')):
             page.evaluate('''({unit,form})=>{
               S=JSON.parse(__edgeBattle);
               if(!P.roster.includes(10021))P.roster.push(10021);
@@ -64,6 +65,8 @@ with sync_playwright() as pw:
             }''', {'unit': unit, 'form': form})
             page.locator('#guard').click()
             page.locator('#attack').click()
+            # A now-disabled queued SBB must enter the same normal critical chain.
+            page.evaluate("kind=>{document.getElementById('bf044-enable').checked=false;S.party[1].action.kind=kind}", action)
             before = page.evaluate(SNAPSHOT)
             page.evaluate('''async random=>{const old=Math.random;Math.random=()=>random;
               try{await BF_debug.execute()}finally{Math.random=old}}''', random)
@@ -83,7 +86,7 @@ with sync_playwright() as pw:
             loss = 100000 - page.evaluate('S.enemies[0].hp')
             assert event['observedHpLoss'] == loss and loss > 0, event
             assert_unchanged(page, before, (unit, form, random))
-            print('PASS actual Intense Edge normal turn', unit, form, random,
+            print('PASS actual Intense Edge normal/fallback turn', unit, form, random, action,
                   'multiplier', multiplier, 'P/storage intact', flush=True)
 
     # Restore the qualified fixture for isolated negative-eligibility controls.
