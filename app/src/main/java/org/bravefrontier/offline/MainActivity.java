@@ -1154,6 +1154,13 @@ public class MainActivity extends Activity {
                 } catch (IOException advancedError) {
                     android.util.Log.w("BraveFrontier", "Optional advanced Auto Battle unavailable", advancedError);
                 }
+                // Optional Auto use of the existing experimental SBB prototype.
+                try {
+                    String autoSbb = readPackagedText("bf_auto_sbb_demo.js");
+                    view.evaluateJavascript(autoSbb, null);
+                } catch (IOException autoSbbError) {
+                    android.util.Log.w("BraveFrontier", "Optional Auto SBB unavailable", autoSbbError);
+                }
                 // v107 source: landed-hit BC/HC check eligibility only;
                 // never award pickups, HP/BB or modify battle/save state.
                 try {

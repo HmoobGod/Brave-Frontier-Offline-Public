@@ -71,3 +71,8 @@ with sync_playwright() as pw:
  assert not errors,errors
  b.close()
 print('PASS v105 Smart Auto defaults, healer threshold, target, BB conservation and v7 isolation')
+
+# Exercise optional SBB planning through actual Auto turns.
+if __name__ == "__main__":
+ import subprocess,sys
+ subprocess.run([sys.executable,str(R/"test_bf_auto_sbb_demo.py")],check=True)
