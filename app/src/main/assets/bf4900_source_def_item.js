@@ -1,7 +1,7 @@
 /* BF_GLOBAL_SOURCE_DEF_ITEM_V4900 */
 (() => {
  'use strict';
- // Original 2022 #20600: +30% DEF to one ally for three turns.
+ // Original 2022 #20600/+30% and #20601/+50% DEF: one ally, three turns.
  // Action Guard, stock, expiration boundary and stacking are DEMO rules.
  const turns=window.BFGlobalItemTurnReservationsV4500;
  if(window.BFGlobalSourceDefItemV4900||!turns||
@@ -20,6 +20,14 @@
    itemMaxEquipped:10,itemMaxStack:99,defPercent:30,duration:3,
    effect:'One ally DEF +30% for three turns'
  });
+ // file/sha256 identify the complete original F_ITEM table, not a #20600
+ // row digest. Both records are covered by the shared v4900 provenance.
+ const sources=Object.freeze({20600:source,20601:Object.freeze({
+   file:source.file,sha256:source.sha256,itemId:20601,name:'堅牢薬',
+   battleEffectGroupId:410,targetType:1,itemTargetArea:1,skillTypeId:5,
+   passiveSkillInfo:'0,0,50,0,0,3',itemMaxEquipped:10,
+   defPercent:50,duration:3,effect:'One ally DEF +50% for three turns'
+ })});
  const css=document.createElement('style');css.id='bf4900-style';
  css.textContent=[
   '#bf4900-def{margin:9px 0 0;padding:9px;border:1px solid #9db9e4;',
@@ -33,6 +41,13 @@
  const ref=document.createElement('small');
  ref.textContent='2022 source item #20600 · '+source.name+
   ' · one ally DEF +30% for three turns.';
+ const strength=document.createElement('select');strength.id='bf4900-strength';
+ strength.setAttribute('aria-label','Choose DEF item strength');
+ strength.style.cssText='display:block;width:100%;min-height:44px;margin:5px 0';
+ for(const profile of Object.values(sources)){
+   const option=document.createElement('option');option.value=String(profile.itemId);
+   option.textContent='DEF +'+profile.defPercent+'% · 3 turns';strength.append(option);
+ }
  const state=document.createElement('strong');state.id='bf4900-status';
  const actor=document.createElement('select');actor.id='bf4900-actor';
  actor.setAttribute('aria-label','Choose acting unit for DEF item');
@@ -41,13 +56,13 @@
  const use=document.createElement('button');use.type='button';use.id='bf4900-use';
  use.textContent='GIVE ALLY +30% DEF · DEMO GUARD ACTION';
  const note=document.createElement('small');
- note.textContent='Original item effect and duration are sourced. DEF is applied to simulated combat. Item charge, Guard cost, rounding, stacking and cast-turn timing are DEMO.';
- panel.append(head,ref,state,actor,recipient,use,note);parent.append(panel);
+ note.textContent='Original item effect and duration are sourced. DEF is applied to simulated combat. One shared charge across both strengths, Guard cost, rounding, stacking and cast-turn timing are DEMO; no owned inventory is consumed.';
+ panel.append(head,ref,strength,state,actor,recipient,use,note);parent.append(panel);
  let battle=S,remaining=1,last='';
  const buffs=new Map();
  function sync(){
    if(S!==battle){
-     battle=S;remaining=1;buffs.clear();last='';
+     battle=S;remaining=1;buffs.clear();strength.value='20600';last='';
    }
    for(const [slot,b] of buffs){
      if(S.party?.[slot]!==b.unit||S.round>b.untilRound){
@@ -79,16 +94,18 @@
    const actors=Array.from({length:6},(_,i)=>i).filter(canAct);
    const recipients=Array.from({length:6},(_,i)=>i).filter(canBenefit);
    const activeBuffs=Object.freeze(Array.from(buffs,([slot,b])=>Object.freeze({
-     slot,baseDef:b.baseDef,bonusDef:b.unit.def-b.baseDef,untilRound:b.untilRound
+     slot,baseDef:b.baseDef,bonusDef:b.unit.def-b.baseDef,untilRound:b.untilRound,
+     itemId:b.itemId,defPercent:b.defPercent
    })));
-   return Object.freeze({source,remaining,round:S.round,activeBuffs,
+   const selectedSource=sources[Number(strength.value)]||null;
+   return Object.freeze({source,selectedSource,remaining,round:S.round,activeBuffs,
      eligibleActors:Object.freeze(actors),eligibleRecipients:Object.freeze(recipients),
-     available:allowed()&&actors.length>0&&recipients.length>0});
+     available:!!selectedSource&&allowed()&&actors.length>0&&recipients.length>0});
  }
  function refresh(){
    const info=snapshot();panel.hidden=S.mode!=='archive';
    const key=JSON.stringify({mode:S.mode,round:S.round,remaining,
-     auto:S.auto,busy:S.busy,over:S.over,
+     auto:S.auto,busy:S.busy,over:S.over,itemId:info.selectedSource?.itemId,
      party:S.party?.map(p=>[p.name,p.hp,p.def,p.action?.kind||null]),
      locked:turns.snapshot().reservations,
      buffs:info.activeBuffs});
@@ -104,31 +121,39 @@
    }
    choices(actor,info.eligibleActors);
    choices(recipient,info.eligibleRecipients);
-   state.textContent='Temporary DEF-item charges: '+remaining+
+   const profile=info.selectedSource||source;
+   ref.textContent='2022 source item #'+profile.itemId+' · '+profile.name+
+     ' · one ally DEF +'+profile.defPercent+'% for three turns.';
+   use.textContent='GIVE ALLY +'+profile.defPercent+'% DEF · DEMO GUARD ACTION';
+   state.textContent='Shared temporary DEF-item charges: '+remaining+
      ' / 1'+(info.activeBuffs.length?
-       ' · DEF +30% until round '+info.activeBuffs.map(b=>b.untilRound).join(', '):'');
+       ' · DEF +'+info.activeBuffs.map(b=>b.defPercent+'% until round '+b.untilRound).join(', '):'');
    use.disabled=!info.available;
    actor.disabled=use.disabled;recipient.disabled=use.disabled;
+   strength.disabled=!allowed();
    return info;
  }
- function useDefItem(actorId,targetId){
+ function useDefItem(actorId,targetId,itemId=20600){
    sync();
-   if(!allowed()||!canAct(actorId)||!canBenefit(targetId))return false;
+   const profile=Number.isSafeInteger(itemId)?sources[itemId]:null;
+   if(!profile||!allowed()||!canAct(actorId)||!canBenefit(targetId))return false;
    if(!turns.reserve(actorId,'def-item-demo'))return false;
    const caster=S.party[actorId],ally=S.party[targetId];
    const baseDef=ally.def;
-   const untilRound=S.round+source.duration-1;
-   ally.def=Math.round(baseDef*(100+source.defPercent)/100);
-   buffs.set(targetId,{unit:ally,baseDef,untilRound});
+   const untilRound=S.round+profile.duration-1;
+   ally.def=Math.round(baseDef*(100+profile.defPercent)/100);
+   buffs.set(targetId,{unit:ally,baseDef,untilRound,itemId,defPercent:profile.defPercent});
+   strength.value=String(itemId);
    caster.action={kind:'guard',target:S.target};
    remaining=0;
-   msg('SOURCE 2022 #20600: '+ally.name+' DEF +30% until round '+
+   msg('SOURCE 2022 #'+itemId+': '+ally.name+' DEF +'+profile.defPercent+'% until round '+
      untilRound+' (DEMO calculation); '+caster.name+' guards.');
    update();last='';refresh();return true;
  }
- use.addEventListener('click',()=>useDefItem(Number(actor.value),Number(recipient.value)));
+ use.addEventListener('click',()=>useDefItem(Number(actor.value),Number(recipient.value),Number(strength.value)));
+ strength.addEventListener('change',()=>{last='';refresh();});
  mode.addEventListener('change',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},700);
- window.BFGlobalSourceDefItemV4900=Object.freeze({source,snapshot,refresh,useDefItem});
+ window.BFGlobalSourceDefItemV4900=Object.freeze({source,sources,snapshot,refresh,useDefItem});
  refresh();
 })();

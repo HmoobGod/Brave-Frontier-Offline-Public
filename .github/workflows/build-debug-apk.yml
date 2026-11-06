@@ -299,6 +299,7 @@ jobs:
           python test_bf_source_full_revive_v4700.py
           python test_bf_demo_auto_item_guard_v4800.py
           python test_bf_source_def_item_v4900.py
+          python3 test_bf_source_def_50_item.py
           python test_bf_source_party_atk_item_v5000.py
           python test_bf_source_double_atk_item_v5100.py
           python test_bf_source_double_def_item_v5200.py
