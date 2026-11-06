@@ -294,6 +294,7 @@ jobs:
           python test_bf_demo_potion_command_v4200.py
           python test_bf_source_party_heal_v4300.py
           python test_bf_source_atk_item_v4400.py
+          python3 test_bf_source_atk_50_item.py
           python test_bf_item_turn_reservations_v4500.py
           python test_bf_source_bb_gauge_item_v4600.py
           python test_bf_source_full_revive_v4700.py
