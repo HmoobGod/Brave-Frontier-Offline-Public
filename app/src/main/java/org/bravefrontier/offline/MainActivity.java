@@ -196,6 +196,11 @@ public class MainActivity extends Activity {
             backTimeout = null;
         }
     }
+    // WebView may not emit DOM visibilitychange on an Activity pause.
+    // Use the same battle-only pause operation through a native lifecycle signal.
+    private static final String UI_BACKGROUND_JS =
+            "(function(){try{var a=window.BF041SmartAuto;if(a&&typeof a.pauseForBackground==='function')a.pauseForBackground(true);window.dispatchEvent(new Event('bf-native-background'));}catch(e){}})();";
+
     private static final String UI_BACK_JS =
             "(function(){try{var n=window.BF_homeNav;return !!(n&&n.current!=='home'&&typeof n.go==='function'&&n.go('home'));}catch(e){return false;}})();";
 
@@ -1546,7 +1551,14 @@ public class MainActivity extends Activity {
     }
     @Override protected void onPause() {
         clearPendingBack();
-        if (game != null) game.onPause();
+        if (game != null) {
+            try {
+                game.evaluateJavascript(UI_BACKGROUND_JS, null);
+            } catch (RuntimeException error) {
+                android.util.Log.w("BraveFrontier", "Background pause dispatch unavailable", error);
+            }
+            game.onPause();
+        }
         super.onPause();
     }
     @Override protected void onResume() {

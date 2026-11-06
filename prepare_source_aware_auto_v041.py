@@ -45,8 +45,8 @@ ui=r"""
   // Original 2022 skill class/targets and Lv1 source values are separately audited.
   const toggleId='bf041-smart-auto';
   const enabled=()=>document.getElementById(toggleId)?.checked===true;
-  function pauseForBackground() {
-    if(!document.hidden || typeof S==='undefined' || !S)return false;
+  function pauseForBackground(nativePause=false) {
+    if((!document.hidden && nativePause!==true) || typeof S==='undefined' || !S)return false;
     const repeat=window.BFGlobalQoLQuestRepeatV9800;
     const repeating=repeat?.statusSnapshot?.()?.active===true;
     if(!S.auto && !repeating)return false;
@@ -117,6 +117,14 @@ ui=r"""
 </script>
 """
 if s.count(marker)==1:
+    # Upgrade previously prepared pages without re-applying the queue wrappers.
+    old_pause="  function pauseForBackground() {\n    if(!document.hidden || typeof S==='undefined' || !S)return false;"
+    new_pause="  function pauseForBackground(nativePause=false) {\n    if((!document.hidden && nativePause!==true) || typeof S==='undefined' || !S)return false;"
+    changed_pause=old_pause in s
+    if changed_pause:
+        assert s.count(old_pause)==1
+        s=s.replace(old_pause,new_pause,1)
+    assert s.count(new_pause)==1
     # v0.42 replaces only the Auto queue site after v0.41 has been installed.
     # Validate either exact v0.41 site or the strictly checked v0.42 successor.
     upgraded = (s.count('/* BF_COORDINATED_AUTO_V042 */')==1 and
@@ -129,6 +137,7 @@ if s.count(marker)==1:
     assert s.count("document.addEventListener('visibilitychange',pauseForBackground);")==1
     assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in s
     assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
+    if changed_pause:HTML.write_text(s,'utf-8')
     print('PASS v0.41 idempotent source-aware Auto Battle patch intact')
 else:
     assert s.count(marker)==0

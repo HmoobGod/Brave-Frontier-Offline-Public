@@ -22,7 +22,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     const web = await device.webView({pkg});
     const page = await web.page();
     page.setDefaultTimeout(120000);
-    await page.waitForFunction(() => typeof P !== 'undefined' && P.version === 7 &&
+    await page.waitForFunction(() => !document.hidden && typeof P !== 'undefined' && P.version === 7 &&
       window.BF_homeNav && window.BF041SmartAuto?.pauseForBackground &&
       window.BFGlobalQoLBattleSpeedV9900 && window.BFGlobalSBBFallbackDispatch,
       null, {polling:100});
@@ -38,7 +38,10 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       }
       S.enemies=[{...S.enemies[0],slot:0,hp:100000000,
         maxHp:100000000,def:100,atk:1}];
-      window.__nativeHidden=[];
+      window.__nativeHidden=[];window.__nativePause=[];
+      window.addEventListener('bf-native-background',()=>{
+        __nativePause.push({auto:S.auto,checked:E.auto.checked,hidden:document.hidden});
+      });
       document.addEventListener('visibilitychange',()=>{
         if(document.hidden)__nativeHidden.push({auto:S.auto,checked:E.auto.checked});
       });
@@ -51,11 +54,15 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     await new Promise(resolve=>setTimeout(resolve,2000));
     adb('shell','am','start','-W','-n',component);
     await page.waitForFunction(() => !document.hidden && !S.busy, null, {polling:100});
-    const state = await page.evaluate(() => ({events:__nativeHidden,
+    const state = await page.evaluate(() => ({events:__nativeHidden,nativeEvents:__nativePause,
       auto:S.auto,checked:E.auto.checked,timer:timer,round:S.round,over:S.over,
       sdkBrowser:/Chrome\/([\d.]+)/.exec(navigator.userAgent)?.[1] || 'unknown'}));
-    assert.ok(state.events.length>0,'Android hidden event was not observed');
-    assert.ok(state.events.every(event=>event.auto===false && event.checked===false),
+    console.log(JSON.stringify({scope:'Android background observations',
+      nativeCallbacks:state.nativeEvents.length,domHiddenEvents:state.events.length,
+      auto:state.auto,checked:state.checked,roundDelta:state.round-round,
+      browserVersion:state.sdkBrowser}));
+    assert.ok(state.nativeEvents.length>0,'Native Activity pause callback was not observed');
+    assert.ok(state.nativeEvents.every(event=>event.auto===false && event.checked===false),
       'Auto controls stayed enabled after native background notification');
     assert.equal(state.auto,false);assert.equal(state.checked,false);
     assert.equal(state.timer,null);assert.equal(state.over,false);
@@ -71,7 +78,8 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     }
     assert.equal(hash(await snapshot()),before,'Player/canonical save changed');
     console.log(JSON.stringify({result:'PASS',scope:'isolated Android35 emulator',
-      package:pkg,browserVersion:state.sdkBrowser,nativeHiddenEventObserved:true,
+      package:pkg,browserVersion:state.sdkBrowser,nativeBackgroundCallbackObserved:true,
+      domHiddenEventObserved:state.events.length>0,
       foregroundAutoRemainsOff:true,nativeBackRoutesReturnedHome:backRoutes,
       playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));

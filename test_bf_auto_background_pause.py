@@ -4,6 +4,7 @@ This exercises page lifecycle handling, not physical Android lifecycle delivery.
 """
 from pathlib import Path
 import shutil
+import json, re
 from playwright.sync_api import sync_playwright
 from bf_capture_progress_audit import INSTALL_STORAGE, SNAPSHOT, assert_unchanged
 
@@ -164,6 +165,28 @@ with sync_playwright() as pw:
     assert page.evaluate('__backgroundCalls===3 && __repeatReplayCalls===2')
     assert page.evaluate('!S.auto && !E.auto.checked && timer===null')
     assert_unchanged(page, baseline, 'repeat waiting at completed result')
+    # Execute the exact native bridge with a visible document and no DOM event.
+    java=(ROOT/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text()
+    literal=re.search(r'private static final String UI_BACKGROUND_JS\s*=\s*("[^\n]+");',java)
+    assert literal, 'Native background bridge expression missing'
+    native_js=json.loads(literal[1])
+    pause=java.split('@Override protected void onPause()',1)[1].split('@Override',1)[0]
+    assert pause.index('evaluateJavascript(UI_BACKGROUND_JS, null)') < pause.index('game.onPause()')
+    page.evaluate("""() => {
+        __setAutoHidden(false);S.over=false;S.busy=false;
+        window.__nativePauseCount=0;
+        window.addEventListener('bf-native-background',()=>__nativePauseCount++);
+        S.auto=true;E.auto.checked=true;scheduleAuto();
+    }""")
+    assert page.evaluate('timer!==null && !document.hidden')
+    page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
+    assert page.evaluate('S.auto && E.auto.checked && timer!==null'), 'Visible event must not force native pause'
+    page.evaluate(native_js)
+    assert page.evaluate('!S.auto && !E.auto.checked && timer===null && !document.hidden')
+    assert page.evaluate('__nativePauseCount')==1
+    page.wait_for_timeout(250)
+    assert page.evaluate('__backgroundCalls===3 && __repeatReplayCalls===2')
+    assert_unchanged(page, baseline, 'native callback without DOM hidden notification')
     assert not errors, errors
     browser.close()
-print('PASS Auto hidden-page timer cancellation, delayed signals, in-flight round, explicit resume, repeat interruption and P/storage isolation')
+print('PASS native Activity callback without DOM visibility and Auto hidden-page timer cancellation, delayed signals, in-flight round, explicit resume, repeat interruption and P/storage isolation')
