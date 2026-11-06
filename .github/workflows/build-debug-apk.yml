@@ -159,6 +159,7 @@ jobs:
           python test_bf_single_hit_critical_combat_v9300.py
           python test_bf_multihit_critical_combat_v9500.py
           python test_bf_critical_ko_guard_v9600.py
+          python3 test_bf_normal_retarget.py
           python test_bf_qol_rotating_backups_v9700.py
           python test_bf_qol_cleared_quest_repeat_v9800.py
           python test_bf_qol_battle_speed_v9900.py
@@ -294,11 +295,13 @@ jobs:
           python test_bf_demo_potion_command_v4200.py
           python test_bf_source_party_heal_v4300.py
           python test_bf_source_atk_item_v4400.py
+          python3 test_bf_source_atk_50_item.py
           python test_bf_item_turn_reservations_v4500.py
           python test_bf_source_bb_gauge_item_v4600.py
           python test_bf_source_full_revive_v4700.py
           python test_bf_demo_auto_item_guard_v4800.py
           python test_bf_source_def_item_v4900.py
+          python3 test_bf_source_def_50_item.py
           python test_bf_source_party_atk_item_v5000.py
           python test_bf_source_double_atk_item_v5100.py
           python test_bf_source_double_def_item_v5200.py
@@ -309,6 +312,8 @@ jobs:
           python test_bf_original_ailment_state_v5700.py
           python test_bf_poison_turn_v5800.py
           python test_bf_curse_bb_lock_v5900.py
+          python3 test_bf_auto_curse_choice.py
+          python3 test_bf_queued_curse_dispatch.py
           python test_bf_paralysis_action_lock_v6000.py
           python3 test_bf_auto_disabled_support.py
           python3 test_bf_auto_support_strength.py
@@ -468,6 +473,7 @@ jobs:
           python test_bf_coordinated_auto_v042.py
           python test_bf_original_sbb_preview_v043.py
           python test_bf_experimental_sbb_v044.py
+          python3 test_bf_sbb_status_safety.py
           python test_bf_egor_snowfield_v045.py
           python test_bf_forest_of_beasts_v046.py
           python test_bf_magutagal_v047.py
@@ -528,6 +534,8 @@ jobs:
         run: python3 test_bf_session_settings.py
       - name: Verify live Advanced Tools controls and Menu routing
         run: python3 test_bf_advanced_tools.py
+      - name: Verify About public build metadata UI
+        run: python3 test_bf_about_build.py
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
@@ -760,6 +768,8 @@ jobs:
         run: python3 test_bf_packaged_poison_turn_v5800.py
       - name: Verify v59 Curse BB lock in signed offline APK
         run: python3 test_bf_packaged_curse_bb_lock_v5900.py
+      - name: Verify Auto Curse choice in APK
+        run: python3 test_bf_packaged_auto_curse_choice.py
       - name: Verify v60 Paralysis action lock in signed offline APK
         run: python3 test_bf_packaged_paralysis_action_lock_v6000.py
       - name: Verify v61 Weakness DEF effect in signed offline APK

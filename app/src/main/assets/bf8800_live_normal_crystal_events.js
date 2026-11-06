@@ -77,7 +77,8 @@
      action?.kind==='attack'&&Number.isInteger(unit.unitId)&&
      Number.isInteger(action.target)&&
      !window.BFGlobalOriginalAilmentStateV5700?.codesFor(slot)?.includes(6);
-   const enemy=eligible?current.enemies?.find(e=>e&&e.slot===action.target&&e.hp>0):null;
+   // Observe the same target that the existing executor will actually attack.
+   const enemy=eligible&&typeof pickTarget==='function'?pickTarget(action.target):null;
    const beforeHp=enemy?.hp,unitId=unit?.unitId,wave=current.wave+1;
    // Preserve the native command execution and error propagation exactly.
    const response=await originalPerform.call(this,unit,token);

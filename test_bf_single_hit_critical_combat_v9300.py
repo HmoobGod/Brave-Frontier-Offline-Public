@@ -104,3 +104,7 @@ with sync_playwright() as pw:
  assert not errors,errors
  b.close()
 print('PASS v93 critical 10%/150% actual source-one-hit demo attack, multihit exclusion, reset/save/offline')
+
+# The existing Android critical-combat job also exercises the new leader component.
+import subprocess, sys
+subprocess.run([sys.executable, str(R / 'test_bf_leader_critical_bonus.py')], check=True)

@@ -230,6 +230,19 @@ public class MainActivity extends Activity {
         game.evaluateJavascript(call.toString(), null);
     }
     public final class SaveBridge {
+        // Public app identity only; never reads a save, signer or device ID.
+        @JavascriptInterface public String getBuildInfo() {
+            try {
+                android.content.pm.PackageInfo info = getPackageManager()
+                        .getPackageInfo(getPackageName(), 0);
+                return new JSONObject()
+                        .put("packageName", getPackageName())
+                        .put("versionName", info.versionName)
+                        .put("versionCode", info.versionCode).toString();
+            } catch (org.json.JSONException | android.content.pm.PackageManager.NameNotFoundException unavailable) {
+                return "{}";
+            }
+        }
         @JavascriptInterface public void importSaveFile() {
             runOnUiThread(() -> {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
@@ -1154,6 +1167,13 @@ public class MainActivity extends Activity {
                 } catch (IOException advancedError) {
                     android.util.Log.w("BraveFrontier", "Optional advanced Auto Battle unavailable", advancedError);
                 }
+                // Optional Auto use of the existing experimental SBB prototype.
+                try {
+                    String autoSbb = readPackagedText("bf_auto_sbb_demo.js");
+                    view.evaluateJavascript(autoSbb, null);
+                } catch (IOException autoSbbError) {
+                    android.util.Log.w("BraveFrontier", "Optional Auto SBB unavailable", autoSbbError);
+                }
                 // v107 source: landed-hit BC/HC check eligibility only;
                 // never award pickups, HP/BB or modify battle/save state.
                 try {
@@ -1275,6 +1295,13 @@ public class MainActivity extends Activity {
                 } catch (IOException type5Error) {
                     android.util.Log.w("BraveFrontier", "Optional original type5 elemental protection unavailable", type5Error);
                 }
+                // Intense Edge: source-qualified critical component; no Spark effect.
+                try {
+                    String leaderCritical = readPackagedText("bf_leader_critical_bonus.js");
+                    view.evaluateJavascript(leaderCritical, null);
+                } catch (IOException criticalLeaderError) {
+                    android.util.Log.w("BraveFrontier", "Optional Intense Edge critical component unavailable", criticalLeaderError);
+                }
                 // v115: enforce exact 2022 original unitMaxLevel only on newly
                 // constructed archive DEMO battle party units, not saved EXP.
                 try {
@@ -1296,6 +1323,13 @@ public class MainActivity extends Activity {
                     view.evaluateJavascript(levelOneCombat, null);
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
+                }
+                // Ruin God's Epidemic: source-qualified one-hit normal DEF component.
+                try {
+                    String leaderDefense = readPackagedText("bf_leader_defense_bypass.js");
+                    view.evaluateJavascript(leaderDefense, null);
+                } catch (IOException defenseLeaderError) {
+                    android.util.Log.w("BraveFrontier", "Optional leader DEF component unavailable", defenseLeaderError);
                 }
                 // v172: source-exact 2022 max-level Lord stats in owned archive battles.
                 // No EXP curve guesses, save changes or non-Lord type rolls.
@@ -1384,6 +1418,13 @@ public class MainActivity extends Activity {
                     view.evaluateJavascript(firstClearRefs, null);
                 } catch (IOException firstClearRefError) {
                     android.util.Log.w("BraveFrontier", "Optional original Gem reward source unavailable", firstClearRefError);
+                }
+                // Normalize invalid experimental SBB before every status/hit handler.
+                try {
+                    String sbbFallback = readPackagedText("bf_sbb_fallback_dispatch.js");
+                    view.evaluateJavascript(sbbFallback, null);
+                } catch (IOException sbbFallbackError) {
+                    android.util.Log.w("BraveFrontier", "Optional SBB fallback normalization unavailable", sbbFallbackError);
                 }
             }
             // External navigation isn't needed for the bundled offline game.

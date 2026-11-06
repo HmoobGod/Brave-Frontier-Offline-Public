@@ -52,6 +52,7 @@ on:
       - 'test_bf_equipment_ui.py'
       - 'test_bf_session_settings.py'
       - 'test_bf_advanced_tools.py'
+      - 'test_bf_about_build.py'
       - 'UI_EQUIPMENT_PREVIEW.md'
       - 'UI_LOCATION_PREVIEWS.md'
       - 'test_bf_training_cost_guidance_v27300.py'
@@ -252,3 +253,6 @@ jobs:
 
       - name: Verify Advanced Tools source
         run: python3 test_bf_advanced_tools.py --source-only
+
+      - name: Verify public About metadata source
+        run: python3 test_bf_about_build.py --source-only

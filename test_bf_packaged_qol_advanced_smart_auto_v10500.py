@@ -16,3 +16,7 @@ assert "applicationId 'org.bravefrontier.offline'" in g
 assert 'bf-development-debug.keystore' in g
 assert 'android.permission.INTERNET' not in (R/'app/src/main/AndroidManifest.xml').read_text('utf8')
 print('PASS v105 packaged opt-in advanced Smart Auto, original v7 and Android signing')
+
+with ZipFile(R/"app/build/outputs/apk/debug/app-debug.apk") as z:
+ assert z.read("assets/bf_auto_sbb_demo.js")== (R/"app/src/main/assets/bf_auto_sbb_demo.js").read_bytes()
+assert java.index('readPackagedText("bf10500_qol_advanced_smart_auto.js")')<java.index('readPackagedText("bf_auto_sbb_demo.js")')<java.index('readPackagedText("bf_sbb_fallback_dispatch.js")')

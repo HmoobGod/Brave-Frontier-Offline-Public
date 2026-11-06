@@ -16,3 +16,8 @@ with zipfile.ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'BF_GLOBAL_GEM_V160_ORIGINAL_CLEAR_LEDGER' in html
  assert 'BF_GLOBAL_GEM_V161_NEW_FIRST_CLEAR_PENDING' in html
 print('PASS v166 signed APK: original type5 10% known-element leader protection, original damage formula preserved, canonical v7 save unchanged')
+
+with zipfile.ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
+ assert z.read('assets/bf_leader_defense_bypass.js')==(R/'app/src/main/assets/bf_leader_defense_bypass.js').read_bytes()
+java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text()
+assert java.index('readPackagedText("bf11400_original_global_leader_english.js")') < java.index('readPackagedText("bf_leader_defense_bypass.js")')
