@@ -1297,6 +1297,13 @@ public class MainActivity extends Activity {
                 } catch (IOException statsError) {
                     android.util.Log.w("BraveFrontier", "Optional original Lord stat reference unavailable", statsError);
                 }
+                // Ruin God's Epidemic: source-qualified one-hit normal DEF component.
+                try {
+                    String leaderDefense = readPackagedText("bf_leader_defense_bypass.js");
+                    view.evaluateJavascript(leaderDefense, null);
+                } catch (IOException defenseLeaderError) {
+                    android.util.Log.w("BraveFrontier", "Optional leader DEF component unavailable", defenseLeaderError);
+                }
                 // v172: source-exact 2022 max-level Lord stats in owned archive battles.
                 // No EXP curve guesses, save changes or non-Lord type rolls.
                 try {
