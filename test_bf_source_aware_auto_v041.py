@@ -79,3 +79,7 @@ with sync_playwright() as pw:
     assert not errors,errors
     print('PASS v0.41 heal/buff/offense + default OFF, real Auto queue, original controls, 6-slot squad, save schema v7 unchanged',flush=True)
     browser.close()
+
+if __name__ == '__main__':
+    import subprocess, sys
+    subprocess.run([sys.executable, str(ROOT/'test_bf_auto_background_pause.py')], check=True)

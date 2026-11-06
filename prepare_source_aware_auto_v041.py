@@ -26,6 +26,10 @@ next="p.action={kind:window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'at
 execute_old='if(!livingEnemies().length)break;await performUnit(p,token);'
 # Normalize the existing Curse fallback before outer normal-hit handlers inspect it.
 execute_new='if(!livingEnemies().length)break;window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);'
+schedule_old='function scheduleAuto(){if(!S.auto||S.busy||S.over)return;'
+schedule_new='function scheduleAuto(){if(document.hidden||!S.auto||S.busy||S.over)return;'
+timer_old='if(token!==epoch||S.busy||S.over||!S.auto)return;'
+timer_new='if(document.hidden||token!==epoch||S.busy||S.over||!S.auto)return;'
 ui=r"""
 <style id="bf041-smart-auto-style">
 #bf041-smart-auto-label { display:inline-flex; align-items:center; flex-wrap:wrap;
@@ -41,6 +45,16 @@ ui=r"""
   // Original 2022 skill class/targets and Lv1 source values are separately audited.
   const toggleId='bf041-smart-auto';
   const enabled=()=>document.getElementById(toggleId)?.checked===true;
+  function pauseForBackground() {
+    if(!document.hidden || typeof S==='undefined' || !S.auto)return;
+    S.auto=false;
+    const auto=document.getElementById('auto');
+    if(auto)auto.checked=false;
+    if(timer){clearTimeout(timer);timer=null;}
+    msg('Auto Battle paused while the game is hidden. Any current round will finish; enable Auto again to resume.');
+    update();
+  }
+  document.addEventListener('visibilitychange',pauseForBackground);
   function kindFor(p) {
     const cursed=window.BFGlobalCurseBBLockV5900?.cursed(p?.id)===true;
     const fallback=p && Number(p.bb)>=100 && !cursed?'burst':'attack';
@@ -105,6 +119,8 @@ if s.count(marker)==1:
     assert (s.count(next)==1 or upgraded) and s.count('id="bf041-smart-auto-style"')==1
     assert s.count(prior)==0
     assert s.count(execute_new)==1
+    assert s.count(schedule_new)==1 and s.count(timer_new)==1
+    assert s.count("document.addEventListener('visibilitychange',pauseForBackground);")==1
     assert 'BFGlobalOriginalAtkBBLevelsV7100?.boostFor(unitId)' in s
     assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in s
     print('PASS v0.41 idempotent source-aware Auto Battle patch intact')
@@ -113,8 +129,10 @@ else:
     assert s.count(prior)==1,('Unexpected auto-battle anchor',s.count(prior))
     assert s.count('</body>')==1
     assert s.count(execute_old)==1
+    assert s.count(schedule_old)==1 and s.count(timer_old)==1
     s=s.replace(prior,next,1).replace('</body>',ui+'\n</body>',1)
     s=s.replace(execute_old,execute_new,1)
+    s=s.replace(schedule_old,schedule_new,1).replace(timer_old,timer_new,1)
     assert s.count(marker)==1 and s.count(next)==1
     HTML.write_text(s,'utf-8')
     print('PASS v0.41 optional source-aware Auto Battle; default original DEMO actions and v7 save unchanged')
