@@ -298,6 +298,11 @@ public class MainActivity extends Activity {
             }
             return insets;
         });
+        // Only the existing isolated debug app exposes its WebView to the
+        // disposable emulator acceptance test. Standard app behavior is unchanged.
+        if (isIsolatedTraceApp()) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         game = new WebView(this);
         game.setBackgroundColor(Color.rgb(14, 21, 33));
         game.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
