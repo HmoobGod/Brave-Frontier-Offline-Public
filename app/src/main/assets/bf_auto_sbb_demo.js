@@ -7,6 +7,8 @@
     typeof prototype?.enabled!=='function'||typeof prototype?.sourceFor!=='function'||
     typeof bfOriginalBB!=='function'||typeof P==='undefined'||P.version!==7||
     typeof S==='undefined')return;
+ // The source preview sits in the action-button grid; give its controls a full row.
+ host.closest('#bf043-sbb-preview')?.style.setProperty('grid-column','1 / -1');
  const label=document.createElement('label');
  const toggle=document.createElement('input');
  toggle.type='checkbox';toggle.id='bf-auto-sbb-enable';toggle.checked=false;

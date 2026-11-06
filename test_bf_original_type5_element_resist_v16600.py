@@ -83,3 +83,7 @@ with sync_playwright() as pw:
  assert not errors,errors
  b.close()
 print('PASS v166 12 authentic type5 Global forms: exact 10% known-element incoming hit, six skills, training and unknown-enemy fallback, no save writes')
+
+# The existing leader-skill CI job also checks the bounded DEF component.
+import subprocess, sys
+subprocess.run([sys.executable, str(R / 'test_bf_leader_defense_bypass.py')], check=True)
