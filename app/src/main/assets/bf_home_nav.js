@@ -92,6 +92,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       if (route === 'home') return window.BFLocationPreview.back();
       window.BFLocationPreview.close();
     }
+    const previous = current;
     current = route;
     home.classList.toggle('bf-hidden',route !== 'home');
     home.setAttribute('aria-hidden',String(route !== 'home'));
@@ -108,6 +109,9 @@ function bfOfflineUnitPortraitV266(source, name) {
     }
     syncProgress();
     window.scrollTo(0,0);
+    if (previous !== route) window.dispatchEvent(new CustomEvent('bf-route-change', {
+      detail: {route,previous}
+    }));
     return true;
   }
   function navigate(event) {
