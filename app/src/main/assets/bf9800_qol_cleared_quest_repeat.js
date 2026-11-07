@@ -11,6 +11,9 @@
    !host||!auto||typeof P==='undefined'||P.version!==7||
    typeof S==='undefined'||typeof QUEST==='undefined')return;
  const freeze=Object.freeze;
+ // Legacy embeds may have no router. With the app router, repeating belongs
+ // to Quest only; changing screens must not leave unattended battles running.
+ const onQuest=()=>!window.BF_homeNav||window.BF_homeNav.current==='quest';
  let session=null,complete=0,reason='Idle',internalToggle=false;
  const panel=document.createElement('details');panel.id='bf9800-auto-repeat';
  panel.style.cssText='margin:9px 2px;padding:10px;border:1px solid #a6b986;'+
@@ -50,7 +53,7 @@
  function update(){
    const s=results.snapshot();
    const cleared=Number(s?.clears)>0;
-   const eligible=!session&&!document.hidden&&!S.busy&&
+   const eligible=!session&&onQuest()&&!document.hidden&&!S.busy&&
      S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
      !!s.canReplay&&cleared&&s.missionId===QUEST?.missionId;
    go.disabled=!eligible;
@@ -75,6 +78,7 @@
  }
  function playAgain(){
    if(!session)return false;
+   if(!onQuest()){leaveQuest();return false;}
    const s=results.snapshot();
    if(S.busy||S.mode!=='archive'||!s?.done||!s.victory||
       !s.archive||!s.stored||s.missionId!==session.missionId||
@@ -93,7 +97,7 @@
  function start(count=Number(picker.value)){
    if(session||!Number.isInteger(count)||![2,5,10].includes(count))return false;
    const s=results.snapshot();
-   if(document.hidden||S.busy||S.mode!=='archive'||
+   if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
       !Number.isSafeInteger(s.clears)||s.clears<1)return false;
@@ -104,6 +108,7 @@
  }
  function poll(){
    if(!session){update();return false;}
+   if(!onQuest())return leaveQuest();
    if(document.hidden)return stop('Stopped: app left foreground',false);
    const s=results.snapshot();
    if(!s||s.missionId!==session.missionId||
@@ -126,6 +131,15 @@
      return stop('Finished '+session.target+' additional clears',true);
    return playAgain();
  }
+ function leaveQuest(){
+   const stopped=stop('Stopped: left Quest',false);
+   if(stopped)setAuto(false); // Cancels the native timer; an in-flight round finishes.
+   return stopped;
+ }
+ window.addEventListener('bf-route-change',()=>{
+   if(session&&!onQuest())leaveQuest();
+   else update();
+ });
  go.addEventListener('click',()=>start());
  halt.addEventListener('click',()=>stop('Stopped by player',true));
  auto.addEventListener('change',()=>{
