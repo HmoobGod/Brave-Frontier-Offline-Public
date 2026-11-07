@@ -42,6 +42,7 @@
  host.after(box);
  const sound=new Audio();sound.loop=true;sound.preload='none';sound.volume=0.42;
  let active=null;let intent=null;let stopped=true;
+ const onQuest=()=>!window.BF_homeNav||window.BF_homeNav.current==='quest';
  function current(){
    if(typeof QUEST==='undefined'||!QUEST||
       !map.has(QUEST.missionId))return null;
@@ -54,7 +55,7 @@
  }
  function refresh(){
    const q=current(),mode=typeof E==='undefined'?null:E.mode?.value;
-   const enabled=mode==='archive'&&!!q;
+   const enabled=mode==='archive'&&!!q&&onQuest();
    const hasMap=enabled&&bundled.has(q.map),hasBoss=enabled&&bundled.has(q.boss);
    mapBtn.disabled=!hasMap;bossBtn.disabled=!hasBoss;
    stopBtn.disabled=stopped;
@@ -76,7 +77,7 @@
  function play(kind){
    const q=current(),mode=typeof E==='undefined'?null:E.mode?.value;
    const file=kind==='map'?q?.map:kind==='boss'?q?.boss:null;
-   if(mode!=='archive'||!file||!bundled.has(file))return false;
+   if(!onQuest()||mode!=='archive'||!file||!bundled.has(file))return false;
    sound.pause();sound.src='content/sound/'+file;
    active=kind;intent=file;stopped=false;
    const result=sound.play();
@@ -96,6 +97,7 @@
  window.addEventListener('bf-native-background',()=>{
    if(!stopped)stop();
  });
+ window.addEventListener('bf-route-change',refresh);
  const list=document.getElementById('questlist');
  if(list)new MutationObserver(()=>refresh()).observe(list,{childList:true});
  const mode=document.getElementById('mode');

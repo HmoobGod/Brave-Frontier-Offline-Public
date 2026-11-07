@@ -1046,6 +1046,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     }
   }
   new MutationObserver(sync).observe(list,{childList:true});
+  window.addEventListener('bf-route-change',sync);
   document.querySelector('.bf-navbar')?.addEventListener('click',sync);
   document.querySelector('#bf-home')?.addEventListener('click',sync);
   window.addEventListener('pagehide',()=>halt());
