@@ -73,7 +73,9 @@
    const previous=session;
    if(previous){complete=previous.completed;session=null;}
    reason=why;
-   if(restore&&previous&&!S.busy)setAuto(previous.autoWasEnabled);
+   // A user pressing Stop during an in-flight Auto round still owns the
+   // Auto toggle. Restore their prior choice now; the current round finishes.
+   if(restore&&previous)setAuto(previous.autoWasEnabled);
    update();return !!previous;
  }
  function playAgain(){
