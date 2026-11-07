@@ -46,7 +46,7 @@
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional quick controls use the original demo buttons. Brave Bursts require a full gauge; all other allies attack. Commands do not execute until you choose Execute. No original 2022 combat AI or damage formula is claimed.';
+ foot.textContent='Optional quick controls use the original demo buttons. Brave Bursts require a full gauge; all other allies attack. Item users and just-revived allies keep their reserved Guard turns. Commands do not execute until you choose Execute. No original 2022 combat AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -76,13 +76,16 @@
    if(!['attack','guard','burst'].includes(mode)||!ready())return false;
    const squad=active();
    if(squad.some(p=>!Number.isInteger(p.id)||!slots.children[p.id]||slots.children[p.id].disabled))return false;
+   // Preserve the same paid item turns that native Execute already enforces.
+   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   const reserved=new Set(reservations.map(r=>r.slot));
    for(const p of squad){
      const slot=slots.children[p.id];if(!slot||slot.disabled)return false;
      slot.click();
      // Curse already rejects the native BB click. Use Attack instead so a
      // blocked burst does not leave the rest of the squad partially queued.
      const canBurst=p.bb>=100&&window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true;
-     const command=mode==='guard'?guard:mode==='burst'&&canBurst?burst:attack;
+     const command=mode==='guard'||reserved.has(p.id)?guard:mode==='burst'&&canBurst?burst:attack;
      if(command.disabled)return false;
      command.click();
      if(p.action?.kind!==(command===burst?'burst':command===guard?'guard':'attack'))return false;
