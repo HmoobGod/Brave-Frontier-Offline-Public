@@ -85,6 +85,38 @@ with sync_playwright() as pw:
  assert 'No rewards' in page.locator('#bf3000-reward').inner_text()
  assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is False
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is False
+ # A genuine DEMO victory may update memory even though the canonical v7
+ # write fails. Never offer Next until that victory has actually been stored.
+ page.locator('#mode').select_option('archive')
+ assert page.evaluate('BFQuestAreas.choose(QUESTS.find(q=>q.missionId===1))') is True
+ before_saved=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate("""() => {
+   window.__resultOriginalSet=localStorage.setItem.bind(localStorage);
+   window.__resultQuota=true;
+   localStorage.setItem=(key,value)=>{
+     if(__resultQuota&&key==='bf_global_offline_demo_v7')
+       throw new DOMException('Synthetic quota failure','QuotaExceededError');
+     return __resultOriginalSet(key,value);
+   };
+   finish(true);
+ }""")
+ failed=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
+ assert failed['done'] and failed['victory'] and failed['archive']
+ assert failed['stored'] is False and failed['nextId'] is None
+ assert page.locator('#bf3000-next').is_disabled()
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_saved
+ memory=page.evaluate('JSON.stringify(P)')
+ assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is False
+ assert page.evaluate('QUEST.missionId')==1
+ assert page.evaluate('JSON.stringify(P)')==memory
+ # A later *successful* manual save re-enables the same earned next mission.
+ assert page.evaluate('()=>{__resultQuota=false;return saveProgress()}') is True
+ saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
+ assert saved['stored'] and saved['nextId']==2
+ assert not page.locator('#bf3000-next').is_disabled()
+ assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is True
+ assert page.evaluate('QUEST.missionId')==2
+ assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[1]")>=1
  assert not errors,errors
  browser.close()
 print('PASS v30.00: real demo victory/defeat results, retry and next via engine, original source scene, training isolation')
