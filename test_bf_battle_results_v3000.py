@@ -117,6 +117,27 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is True
  assert page.evaluate('QUEST.missionId')==2
  assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[1]")>=1
+ # A newly won source-verified clear scene must also be inaccessible after
+ # failed storage; otherwise an unsaved mission 10 still reports completion.
+ page.evaluate("""() => {
+    P.questClears[2]=1;renderQuestList();
+    if(!BFQuestAreas.choose(QUESTS.find(q=>q.missionId===10)))
+      throw Error('No mission 10 for save-scene regression');
+ }""")
+ scene_save=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate('()=>{__resultQuota=true;finish(true)}')
+ missing=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
+ assert missing['victory'] and not missing['stored']
+ assert missing['clearScene'] is False
+ assert page.locator('#bf3000-scene').is_hidden()
+ assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is False
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==scene_save
+ assert page.evaluate('()=>{__resultQuota=false;return saveProgress()}') is True
+ scene_saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
+ assert scene_saved['stored'] and scene_saved['clearScene']
+ assert page.locator('#bf3000-scene').is_visible()
+ assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is True
+ assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[10]")>=1
  assert not errors,errors
  browser.close()
 print('PASS v30.00: real demo victory/defeat results, retry and next via engine, original source scene, training isolation')
