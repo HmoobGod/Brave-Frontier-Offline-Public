@@ -43,7 +43,7 @@ assert ns+"sharedUserId" not in manifest_root.attrib
 assert all(child.tag not in ("provider", "permission") for child in manifest_root.iter())
 assert not (ROOT/"app/src/diagnostic/AndroidManifest.xml").exists(), "Unexpected diagnostic manifest overlay"
 assert len(re.findall(r"^\s*python3 test_bf_isolated_diagnostic_build_v23700.py$", wf, re.M)) == 1
-assert len(re.findall(r"^\s*(?:run:\s*)?python3 test_bf_isolated_diagnostic_build_v23700.py --packaged$", wf, re.M)) == 1
+assert len(re.findall(r"^\s*(?:run:\s*)?python3 test_bf_isolated_diagnostic_build_v23700.py --packaged --emulator$", wf, re.M)) == 1
 assert len(re.findall(r"^\s*(?:run:\s*)?python3 test_bf_isolated_diagnostic_build_v23700.py$", pre, re.M)) == 1
 assert pre.count("test_bf_isolated_diagnostic_build_v23700.py") == 2
 assert re.search(r"\bassembleDebug\b", wf) and re.search(r"\bassembleDiagnostic\b", wf)
@@ -71,7 +71,7 @@ def diagnostic_steps(source):
         assert "|| true" not in section, name
         blocks.append(section)
     assert re.search(r"(?m)^\s*run:\s*gradle --no-daemon assembleDiagnostic\b", blocks[0])
-    assert re.search(r"(?m)^\s*run:\s*python3 test_bf_isolated_diagnostic_build_v23700.py --packaged\s*$", blocks[1])
+    assert re.search(r"(?m)^\s*run:\s*python3 test_bf_isolated_diagnostic_build_v23700.py --packaged --emulator\s*$", blocks[1])
     assert "uses: actions/upload-artifact@v4" in blocks[2]
     assert "if-no-files-found: error" in blocks[2]
     return True
@@ -136,3 +136,10 @@ if "--packaged" in sys.argv[1:]:
     print("PASS v238 packaged: separate app IDs, debuggable trace, isolated manifests, identical game assets")
 else:
     print("PASS v238 source: debuggable diagnostic app, manifest isolation, fail-closed CI steps")
+
+subprocess.run([sys.executable,str(ROOT/'test_bf_android_lifecycle_safety.py')],check=True)
+if '--emulator' in sys.argv[1:]:
+    if '--packaged' not in sys.argv[1:]:
+        raise SystemExit('Native acceptance requires packaged diagnostic verification first')
+    subprocess.run([sys.executable,str(ROOT/'tools/android_lifecycle_ci.py'),
+                    '--apk',str(diag_apk)],check=True)

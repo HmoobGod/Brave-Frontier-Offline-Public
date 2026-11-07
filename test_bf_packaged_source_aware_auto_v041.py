@@ -24,8 +24,8 @@ with ZipFile(p) as z:
     ui = next(ast.literal_eval(node.value) for node in tree.body
               if isinstance(node, ast.Assign) and any(
                   isinstance(target, ast.Name) and target.id == 'ui' for target in node.targets))
-    handler = ui.split('  function pauseForBackground()', 1)[1].split('  function kindFor(p)', 1)[0]
-    assert '  function pauseForBackground()' + handler in html
+    handler = ui.split('  function pauseForBackground(nativePause=false)', 1)[1].split('  function kindFor(p)', 1)[0]
+    assert '  function pauseForBackground(nativePause=false)' + handler in html
     assert 'bf_global_offline_demo_v7' in html
     assert 'unit_anime_atlas_10025.png' in html
 print('PASS v0.41 APK source-aware Auto Battle optional; all previous content and v7')
