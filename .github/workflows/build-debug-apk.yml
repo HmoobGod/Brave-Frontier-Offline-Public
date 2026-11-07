@@ -272,6 +272,7 @@ jobs:
           python test_bf_evolution_ab_v1900.py
           python test_bf_story_battle_hud_v2000.py
           python test_bf_battle_command_tray_v2100.py
+          python3 test_bf_command_tray_curse.py
           python test_bf_original_event_reader_v2200.py
           python test_bf_morgan_event_dialogue_v2300.py
           python test_bf_st_lamia_event_dialogue_v2400.py
