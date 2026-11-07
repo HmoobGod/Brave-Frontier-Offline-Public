@@ -38,6 +38,9 @@
  const replay=make('bf3000-replay','REPLAY MISSION ↻',()=>replayBattle());
  const next=make('bf3000-next','NEXT STORY MISSION ›',()=>advance());
  const scene=make('bf3000-scene','READ ORIGINAL CLEAR SCENE ›',()=>readScene());
+ const retrySave=make('bf3000-retry-save','RETRY SAVE',()=>retrySaveResult());
+ const backup=make('bf3000-backup','DOWNLOAD UNSAVED BACKUP',()=>downloadBackup());
+ retrySave.hidden=backup.hidden=true;
  const note=document.createElement('small');note.id='bf3000-note';
  note.textContent='Offline simulated battle rewards. Original archived quest titles and reward amounts are source metadata; enemy AI, enemy waves, materials, drops, and Energy spending remain DEMO. Training grants no campaign rewards.';
  block.append(heading,reward,meta,buttons,note);
@@ -81,6 +84,8 @@
    if(sig===rendered)return s;
    rendered=sig;
    block.hidden=!s.done;
+   const rescue=s.done&&s.victory&&s.archive&&!s.stored;
+   retrySave.hidden=backup.hidden=!rescue;
    if(!s.done)return s;
    heading.textContent=(s.victory?'BATTLE CLEARED · ':'BATTLE DEFEAT · ')+s.name;
    reward.textContent=s.victory&&s.archive?
@@ -95,6 +100,25 @@
    scene.disabled=!s.clearScene;
    scene.hidden=!s.clearScene;
    return s;
+ }
+ function retrySaveResult(){
+   const s=snapshot();
+   if(!s?.done||!s.victory||!s.archive||s.stored||S.busy||
+      typeof saveProgress!=='function')return false;
+   // Explicit opt-in only; use the native canonical v7 write and its usual
+   // quota/recovery checks. Never claim success from a failed write.
+   const ok=saveProgress()===true;
+   rendered='';refresh();
+   return ok&&snapshot()?.stored===true;
+ }
+ function downloadBackup(){
+   const s=snapshot();
+   if(!s?.done||!s.victory||!s.archive||s.stored||S.busy)return false;
+   // Delegate to the same existing Android/browser export path; no new
+   // serialization, alternate save format, or hidden storage writes.
+   const action=document.getElementById('downloadsave');
+   if(!action)return false;
+   action.click();return true;
  }
  function replayBattle(){
    const s=snapshot();if(!s?.canReplay||S.busy)return false;
