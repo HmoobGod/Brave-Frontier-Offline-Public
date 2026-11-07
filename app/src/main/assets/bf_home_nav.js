@@ -1045,6 +1045,9 @@ function bfOfflineUnitPortraitV266(source, name) {
   document.querySelector('.bf-navbar')?.addEventListener('click',sync);
   document.querySelector('#bf-home')?.addEventListener('click',sync);
   window.addEventListener('pagehide',()=>halt());
+  window.addEventListener('bf-native-background',()=>{
+    if(mode)halt('Music paused while the app is in the background.');
+  });
   sync();
   window.BFGlobalAudio={
     get playingMode(){return mode;},
