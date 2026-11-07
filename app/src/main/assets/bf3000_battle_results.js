@@ -54,7 +54,8 @@
    // player must first restore writable storage or export their progress.
    const stored=typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending;
    const after=archive&&victory&&cleared&&stored?status?.nextId||null:null;
-   const clearScene=archive&&victory&&cleared&&[10,11,21].includes(q.missionId)&&
+   // A newly earned clear scene is also gated on committed v7 progress.
+   const clearScene=archive&&victory&&cleared&&stored&&[10,11,21].includes(q.missionId)&&
        !!scenes.lookup('clear',q.missionId);
    const reference=BFGlobalQuestText.sourceFor(q);
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&u.active):[];
