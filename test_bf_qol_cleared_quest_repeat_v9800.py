@@ -86,7 +86,7 @@ with sync_playwright() as pw:
  # The actual native Android bridge may fire while document.hidden is
  # still false. A completed result must not replay on foreground return.
  java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
- bridge_match=re.search(r'private static final String UI_BACKGROUND_JS\\s*=\\s*("[^\\n]+");',java)
+ bridge_match=re.search(r'private static final String UI_BACKGROUND_JS\s*=\s*("[^\n]+");',java)
  assert bridge_match
  native_background=json.loads(bridge_match[1])
  assert 'bf-native-background' in native_background
