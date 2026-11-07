@@ -92,6 +92,20 @@ with sync_playwright() as pw:
         bad_audio = False
         reset();choose(player,['map'])
         page.wait_for_function('!__requestAudio.paused&&__requestAudio.currentTime>0.02')
+        if player == 'quest':
+            # No current MediaError exists while the real MP3 is decoding.
+            # A late event queued by a detached source must not cancel it.
+            assert page.evaluate('__requestAudio.error===null')
+            page.evaluate("__requestAudio.dispatchEvent(new Event('error'))")
+            assert page.evaluate("BFGlobalAudio.playingMode==='quest'&&!__requestAudio.paused")
+            # Nor may a stale error overwrite the user's explicit Stop state.
+            page.locator('#bf-global-stop-track').click()
+            status_before = page.locator('.bf-global-audio-status').inner_text()
+            assert status_before == 'Music stopped.'
+            page.evaluate("__requestAudio.dispatchEvent(new Event('error'))")
+            assert page.locator('.bf-global-audio-status').inner_text() == status_before
+            page.locator('#bf-global-play-track').click()
+            page.wait_for_function('!__requestAudio.paused&&__requestAudio.currentTime>0.02')
         assert_unchanged(page,before,'current decoder failure and explicit recovery')
     reset()
     assert page.evaluate('!document.hidden&&__routeHiddenEvents===0&&__routeNativePause===0')
