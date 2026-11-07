@@ -50,7 +50,10 @@
    const archive=S.mode==='archive';
    const cleared=(P.questClears?.[q.missionId]||0)>0;
    const status=story.snapshot();
-   const after=archive&&victory&&cleared?status?.nextId||null:null;
+   // A failed canonical v7 save cannot unlock another story mission. The
+   // player must first restore writable storage or export their progress.
+   const stored=typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending;
+   const after=archive&&victory&&cleared&&stored?status?.nextId||null:null;
    const clearScene=archive&&victory&&cleared&&[10,11,21].includes(q.missionId)&&
        !!scenes.lookup('clear',q.missionId);
    const reference=BFGlobalQuestText.sourceFor(q);
@@ -63,7 +66,7 @@
      liveUnits:party.filter(u=>u.hp>0).length,totalUnits:party.length,
      exp:victory&&archive?q.exp:0,zel:victory&&archive?q.zel:0,
      karma:victory&&archive?q.karma:0,
-     level:P.level,stored:typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending
+     level:P.level,stored
    });
  }
  let rendered='';
@@ -95,7 +98,7 @@
    return !S.over&&!S.busy&&QUEST.missionId===s.missionId;
  }
  function advance(){
-   const s=snapshot();if(!s||!s.nextId||!s.done||!s.victory||!s.archive)return false;
+   const s=snapshot();if(!s||!s.stored||!s.nextId||!s.done||!s.victory||!s.archive)return false;
    const moved=story.advance();
    if(moved){rendered='';refresh();}
    return !!moved&&QUEST.missionId===s.nextId;
