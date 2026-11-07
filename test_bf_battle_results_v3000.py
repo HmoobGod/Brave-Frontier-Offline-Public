@@ -135,11 +135,16 @@ with sync_playwright() as pw:
  saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert page.locator('#bf3000-retry-save').is_hidden()
  assert page.locator('#bf3000-backup').is_hidden()
- assert saved['stored'] and saved['nextId']==2 and saved['canReplay']
+ # Mission 10 was already cleared earlier in this same test; the story
+ # router may now offer 11 rather than 2 even when replaying mission 1.
+ # Verify the chosen archived next mission, not a stale hard-coded ID.
+ assert saved['stored'] and saved['canReplay']
+ next_id=saved['nextId']
+ assert isinstance(next_id,int) and next_id>1
  assert not page.locator('#bf3000-next').is_disabled()
  assert not page.locator('#bf3000-replay').is_disabled()
  assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is True
- assert page.evaluate('QUEST.missionId')==2
+ assert page.evaluate('QUEST.missionId')==next_id
  assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[1]")>=1
  # A newly won source-verified clear scene must also be inaccessible after
  # failed storage; otherwise an unsaved mission 10 still reports completion.
