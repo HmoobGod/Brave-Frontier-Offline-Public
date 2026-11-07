@@ -42,6 +42,21 @@
      reservations:Object.freeze(Array.from(ledger,([slot,kind])=>
        Object.freeze({slot,kind})))});
  }
+ function protectManualCommand(event){
+   if(!event.target?.closest?.('#attack,#burst,#bf044-queue'))return;
+   sync();
+   const slot=S.selected,p=S.party?.[slot];
+   if(S.mode!=='archive'||S.busy||S.over||!ledger.has(slot)||
+      !p?.active||!(p.hp>0))return;
+   event.preventDefault();event.stopImmediatePropagation();
+   p.action={kind:'guard',target:S.target};
+   if(typeof msg==='function')msg('DEMO item turn already reserved: '+p.name+' must Guard this round.');
+   if(typeof update==='function')update();
+   window.BF044SBBDemo?.refresh?.();
+ }
+ // Capture before native/prototype queue handlers replace a paid Guard.
+ // Delegation also covers the optional SBB button if mounted later.
+ document.addEventListener('click',protectManualCommand,true);
  execute.addEventListener('click',enforce,true);
  window.BFGlobalItemTurnReservationsV4500=Object.freeze({
    free,reserve,enforce,snapshot

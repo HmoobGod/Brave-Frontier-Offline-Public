@@ -300,6 +300,7 @@ jobs:
           python test_bf_source_atk_item_v4400.py
           python3 test_bf_source_atk_50_item.py
           python test_bf_item_turn_reservations_v4500.py
+          python3 test_bf_manual_item_guards.py
           python test_bf_source_bb_gauge_item_v4600.py
           python test_bf_source_full_revive_v4700.py
           python test_bf_demo_auto_item_guard_v4800.py
