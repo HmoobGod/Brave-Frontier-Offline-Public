@@ -148,6 +148,11 @@
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden&&session)stop('Stopped: app left foreground',false);
  });
+ // Native Activity pause can occur with document.hidden still false.
+ // Cancel the whole replay session before any queued clear can start another.
+ window.addEventListener('bf-native-background',()=>{
+   if(session){stop('Stopped: Android background',false);setAuto(false);}
+ });
  window.addEventListener('pagehide',()=>{if(session)stop('Stopped: page closed',false)});
  setInterval(()=>{if(!document.hidden)poll();},900);
  update();
