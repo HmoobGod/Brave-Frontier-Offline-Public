@@ -92,8 +92,21 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     const backRoutes=['quest','units','summon','menu'];
     for(const route of backRoutes){
       assert.equal(await page.evaluate(route=>BF_homeNav.go(route),route),true);
+      if(route==='quest')await startQuestMusic();
       adb('shell','input','keyevent','KEYCODE_BACK');
       await page.waitForFunction(()=>BF_homeNav.current==='home',null,{polling:100});
+      if(route==='quest'){
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.playingMode),null,
+          'Quest music intent survived native Back navigation');
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.track),'');
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.playing),false);
+        await page.evaluate(()=>BF_homeNav.go('quest'));
+        await new Promise(resolve=>setTimeout(resolve,500));
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.playingMode),null);
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.track),'');
+        assert.equal(await page.evaluate(()=>BFGlobalAudio.playing),false,
+          'Quest music restarted after returning without Play');
+      }
     }
     assert.equal(hash(await snapshot()),before,'Player/canonical save changed');
     console.log(JSON.stringify({result:'PASS',scope:'isolated Android35 emulator',
@@ -102,6 +115,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       foregroundAutoRemainsOff:true,nativeBackRoutesReturnedHome:backRoutes,
       questMusicDecodedBeforePause:true,questMusicStopsWithoutAutoResume:true,
       questMusicExplicitResumeAndStop:true,
+      questMusicStopsOnNativeBack:true,questMusicNoRestartAfterQuestReturn:true,
       playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));
   } finally {
