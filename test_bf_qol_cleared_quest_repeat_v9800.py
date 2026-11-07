@@ -116,6 +116,30 @@ with sync_playwright() as pw:
  p.evaluate(native_background)
  assert p.locator('#auto').is_checked()
  p.locator('#auto').uncheck()
+ # Stop Repeating belongs to the player even while a battle action is
+ # running. The ongoing round may complete, but an Auto setting owned by
+ # the repeat session must not keep driving later rounds.
+ p.evaluate("""()=>{const a=document.getElementById('auto');
+   a.addEventListener('change',()=>{S.auto=a.checked;});}""")
+ for initial_auto in (False,True):
+  p.evaluate("""before=>{
+    QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
+    S.auto=before;document.getElementById('auto').checked=before;
+  }""",initial_auto)
+  assert p.evaluate(api+'.start(2)') is True
+  assert p.locator('#auto').is_checked()
+  p.evaluate('S.busy=true')
+  before_player=p.evaluate('JSON.stringify(P)')
+  previous_replays=p.evaluate('window.__repeatCount')
+  p.locator('#bf9800-stop').click()
+  assert not p.evaluate(api+'.statusSnapshot().active')
+  assert p.evaluate(api+'.statusSnapshot().reason')=='Stopped by player'
+  assert p.locator('#auto').is_checked()==initial_auto
+  assert p.evaluate('S.auto')==initial_auto
+  assert p.evaluate('S.busy') is True
+  assert p.evaluate('window.__repeatCount')==previous_replays
+  assert p.evaluate('JSON.stringify(P)')==before_player
+  p.evaluate('S.busy=false')
  # Re-injecting must not duplicate intervals, panels or listeners.
  p.add_script_tag(path=str(A/'bf9800_qol_cleared_quest_repeat.js'))
  assert p.locator('#bf9800-auto-repeat').count()==1
