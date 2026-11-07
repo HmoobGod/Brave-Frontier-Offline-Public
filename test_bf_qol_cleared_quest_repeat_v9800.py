@@ -121,6 +121,7 @@ with sync_playwright() as pw:
  # the repeat session must not keep driving later rounds.
  p.evaluate("""()=>{const a=document.getElementById('auto');
    a.addEventListener('change',()=>{S.auto=a.checked;});}""")
+ p.locator('#bf9800-auto-repeat > summary').click()
  for initial_auto in (False,True):
   p.evaluate("""before=>{
     QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
