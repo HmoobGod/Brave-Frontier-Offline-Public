@@ -418,6 +418,7 @@ jobs:
           python test_bf_cave_of_flames_expansion.py
           python test_bf_original_offline_bgm.py
           python3 test_bf_music_route_stop.py
+          python3 test_bf_music_play_requests.py
           python test_bf_mistral_quest_map.py
           python test_bf_original_battle_controls.py
           python test_bf_global_collaboration_archive.py

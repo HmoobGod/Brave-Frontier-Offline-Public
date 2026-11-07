@@ -977,6 +977,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   audio.setAttribute('aria-hidden','true');
   panel.append(audio);
   let mode=null; // either quest/boss or null; never saved
+  let playRequest=0;
   const base='content/sound/';
   const pathFor=file=>{
     if(!tracks.has(file))throw new Error('Unverified Global sound file');
@@ -997,6 +998,7 @@ function bfOfflineUnitPortraitV266(source, name) {
   };
   const setStatus=msg=>{status.textContent=msg;};
   function halt(msg){
+    playRequest++;
     audio.pause();
     audio.removeAttribute('src');
     audio.load();
@@ -1010,6 +1012,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       halt('Open Quest to preview original music.');return;
     }
     const track=pathFor(file);
+    const request=++playRequest;
     if(audio.getAttribute('src')!==track){
       audio.src=track;
       audio.load();
@@ -1020,6 +1023,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     try{
       const promise=audio.play();
       if(promise?.catch)promise.catch(()=>{
+        if(request!==playRequest)return;
         halt('Playback blocked or unsupported; tap PLAY again if your device allows audio.');
       });
     }catch(error){halt('Audio unavailable on this device.');}
