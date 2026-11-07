@@ -43,6 +43,17 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
         null,{polling:100});
     };
     await startQuestMusic();
+    await page.locator('#bf-global-stop-track').click();
+    // Both real UI handlers run before the first play promise can settle.
+    await page.evaluate(()=>{
+      document.getElementById('bf-global-play-track').click();
+      document.getElementById('bf-global-boss-preview').click();
+    });
+    await page.waitForFunction(()=>BFGlobalAudio.playingMode==='boss' &&
+      BFGlobalAudio.playing && document.querySelector('.bf-global-audio audio').currentTime>0,
+      null,{polling:100});
+    await page.locator('#bf-global-stop-track').click();
+    await startQuestMusic();
     const round = await page.evaluate(() => {
       BF_homeNav.go('quest');
       for(const unit of S.party){
@@ -138,6 +149,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       questMusicDecodedBeforePause:true,questMusicStopsWithoutAutoResume:true,
       questMusicExplicitResumeAndStop:true,
       questMusicStopsOnNativeBack:true,questMusicNoRestartAfterQuestReturn:true,
+      nativeQuestMusicReplacementKeepsLatest:true,
       nativePauseCapturesCanonicalBackup:true,
       playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));

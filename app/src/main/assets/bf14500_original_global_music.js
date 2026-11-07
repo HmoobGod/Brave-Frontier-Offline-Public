@@ -41,7 +41,7 @@
  box.append(title,note,mapBtn,bossBtn,stopBtn,status);
  host.after(box);
  const sound=new Audio();sound.loop=true;sound.preload='none';sound.volume=0.42;
- let active=null;let intent=null;let stopped=true;
+ let active=null;let intent=null;let stopped=true;let playRequest=0;
  const onQuest=()=>!window.BF_homeNav||window.BF_homeNav.current==='quest';
  function current(){
    if(typeof QUEST==='undefined'||!QUEST||
@@ -49,6 +49,7 @@
    return map.get(QUEST.missionId);
  }
  function stop(){
+   playRequest++;
    sound.pause();sound.removeAttribute('src');sound.load();
    active=null;intent=null;stopped=true;
    refresh();return true;
@@ -65,6 +66,7 @@
    }
    const song=active==='map'?q.map:active==='boss'?q.boss:null;
    if(active&&song&&sound.getAttribute('src')!==('content/sound/'+song)){
+     playRequest++;
      sound.pause();sound.removeAttribute('src');sound.load();
      stopped=true;active=null;intent=null;
    }
@@ -78,11 +80,12 @@
    const q=current(),mode=typeof E==='undefined'?null:E.mode?.value;
    const file=kind==='map'?q?.map:kind==='boss'?q?.boss:null;
    if(!onQuest()||mode!=='archive'||!file||!bundled.has(file))return false;
+   const request=++playRequest;
    sound.pause();sound.src='content/sound/'+file;
    active=kind;intent=file;stopped=false;
    const result=sound.play();
    if(result&&typeof result.catch==='function')result.catch(()=>{
-     if(intent!==file)return;
+     if(request!==playRequest||intent!==file)return;
      stopped=true;active=null;intent=null;
      sound.pause();status.textContent='Playback blocked or unavailable. Tap Play again.';
    });
