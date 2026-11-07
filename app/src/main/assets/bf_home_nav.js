@@ -1034,7 +1034,12 @@ function bfOfflineUnitPortraitV266(source, name) {
   audio.addEventListener('playing',()=>{
     if(mode)setStatus('Playing '+titleFor(mode==='boss'?'bf006_btl_boss.mp3':missionTrack()));
   });
-  audio.addEventListener('error',()=>halt('Bundled audio could not be decoded.'));
+  audio.addEventListener('error',()=>{
+    // An error event queued by an older detached media resource must not
+    // cancel a newer explicit Play or overwrite the user's Stop choice.
+    if(!mode || !audio.error)return;
+    halt('Bundled audio could not be decoded.');
+  });
   function sync(){
     labelCurrent();
     if(window.BF_homeNav.current!=='quest' && mode){

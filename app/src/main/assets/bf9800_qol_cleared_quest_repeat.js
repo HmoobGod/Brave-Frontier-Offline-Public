@@ -73,7 +73,9 @@
    const previous=session;
    if(previous){complete=previous.completed;session=null;}
    reason=why;
-   if(restore&&previous&&!S.busy)setAuto(previous.autoWasEnabled);
+   // A user pressing Stop during an in-flight Auto round still owns the
+   // Auto toggle. Restore their prior choice now; the current round finishes.
+   if(restore&&previous)setAuto(previous.autoWasEnabled);
    update();return !!previous;
  }
  function playAgain(){
@@ -147,6 +149,11 @@
  });
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden&&session)stop('Stopped: app left foreground',false);
+ });
+ // Native Activity pause can occur with document.hidden still false.
+ // Cancel the whole replay session before any queued clear can start another.
+ window.addEventListener('bf-native-background',()=>{
+   if(session){stop('Stopped: Android background',false);setAuto(false);}
  });
  window.addEventListener('pagehide',()=>{if(session)stop('Stopped: page closed',false)});
  setInterval(()=>{if(!document.hidden)poll();},900);

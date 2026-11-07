@@ -64,7 +64,10 @@
  function chooseTarget(enemies){
    if(!active()||config.target==='percent')return baseTarget(enemies);
    if(!Array.isArray(enemies))return baseTarget(enemies);
-   const eligible=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
+   // Match the base Auto planner's source-target safety rules: an enemy
+  // without a valid positive max HP is not a legal percentage/absolute target.
+  const eligible=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
+     Number.isFinite(e.maxHp)&&e.maxHp>0&&
      Number.isSafeInteger(e.slot));
    eligible.sort((a,b)=>a.hp-b.hp||a.slot-b.slot);
    return eligible[0]||null;

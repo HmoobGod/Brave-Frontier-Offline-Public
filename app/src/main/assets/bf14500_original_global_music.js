@@ -83,12 +83,17 @@
    const request=++playRequest;
    sound.pause();sound.src='content/sound/'+file;
    active=kind;intent=file;stopped=false;
-   const result=sound.play();
-   if(result&&typeof result.catch==='function')result.catch(()=>{
-     if(request!==playRequest||intent!==file)return;
-     stopped=true;active=null;intent=null;
-     sound.pause();status.textContent='Playback blocked or unavailable. Tap Play again.';
-   });
+   // Some media implementations fail synchronously instead of returning a
+   // rejected Promise. Either failure must clear the current UI state only.
+   const failure=()=>{
+     if(request!==playRequest||intent!==file)return false;
+     stop();
+     status.textContent='Playback blocked or unavailable. Tap Play again.';
+     return true;
+   };
+   let result;
+   try{result=sound.play();}catch(_){failure();return false;}
+   if(result&&typeof result.catch==='function')result.catch(failure);
    refresh();return true;
  }
  mapBtn.addEventListener('click',()=>play('map'));

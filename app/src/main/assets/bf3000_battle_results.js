@@ -38,6 +38,9 @@
  const replay=make('bf3000-replay','REPLAY MISSION ↻',()=>replayBattle());
  const next=make('bf3000-next','NEXT STORY MISSION ›',()=>advance());
  const scene=make('bf3000-scene','READ ORIGINAL CLEAR SCENE ›',()=>readScene());
+ const retrySave=make('bf3000-retry-save','RETRY SAVE',()=>retrySaveResult());
+ const backup=make('bf3000-backup','DOWNLOAD UNSAVED BACKUP',()=>downloadBackup());
+ retrySave.hidden=backup.hidden=true;
  const note=document.createElement('small');note.id='bf3000-note';
  note.textContent='Offline simulated battle rewards. Original archived quest titles and reward amounts are source metadata; enemy AI, enemy waves, materials, drops, and Energy spending remain DEMO. Training grants no campaign rewards.';
  block.append(heading,reward,meta,buttons,note);
@@ -50,8 +53,12 @@
    const archive=S.mode==='archive';
    const cleared=(P.questClears?.[q.missionId]||0)>0;
    const status=story.snapshot();
-   const after=archive&&victory&&cleared?status?.nextId||null:null;
-   const clearScene=archive&&victory&&cleared&&[10,11,21].includes(q.missionId)&&
+   // A failed canonical v7 save cannot unlock another story mission. The
+   // player must first restore writable storage or export their progress.
+   const stored=typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending;
+   const after=archive&&victory&&cleared&&stored?status?.nextId||null:null;
+   // A newly earned clear scene is also gated on committed v7 progress.
+   const clearScene=archive&&victory&&cleared&&stored&&[10,11,21].includes(q.missionId)&&
        !!scenes.lookup('clear',q.missionId);
    const reference=BFGlobalQuestText.sourceFor(q);
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&u.active):[];
@@ -59,11 +66,14 @@
      missionId:q.missionId,name:reference?.mission?.name||'Mission '+q.missionId,
      dungeon:reference?.dungeon?.name||'Dungeon '+q.dungeonId,
      done,victory,archive,clears:P.questClears?.[q.missionId]||0,
-     nextId:after,clearScene,canReplay:done&&!retry.disabled,
+     nextId:after,clearScene,
+     // Uncommitted victory rewards must remain exportable, not discarded by
+     // an eager replay. Defeats and Training have no campaign payout.
+     canReplay:done&&!retry.disabled&&(!victory||!archive||stored),
      liveUnits:party.filter(u=>u.hp>0).length,totalUnits:party.length,
      exp:victory&&archive?q.exp:0,zel:victory&&archive?q.zel:0,
      karma:victory&&archive?q.karma:0,
-     level:P.level,stored:typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending
+     level:P.level,stored
    });
  }
  let rendered='';
@@ -74,6 +84,8 @@
    if(sig===rendered)return s;
    rendered=sig;
    block.hidden=!s.done;
+   const rescue=s.done&&s.victory&&s.archive&&!s.stored;
+   retrySave.hidden=backup.hidden=!rescue;
    if(!s.done)return s;
    heading.textContent=(s.victory?'BATTLE CLEARED · ':'BATTLE DEFEAT · ')+s.name;
    reward.textContent=s.victory&&s.archive?
@@ -89,13 +101,32 @@
    scene.hidden=!s.clearScene;
    return s;
  }
+ function retrySaveResult(){
+   const s=snapshot();
+   if(!s?.done||!s.victory||!s.archive||s.stored||S.busy||
+      typeof saveProgress!=='function')return false;
+   // Explicit opt-in only; use the native canonical v7 write and its usual
+   // quota/recovery checks. Never claim success from a failed write.
+   const ok=saveProgress()===true;
+   rendered='';refresh();
+   return ok&&snapshot()?.stored===true;
+ }
+ function downloadBackup(){
+   const s=snapshot();
+   if(!s?.done||!s.victory||!s.archive||s.stored||S.busy)return false;
+   // Delegate to the same existing Android/browser export path; no new
+   // serialization, alternate save format, or hidden storage writes.
+   const action=document.getElementById('downloadsave');
+   if(!action)return false;
+   action.click();return true;
+ }
  function replayBattle(){
    const s=snapshot();if(!s?.canReplay||S.busy)return false;
    retry.click();rendered='';refresh();
    return !S.over&&!S.busy&&QUEST.missionId===s.missionId;
  }
  function advance(){
-   const s=snapshot();if(!s||!s.nextId||!s.done||!s.victory||!s.archive)return false;
+   const s=snapshot();if(!s||!s.stored||!s.nextId||!s.done||!s.victory||!s.archive)return false;
    const moved=story.advance();
    if(moved){rendered='';refresh();}
    return !!moved&&QUEST.missionId===s.nextId;

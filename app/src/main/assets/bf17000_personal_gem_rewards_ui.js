@@ -63,6 +63,13 @@
  let message='';
  function render(){
    const s=api.snapshot(),personal=s.mode==='custom';
+   // The Quest shortcut displays the committed personal balance without
+   // another panel tap. Original mode keeps personal Gems out of its label.
+   shortcut.textContent='GEMS · DAILY REWARDS'+
+     (personal?' · '+s.balance.toLocaleString():'');
+   shortcut.setAttribute('aria-label',personal?
+     'Personal Gem balance '+s.balance.toLocaleString()+'. Open rewards':
+     'Open personal Gem rewards');
    stat.textContent='Gem balance: '+s.balance.toLocaleString()+
      ' · Reward mode: '+(personal?'PERSONAL OFFLINE':'ORIGINAL / NO CUSTOM GEMS');
    custom.hidden=personal;original.hidden=!personal;
