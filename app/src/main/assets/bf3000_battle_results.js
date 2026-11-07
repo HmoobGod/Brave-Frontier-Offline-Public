@@ -63,7 +63,10 @@
      missionId:q.missionId,name:reference?.mission?.name||'Mission '+q.missionId,
      dungeon:reference?.dungeon?.name||'Dungeon '+q.dungeonId,
      done,victory,archive,clears:P.questClears?.[q.missionId]||0,
-     nextId:after,clearScene,canReplay:done&&!retry.disabled,
+     nextId:after,clearScene,
+     // Uncommitted victory rewards must remain exportable, not discarded by
+     // an eager replay. Defeats and Training have no campaign payout.
+     canReplay:done&&!retry.disabled&&(!victory||!archive||stored),
      liveUnits:party.filter(u=>u.hp>0).length,totalUnits:party.length,
      exp:victory&&archive?q.exp:0,zel:victory&&archive?q.zel:0,
      karma:victory&&archive?q.karma:0,
