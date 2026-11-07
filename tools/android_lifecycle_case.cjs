@@ -24,12 +24,20 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     page.setDefaultTimeout(120000);
     await page.waitForFunction(() => !document.hidden && typeof P !== 'undefined' && P.version === 7 &&
       window.BF_homeNav && window.BF041SmartAuto?.pauseForBackground &&
-      window.BFGlobalQoLBattleSpeedV9900 && window.BFGlobalSBBFallbackDispatch,
+      window.BFGlobalQoLBattleSpeedV9900 && window.BFGlobalSBBFallbackDispatch && window.BFGlobalAudio,
       null, {polling:100});
     const snapshot = () => page.evaluate(() => JSON.stringify({
       player:JSON.stringify(P),canonical:localStorage.getItem('bf_global_offline_demo_v7')
     }));
     const before = hash(await snapshot());
+    await page.evaluate(()=>BF_homeNav.go('quest'));
+    const startQuestMusic=async()=>{
+      await page.locator('#bf-global-play-track').click();
+      await page.waitForFunction(()=>BFGlobalAudio.playingMode==='quest' &&
+        BFGlobalAudio.playing && document.querySelector('.bf-global-audio audio').currentTime>0,
+        null,{polling:100});
+    };
+    await startQuestMusic();
     const round = await page.evaluate(() => {
       BF_homeNav.go('quest');
       for(const unit of S.party){
@@ -56,6 +64,8 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     await page.waitForFunction(() => !document.hidden && !S.busy, null, {polling:100});
     const state = await page.evaluate(() => ({events:__nativeHidden,nativeEvents:__nativePause,
       auto:S.auto,checked:E.auto.checked,timer:timer,round:S.round,over:S.over,
+      musicMode:BFGlobalAudio.playingMode,musicTrack:BFGlobalAudio.track,
+      musicPlaying:BFGlobalAudio.playing,
       sdkBrowser:/Chrome\/([\d.]+)/.exec(navigator.userAgent)?.[1] || 'unknown'}));
     console.log(JSON.stringify({scope:'Android background observations',
       nativeCallbacks:state.nativeEvents.length,domHiddenEvents:state.events.length,
@@ -66,9 +76,18 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       'Auto controls stayed enabled after native background notification');
     assert.equal(state.auto,false);assert.equal(state.checked,false);
     assert.equal(state.timer,null);assert.equal(state.over,false);
+    assert.equal(state.musicMode,null);assert.equal(state.musicTrack,'');
+    assert.equal(state.musicPlaying,false,'Quest music stayed active after native pause');
     assert.ok(state.round>=round && state.round<=round+1,'Unexpected extra Auto rounds');
     await new Promise(resolve=>setTimeout(resolve,1500));
     assert.equal(await page.evaluate(()=>S.round),state.round,'Auto resumed without input');
+    assert.equal(await page.evaluate(()=>BFGlobalAudio.playingMode),null,'Music resumed without input');
+    assert.equal(await page.evaluate(()=>BFGlobalAudio.track),'');
+    await startQuestMusic();
+    await page.locator('#bf-global-stop-track').click();
+    assert.equal(await page.evaluate(()=>BFGlobalAudio.playingMode),null);
+    assert.equal(await page.evaluate(()=>BFGlobalAudio.track),'');
+    assert.equal(await page.evaluate(()=>BFGlobalAudio.playing),false);
     // Exercise the real Android key dispatch and Java-to-WebView route bridge.
     const backRoutes=['quest','units','summon','menu'];
     for(const route of backRoutes){
@@ -81,9 +100,11 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       package:pkg,browserVersion:state.sdkBrowser,nativeBackgroundCallbackObserved:true,
       domHiddenEventObserved:state.events.length>0,
       foregroundAutoRemainsOff:true,nativeBackRoutesReturnedHome:backRoutes,
+      questMusicDecodedBeforePause:true,questMusicStopsWithoutAutoResume:true,
+      questMusicExplicitResumeAndStop:true,
       playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));
   } finally {
     await device.close();
   }
-})().catch(error=>{console.error(error.message);process.exitCode=1;});
+})().catch(error=>{console.error(error.stack || error.message);process.exitCode=1;});

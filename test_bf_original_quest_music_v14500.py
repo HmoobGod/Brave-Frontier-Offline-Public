@@ -80,8 +80,21 @@ with sync_playwright() as pw:
  page.locator('#bf145-original-music button').nth(0).click()
  assert page.evaluate('window.__playCalls')==1
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.src')=='content/sound/bf010_map_grass.mp3'
+ # Legacy optional controls receive the same real native callback expression.
+ native_js=json.loads(re.search(r'UI_BACKGROUND_JS\s*=\s*("[^\n]+");',java)[1])
+ assert page.evaluate('!document.hidden')
+ pauses=page.evaluate('__pauseCalls')
+ page.evaluate(native_js)
+ assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
+ assert page.evaluate('BFOriginalGlobalMusicV14500.state.src') is None
+ assert page.evaluate('__pauseCalls')>pauses
+ page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
+ page.wait_for_timeout(50)
+ assert page.evaluate('__playCalls')==1, 'Foreground must not restart legacy music'
+ page.locator('#bf145-original-music button').nth(0).click()
+ assert page.evaluate('__playCalls')==2
  page.locator('#bf145-original-music button').nth(1).click()
- assert page.evaluate('window.__playCalls')==2
+ assert page.evaluate('window.__playCalls')==3
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.src')=='content/sound/bf006_btl_boss.mp3'
  page.locator('#bf145-original-music button').nth(2).click()
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True

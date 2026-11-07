@@ -93,6 +93,9 @@
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden&&!stopped)stop();
  });
+ window.addEventListener('bf-native-background',()=>{
+   if(!stopped)stop();
+ });
  const list=document.getElementById('questlist');
  if(list)new MutationObserver(()=>refresh()).observe(list,{childList:true});
  const mode=document.getElementById('mode');

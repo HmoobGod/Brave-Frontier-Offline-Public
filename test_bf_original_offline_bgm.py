@@ -5,7 +5,7 @@ bundled directly inside the APK. Uses a disposable browser/save and mocks
 HTMLAudioElement.play() so CI doesn't require an audio output device.
 """
 from pathlib import Path
-import json,hashlib,shutil
+import json,hashlib,shutil,re
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parent
@@ -82,6 +82,24 @@ with sync_playwright() as pw:
     assert page.evaluate("BFGlobalAudio.playingMode")=="quest"
     assert page.evaluate("BFGlobalAudio.track")=="content/sound/bf010_map_grass.mp3"
     assert page.locator("#bf-global-stop-track").is_enabled()
+
+    # The exact Activity callback must stop music even without a hidden event.
+    java=(ROOT/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text()
+    native_js=json.loads(re.search(r'UI_BACKGROUND_JS\s*=\s*("[^\n]+");',java)[1])
+    snap=lambda:page.evaluate("JSON.stringify({p:P,s:S,storage:Array.from({length:localStorage.length},(_,i)=>{const k=localStorage.key(i);return [k,localStorage.getItem(k)]}).sort()})")
+    music_before=snap();plays=page.evaluate('__playCalls');pauses=page.evaluate('__pauseCalls')
+    assert page.evaluate('!document.hidden')
+    page.evaluate(native_js)
+    assert page.evaluate('BFGlobalAudio.playingMode') is None
+    assert page.evaluate('BFGlobalAudio.track')==''
+    assert page.locator('#bf-global-stop-track').is_disabled()
+    assert page.evaluate('__pauseCalls')>pauses
+    page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
+    page.wait_for_timeout(50)
+    assert page.evaluate('__playCalls')==plays, 'Foreground must not restart music'
+    assert snap()==music_before, 'Native music pause mutated player/battle/storage'
+    page.locator('#bf-global-play-track').click()
+    assert page.evaluate('__playCalls')==plays+1, 'Explicit play must remain available'
 
     page.evaluate("""() => {
       P.questClears[1]=1;P.questClears[2]=1;P.questClears[10]=1;

@@ -35,5 +35,13 @@ failed because no DOM hidden event was observed. The Activity now explicitly
 calls the existing battle pause operation before `WebView.onPause()` and emits
 `bf-native-background` as a native callback acknowledgment. It does not forge a
 DOM visibility event or alter `document.hidden`. The test requires that native
-callback and reports DOM visibility delivery separately and truthfully. Fresh
-native acceptance of this correction remains pending.
+callback and reports DOM visibility delivery separately and truthfully. Corrected native acceptance passed in run42311511121 (Chrome124.0.6367.219),
+including Auto pause, four Back routes and full player/canonical-save hashes;
+DOM hidden events remained absent. This is emulator evidence, not phone acceptance.
+
+The Quest music case starts the actual visible Play button, requires the bundled
+MP3 media clock to advance, then checks the native background callback clears
+playback intent and source and leaves music stopped after returning. This checks
+WebView playback/decoder state, not audible hardware output (CI is headless).
+Legacy optional music controls have browser callback coverage; no separate
+native legacy-audio playback claim is made. New audio acceptance is pending CI.
