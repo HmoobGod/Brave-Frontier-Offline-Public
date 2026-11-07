@@ -1,6 +1,6 @@
 """v98: bounded cleared-mission automation driven only by verified result/replay."""
 from pathlib import Path
-import shutil
+import shutil, re, json
 from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parent
 A=R/'app/src/main/assets'
@@ -83,6 +83,39 @@ with sync_playwright() as pw:
  p.locator('#auto').uncheck()
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert 'Auto Battle disabled' in p.evaluate(api+'.statusSnapshot().reason')
+ # The actual native Android bridge may fire while document.hidden is
+ # still false. A completed result must not replay on foreground return.
+ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
+ bridge_match=re.search(r'private static final String UI_BACKGROUND_JS\\s*=\\s*("[^\\n]+");',java)
+ assert bridge_match
+ native_background=json.loads(bridge_match[1])
+ assert 'bf-native-background' in native_background
+ p.evaluate("""()=>{window.__repeatHiddenSignals=0;
+     document.addEventListener('visibilitychange',()=>__repeatHiddenSignals++);}""")
+ for phase in ('running','completed'):
+  p.evaluate("""()=>{QUEST.missionId=1;S.over=true;S.phase='Victory';
+    document.getElementById('auto').checked=false;}""")
+  assert p.evaluate(api+'.start(2)') is True
+  if phase=='completed':
+   p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory';
+     document.getElementById('auto').checked=false;}""")
+  previous_replays=p.evaluate('window.__repeatCount')
+  before_player=p.evaluate('JSON.stringify(P)')
+  p.evaluate(native_background)
+  assert p.evaluate('document.hidden') is False
+  assert p.evaluate('__repeatHiddenSignals')==0
+  assert p.evaluate(api+'.statusSnapshot().active') is False,(phase,'Native background left repeat armed')
+  assert 'background' in p.evaluate(api+'.statusSnapshot().reason')
+  assert not p.locator('#auto').is_checked()
+  assert p.evaluate('JSON.stringify(P)')==before_player
+  p.evaluate(api+'.poll()')
+  assert p.evaluate('window.__repeatCount')==previous_replays,(phase,'Replay continued after Android pause')
+ # Without an auto-repeat session the module must not interfere with ordinary
+ # Auto controls. The real Android bridge calls Smart Auto separately first.
+ p.locator('#auto').check()
+ p.evaluate(native_background)
+ assert p.locator('#auto').is_checked()
+ p.locator('#auto').uncheck()
  # Re-injecting must not duplicate intervals, panels or listeners.
  p.add_script_tag(path=str(A/'bf9800_qol_cleared_quest_repeat.js'))
  assert p.locator('#bf9800-auto-repeat').count()==1
