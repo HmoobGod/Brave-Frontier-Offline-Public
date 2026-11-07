@@ -103,8 +103,11 @@ with sync_playwright() as pw:
  failed=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert failed['done'] and failed['victory'] and failed['archive']
  assert failed['stored'] is False and failed['nextId'] is None
+ assert failed['canReplay'] is False
  assert page.locator('#bf3000-next').is_disabled()
+ assert page.locator('#bf3000-replay').is_disabled()
  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_saved
+ assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is False
  memory=page.evaluate('JSON.stringify(P)')
  assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is False
  assert page.evaluate('QUEST.missionId')==1
@@ -112,8 +115,9 @@ with sync_playwright() as pw:
  # A later *successful* manual save re-enables the same earned next mission.
  assert page.evaluate('()=>{__resultQuota=false;return saveProgress()}') is True
  saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
- assert saved['stored'] and saved['nextId']==2
+ assert saved['stored'] and saved['nextId']==2 and saved['canReplay']
  assert not page.locator('#bf3000-next').is_disabled()
+ assert not page.locator('#bf3000-replay').is_disabled()
  assert page.evaluate('BFGlobalBattleResultsV3000.advance()') is True
  assert page.evaluate('QUEST.missionId')==2
  assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[1]")>=1
@@ -128,13 +132,16 @@ with sync_playwright() as pw:
  page.evaluate('()=>{__resultQuota=true;finish(true)}')
  missing=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert missing['victory'] and not missing['stored']
+ assert missing['canReplay'] is False
+ assert page.locator('#bf3000-replay').is_disabled()
+ assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is False
  assert missing['clearScene'] is False
  assert page.locator('#bf3000-scene').is_hidden()
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is False
  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==scene_save
  assert page.evaluate('()=>{__resultQuota=false;return saveProgress()}') is True
  scene_saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
- assert scene_saved['stored'] and scene_saved['clearScene']
+ assert scene_saved['stored'] and scene_saved['clearScene'] and scene_saved['canReplay']
  assert page.locator('#bf3000-scene').is_visible()
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is True
  assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[10]")>=1
