@@ -7,7 +7,10 @@ src=(A/'bf3000_battle_results.js').read_text('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count('/* BF_GLOBAL_DEMO_BATTLE_RESULTS_V3000 */')==1
 assert len(src.encode('utf8'))<65536
-assert 'localStorage' not in src and 'saveProgress(' not in src
+# Saving is explicitly user-triggered only by the rescue button. The module
+# never writes storage directly or adds an alternate save key/format.
+assert 'localStorage' not in src and src.count('saveProgress()')==1
+assert src.count("document.getElementById('downloadsave')")==1
 assert java.index('readPackagedText("bf2900_original_event_expressions.js")') < java.index('readPackagedText("bf3000_battle_results.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -106,6 +109,20 @@ with sync_playwright() as pw:
  assert failed['canReplay'] is False
  assert page.locator('#bf3000-next').is_disabled()
  assert page.locator('#bf3000-replay').is_disabled()
+ assert page.locator('#bf3000-retry-save').is_visible()
+ assert page.locator('#bf3000-backup').is_visible()
+ before_retry=page.evaluate('JSON.stringify(P)')
+ page.locator('#bf3000-retry-save').click()
+ assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is False
+ assert page.evaluate('JSON.stringify(P)')==before_retry
+ # Do not launch an actual download in this test; the standalone signed-APK
+ # browser proof separately verifies the exported JSON bytes.
+ page.evaluate("""() => {window.__v3000Exports=0;
+   document.getElementById('downloadsave').addEventListener('click',e=>{
+     __v3000Exports++;e.stopImmediatePropagation();
+   },true)}""")
+ page.locator('#bf3000-backup').click()
+ assert page.evaluate('__v3000Exports')==1
  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_saved
  assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is False
  memory=page.evaluate('JSON.stringify(P)')
@@ -113,8 +130,11 @@ with sync_playwright() as pw:
  assert page.evaluate('QUEST.missionId')==1
  assert page.evaluate('JSON.stringify(P)')==memory
  # A later *successful* manual save re-enables the same earned next mission.
- assert page.evaluate('()=>{__resultQuota=false;return saveProgress()}') is True
+ page.evaluate('window.__resultQuota=false')
+ page.locator('#bf3000-retry-save').click()
  saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
+ assert page.locator('#bf3000-retry-save').is_hidden()
+ assert page.locator('#bf3000-backup').is_hidden()
  assert saved['stored'] and saved['nextId']==2 and saved['canReplay']
  assert not page.locator('#bf3000-next').is_disabled()
  assert not page.locator('#bf3000-replay').is_disabled()
