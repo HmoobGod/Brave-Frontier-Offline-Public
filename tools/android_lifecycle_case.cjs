@@ -29,6 +29,11 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     const snapshot = () => page.evaluate(() => JSON.stringify({
       player:JSON.stringify(P),canonical:localStorage.getItem('bf_global_offline_demo_v7')
     }));
+    // Establish a canonical fixture only in this fresh disposable diagnostic app.
+    await page.evaluate(() => {
+      if(localStorage.getItem('bf_global_offline_demo_v7')===null && !saveProgress())
+        throw Error('Cannot establish diagnostic canonical save fixture');
+    });
     const before = hash(await snapshot());
     await page.evaluate(()=>BF_homeNav.go('quest'));
     const startQuestMusic=async()=>{
@@ -47,8 +52,23 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       S.enemies=[{...S.enemies[0],slot:0,hp:100000000,
         maxHp:100000000,def:100,atk:1}];
       window.__nativeHidden=[];window.__nativePause=[];
+      window.__nativeBackup=[];
+      // Empty only the diagnostic backup fixture immediately before delivering
+      // the real native signal; keep its actual dispatch and module listeners.
+      // This excludes a periodic capture as a false positive for this check.
+      const nativeDispatch=window.dispatchEvent;
+      window.dispatchEvent=function(event){
+        if(event.type==='bf-native-background'){
+          window.dispatchEvent=nativeDispatch;
+          localStorage.removeItem(BFGlobalQoLBackupsV9700.key);
+        }
+        return nativeDispatch.call(this,event);
+      };
       window.addEventListener('bf-native-background',()=>{
         __nativePause.push({auto:S.auto,checked:E.auto.checked,hidden:document.hidden});
+        const api=BFGlobalQoLBackupsV9700;
+        const slots=JSON.parse(localStorage.getItem(api.key)||'null')?.slots;
+        __nativeBackup.push(slots?.[0]?.raw===localStorage.getItem(api.liveKey));
       });
       document.addEventListener('visibilitychange',()=>{
         if(document.hidden)__nativeHidden.push({auto:S.auto,checked:E.auto.checked});
@@ -63,6 +83,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
     adb('shell','am','start','-W','-n',component);
     await page.waitForFunction(() => !document.hidden && !S.busy, null, {polling:100});
     const state = await page.evaluate(() => ({events:__nativeHidden,nativeEvents:__nativePause,
+      backupCaptured:__nativeBackup.length>0&&__nativeBackup.every(Boolean),
       auto:S.auto,checked:E.auto.checked,timer:timer,round:S.round,over:S.over,
       musicMode:BFGlobalAudio.playingMode,musicTrack:BFGlobalAudio.track,
       musicPlaying:BFGlobalAudio.playing,
@@ -72,6 +93,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       auto:state.auto,checked:state.checked,roundDelta:state.round-round,
       browserVersion:state.sdkBrowser}));
     assert.ok(state.nativeEvents.length>0,'Native Activity pause callback was not observed');
+    assert.equal(state.backupCaptured,true,'Native pause did not capture current canonical backup');
     assert.ok(state.nativeEvents.every(event=>event.auto===false && event.checked===false),
       'Auto controls stayed enabled after native background notification');
     assert.equal(state.auto,false);assert.equal(state.checked,false);
@@ -116,6 +138,7 @@ assert.equal(adb('shell','getprop','ro.kernel.qemu'),'1');
       questMusicDecodedBeforePause:true,questMusicStopsWithoutAutoResume:true,
       questMusicExplicitResumeAndStop:true,
       questMusicStopsOnNativeBack:true,questMusicNoRestartAfterQuestReturn:true,
+      nativePauseCapturesCanonicalBackup:true,
       playerAndCanonicalSaveUnchanged:true,
       ownerPhoneOrSaveTested:false}));
   } finally {

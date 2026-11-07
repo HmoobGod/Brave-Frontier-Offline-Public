@@ -145,6 +145,8 @@
  document.addEventListener('visibilitychange',()=>{
    if(document.hidden)capture();
  });
+ // Android can pause the Activity while WebView still reports a visible DOM.
+ window.addEventListener('bf-native-background',()=>capture());
  const timer=setInterval(()=>{if(!document.hidden)capture();},12000);
  window.addEventListener('pagehide',()=>capture());
  window.addEventListener('beforeunload',()=>clearInterval(timer),{once:true});
