@@ -22,7 +22,7 @@
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
-       target:['percent','absolute','highest-atk','lowest-def','elemental'].includes(raw?.target)?raw.target:'percent',
+       target:['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental'].includes(raw?.target)?raw.target:'percent',
        burst:['normal','conserve','final-wave'].includes(raw?.burst)?raw.burst:'normal',
        guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0};
    }catch(_){return configDefaults();}
@@ -32,7 +32,7 @@
  function valid(options){
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
-     ['percent','absolute','highest-atk','lowest-def','elemental'].includes(options.target)&&
+     ['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental'].includes(options.target)&&
      ['normal','conserve','final-wave'].includes(options.burst)&&
      (options.guard===undefined||[0,20,35,50].includes(options.guard));
  }
@@ -144,7 +144,13 @@
       new Set(live.map(e=>e.slot)).size!==live.length)return null;
    const eligible=live.filter(e=>Number.isFinite(e[key]));
    eligible.sort((a,b)=>{
-     const delta=config.target==='highest-atk'?b.atk-a.atk:a[key]-b[key];
+     // Both high-HP options are opt-in: absolute HP favors large remaining
+     // pools, while HP% favors enemies closest to full health. Source-backed
+     // slot ties preserve native deterministic target mapping.
+     const delta=config.target==='highest-atk'?b.atk-a.atk:
+       config.target==='highest-hp'?b.hp-a.hp:
+       config.target==='highest-hp-percent'?
+         b.hp/b.maxHp-a.hp/a.maxHp:a[key]-b[key];
      return delta||a.slot-b.slot;
    });
    return eligible[0]||null;
@@ -179,7 +185,7 @@
  onLabel.append(toggle,document.createTextNode(' Enable advanced rules (Smart Auto must also be enabled)'));
  settings.append(onLabel);
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
- const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)']]);
+ const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-hp','Highest remaining HP'],['highest-hp-percent','Highest HP percentage'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge'],['final-wave','Save offensive BB until final recorded quest wave']]);
  const guard=option('Low HP Auto defense','bf10500-guard',[[0,'Off (original default)'],[20,'Guard at or below 20% HP'],[35,'Guard at or below 35% HP'],[50,'Guard at or below 50% HP']]);
  const status=document.createElement('p');status.id='bf10500-status';
