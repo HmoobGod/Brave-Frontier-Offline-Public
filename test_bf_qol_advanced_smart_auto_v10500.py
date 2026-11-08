@@ -125,6 +125,34 @@ with sync_playwright() as pw:
  p.evaluate("""()=>{__party105[0].unitId=20011;__party105[2].unitId=30011;}""")
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ # Player Auto Guard is optional; test source-safe live battler identity,
+ # archive Auto ownership, exact health threshold, and saved v7 isolation.
+ settings['guard']=35
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.locator('#bf10500-guard option').count()==4
+ assert p.evaluate(api+'.get().guard')==35
+ assert p.evaluate("""()=>JSON.parse(localStorage.getItem(
+   'bf_global_offline_qol_advanced_auto_v105')).guard""")==35
+ p.evaluate("""()=>{S.party=__party105;S.auto=true;S.mode='archive';S.over=false;
+    __party105[1].hp=35;__party105[1].maxHp=100;}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='guard'
+ assert p.evaluate('BF041SmartAuto.kindFor({...__party105[1]})')=='burst'
+ p.evaluate('S.auto=false')
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{S.auto=true;S.mode='training'}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{S.mode='archive';__party105[1].hp=36}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate('__party105[1].hp=35;__party105[1].maxHp=0')
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate('__party105[1].maxHp=100')
+ settings['guard']=999
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is False
+ assert p.evaluate(api+'.get().guard')==35
+ settings['guard']=0
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{S.auto=false;__party105[1].hp=100}""")
  # Missing target statistics and impossible enemy records fail closed.
  invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
           {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
@@ -151,7 +179,7 @@ with sync_playwright() as pw:
  assert p.locator('#bf10500-auto-settings').count()==1
  assert not errors,errors
  b.close()
-print('PASS v105 Smart Auto defaults, healer threshold, target, BB conservation and v7 isolation')
+print('PASS v105 Smart Auto defaults, optional low-HP Guard, heal, elemental focus, BB conservation and v7 isolation')
 
 # Exercise optional SBB planning through actual Auto turns.
 if __name__ == "__main__":
