@@ -108,7 +108,10 @@ with sync_playwright() as pw:
  assert p.locator('#bf10500-target').input_value()=='highest-hp'
  assert p.evaluate("""()=>JSON.parse(localStorage.getItem(
    'bf_global_offline_qol_advanced_auto_v105')).target""")=='highest-hp'
- # Actual player-facing select dispatches the same on-change path.
+ # Open the native settings disclosure before exercising the *visible*
+ # player select control. Playwright must not click a collapsed <details>.
+ p.locator('#bf10500-auto-settings summary').click()
+ assert p.locator('#bf10500-auto-settings').get_attribute('open') is not None
  p.locator('#bf10500-target').select_option('highest-hp-percent')
  assert p.evaluate(api+'.get().target')=='highest-hp-percent'
  settings['target']='highest-hp-percent'
