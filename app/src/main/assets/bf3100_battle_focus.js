@@ -27,7 +27,12 @@
  function lookup(kind){
    if(!strategies.some(x=>x[0]===kind)||!Array.isArray(S.enemies))return null;
    const key=kind==='highest-atk'?'atk':kind==='lowest-def'?'def':'hp';
-   const foes=S.enemies.filter(e=>e&&e.hp>0&&Number.isInteger(e.slot)&&Number.isFinite(e[key]));
+   // A focus shortcut must never prioritize corrupt/untargetable foe
+   // records (e.g. infinite HP or zero max HP) over a surviving real foe.
+   // This is the same fail-closed target eligibility used by Smart Auto.
+   const foes=S.enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
+     Number.isFinite(e.maxHp)&&e.maxHp>0&&
+     Number.isSafeInteger(e.slot)&&e.slot>=0&&Number.isFinite(e[key]));
    foes.sort((a,b)=>{
      const diff=kind==='highest-atk'?b[key]-a[key]:a[key]-b[key];
      return diff||a.slot-b.slot;
