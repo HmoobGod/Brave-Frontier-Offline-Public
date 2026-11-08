@@ -77,6 +77,28 @@ with sync_playwright() as pw:
  assert page.evaluate('QUEST.missionId')==10
  page.evaluate('finish(true)')
  assert page.evaluate('BFGlobalBattleResultsV3000.refresh().clearScene') is True
+ # Result-screen Next must agree with the campaign resolver even when a later
+ # archived mission has just been cleared and earlier missions are unfinished.
+ linked=page.evaluate("""()=>({
+    campaign:BFGrandGaiaCampaignV100.nextPlayable()?.missionId||null,
+    hud:BFGlobalStoryBattleV2000.snapshot().nextId,
+    result:BFGlobalBattleResultsV3000.snapshot().nextId
+ })""")
+ assert linked['campaign']==linked['hud']==linked['result'],linked
+ # Invalid *later* saved quest clear must block all navigation consumers.
+ quarantined=page.evaluate("""()=>{const id=QUESTS[QUESTS.length-1].missionId;
+   const prior=P.questClears[id];
+   try{
+     P.questClears[id]=-1;
+     return [BFGrandGaiaCampaignV100.nextPlayable(),
+       BFGlobalStoryBattleV2000.snapshot().nextId,
+       BFGlobalBattleResultsV3000.snapshot().nextId];
+   }finally{
+     if(prior===undefined)delete P.questClears[id];
+     else P.questClears[id]=prior;
+   }
+ }""")
+ assert quarantined==[None,None,None],quarantined
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is True
  assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().chosen')=='clear:10'
  assert 'Farm' in page.locator('#bf2200-text').inner_text()
