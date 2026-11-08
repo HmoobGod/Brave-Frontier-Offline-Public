@@ -23,7 +23,7 @@
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
        target:['percent','absolute','highest-atk','lowest-def','elemental'].includes(raw?.target)?raw.target:'percent',
-       burst:['normal','conserve'].includes(raw?.burst)?raw.burst:'normal',
+       burst:['normal','conserve','final-wave'].includes(raw?.burst)?raw.burst:'normal',
        guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0};
    }catch(_){return configDefaults();}
  }
@@ -33,7 +33,7 @@
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
      ['percent','absolute','highest-atk','lowest-def','elemental'].includes(options.target)&&
-     ['normal','conserve'].includes(options.burst)&&
+     ['normal','conserve','final-wave'].includes(options.burst)&&
      (options.guard===undefined||[0,20,35,50].includes(options.guard));
  }
  function set(next){
@@ -74,6 +74,22 @@
    }
    if(config.burst==='conserve'&&source.target!=='support'&&
       previous==='burst')return 'attack';
+   // Player opt-in: keep offensive BB for the *last recorded quest wave*.
+   // Only compare against the source-backed 2022 quest wave COUNT; actual
+   // enemy identities/AI and the boss's identity remain demo/unknown.
+   // Heal and support BBs stay available throughout the mission.
+   if(config.burst==='final-wave'&&previous==='burst'&&
+      ['single_enemy','all_enemies'].includes(source.target)&&
+      typeof S!=='undefined'&&S.mode==='archive'&&S.auto===true&&!S.over&&
+      Number.isSafeInteger(unit.id)&&unit.id>=0&&unit.id<6&&
+      S.party?.[unit.id]===unit&&Number.isSafeInteger(S.wave)&&S.wave>=0&&
+      typeof QUEST!=='undefined'&&typeof QUESTS!=='undefined'&&
+      Array.isArray(QUESTS)){
+     const archived=QUESTS.find(q=>q.missionId===QUEST?.missionId);
+     if(archived&&Number.isSafeInteger(archived.battles)&&archived.battles>1&&
+        archived.battles===QUEST.battles&&S.wave<archived.battles-1)
+       return 'attack';
+   }
    return previous;
  }
  // Source-backed elemental targeting for the player's optional Smart Auto.
@@ -156,14 +172,14 @@
  settings.append(onLabel);
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
  const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)']]);
- const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge']]);
+ const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge'],['final-wave','Save offensive BB until final recorded quest wave']]);
  const guard=option('Low HP Auto defense','bf10500-guard',[[0,'Off (original default)'],[20,'Guard at or below 20% HP'],[35,'Guard at or below 35% HP'],[50,'Guard at or below 50% HP']]);
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
    'Element targeting uses known original unit types and visible, identified enemy types; '+
    'unknown weaknesses revert to the existing HP% strategy. Optional Guard applies '+
-   'only to active player Auto turns; no changes to enemy AI, damage, rewards or v7 save.';
+   'only to active player Auto turns. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
  function refresh(){
    toggle.checked=config.on;heal.value=String(config.heal);
