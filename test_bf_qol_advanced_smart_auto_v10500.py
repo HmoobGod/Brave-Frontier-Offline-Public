@@ -72,7 +72,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
  # Optional player strategies add visible demo enemy ATK/DEF priorities without
  # touching the original default, battle commands, save or enemy-owned AI.
- assert p.locator('#bf10500-target option').count()==5
+ assert p.locator('#bf10500-target option').count()==7
  candidates=[
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
@@ -95,6 +95,42 @@ with sync_playwright() as pw:
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
+ # New opt-in boss-focused choices have distinct absolute and relative HP
+ # semantics. Both use native slots; ties prefer the lower original slot.
+ hp_choices=[
+   {'hp':500,'maxHp':1000,'slot':5,'atk':60,'def':80},
+   {'hp':80,'maxHp':100,'slot':2,'atk':20,'def':40},
+   {'hp':150,'maxHp':200,'slot':7,'atk':100,'def':20}
+ ]
+ settings['target']='highest-hp'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",hp_choices)==5
+ assert p.locator('#bf10500-target').input_value()=='highest-hp'
+ assert p.evaluate("""()=>JSON.parse(localStorage.getItem(
+   'bf_global_offline_qol_advanced_auto_v105')).target""")=='highest-hp'
+ # Actual player-facing select dispatches the same on-change path.
+ p.locator('#bf10500-target').select_option('highest-hp-percent')
+ assert p.evaluate(api+'.get().target')=='highest-hp-percent'
+ settings['target']='highest-hp-percent'
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",hp_choices)==2
+ tied=[{'hp':80,'maxHp':100,'slot':5},
+       {'hp':40,'maxHp':50,'slot':2}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",tied)==2
+ for high_priority in ('highest-hp','highest-hp-percent'):
+  settings['target']=high_priority
+  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+  # Corrupt living foe data must block targeting rather than discarding a
+  # badly typed, duplicate, or otherwise ambiguous native enemy slot.
+  for malformed in ('numeric-infinity','string-infinity','zero-max','duplicate-slot'):
+   outcome=p.evaluate("""({rows,variant})=>{
+     const bad=variant==='numeric-infinity'?{hp:Infinity,maxHp:100,slot:9}:
+       variant==='string-infinity'?{hp:'Infinity',maxHp:100,slot:9}:
+       variant==='zero-max'?{hp:4,maxHp:0,slot:9}:
+       {hp:4,maxHp:10,slot:2};
+     return BF042AutoCoordination.chooseTarget([bad,...rows]);
+   }""",{'rows':hp_choices,'variant':malformed})
+   assert outcome is None,(high_priority,malformed)
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",hp_choices)==(5 if high_priority=='highest-hp' else 2)
  # Elemental player Auto priority uses the real source-backed six-element
  # matchup API; its threat choice is team-wide and never guesses unknown types.
  p.evaluate("""()=>{window.S={mode:'archive',over:false,round:0,enemies:[]};
