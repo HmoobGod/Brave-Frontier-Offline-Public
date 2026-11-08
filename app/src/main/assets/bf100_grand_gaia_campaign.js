@@ -88,11 +88,18 @@
  // Never synthesize a fight, award a clear, or modify canonical v7 progress.
  function nextPlayable(){
    if(typeof P!=='object' || !P || !P.questClears || typeof questUnlocked!=='function')return null;
+   // Validate the entire source catalog and clear ledger before selecting a mission.
+   // An invalid later record must not be hidden by an earlier playable mission.
+   const seen=new Set();
    for(const q of QUESTS){
-     if(!q || !Number.isSafeInteger(q.missionId) || !idset.has(q.dungeonId))return null;
+     if(!q || !Number.isSafeInteger(q.missionId) || seen.has(q.missionId) ||
+        !idset.has(q.dungeonId) || !Number.isSafeInteger(q.battles) || q.battles<1)return null;
+     seen.add(q.missionId);
      const count=P.questClears[q.missionId];
      if(count!==undefined && (!Number.isSafeInteger(count) || count<0))return null;
-     if((count||0)===0 && questUnlocked(q))
+   }
+   for(const q of QUESTS){
+     if((P.questClears[q.missionId]||0)===0 && questUnlocked(q))
        return Object.freeze({missionId:q.missionId,dungeonId:q.dungeonId,
          name:String(q.name||''),battles:q.battles});
    }
