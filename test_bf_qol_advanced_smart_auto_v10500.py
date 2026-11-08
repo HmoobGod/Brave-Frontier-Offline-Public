@@ -31,7 +31,7 @@ with sync_playwright() as pw:
    ];
    window.liveParty=()=>__party105;
    window.bfOriginalBB=id=>id===20011?{target:'support'}:
-     id===30011?{target:'support'}:{target:'single'};
+     id===30011?{target:'support'}:{target:'single_enemy'};
    window.originalSupport=id=>id===20011?{kind:'heal_all'}:
      id===30011?{kind:'atk_buff_all',pct:30}:null;
    window.BF041SmartAuto={
@@ -155,6 +155,33 @@ with sync_playwright() as pw:
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
  p.evaluate("""()=>{S.auto=false;__party105[1].hp=100}""")
+ # Source-backed quest final-wave offensive BB conservation. Support buffs
+ # remain available in earlier waves, and unknown quest data never invents
+ # a boss wave or changes existing kindFor decisions.
+ settings['burst']='final-wave'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.locator('#bf10500-burst option').count()==3
+ p.evaluate("""()=>{window.QUESTS=[{missionId:1,battles:3}];QUEST=QUESTS[0];
+   S.party=__party105;S.wave=0;S.mode='archive';S.over=false;S.auto=true;}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
+ p.evaluate('S.wave=1')
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
+ p.evaluate('S.wave=2')
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate('S.wave=3')
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{S.wave=0;QUEST={missionId:99,battles:3}}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{QUEST=QUESTS[0];S.mode='training'}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate("""()=>{S.mode='archive';S.auto=false}""")
+ assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
+ p.evaluate('S.auto=true')
+ assert p.evaluate('BF041SmartAuto.kindFor({...__party105[1]})')=='burst'
+ p.evaluate('S.auto=false')
+ settings['burst']='normal'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Missing target statistics and impossible enemy records fail closed.
  invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
           {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
@@ -181,7 +208,7 @@ with sync_playwright() as pw:
  assert p.locator('#bf10500-auto-settings').count()==1
  assert not errors,errors
  b.close()
-print('PASS v105 Smart Auto defaults, optional low-HP Guard, heal, elemental focus, BB conservation and v7 isolation')
+print('PASS v105 Smart Auto defaults, low-HP Guard, final-wave offensive BB, heal, elemental targeting and v7 isolation')
 
 # Exercise optional SBB planning through actual Auto turns.
 if __name__ == "__main__":
