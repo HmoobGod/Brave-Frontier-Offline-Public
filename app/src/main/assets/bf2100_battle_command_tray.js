@@ -71,8 +71,14 @@
    // disabled placeholders for defeated enemies. Never map a surviving
    // enemy slot through an unverified index in the wrong button list.
    const all=Array.isArray(S.enemies)?S.enemies:[];
-   const living=all.filter(e=>e&&e.hp>0&&Number.isSafeInteger(e.slot));
-   if(!living.some(e=>e.slot===slot))return false;
+   // Recheck the entire live target roster before translating native button
+   // indices. A corrupt/duplicate live slot makes its mapping ambiguous even
+   // if the requested target happens to be valid.
+   const living=all.filter(e=>e&&e.hp>0);
+   if(living.some(e=>!Number.isFinite(e.hp)||!Number.isFinite(e.maxHp)||
+      e.maxHp<=0||!Number.isSafeInteger(e.slot)||e.slot<0)||
+      new Set(living.map(e=>e.slot)).size!==living.length||
+      !living.some(e=>e.slot===slot))return false;
    const rendered=Array.from(targetList.children);
    if(!rendered.every(b=>b.tagName==='BUTTON'))return false;
    const source=rendered.length===all.length?all:

@@ -77,6 +77,28 @@ with sync_playwright() as pw:
  assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
  assert assigned==[['attack',1 if i%2==0 else 2] for i in range(len(assigned))],assigned
  assert page.evaluate('S.enemies[0].hp')==0
+ # A broken live foe (or duplicate slot) makes the native button-to-enemy
+ # mapping unsafe. Fail before clicking, without exposing corrupt temporary
+ # records to the browser renderer between evaluation tasks.
+ invalid_results=page.evaluate("""()=>{const original=S.enemies;
+   const selected=S.target,seed=original[1];
+   const good={...seed,slot:2,hp:100,maxHp:200};
+   const cases=[
+     [{...seed,slot:1,hp:40,maxHp:0},good],
+     [{...seed,slot:1,hp:Infinity,maxHp:100},good],
+     [{...seed,slot:-1,hp:40,maxHp:100},good],
+     [{...seed,slot:2,hp:40,maxHp:100},good],
+     [{...seed,slot:1,hp:40,maxHp:undefined},good]
+   ];
+   try{
+     return cases.map(foes=>{
+       S.enemies=foes;
+       return BFGlobalBattleCommandsV2100.setTarget(2);
+     });
+   }finally{S.enemies=original;S.target=selected;}
+ }""")
+ assert invalid_results==[False]*5,invalid_results
+ assert page.evaluate('S.enemies[0].hp')==0
  # Source-backed elemental matchup option uses the original 2022 six-element
  # relationship, but never invents unknown demo enemy/ally elements or damage.
  assert page.locator('#bf2100-elements').is_visible()
