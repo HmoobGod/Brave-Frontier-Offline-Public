@@ -88,7 +88,7 @@ with sync_playwright() as pw:
      [{...seed,slot:1,hp:Infinity,maxHp:100},good],
      [{...seed,slot:-1,hp:40,maxHp:100},good],
      [{...seed,slot:2,hp:40,maxHp:100},good],
-     [{...seed,slot:1,hp:40},good]
+     [{...seed,slot:1,hp:40,maxHp:undefined},good]
    ];
    try{
      return cases.map(foes=>{
