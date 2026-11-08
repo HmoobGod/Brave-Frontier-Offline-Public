@@ -70,6 +70,7 @@ with sync_playwright() as pw:
  p.evaluate(api+'.poll()')
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert 'quest or mode changed' in p.evaluate(api+'.statusSnapshot().reason')
+ assert not p.locator('#auto').is_checked(),'unexpected quest change kept native Auto running'
  # Defeat stops repeats instead of replaying a loss.
  p.evaluate("""()=>{QUEST.missionId=1;S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(2)') is True
@@ -77,6 +78,24 @@ with sync_playwright() as pw:
  p.evaluate(api+'.poll()')
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert 'battle lost' in p.evaluate(api+'.statusSnapshot().reason')
+ assert not p.locator('#auto').is_checked(),'defeat cancellation kept native Auto running'
+ # A failed native save or unconfirmed repeated clear must also disarm Auto,
+ # and may never trigger another replay or mutate the canonical player data.
+ for failed in ('save','missing-clear'):
+  p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
+    window.__stored98=true;document.getElementById('auto').checked=false;}""")
+  assert p.evaluate(api+'.start(2)') is True,failed
+  assert p.locator('#auto').is_checked(),failed
+  before_player=p.evaluate('JSON.stringify(P)')
+  before_replays=p.evaluate('window.__repeatCount')
+  p.evaluate('S.over=true;S.phase="Victory"')
+  if failed=='save':p.evaluate('window.__stored98=false')
+  assert p.evaluate(api+'.poll()') is True,failed
+  assert not p.evaluate(api+'.statusSnapshot().active'),failed
+  assert not p.locator('#auto').is_checked(),failed
+  assert p.evaluate('window.__repeatCount')==before_replays,failed
+  assert p.evaluate('JSON.stringify(P)')==before_player,failed
+  p.evaluate('window.__stored98=true')
  # Auto checkbox turning off is an immediate opt-out.
  p.evaluate("""()=>{S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(5)') is True
@@ -169,4 +188,4 @@ with sync_playwright() as pw:
  assert p.evaluate('P.version')==7
  assert not errors,errors
  b.close()
-print('PASS v98 bounded cleared-quest replay: two confirmed clears, stop/defeat/mode/auto and v7 isolation')
+print('PASS v98 bounded cleared-quest replay: verified clears, stop, unexpected cancellation disarms Auto and v7 isolation')
