@@ -67,6 +67,39 @@ with sync_playwright() as pw:
  assert page.evaluate('S.party[0].action.kind')=='burst'
  assert page.evaluate('S.party.slice(1).every(p=>p.action.kind==="attack")')
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().bbReady')==1
+ # Offensive squad shortcuts must reject the WHOLE corrupt native foe roster
+ # before the first player click; no partial orders or selected target change.
+ # Keep temporary malformed state inside one synchronous browser task.
+ rejected=page.evaluate("""()=>{const enemy=S.enemies,party=S.party;
+   const first=enemy[0],before=S.party.map(p=>JSON.stringify(p.action));
+   const selected=S.target;
+   const cases=[
+     [{...first,slot:0,hp:Infinity,maxHp:100},{...first,slot:1,hp:80,maxHp:100}],
+     [{...first,slot:0,hp:'Infinity',maxHp:100},{...first,slot:1,hp:80,maxHp:100}],
+     [{...first,slot:0,hp:20,maxHp:0},{...first,slot:1,hp:80,maxHp:100}],
+     [{...first,slot:1,hp:20,maxHp:100},{...first,slot:1,hp:80,maxHp:100}],
+     [{...first,slot:-1,hp:20,maxHp:100},{...first,slot:1,hp:80,maxHp:100}]
+   ];
+   try{
+     const results=cases.map(foes=>{
+       S.enemies=foes;
+       const attack=BFGlobalBattleCommandsV2100.queueAll('attack');
+       const burst=BFGlobalBattleCommandsV2100.queueAll('burst');
+       return {attack,burst,targetUnchanged:S.target===selected,
+         ordersUnchanged:before.every((a,i)=>a===JSON.stringify(S.party[i].action))};
+     });
+     S.enemies=enemy;
+     S.party=[party[0],{...party[1],id:party[0].id},...party.slice(2)];
+     const invalidAlly=BFGlobalBattleCommandsV2100.queueAll('attack');
+     const allyUnchanged=before.every((a,i)=>a===JSON.stringify(party[i].action));
+     return {results,invalidAlly,allyUnchanged};
+   }finally{S.enemies=enemy;S.party=party;S.target=selected;}
+ }""")
+ assert len(rejected['results'])==5,rejected
+ assert all(x['attack'] is False and x['burst'] is False and
+            x['targetUnchanged'] and x['ordersUnchanged']
+            for x in rejected['results']),rejected
+ assert rejected['invalidAlly'] is False and rejected['allyUnchanged'],rejected
  slots=page.evaluate('BFGlobalBattleCommandsV2100.snapshot().foes.map(e=>e.slot)')
  assert slots
  assert page.evaluate('(slot)=>BFGlobalBattleCommandsV2100.setTarget(slot)',slots[-1]) is True
@@ -191,4 +224,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: native squad attacks, wounded guards, spread, source element, KO targeting, busy/auto and v7 isolation')
+print('PASS v21.00: safe native squad queue, malformed foe/ally preflight, wounded guards, spread, KO targeting and v7 isolation')
