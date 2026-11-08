@@ -66,6 +66,26 @@ with sync_playwright() as pw:
   # Source-ordered next-playable lookup is read-only and respects real unlocks.
   initial_next=page.evaluate("""() => BFGrandGaiaCampaignV100.nextPlayable()""")
   assert initial_next is not None and initial_next['missionId']==page.evaluate('QUESTS[0].missionId')
+  # A malformed later record must block selection of an otherwise valid first mission.
+  # Restore the exact in-memory fixture without touching any persistent owner save.
+  preflight=page.evaluate("""() => {
+    const first=BFGrandGaiaCampaignV100.nextPlayable();
+    const later=QUESTS[QUESTS.length-1].missionId;
+    const original=P.questClears[later];
+    try {
+      P.questClears[later]=-1;
+      const invalidLater=BFGrandGaiaCampaignV100.nextPlayable();
+      P.questClears[later]=Number.NaN;
+      const nonfiniteLater=BFGrandGaiaCampaignV100.nextPlayable();
+      return {first,invalidLater,nonfiniteLater};
+    } finally {
+      if(original===undefined)delete P.questClears[later];
+      else P.questClears[later]=original;
+    }
+  }""")
+  assert preflight['first']['missionId']==initial_next['missionId']
+  assert preflight['invalidLater'] is None and preflight['nonfiniteLater'] is None
+  assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable().missionId')==initial_next['missionId']
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version
