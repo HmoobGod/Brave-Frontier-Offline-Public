@@ -40,6 +40,28 @@ with sync_playwright() as pw:
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ # Player-only defensive tactic: wounded allies Guard, healthy allies Attack.
+ # Native buttons queue orders but do not run a turn, heal units, or award XP.
+ assert page.locator('#bf2100-protect').is_visible()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
+ page.evaluate("""()=>{S.party.forEach((p,i)=>{
+   if(!p.active||p.hp<=0)return;
+   p.hp=i<2?Math.max(1,Math.floor(p.maxHp*(i===0?.25:.40))):p.maxHp;
+ });update()}""")
+ plan=page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()')
+ assert plan and len(plan['orders'])==6,plan
+ assert [o['kind'] for o in plan['orders']]==['guard','guard']+['attack']*4,plan
+ assert not page.locator('#bf2100-protect').is_disabled()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is True
+ actions=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action.kind,p.action.target])')
+ assert [x[0] for x in actions]==['guard','guard']+['attack']*4,actions
+ assert all(x[1]==plan['target'] for x in actions[2:]),actions
+ assert page.evaluate('S.busy') is False
+ page.evaluate("""()=>{S.party.forEach(p=>{if(p.active&&p.hp>0)p.hp=p.maxHp});update()}""")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
+ # The original burst and target-selection shortcuts still work afterwards.
  page.evaluate('S.party[0].bb=100;update()')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("burst")') is True
  assert page.evaluate('S.party[0].action.kind')=='burst'
@@ -143,6 +165,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
  page.evaluate('S.busy=false')
  page.locator('#auto').check()
@@ -150,6 +173,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  page.locator('#auto').uncheck()
  page.evaluate('BFGlobalBattleCommandsV2100.refresh()')
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -167,4 +191,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: native queue, spread and source-backed element attacks, KO target, busy/auto guards, v7 isolation')
+print('PASS v21.00: native squad attacks, wounded guards, spread, source element, KO targeting, busy/auto and v7 isolation')
