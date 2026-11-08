@@ -409,9 +409,31 @@
       'No beneficial Imp materials available; no inventory spent.';refresh();
   });
   exportButton.addEventListener('click',()=>{backupText.value=exportState()||'';});
-  importButton.addEventListener('click',()=>{message=importState(backupText.value)?
-    'Imp progress stored with the current v7 save.':
-    'Invalid Imp backup; current save was not changed.';refresh();});
+  importButton.addEventListener('click',()=>{
+    const raw=backupText.value;
+    let parsed=null;
+    try{
+      if(typeof raw==='string'&&raw.length<=250000)
+        parsed=validState(JSON.parse(raw));
+    }catch(_){}
+    if(!parsed){
+      message='Invalid Imp backup; current save was not changed.';
+      refresh();return;
+    }
+    // A manual Imp restore replaces earned stock, bonuses and quest-claim
+    // cursors. Never overwrite them on a stray tap or a missing dialog.
+    if(typeof confirm!=='function'||!confirm(
+      'Restore this Imp backup to the CURRENT save? This REPLACES your '+
+      'current Imp inventory, fed bonuses and reward cursors. Only use a '+
+      'backup belonging to this same v7 game save. Continue?')){
+      message='Imp restore canceled; current save was not changed.';
+      refresh();return;
+    }
+    message=importState(raw)?
+      'Imp progress stored with the current v7 save.':
+      'Imp restore failed; current save was not changed.';
+    refresh();
+  });
   function legacyImport(){
     synchronize();
     if(state||invalidStorage)return false;
