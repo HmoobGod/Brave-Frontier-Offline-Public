@@ -132,9 +132,14 @@
    // ranking by an optional visible enemy statistic. Unknown stats fail closed.
    const key=config.target==='highest-atk'?'atk':
      config.target==='lowest-def'?'def':'hp';
-   const eligible=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
-     Number.isFinite(e.maxHp)&&e.maxHp>0&&
-     Number.isSafeInteger(e.slot)&&e.slot>=0&&Number.isFinite(e[key]));
+   // Do not silently discard a corrupt *living* enemy and queue a command
+   // against a possibly ambiguous native slot. Match elemental fail-closed.
+   const live=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+   if(enemies.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp))||
+      live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+        !Number.isSafeInteger(e.slot)||e.slot<0)||
+      new Set(live.map(e=>e.slot)).size!==live.length)return null;
+   const eligible=live.filter(e=>Number.isFinite(e[key]));
    eligible.sort((a,b)=>{
      const delta=config.target==='highest-atk'?b.atk-a.atk:a[key]-b[key];
      return delta||a.slot-b.slot;
