@@ -102,6 +102,9 @@
       typeof element.multiplier!=='function'||
       typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function')
      return undefined;
+   // Infinite or string-coerced positive HP may still occupy a native foe
+   // slot. Refuse ambiguous targets instead of silently omitting that enemy.
+   if(enemies.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
    const live=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
    if(live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
        !Number.isSafeInteger(e.slot)||e.slot<0)||
