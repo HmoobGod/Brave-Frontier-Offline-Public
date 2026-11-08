@@ -63,6 +63,9 @@ with sync_playwright() as pw:
   assert page.evaluate('BFGrandGaiaCampaignV100.summary().cleared')==0
   assert page.evaluate('BFMorganMapV080.isUnlocked(200)') is False
   assert page.evaluate('BFStLamiaMapV090.isUnlocked(300)') is False
+  # Source-ordered next-playable lookup is read-only and respects real unlocks.
+  initial_next=page.evaluate("""() => BFGrandGaiaCampaignV100.nextPlayable()""")
+  assert initial_next is not None and initial_next['missionId']==page.evaluate('QUESTS[0].missionId')
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version
@@ -84,6 +87,11 @@ with sync_playwright() as pw:
              got:[P.exp-past.exp,P.zel-past.zel,P.karma-past.karma,P.clears-past.clears],
              expected:[q.exp,q.zel,q.karma,1]};
         log.push(q.missionId);
+        const next=BFGrandGaiaCampaignV100.nextPlayable();
+        if(i<QUESTS.length-1 && (!next || next.missionId!==QUESTS[i+1].missionId))
+          return {error:'next playable mismatch',at:i,next};
+        if(i===QUESTS.length-1 && next!==null)
+          return {error:'completed campaign still playable',next};
         if([33,69,105].includes(i))checkpoints.push({
           at:log.length,campaign:BFGrandGaiaCampaignV100.summary(),
           morgan:BFMorganMapV080.isUnlocked(200),
@@ -100,6 +108,7 @@ with sync_playwright() as pw:
      }};
   }""")
   assert 'error' not in report,report
+  assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable()') is None
   assert len(report['log'])==106
   assert len(set(report['log']))==106
   assert [a['at'] for a in report['checkpoints']]==[34,70,106]
