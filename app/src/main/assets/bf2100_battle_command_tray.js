@@ -46,9 +46,10 @@
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
  const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
+ const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional quick controls use the original demo buttons. Spread Attacks distributes allies across living foes. Element Advantage queues normal attacks against enemies with source-verified weaknesses, while keeping the player-selected target for unmatched allies. Paid item reservations keep Guard. Nothing executes until Execute is pressed; unknown elements are never invented.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Element Advantage uses source-known weaknesses; Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -207,6 +208,55 @@
    }
    signature='';refresh();return true;
  }
+ // Manual defensive turn planner. Use only existing native player Guard and
+ // Attack buttons; do not modify HP, turn outcome, enemy AI or rewards.
+ // Read-only planning keeps the UI refresh path free of hidden battle clicks.
+ function woundedPlan(){
+   if(!ready()||!Array.isArray(S.party)||!Array.isArray(S.enemies))return null;
+   const squad=active(),ids=squad.map(p=>p.id);
+   if(squad.some(p=>!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||
+      p.maxHp<=0||!Number.isSafeInteger(p.id)||p.id<0||
+      !slots.children[p.id]||slots.children[p.id].disabled)||
+      new Set(ids).size!==ids.length)return null;
+   const wounded=new Set(squad.filter(p=>p.hp/p.maxHp<=0.40).map(p=>p.id));
+   if(!wounded.size)return null; // Normal Queue All Attacks covers healthy squads.
+   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   if(!Array.isArray(reservations)||reservations.some(r=>!Number.isSafeInteger(r.slot)||
+      r.slot<0))return null;
+   const reserved=new Set(reservations.map(r=>r.slot));
+   const orders=squad.map(p=>Object.freeze({slot:p.id,
+      kind:wounded.has(p.id)||reserved.has(p.id)?'guard':'attack'}));
+   if(orders.some(order=>order.kind==='attack')){
+     // Match native target button shape without pressing any controls yet.
+     const all=S.enemies,living=enemies();
+     if(!living.length||living.some(e=>!Number.isFinite(e.hp)||!Number.isFinite(e.maxHp)||
+       e.maxHp<=0||!Number.isSafeInteger(e.slot)||e.slot<0)||
+       new Set(living.map(e=>e.slot)).size!==living.length)return null;
+     const rendered=Array.from(targetList.children);
+     if(!rendered.every(b=>b.tagName==='BUTTON'))return null;
+     const source=rendered.length===all.length?all:
+       rendered.length===living.length?living:null;
+     const index=source?.findIndex(e=>e?.slot===S.target&&e.hp>0)??-1;
+     if(index<0||!rendered[index]||rendered[index].disabled)return null;
+   }
+   return Object.freeze({target:S.target,orders:Object.freeze(orders)});
+ }
+ function protectWounded(){
+   const plan=woundedPlan();
+   if(!plan)return false;
+   if(plan.orders.some(order=>order.kind==='attack')&&!setTarget(plan.target))
+     return false;
+   for(const order of plan.orders){
+     if(!ready())return false;
+     const slot=slots.children[order.slot],command=order.kind==='guard'?guard:attack;
+     if(!slot||slot.disabled||command.disabled)return false;
+     slot.click();command.click();
+     const p=S.party.find(u=>u?.id===order.slot);
+     if(!p||p.action?.kind!==order.kind||
+        (order.kind==='attack'&&p.action.target!==plan.target))return false;
+   }
+   signature='';refresh();return true;
+ }
  function executeTurn(){
    if(!snapshot().canExecute||execute.disabled)return false;
    execute.click();signature='';refresh();return true;
@@ -220,6 +270,7 @@
      (st.auto?' · Auto Battle enabled':'');
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
    element.disabled=!elementPlan();
+   protect.disabled=!woundedPlan();
    fire.disabled=!st.canExecute;
    const group=document.createDocumentFragment();
    for(const e of st.foes){
@@ -236,5 +287,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,elementPlan,elementAttacks,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,elementPlan,elementAttacks,woundedPlan,protectWounded,executeTurn});
 })();
