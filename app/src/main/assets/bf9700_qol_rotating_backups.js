@@ -27,8 +27,12 @@
    try{
      const value=JSON.parse(safeGet(backupKey)||'null');
      if(!value||value.version!==1||!Array.isArray(value.slots))return [];
-     return value.slots.slice(0,limit).filter(x=>
-       x&&Number.isSafeInteger(x.time)&&x.time>0&&valid(x.raw));
+     const seen=new Set();
+     return value.slots.slice(0,limit).filter(x=>{
+       if(!x||!Number.isSafeInteger(x.time)||x.time<=0||
+          !valid(x.raw)||seen.has(x.raw))return false;
+       seen.add(x.raw);return true;
+     });
    }catch(_){return [];}
  }
  let enabled=safeGet(enabledKey)!=='off';
@@ -43,7 +47,10 @@
    if(!valid(raw))return false;
    const slots=existing();
    if(slots[0]?.raw===raw)return false;
-   const next=[{time:Date.now(),raw},...slots].slice(0,limit);
+   // Restoring an older valid save should move it to newest without wasting
+   // one of the three recovery slots on byte-identical progress.
+   const next=[{time:Date.now(),raw},...slots.filter(x=>x.raw!==raw)]
+     .slice(0,limit);
    try{localStorage.setItem(backupKey,JSON.stringify({version:1,slots:next}));}
    catch(_){return false;}
    refresh();return true;

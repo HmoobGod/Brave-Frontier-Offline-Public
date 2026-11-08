@@ -111,6 +111,53 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.enabled') is True
  assert p.evaluate(api+'.listing().length')==3
  assert p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).version")==7
+ # A previously saved state can become current again after an export/import
+ # or a user restoring an older snapshot. Its bytes must not waste a slot.
+ p.evaluate("""() => {
+   const a=BFGlobalQoLBackupsV9700;
+   P.questClears[1]=10;
+   const raw=JSON.stringify(P);
+   localStorage.setItem(a.liveKey,raw);
+   localStorage.setItem(a.key,JSON.stringify({version:1,
+      slots:[{time:1001,raw}]}));
+ }""")
+ for n in [11,10]:
+  p.evaluate("""n=>{
+    const a=BFGlobalQoLBackupsV9700;
+    P.questClears[1]=n;
+    localStorage.setItem(a.liveKey,JSON.stringify(P));
+  }""",n)
+  before_live=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")
+  assert p.evaluate(api+'.capture()') is True
+  assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")==before_live
+ assert p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700;
+   const slots=JSON.parse(localStorage.getItem(a.key)).slots;
+   return slots.map(x=>JSON.parse(x.raw).questClears[1]);
+ }""")==[10,11]
+ assert p.evaluate(api+'.listing().length')==2
+ assert '2/3 distinct saved snapshots' in p.locator('#bf9700-status').text_content()
+ # Older valid backup histories may already contain duplicate raw values.
+ # Reading/refreshing deduplicates presentation without rewriting them.
+ p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700,raw=localStorage.getItem(a.liveKey);
+   const other=JSON.stringify({...P,questClears:{1:11}});
+   localStorage.setItem(a.key,JSON.stringify({version:1,slots:[
+     {time:1003,raw},{time:1002,raw},{time:1001,raw:other}]}));
+ }""")
+ original_duplicate=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")
+ assert p.evaluate(api+'.refresh().length')==2
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==original_duplicate
+ p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700;
+   P.questClears[1]=12;localStorage.setItem(a.liveKey,JSON.stringify(P));
+ }""")
+ assert p.evaluate(api+'.capture()') is True
+ assert p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700;
+   return JSON.parse(localStorage.getItem(a.key)).slots
+      .map(x=>JSON.parse(x.raw).questClears[1]);
+ }""")==[12,10,11]
  p.add_script_tag(path=str(asset))
  assert p.locator('#bf9700-backups').count()==1
  assert not errors,errors
