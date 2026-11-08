@@ -68,6 +68,54 @@ with sync_playwright() as pw:
  assert page.locator('#bf101-continue').is_disabled()
  assert '106 archived story missions cleared' in page.locator('#bf101-next').text_content()
  assert page.locator('#bf101-story-continue [aria-valuenow]').get_attribute('aria-valuenow')=='106'
+ # Start a separate, clean synthetic player profile for the quota case.
+ # Rewinding a previously cleared 106-mission profile to zero in memory is
+ # not a valid save migration and can correctly fail the v7 save guard.
+ page.close()
+ page=browser.new_page(viewport={'width':390,'height':844})
+ page.on('pageerror',lambda e:errors.append(str(e)))
+ page.evaluate("""() => {
+   const db={};
+   Object.defineProperty(window,'localStorage',{configurable:true,value:{
+      getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
+      removeItem:k=>{delete db[k]},key:i=>Object.keys(db)[i]??null,
+      get length(){return Object.keys(db).length}}});
+   window.alert=()=>{};window.confirm=()=>true;
+   HTMLMediaElement.prototype.load=()=>{};
+   HTMLMediaElement.prototype.pause=()=>{};
+   HTMLMediaElement.prototype.play=()=>Promise.resolve();
+ }""")
+ page.set_content((A/'index.html').read_text('utf-8'),wait_until='load',timeout=90000)
+ page.add_style_tag(path=str(A/'bf_home_nav.css'))
+ for name in ('bf_home_nav.js','bf080_morgan_map.js','bf090_st_lamia_map.js',
+              'bf100_grand_gaia_campaign.js','bf101_story_continue.js'):
+  page.add_script_tag(path=str(A/name))
+ page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ assert page.evaluate('P.questClears[1]') is None
+ assert page.evaluate('QUEST.missionId')==1
+ persisted=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate("""()=>{window.__continueOriginalSet=localStorage.setItem.bind(localStorage);
+   window.__continueDenySave=true;
+   localStorage.setItem=(key,value)=>{
+     if(__continueDenySave&&key==='bf_global_offline_demo_v7')
+       throw new DOMException('Synthetic storage quota','QuotaExceededError');
+     return __continueOriginalSet(key,value);
+   };
+   finish(true);
+   BFGrandGaiaContinueV101.refresh();
+ }""")
+ assert page.evaluate('P.questClears[1]')>=1
+ assert page.evaluate('BFGrandGaiaContinueV101.snapshot().nextMission') is None
+ assert page.evaluate('BFGrandGaiaContinueV101.nextMission') is None
+ assert page.locator('#bf101-continue').is_disabled()
+ assert 'VICTORY NOT SAVED' in page.locator('#bf101-next').inner_text()
+ assert page.evaluate('QUEST.missionId')==1
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
+ assert page.evaluate("()=>{__continueDenySave=false;return saveProgress()}") is True
+ assert page.evaluate('BFGrandGaiaContinueV101.refresh().nextMission')==2
+ assert page.locator('#bf101-continue').is_enabled()
+ page.locator('#bf101-continue').click()
+ assert page.evaluate('QUEST.missionId')==2
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()

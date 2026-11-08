@@ -51,6 +51,10 @@
  questDetail.after(panel);
  const region=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
  const cleared=q=>(P.questClears?.[q.missionId]||0)>0;
+ // Share the core's canonical v7 save-success gate with the result screen.
+ // A won mission kept only in memory cannot open the next story stage.
+ const progressStored=()=>typeof saveEnabled==='boolean'&&saveEnabled&&
+   typeof saveRecoveryPending==='boolean'&&!saveRecoveryPending;
  function upcoming(q){
    const index=QUESTS.findIndex(row=>row.missionId===q?.missionId);
    return index<0?null:QUESTS.slice(index+1).find(row=>!cleared(row)&&questUnlocked(row))||null;
@@ -69,12 +73,13 @@
    const current=total?(won?total:Math.min(total,completed+1)):0;
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
    const foes=Array.isArray(S.enemies)?S.enemies.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
-   const upcomingQuest=archive&&won&&cleared(q)?upcoming(q):null;
+   const stored=progressStored();
+   const upcomingQuest=archive&&won&&stored&&cleared(q)?upcoming(q):null;
    return Object.freeze({
      missionId:q.missionId,region:['Mistral','Morgan','St. Lamia'][region(q)],
      name:reference?.mission?.name||'Mission '+q.missionId,
      dungeon:reference?.dungeon?.name||'Dungeon '+q.dungeonId,
-     archive,total,current,completed,won,lost,busy:!!S.busy,
+     archive,total,current,completed,won,lost,stored,busy:!!S.busy,
      phase:String(S.phase||''),clears:P.questClears?.[q.missionId]||0,
      allies:party.filter(u=>u.hp>0).length,party:party.length,
      enemies:foes.filter(u=>u.hp>0).length,foes:foes.length,
@@ -106,16 +111,20 @@
    waves.replaceChildren(fragment);
    status.textContent=(state.won?'VICTORY':state.lost?'DEFEAT':state.busy?'TURN IN PROGRESS':'BATTLE READY')+
      ' · Wave '+state.current+'/'+state.total+
-     ' · Allies '+state.allies+'/'+state.party+' · Enemies '+state.enemies+'/'+state.foes;
+     ' · Allies '+state.allies+'/'+state.party+' · Enemies '+state.enemies+'/'+state.foes+
+     (state.archive&&state.won&&!state.stored?
+       ' · SAVE REQUIRED: retry save or export backup before advancing':'');
    next.disabled=!!state.busy||!state.nextId;
    next.textContent=state.nextId?'NEXT: '+state.nextName+' ›':'NEXT STORY MISSION ›';
    next.title=state.nextId?'Continue to archived mission '+state.nextId:
-     'Clear the current DEMO story battle to unlock the next mission';
+     state.archive&&state.won&&!state.stored?
+       'Victory not saved. Retry Save or download a backup before continuing':
+       'Clear the current DEMO story battle to unlock the next mission';
    return state;
  }
  function advance(){
    const state=snapshot();
-   if(!state||state.busy||!state.won||!state.archive||!state.nextId)return false;
+   if(!state||state.busy||!state.won||!state.archive||!state.stored||!state.nextId)return false;
    const q=QUESTS.find(row=>row.missionId===state.nextId);
    if(!q||!questUnlocked(q)||cleared(q)||!BFQuestAreas.choose(q))return false;
    tabs.querySelectorAll('button')[region(q)]?.click();
