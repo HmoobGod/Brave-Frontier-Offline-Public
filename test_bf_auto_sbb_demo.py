@@ -40,16 +40,31 @@ with sync_playwright() as pw:
         ('paralysis',True,True,False,10015,100,6,'burst'),
         ('support',True,True,True,20041,100,None,'burst'),
         ('conserve',True,True,True,10015,100,None,'attack'),
-        ('wounded-guard',True,True,True,10015,100,None,'guard'))
+        ('wounded-guard',True,True,True,10015,100,None,'guard'),
+        ('early-wave-bb',True,True,True,10015,100,None,'attack'),
+        ('final-wave-bb',True,True,True,10015,100,None,'sbb_demo'))
  for label,on,prototype,smart,unit,gauge,status,expected in cases:
-  p.evaluate('''([on,prototype,smart,unit,gauge,injured])=>{
+  p.evaluate('''([on,prototype,smart,unit,gauge,injured,label])=>{
    S=JSON.parse(__autoSbbFresh);S.party[0].unitId=unit;S.party[0].bb=gauge;if(injured)S.party[0].hp=200;seed=771;
    document.getElementById('bf-auto-sbb-enable').checked=on;document.getElementById('bf044-enable').checked=prototype;document.getElementById('bf041-smart-auto').checked=smart;
-  }''',[on,prototype,smart,unit,gauge,label in ('support','wounded-guard')])
+   // Do not invent enemies: use only the source-recorded mission wave count.
+   if(label==='final-wave-bb'){
+     if(!Number.isSafeInteger(QUEST?.battles)||QUEST.battles<2)
+       throw Error('Source mission wave count unavailable');
+     S.wave=QUEST.battles-1;
+   }else if(label==='early-wave-bb'){
+     if(!Number.isSafeInteger(QUEST?.battles)||QUEST.battles<2)
+       throw Error('Source mission wave count unavailable');
+     S.wave=0;
+   }
+  }''',[on,prototype,smart,unit,gauge,label in ('support','wounded-guard'),label])
   # Advanced preferences are an isolated setup write before the audit snapshot.
-  assert p.evaluate('''([on,guard])=>BFGlobalQoLAdvancedAutoV10500.set({
-    on,heal:60,target:"percent",burst:on?"conserve":"normal",guard})''',
-    [label in ('conserve','wounded-guard'),35 if label=='wounded-guard' else 0])
+  assert p.evaluate('''([on,guard,burst])=>BFGlobalQoLAdvancedAutoV10500.set({
+    on,heal:60,target:"percent",burst,guard})''',
+    [label in ('conserve','wounded-guard','early-wave-bb','final-wave-bb'),
+     35 if label=='wounded-guard' else 0,
+     'final-wave' if label in ('early-wave-bb','final-wave-bb') else
+     'conserve' if label=='conserve' else 'normal'])
   if status:assert p.evaluate('code=>BFGlobalOriginalAilmentStateV5700.inflict(0,code)',status)
   before=p.evaluate(SNAPSHOT);round_before=p.evaluate('S.round')
   p.evaluate('''()=>{
@@ -70,8 +85,10 @@ with sync_playwright() as pw:
    assert p.evaluate('S.party[0].bb')==100
    if status==6:assert hp==[100000,100000]
   if label=='support':assert hp==[100000,100000] and p.evaluate('S.party[0].hp')>200
+  if label in ('wounded-guard','early-wave-bb'):
+   assert p.evaluate('S.party[0].bb')==100
   if label=='wounded-guard':
-   assert hp==[100000,100000] and p.evaluate('S.party[0].bb')==100
+   assert hp==[100000,100000]
   assert_unchanged(p,before,label)
   print('PASS actual Auto SBB',label,expected,'gauge',p.evaluate('S.party[0].bb'),'P/storage intact',flush=True)
  # Planner calls outside live archive Auto and copied/disabled actors cannot opt in.
@@ -86,4 +103,4 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(S.party[0])')=='burst'
  assert_unchanged(p,before,'manual/training/identity controls')
  assert not errors,errors;b.close()
-print('PASS actual scheduled Auto turns: default SBB, support, curse, conserve, low-HP Guard and v7 isolation')
+print('PASS actual scheduled Auto turns: player SBB, early/final source-wave BB, support, curse, low-HP Guard and v7 isolation')
