@@ -49,10 +49,30 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalStoryBattleV2000.advance()') is False
  # Actual reward handler is reused. Bypassing combat here is a smoke fixture, not a
  # measured full-play victory; full native demo combat has separate regression gates.
- page.evaluate("""()=>{finish(true);S.over=true;S.phase='Victory';
-   BFGlobalStoryBattleV2000.refresh()}""")
- s=page.evaluate('BFGlobalStoryBattleV2000.snapshot()')
- assert s['won'] and s['clears']>=1 and s['nextId']==2,s
+ # Exercise a real core victory with a synthetic canonical-v7 quota error.
+ # No separate save format or mocked reward engine: only setItem is denied.
+ persisted=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate("""()=>{window.__hudOldSet=localStorage.setItem.bind(localStorage);
+   window.__hudDenySave=true;
+   localStorage.setItem=(key,value)=>{
+     if(__hudDenySave&&key==='bf_global_offline_demo_v7')
+       throw new DOMException('Synthetic storage quota','QuotaExceededError');
+     return __hudOldSet(key,value);
+   };
+   finish(true);S.over=true;S.phase='Victory';
+   BFGlobalStoryBattleV2000.refresh();
+ }""")
+ unsaved=page.evaluate('BFGlobalStoryBattleV2000.snapshot()')
+ assert unsaved['won'] and unsaved['clears']>=1 and not unsaved['stored'],unsaved
+ assert unsaved['nextId'] is None,unsaved
+ assert page.locator('#bf2000-next').is_disabled()
+ assert 'SAVE REQUIRED' in page.locator('#bf2000-state').inner_text()
+ assert page.evaluate('BFGlobalStoryBattleV2000.advance()') is False
+ assert page.evaluate('QUEST.missionId')==1
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
+ assert page.evaluate("()=>{__hudDenySave=false;return saveProgress()}") is True
+ s=page.evaluate('BFGlobalStoryBattleV2000.refresh()')
+ assert s['won'] and s['stored'] and s['clears']>=1 and s['nextId']==2,s
  assert page.locator('#bf2000-next').is_enabled()
  assert page.locator('#bf2000-waves span[data-completed="true"]').count()==3
  page.evaluate('S.busy=true')
