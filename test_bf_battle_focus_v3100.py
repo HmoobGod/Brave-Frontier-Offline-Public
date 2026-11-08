@@ -56,6 +56,29 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-def","burst")') is True
  assert page.evaluate('S.party[0].action.kind')=='burst'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===2)')
+ # No focus strategy may choose a corrupt foe record with impossible HP,
+ # even when its ATK/DEF would otherwise rank it first.
+ # Keep the intentionally malformed fixture inside one synchronous browser
+ # task. Polling HUD modules must never observe deliberately corrupt S.enemies.
+ results=page.evaluate("""()=>{const original=S.enemies;
+   const seed=original[0],strategies=['lowest-hp','highest-atk','lowest-def'];
+   try{
+     S.enemies=[
+       {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
+       {...seed,slot:1,name:'Infinite HP',hp:Infinity,maxHp:100,atk:9998,def:-98},
+       {...seed,slot:-1,name:'Bad slot',hp:2,maxHp:100,atk:9997,def:-97},
+       {...seed,slot:3,name:'Valid target',hp:175,maxHp:200,atk:50,def:50}
+     ];
+     const valid=strategies.map(kind=>BFGlobalBattleFocusV3100.lookup(kind)?.slot);
+     S.enemies=S.enemies.slice(0,3);
+     const invalid=strategies.map(kind=>BFGlobalBattleFocusV3100.lookup(kind));
+     const rejected=BFGlobalBattleFocusV3100.focus('highest-atk')===false;
+     return {valid,invalid,rejected};
+   }finally{S.enemies=original;}
+ }""")
+ assert results['valid']==[3,3,3],results
+ assert results['invalid']==[None,None,None],results
+ assert results['rejected'],results
  assert page.evaluate('P.version')==7
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  # The fixture explicitly selects a mission, so compare save for implicit writes, not transient P.lastMission.
