@@ -50,6 +50,20 @@ with sync_playwright() as pw:
  assert page.evaluate('(slot)=>BFGlobalBattleCommandsV2100.setTarget(slot)',slots[-1]) is True
  assert page.evaluate('S.target')==slots[-1]
  assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(9999)') is False
+ # After an enemy falls, the native target list may exclude that dead slot
+ # instead of retaining a disabled placeholder. The tray must select the
+ # intended surviving target through the real native button either way.
+ page.evaluate("""()=>{const e=S.enemies[0];
+   S.enemies=[{...e,slot:0,name:'Defeated',hp:0,maxHp:100},
+              {...e,slot:1,name:'Survivor A',hp:100,maxHp:100},
+              {...e,slot:2,name:'Survivor B',hp:200,maxHp:200}];
+   update()}""")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(0)') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(2)') is True
+ assert page.evaluate('S.target')==2
+ assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(1)') is True
+ assert page.evaluate('S.target')==1
+ assert page.evaluate('S.enemies[0].hp')==0
  page.evaluate('S.busy=true')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False

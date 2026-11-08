@@ -65,9 +65,19 @@
  }
  function setTarget(slot){
    if(!ready()||!Number.isInteger(slot))return false;
-   const index=S.enemies.findIndex(e=>e.slot===slot&&e.hp>0);
-   if(index<0)return false;
-   const nativeButton=targetList.children[index];
+   // The core may render only living enemy buttons after a KO, or retain
+   // disabled placeholders for defeated enemies. Never map a surviving
+   // enemy slot through an unverified index in the wrong button list.
+   const all=Array.isArray(S.enemies)?S.enemies:[];
+   const living=all.filter(e=>e&&e.hp>0&&Number.isSafeInteger(e.slot));
+   if(!living.some(e=>e.slot===slot))return false;
+   const rendered=Array.from(targetList.children);
+   if(!rendered.every(b=>b.tagName==='BUTTON'))return false;
+   const source=rendered.length===all.length?all:
+     rendered.length===living.length?living:null;
+   if(!source)return false;
+   const index=source.findIndex(e=>e?.slot===slot&&e.hp>0);
+   const nativeButton=index>=0?rendered[index]:null;
    if(!nativeButton||nativeButton.disabled)return false;
    nativeButton.click();signature='';refresh();
    return S.target===slot;
