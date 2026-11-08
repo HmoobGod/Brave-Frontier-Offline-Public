@@ -16,14 +16,15 @@
  const pref='bf_global_offline_qol_advanced_auto_v105';
  const baseKind=smart.kindFor.bind(smart);
  const baseTarget=coordinated.chooseTarget.bind(coordinated);
- const configDefaults=()=>({on:false,heal:60,target:'percent',burst:'normal'});
+ const configDefaults=()=>({on:false,heal:60,target:'percent',burst:'normal',guard:0});
  function readPrefs(){
    try{
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
        target:['percent','absolute','highest-atk','lowest-def','elemental'].includes(raw?.target)?raw.target:'percent',
-       burst:['normal','conserve'].includes(raw?.burst)?raw.burst:'normal'};
+       burst:['normal','conserve'].includes(raw?.burst)?raw.burst:'normal',
+       guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0};
    }catch(_){return configDefaults();}
  }
  let config=readPrefs();
@@ -32,20 +33,34 @@
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
      ['percent','absolute','highest-atk','lowest-def','elemental'].includes(options.target)&&
-     ['normal','conserve'].includes(options.burst);
+     ['normal','conserve'].includes(options.burst)&&
+     (options.guard===undefined||[0,20,35,50].includes(options.guard));
  }
  function set(next){
    if(!valid(next))return false;
    const requested={on:next.on,heal:next.heal,
-     target:next.target,burst:next.burst};
+     target:next.target,burst:next.burst,
+     guard:next.guard===undefined?config.guard:next.guard};
    try{localStorage.setItem(pref,JSON.stringify({
-     heal:requested.heal,target:requested.target,burst:requested.burst
+     heal:requested.heal,target:requested.target,burst:requested.burst,
+     guard:requested.guard
    }));}catch(_){return false}
    config=requested;refresh();return true;
  }
  function active(){return config.on&&smart.enabled()===true}
  function kindFor(unit){
    const previous=baseKind(unit);
+   // Optional low-HP survival Guard on the live PLAYER-controlled Auto turn.
+   // Check original battler identity and current health; clones and noncombat
+   // planning calls cannot trigger the rule. No enemy/NPC AI is modified.
+   if(active()&&config.guard>0&&typeof S!=='undefined'&&
+      S.mode==='archive'&&S.auto===true&&!S.over&&
+      Number.isSafeInteger(unit?.id)&&unit.id>=0&&unit.id<6&&
+      S.party?.[unit.id]===unit&&unit.active===true&&
+      Number.isFinite(unit.hp)&&unit.hp>0&&
+      Number.isFinite(unit.maxHp)&&unit.maxHp>0&&
+      unit.hp/unit.maxHp<=config.guard/100&&
+      !window.BFGlobalParalysisActionLockV6000?.paralyzed(unit.id))return 'guard';
    if(window.BFGlobalCurseBBLockV5900?.cursed(unit?.id))return 'attack';
    if(!active()||!unit||!unit.active||!(unit.hp>0)||
      !(Number(unit.bb)>=100))return previous;
@@ -142,16 +157,17 @@
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
  const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge']]);
+ const guard=option('Low HP Auto defense','bf10500-guard',[[0,'Off (original default)'],[20,'Guard at or below 20% HP'],[35,'Guard at or below 35% HP'],[50,'Guard at or below 50% HP']]);
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
    'Element targeting uses known original unit types and visible, identified enemy types; '+
-   'unknown weaknesses revert to the existing HP% strategy. No changes to saved squad, '+
-   'attack formulas, source buffs, quest rewards or game save.';
+   'unknown weaknesses revert to the existing HP% strategy. Optional Guard applies '+
+   'only to active player Auto turns; no changes to enemy AI, damage, rewards or v7 save.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
  function refresh(){
    toggle.checked=config.on;heal.value=String(config.heal);
-   target.value=config.target;burst.value=config.burst;
+   target.value=config.target;burst.value=config.burst;guard.value=String(config.guard);
    status.textContent='Advanced rules '+(config.on?'ON':'OFF')+
      (smart.enabled()?' · Smart Auto ready':' · Existing Smart Auto is disabled');
    return get();
@@ -160,6 +176,7 @@
  heal.addEventListener('change',()=>set({...config,heal:Number(heal.value)}));
  target.addEventListener('change',()=>set({...config,target:target.value}));
  burst.addEventListener('change',()=>set({...config,burst:burst.value}));
+ guard.addEventListener('change',()=>set({...config,guard:Number(guard.value)}));
  host.addEventListener('change',refresh);
  refresh();
  window.BFGlobalQoLAdvancedAutoV10500=freeze({
