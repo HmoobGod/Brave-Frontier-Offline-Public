@@ -44,7 +44,9 @@ const source={10011:[400,160,80,80],10025:[1000,240,560,400],
   20011:[750,350,200,350],99999:[0,0,0,0]};
 const window={BFGlobalUnitArchive:{count:2291,originalImpCaps:id=>source[id]||null}};
 const saveProgress=()=>{if(failWrite)return false;db.set(coreSave,JSON.stringify(P));return true;};
-const ctx={window,P,S,document,localStorage,saveProgress,effectiveUnit:baseId=>({id:baseId,stats:{
+let restoreAllowed=false,restoreConfirmations=0;
+const confirm=()=>{restoreConfirmations++;return restoreAllowed;};
+const ctx={window,P,S,document,localStorage,saveProgress,confirm,effectiveUnit:baseId=>({id:baseId,stats:{
   hp:1030,atk:500,def:410,rec:320}})};
 vm.runInNewContext(script,ctx,{filename:'bf16900_optional_imp_fusion.js'});
 const imp=window.BFGlobalOptionalImpsV16900;
@@ -135,4 +137,41 @@ assert.equal(window2.BFGlobalOptionalImpsV16900.snapshot().enabled,false);
 assert.equal(window2.BFGlobalOptionalImpsV16900.feed(10011),false);
 assert.equal(window2.BFGlobalOptionalImpsV16900.importState(backup),true);
 assert.equal(window2.BFGlobalOptionalImpsV16900.snapshot().enabled,true);
+// Manual restore must ask before replacing the CURRENT canonical v7 Imp data.
+function findControl(root, predicate){
+  if(!root)return null;
+  if(predicate(root))return root;
+  for(const child of root.children||[]){
+    const found=findControl(child,predicate);
+    if(found)return found;
+  }
+  return null;
+}
+const panel=elements.get('bf16900-imp-fusion');
+const field=findControl(panel,e=>e.id==='bf16900-backup');
+const restore=findControl(panel,e=>e.textContent==='RESTORE IMP BACKUP TO CURRENT SAVE');
+assert(field&&restore&&typeof restore.onclick==='function',
+  'restore controls missing from real source panel');
+const beforeRestore=JSON.stringify(P);
+const savedBeforeRestore=db.get(coreSave);
+field.value='{"version":1}'; // Bad backup should be rejected BEFORE any confirmation.
+restore.onclick();
+assert.equal(restoreConfirmations,0);
+assert.equal(JSON.stringify(P),beforeRestore);
+assert.equal(db.get(coreSave),savedBeforeRestore);
+const alternate=JSON.parse(imp.exportState());
+const newStock=alternate.inventory.arton===10000?9999:alternate.inventory.arton+1;
+alternate.inventory.arton=newStock;
+field.value=JSON.stringify(alternate);
+restore.onclick(); // User presses Cancel.
+assert.equal(restoreConfirmations,1);
+assert.equal(JSON.stringify(P),beforeRestore,'cancel must not replace in-memory Imps');
+assert.equal(db.get(coreSave),savedBeforeRestore,'cancel must not write canonical v7');
+restoreAllowed=true;
+restore.onclick(); // User explicitly confirms.
+assert.equal(restoreConfirmations,2);
+assert.equal(imp.stock().arton,newStock);
+assert.equal(P._bfImpsV171.inventory.arton,newStock);
+assert.equal(JSON.parse(db.get(coreSave))._bfImpsV171.inventory.arton,newStock);
+assert.deepEqual(P.roster,[10011,10025,60015,10041],'restore cannot alter owned roster');
 console.log('PASS v171: strict Imp cap and canonical v7 save, original Imp increments, no double application, rollback, manual old backup restore');
