@@ -14,7 +14,7 @@ with sync_playwright() as pw:
   executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),
   args=['--no-sandbox','--disable-dev-shm-usage'])
  page=browser.new_page(viewport={'width':390,'height':844})
- errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
+ errors=[];page.on('pageerror',lambda e:errors.append(str(e)+'\n'+str(e.stack)))
  page.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
   getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
   removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
