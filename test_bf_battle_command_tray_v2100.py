@@ -47,7 +47,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  page.evaluate("""()=>{S.party.forEach((p,i)=>{
    if(!p.active||p.hp<=0)return;
-   p.hp=i<2?Math.max(1,Math.floor(p.maxHp*(i===0?.25:.40))):p.maxHp;
+   p.hp=i<2?Math.max(1,Math.floor(p.maxHp*(i===0 ? 0.25 : 0.40))):p.maxHp;
  });update()}""")
  plan=page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()')
  assert plan and len(plan['orders'])==6,plan
