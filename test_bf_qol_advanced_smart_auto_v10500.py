@@ -122,6 +122,20 @@ with sync_playwright() as pw:
  unknown=[{'hp':10,'maxHp':100,'slot':0,'element':'Unknown'},
           {'hp':40,'maxHp':100,'slot':1}]
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",unknown)==0
+ # Even when another foe has a known elemental weakness, nonfinite
+ # positive HP must not be omitted from the native live enemy roster.
+ # Both numeric Infinity and coercible text remain invalid. The latter
+ # catches malformed external UI records without touching saved v7 data.
+ for corrupted in ('Infinity','text'):
+  if corrupted=='Infinity':
+   choice=p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
+     {hp:Infinity,maxHp:100,slot:2,element:'Fire'},
+     {hp:80,maxHp:100,slot:0,element:'Earth'}])""")
+  else:
+   choice=p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
+     {hp:'Infinity',maxHp:100,slot:2,element:'Unknown'},
+     {hp:80,maxHp:100,slot:0,element:'Unknown'}])""")
+  assert choice is None,corrupted
  # Ambiguous live slots or invalid maximum HP are never auto-targeted.
  bad_elements=[{'hp':80,'maxHp':100,'slot':0,'element':'Earth'},
                {'hp':5,'maxHp':100,'slot':0,'element':'Fire'}]
