@@ -34,6 +34,8 @@
    const opt=document.createElement('option');opt.value=String(n);
    opt.textContent=n+' additional clears';picker.append(opt);
  }
+ // Preserve the original two-clear default after adding the opt-in one-clear choice.
+ picker.value='2';
  const go=document.createElement('button');
  go.id='bf9800-start';go.type='button';go.textContent='START AUTO-REPEAT';
  const halt=document.createElement('button');
