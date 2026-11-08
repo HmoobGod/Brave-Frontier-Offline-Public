@@ -73,9 +73,11 @@
    const previous=session;
    if(previous){complete=previous.completed;session=null;}
    reason=why;
-   // A user pressing Stop during an in-flight Auto round still owns the
-   // Auto toggle. Restore their prior choice now; the current round finishes.
-   if(restore&&previous)setAuto(previous.autoWasEnabled);
+   // Player pressing Stop restores their own earlier Auto preference.
+   // Unexpected aborts (defeat, failed save, changed quest or invalid clear)
+   // must DISARM native Auto too, otherwise the repeat session stops while
+   // the engine can continue unattended in subsequent rounds.
+   if(previous)setAuto(restore?previous.autoWasEnabled:false);
    update();return !!previous;
  }
  function playAgain(){
