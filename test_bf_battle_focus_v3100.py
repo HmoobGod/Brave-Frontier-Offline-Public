@@ -61,10 +61,10 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-def","burst")') is True
  assert page.evaluate('S.party[0].action.kind')=='burst'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===2)')
- # No focus strategy may choose a corrupt foe record with impossible HP,
- # even when its ATK/DEF would otherwise rank it first.
- # Keep the intentionally malformed fixture inside one synchronous browser
- # task. Polling HUD modules must never observe deliberately corrupt S.enemies.
+ # Any invalid living foe must block the WHOLE manual focus plan rather
+ # than silently skipping it and targeting an ambiguous native button.
+ # Keep synthetic corruption in one synchronous browser task, so the
+ # normal battle renderer never observes these deliberately invalid rows.
  results=page.evaluate("""()=>{const original=S.enemies;
    const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-atk','lowest-def'];
    try{
@@ -81,17 +81,46 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[3,3,3,3],results
+ assert results['valid']==[None,None,None,None],results
  assert results['invalid']==[None,None,None,None],results
  assert results['rejected'],results
- # Percentage ranking differs from absolute ranking. Invalid max HP and
- # ties are handled without leaking a fake enemy into the live renderer.
+ # Targeting and queued orders must remain untouched if ANY living record
+ # is corrupt, including text-coerced Infinity or a duplicate valid slot.
+ # Validate all four focus strategies and actual queueFocus player controls.
+ gated=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
+   const originalTarget=S.target;
+   const savedActions=S.party.map(p=>JSON.stringify(p.action));
+   const cases=[
+     [{...seed,slot:0,hp:5,maxHp:0},{...seed,slot:1,hp:45,maxHp:100}],
+     [{...seed,slot:0,hp:'Infinity',maxHp:100},{...seed,slot:1,hp:45,maxHp:100}],
+     [{...seed,slot:0,hp:Infinity,maxHp:100},{...seed,slot:1,hp:45,maxHp:100}],
+     [{...seed,slot:1,hp:5,maxHp:100},{...seed,slot:1,hp:45,maxHp:100}],
+     [{...seed,slot:-1,hp:5,maxHp:100},{...seed,slot:1,hp:45,maxHp:100}]
+   ];
+   try{
+     return cases.map(foes=>{
+       S.enemies=foes;
+       const looked=['lowest-hp','lowest-hp-percent','highest-atk','lowest-def']
+         .map(k=>BFGlobalBattleFocusV3100.lookup(k));
+       const focused=BFGlobalBattleFocusV3100.focus('lowest-hp');
+       const queued=BFGlobalBattleFocusV3100.queueFocus('highest-atk','burst');
+       return {looked,focused,queued,targetUnchanged:S.target===originalTarget,
+         actionsUnchanged:savedActions.every((a,i)=>a===JSON.stringify(S.party[i].action))};
+     });
+   }finally{S.enemies=original;S.target=originalTarget;}
+ }""")
+ assert len(gated)==5,gated
+ assert all(x['looked']==[None]*4 and x['focused'] is False and
+            x['queued'] is False and x['targetUnchanged'] and
+            x['actionsUnchanged'] for x in gated),gated
+ # With an entirely valid roster, percentage ranking still differs from
+ # absolute HP ranking; ties retain the prior lower-slot ordering.
  ranks=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
    try{
      S.enemies=[
        {...seed,slot:0,hp:10,maxHp:20},
        {...seed,slot:1,hp:100,maxHp:1000},
-       {...seed,slot:2,hp:5,maxHp:0},
+       {...seed,slot:2,hp:600,maxHp:1000},
        {...seed,slot:3,hp:50,maxHp:500}
      ];
      return {absolute:BFGlobalBattleFocusV3100.lookup('lowest-hp')?.slot,
@@ -114,4 +143,4 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
  browser.close()
-print('PASS v31.00: three enemy focus strategies, native queue/BB, phase gates and no implicit saved rewards')
+print('PASS v31.00: four manual focus strategies, full living-roster preflight, native queue/BB and v7 save isolation')
