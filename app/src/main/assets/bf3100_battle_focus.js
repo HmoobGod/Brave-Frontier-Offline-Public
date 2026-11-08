@@ -28,12 +28,17 @@
  function lookup(kind){
    if(!strategies.some(x=>x[0]===kind)||!Array.isArray(S.enemies))return null;
    const key=kind==='highest-atk'?'atk':kind==='lowest-def'?'def':'hp';
-   // A focus shortcut must never prioritize corrupt/untargetable foe
-   // records (e.g. infinite HP or zero max HP) over a surviving real foe.
-   // This is the same fail-closed target eligibility used by Smart Auto.
-   const foes=S.enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
-     Number.isFinite(e.maxHp)&&e.maxHp>0&&
-     Number.isSafeInteger(e.slot)&&e.slot>=0&&Number.isFinite(e[key]));
+   // Validate EVERY living native foe before any optional ranking.
+   // Silently skipping a corrupt foe can mis-map the real target buttons,
+   // even if the candidate itself has valid HP and a legal slot.
+   if(S.enemies.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
+   const living=S.enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+   if(living.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+      !Number.isSafeInteger(e.slot)||e.slot<0)||
+      new Set(living.map(e=>e.slot)).size!==living.length)return null;
+   // Unknown optional ATK/DEF values are not ranked, while valid HP
+   // strategies and native slot ordering remain exactly as before.
+   const foes=living.filter(e=>Number.isFinite(e[key]));
    foes.sort((a,b)=>{
      const diff=kind==='highest-atk'?b[key]-a[key]:
        kind==='lowest-hp-percent'?a.hp/a.maxHp-b.hp/b.maxHp:
