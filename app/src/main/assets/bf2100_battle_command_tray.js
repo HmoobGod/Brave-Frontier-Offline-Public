@@ -262,15 +262,13 @@
    execute.click();signature='';refresh();return true;
  }
  function refresh(){
-   const st=snapshot(),key=JSON.stringify(st);
+   const st=snapshot(),key=JSON.stringify([st,active().map(p=>[p.id,p.hp,p.maxHp])]);
    if(key===signature)return st;
    signature=key;
    status.textContent='Wave '+(st.wave+1)+' · Round '+st.round+
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
      (st.auto?' · Auto Battle enabled':'');
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
-   element.disabled=!elementPlan();
-   protect.disabled=!woundedPlan();
    fire.disabled=!st.canExecute;
    const group=document.createDocumentFragment();
    for(const e of st.foes){
@@ -280,7 +278,13 @@
      b.disabled=!st.canQueue;b.dataset.bf2100Target=String(e.slot);
      b.addEventListener('click',()=>setTarget(e.slot));group.append(b);
    }
-   targets.replaceChildren(group);return st;
+   targets.replaceChildren(group);
+   // Plan validation requires the current native target buttons, not the
+   // previous render. Ally HP is part of the refresh key above so crossing
+   // the wounded threshold updates the button without a round change.
+   element.disabled=!elementPlan();
+   protect.disabled=!woundedPlan();
+   return st;
  }
  new MutationObserver(refresh).observe(document.getElementById('meta')||area,
    {subtree:true,childList:true,characterData:true});
