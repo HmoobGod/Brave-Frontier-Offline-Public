@@ -148,14 +148,21 @@
    if(session&&!internalToggle&&!auto.checked)stop('Stopped: Auto Battle disabled',false);
  });
  document.addEventListener('visibilitychange',()=>{
-   if(document.hidden&&session)stop('Stopped: app left foreground',false);
+   // Browser-only background events must cancel native Auto as well as the
+   // repeat session. Without this, poll() sleeps while hidden but Auto can
+   // continue unattended after the foreground session is disarmed.
+   if(document.hidden&&session){
+     stop('Stopped: app left foreground',false);setAuto(false);
+   }
  });
  // Native Activity pause can occur with document.hidden still false.
  // Cancel the whole replay session before any queued clear can start another.
  window.addEventListener('bf-native-background',()=>{
    if(session){stop('Stopped: Android background',false);setAuto(false);}
  });
- window.addEventListener('pagehide',()=>{if(session)stop('Stopped: page closed',false)});
+ window.addEventListener('pagehide',()=>{
+   if(session){stop('Stopped: page closed',false);setAuto(false);}
+ });
  setInterval(()=>{if(!document.hidden)poll();},900);
  update();
  window.BFGlobalQoLQuestRepeatV9800=freeze({start,poll,stop,statusSnapshot});
