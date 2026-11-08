@@ -79,7 +79,7 @@ with sync_playwright() as pw:
    {'hp':70,'maxHp':100,'slot':2,'atk':44,'def':7},
    {'hp':1,'maxHp':0,'slot':3,'atk':9999,'def':-100},
    {'hp':1,'maxHp':100,'slot':-1,'atk':9999,'def':-100},
-   {'hp':1,'maxHp':100,'slot':4,'def':-100}
+   {'hp':1,'maxHp':100,'slot':4}
  ]
  settings['target']='highest-atk'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
