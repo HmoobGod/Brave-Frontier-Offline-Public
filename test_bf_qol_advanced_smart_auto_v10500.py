@@ -128,6 +128,8 @@ with sync_playwright() as pw:
  # Player Auto Guard is optional; test source-safe live battler identity,
  # archive Auto ownership, exact health threshold, and saved v7 isolation.
  settings['guard']=35
+ # Keep BB conservation disabled here so the non-Guard fallback is Burst.
+ settings['burst']='normal'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.locator('#bf10500-guard option').count()==4
  assert p.evaluate(api+'.get().guard')==35
