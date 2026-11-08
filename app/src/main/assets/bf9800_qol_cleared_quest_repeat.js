@@ -131,6 +131,11 @@
    if(!s.stored)return stop('Stopped: game save unavailable',false);
    if(!Number.isSafeInteger(s.clears)||s.clears<=session.lastClear)
      return stop('Stopped: new clear not confirmed',false);
+   // One completed native battle can only earn one additional quest clear.
+   // A jump by more than one is ambiguous (e.g. a save or replay race):
+   // disarm Auto rather than counting it as a legitimate repeat.
+   if(s.clears!==session.lastClear+1)
+     return stop('Stopped: unexpected saved clear count',false);
    session.completed++;
    session.lastClear=s.clears;
    if(session.completed>=session.target)
