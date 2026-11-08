@@ -12,7 +12,16 @@
  if(!host || !list || !tabs || tabs.querySelectorAll('button').length!==3 ||
     QUESTS[0]?.missionId!==1 || QUESTS[105]?.missionId!==365) return;
  const cleared=q=>(P.questClears?.[q.missionId]||0)>0;
- const remaining=()=>QUESTS.find(q=>!cleared(q)&&questUnlocked(q))||null;
+ // Match the result screen: a failed canonical save must not enable another
+ // mission through the global Continue Story shortcut. The failure flag
+ // persists even if the battle display is later hidden or changes mode.
+ const awaitingSave=()=>(
+   (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
+   (!!S?.over&&S.phase==='Victory'&&
+     (typeof saveEnabled!=='boolean'||!saveEnabled))
+ );
+ const remaining=()=>awaitingSave()?null:
+   QUESTS.find(q=>!cleared(q)&&questUnlocked(q))||null;
  const regionIndex=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
  const regionName=q=>['Mistral','Morgan','St. Lamia'][regionIndex(q)];
  const panel=document.createElement('section');
@@ -56,7 +65,9 @@
     meter.setAttribute('aria-valuemax','106');
     meter.setAttribute('aria-valuenow',String(s.done));
     button.disabled=!!S?.busy||!q;
-    if(q){
+    if(awaitingSave()){
+      next.textContent='VICTORY NOT SAVED · Retry Save or download an unsaved backup before continuing.';
+    }else if(q){
       const source=BFGlobalQuestText.sourceFor(q);
       next.textContent='NEXT: '+(source?.mission?.name||'Mission '+q.missionId)+
          ' · '+regionName(q)+' · Mission '+q.missionId;
@@ -67,7 +78,7 @@
  }
  button.addEventListener('click',()=>{
    const q=remaining();
-   if(!q||S?.busy||!BFQuestAreas.choose(q))return;
+   if(!q||S?.busy||awaitingSave()||!BFQuestAreas.choose(q))return;
    // Native tab click also hides St. Lamia when returning to other regions.
    tabs.querySelectorAll('button')[regionIndex(q)]?.click();
    refresh();
