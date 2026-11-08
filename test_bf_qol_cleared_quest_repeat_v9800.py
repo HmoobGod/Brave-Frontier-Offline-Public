@@ -110,6 +110,26 @@ with sync_playwright() as pw:
   assert p.evaluate('window.__repeatCount')==before_replays,failed
   assert p.evaluate('JSON.stringify(P)')==before_player,failed
   p.evaluate('window.__stored98=true')
+ # An unexpectedly jumped clear counter must never be counted as one replay
+ # or start another unattended battle. The simulator changes P deliberately;
+ # the replay module must not write further P fields or local saved storage.
+ p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
+   window.__stored98=true;document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.start(2)') is True
+ assert p.locator('#auto').is_checked()
+ old_replays=p.evaluate('window.__repeatCount')
+ p.evaluate("""()=>{P.questClears[1]+=2;S.over=true;S.phase='Victory';
+   document.getElementById('auto').checked=false;}""")
+ after_external=p.evaluate('JSON.stringify(P)')
+ before_save=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ assert p.evaluate(api+'.poll()') is True
+ assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert p.evaluate(api+'.statusSnapshot().completed')==0
+ assert 'unexpected saved clear count' in p.evaluate(api+'.statusSnapshot().reason')
+ assert not p.locator('#auto').is_checked()
+ assert p.evaluate('window.__repeatCount')==old_replays
+ assert p.evaluate('JSON.stringify(P)')==after_external
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_save
  # Auto checkbox turning off is an immediate opt-out.
  p.evaluate("""()=>{S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(5)') is True
@@ -202,4 +222,4 @@ with sync_playwright() as pw:
  assert p.evaluate('P.version')==7
  assert not errors,errors
  b.close()
-print('PASS v98 bounded cleared-quest replay: one/2/5/10 additional clears, stop, unexpected cancellation disarms Auto and v7 isolation')
+print('PASS v98 bounded replay: one clear per stored receipt, counter jump disarms Auto, Android pause and v7 isolation')
