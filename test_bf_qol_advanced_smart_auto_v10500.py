@@ -122,6 +122,18 @@ with sync_playwright() as pw:
  unknown=[{'hp':10,'maxHp':100,'slot':0,'element':'Unknown'},
           {'hp':40,'maxHp':100,'slot':1}]
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",unknown)==0
+ # Malformed positive HP cannot be silently dropped from elemental target roster.
+ # Numeric Infinity and coercible string Infinity both invalidate selection.
+ for malformed in ('number','string'):
+  if malformed=='number':
+   choice=p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
+     {hp:Infinity,maxHp:100,slot:2,element:'Fire'},
+     {hp:80,maxHp:100,slot:0,element:'Earth'}])""")
+  else:
+   choice=p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
+     {hp:'Infinity',maxHp:100,slot:2,element:'Unknown'},
+     {hp:80,maxHp:100,slot:0,element:'Unknown'}])""")
+  assert choice is None,malformed
  # Ambiguous live slots or invalid maximum HP are never auto-targeted.
  bad_elements=[{'hp':80,'maxHp':100,'slot':0,'element':'Earth'},
                {'hp':5,'maxHp':100,'slot':0,'element':'Fire'}]
