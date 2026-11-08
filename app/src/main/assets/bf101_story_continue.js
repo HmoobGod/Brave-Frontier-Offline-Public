@@ -20,8 +20,18 @@
    (!!S?.over&&S.phase==='Victory'&&
      (typeof saveEnabled!=='boolean'||!saveEnabled))
  );
- const remaining=()=>awaitingSave()?null:
-   QUESTS.find(q=>!cleared(q)&&questUnlocked(q))||null;
+ // Continue Story must use the SAME whole-catalog validation as the
+ // campaign and post-victory Next controls. A corrupt later quest clear must
+ // never be bypassed just because an earlier unlocked quest is available.
+ const remaining=()=>{
+   if(awaitingSave()||
+      typeof window.BFGrandGaiaCampaignV100?.nextPlayable!=='function')return null;
+   const next=window.BFGrandGaiaCampaignV100.nextPlayable();
+   if(!next)return null;
+   const q=QUESTS.find(row=>row.missionId===next.missionId);
+   return q&&q.dungeonId===next.dungeonId&&q.battles===next.battles&&
+     !cleared(q)&&questUnlocked(q)?q:null;
+ };
  const regionIndex=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
  const regionName=q=>['Mistral','Morgan','St. Lamia'][regionIndex(q)];
  const panel=document.createElement('section');

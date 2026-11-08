@@ -44,6 +44,30 @@ with sync_playwright() as pw:
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'passive refresh must not change save'
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ # The button must fail closed with the same canonical full-catalog policy
+ # as the campaign resolver. Keep test-only corrupt records atomic to avoid
+ # exposing an invalid ledger to the live browser renderer between calls.
+ bad=page.evaluate("""()=>{const id=QUESTS[QUESTS.length-1].missionId;
+   const prior=P.questClears[id],mission=QUEST.missionId;
+   const before=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     P.questClears[id]=-1;
+     BFGrandGaiaContinueV101.refresh();
+     const global=BFGrandGaiaCampaignV100.nextPlayable();
+     const next=BFGrandGaiaContinueV101.nextMission;
+     const disabled=document.getElementById('bf101-continue').disabled;
+     document.getElementById('bf101-continue').click();
+     return {global,next,disabled,missionUnchanged:QUEST.missionId===mission,
+       saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===before};
+   }finally{
+     if(prior===undefined)delete P.questClears[id];
+     else P.questClears[id]=prior;
+   }
+ }""")
+ assert bad=={'global':None,'next':None,'disabled':True,
+   'missionUnchanged':True,'saveUnchanged':True},bad
+ assert page.evaluate('BFGrandGaiaContinueV101.refresh().nextMission')==1
+ assert page.locator('#bf101-continue').is_enabled()
  page.locator('#bf101-continue').click()
  assert page.evaluate('QUEST.missionId')==1
  assert page.locator('.bf-mistral-map').is_visible()
@@ -51,11 +75,13 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGrandGaiaContinueV101.nextMission')==1
  page.evaluate('()=>{for(const q of QUESTS.slice(0,34))P.questClears[q.missionId]=1;renderQuestList()}')
  assert page.evaluate('BFGrandGaiaContinueV101.nextMission')==200
+ assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable().missionId')==200
  page.locator('#bf101-continue').click()
  assert page.evaluate('QUEST.missionId')==200
  assert page.locator('#bf080-morgan-map').is_visible()
  page.evaluate('()=>{for(const q of QUESTS.slice(0,70))P.questClears[q.missionId]=1;renderQuestList()}')
  assert page.evaluate('BFGrandGaiaContinueV101.nextMission')==300
+ assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable().missionId')==300
  page.locator('#bf101-continue').click()
  assert page.evaluate('QUEST.missionId')==300
  assert page.locator('#bf090-stlamia-map').is_visible()
