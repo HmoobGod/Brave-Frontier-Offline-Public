@@ -65,7 +65,7 @@ with sync_playwright() as pw:
              {'hp':1,'maxHp':-10,'slot':0},
              {'hp':1,'slot':0}]:
   rows=[bad,{'hp':60,'maxHp':100,'slot':1}]
-  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",rows)==1
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",rows) is None
  assert p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
    {hp:1,maxHp:0,slot:0},{hp:2,slot:1}])""") is None
  good=[{'hp':80,'maxHp':1000,'slot':0},{'hp':20,'maxHp':100,'slot':1}]
@@ -77,14 +77,21 @@ with sync_playwright() as pw:
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
    {'hp':70,'maxHp':100,'slot':2,'atk':44,'def':7},
-   {'hp':1,'maxHp':0,'slot':3,'atk':9999,'def':-100},
-   {'hp':1,'maxHp':100,'slot':-1,'atk':9999,'def':-100},
-   {'hp':1,'maxHp':100,'slot':4}
+    {'hp':1,'maxHp':100,'slot':4}
  ]
  settings['target']='highest-atk'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==1
  assert p.locator('#bf10500-target').input_value()=='highest-atk'
+ # A corrupt living foe must not be silently skipped: its native slot
+ # could collide with the chosen target. Reject the entire player Auto choice.
+ for bad in [
+   {'hp':5,'maxHp':0,'slot':3,'atk':999,'def':1},
+   {'hp':5,'maxHp':100,'slot':-1,'atk':999,'def':1},
+   {'hp':5,'maxHp':100,'slot':1,'atk':999,'def':1},
+  ]:
+  rows=[{'hp':70,'maxHp':100,'slot':1,'atk':50,'def':30},bad]
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",rows) is None
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
