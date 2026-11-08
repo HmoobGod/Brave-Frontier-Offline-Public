@@ -22,7 +22,7 @@
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
-       target:['percent','absolute','highest-atk','lowest-def'].includes(raw?.target)?raw.target:'percent',
+       target:['percent','absolute','highest-atk','lowest-def','elemental'].includes(raw?.target)?raw.target:'percent',
        burst:['normal','conserve'].includes(raw?.burst)?raw.burst:'normal'};
    }catch(_){return configDefaults();}
  }
@@ -31,7 +31,7 @@
  function valid(options){
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
-     ['percent','absolute','highest-atk','lowest-def'].includes(options.target)&&
+     ['percent','absolute','highest-atk','lowest-def','elemental'].includes(options.target)&&
      ['normal','conserve'].includes(options.burst);
  }
  function set(next){
@@ -61,9 +61,41 @@
       previous==='burst')return 'attack';
    return previous;
  }
+ // Source-backed elemental targeting for the player's optional Smart Auto.
+ // Favor the foe weak to the largest number of living source-typed allies.
+ // Unknown foe/ally elements are not inferred; default behavior survives.
+ function elementalTarget(enemies){
+   const element=window.BFGlobalElementalCombatV6900;
+   if(typeof S==='undefined'||S.mode!=='archive'||S.over||
+      !element||typeof element.normalize!=='function'||
+      typeof element.multiplier!=='function'||
+      typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function')
+     return undefined;
+   const live=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+   if(live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+       !Number.isSafeInteger(e.slot)||e.slot<0)||
+       new Set(live.map(e=>e.slot)).size!==live.length)
+     return null; // Ambiguous target roster: fail closed, never guess slots.
+   const types=liveParty().filter(u=>u&&u.active&&Number.isFinite(u.hp)&&u.hp>0)
+     .map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element)).filter(Boolean);
+   if(!types.length)return undefined;
+   const ranked=live.map(foe=>{
+     const kind=element.normalize(foe.element);
+     const count=kind?types.filter(a=>element.multiplier(a,kind)===1.5).length:0;
+     return {foe,count};
+   }).filter(row=>row.count>0);
+   ranked.sort((a,b)=>b.count-a.count||
+     a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
+     a.foe.slot-b.foe.slot);
+   return ranked[0]?.foe||undefined;
+ }
  function chooseTarget(enemies){
    if(!active()||config.target==='percent')return baseTarget(enemies);
    if(!Array.isArray(enemies))return baseTarget(enemies);
+   if(config.target==='elemental'){
+     const chosen=elementalTarget(enemies);
+     return chosen===undefined?baseTarget(enemies):chosen;
+   }
    // Player-selected DEMO priorities, not recovered enemy or original AI.
    // Keep the native planner's positive HP/max HP and legal slot gate before
    // ranking by an optional visible enemy statistic. Unknown stats fail closed.
@@ -108,12 +140,14 @@
  onLabel.append(toggle,document.createTextNode(' Enable advanced rules (Smart Auto must also be enabled)'));
  settings.append(onLabel);
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
- const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF']]);
+ const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge']]);
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
-   'No changes to saved squad, attack formulas, source buffs, quest rewards or game save.';
+   'Element targeting uses known original unit types and visible, identified enemy types; '+
+   'unknown weaknesses revert to the existing HP% strategy. No changes to saved squad, '+
+   'attack formulas, source buffs, quest rewards or game save.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
  function refresh(){
    toggle.checked=config.on;heal.value=String(config.heal);

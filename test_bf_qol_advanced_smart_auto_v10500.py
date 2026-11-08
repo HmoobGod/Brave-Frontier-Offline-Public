@@ -72,7 +72,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
  # Optional player strategies add visible demo enemy ATK/DEF priorities without
  # touching the original default, battle commands, save or enemy-owned AI.
- assert p.locator('#bf10500-target option').count()==4
+ assert p.locator('#bf10500-target option').count()==5
  candidates=[
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
@@ -88,6 +88,43 @@ with sync_playwright() as pw:
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
+ # Elemental player Auto priority uses the real source-backed six-element
+ # matchup API; its threat choice is team-wide and never guesses unknown types.
+ p.evaluate("""()=>{window.S={mode:'archive',over:false,round:0,enemies:[]};
+   window.UNIT_BY_ID=new Map([
+     [10011,{element:'Fire'}],[20011,{element:'Water'}],
+     [30011,{element:'Thunder'}]
+   ]);
+   __party105[0].unitId=10011;__party105[2].unitId=20011;
+ }""")
+ p.add_script_tag(path=str(A/'bf6900_elemental_combat.js'))
+ assert p.evaluate('BFGlobalElementalCombatV6900.source.advantage')==1.5
+ settings['target']='elemental'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.locator('#bf10500-target').input_value()=='elemental'
+ typed_foes=[
+   {'hp':80,'maxHp':100,'slot':0,'element':'Earth'},
+   {'hp':5,'maxHp':100,'slot':1,'element':'Fire'},
+   {'hp':1,'maxHp':100,'slot':2,'element':'Water'}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",typed_foes)==0
+ # Ties favor lower remaining HP%, then native slot.
+ same=[{'hp':50,'maxHp':500,'slot':5,'element':'Earth'},
+       {'hp':10,'maxHp':100,'slot':2,'element':'Earth'}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",same)==2
+ # Unknown foe types carry no invented weaknesses: use current baseline.
+ unknown=[{'hp':10,'maxHp':100,'slot':0,'element':'Unknown'},
+          {'hp':40,'maxHp':100,'slot':1}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",unknown)==0
+ # Ambiguous live slots or invalid maximum HP are never auto-targeted.
+ bad_elements=[{'hp':80,'maxHp':100,'slot':0,'element':'Earth'},
+               {'hp':5,'maxHp':100,'slot':0,'element':'Fire'}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",bad_elements) is None
+ bad_elements[1]['slot']=1
+ bad_elements[1]['maxHp']=0
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",bad_elements) is None
+ p.evaluate("""()=>{__party105[0].unitId=20011;__party105[2].unitId=30011;}""")
+ settings['target']='lowest-def'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Missing target statistics and impossible enemy records fail closed.
  invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
           {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
