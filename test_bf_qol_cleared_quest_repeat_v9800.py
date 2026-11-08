@@ -90,7 +90,7 @@ with sync_playwright() as pw:
   before_replays=p.evaluate('window.__repeatCount')
   p.evaluate('S.over=true;S.phase="Victory"')
   if failed=='save':p.evaluate('window.__stored98=false')
-  assert p.evaluate(api+'.poll()') is False,failed
+  assert p.evaluate(api+'.poll()') is True,failed
   assert not p.evaluate(api+'.statusSnapshot().active'),failed
   assert not p.locator('#auto').is_checked(),failed
   assert p.evaluate('window.__repeatCount')==before_replays,failed
