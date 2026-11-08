@@ -116,6 +116,28 @@ with sync_playwright() as pw:
  p.evaluate(native_background)
  assert p.locator('#auto').is_checked()
  p.locator('#auto').uncheck()
+ # On browser-only background/close, Auto MUST stop too. Otherwise the
+ # repeat session is disarmed but native Auto can keep running unattended.
+ for signal in ('visibilitychange','pagehide'):
+  p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;
+    S.phase='Victory';document.getElementById('auto').checked=false;}""")
+  assert p.evaluate(api+'.start(2)') is True,signal
+  assert p.locator('#auto').is_checked()
+  previous_replays=p.evaluate('window.__repeatCount')
+  before_player=p.evaluate('JSON.stringify(P)')
+  if signal=='visibilitychange':
+   p.evaluate("""()=>{Object.defineProperty(document,'hidden',{
+     configurable:true,value:true});
+     try{document.dispatchEvent(new Event('visibilitychange'));}
+     finally{delete document.hidden;}
+   }""")
+  else:
+   p.evaluate("window.dispatchEvent(new Event('pagehide'))")
+  assert p.evaluate(api+'.statusSnapshot().active') is False,signal
+  assert not p.locator('#auto').is_checked(),signal
+  assert p.evaluate('JSON.stringify(P)')==before_player,signal
+  assert p.evaluate(api+'.poll()') is False,signal
+  assert p.evaluate('window.__repeatCount')==previous_replays,signal
  # Stop Repeating belongs to the player even while a battle action is
  # running. The ongoing round may complete, but an Auto setting owned by
  # the repeat session must not keep driving later rounds.
