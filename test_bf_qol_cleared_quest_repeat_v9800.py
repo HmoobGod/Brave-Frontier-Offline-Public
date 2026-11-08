@@ -21,8 +21,23 @@ with sync_playwright() as pw:
  errors=[];p.on('pageerror',lambda e:errors.append(str(e)))
  p.set_content("""<html><body><div id="bf2000-run"></div>
    <input id="auto" type="checkbox"></body></html>""")
+ # set_content runs on about:blank, where native localStorage is denied.
+ # Provide a disposable in-memory key/value store and write counter rather
+ # than depending on a real browser origin or the owner's canonical save.
+ p.evaluate("""()=>{
+   const data=new Map();
+   window.__v98StorageWrites=0;
+   Object.defineProperty(window,'localStorage',{configurable:true,value:{
+     getItem:key=>data.has(key)?data.get(key):null,
+     setItem:(key,value)=>{data.set(String(key),String(value));__v98StorageWrites++;},
+     removeItem:key=>data.delete(String(key)),
+     clear:()=>data.clear(),key:i=>[...data.keys()][i]??null,
+     get length(){return data.size}
+   }});
+ }""")
  p.evaluate("""()=>{
    window.P={version:7,roster:[10011],squad:[10011],questClears:{1:1}};
+   localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));
    window.QUEST={missionId:1};
    window.S={mode:'archive',over:true,busy:false,phase:'Victory'};
    window.__repeatCount=0;
@@ -122,6 +137,7 @@ with sync_playwright() as pw:
    document.getElementById('auto').checked=false;}""")
  after_external=p.evaluate('JSON.stringify(P)')
  before_save=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ before_writes=p.evaluate('__v98StorageWrites')
  assert p.evaluate(api+'.poll()') is True
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert p.evaluate(api+'.statusSnapshot().completed')==0
@@ -130,6 +146,7 @@ with sync_playwright() as pw:
  assert p.evaluate('window.__repeatCount')==old_replays
  assert p.evaluate('JSON.stringify(P)')==after_external
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_save
+ assert p.evaluate('__v98StorageWrites')==before_writes
  # Auto checkbox turning off is an immediate opt-out.
  p.evaluate("""()=>{S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(5)') is True
