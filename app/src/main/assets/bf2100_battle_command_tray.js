@@ -44,9 +44,10 @@
  const attacks=btn('QUEUE ALL ATTACKS','bf2100-attacks',()=>queueAll('attack'));
  const guards=btn('QUEUE ALL GUARDS','bf2100-guards',()=>queueAll('guard'));
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
+ const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional quick controls use the original demo buttons. Brave Bursts require a full gauge; all other allies attack. Item users and just-revived allies keep their reserved Guard turns. Commands do not execute until you choose Execute. No original 2022 combat AI or damage formula is claimed.';
+ foot.textContent='Optional quick controls use the original demo buttons. Spread Attacks distributes living allies over living foes in turn order. Brave Bursts require a full gauge; all other allies attack. Item users keep reserved Guard turns. Commands do not execute until you choose Execute. No original 2022 combat AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -102,6 +103,41 @@
    }
    signature='';refresh();return true;
  }
+ // Manually spread single-target attacks around surviving foes instead of
+ // focusing every ally on the same enemy. Use only the native player buttons.
+ // Existing item-turn reservations keep their Guard actions, and no turn is
+ // executed without the player's separate Execute command.
+ function spreadAttacks(){
+   if(!ready()||!Array.isArray(S.enemies))return false;
+   const squad=active(),living=enemies();
+   if(!living.length||living.some(e=>!Number.isFinite(e.hp)||e.hp<=0||
+      !Number.isFinite(e.maxHp)||e.maxHp<=0||
+      !Number.isSafeInteger(e.slot)||e.slot<0))return false;
+   if(new Set(living.map(e=>e.slot)).size!==living.length)return false;
+   if(squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      !slots.children[p.id]||slots.children[p.id].disabled))return false;
+   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   if(!Array.isArray(reservations))return false;
+   const reserved=new Set(reservations.map(r=>r.slot));
+   let attackIndex=0;
+   for(const p of squad){
+     if(!ready())return false;
+     if(!reserved.has(p.id)){
+       const target=living[attackIndex%living.length];
+       if(!setTarget(target.slot))return false;
+       attackIndex++;
+     }
+     const slot=slots.children[p.id];if(!slot||slot.disabled)return false;
+     slot.click();
+     const command=reserved.has(p.id)?guard:attack;
+     if(command.disabled)return false;
+     command.click();
+     if(p.action?.kind!==(command===guard?'guard':'attack'))return false;
+     if(command===attack&&p.action.target!==living[(attackIndex-1)%living.length].slot)
+       return false;
+   }
+   signature='';refresh();return true;
+ }
  function executeTurn(){
    if(!snapshot().canExecute||execute.disabled)return false;
    execute.click();signature='';refresh();return true;
@@ -113,7 +149,7 @@
    status.textContent='Wave '+(st.wave+1)+' · Round '+st.round+
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
      (st.auto?' · Auto Battle enabled':'');
-   attacks.disabled=guards.disabled=bursts.disabled=!st.canQueue;
+   attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
    fire.disabled=!st.canExecute;
    const group=document.createDocumentFragment();
    for(const e of st.foes){
@@ -130,5 +166,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,executeTurn});
 })();

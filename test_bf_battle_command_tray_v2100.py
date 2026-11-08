@@ -50,6 +50,15 @@ with sync_playwright() as pw:
  assert page.evaluate('(slot)=>BFGlobalBattleCommandsV2100.setTarget(slot)',slots[-1]) is True
  assert page.evaluate('S.target')==slots[-1]
  assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(9999)') is False
+ # The player can distribute manual attacks across all live enemies without
+ # executing a turn, changing quest progress, or touching the canonical save.
+ assert page.locator('#bf2100-spread').is_visible()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is True
+ assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
+ living=page.evaluate('S.enemies.filter(e=>e.hp>0).map(e=>e.slot)')
+ assert len(living)>=2
+ assert assigned==[['attack',living[i%len(living)]] for i in range(len(assigned))],assigned
+ assert not page.evaluate('S.busy')
  # After an enemy falls, the native target list may exclude that dead slot
  # instead of retaining a disabled placeholder. The tray must select the
  # intended surviving target through the real native button either way.
@@ -64,13 +73,21 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.setTarget(1)') is True
  assert page.evaluate('S.target')==1
  assert page.evaluate('S.enemies[0].hp')==0
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is True
+ assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
+ assert assigned==[['attack',1 if i%2==0 else 2] for i in range(len(assigned))],assigned
+ assert page.evaluate('S.enemies[0].hp')==0
+ # Still only commands queued: this source-level action cannot award rewards.
+ assert not page.evaluate('S.busy')
  page.evaluate('S.busy=true')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
  page.evaluate('S.busy=false')
  page.locator('#auto').check()
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().auto') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  page.locator('#auto').uncheck()
  page.evaluate('BFGlobalBattleCommandsV2100.refresh()')
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -88,4 +105,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: native queue buttons, target switching, BB fallback, busy/auto guards, execute and v7 isolation')
+print('PASS v21.00: native queue, spread attacks, KO retargeting, BB fallback, busy/auto guards, execute and v7 isolation')
