@@ -102,6 +102,9 @@
       typeof element.multiplier!=='function'||
       typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function')
      return undefined;
+   // Reject malformed positive HP before filtering native living slots.
+   // Otherwise elemental ranking could target a different, ambiguous foe.
+   if(enemies.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
    const live=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
    if(live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
        !Number.isSafeInteger(e.slot)||e.slot<0)||
