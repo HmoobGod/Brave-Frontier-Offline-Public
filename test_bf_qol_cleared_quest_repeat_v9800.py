@@ -41,6 +41,7 @@ with sync_playwright() as pw:
  assert p.locator('#bf9800-auto-repeat').count()==1
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert p.locator('#bf9800-repeat-count option').count()==4
+ assert p.locator('#bf9800-repeat-count').input_value()=='2'
  assert p.evaluate(api+'.start(0)') is False
  assert p.evaluate(api+'.start(20)') is False
  p.evaluate("window.__stored98=false")
