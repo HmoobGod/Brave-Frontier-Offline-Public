@@ -20,7 +20,8 @@
  foot.textContent='Targets use visible DEMO enemy stats. Queuing replaces earlier squad orders; Execute is manual. This is optional and not recovered original AI.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
-  ['lowest-hp','LOWEST HP'],['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF']
+  ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
+  ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF']
  ];
  let selected='lowest-hp',signature='';
  const legal=()=>!S.busy&&!S.over&&!S.auto&&!!commands.snapshot()?.canQueue;
@@ -34,7 +35,9 @@
      Number.isFinite(e.maxHp)&&e.maxHp>0&&
      Number.isSafeInteger(e.slot)&&e.slot>=0&&Number.isFinite(e[key]));
    foes.sort((a,b)=>{
-     const diff=kind==='highest-atk'?b[key]-a[key]:a[key]-b[key];
+     const diff=kind==='highest-atk'?b[key]-a[key]:
+       kind==='lowest-hp-percent'?a.hp/a.maxHp-b.hp/b.maxHp:
+       a[key]-b[key];
      return diff||a.slot-b.slot;
    });
    const f=foes[0];return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp,atk:f.atk,def:f.def}):null;
