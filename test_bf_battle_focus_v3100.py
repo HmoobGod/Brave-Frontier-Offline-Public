@@ -42,14 +42,19 @@ with sync_playwright() as pw:
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert page.evaluate('S.enemies.length')==3
  page.evaluate("""()=>{const es=S.enemies;
- es[0].hp=390;es[0].atk=800;es[0].def=50;
- es[1].hp=75;es[1].atk=100;es[1].def=180;
- es[2].hp=760;es[2].atk=300;es[2].def=5;update()}""")
+ es[0].hp=390;es[0].maxHp=5000;es[0].atk=800;es[0].def=50;
+ es[1].hp=75;es[1].maxHp=100;es[1].atk=100;es[1].def=180;
+ es[2].hp=760;es[2].maxHp=2000;es[2].atk=300;es[2].def=5;update()}""")
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-hp").slot')==1
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-hp-percent").slot')==0
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-atk").slot')==0
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-def").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
+ assert page.locator('#bf3100-options button').count()==5
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
  page.evaluate('S.party[0].bb=100;update()')
@@ -61,7 +66,7 @@ with sync_playwright() as pw:
  # Keep the intentionally malformed fixture inside one synchronous browser
  # task. Polling HUD modules must never observe deliberately corrupt S.enemies.
  results=page.evaluate("""()=>{const original=S.enemies;
-   const seed=original[0],strategies=['lowest-hp','highest-atk','lowest-def'];
+   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-atk','lowest-def'];
    try{
      S.enemies=[
        {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
@@ -76,9 +81,24 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[3,3,3],results
- assert results['invalid']==[None,None,None],results
+ assert results['valid']==[3,3,3,3],results
+ assert results['invalid']==[None,None,None,None],results
  assert results['rejected'],results
+ # Percentage ranking differs from absolute ranking. Invalid max HP and
+ # ties are handled without leaking a fake enemy into the live renderer.
+ ranks=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
+   try{
+     S.enemies=[
+       {...seed,slot:0,hp:10,maxHp:20},
+       {...seed,slot:1,hp:100,maxHp:1000},
+       {...seed,slot:2,hp:5,maxHp:0},
+       {...seed,slot:3,hp:50,maxHp:500}
+     ];
+     return {absolute:BFGlobalBattleFocusV3100.lookup('lowest-hp')?.slot,
+       relative:BFGlobalBattleFocusV3100.lookup('lowest-hp-percent')?.slot};
+   }finally{S.enemies=original;}
+ }""")
+ assert ranks=={'absolute':0,'relative':1},ranks
  assert page.evaluate('P.version')==7
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  # The fixture explicitly selects a mission, so compare save for implicit writes, not transient P.lastMission.
