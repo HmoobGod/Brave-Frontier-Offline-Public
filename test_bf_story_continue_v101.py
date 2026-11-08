@@ -68,6 +68,33 @@ with sync_playwright() as pw:
  assert page.locator('#bf101-continue').is_disabled()
  assert '106 archived story missions cleared' in page.locator('#bf101-next').text_content()
  assert page.locator('#bf101-story-continue [aria-valuenow]').get_attribute('aria-valuenow')=='106'
+ # After quota failure, the global story shortcut must not route to a
+ # newly unlocked mission while earned victory progress is only in memory.
+ page.evaluate("""()=>{P.questClears={};renderQuestList();
+   if(!BFQuestAreas.choose(QUESTS[0]))throw Error('No starter mission');}""")
+ persisted=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate("""()=>{window.__continueOriginalSet=localStorage.setItem.bind(localStorage);
+   window.__continueDenySave=true;
+   localStorage.setItem=(key,value)=>{
+     if(__continueDenySave&&key==='bf_global_offline_demo_v7')
+       throw new DOMException('Synthetic storage quota','QuotaExceededError');
+     return __continueOriginalSet(key,value);
+   };
+   finish(true);
+   BFGrandGaiaContinueV101.refresh();
+ }""")
+ assert page.evaluate('P.questClears[1]')>=1
+ assert page.evaluate('BFGrandGaiaContinueV101.snapshot().nextMission') is None
+ assert page.evaluate('BFGrandGaiaContinueV101.nextMission') is None
+ assert page.locator('#bf101-continue').is_disabled()
+ assert 'VICTORY NOT SAVED' in page.locator('#bf101-next').inner_text()
+ assert page.evaluate('QUEST.missionId')==1
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
+ assert page.evaluate("()=>{__continueDenySave=false;return saveProgress()}") is True
+ assert page.evaluate('BFGrandGaiaContinueV101.refresh().nextMission')==2
+ assert page.locator('#bf101-continue').is_enabled()
+ page.locator('#bf101-continue').click()
+ assert page.evaluate('QUEST.missionId')==2
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
