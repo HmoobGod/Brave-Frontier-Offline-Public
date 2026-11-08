@@ -21,6 +21,7 @@
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
+  ['highest-hp','HIGHEST HP'],['highest-hp-percent','HIGHEST HP %'],
   ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF']
  ];
  let selected='lowest-hp',signature='';
@@ -41,6 +42,8 @@
    const foes=living.filter(e=>Number.isFinite(e[key]));
    foes.sort((a,b)=>{
      const diff=kind==='highest-atk'?b[key]-a[key]:
+       kind==='highest-hp'?b.hp-a.hp:
+       kind==='highest-hp-percent'?b.hp/b.maxHp-a.hp/a.maxHp:
        kind==='lowest-hp-percent'?a.hp/a.maxHp-b.hp/b.maxHp:
        a[key]-b[key];
      return diff||a.slot-b.slot;
