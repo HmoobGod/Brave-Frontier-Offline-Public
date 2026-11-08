@@ -3,6 +3,7 @@
  'use strict';
  if (window.BFGlobalStoryBattleV2000 || !window.BFQuestAreas ||
      !window.BFGlobalQuestText || !window.BFGrandGaiaContinueV101 ||
+     typeof window.BFGrandGaiaCampaignV100?.nextPlayable!=='function' ||
      typeof QUESTS==='undefined' || QUESTS.length!==106 ||
      typeof P==='undefined' || P.version!==7 || typeof S==='undefined') return;
  const questDetail=document.getElementById('bf-quest-details');
@@ -56,8 +57,16 @@
  const progressStored=()=>typeof saveEnabled==='boolean'&&saveEnabled&&
    typeof saveRecoveryPending==='boolean'&&!saveRecoveryPending;
  function upcoming(q){
-   const index=QUESTS.findIndex(row=>row.missionId===q?.missionId);
-   return index<0?null:QUESTS.slice(index+1).find(row=>!cleared(row)&&questUnlocked(row))||null;
+   // Reuse the campaign's complete source-catalog and clear-ledger preflight.
+   // An already-cleared later mission must not skip an earlier unfinished one.
+   // A malformed later clear blocks ALL Next buttons, not only the map widget.
+   if(!q||!QUESTS.some(row=>row.missionId===q.missionId))return null;
+   const chosen=window.BFGrandGaiaCampaignV100.nextPlayable();
+   if(!chosen)return null;
+   const row=QUESTS.find(entry=>entry.missionId===chosen.missionId);
+   if(!row||row.dungeonId!==chosen.dungeonId||row.battles!==chosen.battles||
+      cleared(row)||!questUnlocked(row))return null;
+   return row;
  }
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;

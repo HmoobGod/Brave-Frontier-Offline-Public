@@ -73,6 +73,30 @@ with sync_playwright() as pw:
  assert page.evaluate("()=>{__hudDenySave=false;return saveProgress()}") is True
  s=page.evaluate('BFGlobalStoryBattleV2000.refresh()')
  assert s['won'] and s['stored'] and s['clears']>=1 and s['nextId']==2,s
+ # The battle HUD and results must use the NEW campaign-wide source order.
+ # An already cleared later selection must not skip an earlier open mission,
+ # even if the older local slice would have pointed after that later stage.
+ ledger=page.evaluate("""()=>{const current=QUEST,high=QUESTS.find(q=>q.missionId===10);
+   const old=P.questClears[10],lastId=QUESTS[QUESTS.length-1].missionId;
+   const last=P.questClears[lastId];
+   try{
+     QUEST=high;P.questClears[10]=1;
+     const global=BFGrandGaiaCampaignV100.nextPlayable();
+     const same=BFGlobalStoryBattleV2000.snapshot().nextId;
+     P.questClears[lastId]=-1;
+     const corruptCampaign=BFGrandGaiaCampaignV100.nextPlayable();
+     const corruptHUD=BFGlobalStoryBattleV2000.snapshot().nextId;
+     return {global:global?.missionId,same,corruptCampaign,corruptHUD};
+   }finally{
+     QUEST=current;
+     if(old===undefined)delete P.questClears[10];
+     else P.questClears[10]=old;
+     if(last===undefined)delete P.questClears[lastId];
+     else P.questClears[lastId]=last;
+   }
+ }""")
+ assert ledger=={'global':2,'same':2,'corruptCampaign':None,'corruptHUD':None},ledger
+ assert page.evaluate('BFGlobalStoryBattleV2000.refresh().nextId')==2
  assert page.locator('#bf2000-next').is_enabled()
  assert page.locator('#bf2000-waves span[data-completed="true"]').count()==3
  page.evaluate('S.busy=true')
