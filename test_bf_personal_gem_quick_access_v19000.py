@@ -70,6 +70,37 @@ with sync_playwright() as pw:
        save:localStorage.getItem('bf_global_offline_demo_v7'),
        writes:[...__v190Writes]})""")
     assert before==after,(before,after)
+    # The shortcut is read-only; its displayed personal balance updates only
+    # after the existing canonical v7 Gem/quest transactions commit.
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS'
+    assert page.evaluate('BFGlobalCustomGemsV17000.setMode("custom")') is True
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 0'
+    assert page.evaluate('BFGlobalCustomGemsV17000.claimWelcome()') is True
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 1,000'
+    assert page.evaluate('BFGlobalCustomGemsV17000.claimDaily()') is True
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 1,100'
+    page.evaluate('QUEST=QUESTS.find(q=>q.missionId===1);awardDemoRewards()')
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 1,125'
+    page.evaluate('awardDemoRewards()')
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 1,126'
+    assert page.evaluate('P._bfGemV170Custom.balance') == 1126
+    assert page.evaluate("""()=>{
+        const raw=localStorage.getItem('bf_global_offline_demo_v7');
+        return JSON.parse(raw)._bfGemV170Custom.balance===1126;
+    }""")
+    snapshot=page.evaluate('JSON.stringify(P)')
+    saved=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+    page.evaluate('BFGlobalPersonalGemUIV17000.refresh()')
+    assert page.evaluate('JSON.stringify(P)') == snapshot
+    assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") == saved
+    assert jump.get_attribute('aria-label') == 'Personal Gem balance 1,126. Open rewards'
+    assert page.evaluate('BFGlobalCustomGemsV17000.setMode("original")') is True
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS'
+    assert page.evaluate('P._bfGemV170Custom.balance') == 1126
+    assert page.evaluate('BFGlobalCustomGemsV17000.setMode("custom")') is True
+    assert jump.inner_text() == 'GEMS · DAILY REWARDS · 1,126'
+    assert page.locator('#bf19000-open-gem-rewards').count()==1
+    assert page.locator('#bf17000-gem-rewards').count()==1
     assert not failures,failures
     browser.close()
 print("PASS v190: Quest shortcut opens existing offline Gem panel; v7 wallet and combat state unchanged")
