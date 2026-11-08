@@ -77,17 +77,48 @@ with sync_playwright() as pw:
  assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
  assert assigned==[['attack',1 if i%2==0 else 2] for i in range(len(assigned))],assigned
  assert page.evaluate('S.enemies[0].hp')==0
+ # Source-backed elemental matchup option uses the original 2022 six-element
+ # relationship, but never invents unknown demo enemy/ally elements or damage.
+ assert page.locator('#bf2100-elements').is_visible()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
+ page.add_script_tag(path=str(A/'bf6900_elemental_combat.js'))
+ assert page.evaluate('BFGlobalElementalCombatV6900.normalize("Fire")')=='Fire'
+ assert page.evaluate('UNIT_BY_ID.get(10011).element')=='Fire'
+ page.evaluate("""()=>{S.party.forEach(p=>{if(p.active)p.unitId=10011});
+   S.enemies[1].element='Earth';S.enemies[2].element='Water';update()}""")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan().length')==6
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan().every(x=>x.target===1&&!x.reserved)')
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is True
+ assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
+ assert assigned==[['attack',1] for _ in assigned],assigned
+ assert not page.evaluate('S.busy')
+ # An unknown source ally must fail before any player orders change.
+ saved_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
+ page.evaluate('S.party[0].unitId=999999')
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==saved_orders
+ page.evaluate('S.party[0].unitId=10011')
+ # With no advantageous foe, the option refuses to overwrite previous orders.
+ page.evaluate("S.enemies[1].element='Water';update()")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==saved_orders
+ # Restore a favorable foe before testing busy / Auto rejection.
+ page.evaluate("S.enemies[1].element='Earth';update()")
  # Still only commands queued: this source-level action cannot award rewards.
  assert not page.evaluate('S.busy')
  page.evaluate('S.busy=true')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
  page.evaluate('S.busy=false')
  page.locator('#auto').check()
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().auto') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  page.locator('#auto').uncheck()
  page.evaluate('BFGlobalBattleCommandsV2100.refresh()')
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -105,4 +136,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: native queue, spread attacks, KO retargeting, BB fallback, busy/auto guards, execute and v7 isolation')
+print('PASS v21.00: native queue, spread and source-backed element attacks, KO target, busy/auto guards, v7 isolation')
