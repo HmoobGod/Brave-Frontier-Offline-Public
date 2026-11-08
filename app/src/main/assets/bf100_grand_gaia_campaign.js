@@ -84,6 +84,27 @@
      total:entries.reduce((n,x)=>n+x.total,0),
      dungeons:idset.size});
  }
+ // Read-only next playable mission, following source catalog order and real unlocks.
+ // Never synthesize a fight, award a clear, or modify canonical v7 progress.
+ function nextPlayable(){
+   if(typeof P!=='object' || !P || !P.questClears || typeof questUnlocked!=='function')return null;
+   // Validate the entire source catalog and clear ledger before selecting a mission.
+   // An invalid later record must not be hidden by an earlier playable mission.
+   const seen=new Set();
+   for(const q of QUESTS){
+     if(!q || !Number.isSafeInteger(q.missionId) || seen.has(q.missionId) ||
+        !idset.has(q.dungeonId) || !Number.isSafeInteger(q.battles) || q.battles<1)return null;
+     seen.add(q.missionId);
+     const count=P.questClears[q.missionId];
+     if(count!==undefined && (!Number.isSafeInteger(count) || count<0))return null;
+   }
+   for(const q of QUESTS){
+     if((P.questClears[q.missionId]||0)===0 && questUnlocked(q))
+       return Object.freeze({missionId:q.missionId,dungeonId:q.dungeonId,
+         name:String(q.name||''),battles:q.battles});
+   }
+   return null;
+ }
  function refresh(){
    const info=summary();
    total.textContent=info.cleared+' / '+info.total+' original missions cleared';
@@ -107,6 +128,6 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  tabs.addEventListener('click',refresh);
  refresh();
- window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,
+ window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,
     get missionCount(){return 106},get dungeonCount(){return 23}});
 })();
