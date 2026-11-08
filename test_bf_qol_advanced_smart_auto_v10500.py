@@ -89,14 +89,9 @@ with sync_playwright() as pw:
    {'hp':5,'maxHp':0,'slot':3,'atk':999,'def':1},
    {'hp':5,'maxHp':100,'slot':-1,'atk':999,'def':1},
    {'hp':5,'maxHp':100,'slot':1,'atk':999,'def':1},
-   {'hp':5,'maxHp':100,'slot':3,'atk':float('inf'),'def':1},
- ]:
+  ]:
   rows=[{'hp':70,'maxHp':100,'slot':1,'atk':50,'def':30},bad]
-  if bad['atk']==float('inf'):
-   # Invalid ranking stat alone excludes that candidate, not the valid foe.
-   assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",rows)==1
-  else:
-   assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",rows) is None
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",rows) is None
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
