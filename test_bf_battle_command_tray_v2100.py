@@ -94,11 +94,20 @@ with sync_playwright() as pw:
  assert not page.evaluate('S.busy')
  # An unknown source ally must fail before any player orders change.
  saved_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
- page.evaluate('S.party[0].unitId=999999')
- assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
- assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ # The live renderer reads UNIT_BY_ID for animation on every RAF. Never
+ # expose a deliberately invalid unit ID across separate evaluate calls.
+ # Run the negative preflight and immediately restore source identity.
+ unknown=page.evaluate("""()=>{const old=S.party[0].unitId;
+   const before=S.party.map(p=>JSON.stringify(p.action));
+   try{
+     S.party[0].unitId=999999;
+     return {noPlan:BFGlobalBattleCommandsV2100.elementPlan()===null,
+       rejected:BFGlobalBattleCommandsV2100.elementAttacks()===false,
+       unchanged:before.every((order,i)=>order===JSON.stringify(S.party[i].action))};
+   }finally{S.party[0].unitId=old;}
+ }""")
+ assert unknown=={'noPlan':True,'rejected':True,'unchanged':True},unknown
  assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==saved_orders
- page.evaluate('S.party[0].unitId=10011')
  # With no advantageous foe, the option refuses to overwrite previous orders.
  page.evaluate("S.enemies[1].element='Water';update()")
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
