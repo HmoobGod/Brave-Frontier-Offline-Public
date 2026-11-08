@@ -58,6 +58,18 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
  assert p.evaluate("""foes=>BF042AutoCoordination.chooseTarget(foes).slot""",foes)==1
+ # The base Smart Auto targets only living enemies with valid positive max HP.
+ # Advanced absolute targeting must preserve that legality gate, not choose
+ # a smaller apparent HP on an impossible maxHp/unknown enemy.
+ for bad in [{'hp':1,'maxHp':0,'slot':0},
+             {'hp':1,'maxHp':-10,'slot':0},
+             {'hp':1,'slot':0}]:
+  rows=[bad,{'hp':60,'maxHp':100,'slot':1}]
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",rows)==1
+ assert p.evaluate("""()=>BF042AutoCoordination.chooseTarget([
+   {hp:1,maxHp:0,slot:0},{hp:2,slot:1}])""") is None
+ good=[{'hp':80,'maxHp':1000,'slot':0},{'hp':20,'maxHp':100,'slot':1}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
  settings['heal']=75
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[0])')=='burst'
