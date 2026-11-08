@@ -93,10 +93,30 @@
  }
  function queueAll(mode){
    if(!['attack','guard','burst'].includes(mode)||!ready())return false;
-   const squad=active();
-   if(squad.some(p=>!Number.isInteger(p.id)||!slots.children[p.id]||slots.children[p.id].disabled))return false;
-   // Preserve the same paid item turns that native Execute already enforces.
+   const squad=active(),ids=squad.map(p=>p.id);
+   // Prevent a duplicate or malformed player slot from receiving two orders
+   // while a different living teammate is left unqueued.
+   if(squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0||
+      !slots.children[p.id]||slots.children[p.id].disabled)||
+      new Set(ids).size!==ids.length)return false;
+   // Offensive queue shortcuts rely on the native enemy slot map. An invalid
+   // living foe must cancel the WHOLE operation before any ally order changes.
+   // Guard-only commands retain their original defensive behavior.
+   if(mode!=='guard'){
+     if(!Array.isArray(S.enemies))return false;
+     const living=S.enemies.filter(e=>e&&e.hp>0);
+     if(S.enemies.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp))||
+        !living.length||living.some(e=>!Number.isFinite(e.hp)||
+          !Number.isFinite(e.maxHp)||e.maxHp<=0||
+          !Number.isSafeInteger(e.slot)||e.slot<0)||
+        new Set(living.map(e=>e.slot)).size!==living.length)return false;
+   }
+   // Preserve paid item turns, validating the optional reservation snapshot
+   // before issuing any native player click.
    const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   if(!Array.isArray(reservations)||reservations.some(r=>
+       !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
    const reserved=new Set(reservations.map(r=>r.slot));
    for(const p of squad){
      const slot=slots.children[p.id];if(!slot||slot.disabled)return false;
