@@ -70,6 +70,38 @@ with sync_playwright() as pw:
    {hp:1,maxHp:0,slot:0},{hp:2,slot:1}])""") is None
  good=[{'hp':80,'maxHp':1000,'slot':0},{'hp':20,'maxHp':100,'slot':1}]
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
+ # Optional player strategies add visible demo enemy ATK/DEF priorities without
+ # touching the original default, battle commands, save or enemy-owned AI.
+ assert p.locator('#bf10500-target option').count()==4
+ candidates=[
+   {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
+   {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
+   {'hp':70,'maxHp':100,'slot':2,'atk':44,'def':7},
+   {'hp':1,'maxHp':0,'slot':3,'atk':9999,'def':-100},
+   {'hp':1,'maxHp':100,'slot':-1,'atk':9999,'def':-100},
+   {'hp':1,'maxHp':100,'slot':4}
+ ]
+ settings['target']='highest-atk'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==1
+ assert p.locator('#bf10500-target').input_value()=='highest-atk'
+ settings['target']='lowest-def'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
+ # Missing target statistics and impossible enemy records fail closed.
+ invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
+          {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
+          {'hp':3,'maxHp':10,'slot':2}]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",invalid) is None
+ settings['target']='highest-atk'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",invalid) is None
+ settings['target']='invalid-priority'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is False
+ assert p.evaluate('BFGlobalQoLAdvancedAutoV10500.get().target')=='highest-atk'
+ settings['target']='percent'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==0
  settings['heal']=75
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[0])')=='burst'

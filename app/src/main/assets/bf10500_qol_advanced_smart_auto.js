@@ -22,7 +22,7 @@
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
-       target:['percent','absolute'].includes(raw?.target)?raw.target:'percent',
+       target:['percent','absolute','highest-atk','lowest-def'].includes(raw?.target)?raw.target:'percent',
        burst:['normal','conserve'].includes(raw?.burst)?raw.burst:'normal'};
    }catch(_){return configDefaults();}
  }
@@ -31,7 +31,7 @@
  function valid(options){
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
-     ['percent','absolute'].includes(options.target)&&
+     ['percent','absolute','highest-atk','lowest-def'].includes(options.target)&&
      ['normal','conserve'].includes(options.burst);
  }
  function set(next){
@@ -64,12 +64,18 @@
  function chooseTarget(enemies){
    if(!active()||config.target==='percent')return baseTarget(enemies);
    if(!Array.isArray(enemies))return baseTarget(enemies);
-   // Match the base Auto planner's source-target safety rules: an enemy
-  // without a valid positive max HP is not a legal percentage/absolute target.
-  const eligible=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
+   // Player-selected DEMO priorities, not recovered enemy or original AI.
+   // Keep the native planner's positive HP/max HP and legal slot gate before
+   // ranking by an optional visible enemy statistic. Unknown stats fail closed.
+   const key=config.target==='highest-atk'?'atk':
+     config.target==='lowest-def'?'def':'hp';
+   const eligible=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0&&
      Number.isFinite(e.maxHp)&&e.maxHp>0&&
-     Number.isSafeInteger(e.slot));
-   eligible.sort((a,b)=>a.hp-b.hp||a.slot-b.slot);
+     Number.isSafeInteger(e.slot)&&e.slot>=0&&Number.isFinite(e[key]));
+   eligible.sort((a,b)=>{
+     const delta=config.target==='highest-atk'?b.atk-a.atk:a[key]-b[key];
+     return delta||a.slot-b.slot;
+   });
    return eligible[0]||null;
  }
  // Old coordinated plan dynamically calls window.BF041SmartAuto.kindFor(p).
@@ -102,7 +108,7 @@
  onLabel.append(toggle,document.createTextNode(' Enable advanced rules (Smart Auto must also be enabled)'));
  settings.append(onLabel);
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
- const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP']]);
+ const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge']]);
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
