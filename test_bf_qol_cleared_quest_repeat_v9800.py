@@ -40,26 +40,39 @@ with sync_playwright() as pw:
  api='BFGlobalQoLQuestRepeatV9800'
  assert p.locator('#bf9800-auto-repeat').count()==1
  assert p.evaluate(api+'.statusSnapshot().active') is False
- assert p.evaluate(api+'.start(1)') is False
+ assert p.locator('#bf9800-repeat-count option').count()==4
+ assert p.evaluate(api+'.start(0)') is False
  assert p.evaluate(api+'.start(20)') is False
  p.evaluate("window.__stored98=false")
  assert p.evaluate(api+'.start(2)') is False
  p.evaluate("window.__stored98=true")
- assert p.evaluate(api+'.start(2)') is True
+ # A one-clear player choice is a genuine bounded native replay: it executes
+ # one additional quest, confirms the stored clear, then restores Auto OFF.
+ assert p.evaluate(api+'.start(1)') is True
  assert p.evaluate('window.__repeatCount')==1
+ assert p.locator('#auto').is_checked()
+ p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory';
+   document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.poll()') is True
+ assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert p.evaluate(api+'.statusSnapshot().completed')==1
+ assert p.evaluate('window.__repeatCount')==1
+ assert not p.locator('#auto').is_checked()
+ assert p.evaluate(api+'.start(2)') is True
+ assert p.evaluate('window.__repeatCount')==2
  assert p.locator('#auto').is_checked()
  assert p.evaluate(api+'.statusSnapshot().target')==2
  p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory';
    document.getElementById('auto').checked=false;}""")
  assert p.evaluate(api+'.poll()') is True
- assert p.evaluate('window.__repeatCount')==2
+ assert p.evaluate('window.__repeatCount')==3
  assert p.evaluate(api+'.statusSnapshot().completed')==1
  p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.poll()') is True
  assert p.evaluate(api+'.statusSnapshot().active') is False
  assert p.evaluate(api+'.statusSnapshot().completed')==2
  assert not p.locator('#auto').is_checked()
- assert p.evaluate('window.__repeatCount')==2
+ assert p.evaluate('window.__repeatCount')==3
  # Cannot start before first successful clear of a mission.
  p.evaluate("""()=>{QUEST.missionId=2;P.questClears[2]=0;S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(2)') is False
@@ -188,4 +201,4 @@ with sync_playwright() as pw:
  assert p.evaluate('P.version')==7
  assert not errors,errors
  b.close()
-print('PASS v98 bounded cleared-quest replay: verified clears, stop, unexpected cancellation disarms Auto and v7 isolation')
+print('PASS v98 bounded cleared-quest replay: one/2/5/10 additional clears, stop, unexpected cancellation disarms Auto and v7 isolation')
