@@ -63,6 +63,13 @@
  function applyPreset(index){
    if(!Number.isInteger(index)||index<0||index>=max||S.busy||
       typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
+   // S.busy can be false BETWEEN automatically scheduled turns. Swapping
+   // squads there would reset the live battle while native Auto still owns it.
+   // Wait until Auto is stopped or the result screen is reached.
+   if(S.auto===true&&!S.over){
+     message='Stop Auto Battle before applying a squad preset.';
+     refresh();return false;
+   }
    const slot=slots[index];
    if(!slot||!goodIds(slot.squad,true)){
      message='Preset contains an unowned or invalid unit. Nothing changed.';
@@ -124,7 +131,8 @@
    const index=Number(selected.value)||0,slot=slots[index];
    const unavailable=!!S.busy;
    saveButton.disabled=unavailable||!goodIds(P.squad,true);
-   equipButton.disabled=unavailable||!slot||!goodIds(slot.squad,true);
+   equipButton.disabled=unavailable||(S.auto===true&&!S.over)||
+     !slot||!goodIds(slot.squad,true);
    removeButton.disabled=unavailable||!slot;
    selected.querySelectorAll('option').forEach((o,i)=>{
      o.textContent='Preset '+(i+1)+(slots[i]?' · '+slots[i].name:' · Empty');
