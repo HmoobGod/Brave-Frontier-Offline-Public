@@ -256,6 +256,20 @@ with sync_playwright() as pw:
  }""")
  assert spread_atomic=={'rejected':True,'unmodified':True,
    'selectedSame':True,'noTurn':True,'savedSame':True},spread_atomic
+ # The actor's declared native slot must actually own the matching party
+ # array entry; shuffled actor identities cannot queue partial commands.
+ shifted_actor=page.evaluate("""()=>{const party=S.party;
+   const orders=party.map(p=>JSON.stringify(p.action)),selection=S.target;
+   try{
+     S.party=[party[1],party[0],...party.slice(2)];
+     return {attackRefused:BFGlobalBattleCommandsV2100.spreadAttacks()===false,
+       burstRefused:BFGlobalBattleCommandsV2100.spreadBursts()===false,
+       preserved:orders.every((v,i)=>v===JSON.stringify(party[i].action)),
+       selectedSame:S.target===selection,noTurn:!S.busy};
+   }finally{S.party=party;}
+ }""")
+ assert shifted_actor=={'attackRefused':True,'burstRefused':True,
+   'preserved':True,'selectedSame':True,'noTurn':True},shifted_actor
  # Reserved player item turns must still Guard and not consume rotation.
  spread_reserved=page.evaluate("""()=>{
    const old=window.BFGlobalItemTurnReservationsV4500;
