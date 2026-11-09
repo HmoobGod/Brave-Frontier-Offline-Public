@@ -63,6 +63,24 @@ with sync_playwright() as pw:
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate('window.__resetCalls')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
+ # Native Auto may have a gap with S.busy=false between scheduled turns.
+ # Applying another squad must NEVER reset the live battle or save a team
+ # during that gap. An Auto-owned result is no longer a live turn.
+ p.evaluate("""()=>{window.__savePossible=true;S.busy=false;
+   S.auto=true;S.over=false;
+   document.getElementById('bf10000-slot').value='1';
+   BFGlobalQoLSquadPresetsV10000.refresh();}""")
+ assert p.locator('#bf10000-apply').is_disabled()
+ assert p.evaluate(api+'.applyPreset(1)') is False
+ assert p.evaluate('P.squad')==[10011,20011]
+ assert p.evaluate('window.__resetCalls')==1
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
+ # The preset panel is collapsed; text_content reads the status even while hidden.
+ assert 'Stop Auto Battle' in p.locator('#bf10000-status').text_content()
+ p.evaluate('S.over=true')
+ p.evaluate(api+'.refresh()')
+ assert not p.locator('#bf10000-apply').is_disabled()
+ p.evaluate('''()=>{S.auto=false;S.over=false;}''')
  p.evaluate('''()=>{window.__savePossible=true;window.S.busy=true;}''')
  assert p.evaluate(api+'.applyPreset(1)') is False
  p.evaluate('''()=>{window.S.busy=false;P.roster=[10011,30011];}''')
