@@ -448,6 +448,46 @@ with sync_playwright() as pw:
  assert stale_execution=={'invalid':True,'ko':True,'duplicate':True,
                           'noTurn':True,'changedOnlyDuringFixture':True},stale_execution
  assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
+ # The native DEMO resolves BBs with source-tagged offensiveCandidate=false
+ # as support without pickTarget(). All other BBs require live native targets.
+ # Check the REAL source archive rather than inventing a BB target category.
+ bb_target=page.evaluate("""()=>{const caster=S.party[0];
+   const selected=caster.action?.target;
+   const foe=S.enemies.find(e=>e.slot===selected&&e.hp>0);
+   if(!foe||BF_ARCHIVE_BB_HITS?.['20041']?.offensiveCandidate!==false||
+      BF_ARCHIVE_BB_HITS?.['10011']?.offensiveCandidate!==true)
+     return {badFixture:true};
+   const hp=foe.hp,original={unitId:caster.unitId,bb:caster.bb,
+     action:caster.action},saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const originalOrders=S.party.map(p=>JSON.stringify(p.action));
+   try{
+     caster.unitId=10011;caster.bb=100;
+     caster.action={kind:'burst',target:99999};
+     const stale=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false&&
+       BFGlobalBattleCommandsV2100.executeTurn()===false;
+     caster.action.target=selected;foe.hp=0;
+     const ko=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false&&
+       BFGlobalBattleCommandsV2100.executeTurn()===false;
+     foe.hp=hp;
+     const validOffense=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===true;
+     caster.unitId=20041;caster.action.target=99999;
+     const sourceSupport=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===true;
+     caster.unitId=999999;
+     const unknownProfile=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false;
+     return {stale,ko,validOffense,sourceSupport,unknownProfile,
+       noTurn:S.busy===false,
+       saved:localStorage.getItem('bf_global_offline_demo_v7')===saved,
+       otherOrders:S.party.slice(1).every((p,i)=>
+          JSON.stringify(p.action)===originalOrders[i+1])};
+   }finally{
+     foe.hp=hp;caster.unitId=original.unitId;caster.bb=original.bb;
+     caster.action=original.action;
+   }
+ }""")
+ assert bb_target=={'stale':True,'ko':True,'validOffense':True,
+                    'sourceSupport':True,'unknownProfile':True,'noTurn':True,
+                    'saved':True,'otherOrders':True},bb_target
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
