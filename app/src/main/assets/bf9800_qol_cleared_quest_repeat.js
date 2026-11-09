@@ -86,7 +86,18 @@
    // Unexpected aborts (defeat, failed save, changed quest or invalid clear)
    // must DISARM native Auto too, otherwise the repeat session stops while
    // the engine can continue unattended in subsequent rounds.
-   if(previous)setAuto(restore?previous.autoWasEnabled:false);
+   if(previous){
+     const wanted=restore?previous.autoWasEnabled:false;
+     const toggled=setAuto(wanted);
+     if(!wanted&&(!toggled||S.auto===true)){
+       // The native checkbox may be DISABLED while still checked. Native
+       // click() cannot clear it then, so fail closed in transient battle
+       // state as well. Pending native timers inspect S.auto before acting.
+       // This never changes P, reward calculations or the v7 save.
+       S.auto=false;
+       auto.checked=false;
+     }
+   }
    update();return !!previous;
  }
  function playAgain(){
