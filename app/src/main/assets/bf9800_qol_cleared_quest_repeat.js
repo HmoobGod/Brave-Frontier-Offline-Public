@@ -67,13 +67,16 @@
    return statusSnapshot();
  }
  function setAuto(on){
-   if(auto.checked===on)return true;
+   // An already-checked but DISABLED native control is not proof that the
+   // newly replayed battle can execute Auto. Allow the native victory state
+   // (disabled + unchecked) only when clearing Auto before replay.
+   if(auto.checked===on)return !on||!auto.disabled;
    // Native controls can become disabled or reject a click while the
    // archive battle changes phase. Never assume Auto actually toggled.
    if(auto.disabled)return false;
    internalToggle=true;
    try{auto.click();}finally{internalToggle=false;}
-   return auto.checked===on;
+   return auto.checked===on&&(!on||!auto.disabled);
  }
  function stop(why='Stopped',restore=true){
    const previous=session;
