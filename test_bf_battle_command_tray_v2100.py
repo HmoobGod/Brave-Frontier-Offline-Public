@@ -40,6 +40,50 @@ with sync_playwright() as pw:
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ # Manual offensive queues must reject an invalid, KO'd or disabled
+ # current native enemy target, preserving all existing orders. Guard-only
+ # still works because it does not use enemy targeting.
+ stale=page.evaluate("""()=>{const before=S.party.map(p=>JSON.stringify(p.action));
+   const old=S.target,enemies=S.enemies;
+   const current=enemies.find(e=>e.slot===old&&e.hp>0);
+   if(!current)return {badFixture:true};
+   const originalHp=current.hp;
+   const checks=[];
+   try{
+     for(const value of [-1,99999,'0',NaN]){
+       S.target=value;
+       checks.push({attack:BFGlobalBattleCommandsV2100.queueAll('attack'),
+         burst:BFGlobalBattleCommandsV2100.queueAll('burst'),
+         unchanged:before.every((x,i)=>x===JSON.stringify(S.party[i].action))});
+     }
+     S.target=old;current.hp=0;
+     checks.push({attack:BFGlobalBattleCommandsV2100.queueAll('attack'),
+       burst:BFGlobalBattleCommandsV2100.queueAll('burst'),
+       unchanged:before.every((x,i)=>x===JSON.stringify(S.party[i].action))});
+     current.hp=originalHp;
+     const native=document.getElementById('targets').children;
+     const living=enemies.filter(e=>e.hp>0);
+     const mapped=native.length===enemies.length?enemies:
+       native.length===living.length?living:null;
+     const index=mapped?.findIndex(e=>e.slot===old)??-1;
+     if(index<0)return {badFixture:true,index};
+     const button=native[index],originalDisabled=button.disabled;
+     try{
+       button.disabled=true;
+       checks.push({attack:BFGlobalBattleCommandsV2100.queueAll('attack'),
+         burst:BFGlobalBattleCommandsV2100.queueAll('burst'),
+         unchanged:before.every((x,i)=>x===JSON.stringify(S.party[i].action))});
+     }finally{button.disabled=originalDisabled}
+     return {checks};
+   }finally{current.hp=originalHp;S.target=old;}
+ }""")
+ assert 'badFixture' not in stale,stale
+ assert len(stale['checks'])==6,stale
+ assert all(x=={'attack':False,'burst':False,'unchanged':True}
+            for x in stale['checks']),stale
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action.kind==="guard")') is True
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
  # Source-verified manual HEALING BB: use exactly one genuine heal-all
  # support BB when an owned ally reaches 50% HP. Do not execute the turn.
  assert page.locator('#bf2100-heal-bb').is_visible()
@@ -373,6 +417,39 @@ with sync_playwright() as pw:
  # Original Execute button still powers shortcut, and cannot execute when incomplete.
  page.evaluate('S.party[0].action=null;update()')
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
+ # A manually queued attack is checked AGAIN before the separate Execute
+ # button. This protects against a KO or stale actor/target after queueing.
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
+ stale_execution=page.evaluate("""()=>{const party=S.party,enemies=S.enemies;
+   const before=party.map(p=>JSON.stringify(p.action)),chosen=party[0].action.target;
+   const victim=enemies.find(e=>e.slot===chosen&&e.hp>0);
+   if(!victim)return {badFixture:true};
+   const health=victim.hp;
+   try{
+     party[0].action.target=99999;
+     const invalid=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false&&
+       BFGlobalBattleCommandsV2100.executeTurn()===false;
+     party[0].action.target=chosen;
+     victim.hp=0;
+     const ko=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false&&
+       BFGlobalBattleCommandsV2100.executeTurn()===false;
+     victim.hp=health;
+     S.party=[party[0],{...party[1],id:party[0].id},...party.slice(2)];
+     const duplicate=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false&&
+       BFGlobalBattleCommandsV2100.executeTurn()===false;
+     return {invalid,ko,duplicate,
+       noTurn:S.busy===false,
+       changedOnlyDuringFixture:before.every((a,i)=>a===JSON.stringify(party[i].action))};
+   }finally{
+     party[0].action.target=chosen;victim.hp=health;S.party=party;
+   }
+ }""")
+ assert stale_execution=={'invalid':True,'ko':True,'duplicate':True,
+                          'noTurn':True,'changedOnlyDuringFixture':True},stale_execution
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
  page.evaluate('for(const e of S.enemies)e.hp=e.maxHp=999999')
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is True
