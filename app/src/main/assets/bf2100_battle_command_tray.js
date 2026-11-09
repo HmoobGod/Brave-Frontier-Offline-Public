@@ -131,9 +131,11 @@
  function queueAll(mode){
    if(!['attack','guard','burst','heal'].includes(mode)||!ready())return false;
    const squad=active(),ids=squad.map(p=>p.id);
-   // Prevent a duplicate or malformed player slot from receiving two orders
-   // while a different living teammate is left unqueued.
+   // Native action buttons address S.party by player slot. A shuffled
+   // actor with a valid id is still NOT the owner of that slot; reject the
+   // complete queue before clicking, including Guard-only shortcuts.
    if(squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      S.party?.[p.id]!==p||
       !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0||
       !slots.children[p.id]||slots.children[p.id].disabled)||
       new Set(ids).size!==ids.length)return false;
