@@ -55,8 +55,8 @@
    return typeof S!=='undefined'&&S.mode==='archive'&&
      S.auto===true&&!S.over&&Array.isArray(S.party)&&
      Number.isSafeInteger(unit?.id)&&unit.id>=0&&unit.id<6&&
-     S.party[unit.id]===unit&&
-     S.party.filter(actor=>actor===unit).length===1&&unit.active===true&&
+     S.party[unit.id]===unit&&unit.active===true&&
+     S.party.filter(actor=>actor===unit).length===1&&
      Number.isFinite(unit.hp)&&unit.hp>0&&
      Number.isFinite(unit.maxHp)&&unit.maxHp>0;
  }
