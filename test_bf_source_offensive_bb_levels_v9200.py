@@ -41,7 +41,11 @@ with sync_playwright() as pw:
  api='BFGlobalSourceOffensiveBBLevelsV9200'
  assert p.evaluate(api+'.source.supportedOffensiveSkills')==24
  assert p.evaluate(api+'.snapshot().level')==1
+ # Source-level changes apply only to an active native player actor.
+ p.evaluate("S.party[0].unitId=10011")
  assert p.evaluate('bbDamageMultiplier({unitId:10011},true)')==1.3
+ assert p.evaluate('BFGlobalSourceOffensiveBBLevelsV9200.multiplierFor({unitId:10011},true)') is None
+ assert p.evaluate('bbDamageMultiplier(S.party[0],true)')==1.3
  assert p.evaluate('bbDamageMultiplier({unitId:10021},true)')==2.5
  assert p.evaluate('bbDamageMultiplier({unitId:10011},false)')==1
  assert p.evaluate(api+'.sourceFor(10011,11)') is None
@@ -49,10 +53,35 @@ with sync_playwright() as pw:
  assert p.evaluate('bbDamageMultiplier({unitId:999999999},true)')==2.1
  for level in range(1,11):
   assert p.evaluate(f'BFGlobalOriginalHealBBLevelsV6800.selectLevel({level})') is True
-  got=p.evaluate('bbDamageMultiplier({unitId:10011},true)')
+  got=p.evaluate('bbDamageMultiplier(S.party[0],true)')
   assert abs(got-(1+data['skills']['10011']['levels'][level-1]['damageModifierPct']/100))<1e-9,(level,got)
- assert p.evaluate('bbDamageMultiplier({unitId:10011},true)')==1.75
- assert p.evaluate('bbDamageMultiplier({unitId:10021},true)')==3.4
+ assert p.evaluate('bbDamageMultiplier(S.party[0],true)')==1.75
+ p.evaluate("S.party[0].unitId=10021")
+ assert p.evaluate('bbDamageMultiplier(S.party[0],true)')==3.4
+ p.evaluate("S.party[0].unitId=10011")
+ # Rejected non-player actor references use the unchanged DEMO baseline.
+ no_ownership=p.evaluate("""()=>{
+   const old=S.party,unit=old[0],progress=JSON.stringify(P),
+     saved=localStorage.getItem('bf_global_offline_demo_v7'),originalHp=unit.hp;
+   const fake={...unit};
+   const clone=bbDamageMultiplier(fake,true);
+   const detached=bbDamageMultiplier({unitId:10011},true);
+   let shuffled,duplicated,dead;
+   try{
+     S.party=[old[1],unit,...old.slice(2)];
+     shuffled=bbDamageMultiplier(unit,true);
+     S.party=[unit,unit,...old.slice(2)];
+     duplicated=bbDamageMultiplier(unit,true);
+     S.party=old;unit.hp=0;
+     dead=bbDamageMultiplier(unit,true);
+   }finally{S.party=old;unit.hp=originalHp;}
+   return {clone,detached,shuffled,duplicated,dead,
+     noProgressChange:JSON.stringify(P)===progress,
+     noSaveChange:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+ }""")
+ assert no_ownership=={'clone':1.3,'detached':1.3,'shuffled':1.3,
+                       'duplicated':1.3,'dead':1.3,
+                       'noProgressChange':True,'noSaveChange':True},no_ownership
  before=p.evaluate("""()=>({progress:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  def burst_damage(level):
   p.locator('#reset').click()
