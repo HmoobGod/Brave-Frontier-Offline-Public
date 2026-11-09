@@ -195,8 +195,9 @@
  // Player manual split-target BB plan. Plan the COMPLETE live roster and
  // owned squad before pressing any native player buttons. No hidden Execute,
  // AI changes, save writes, or speculative original 2022 combat math.
- function spreadBurstPlan(){
-   if(!ready()||S.mode!=='archive'||!Array.isArray(S.enemies))return null;
+ function spreadBurstPlan(requireArchive=true){
+   if(!ready()||(requireArchive&&S.mode!=='archive')||
+      !Array.isArray(S.enemies))return null;
    const all=S.enemies;
    if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
    const living=all.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
@@ -210,6 +211,7 @@
    if(!source)return null;
    const squad=active(),ids=squad.map(p=>p.id);
    if(!squad.length||squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+       S.party?.[p.id]!==p||
        !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0||
        !slots.children[p.id]||slots.children[p.id].disabled)||
        new Set(ids).size!==ids.length)return null;
@@ -258,33 +260,23 @@
    signature='';refresh();return true;
  }
  function spreadAttacks(){
-   if(!ready()||!Array.isArray(S.enemies))return false;
-   const squad=active(),living=enemies();
-   if(!living.length||living.some(e=>!Number.isFinite(e.hp)||e.hp<=0||
-      !Number.isFinite(e.maxHp)||e.maxHp<=0||
-      !Number.isSafeInteger(e.slot)||e.slot<0))return false;
-   if(new Set(living.map(e=>e.slot)).size!==living.length)return false;
-   if(squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
-      !slots.children[p.id]||slots.children[p.id].disabled))return false;
-   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
-   if(!Array.isArray(reservations))return false;
-   const reserved=new Set(reservations.map(r=>r.slot));
-   let attackIndex=0;
-   for(const p of squad){
+   // Use the same complete native target/actor preflight as Spread Ready BB,
+   // without requiring Archive mode or selecting BBs for normal Attacks.
+   // A blocked later target must not leave earlier allies half-queued.
+   const plan=spreadBurstPlan(false);
+   if(!plan||plan.some(o=>o.target!==null)&&attack.disabled)return false;
+   for(const order of plan){
      if(!ready())return false;
-     if(!reserved.has(p.id)){
-       const target=living[attackIndex%living.length];
-       if(!setTarget(target.slot))return false;
-       attackIndex++;
-     }
-     const slot=slots.children[p.id];if(!slot||slot.disabled)return false;
+     if(order.target!==null&&!setTarget(order.target))return false;
+     const slot=slots.children[order.slot];
+     if(!slot||slot.disabled)return false;
      slot.click();
-     const command=reserved.has(p.id)?guard:attack;
+     const command=order.target===null?guard:attack;
      if(command.disabled)return false;
      command.click();
-     if(p.action?.kind!==(command===guard?'guard':'attack'))return false;
-     if(command===attack&&p.action.target!==living[(attackIndex-1)%living.length].slot)
-       return false;
+     const p=S.party?.[order.slot],kind=order.target===null?'guard':'attack';
+     if(!p||p.id!==order.slot||p.action?.kind!==kind||
+       (kind==='attack'&&p.action.target!==order.target))return false;
    }
    signature='';refresh();return true;
  }
