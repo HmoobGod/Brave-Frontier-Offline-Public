@@ -11,7 +11,8 @@ if '--source-only' in sys.argv:
     smart=(ROOT/'prepare_source_aware_auto_v041.py').read_text()
     advanced=(A/'bf10500_qol_advanced_smart_auto.js').read_text()
     assert 'BFGlobalCurseBBLockV5900?.cursed(p?.id)' in smart
-    assert 'BFGlobalCurseBBLockV5900?.cursed(unit?.id)' in advanced
+    assert 'if(!ownedAutoActor(unit))return previous' in advanced
+    assert 'BFGlobalCurseBBLockV5900?.cursed(unit.id)' in advanced
     assert 'python3 test_bf_auto_curse_choice.py' in (ROOT/'.github/workflows/build-debug-apk.yml').read_text()
     print('PASS source: default/Smart/Advanced Auto respect existing Curse BB lock')
     raise SystemExit(0)
