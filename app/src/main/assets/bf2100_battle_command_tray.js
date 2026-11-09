@@ -46,10 +46,11 @@
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
  const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
+ const elementBB=btn('ELEMENT + BB IF READY','bf2100-element-bb',()=>elementBursts());
  const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Element Advantage uses source-known weaknesses; Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -177,6 +178,9 @@
       typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function'||
       !Array.isArray(S.enemies))return null;
    const squad=active(),all=S.enemies,living=enemies();
+   // The native slot map includes every living record; silently excluding
+   // Infinity / coercible HP would permit a partially mapped player turn.
+   if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
    if(living.some(e=>!Number.isFinite(e.hp)||e.hp<=0||
       !Number.isFinite(e.maxHp)||e.maxHp<=0||
       !Number.isSafeInteger(e.slot)||e.slot<0))return null;
@@ -189,6 +193,10 @@
    const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
    if(!Array.isArray(reservations)||reservations.some(r=>!Number.isSafeInteger(r.slot)))return null;
    const reserved=new Set(reservations.map(r=>r.slot));
+   const ids=squad.map(p=>p.id);
+   if(new Set(ids).size!==ids.length||squad.some(p=>
+      !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0))
+     return null;
    const plan=[];
    let advantageous=false;
    for(const p of squad){
@@ -224,6 +232,30 @@
      command.click();
      const p=S.party.find(u=>u?.id===order.slot);
      if(!p||p.action?.kind!==(order.reserved?'guard':'attack')||
+        (!order.reserved&&p.action.target!==order.target))return false;
+   }
+   signature='';refresh();return true;
+ }
+ // Optional manual elemental action: keep each ally's verified source
+ // weakness target while issuing their native BB if the ready, noncursed
+ // action is legal. Unknown BB status falls back to Attack. Item-turn
+ // reservations continue to Guard; no turn is auto-executed.
+ function elementBursts(){
+   const plan=elementPlan();
+   if(!plan)return false;
+   for(const order of plan){
+     if(!ready())return false;
+     if(!order.reserved&&!setTarget(order.target))return false;
+     const slot=slots.children[order.slot];if(!slot||slot.disabled)return false;
+     slot.click();
+     const p=S.party.find(u=>u?.id===order.slot);
+     if(!p)return false;
+     const canBurst=!order.reserved&&Number.isFinite(p.bb)&&p.bb>=100&&
+       window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true&&!burst.disabled;
+     const command=order.reserved?guard:canBurst?burst:attack;
+     if(command.disabled)return false;
+     command.click();
+     if(p.action?.kind!==(command===guard?'guard':command===burst?'burst':'attack')||
         (!order.reserved&&p.action.target!==order.target))return false;
    }
    signature='';refresh();return true;
@@ -302,7 +334,8 @@
    // Plan validation requires the current native target buttons, not the
    // previous render. Ally HP is part of the refresh key above so crossing
    // the wounded threshold updates the button without a round change.
-   element.disabled=!elementPlan();
+   const elementReady=!!elementPlan();
+   element.disabled=elementBB.disabled=!elementReady;
    protect.disabled=!woundedPlan();
    return st;
  }
@@ -311,5 +344,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,elementPlan,elementAttacks,woundedPlan,protectWounded,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,executeTurn});
 })();
