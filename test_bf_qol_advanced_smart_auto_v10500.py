@@ -294,12 +294,12 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor({...__party105[1]})')=='burst'
  # Duplicate references are not unique player actors even if the native
  # id slot still points to the same object. Do not grant optional Guard.
- duplicate=p.evaluate("""()=>{const before=S.party.slice(),actor=__party105[1];
+ duplicate=p.evaluate("""()=>{const originalSlot=S.party[3],actor=__party105[1];
    const saved=localStorage.getItem('bf_global_offline_demo_v7');
    try{S.party[3]=actor;
      return {action:BF041SmartAuto.kindFor(actor),
        saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
-   }finally{S.party=before;}
+   }finally{S.party[3]=originalSlot;}
  }""")
  assert duplicate=={'action':'burst','saveSame':True},duplicate
  p.evaluate('S.auto=false')
