@@ -47,11 +47,13 @@ with sync_playwright() as pw:
  es[2].hp=760;es[2].maxHp=2000;es[2].atk=300;es[2].def=5;update()}""")
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-hp").slot')==1
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-hp-percent").slot')==0
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-hp").slot')==2
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-hp-percent").slot')==1
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-atk").slot')==0
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-def").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
- assert page.locator('#bf3100-options button').count()==5
+ assert page.locator('#bf3100-options button').count()==7
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
@@ -61,12 +63,21 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-def","burst")') is True
  assert page.evaluate('S.party[0].action.kind')=='burst'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===2)')
+ # New high-HP player controls queue the real native Attack actions and
+ # never execute the round unless the owner presses the Execute button.
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("highest-hp")') is True
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='highest-hp'
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===2)')
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("highest-hp-percent")') is True
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='highest-hp-percent'
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
+ assert page.evaluate('S.busy') is False
  # Any invalid living foe must block the WHOLE manual focus plan rather
  # than silently skipping it and targeting an ambiguous native button.
  # Keep synthetic corruption in one synchronous browser task, so the
  # normal battle renderer never observes these deliberately invalid rows.
  results=page.evaluate("""()=>{const original=S.enemies;
-   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-atk','lowest-def'];
+   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def'];
    try{
      S.enemies=[
        {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
@@ -81,12 +92,12 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[None,None,None,None],results
- assert results['invalid']==[None,None,None,None],results
+ assert results['valid']==[None]*6,results
+ assert results['invalid']==[None]*6,results
  assert results['rejected'],results
  # Targeting and queued orders must remain untouched if ANY living record
  # is corrupt, including text-coerced Infinity or a duplicate valid slot.
- # Validate all four focus strategies and actual queueFocus player controls.
+ # Validate all six focus strategies and actual queueFocus player controls.
  gated=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
    const originalTarget=S.target;
    const savedActions=S.party.map(p=>JSON.stringify(p.action));
@@ -100,17 +111,17 @@ with sync_playwright() as pw:
    try{
      return cases.map(foes=>{
        S.enemies=foes;
-       const looked=['lowest-hp','lowest-hp-percent','highest-atk','lowest-def']
+       const looked=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def']
          .map(k=>BFGlobalBattleFocusV3100.lookup(k));
-       const focused=BFGlobalBattleFocusV3100.focus('lowest-hp');
-       const queued=BFGlobalBattleFocusV3100.queueFocus('highest-atk','burst');
+       const focused=BFGlobalBattleFocusV3100.focus('highest-hp');
+       const queued=BFGlobalBattleFocusV3100.queueFocus('highest-hp-percent','burst');
        return {looked,focused,queued,targetUnchanged:S.target===originalTarget,
          actionsUnchanged:savedActions.every((a,i)=>a===JSON.stringify(S.party[i].action))};
      });
    }finally{S.enemies=original;S.target=originalTarget;}
  }""")
  assert len(gated)==5,gated
- assert all(x['looked']==[None]*4 and x['focused'] is False and
+ assert all(x['looked']==[None]*6 and x['focused'] is False and
             x['queued'] is False and x['targetUnchanged'] and
             x['actionsUnchanged'] for x in gated),gated
  # With an entirely valid roster, percentage ranking still differs from
@@ -121,13 +132,16 @@ with sync_playwright() as pw:
        {...seed,slot:0,hp:10,maxHp:20},
        {...seed,slot:1,hp:100,maxHp:1000},
        {...seed,slot:2,hp:600,maxHp:1000},
-       {...seed,slot:3,hp:50,maxHp:500}
+       {...seed,slot:3,hp:50,maxHp:500},
+       {...seed,slot:4,hp:300,maxHp:500}
      ];
      return {absolute:BFGlobalBattleFocusV3100.lookup('lowest-hp')?.slot,
-       relative:BFGlobalBattleFocusV3100.lookup('lowest-hp-percent')?.slot};
+       relative:BFGlobalBattleFocusV3100.lookup('lowest-hp-percent')?.slot,
+       highest:BFGlobalBattleFocusV3100.lookup('highest-hp')?.slot,
+       highestPercent:BFGlobalBattleFocusV3100.lookup('highest-hp-percent')?.slot};
    }finally{S.enemies=original;}
  }""")
- assert ranks=={'absolute':0,'relative':1},ranks
+ assert ranks=={'absolute':0,'relative':1,'highest':2,'highestPercent':2},ranks
  assert page.evaluate('P.version')==7
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  # The fixture explicitly selects a mission, so compare save for implicit writes, not transient P.lastMission.
@@ -143,4 +157,4 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
  browser.close()
-print('PASS v31.00: four manual focus strategies, full living-roster preflight, native queue/BB and v7 save isolation')
+print('PASS v31.00: six manual focus strategies, high-HP native queue, corrupt-roster refusal and v7 save isolation')
