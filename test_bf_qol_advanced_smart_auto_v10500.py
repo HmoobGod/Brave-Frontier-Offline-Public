@@ -292,6 +292,16 @@ with sync_playwright() as pw:
     __party105[1].hp=35;__party105[1].maxHp=100;}""")
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='guard'
  assert p.evaluate('BF041SmartAuto.kindFor({...__party105[1]})')=='burst'
+ # Duplicate references are not unique player actors even if the native
+ # id slot still points to the same object. Do not grant optional Guard.
+ duplicate=p.evaluate("""()=>{const before=S.party.slice(),actor=__party105[1];
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{S.party[3]=actor;
+     return {action:BF041SmartAuto.kindFor(actor),
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{S.party=before;}
+ }""")
+ assert duplicate=={'action':'burst','saveSame':True},duplicate
  p.evaluate('S.auto=false')
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
  p.evaluate("""()=>{S.auto=true;S.mode='training'}""")
