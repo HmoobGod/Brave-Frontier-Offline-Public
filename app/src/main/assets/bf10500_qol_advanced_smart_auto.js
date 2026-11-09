@@ -133,6 +133,12 @@
  function chooseTarget(enemies){
    if(!active()||config.target==='percent')return baseTarget(enemies);
    if(!Array.isArray(enemies))return baseTarget(enemies);
+   // Non-selected priority rules are strictly PLAYER Auto overrides.
+   // During manual, training, or completed combat keep the original
+   // coordinated target policy; never apply optional player priorities
+   // to unrelated planners. Selected mode retains its stricter null gate.
+   if(config.target!=='selected'&&(typeof S==='undefined'||
+      S.mode!=='archive'||S.auto!==true||S.over))return baseTarget(enemies);
    // Player opt-in: hold the same native enemy slot they manually selected
    // before starting Auto. Never guess a substitute after KO or bad data;
    // the player can change the target or return to default HP% targeting.

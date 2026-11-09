@@ -60,6 +60,23 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
  assert p.evaluate("""foes=>BF042AutoCoordination.chooseTarget(foes).slot""",foes)==1
+ # Optional targeting must not override the baseline in manual play,
+ # training, or a completed fight. Selected-target mode already has its
+ # separate fail-closed null policy and is covered below.
+ turn_scopes=p.evaluate("""rows=>{const old={auto:S.auto,mode:S.mode,over:S.over};
+   try{
+     S.auto=false;S.mode='archive';S.over=false;
+     const manual=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.auto=true;S.mode='training';
+     const training=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.mode='archive';S.over=true;
+     const finished=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.over=false;
+     const playerAuto=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     return {manual,training,finished,playerAuto};
+   }finally{S.auto=old.auto;S.mode=old.mode;S.over=old.over;}
+ }""",foes)
+ assert turn_scopes=={'manual':0,'training':0,'finished':0,'playerAuto':1},turn_scopes
  # The base Smart Auto targets only living enemies with valid positive max HP.
  # Advanced absolute targeting must preserve that legality gate, not choose
  # a smaller apparent HP on an impossible maxHp/unknown enemy.
@@ -214,7 +231,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Elemental player Auto priority uses the real source-backed six-element
  # matchup API; its threat choice is team-wide and never guesses unknown types.
- p.evaluate("""()=>{window.S={mode:'archive',over:false,round:0,enemies:[]};
+ p.evaluate("""()=>{window.S={mode:'archive',auto:true,over:false,round:0,enemies:[]};
    window.UNIT_BY_ID=new Map([
      [10011,{element:'Fire'}],[20011,{element:'Water'}],
      [30011,{element:'Thunder'}]
@@ -318,6 +335,9 @@ with sync_playwright() as pw:
  p.evaluate('S.auto=false')
  settings['burst']='normal'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ # Strict malformed-roster rejection is for an active player Auto choice;
+ # manual/training scopes intentionally use the unchanged baseline target.
+ p.evaluate("S.auto=true")
  # Missing target statistics and impossible enemy records fail closed.
  invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
           {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
