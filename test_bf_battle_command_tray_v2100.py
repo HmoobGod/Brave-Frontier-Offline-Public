@@ -157,7 +157,10 @@ with sync_playwright() as pw:
  # Source-backed elemental matchup option uses the original 2022 six-element
  # relationship, but never invents unknown demo enemy/ally elements or damage.
  assert page.locator('#bf2100-elements').is_visible()
+ assert page.locator('#bf2100-element-bb').is_visible()
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementBursts()') is False
+ assert page.locator('#bf2100-element-bb').is_disabled()
  page.add_script_tag(path=str(A/'bf6900_elemental_combat.js'))
  assert page.evaluate('BFGlobalElementalCombatV6900.normalize("Fire")')=='Fire'
  assert page.evaluate('UNIT_BY_ID.get(10011).element')=='Fire'
@@ -169,6 +172,27 @@ with sync_playwright() as pw:
  assigned=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
  assert assigned==[['attack',1] for _ in assigned],assigned
  assert not page.evaluate('S.busy')
+ # The separate Element + BB option makes real native BB choices for ready
+ # allies while preserving the source-confirmed target and manual Execute.
+ # With BB unavailable, the remaining living allies still Attack.
+ page.evaluate("""()=>{S.party.forEach((p,i)=>p.bb=i===0?100:0);update()}""")
+ assert not page.locator('#bf2100-element-bb').is_disabled()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementBursts()') is True
+ ready_orders=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
+ assert ready_orders==[['burst',1]]+[['attack',1]]*(len(ready_orders)-1),ready_orders
+ assert page.evaluate('S.busy') is False
+ # Curse-prohibited BBs must fall back to the native Attack button rather
+ # than queuing an illegal Burst or auto-executing an unrequested turn.
+ curse_fallback=page.evaluate("""()=>{
+   const old=window.BFGlobalCurseBBLockV5900;
+   window.BFGlobalCurseBBLockV5900={cursed:id=>id===0};
+   try{
+     return {queued:BFGlobalBattleCommandsV2100.elementBursts(),
+       actions:S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])};
+   }finally{window.BFGlobalCurseBBLockV5900=old;}
+ }""")
+ assert curse_fallback['queued'] is True,curse_fallback
+ assert curse_fallback['actions']==[['attack',1]]*6,curse_fallback
  # An unknown source ally must fail before any player orders change.
  saved_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
  # The live renderer reads UNIT_BY_ID for animation on every RAF. Never
@@ -180,15 +204,17 @@ with sync_playwright() as pw:
      S.party[0].unitId=999999;
      return {noPlan:BFGlobalBattleCommandsV2100.elementPlan()===null,
        rejected:BFGlobalBattleCommandsV2100.elementAttacks()===false,
+       bbRejected:BFGlobalBattleCommandsV2100.elementBursts()===false,
        unchanged:before.every((order,i)=>order===JSON.stringify(S.party[i].action))};
    }finally{S.party[0].unitId=old;}
  }""")
- assert unknown=={'noPlan':True,'rejected':True,'unchanged':True},unknown
+ assert unknown=={'noPlan':True,'rejected':True,'bbRejected':True,'unchanged':True},unknown
  assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==saved_orders
  # With no advantageous foe, the option refuses to overwrite previous orders.
  page.evaluate("S.enemies[1].element='Water';update()")
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementPlan()') is None
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.elementBursts()') is False
  assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==saved_orders
  # Restore a favorable foe before testing busy / Auto rejection.
  page.evaluate("S.enemies[1].element='Earth';update()")
@@ -224,4 +250,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: safe native squad queue, malformed foe/ally preflight, wounded guards, spread, KO targeting and v7 isolation')
+print('PASS v21.00: elemental BB/Attack source targeting, Curse fallback, malformed roster refusal and v7 save isolation')
