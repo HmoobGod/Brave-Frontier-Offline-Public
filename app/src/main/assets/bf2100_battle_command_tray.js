@@ -44,6 +44,7 @@
  const attacks=btn('QUEUE ALL ATTACKS','bf2100-attacks',()=>queueAll('attack'));
  const guards=btn('QUEUE ALL GUARDS','bf2100-guards',()=>queueAll('guard'));
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
+ const healBB=btn('HEALING BB + ATTACK','bf2100-heal-bb',()=>queueAll('heal'));
  const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
  const spreadBB=btn('SPREAD READY BB','bf2100-spread-bb',()=>spreadBursts());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
@@ -51,7 +52,7 @@
  const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Healing BB + Attack uses one source-verified party heal when an ally is at or below half HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -93,8 +94,42 @@
    nativeButton.click();signature='';refresh();
    return S.target===slot;
  }
+ // Manual emergency party heal: only an original Global BB explicitly
+ // identified as heal_all may replace one attack. No guessed healing effect,
+ // synthetic unit identity, automatic turn, or stored state mutation.
+ function healingChoice(squad,reserved){
+   if(!ready()||S.mode!=='archive'||!Array.isArray(squad)||
+      typeof bfOriginalBB!=='function'||typeof originalSupport!=='function'||
+      !(reserved instanceof Set)||!squad.length)return null;
+   const ids=squad.map(p=>p?.id);
+   if(squad.some(p=>!p||!Number.isSafeInteger(p.id)||p.id<0||
+        S.party?.[p.id]!==p||!Number.isSafeInteger(p.unitId)||p.unitId<1||
+        !Number.isFinite(p.hp)||p.hp<=0||
+        !Number.isFinite(p.maxHp)||p.maxHp<=0||
+        !Number.isFinite(p.bb)||p.bb<0||
+        !slots.children[p.id]||slots.children[p.id].disabled)||
+        new Set(ids).size!==squad.length)return null;
+   if(!squad.some(p=>p.hp/p.maxHp<=0.5))return null;
+   return squad.find(p=>!reserved.has(p.id)&&p.bb>=100&&
+     window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true&&
+     window.BFGlobalParalysisActionLockV6000?.paralyzed(p.id)!==true&&
+     bfOriginalBB(p.unitId)?.target==='support'&&
+     originalSupport(p.unitId)?.kind==='heal_all')?.id??null;
+ }
+ function healingAvailable(){
+   if(!ready()||S.mode!=='archive'||!Array.isArray(S.enemies))return false;
+   const all=S.enemies,live=all.filter(e=>e&&e.hp>0);
+   if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp))||
+      !live.length||live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+        !Number.isSafeInteger(e.slot)||e.slot<0)||
+      new Set(live.map(e=>e.slot)).size!==live.length)return false;
+   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   if(!Array.isArray(reservations)||reservations.some(r=>
+      !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
+   return healingChoice(active(),new Set(reservations.map(r=>r.slot)))!==null;
+ }
  function queueAll(mode){
-   if(!['attack','guard','burst'].includes(mode)||!ready())return false;
+   if(!['attack','guard','burst','heal'].includes(mode)||!ready())return false;
    const squad=active(),ids=squad.map(p=>p.id);
    // Prevent a duplicate or malformed player slot from receiving two orders
    // while a different living teammate is left unqueued.
@@ -131,13 +166,22 @@
    if(!Array.isArray(reservations)||reservations.some(r=>
        !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
    const reserved=new Set(reservations.map(r=>r.slot));
-   for(const p of squad){
+   const healerSlot=mode==='heal'?healingChoice(squad,reserved):null;
+   if(mode==='heal'&&healerSlot===null)return false;
+   // Queue the healing caster first: if its native BB is unavailable,
+   // fail without altering any teammate's previous queued action.
+   const ordered=mode==='heal'?
+     [squad.find(p=>p.id===healerSlot),...squad.filter(p=>p.id!==healerSlot)]:squad;
+   for(const p of ordered){
      const slot=slots.children[p.id];if(!slot||slot.disabled)return false;
      slot.click();
      // Curse already rejects the native BB click. Use Attack instead so a
      // blocked burst does not leave the rest of the squad partially queued.
-     const canBurst=p.bb>=100&&window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true;
-     const command=mode==='guard'||reserved.has(p.id)?guard:mode==='burst'&&canBurst?burst:attack;
+     const canBurst=Number.isFinite(p.bb)&&p.bb>=100&&
+       window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true;
+     const useBurst=canBurst&&(mode==='burst'||mode==='heal'&&p.id===healerSlot);
+     const command=mode==='guard'||reserved.has(p.id)?guard:useBurst?burst:attack;
+     if(mode==='heal'&&p.id===healerSlot&&command!==burst)return false;
      if(command.disabled)return false;
      command.click();
      if(p.action?.kind!==(command===burst?'burst':command===guard?'guard':'attack'))return false;
@@ -430,6 +474,7 @@
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
      (st.auto?' · Auto Battle enabled':'');
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
+   healBB.disabled=!healingAvailable();
    spreadBB.disabled=!spreadBurstPlan();
    fire.disabled=!st.canExecute;
    const group=document.createDocumentFragment();
@@ -454,5 +499,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn});
 })();

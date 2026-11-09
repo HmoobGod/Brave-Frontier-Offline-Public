@@ -158,7 +158,11 @@
       live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
         !Number.isSafeInteger(e.slot)||e.slot<0)||
       new Set(live.map(e=>e.slot)).size!==live.length)return null;
-   const eligible=live.filter(e=>Number.isFinite(e[key]));
+   // Optional ATK/DEF modes require the chosen ranking stat on EVERY living
+   // native enemy. Skipping one unknown stat would silently attack a different
+   // enemy despite explicit player targeting and the strict Auto gate.
+   if(live.some(e=>!Number.isFinite(e[key])))return null;
+   const eligible=live.slice();
    eligible.sort((a,b)=>{
      // Both high-HP options are opt-in: absolute HP favors large remaining
      // pools, while HP% favors enemies closest to full health. Source-backed
