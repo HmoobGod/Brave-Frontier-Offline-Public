@@ -62,17 +62,20 @@ with sync_playwright() as pw:
  p.evaluate("window.__stored98=false")
  assert p.evaluate(api+'.start(2)') is False
  p.evaluate("window.__stored98=true")
- # A disabled native Auto checkbox cannot drive a replay. Refuse before
- # changing the battle, quest cursor, canonical save or unattended session.
+ # Native victory normally disables the Auto control until replayBattle
+ # begins the next battle. Allow that transition; if the new battle STILL
+ # cannot enable Auto, abort the repeat session without saving or continuing.
  p.evaluate("document.getElementById('auto').disabled=true")
  before_replays=p.evaluate('window.__repeatCount')
  before_save=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
  assert p.evaluate(api+'.start(1)') is False
- assert p.evaluate('window.__repeatCount')==before_replays
+ assert p.evaluate('window.__repeatCount')==before_replays+1
  assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert p.evaluate(api+'.statusSnapshot().reason')=='Stopped: native Auto could not start'
  assert not p.locator('#auto').is_checked()
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_save
- p.evaluate("document.getElementById('auto').disabled=false")
+ p.evaluate("""()=>{document.getElementById('auto').disabled=false;
+    window.__repeatCount=0;S.over=true;S.phase='Victory';}""")
  # The native checkbox can also become disabled AFTER a real replay starts.
  # Detect that immediately, so no invisible repeat session remains armed.
  toggle_lost=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
