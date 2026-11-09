@@ -114,6 +114,62 @@ with sync_playwright() as pw:
  assert len(living)>=2
  assert assigned==[['attack',living[i%len(living)]] for i in range(len(assigned))],assigned
  assert not page.evaluate('S.busy')
+ # SPREAD READY BB is manual: rotate live native targets while ready
+ # player-owned actors use Burst and unready actors queue normal Attack.
+ assert page.locator('#bf2100-spread-bb').is_visible()
+ page.evaluate("()=>{S.party.forEach((p,i)=>{if(p.active)p.bb=i%2===0?100:0});update()}")
+ plan=page.evaluate('BFGlobalBattleCommandsV2100.spreadBurstPlan()')
+ assert plan and len(plan)==6,plan
+ assert [o['kind'] for o in plan]==['burst','attack']*3,plan
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadBursts()') is True
+ spread_bb=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])')
+ assert spread_bb==[[('burst' if i%2==0 else 'attack'),living[i%len(living)]] for i in range(6)],spread_bb
+ assert page.evaluate('S.busy') is False
+ # A cursed actor must attack instead of spending a prohibited BB.
+ cursed=page.evaluate("""()=>{const old=window.BFGlobalCurseBBLockV5900;
+   window.BFGlobalCurseBBLockV5900={cursed:id=>id===0};
+   try{return {success:BFGlobalBattleCommandsV2100.spreadBursts(),
+     kinds:S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action?.kind)}}
+   finally{window.BFGlobalCurseBBLockV5900=old}
+ }""")
+ assert cursed['success'] and cursed['kinds']==['attack','attack','burst','attack','burst','attack'],cursed
+ # Paid item reservations become Guard and do not consume a target in rotation.
+ reserved=page.evaluate("""()=>{const old=window.BFGlobalItemTurnReservationsV4500;
+   window.BFGlobalItemTurnReservationsV4500={snapshot:()=>({reservations:[{slot:1}]})};
+   try{return {plan:BFGlobalBattleCommandsV2100.spreadBurstPlan(),
+     success:BFGlobalBattleCommandsV2100.spreadBursts(),
+     orders:S.party.filter(p=>p.active&&p.hp>0).map(p=>[p.action?.kind,p.action?.target])}}
+   finally{window.BFGlobalItemTurnReservationsV4500=old}
+ }""")
+ assert reserved['success'],reserved
+ assert reserved['plan'][1]=={'slot':1,'kind':'guard','target':None},reserved
+ assert reserved['orders'][1][0]=='guard',reserved
+ assert [o[1] for o in reserved['orders'] if o[0]!='guard']==[living[i%len(living)] for i in range(5)],reserved
+ # Corrupt live enemy / duplicate actor rejects the entire queue before clicks.
+ rejected_spread=page.evaluate("""()=>{const oldEnemies=S.enemies,oldParty=S.party;
+   const selected=S.target,actions=S.party.map(p=>JSON.stringify(p.action));
+   const e=S.enemies[0],other={...e,slot:1,hp:80,maxHp:100};
+   const bad=[
+     [{...e,slot:0,hp:Infinity,maxHp:100},other],
+     [{...e,slot:0,hp:'Infinity',maxHp:100},other],
+     [{...e,slot:0,hp:20,maxHp:0},other],
+     [{...e,slot:1,hp:20,maxHp:100},other],
+     [{...e,slot:-1,hp:20,maxHp:100},other]
+   ];
+   try{
+     const failures=bad.map(foes=>{S.enemies=foes;
+       return BFGlobalBattleCommandsV2100.spreadBurstPlan()===null&&
+         BFGlobalBattleCommandsV2100.spreadBursts()===false&&
+         S.target===selected&&actions.every((a,i)=>a===JSON.stringify(S.party[i].action));
+     });
+     S.enemies=oldEnemies;
+     S.party=[oldParty[0],{...oldParty[1],id:oldParty[0].id},...oldParty.slice(2)];
+     return {failures,duplicateRejected:BFGlobalBattleCommandsV2100.spreadBursts()===false,
+       noActionChange:actions.every((a,i)=>a===JSON.stringify(oldParty[i].action))};
+   }finally{S.enemies=oldEnemies;S.party=oldParty;S.target=selected}
+ }""")
+ assert rejected_spread['failures']==[True]*5,rejected_spread
+ assert rejected_spread['duplicateRejected'] and rejected_spread['noActionChange'],rejected_spread
  # After an enemy falls, the native target list may exclude that dead slot
  # instead of retaining a disabled placeholder. The tray must select the
  # intended surviving target through the real native button either way.
@@ -223,6 +279,7 @@ with sync_playwright() as pw:
  page.evaluate('S.busy=true')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadBursts()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
@@ -231,6 +288,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().auto') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.spreadBursts()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  page.locator('#auto').uncheck()
@@ -250,4 +308,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: elemental BB/Attack source targeting, Curse fallback, malformed roster refusal and v7 save isolation')
+print('PASS v21.00: native BB spread, Curse/Guard fallback, malformed roster refusal and v7 save isolation')
