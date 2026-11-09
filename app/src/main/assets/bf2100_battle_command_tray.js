@@ -211,6 +211,7 @@
    if(!source)return null;
    const squad=active(),ids=squad.map(p=>p.id);
    if(!squad.length||squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+       S.party?.[p.id]!==p||
        !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0||
        !slots.children[p.id]||slots.children[p.id].disabled)||
        new Set(ids).size!==ids.length)return null;
