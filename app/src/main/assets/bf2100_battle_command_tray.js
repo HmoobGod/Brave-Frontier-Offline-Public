@@ -45,12 +45,13 @@
  const guards=btn('QUEUE ALL GUARDS','bf2100-guards',()=>queueAll('guard'));
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
  const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
+ const spreadBB=btn('SPREAD READY BB','bf2100-spread-bb',()=>spreadBursts());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
  const elementBB=btn('ELEMENT + BB IF READY','bf2100-element-bb',()=>elementBursts());
  const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -136,6 +137,71 @@
  // focusing every ally on the same enemy. Use only the native player buttons.
  // Existing item-turn reservations keep their Guard actions, and no turn is
  // executed without the player's separate Execute command.
+ // Player manual split-target BB plan. Plan the COMPLETE live roster and
+ // owned squad before pressing any native player buttons. No hidden Execute,
+ // AI changes, save writes, or speculative original 2022 combat math.
+ function spreadBurstPlan(){
+   if(!ready()||S.mode!=='archive'||!Array.isArray(S.enemies))return null;
+   const all=S.enemies;
+   if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return null;
+   const living=all.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+   if(!living.length||living.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+       !Number.isSafeInteger(e.slot)||e.slot<0)||
+       new Set(living.map(e=>e.slot)).size!==living.length)return null;
+   const rendered=Array.from(targetList.children);
+   if(!rendered.every(b=>b.tagName==='BUTTON'))return null;
+   const source=rendered.length===all.length?all:
+     rendered.length===living.length?living:null;
+   if(!source)return null;
+   const squad=active(),ids=squad.map(p=>p.id);
+   if(!squad.length||squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+       !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0||
+       !slots.children[p.id]||slots.children[p.id].disabled)||
+       new Set(ids).size!==ids.length)return null;
+   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   if(!Array.isArray(reservations)||reservations.some(r=>
+       !Number.isSafeInteger(r?.slot)||r.slot<0))return null;
+   const reserved=new Set(reservations.map(r=>r.slot));
+   let index=0;
+   const orders=[];
+   for(const p of squad){
+     if(reserved.has(p.id)){
+       if(guard.disabled)return null;
+       orders.push(Object.freeze({slot:p.id,kind:'guard',target:null}));
+       continue;
+     }
+     const foe=living[index++%living.length];
+     const nativeIndex=source.findIndex(e=>e?.slot===foe.slot&&e.hp>0);
+     if(nativeIndex<0||!rendered[nativeIndex]||rendered[nativeIndex].disabled)
+       return null;
+     const canBurst=Number.isFinite(p.bb)&&p.bb>=100&&
+       window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true;
+     orders.push(Object.freeze({slot:p.id,kind:canBurst?'burst':'attack',
+       target:foe.slot}));
+   }
+   return Object.freeze(orders);
+ }
+ function spreadBursts(){
+   const plan=spreadBurstPlan();
+   if(!plan)return false;
+   for(const order of plan){
+     if(!ready())return false;
+     if(order.target!==null&&!setTarget(order.target))return false;
+     const slot=slots.children[order.slot];
+     if(!slot||slot.disabled)return false;
+     slot.click();
+     // Native BB readiness is rechecked after selecting each actual actor.
+     // If BB becomes disabled, use an ordinary Attack; never force a burst.
+     const kind=order.kind==='burst'&&burst.disabled?'attack':order.kind;
+     const command=kind==='guard'?guard:kind==='burst'?burst:attack;
+     if(command.disabled)return false;
+     command.click();
+     const p=S.party.find(u=>u?.id===order.slot);
+     if(!p||p.action?.kind!==kind||
+         (kind!=='guard'&&p.action.target!==order.target))return false;
+   }
+   signature='';refresh();return true;
+ }
  function spreadAttacks(){
    if(!ready()||!Array.isArray(S.enemies))return false;
    const squad=active(),living=enemies();
@@ -321,6 +387,7 @@
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
      (st.auto?' · Auto Battle enabled':'');
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
+   spreadBB.disabled=!spreadBurstPlan();
    fire.disabled=!st.canExecute;
    const group=document.createDocumentFragment();
    for(const e of st.foes){
@@ -344,5 +411,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,executeTurn});
 })();
