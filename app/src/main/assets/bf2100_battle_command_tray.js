@@ -476,7 +476,13 @@
  function refresh(){
    const st=snapshot(),key=JSON.stringify([st,active().map(p=>[
      p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
-   if(key===signature)return st;
+   // Native target-button availability can change without changing the
+   // battle snapshot (for example, a DOM button is disabled mid-turn).
+   // Revalidate Execute on every refresh, even when layout data is stable.
+   if(key===signature){
+     fire.disabled=!st.canExecute||!queuedAttacksSafe();
+     return st;
+   }
    signature=key;
    status.textContent='Wave '+(st.wave+1)+' · Round '+st.round+
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
