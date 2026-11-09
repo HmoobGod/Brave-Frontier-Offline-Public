@@ -148,6 +148,17 @@
           !Number.isFinite(e.maxHp)||e.maxHp<=0||
           !Number.isSafeInteger(e.slot)||e.slot<0)||
         new Set(living.map(e=>e.slot)).size!==living.length)return false;
+     // The queue must use a currently living, enabled native target button.
+     // Otherwise a stale selected slot (e.g. the enemy KO'd last turn) could
+     // silently queue the squad against an enemy that cannot be attacked.
+     if(!Number.isSafeInteger(S.target)||S.target<0||
+        !living.some(e=>e.slot===S.target))return false;
+     const rendered=Array.from(targetList.children);
+     if(!rendered.every(b=>b.tagName==='BUTTON'))return false;
+     const mapped=rendered.length===S.enemies.length?S.enemies:
+       rendered.length===living.length?living:null;
+     const position=mapped?.findIndex(e=>e?.slot===S.target&&e.hp>0)??-1;
+     if(position<0||!rendered[position]||rendered[position].disabled)return false;
    }
    // Preserve paid item turns, validating the optional reservation snapshot
    // before issuing any native player click.
@@ -419,8 +430,40 @@
    }
    signature='';refresh();return true;
  }
+ // The separate Execute shortcut is a second safety boundary. A living
+ // foe may have been KO'd or a party command changed after it was queued.
+ // Preserve the native Execute button for valid manual Guard, item and BB
+ // turns; reject only demonstrably stale normal-attack target mappings.
+ function queuedAttacksSafe(){
+   if(!snapshot().canExecute||!Array.isArray(S.party)||!Array.isArray(S.enemies))
+     return false;
+   const squad=active(),ids=squad.map(p=>p.id);
+   if(!squad.length||squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      S.party[p.id]!==p||!p.action||!Number.isFinite(p.hp)||p.hp<=0||
+      !Number.isFinite(p.maxHp)||p.maxHp<=0)||
+      new Set(ids).size!==squad.length)return false;
+   const offensive=squad.filter(p=>p.action.kind==='attack');
+   if(!offensive.length)return true;
+   const all=S.enemies;
+   if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return false;
+   const living=all.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+   if(!living.length||living.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
+      !Number.isSafeInteger(e.slot)||e.slot<0)||
+      new Set(living.map(e=>e.slot)).size!==living.length)return false;
+   const rendered=Array.from(targetList.children);
+   if(!rendered.every(b=>b.tagName==='BUTTON'))return false;
+   const mapped=rendered.length===all.length?all:
+     rendered.length===living.length?living:null;
+   if(!mapped)return false;
+   return offensive.every(p=>{
+     const target=p.action.target;
+     if(!Number.isSafeInteger(target)||target<0)return false;
+     const idx=mapped.findIndex(e=>e?.slot===target&&e.hp>0);
+     return idx>=0&&!!rendered[idx]&&!rendered[idx].disabled;
+   });
+ }
  function executeTurn(){
-   if(!snapshot().canExecute||execute.disabled)return false;
+   if(!queuedAttacksSafe()||execute.disabled)return false;
    execute.click();signature='';refresh();return true;
  }
  function refresh(){
@@ -456,5 +499,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn});
 })();
