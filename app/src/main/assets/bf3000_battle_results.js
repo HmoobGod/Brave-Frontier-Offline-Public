@@ -107,7 +107,10 @@
       typeof saveProgress!=='function')return false;
    // Explicit opt-in only; use the native canonical v7 write and its usual
    // quota/recovery checks. Never claim success from a failed write.
-   const ok=saveProgress()===true;
+   // A storage adapter can throw instead of returning a failed write.
+   // Keep the unsaved victory and its explicit recovery controls intact.
+   let ok=false;
+   try{ok=saveProgress()===true;}catch(_){ok=false;}
    rendered='';refresh();
    return ok&&snapshot()?.stored===true;
  }

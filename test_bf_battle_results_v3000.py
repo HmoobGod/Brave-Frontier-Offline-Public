@@ -137,6 +137,20 @@ with sync_playwright() as pw:
  page.locator('#bf3000-retry-save').click()
  assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is False
  assert page.evaluate('JSON.stringify(P)')==before_retry
+ # An unexpected storage adapter exception must not escape the Retry Save
+ # click handler or change the unsaved win, prior stored bytes, or navigation.
+ before_throw_save=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ page.evaluate("""()=>{window.__v3000OriginalSave=window.saveProgress;
+   window.saveProgress=()=>{throw new Error('Synthetic retry save failure')};}""")
+ page.locator('#bf3000-retry-save').click()
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_throw_save
+ assert page.evaluate('JSON.stringify(P)')==before_retry
+ assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is False
+ assert page.locator('#bf3000-next').is_disabled()
+ assert page.locator('#bf3000-replay').is_disabled()
+ assert page.locator('#bf3000-retry-save').is_visible()
+ page.evaluate("window.saveProgress=window.__v3000OriginalSave")
+ assert not errors,errors
  # Do not launch an actual download in this test; the standalone signed-APK
  # browser proof separately verifies the exported JSON bytes.
  page.evaluate("""() => {window.__v3000Exports=0;
