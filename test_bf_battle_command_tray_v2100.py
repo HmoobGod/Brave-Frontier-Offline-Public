@@ -40,6 +40,79 @@ with sync_playwright() as pw:
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ # Source-verified manual HEALING BB: use exactly one genuine heal-all
+ # support BB when an owned ally reaches 50% HP. Do not execute the turn.
+ assert page.locator('#bf2100-heal-bb').is_visible()
+ assert page.evaluate("bfOriginalBB(20041)?.target==='support'") is True
+ assert page.evaluate("originalSupport(20041)?.kind==='heal_all'") is True
+ original_healer_unit=page.evaluate('S.party[0].unitId')
+ page.evaluate("""()=>{S.party.forEach((p,i)=>{
+   if(!p.active||p.hp<=0)return;
+   p.bb=i===0?100:0;p.hp=p.maxHp;
+ });
+ S.party[0].unitId=20041;
+ S.party[1].hp=Math.floor(S.party[1].maxHp*.40);
+ update();BFGlobalBattleCommandsV2100.refresh()}""")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.healingAvailable()') is True
+ assert not page.locator('#bf2100-heal-bb').is_disabled()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("heal")') is True
+ healed_orders=page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action?.kind)')
+ assert healed_orders==['burst']+['attack']*5,healed_orders
+ assert page.evaluate('S.busy') is False
+ # Repeated use with no injured allies refuses instead of wasting a healer BB.
+ page.evaluate("()=>{S.party[1].hp=S.party[1].maxHp;update();BFGlobalBattleCommandsV2100.refresh()}")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.healingAvailable()') is False
+ assert page.locator('#bf2100-heal-bb').is_disabled()
+ prior_heal_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("heal")') is False
+ assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==prior_heal_orders
+ # Curse and item-turn reservations both block this healer and cannot
+ # silently consume a different offensive BB or alter queued commands.
+ blocks=page.evaluate("""()=>{const oldCurse=window.BFGlobalCurseBBLockV5900;
+   const oldItem=window.BFGlobalItemTurnReservationsV4500;
+   S.party[1].hp=Math.floor(S.party[1].maxHp*.40);
+   const before=S.party.map(p=>JSON.stringify(p.action));
+   try{
+     window.BFGlobalCurseBBLockV5900={cursed:id=>id===0};
+     const curse={available:BFGlobalBattleCommandsV2100.healingAvailable(),
+       success:BFGlobalBattleCommandsV2100.queueAll('heal')};
+     window.BFGlobalCurseBBLockV5900=oldCurse;
+     window.BFGlobalItemTurnReservationsV4500={
+       snapshot:()=>({reservations:[{slot:0}]})
+     };
+     const item={available:BFGlobalBattleCommandsV2100.healingAvailable(),
+       success:BFGlobalBattleCommandsV2100.queueAll('heal')};
+     return {curse,item,unchanged:before.every((a,i)=>a===JSON.stringify(S.party[i].action))};
+   }finally{
+     window.BFGlobalCurseBBLockV5900=oldCurse;
+     window.BFGlobalItemTurnReservationsV4500=oldItem;
+   }
+ }""")
+ assert blocks=={'curse':{'available':False,'success':False},
+                 'item':{'available':False,'success':False},
+                 'unchanged':True},blocks
+ # A broken living foe or duplicate player actor must reject the entire
+ # healing shortcut before selecting an actor or queueing even one action.
+ bad_heal=page.evaluate("""()=>{const foes=S.enemies,party=S.party;
+   const before=S.party.map(p=>JSON.stringify(p.action)),selected=S.target;
+   try{
+     S.enemies=[{...foes[0],slot:0,hp:Infinity,maxHp:100},
+                {...foes[0],slot:1,hp:40,maxHp:100}];
+     const invalidFoe=BFGlobalBattleCommandsV2100.queueAll('heal')===false;
+     S.enemies=foes;
+     S.party=[party[0],{...party[1],id:party[0].id},...party.slice(2)];
+     const duplicateActor=BFGlobalBattleCommandsV2100.queueAll('heal')===false;
+     return {invalidFoe,duplicateActor,targetUnchanged:S.target===selected,
+       ordersUnchanged:before.every((a,i)=>a===JSON.stringify(party[i].action))};
+   }finally{S.enemies=foes;S.party=party;S.target=selected}
+ }""")
+ assert bad_heal=={'invalidFoe':True,'duplicateActor':True,
+                   'targetUnchanged':True,'ordersUnchanged':True},bad_heal
+ # Restore the exact owned source identity and ally health for other tactics.
+ page.evaluate("""id=>{S.party[0].unitId=id;
+   S.party.forEach(p=>{if(p.active&&p.hp>0){p.hp=p.maxHp;p.bb=0;}});
+   update();BFGlobalBattleCommandsV2100.refresh()}""",original_healer_unit)
+ assert page.evaluate('BFGlobalBattleCommandsV2100.healingAvailable()') is False
  # Player-only defensive tactic: wounded allies Guard, healthy allies Attack.
  # Native buttons queue orders but do not run a turn, heal units, or award XP.
  assert page.locator('#bf2100-protect').is_visible()
@@ -280,6 +353,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadBursts()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("heal")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.executeTurn()') is False
@@ -289,6 +363,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.spreadBursts()') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("heal")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.elementAttacks()') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
  page.locator('#auto').uncheck()
@@ -308,4 +383,4 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
-print('PASS v21.00: native BB spread, Curse/Guard fallback, malformed roster refusal and v7 save isolation')
+print('PASS v21.00: native manual source healing BB, BB spread, Curse/Guard, corrupt foe rejection and v7 save isolation')

@@ -183,6 +183,24 @@ with sync_playwright() as pw:
     valid=page.evaluate('window.__bf042queued')
     assert valid['visualTarget']==0 and all(
       a['target']==0 for a in valid['actions']),valid
+    # Missing ATK/DEF on one otherwise live enemy must not make the
+    # scheduler quietly pick another foe with a known priority stat.
+    for priority,missing in [('highest-atk','atk'),('lowest-def','def')]:
+      page.evaluate("""({priority,missing})=>{
+        S.auto=false;window.__bf042queued=null;
+        S.enemies[0].atk=40;S.enemies[1].atk=undefined;
+        S.enemies[0].def=20;S.enemies[1].def=20;
+        if(missing==='def')delete S.enemies[1].def;
+        BFGlobalQoLAdvancedAutoV10500.set({
+          on:true,heal:60,target:priority,burst:'normal',guard:0
+        });
+        S.auto=true;E.auto.checked=true;scheduleAuto();
+      }""",{'priority':priority,'missing':missing})
+      page.wait_for_function("()=>S.auto===false",timeout=5500)
+      assert page.evaluate('__bf042queued') is None,(priority,missing)
+      assert page.evaluate('E.auto.checked') is False,(priority,missing)
+    # Restore complete battle-stats fixture before disabling optional mode.
+    page.evaluate("()=>{S.enemies[1].atk=25;S.enemies[1].def=20;}")
     page.evaluate("""()=>{
       S.enemies[1].hp=120;
       BFGlobalQoLAdvancedAutoV10500.set({
