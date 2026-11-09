@@ -75,7 +75,8 @@ with sync_playwright() as pw:
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate('window.__resetCalls')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
- assert 'Stop Auto Battle' in p.locator('#bf10000-status').inner_text()
+ # The preset panel is collapsed; text_content reads the status even while hidden.
+ assert 'Stop Auto Battle' in p.locator('#bf10000-status').text_content()
  p.evaluate('S.over=true')
  p.evaluate(api+'.refresh()')
  assert not p.locator('#bf10000-apply').is_disabled()
