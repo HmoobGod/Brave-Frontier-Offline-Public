@@ -228,6 +228,9 @@
  refresh();
  window.BFGlobalQoLAdvancedAutoV10500=freeze({
    get,active,kindFor,chooseTarget,set,refresh,
-   requiresSelectedTarget:()=>active()&&config.target==='selected'
+   requiresSelectedTarget:()=>active()&&config.target==='selected',
+   // Native Auto must not override a rejected optional advanced target with
+   // the legacy lowest-absolute-HP fallback. Default targeting is unchanged.
+   requiresValidatedTarget:()=>active()&&config.target!=='percent'
  });
 })();
