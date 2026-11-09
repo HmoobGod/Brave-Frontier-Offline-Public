@@ -94,6 +94,9 @@ with sync_playwright() as pw:
    }finally{
      impl.replayBattle=native;
      document.getElementById('auto').disabled=false;
+     // The rejected replay is an isolated failure fixture, not a completed
+     // normal test run. Restore this test harness's synthetic replay counter.
+     window.__repeatCount=before;
      S.over=true;S.phase='Victory';
    }
  }""")
