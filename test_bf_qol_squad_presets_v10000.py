@@ -7,7 +7,7 @@ js=(A/'bf10000_qol_squad_presets.js').read_text('utf8')
 assert js.count('BF_GLOBAL_QOL_SQUAD_PRESETS_V10000')==1
 assert len(js.encode())<65536
 assert "P.squad=slot.squad.slice()" in js
-assert "if(!saveProgress())" in js
+assert "try{saved=!!saveProgress();}catch(_){saved=false;}" in js
 assert 'P.squad=previous' in js
 assert 'localStorage.setItem(key' in js
 assert "bf_global_offline_demo_v7" not in js
@@ -63,6 +63,17 @@ with sync_playwright() as pw:
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate('window.__resetCalls')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
+ # A failing storage adapter can THROW rather than return false. The active
+ # team, canonical v7 save and battle reset counter must still be unchanged.
+ p.evaluate("""()=>{window.__savePossible=true;
+   window.__squadOriginalSave=window.saveProgress;
+   window.saveProgress=()=>{throw new Error('synthetic canonical save failure')};}""")
+ assert p.evaluate(api+'.applyPreset(1)') is False
+ assert p.evaluate('P.squad')==[10011,20011]
+ assert p.evaluate('window.__resetCalls')==1
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
+ assert 'save unavailable' in p.locator('#bf10000-status').text_content()
+ p.evaluate('window.saveProgress=window.__squadOriginalSave')
  # Native Auto may have a gap with S.busy=false between scheduled turns.
  # Applying another squad must NEVER reset the live battle or save a team
  # during that gap. An Auto-owned result is no longer a live turn.
