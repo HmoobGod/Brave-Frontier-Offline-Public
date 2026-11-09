@@ -67,9 +67,16 @@
    return statusSnapshot();
  }
  function setAuto(on){
-   if(auto.checked===on)return;
+   // An already-checked but DISABLED native control is not proof that the
+   // newly replayed battle can execute Auto. Allow the native victory state
+   // (disabled + unchecked) only when clearing Auto before replay.
+   if(auto.checked===on)return !on||!auto.disabled;
+   // Native controls can become disabled or reject a click while the
+   // archive battle changes phase. Never assume Auto actually toggled.
+   if(auto.disabled)return false;
    internalToggle=true;
    try{auto.click();}finally{internalToggle=false;}
+   return auto.checked===on&&(!on||!auto.disabled);
  }
  function stop(why='Stopped',restore=true){
    const previous=session;
@@ -79,7 +86,18 @@
    // Unexpected aborts (defeat, failed save, changed quest or invalid clear)
    // must DISARM native Auto too, otherwise the repeat session stops while
    // the engine can continue unattended in subsequent rounds.
-   if(previous)setAuto(restore?previous.autoWasEnabled:false);
+   if(previous){
+     const wanted=restore?previous.autoWasEnabled:false;
+     const toggled=setAuto(wanted);
+     if(!wanted&&(!toggled||S.auto===true)){
+       // The native checkbox may be DISABLED while still checked. Native
+       // click() cannot clear it then, so fail closed in transient battle
+       // state as well. Pending native timers inspect S.auto before acting.
+       // This never changes P, reward calculations or the v7 save.
+       S.auto=false;
+       auto.checked=false;
+     }
+   }
    update();return !!previous;
  }
  function playAgain(){
@@ -92,12 +110,21 @@
      stop('Stopped: replay prerequisites changed',false);return false;
    }
    // Reset Auto at a completed result, then activate it on the fresh run.
-   setAuto(false);
+   // A completed native result may disable its Auto checkbox until the
+   // NEXT battle starts. Clear only an enabled, checked toggle before replay;
+   // the authoritative enabled/checked gate is AFTER replayBattle().
+   if(!setAuto(false)){
+     stop('Stopped: native Auto control unavailable',false);return false;
+   }
    if(!results.replayBattle()||S.over||
       QUEST?.missionId!==session.missionId){
      stop('Stopped: native mission replay failed',false);return false;
    }
-   setAuto(true);
+   if(!setAuto(true)){
+     // The native replay already started, but Auto cannot drive it. Disarm
+     // the repeat session immediately; never queue an unattended next run.
+     stop('Stopped: native Auto could not start',false);return false;
+   }
    reason='Battle in progress';update();return true;
  }
  function start(count=Number(picker.value)){
