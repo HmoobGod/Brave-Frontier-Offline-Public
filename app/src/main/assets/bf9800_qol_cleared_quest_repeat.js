@@ -67,9 +67,13 @@
    return statusSnapshot();
  }
  function setAuto(on){
-   if(auto.checked===on)return;
+   if(auto.checked===on)return true;
+   // Native controls can become disabled or reject a click while the
+   // archive battle changes phase. Never assume Auto actually toggled.
+   if(auto.disabled)return false;
    internalToggle=true;
    try{auto.click();}finally{internalToggle=false;}
+   return auto.checked===on;
  }
  function stop(why='Stopped',restore=true){
    const previous=session;
@@ -92,18 +96,26 @@
      stop('Stopped: replay prerequisites changed',false);return false;
    }
    // Reset Auto at a completed result, then activate it on the fresh run.
-   setAuto(false);
+   // A disabled native toggle must block the replay BEFORE it starts.
+   if(auto.disabled||!setAuto(false)){
+     stop('Stopped: native Auto control unavailable',false);return false;
+   }
    if(!results.replayBattle()||S.over||
       QUEST?.missionId!==session.missionId){
      stop('Stopped: native mission replay failed',false);return false;
    }
-   setAuto(true);
+   if(!setAuto(true)){
+     // The native replay already started, but Auto cannot drive it. Disarm
+     // the repeat session immediately; never queue an unattended next run.
+     stop('Stopped: native Auto could not start',false);return false;
+   }
    reason='Battle in progress';update();return true;
  }
  function start(count=Number(picker.value)){
    if(session||!Number.isInteger(count)||![1,2,5,10].includes(count))return false;
    const s=results.snapshot();
-   if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
+   if(!onQuest()||document.hidden||auto.disabled||
+      S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
       !Number.isSafeInteger(s.clears)||s.clears<1)return false;
