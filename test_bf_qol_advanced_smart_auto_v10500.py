@@ -178,6 +178,16 @@ with sync_playwright() as pw:
    [{'slot':0,'hp':90,'maxHp':100},
     {'slot':1,'hp':10,'maxHp':100},
     {'slot':2,'hp':0,'maxHp':100}]) is None
+ # Native scheduler strictness: any opt-in advanced choice that returns
+ # no legal target must not be replaced by the legacy absolute-HP fallback.
+ assert p.evaluate(api+'.requiresValidatedTarget()') is True
+ settings['target']='percent'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate(api+'.requiresValidatedTarget()') is False
+ settings['target']='absolute'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate(api+'.requiresSelectedTarget()') is False
+ assert p.evaluate(api+'.requiresValidatedTarget()') is True
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Elemental player Auto priority uses the real source-backed six-element

@@ -9,7 +9,7 @@ assert html.count('/* BF_SOURCE_AWARE_AUTO_V041 */')==1
 assert html.count('/* BF_BATTLE_BB_GUIDE_V040 */')==1
 assert html.count('/* BF_EVOLUTION_ROADMAP_V039 */')==1
 assert html.count('window.BF042AutoCoordination?.plan(liveParty())')==1
-assert html.count('requiresSelectedTarget?.()===true')==1
+assert html.count('requiresValidatedTarget?.()===true')==1
 assert html.count("S.auto=false;E.auto.checked=false;E.phase.textContent='Choose actions'")==1
 assert html.count('window.BF041SmartAuto?.kindFor(p)')==1
 assert 'bf_global_offline_demo_v7' in html
@@ -160,6 +160,29 @@ with sync_playwright() as pw:
     page.wait_for_function("()=>S.auto===false",timeout=5500)
     assert page.evaluate('__bf042queued') is None
     assert page.evaluate('E.auto.checked') is False
+    # Other explicit advanced priorities also reject invalid native foe maps.
+    # Previously a null advanced choice silently fell back to lowest HP.
+    page.evaluate("""()=>{
+      window.__bf042queued=null;
+      BFGlobalQoLAdvancedAutoV10500.set({
+        on:true,heal:60,target:'absolute',burst:'normal',guard:0
+      });
+      S.auto=true;E.auto.checked=true;scheduleAuto();
+    }""")
+    assert page.evaluate('BFGlobalQoLAdvancedAutoV10500.requiresSelectedTarget()') is False
+    assert page.evaluate('BFGlobalQoLAdvancedAutoV10500.requiresValidatedTarget()') is True
+    page.wait_for_function("()=>S.auto===false",timeout=5500)
+    assert page.evaluate('__bf042queued') is None
+    assert page.evaluate('E.auto.checked') is False
+    # With valid source-owned targets, absolute HP advanced Auto still queues.
+    page.evaluate("""()=>{
+      S.enemies[1].hp=120;S.target=1;window.__bf042queued=null;
+      S.auto=true;E.auto.checked=true;scheduleAuto();
+    }""")
+    page.wait_for_function("()=>!!window.__bf042queued",timeout=5500)
+    valid=page.evaluate('window.__bf042queued')
+    assert valid['visualTarget']==0 and all(
+      a['target']==0 for a in valid['actions']),valid
     page.evaluate("""()=>{
       S.enemies[1].hp=120;
       BFGlobalQoLAdvancedAutoV10500.set({
