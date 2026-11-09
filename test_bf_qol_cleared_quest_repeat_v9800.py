@@ -100,6 +100,28 @@ with sync_playwright() as pw:
  }""")
  assert native_victory=={'accepted':True,'armed':True,'enabled':True,
    'stopped':True,'disarmed':True,'replayCount':1,'saveSame':True},native_victory
+ # Native replay may leave Auto CHECKED but disabled. Its checked state
+ # alone does not establish that the new battle can drive Auto.
+ disabled_checked=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
+   const original=impl.replayBattle,auto=document.getElementById('auto');
+   const before=window.__repeatCount;
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     impl.replayBattle=()=>{const ok=original();
+       auto.checked=true;auto.disabled=true;return ok;};
+     const accepted=BFGlobalQoLQuestRepeatV9800.start(1);
+     const status=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
+     return {accepted,armed:status.active,reason:status.reason,
+       replayCount:window.__repeatCount-before,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{
+     impl.replayBattle=original;auto.disabled=false;auto.checked=false;
+     window.__repeatCount=before;S.over=true;S.phase='Victory';
+   }
+ }""")
+ assert disabled_checked=={'accepted':False,'armed':False,
+   'reason':'Stopped: native Auto could not start',
+   'replayCount':1,'saveSame':True},disabled_checked
  # The native checkbox can also become disabled AFTER a real replay starts.
  # Detect that immediately, so no invisible repeat session remains armed.
  toggle_lost=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
