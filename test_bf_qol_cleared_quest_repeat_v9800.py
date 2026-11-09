@@ -106,21 +106,24 @@ with sync_playwright() as pw:
    const original=impl.replayBattle,auto=document.getElementById('auto');
    const before=window.__repeatCount;
    const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const priorAuto=S.auto;
    try{
      impl.replayBattle=()=>{const ok=original();
-       auto.checked=true;auto.disabled=true;return ok;};
+       auto.checked=true;auto.disabled=true;S.auto=true;return ok;};
      const accepted=BFGlobalQoLQuestRepeatV9800.start(1);
      const status=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
      return {accepted,armed:status.active,reason:status.reason,
+       disarmed:!auto.checked&&S.auto===false,
        replayCount:window.__repeatCount-before,
        saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
    }finally{
      impl.replayBattle=original;auto.disabled=false;auto.checked=false;
+     S.auto=priorAuto;
      window.__repeatCount=before;S.over=true;S.phase='Victory';
    }
  }""")
  assert disabled_checked=={'accepted':False,'armed':False,
-   'reason':'Stopped: native Auto could not start',
+   'reason':'Stopped: native Auto could not start','disarmed':True,
    'replayCount':1,'saveSame':True},disabled_checked
  # The native checkbox can also become disabled AFTER a real replay starts.
  # Detect that immediately, so no invisible repeat session remains armed.
