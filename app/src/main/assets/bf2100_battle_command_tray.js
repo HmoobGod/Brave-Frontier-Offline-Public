@@ -113,6 +113,17 @@
           !Number.isFinite(e.maxHp)||e.maxHp<=0||
           !Number.isSafeInteger(e.slot)||e.slot<0)||
         new Set(living.map(e=>e.slot)).size!==living.length)return false;
+     // The queue must use a currently living, enabled native target button.
+     // Otherwise a stale selected slot (e.g. the enemy KO'd last turn) could
+     // silently queue the squad against an enemy that cannot be attacked.
+     if(!Number.isSafeInteger(S.target)||S.target<0||
+        !living.some(e=>e.slot===S.target))return false;
+     const rendered=Array.from(targetList.children);
+     if(!rendered.every(b=>b.tagName==='BUTTON'))return false;
+     const mapped=rendered.length===S.enemies.length?S.enemies:
+       rendered.length===living.length?living:null;
+     const position=mapped?.findIndex(e=>e?.slot===S.target&&e.hp>0)??-1;
+     if(position<0||!rendered[position]||rendered[position].disabled)return false;
    }
    // Preserve paid item turns, validating the optional reservation snapshot
    // before issuing any native player click.
