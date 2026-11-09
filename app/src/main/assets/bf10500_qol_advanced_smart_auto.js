@@ -209,7 +209,7 @@
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
    'Element targeting uses known original unit types and visible, identified enemy types; '+
    'unknown weaknesses revert to the existing HP% strategy. Selected-target Auto '+ 
-   'requires a live legal player target; if it vanishes, it queues no guessed substitute. Optional Guard applies '+
+   'requires a live legal player target; if it vanishes, Auto turns OFF instead of choosing another foe. Optional Guard applies '+
    'only to active player Auto turns. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
  function refresh(){
@@ -227,6 +227,7 @@
  host.addEventListener('change',refresh);
  refresh();
  window.BFGlobalQoLAdvancedAutoV10500=freeze({
-   get,active,kindFor,chooseTarget,set,refresh
+   get,active,kindFor,chooseTarget,set,refresh,
+   requiresSelectedTarget:()=>active()&&config.target==='selected'
  });
 })();
