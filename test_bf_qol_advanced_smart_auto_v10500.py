@@ -30,6 +30,8 @@ with sync_playwright() as pw:
      {unitId:30011,id:2,active:true,hp:100,maxHp:100,bb:100}
    ];
    window.liveParty=()=>__party105;
+   // Simulate the actual native player Auto ownership for kindFor overrides.
+   window.S={mode:'archive',auto:true,over:false,party:__party105,wave:0};
    window.bfOriginalBB=id=>id===20011?{target:'support'}:
      id===30011?{target:'support'}:{target:'single_enemy'};
    window.originalSupport=id=>id===20011?{kind:'heal_all'}:
@@ -333,6 +335,43 @@ with sync_playwright() as pw:
  settings['heal']=75
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[0])')=='burst'
+ # Advanced behavior must not leak onto enemy/partner actors, cloned player
+ # units, manual turns or a shuffled player slot that shares an ID.
+ # The baseline still runs, but only a real player-owned Auto actor gets
+ # optional heal/Curse/Guard overrides.
+ player_ownership=p.evaluate("""()=>{const oldCurse=window.BFGlobalCurseBBLockV5900;
+   const oldMode=S.mode,oldAuto=S.auto,oldParty=S.party;
+   const healer=__party105[0],attacker=__party105[1],hp=healer.hp;
+   const teammate=__party105[2],teammateHp=teammate.hp;
+   try{
+     S.party=__party105;S.mode='archive';S.auto=true;S.over=false;
+     healer.hp=healer.maxHp;attacker.hp=attacker.maxHp;
+     teammate.hp=teammate.maxHp;
+     const ownedHealer=BF041SmartAuto.kindFor(healer)==='attack';
+     const clonedHealer=BF041SmartAuto.kindFor({...healer})==='burst';
+     window.BFGlobalCurseBBLockV5900={cursed:id=>id===1};
+     const ownedCursed=BF041SmartAuto.kindFor(attacker)==='attack';
+     const clonedCursed=BF041SmartAuto.kindFor({...attacker})==='burst';
+     S.auto=false;
+     const manualCursed=BF041SmartAuto.kindFor(attacker)==='burst';
+     S.auto=true;S.mode='training';
+     const trainingCursed=BF041SmartAuto.kindFor(attacker)==='burst';
+     S.mode='archive';
+     S.party=[__party105[1],__party105[0],__party105[2]];
+     const shuffledCursed=BF041SmartAuto.kindFor(attacker)==='burst';
+     return {ownedHealer,clonedHealer,ownedCursed,clonedCursed,
+       manualCursed,trainingCursed,shuffledCursed};
+   }finally{
+     S.mode=oldMode;S.auto=oldAuto;S.party=oldParty;
+     healer.hp=hp;teammate.hp=teammateHp;
+     window.BFGlobalCurseBBLockV5900=oldCurse;
+   }
+ }""")
+ assert player_ownership=={
+   'ownedHealer':True,'clonedHealer':True,
+   'ownedCursed':True,'clonedCursed':True,
+   'manualCursed':True,'trainingCursed':True,'shuffledCursed':True
+ },player_ownership
  p.locator('#bf041-smart-auto').uncheck()
  assert p.evaluate(api+'.active()') is False
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
