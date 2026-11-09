@@ -72,7 +72,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
  # Optional player strategies add visible demo enemy ATK/DEF priorities without
  # touching the original default, battle commands, save or enemy-owned AI.
- assert p.locator('#bf10500-target option').count()==7
+ assert p.locator('#bf10500-target option').count()==8
  candidates=[
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
@@ -134,6 +134,52 @@ with sync_playwright() as pw:
    }""",{'rows':hp_choices,'variant':malformed})
    assert outcome is None,(high_priority,malformed)
   assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",hp_choices)==(5 if high_priority=='highest-hp' else 2)
+ # Player-selected Auto priority should follow the original native selected
+ # enemy slot only while source-owned Auto combat is live. Stale or corrupt
+ # targets fail closed rather than sending a command to a different foe.
+ settings['target']='selected'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ p.locator('#bf10500-target').select_option('selected')
+ assert p.evaluate(api+'.get().target')=='selected'
+ assert p.evaluate("""()=>JSON.parse(localStorage.getItem(
+   'bf_global_offline_qol_advanced_auto_v105')).target""")=='selected'
+ selected_foes=[
+   {'slot':0,'hp':90,'maxHp':100},
+   {'slot':1,'hp':10,'maxHp':100},
+   {'slot':2,'hp':80,'maxHp':100}
+ ]
+ p.evaluate("""()=>{window.S={mode:'archive',over:false,auto:true,target:2,round:1};}""")
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",selected_foes)==2
+ p.evaluate('S.target=0')
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",selected_foes)==0
+ p.evaluate('S.target=9')
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",selected_foes) is None
+ p.evaluate('S.target=-1')
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",selected_foes) is None
+ p.evaluate("""()=>{S.target=2;S.auto=false}""")
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",selected_foes) is None
+ p.evaluate("""()=>{S.auto=true;S.mode='training'}""")
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",selected_foes) is None
+ p.evaluate("""()=>{S.mode='archive';S.over=true}""")
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",selected_foes) is None
+ p.evaluate('S.over=false')
+ for bad in ('numeric-infinity','string-infinity','bad-max','duplicate-slot'):
+  rejected=p.evaluate("""({rows,variant})=>{
+    const invalid=variant==='numeric-infinity'?{slot:5,hp:Infinity,maxHp:100}:
+      variant==='string-infinity'?{slot:5,hp:'Infinity',maxHp:100}:
+      variant==='bad-max'?{slot:5,hp:10,maxHp:0}:
+      {slot:2,hp:10,maxHp:100};
+    return BF042AutoCoordination.chooseTarget([...rows,invalid]);
+  }""",{'rows':selected_foes,'variant':bad})
+  assert rejected is None,bad
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",selected_foes)==2
+ # If the chosen enemy is KO'd, never silently retarget another living foe.
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)""",
+   [{'slot':0,'hp':90,'maxHp':100},
+    {'slot':1,'hp':10,'maxHp':100},
+    {'slot':2,'hp':0,'maxHp':100}]) is None
+ settings['target']='lowest-def'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Elemental player Auto priority uses the real source-backed six-element
  # matchup API; its threat choice is team-wide and never guesses unknown types.
  p.evaluate("""()=>{window.S={mode:'archive',over:false,round:0,enemies:[]};

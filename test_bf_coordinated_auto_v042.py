@@ -9,6 +9,8 @@ assert html.count('/* BF_SOURCE_AWARE_AUTO_V041 */')==1
 assert html.count('/* BF_BATTLE_BB_GUIDE_V040 */')==1
 assert html.count('/* BF_EVOLUTION_ROADMAP_V039 */')==1
 assert html.count('window.BF042AutoCoordination?.plan(liveParty())')==1
+assert html.count('requiresSelectedTarget?.()===true')==1
+assert html.count("S.auto=false;E.auto.checked=false;E.phase.textContent='Choose actions'")==1
 assert html.count('window.BF041SmartAuto?.kindFor(p)')==1
 assert 'bf_global_offline_demo_v7' in html
 M=json.loads((ROOT/'source_data/bf_global_original_bb_support_v029.json').read_text())
@@ -117,6 +119,56 @@ with sync_playwright() as pw:
     assert all(a['target']==0 for a in legacy['actions']),legacy
     assert [a['kind'] for a in legacy['actions'][:2]]==['burst','burst'],legacy
     page.evaluate("()=>{S.auto=false;document.getElementById('bf041-smart-auto').checked=false;}")
+    # Full generated engine regression, not just the standalone QoL helper:
+    # the v0.42 ?? legacy fallback must NOT silently override the player's
+    # opt-in selected target after it dies or becomes ambiguously mapped.
+    page.add_script_tag(path=str(ROOT/'app/src/main/assets/bf10500_qol_advanced_smart_auto.js'))
+    selected=page.evaluate("""()=>{
+      document.getElementById('bf041-smart-auto').checked=true;
+      const enabled=BFGlobalQoLAdvancedAutoV10500.set({
+        on:true,heal:60,target:'selected',burst:'normal',guard:0
+      });
+      S.mode='archive';S.over=false;S.target=0;S.auto=false;
+      S.enemies=[{slot:0,name:'Selected',hp:70,maxHp:100,def:20},
+        {slot:1,name:'Lowest HP %',hp:120,maxHp:1000,def:20}];
+      return enabled&&BFGlobalQoLAdvancedAutoV10500.requiresSelectedTarget();
+    }""")
+    assert selected is True
+    page.evaluate("()=>{window.__bf042queued=null;S.auto=true;E.auto.checked=true;scheduleAuto();}")
+    page.wait_for_function("()=>!!window.__bf042queued",timeout=5500)
+    kept=page.evaluate('window.__bf042queued')
+    assert kept['visualTarget']==0 and all(
+      a['target']==0 for a in kept['actions']),kept
+    # On KO, the scheduled callback must disarm Auto and issue NO fallback
+    # attack on still-living enemy slot 1.
+    page.evaluate("""()=>{
+      S.auto=false;S.enemies[0].hp=0;S.target=0;
+      window.__bf042queued=null;S.auto=true;E.auto.checked=true;
+      scheduleAuto();
+    }""")
+    page.wait_for_function("()=>S.auto===false",timeout=5500)
+    assert page.evaluate('__bf042queued') is None
+    assert page.evaluate('E.auto.checked') is False
+    assert page.evaluate('E.phase.textContent')=='Choose actions'
+    # Invalid *other* live foe also disarms, instead of ignoring that foe
+    # to target a different native index.
+    page.evaluate("""()=>{
+      S.auto=false;S.enemies[0].hp=70;S.enemies[1].hp=Infinity;S.target=0;
+      window.__bf042queued=null;S.auto=true;E.auto.checked=true;
+      scheduleAuto();
+    }""")
+    page.wait_for_function("()=>S.auto===false",timeout=5500)
+    assert page.evaluate('__bf042queued') is None
+    assert page.evaluate('E.auto.checked') is False
+    page.evaluate("""()=>{
+      S.enemies[1].hp=120;
+      BFGlobalQoLAdvancedAutoV10500.set({
+        on:false,heal:60,target:'selected',burst:'normal',guard:0
+      });
+      document.getElementById('bf041-smart-auto').checked=false;
+      S.auto=false;
+    }""")
+    assert page.evaluate('BFGlobalQoLAdvancedAutoV10500.requiresSelectedTarget()') is False
     assert page.evaluate("JSON.stringify(P)")==before['progress'],'P changed'
     assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before['saved'],'save changed'
     assert not errors,errors
