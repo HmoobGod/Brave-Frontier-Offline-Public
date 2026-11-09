@@ -125,6 +125,49 @@ with sync_playwright() as pw:
  assert disabled_checked=={'accepted':False,'armed':False,
    'reason':'Stopped: native Auto could not start','disarmed':True,
    'replayCount':1,'saveSame':True},disabled_checked
+ # A stale checked Auto input is not evidence of native battle execution.
+ # An explicit S.auto=false after replay must disarm the session rather
+ # than leaving repeat armed against a manual-only battle.
+ mismatched=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
+   const native=impl.replayBattle,auto=document.getElementById('auto');
+   const count=window.__repeatCount,priorAuto=S.auto;
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     impl.replayBattle=()=>{const accepted=native();
+       auto.checked=true;S.auto=false;return accepted;};
+     const accepted=BFGlobalQoLQuestRepeatV9800.start(2);
+     const state=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
+     return {accepted,armed:state.active,reason:state.reason,
+       disarmed:!auto.checked&&S.auto===false,
+       replayCount:window.__repeatCount-count,
+       savedSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{impl.replayBattle=native;auto.checked=false;S.auto=priorAuto;
+     window.__repeatCount=count;S.over=true;S.phase='Victory';}
+ }""")
+ assert mismatched=={'accepted':False,'armed':False,
+   'reason':'Stopped: native Auto could not start','disarmed':True,
+   'replayCount':1,'savedSame':True},mismatched
+ # A later native Auto engine shutoff (without a checkbox change event)
+ # also cancels the repeat before any second quest can start.
+ mismatch_poll=p.evaluate("""()=>{const auto=document.getElementById('auto');
+   const count=window.__repeatCount,priorAuto=S.auto;
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     const started=BFGlobalQoLQuestRepeatV9800.start(2);
+     if(!started)return {fixtureFailed:true};
+     S.auto=false;
+     const stopped=BFGlobalQoLQuestRepeatV9800.poll();
+     const status=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
+     return {started,stopped,armed:status.active,
+       reason:status.reason,disarmed:!auto.checked&&S.auto===false,
+       replayCount:window.__repeatCount-count,
+       savedSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{auto.checked=false;S.auto=priorAuto;
+     window.__repeatCount=count;S.over=true;S.phase='Victory';}
+ }""")
+ assert mismatch_poll=={'started':True,'stopped':True,'armed':False,
+   'reason':'Stopped: Auto Battle disabled','disarmed':True,
+   'replayCount':1,'savedSame':True},mismatch_poll
  # The native checkbox can also become disabled AFTER a real replay starts.
  # Detect that immediately, so no invisible repeat session remains armed.
  toggle_lost=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
