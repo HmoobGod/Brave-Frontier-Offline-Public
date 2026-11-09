@@ -70,6 +70,25 @@ with sync_playwright() as pw:
   assert p.evaluate(api+".scaleIncoming(100,'"+other+"',S.party[1])")==100
   # No cumulative effect: only one reduction per incoming hit.
   assert p.evaluate(api+".scaleIncoming(100,'"+element+"',S.party[1])")==90
+ # A cloned/shuffled player actor does not own its native target slot.
+ # Never reduce incoming damage for ambiguous squad references.
+ p.evaluate("""()=>{P.squad[0]=10041;document.getElementById('mode').value='archive';reset()}""")
+ ownership=p.evaluate("""()=>{const original=S.party,actor=original[1];
+   const snapshot=JSON.stringify(P);const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     const clone={...actor};
+     const cloned=BFGlobalOriginalElementResistV16600.scaleIncoming(100,'Fire',clone);
+     S.party=[actor,original[0],...original.slice(2)];
+     const shuffled=BFGlobalOriginalElementResistV16600.scaleIncoming(100,'Fire',actor);
+     S.party=[original[0],actor,actor,...original.slice(3)];
+     const duplicated=BFGlobalOriginalElementResistV16600.scaleIncoming(100,'Fire',actor);
+     return {cloned,shuffled,duplicated,
+       playerSame:JSON.stringify(P)===snapshot,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{S.party=original;}
+ }""")
+ assert ownership=={'cloned':100,'shuffled':100,'duplicated':100,
+                    'playerSame':True,'saveSame':True},ownership
  p.evaluate("document.getElementById('mode').value='training';reset()")
  assert p.evaluate(api+'.leader()') is None
  assert p.evaluate(api+".scaleIncoming(100,'Dark',S.party[1])")==100
