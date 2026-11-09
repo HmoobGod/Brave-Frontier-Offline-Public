@@ -488,6 +488,49 @@ with sync_playwright() as pw:
                     'sourceSupport':True,'unknownProfile':True,'noTurn':True,
                     'saved':True,'otherOrders':True},bb_target
  assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
+ # The visible Execute shortcut must track the actual target preflight,
+ # including changes to queued actions without HP, round, or count changes.
+ # Invalid offensive BBs are disabled; archived support BBs remain usable.
+ execute_ui=page.evaluate("""()=>{const actor=S.party[0],original=actor.action;
+   const unitId=actor.unitId,button=document.getElementById('bf2100-execute');
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const target=original?.target;
+   const foe=S.enemies.find(e=>e?.slot===target&&e.hp>0);
+   if(!foe||original?.kind!=='attack'||!button)return {badFixture:true};
+   const hp=foe.hp;
+   try{
+     BFGlobalBattleCommandsV2100.refresh();
+     const validAttack=!button.disabled;
+     actor.action={...original,target:99999};
+     BFGlobalBattleCommandsV2100.refresh();
+     const staleAttack=button.disabled;
+     actor.action={...original,target};
+     foe.hp=0;BFGlobalBattleCommandsV2100.refresh();
+     const koTarget=button.disabled;
+     foe.hp=hp;BFGlobalBattleCommandsV2100.refresh();
+     const restoredAttack=!button.disabled;
+     actor.unitId=10011;actor.action={kind:'burst',target:99999};
+     BFGlobalBattleCommandsV2100.refresh();
+     const staleOffensiveBB=button.disabled;
+     actor.unitId=20041;BFGlobalBattleCommandsV2100.refresh();
+     const supportBBEnabled=!button.disabled;
+     actor.unitId=999999;BFGlobalBattleCommandsV2100.refresh();
+     const unknownBBDisabled=button.disabled;
+     return {validAttack,staleAttack,koTarget,restoredAttack,
+       staleOffensiveBB,supportBBEnabled,unknownBBDisabled,
+       saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===saved,
+       noTurn:S.busy===false};
+   }finally{
+     actor.action=original;actor.unitId=unitId;foe.hp=hp;
+     BFGlobalBattleCommandsV2100.refresh();
+   }
+ }""")
+ assert execute_ui=={
+   'validAttack':True,'staleAttack':True,'koTarget':True,
+   'restoredAttack':True,'staleOffensiveBB':True,
+   'supportBBEnabled':True,'unknownBBDisabled':True,
+   'saveUnchanged':True,'noTurn':True},execute_ui
+ assert page.locator('#bf2100-execute').is_enabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True

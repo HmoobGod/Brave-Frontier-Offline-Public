@@ -474,7 +474,8 @@
    execute.click();signature='';refresh();return true;
  }
  function refresh(){
-   const st=snapshot(),key=JSON.stringify([st,active().map(p=>[p.id,p.hp,p.maxHp])]);
+   const st=snapshot(),key=JSON.stringify([st,active().map(p=>[
+     p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
    if(key===signature)return st;
    signature=key;
    status.textContent='Wave '+(st.wave+1)+' · Round '+st.round+
@@ -483,7 +484,9 @@
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
    healBB.disabled=!healingAvailable();
    spreadBB.disabled=!spreadBurstPlan();
-   fire.disabled=!st.canExecute;
+   // Match the real pre-Execute target gate in the visible player UI.
+   // Recheck every refresh: queued targets/BB profiles can change mid-turn.
+   fire.disabled=!st.canExecute||!queuedAttacksSafe();
    const group=document.createDocumentFragment();
    for(const e of st.foes){
      const b=document.createElement('button');b.type='button';
