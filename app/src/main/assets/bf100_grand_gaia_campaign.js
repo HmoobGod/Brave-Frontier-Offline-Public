@@ -105,6 +105,21 @@
    }
    return null;
  }
+ // Read-only source-wave readiness for the 106 archived missions. A wave
+ // count is not evidence of its enemy formation, drops, or native combat AI.
+ // Refuse inconsistent catalog rows rather than silently inventing waves.
+ function waveReadiness(missionId){
+   if(!Number.isSafeInteger(missionId)||missionId<0||
+      !Array.isArray(QUESTS)||QUESTS.length!==106)return null;
+   const matches=QUESTS.filter(q=>q?.missionId===missionId);
+   if(matches.length!==1)return null;
+   const q=matches[0];
+   if(!idset.has(q.dungeonId)||!Number.isSafeInteger(q.battles)||
+      q.battles<1||q.battles>100)return null;
+   return Object.freeze({missionId,dungeonId:q.dungeonId,
+     verifiedWaveCount:q.battles,enemyFormationsVerified:false,
+     dropsVerified:false,nativeMultiWaveEnabled:false});
+ }
  function refresh(){
    const info=summary();
    total.textContent=info.cleared+' / '+info.total+' original missions cleared';
@@ -128,6 +143,6 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  tabs.addEventListener('click',refresh);
  refresh();
- window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,
+ window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,waveReadiness,
     get missionCount(){return 106},get dungeonCount(){return 23}});
 })();
