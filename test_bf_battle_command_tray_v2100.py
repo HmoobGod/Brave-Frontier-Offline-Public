@@ -40,6 +40,25 @@ with sync_playwright() as pw:
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ # A valid-but-swapped actor slot must not let native action buttons queue
+ # attacks/guards/bursts for the wrong party member. This must fail before
+ # selecting ANY actor, without altering queued orders or the v7 save.
+ ownership=page.evaluate("""()=>{
+   const party=S.party,orders=party.map(p=>JSON.stringify(p.action));
+   const target=S.target,saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     S.party=[party[1],party[0],...party.slice(2)];
+     const attack=BFGlobalBattleCommandsV2100.queueAll('attack');
+     const guard=BFGlobalBattleCommandsV2100.queueAll('guard');
+     const burst=BFGlobalBattleCommandsV2100.queueAll('burst');
+     const heal=BFGlobalBattleCommandsV2100.queueAll('heal');
+     return {attack,guard,burst,heal,ordersUnchanged:orders.every((a,i)=>
+       a===JSON.stringify(party[i].action)),targetSame:S.target===target,
+       noTurn:!S.busy,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{S.party=party;}
+ }""")
+ assert ownership=={'attack':False,'guard':False,'burst':False,'heal':False,
+   'ordersUnchanged':True,'targetSame':True,'noTurn':True,'saveSame':True},ownership
  # Manual offensive queues must reject an invalid, KO'd or disabled
  # current native enemy target, preserving all existing orders. Guard-only
  # still works because it does not use enemy targeting.
