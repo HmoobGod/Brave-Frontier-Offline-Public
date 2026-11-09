@@ -59,6 +59,32 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
+ # Native Focus changes S.target before calling the shared queue planner.
+ # With shuffled or cloned player actors, its caller must reject the request
+ # BEFORE mutating the old selected target or the existing squad actions.
+ guarded_focus=page.evaluate("""()=>{const party=S.party,selected=S.target;
+   const oldOrders=party.map(p=>JSON.stringify(p.action));
+   const stored=localStorage.getItem('bf_global_offline_demo_v7');
+   const initialStrategy=BFGlobalBattleFocusV3100.snapshot().strategy;
+   const testCase=()=>({
+     attack:BFGlobalBattleFocusV3100.queueFocus('highest-atk')===false,
+     burst:BFGlobalBattleFocusV3100.queueFocus('highest-atk','burst')===false
+   });
+   try{
+     S.party=[party[1],party[0],...party.slice(2)];
+     const shuffled=testCase();
+     S.party=[party[0],{...party[1],id:party[0].id},...party.slice(2)];
+     const cloned=testCase();
+     return {shuffled,cloned,selectedSame:S.target===selected,
+       strategySame:BFGlobalBattleFocusV3100.snapshot().strategy===initialStrategy,
+       ordersSame:oldOrders.every((a,i)=>a===JSON.stringify(party[i].action)),
+       savedSame:localStorage.getItem('bf_global_offline_demo_v7')===stored,
+       noTurn:!S.busy};
+   }finally{S.party=party;}
+ }""")
+ assert guarded_focus=={'shuffled':{'attack':True,'burst':True},
+   'cloned':{'attack':True,'burst':True},'selectedSame':True,
+   'strategySame':True,'ordersSame':True,'savedSame':True,'noTurn':True},guarded_focus
  page.evaluate('S.party[0].bb=100;update()')
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-def","burst")') is True
  assert page.evaluate('S.party[0].action.kind')=='burst'

@@ -81,8 +81,11 @@
      message='This squad is already active.';refresh();return true;
    }
    P.squad=slot.squad.slice();
-   // Apply through the existing save function; roll back if storage blocks it.
-   if(!saveProgress()){
+   // Apply through the existing canonical save function. Even if a
+   // storage adapter throws, revert the in-memory party before any reset.
+   let saved=false;
+   try{saved=!!saveProgress();}catch(_){saved=false;}
+   if(!saved){
      P.squad=previous;
      message='Active save unavailable; squad was not changed.';
      refresh();return false;

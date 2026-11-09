@@ -6,7 +6,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     data=z.read('assets/bf10000_qol_squad_presets.js').decode('utf8')
     assert data.count('BF_GLOBAL_QOL_SQUAD_PRESETS_V10000')==1
     assert "P.squad=slot.squad.slice()" in data
-    assert "if(!saveProgress())" in data
+    assert "try{saved=!!saveProgress();}catch(_){saved=false;}" in data
+    assert "if(!saved){" in data
+    assert "P.squad=previous;" in data
     assert 'assets/bf9900_qol_battle_speed.js' in z.namelist()
     assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')

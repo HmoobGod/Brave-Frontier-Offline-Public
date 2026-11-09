@@ -95,7 +95,16 @@
    selected=kind;signature='';refresh();return true;
  }
  function queueFocus(kind,action='attack'){
-   if(action!=='attack'&&action!=='burst')return false;
+   if(action!=='attack'&&action!=='burst'||!legal()||!Array.isArray(S.party))return false;
+   // Focus changes the selected native target BEFORE queueAll checks actors.
+   // Refuse a shuffled/cloned player squad without touching target or orders.
+   const actors=S.party.filter(p=>p&&p.active&&p.hp>0);
+   const nativeSlots=document.getElementById('slots')?.children;
+   if(!actors.length||actors.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      S.party[p.id]!==p||!Number.isFinite(p.hp)||
+      !Number.isFinite(p.maxHp)||p.maxHp<=0||
+      !nativeSlots?.[p.id]||nativeSlots[p.id].disabled)||
+      new Set(actors.map(p=>p.id)).size!==actors.length)return false;
    if(!focus(kind)||!commands.queueAll(action))return false;
    const target=lookup(kind),live=S.party.filter(p=>p.active&&p.hp>0);
    signature='';refresh();

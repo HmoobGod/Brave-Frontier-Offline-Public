@@ -60,7 +60,7 @@ for name,_ in MODULES:
  assert not re.search(r'\bP\.(?:squad|roster|materials|questClears|unitExp|exp|zel|karma)\s*=(?!=)',script),name
 
 squads=(ASSETS/'bf10000_qol_squad_presets.js').read_text('utf8')
-assert 'if(!saveProgress())' in squads
+assert 'try{saved=!!saveProgress();}catch(_){saved=false;}' in squads
 assert 'P.squad=previous' in squads
 repeat=(ASSETS/'bf9800_qol_cleared_quest_repeat.js').read_text('utf8')
 assert 'results.replayBattle()' in repeat

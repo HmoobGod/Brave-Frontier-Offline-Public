@@ -309,7 +309,10 @@
    if(!Array.isArray(reservations)||reservations.some(r=>!Number.isSafeInteger(r.slot)))return null;
    const reserved=new Set(reservations.map(r=>r.slot));
    const ids=squad.map(p=>p.id);
+   // Native squad buttons act on S.party by index, not on a copied unit ID.
+   // Reject shuffled, duplicated or cloned actors before changing ANY order.
    if(new Set(ids).size!==ids.length||squad.some(p=>
+      !Number.isSafeInteger(p.id)||p.id<0||S.party?.[p.id]!==p||
       !Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||p.maxHp<=0))
      return null;
    const plan=[];
