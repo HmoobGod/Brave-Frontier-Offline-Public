@@ -71,6 +71,16 @@ for(const r of rows){
  assert.equal(api.scaleIncoming(100,e,bad),100);
  assert.equal(api.scaleIncoming(100,e,{active:true,hp:20}),100);
 }
+// Only the exact live slot owner can receive source-backed type5 reduction.
+const priorParty=state.party;
+try{
+ state.party=[bad,actor];
+ assert.equal(api.scaleIncoming(100,'Fire',actor),100,'shuffled actor must fail closed');
+ state.party=[actor,actor];
+ assert.equal(api.scaleIncoming(100,'Fire',actor),100,'duplicate reference must fail closed');
+ state.party=[actor];
+ assert.equal(api.scaleIncoming(100,'Fire',{...actor}),100,'cloned actor must fail closed');
+}finally{state.party=priorParty;}
 assert.equal(api.snapshot().applied,12);
 assert.equal(api.snapshot().prevented,120);
 assert.equal(api.snapshot().recent.length,8);
