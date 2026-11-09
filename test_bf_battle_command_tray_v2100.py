@@ -231,6 +231,63 @@ with sync_playwright() as pw:
  assert len(living)>=2
  assert assigned==[['attack',living[i%len(living)]] for i in range(len(assigned))],assigned
  assert not page.evaluate('S.busy')
+ # Spread Attacks must preflight the *entire* native target roster first.
+ # Disabling the SECOND living target used to queue the first ally before
+ # failing on the second; all existing player orders must now stay intact.
+ spread_atomic=page.evaluate("""()=>{
+   const party=S.party,foes=S.enemies,live=foes.filter(e=>e&&e.hp>0);
+   const buttons=Array.from(document.getElementById('targets').children);
+   const source=buttons.length===foes.length?foes:
+     buttons.length===live.length?live:null;
+   const idx=source?.findIndex(e=>e?.slot===live[1]?.slot)??-1;
+   const blocked=buttons[idx],selected=S.target;
+   if(!blocked||blocked.disabled)return {badFixture:true};
+   const before=party.map(p=>JSON.stringify(p.action));
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const original=blocked.disabled;
+   try{
+     blocked.disabled=true;
+     const rejected=BFGlobalBattleCommandsV2100.spreadAttacks()===false;
+     const unmodified=before.every((a,i)=>a===JSON.stringify(party[i].action));
+     return {rejected,unmodified,selectedSame:S.target===selected,
+       noTurn:!S.busy,
+       savedSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{blocked.disabled=original;}
+ }""")
+ assert spread_atomic=={'rejected':True,'unmodified':True,
+   'selectedSame':True,'noTurn':True,'savedSame':True},spread_atomic
+ # The actor's declared native slot must actually own the matching party
+ # array entry; shuffled actor identities cannot queue partial commands.
+ shifted_actor=page.evaluate("""()=>{const party=S.party;
+   const orders=party.map(p=>JSON.stringify(p.action)),selection=S.target;
+   try{
+     S.party=[party[1],party[0],...party.slice(2)];
+     return {attackRefused:BFGlobalBattleCommandsV2100.spreadAttacks()===false,
+       burstRefused:BFGlobalBattleCommandsV2100.spreadBursts()===false,
+       preserved:orders.every((v,i)=>v===JSON.stringify(party[i].action)),
+       selectedSame:S.target===selection,noTurn:!S.busy};
+   }finally{S.party=party;}
+ }""")
+ assert shifted_actor=={'attackRefused':True,'burstRefused':True,
+   'preserved':True,'selectedSame':True,'noTurn':True},shifted_actor
+ # Reserved player item turns must still Guard and not consume rotation.
+ spread_reserved=page.evaluate("""()=>{
+   const old=window.BFGlobalItemTurnReservationsV4500;
+   window.BFGlobalItemTurnReservationsV4500={
+     snapshot:()=>({reservations:[{slot:1}]})};
+   try{
+     const success=BFGlobalBattleCommandsV2100.spreadAttacks();
+     const targets=S.enemies.filter(e=>e&&e.hp>0).map(e=>e.slot);
+     const actions=S.party.filter(p=>p.active&&p.hp>0)
+       .map(p=>({id:p.id,kind:p.action?.kind,target:p.action?.target}));
+     const active=actions.filter(p=>p.kind==='attack');
+     return {success,guard:actions[1]?.kind==='guard',
+       attackTargets:active.every((p,i)=>p.target===targets[i%targets.length]),
+       attackCount:active.length,noTurn:!S.busy};
+   }finally{window.BFGlobalItemTurnReservationsV4500=old;}
+ }""")
+ assert spread_reserved=={'success':True,'guard':True,'attackTargets':True,
+   'attackCount':5,'noTurn':True},spread_reserved
  # SPREAD READY BB is manual: rotate live native targets while ready
  # player-owned actors use Burst and unready actors queue normal Attack.
  assert page.locator('#bf2100-spread-bb').is_visible()
