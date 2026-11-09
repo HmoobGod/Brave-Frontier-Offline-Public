@@ -442,7 +442,14 @@
       S.party[p.id]!==p||!p.action||!Number.isFinite(p.hp)||p.hp<=0||
       !Number.isFinite(p.maxHp)||p.maxHp<=0)||
       new Set(ids).size!==squad.length)return false;
-   const offensive=squad.filter(p=>p.action.kind==='attack');
+   // The native DEMO engine skips enemy selection only for archived BB
+   // profiles explicitly tagged non-offensive. Offensive/unknown BBs still
+   // call pickTarget(action.target), just like normal player Attacks.
+   // Never spend a queued offensive BB on a target KO'd since queuing.
+   const archive=window.BF_ARCHIVE_BB_HITS;
+   const offensive=squad.filter(p=>p.action.kind==='attack'||
+     p.action.kind==='burst'&&
+     archive?.[String(p.unitId)]?.offensiveCandidate!==false);
    if(!offensive.length)return true;
    const all=S.enemies;
    if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp)))return false;
