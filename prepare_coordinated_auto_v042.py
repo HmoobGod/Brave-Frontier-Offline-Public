@@ -20,8 +20,11 @@ assert other['records']['40025']['bb']['target']=='support'
 assert other['records']['40025']['bb']['levels'][0]['params']==[0,94,0,0,0,3,170]
 
 MARK='/* BF_COORDINATED_AUTO_V042 */'
+# When the player explicitly selects a fixed native enemy target, a KO or
+# malformed roster must stop Auto instead of invoking the legacy fallback
+# from a null coordinator choice. All other default Auto behavior is intact.
 old="const target=livingEnemies().sort((a,b)=>a.hp-b.hp)[0];if(!target)return;for(const p of liveParty()){p.action={kind:window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'attack'),target:target.slot}}update();execute()"
-new="const target=window.BF042AutoCoordination?.chooseTarget(livingEnemies()) ?? livingEnemies().sort((a,b)=>a.hp-b.hp)[0];if(!target)return;const plan=window.BF042AutoCoordination?.plan(liveParty());for(const p of liveParty()){p.action={kind:plan?.get(p) ?? (window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'attack')),target:target.slot}}if(window.BF041SmartAuto?.enabled())S.target=target.slot;update();execute()"
+new="const strict=window.BFGlobalQoLAdvancedAutoV10500?.requiresSelectedTarget?.()===true;const choice=window.BF042AutoCoordination?.chooseTarget(livingEnemies());const target=choice ?? (strict?null:livingEnemies().sort((a,b)=>a.hp-b.hp)[0]);if(!target){if(strict){S.auto=false;E.auto.checked=false;E.phase.textContent='Choose actions';update()}return;}const plan=window.BF042AutoCoordination?.plan(liveParty());for(const p of liveParty()){p.action={kind:plan?.get(p) ?? (window.BF041SmartAuto?.kindFor(p) ?? (p.bb>=100?'burst':'attack')),target:target.slot}}if(window.BF041SmartAuto?.enabled())S.target=target.slot;update();execute()"
 JS=r"""
 <script>
 /* BF_COORDINATED_AUTO_V042 */
