@@ -442,6 +442,28 @@ with sync_playwright() as pw:
  }""")
  assert curse_fallback['queued'] is True,curse_fallback
  assert curse_fallback['actions']==[['attack',1]]*6,curse_fallback
+ # Element Attack and Element + BB must use the real player-owned actor
+ # in each native slot, not a swapped or cloned object with a valid unit ID.
+ # Preflight must reject the entire plan without changing an earlier order.
+ owned_element=page.evaluate("""()=>{const party=S.party;
+   const prior=party.map(p=>JSON.stringify(p.action));
+   const target=S.target,save=localStorage.getItem('bf_global_offline_demo_v7');
+   const run=()=>({plan:BFGlobalBattleCommandsV2100.elementPlan()===null,
+     attack:BFGlobalBattleCommandsV2100.elementAttacks()===false,
+     burst:BFGlobalBattleCommandsV2100.elementBursts()===false});
+   try{
+     S.party=[party[1],party[0],...party.slice(2)];
+     const swapped=run();
+     S.party=[party[0],{...party[1],id:party[0].id},...party.slice(2)];
+     const cloned=run();
+     return {swapped,cloned,unchanged:prior.every((a,i)=>
+       a===JSON.stringify(party[i].action)),targetSame:S.target===target,
+       noTurn:!S.busy,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save};
+   }finally{S.party=party;}
+ }""")
+ assert owned_element=={'swapped':{'plan':True,'attack':True,'burst':True},
+   'cloned':{'plan':True,'attack':True,'burst':True},
+   'unchanged':True,'targetSame':True,'noTurn':True,'saveSame':True},owned_element
  # An unknown source ally must fail before any player orders change.
  saved_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
  # The live renderer reads UNIT_BY_ID for animation on every RAF. Never
