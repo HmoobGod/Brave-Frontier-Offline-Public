@@ -60,6 +60,23 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
  assert p.evaluate("""foes=>BF042AutoCoordination.chooseTarget(foes).slot""",foes)==1
+ # Optional targeting must not override the baseline in manual play,
+ # training, or a completed fight. Selected-target mode already has its
+ # separate fail-closed null policy and is covered below.
+ turn_scopes=p.evaluate("""rows=>{const old={auto:S.auto,mode:S.mode,over:S.over};
+   try{
+     S.auto=false;S.mode='archive';S.over=false;
+     const manual=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.auto=true;S.mode='training';
+     const training=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.mode='archive';S.over=true;
+     const finished=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     S.over=false;
+     const playerAuto=BF042AutoCoordination.chooseTarget(rows)?.slot;
+     return {manual,training,finished,playerAuto};
+   }finally{S.auto=old.auto;S.mode=old.mode;S.over=old.over;}
+ }""",foes)
+ assert turn_scopes=={'manual':0,'training':0,'finished':0,'playerAuto':1},turn_scopes
  # The base Smart Auto targets only living enemies with valid positive max HP.
  # Advanced absolute targeting must preserve that legality gate, not choose
  # a smaller apparent HP on an impossible maxHp/unknown enemy.
