@@ -86,6 +86,29 @@ with sync_playwright() as pw:
   assert preflight['first']['missionId']==initial_next['missionId']
   assert preflight['invalidLater'] is None and preflight['nonfiniteLater'] is None
   assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable().missionId')==initial_next['missionId']
+  # Native Chromium: all 106 source wave counts are read-only metadata;
+  # neither enemy formations nor native wave execution is certified.
+  wave_report=page.evaluate("""() => {
+    const api=BFGrandGaiaCampaignV100;
+    const saved=localStorage.getItem('bf_global_offline_demo_v7');
+    const player=JSON.stringify(P);
+    const rows=QUESTS.map(q=>api.waveReadiness(q.missionId));
+    const q=QUESTS[0],old=q.battles;
+    let malformed;
+    try{q.battles=0;malformed=api.waveReadiness(q.missionId);}
+    finally{q.battles=old;}
+    return {rows,malformed,unknown:api.waveReadiness(-1),
+      playerSame:JSON.stringify(P)===player,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert len(wave_report['rows'])==106
+  assert all(row and row['verifiedWaveCount']>=1 and
+             row['enemyFormationsVerified'] is False and
+             row['dropsVerified'] is False and
+             row['nativeMultiWaveEnabled'] is False
+             for row in wave_report['rows'])
+  assert wave_report['malformed'] is None and wave_report['unknown'] is None
+  assert wave_report['playerSame'] and wave_report['saveSame']
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version
