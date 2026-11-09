@@ -231,7 +231,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # Elemental player Auto priority uses the real source-backed six-element
  # matchup API; its threat choice is team-wide and never guesses unknown types.
- p.evaluate("""()=>{window.S={mode:'archive',over:false,round:0,enemies:[]};
+ p.evaluate("""()=>{window.S={mode:'archive',auto:true,over:false,round:0,enemies:[]};
    window.UNIT_BY_ID=new Map([
      [10011,{element:'Fire'}],[20011,{element:'Water'}],
      [30011,{element:'Thunder'}]
@@ -335,6 +335,9 @@ with sync_playwright() as pw:
  p.evaluate('S.auto=false')
  settings['burst']='normal'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ # Strict malformed-roster rejection is for an active player Auto choice;
+ # manual/training scopes intentionally use the unchanged baseline target.
+ p.evaluate("S.auto=true")
  # Missing target statistics and impossible enemy records fail closed.
  invalid=[{'hp':1,'maxHp':0,'slot':0,'atk':500,'def':-40},
           {'hp':8,'maxHp':10,'slot':-1,'atk':500,'def':-40},
