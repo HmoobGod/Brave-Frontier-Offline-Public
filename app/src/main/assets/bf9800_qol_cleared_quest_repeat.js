@@ -96,8 +96,10 @@
      stop('Stopped: replay prerequisites changed',false);return false;
    }
    // Reset Auto at a completed result, then activate it on the fresh run.
-   // A disabled native toggle must block the replay BEFORE it starts.
-   if(auto.disabled||!setAuto(false)){
+   // A completed native result may disable its Auto checkbox until the
+   // NEXT battle starts. Clear only an enabled, checked toggle before replay;
+   // the authoritative enabled/checked gate is AFTER replayBattle().
+   if(!setAuto(false)){
      stop('Stopped: native Auto control unavailable',false);return false;
    }
    if(!results.replayBattle()||S.over||
@@ -114,8 +116,7 @@
  function start(count=Number(picker.value)){
    if(session||!Number.isInteger(count)||![1,2,5,10].includes(count))return false;
    const s=results.snapshot();
-   if(!onQuest()||document.hidden||auto.disabled||
-      S.busy||S.mode!=='archive'||
+   if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
       !Number.isSafeInteger(s.clears)||s.clears<1)return false;
