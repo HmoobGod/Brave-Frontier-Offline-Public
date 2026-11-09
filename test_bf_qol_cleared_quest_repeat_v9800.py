@@ -62,6 +62,44 @@ with sync_playwright() as pw:
  p.evaluate("window.__stored98=false")
  assert p.evaluate(api+'.start(2)') is False
  p.evaluate("window.__stored98=true")
+ # A disabled native Auto checkbox cannot drive a replay. Refuse before
+ # changing the battle, quest cursor, canonical save or unattended session.
+ p.evaluate("document.getElementById('auto').disabled=true")
+ before_replays=p.evaluate('window.__repeatCount')
+ before_save=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ assert p.evaluate(api+'.start(1)') is False
+ assert p.evaluate('window.__repeatCount')==before_replays
+ assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert not p.locator('#auto').is_checked()
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_save
+ p.evaluate("document.getElementById('auto').disabled=false")
+ # The native checkbox can also become disabled AFTER a real replay starts.
+ # Detect that immediately, so no invisible repeat session remains armed.
+ toggle_lost=p.evaluate("""()=>{const impl=BFGlobalBattleResultsV3000;
+   const before=window.__repeatCount;
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const native=impl.replayBattle;
+   try{
+     impl.replayBattle=()=>{
+       const result=native();
+       document.getElementById('auto').disabled=true;
+       return result;
+     };
+     const accepted=BFGlobalQoLQuestRepeatV9800.start(2);
+     const status=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
+     return {accepted,armed:status.active,
+       reason:status.reason,auto:document.getElementById('auto').checked,
+       replayCount:window.__repeatCount-before,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{
+     impl.replayBattle=native;
+     document.getElementById('auto').disabled=false;
+     S.over=true;S.phase='Victory';
+   }
+ }""")
+ assert toggle_lost=={'accepted':False,'armed':False,
+   'reason':'Stopped: native Auto could not start','auto':False,
+   'replayCount':1,'saveSame':True},toggle_lost
  # A one-clear player choice is a genuine bounded native replay: it executes
  # one additional quest, confirms the stored clear, then restores Auto OFF.
  assert p.evaluate(api+'.start(1)') is True
