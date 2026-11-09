@@ -70,13 +70,15 @@
    // An already-checked but DISABLED native control is not proof that the
    // newly replayed battle can execute Auto. Allow the native victory state
    // (disabled + unchecked) only when clearing Auto before replay.
-   if(auto.checked===on)return !on||!auto.disabled;
+   if(auto.checked===on)return (!on||!auto.disabled)&&(!on||S.auto!==false);
    // Native controls can become disabled or reject a click while the
    // archive battle changes phase. Never assume Auto actually toggled.
    if(auto.disabled)return false;
    internalToggle=true;
    try{auto.click();}finally{internalToggle=false;}
-   return auto.checked===on&&(!on||!auto.disabled);
+   // A checked DOM checkbox is not an authoritative running Auto engine.
+   // Fail closed if native combat explicitly reports Auto OFF.
+   return auto.checked===on&&(!on||!auto.disabled)&&(!on||S.auto!==false);
  }
  function stop(why='Stopped',restore=true){
    const previous=session;
@@ -151,7 +153,8 @@
    // Native finish() deliberately unchecks Auto after every result, including
    // victory. Only treat Auto-off as cancellation while a battle is ongoing.
    if(!s.done){
-     if(!auto.checked)return stop('Stopped: Auto Battle disabled',false);
+     if(!auto.checked||S.auto===false)
+       return stop('Stopped: Auto Battle disabled',false);
      update();return true;
    }
    if(!s.victory)return stop('Stopped: battle lost',false);

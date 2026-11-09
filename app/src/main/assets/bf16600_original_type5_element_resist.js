@@ -38,7 +38,9 @@
    syncEncounter();
    if(!Number.isSafeInteger(amount)||amount<=0||
       !target||typeof target!=='object'||target.active!==true||
-      !Array.isArray(S.party)||!S.party.includes(target)||target.hp<=0)
+      !Array.isArray(S.party)||!Number.isSafeInteger(target.id)||
+      target.id<0||target.id>=6||S.party[target.id]!==target||
+      S.party.filter(unit=>unit===target).length!==1||target.hp<=0)
      return amount;
    const l=leader();
    if(!l||elements.normalize(attackerElement)!==l.resistedElement)
