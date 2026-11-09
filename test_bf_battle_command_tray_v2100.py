@@ -531,6 +531,43 @@ with sync_playwright() as pw:
    'supportBBEnabled':True,'unknownBBDisabled':True,
    'saveUnchanged':True,'noTurn':True},execute_ui
  assert page.locator('#bf2100-execute').is_enabled()
+ # Native target controls can become unavailable without HP, squad orders,
+ # or the tray refresh signature changing. The visible Execute button must
+ # reject and recover on the very next refresh, without a hidden turn.
+ native_target_ui=page.evaluate("""()=>{const actor=S.party[0];
+   const enemySlot=actor.action?.target,all=S.enemies;
+   const living=all.filter(e=>e&&e.hp>0);
+   const controls=Array.from(document.getElementById('targets')?.children||[]);
+   const mapped=controls.length===all.length?all:
+     controls.length===living.length?living:null;
+   const idx=mapped?.findIndex(e=>e?.slot===enemySlot&&e.hp>0)??-1;
+   const button=controls[idx],fire=document.getElementById('bf2100-execute');
+   if(!button||button.tagName!=='BUTTON'||!fire||
+      button.disabled||actor.action?.kind!=='attack')return {badFixture:true};
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const originalDisabled=button.disabled;
+   try{
+     BFGlobalBattleCommandsV2100.refresh();
+     const initiallyEnabled=!fire.disabled;
+     button.disabled=true;
+     const nativeUnsafe=BFGlobalBattleCommandsV2100.queuedAttacksSafe()===false;
+     BFGlobalBattleCommandsV2100.refresh();
+     const disabledOnRefresh=fire.disabled;
+     button.disabled=false;
+     BFGlobalBattleCommandsV2100.refresh();
+     const restoredOnRefresh=!fire.disabled;
+     return {initiallyEnabled,nativeUnsafe,disabledOnRefresh,
+       restoredOnRefresh,noTurn:!S.busy,
+       saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{
+     button.disabled=originalDisabled;
+     BFGlobalBattleCommandsV2100.refresh();
+   }
+ }""")
+ assert native_target_ui=={'initiallyEnabled':True,'nativeUnsafe':True,
+   'disabledOnRefresh':True,'restoredOnRefresh':True,'noTurn':True,
+   'saveUnchanged':True},native_target_ui
+ assert page.locator('#bf2100-execute').is_enabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queuedAttacksSafe()') is True
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
