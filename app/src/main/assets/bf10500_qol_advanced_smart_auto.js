@@ -48,22 +48,29 @@
    config=requested;refresh();return true;
  }
  function active(){return config.on&&smart.enabled()===true}
+ // Only apply advanced actions to the actual player-owned live Auto actor.
+ // Enemy/partner/cloned battlers can share an id or unitId but must retain
+ // the source-aware baseline action (including under player Curse).
+ function ownedAutoActor(unit){
+   return typeof S!=='undefined'&&S.mode==='archive'&&
+     S.auto===true&&!S.over&&Array.isArray(S.party)&&
+     Number.isSafeInteger(unit?.id)&&unit.id>=0&&unit.id<6&&
+     S.party[unit.id]===unit&&unit.active===true&&
+     Number.isFinite(unit.hp)&&unit.hp>0&&
+     Number.isFinite(unit.maxHp)&&unit.maxHp>0;
+ }
  function kindFor(unit){
    const previous=baseKind(unit);
+   if(!ownedAutoActor(unit))return previous;
    // Optional low-HP survival Guard on the live PLAYER-controlled Auto turn.
    // Check original battler identity and current health; clones and noncombat
    // planning calls cannot trigger the rule. No enemy/NPC AI is modified.
-   if(active()&&config.guard>0&&typeof S!=='undefined'&&
-      S.mode==='archive'&&S.auto===true&&!S.over&&
-      Number.isSafeInteger(unit?.id)&&unit.id>=0&&unit.id<6&&
-      S.party?.[unit.id]===unit&&unit.active===true&&
-      Number.isFinite(unit.hp)&&unit.hp>0&&
-      Number.isFinite(unit.maxHp)&&unit.maxHp>0&&
+   if(active()&&config.guard>0&&
       unit.hp/unit.maxHp<=config.guard/100&&
       !window.BFGlobalParalysisActionLockV6000?.paralyzed(unit.id))return 'guard';
-   if(window.BFGlobalCurseBBLockV5900?.cursed(unit?.id))return 'attack';
-   if(!active()||!unit||!unit.active||!(unit.hp>0)||
-     !(Number(unit.bb)>=100))return previous;
+   // Curse and source-backed BB heuristics are player-only overrides.
+   if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';
+   if(!active()||!Number.isFinite(unit.bb)||unit.bb<100)return previous;
    const source=Number.isSafeInteger(unit.unitId)?
      bfOriginalBB(unit.unitId):null;
    if(!source)return previous;
