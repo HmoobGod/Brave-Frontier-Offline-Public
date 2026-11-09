@@ -17,12 +17,13 @@
  const options=document.createElement('div');options.id='bf3100-options';
  const state=document.createElement('p');state.id='bf3100-status';
  const foot=document.createElement('small');
- foot.textContent='Targets use visible DEMO enemy stats. Queuing replaces earlier squad orders; Execute is manual. This is optional and not recovered original AI.';
+ foot.textContent='Targets use visible DEMO enemy stats. Element Weakness uses only source-known elements and requires a proven ally advantage. Queuing replaces earlier squad orders; Execute is manual. This is optional and not recovered original AI.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
   ['highest-hp','HIGHEST HP'],['highest-hp-percent','HIGHEST HP %'],
-  ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF']
+  ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF'],
+  ['elemental','ELEMENT WEAKNESS']
  ];
  let selected='lowest-hp',signature='';
  const legal=()=>!S.busy&&!S.over&&!S.auto&&!!commands.snapshot()?.canQueue;
@@ -37,6 +38,32 @@
    if(living.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
       !Number.isSafeInteger(e.slot)||e.slot<0)||
       new Set(living.map(e=>e.slot)).size!==living.length)return null;
+   // Only source-known six-element advantages count; never infer types
+   // from names, artwork, or missing enemy metadata. Favor the foe weak to
+   // the most living typed allies, then lowest HP%, then native slot.
+   // No verified advantage means no manual focus; do not silently fall back.
+   if(kind==='elemental'){
+     const element=window.BFGlobalElementalCombatV6900;
+     if(S.mode!=='archive'||!element||
+        typeof element.normalize!=='function'||
+        typeof element.multiplier!=='function'||
+        typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function'||
+        !Array.isArray(S.party))return null;
+     const types=S.party.filter(u=>u&&u.active&&Number.isFinite(u.hp)&&u.hp>0)
+       .map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element)).filter(Boolean);
+     if(!types.length)return null;
+     const ranked=living.map(foe=>{
+       const targetType=element.normalize(foe.element);
+       const count=targetType?types.filter(type=>
+         element.multiplier(type,targetType)===1.5).length:0;
+       return {foe,count};
+     }).filter(row=>row.count>0);
+     ranked.sort((a,b)=>b.count-a.count||
+       a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
+       a.foe.slot-b.foe.slot);
+     const f=ranked[0]?.foe;
+     return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp,atk:f.atk,def:f.def}):null;
+   }
    // Unknown optional ATK/DEF values are not ranked, while valid HP
    // strategies and native slot ordering remain exactly as before.
    const foes=living.filter(e=>Number.isFinite(e[key]));
@@ -52,9 +79,13 @@
  }
  function snapshot(){return Object.freeze({strategy:selected,target:lookup(selected),canQueue:legal()});}
  function refresh(){
-   const s=snapshot(),key=JSON.stringify(s);
+   const s=snapshot(),elemental=lookup('elemental');
+   // Element scripts may be loaded AFTER this panel. Include source
+   // availability in the refresh key to enable the button once ready.
+   const key=JSON.stringify([s,elemental?.slot??null]);
    if(key===signature)return s;signature=key;
-   for(const b of options.querySelectorAll('button'))b.disabled=!s.canQueue;
+   for(const b of options.querySelectorAll('button'))
+     b.disabled=!s.canQueue||(b.dataset.strategy==='elemental'&&!elemental);
    state.textContent=s.target?'Focus '+s.target.name+' · '+s.strategy.replaceAll('-',' ')+' · '+s.target.hp+' HP':'No eligible target';
    return s;
  }
@@ -71,7 +102,8 @@
    return !!target&&live.length>0&&live.every(p=>p.action?.target===target.slot);
  }
  for(const [kind,label] of strategies){
-   const b=document.createElement('button');b.type='button';b.textContent=label+' + ATTACK';
+   const b=document.createElement('button');b.type='button';
+   b.dataset.strategy=kind;b.textContent=label+' + ATTACK';
    b.addEventListener('click',()=>queueFocus(kind));options.append(b);
  }
  const bursts=document.createElement('button');bursts.type='button';
