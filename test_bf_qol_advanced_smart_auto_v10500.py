@@ -77,12 +77,32 @@ with sync_playwright() as pw:
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
    {'hp':70,'maxHp':100,'slot':2,'atk':44,'def':7},
-    {'hp':1,'maxHp':100,'slot':4}
+    {'hp':1,'maxHp':100,'slot':4,'atk':15,'def':82}
  ]
  settings['target']='highest-atk'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==1
  assert p.locator('#bf10500-target').input_value()=='highest-atk'
+ # For stat-based optional target modes, the whole living foe roster
+ # must contain valid native ATK/DEF; skipping a missing stat is unsafe.
+ # A single unknown foe cannot be silently omitted from target ranking.
+ for target_mode in ('highest-atk','lowest-def'):
+  settings['target']=target_mode
+  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+  for invalid in ('missing','string-infinity','nan','null'):
+   result=p.evaluate("""({rows,mode,variant})=>{
+     const copy=rows.map(x=>({...x})),key=mode==='highest-atk'?'atk':'def';
+     if(variant==='missing')delete copy[3][key];
+     else if(variant==='string-infinity')copy[3][key]='Infinity';
+     else if(variant==='nan')copy[3][key]=NaN;
+     else copy[3][key]=null;
+     return BF042AutoCoordination.chooseTarget(copy);
+   }""",{'rows':candidates,'mode':target_mode,'variant':invalid})
+   assert result is None,(target_mode,invalid)
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",
+    candidates)==(1 if target_mode=='highest-atk' else 2)
+ settings['target']='highest-atk'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  # A corrupt living foe must not be silently skipped: its native slot
  # could collide with the chosen target. Reject the entire player Auto choice.
  for bad in [
