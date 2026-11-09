@@ -53,7 +53,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-def").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
- assert page.locator('#bf3100-options button').count()==7
+ assert page.locator('#bf3100-options button').count()==8
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
@@ -72,12 +72,50 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='highest-hp-percent'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
  assert page.evaluate('S.busy') is False
+ # Source-known elemental manual focus is a separate tactic from the
+ # per-ally Element Advantage action. The Android app loads v69 later,
+ # so this dynamic API must remain inactive until that source loads.
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")') is None
+ assert page.locator('#bf3100-options button[data-strategy="elemental"]').is_disabled()
+ page.add_script_tag(path=str(A/'bf6900_elemental_combat.js'))
+ assert page.evaluate('BFGlobalElementalCombatV6900.normalize("Fire")')=='Fire'
+ prior_types=page.evaluate('S.party.map(p=>p.unitId)')
+ prior_elements=page.evaluate('S.enemies.map(e=>e.element??null)')
+ page.evaluate("""()=>{S.party.forEach(p=>{if(p.active)p.unitId=10011});
+   S.enemies[0].element='Water';S.enemies[1].element='Earth';
+   S.enemies[2].element='Light';update()}""")
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")?.slot')==1
+ assert page.evaluate('BFGlobalBattleFocusV3100.refresh().canQueue') is True
+ assert not page.locator('#bf3100-options button[data-strategy="elemental"]').is_disabled()
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("elemental")') is True
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='elemental'
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
+ assert page.evaluate('S.busy') is False
+ elemental_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
+ # Without a source-verified weakness, do not guess or overwrite orders.
+ page.evaluate("S.enemies[1].element='Water';update()")
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")') is None
+ assert page.evaluate('BFGlobalBattleFocusV3100.refresh().target') is None
+ assert page.locator('#bf3100-options button[data-strategy="elemental"]').is_disabled()
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("elemental")') is False
+ assert page.evaluate('S.party.map(p=>JSON.stringify(p.action))')==elemental_orders
+ # Two known Earth foes tie on ally advantages: lowest HP%, then slot.
+ page.evaluate("""()=>{S.enemies[0].element='Earth';
+   S.enemies[1].element='Earth';S.enemies[2].element='Water';update()}""")
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")?.slot')==0
+ # Unknown enemy types do not become guessed weaknesses.
+ page.evaluate("""()=>S.enemies.forEach(e=>e.element='Unknown')""")
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")') is None
+ page.evaluate("""v=>{S.party.forEach((p,i)=>p.unitId=v.types[i]);
+    S.enemies.forEach((e,i)=>{if(v.elements[i]===null)delete e.element;
+      else e.element=v.elements[i]});update()}""",
+    {'types':prior_types,'elements':prior_elements})
  # Any invalid living foe must block the WHOLE manual focus plan rather
  # than silently skipping it and targeting an ambiguous native button.
  # Keep synthetic corruption in one synchronous browser task, so the
  # normal battle renderer never observes these deliberately invalid rows.
  results=page.evaluate("""()=>{const original=S.enemies;
-   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def'];
+   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental'];
    try{
      S.enemies=[
        {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
@@ -92,12 +130,12 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[None]*6,results
- assert results['invalid']==[None]*6,results
+ assert results['valid']==[None]*7,results
+ assert results['invalid']==[None]*7,results
  assert results['rejected'],results
  # Targeting and queued orders must remain untouched if ANY living record
  # is corrupt, including text-coerced Infinity or a duplicate valid slot.
- # Validate all six focus strategies and actual queueFocus player controls.
+ # Validate all seven focus strategies and actual queueFocus player controls.
  gated=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
    const originalTarget=S.target;
    const savedActions=S.party.map(p=>JSON.stringify(p.action));
@@ -111,7 +149,7 @@ with sync_playwright() as pw:
    try{
      return cases.map(foes=>{
        S.enemies=foes;
-       const looked=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def']
+       const looked=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental']
          .map(k=>BFGlobalBattleFocusV3100.lookup(k));
        const focused=BFGlobalBattleFocusV3100.focus('highest-hp');
        const queued=BFGlobalBattleFocusV3100.queueFocus('highest-hp-percent','burst');
@@ -121,7 +159,7 @@ with sync_playwright() as pw:
    }finally{S.enemies=original;S.target=originalTarget;}
  }""")
  assert len(gated)==5,gated
- assert all(x['looked']==[None]*6 and x['focused'] is False and
+ assert all(x['looked']==[None]*7 and x['focused'] is False and
             x['queued'] is False and x['targetUnchanged'] and
             x['actionsUnchanged'] for x in gated),gated
  # With an entirely valid roster, percentage ranking still differs from
@@ -157,4 +195,4 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
  browser.close()
-print('PASS v31.00: six manual focus strategies, high-HP native queue, corrupt-roster refusal and v7 save isolation')
+print('PASS v31.00: seven manual focus strategies, source-known elemental focus, native queue and v7 save isolation')
