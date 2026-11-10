@@ -58,6 +58,21 @@ with sync_playwright() as pw:
      S.wave=0;
    }
   }''',[on,prototype,smart,unit,gauge,label in ('support','wounded-guard'),label])
+  # A strict source wave-readiness module can fail closed when an unrelated
+  # DEMO quest row was modified. In that case opt-in final-wave BB policy
+  # correctly refuses to reserve BB for an unverified later wave; regular
+  # (and experimental SBB) burst execution remains the native fallback.
+  if label=='early-wave-bb':
+   readiness=p.evaluate('''()=>{
+    const api=window.BFGrandGaiaCampaignV100,
+      row=typeof api?.waveReadiness==='function'?api.waveReadiness(QUEST.missionId):undefined;
+    return {present:!!api,
+      valid:!!row&&row.missionId===QUEST.missionId&&
+        row.verifiedWaveCount===QUEST.battles};
+   }''')
+   if readiness['present'] and not readiness['valid']:
+    expected='sbb_demo'
+   print('INFO Auto SBB early-wave source readiness',readiness,'expected',expected,flush=True)
   # Advanced preferences are an isolated setup write before the audit snapshot.
   assert p.evaluate('''([on,guard,burst])=>BFGlobalQoLAdvancedAutoV10500.set({
     on,heal:60,target:"percent",burst,guard})''',
@@ -85,7 +100,7 @@ with sync_playwright() as pw:
    assert p.evaluate('S.party[0].bb')==100
    if status==6:assert hp==[100000,100000]
   if label=='support':assert hp==[100000,100000] and p.evaluate('S.party[0].hp')>200
-  if label in ('wounded-guard','early-wave-bb'):
+  if label=='wounded-guard' or (label=='early-wave-bb' and expected=='attack'):
    assert p.evaluate('S.party[0].bb')==100
   if label=='wounded-guard':
    assert hp==[100000,100000]
