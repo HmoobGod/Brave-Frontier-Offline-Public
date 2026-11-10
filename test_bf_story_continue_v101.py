@@ -44,6 +44,46 @@ with sync_playwright() as pw:
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'passive refresh must not change save'
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ # A live Auto player turn can have busy=false; a bounded repeat can
+ # still own the victory screen. Neither state permits story rerouting.
+ owned=page.evaluate("""()=>{
+   const button=document.getElementById('bf101-continue'),
+     saved=localStorage.getItem('bf_global_offline_demo_v7'),
+     progress=JSON.stringify(P),quest=QUEST.missionId,
+     original={mode:S.mode,auto:S.auto,busy:S.busy,over:S.over},
+     oldRepeat=window.BFGlobalQoLQuestRepeatV9800;
+   try{
+     S.mode='archive';S.auto=true;S.busy=false;S.over=false;
+     BFGrandGaiaContinueV101.refresh();
+     const autoBlocked=button.disabled &&
+       document.getElementById('bf101-next').textContent.includes('AUTO BATTLE / REPEAT ACTIVE');
+     button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+     const autoNoRoute=QUEST.missionId===quest;
+     S.auto=false;S.over=true;
+     window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+     BFGrandGaiaContinueV101.refresh();
+     const repeatBlocked=button.disabled &&
+       document.getElementById('bf101-next').textContent.includes('AUTO BATTLE / REPEAT ACTIVE');
+     button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+     const repeatNoRoute=QUEST.missionId===quest;
+     // Broken optional result providers must not silently bypass a live repeat.
+     window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('bad repeat status')}};
+     BFGrandGaiaContinueV101.refresh();
+     const brokenBlocked=button.disabled;
+     return {autoBlocked,autoNoRoute,repeatBlocked,repeatNoRoute,brokenBlocked,
+       progressSame:JSON.stringify(P)===progress,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+   }finally{
+     Object.assign(S,original);
+     if(oldRepeat===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
+     else window.BFGlobalQoLQuestRepeatV9800=oldRepeat;
+     BFGrandGaiaContinueV101.refresh();
+   }
+ }""")
+ assert owned=={'autoBlocked':True,'autoNoRoute':True,
+    'repeatBlocked':True,'repeatNoRoute':True,'brokenBlocked':True,
+    'progressSame':True,'saveSame':True},owned
+ assert page.locator('#bf101-continue').is_enabled()
  # The button must fail closed with the same canonical full-catalog policy
  # as the campaign resolver. Keep test-only corrupt records atomic to avoid
  # exposing an invalid ledger to the live browser renderer between calls.

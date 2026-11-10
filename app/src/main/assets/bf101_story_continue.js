@@ -20,6 +20,19 @@
    (!!S?.over&&S.phase==='Victory'&&
      (typeof saveEnabled!=='boolean'||!saveEnabled))
  );
+ // A player Auto battle can be alive while S.busy is briefly false between
+ // turns; a bounded repeat can own a victory screen while S.over is true.
+ // Never redirect either unattended action into another story mission.
+ // The optional repeat module is source-tested separately and may be absent
+ // on older embedded pages. If present but broken, refuse navigation.
+ function unattendedOwnsNavigation(){
+   if(S?.mode==='archive'&&S.auto===true&&S.over===false)return true;
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;
+   if(!repeat)return false;
+   try{return typeof repeat.statusSnapshot!=='function'||
+       repeat.statusSnapshot()?.active===true;}
+   catch(_){return true;}
+ }
  // Continue Story must use the SAME whole-catalog validation as the
  // campaign and post-victory Next controls. A corrupt later quest clear must
  // never be bypassed just because an earlier unlocked quest is available.
@@ -74,9 +87,12 @@
     meter.setAttribute('aria-valuemin','0');
     meter.setAttribute('aria-valuemax','106');
     meter.setAttribute('aria-valuenow',String(s.done));
-    button.disabled=!!S?.busy||!q;
+    const unattended=unattendedOwnsNavigation();
+    button.disabled=!!S?.busy||unattended||!q;
     if(awaitingSave()){
       next.textContent='VICTORY NOT SAVED · Retry Save or download an unsaved backup before continuing.';
+    }else if(unattended){
+      next.textContent='AUTO BATTLE / REPEAT ACTIVE · Stop Auto or finish the current run before continuing.';
     }else if(q){
       const source=BFGlobalQuestText.sourceFor(q);
       next.textContent='NEXT: '+(source?.mission?.name||'Mission '+q.missionId)+
@@ -88,7 +104,8 @@
  }
  button.addEventListener('click',()=>{
    const q=remaining();
-   if(!q||S?.busy||awaitingSave()||!BFQuestAreas.choose(q))return;
+   if(!q||S?.busy||awaitingSave()||unattendedOwnsNavigation()||
+      !BFQuestAreas.choose(q))return;
    // Native tab click also hides St. Lamia when returning to other regions.
    tabs.querySelectorAll('button')[regionIndex(q)]?.click();
    refresh();

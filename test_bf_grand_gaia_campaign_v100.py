@@ -75,6 +75,42 @@ with sync_playwright() as pw:
   # Source-ordered next-playable lookup is read-only and respects real unlocks.
   initial_next=page.evaluate("""() => BFGrandGaiaCampaignV100.nextPlayable()""")
   assert initial_next is not None and initial_next['missionId']==page.evaluate('QUESTS[0].missionId')
+  # Source-pinned 2022 Economy v143 is available in the packaged app after
+  # v100 loads. Verify it protects next-mission routing against any changed
+  # unlock, stamina or scalar reward field anywhere in the 106-row catalog.
+  page.add_script_tag(path=str(ASSETS/'bf14300_original_quest_energy.js'))
+  assert page.evaluate('BFOriginalGlobalQuestEnergyV14300.source.recordCount')==106
+  assert page.evaluate('BFGrandGaiaCampaignV100.sourceEconomyReadiness()') is True
+  economy_guard=page.evaluate("""() => {
+    const api=BFGrandGaiaCampaignV100, q=QUESTS[QUESTS.length-1],
+      save=localStorage.getItem('bf_global_offline_demo_v7'),
+      progress=JSON.stringify(P), original=window.BFOriginalGlobalQuestEnergyV14300,
+      fields=['requires','energy','exp','zel','karma'];
+    const changes={};
+    try {
+      for(const field of fields){
+        const old=q[field];
+        try{
+          q[field]=old+1;
+          changes[field]=api.nextPlayable()===null &&
+            api.sourceEconomyReadiness()===false;
+        } finally {q[field]=old;}
+      }
+      window.BFOriginalGlobalQuestEnergyV14300={
+        source:original.source,lookup:()=>{throw Error('source lookup broken')}};
+      changes.exception=api.nextPlayable()===null;
+      window.BFOriginalGlobalQuestEnergyV14300={
+        source:{...original.source,sourceSha256:'changed'},lookup:original.lookup};
+      changes.shaMismatch=api.nextPlayable()===null;
+    } finally {window.BFOriginalGlobalQuestEnergyV14300=original;}
+    return {changes,restored:api.sourceEconomyReadiness()===true&&
+      api.nextPlayable()?.missionId===QUESTS[0].missionId,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save,
+      progressSame:JSON.stringify(P)===progress};
+  }""")
+  assert economy_guard['changes']=={name:True for name in
+    ('requires','energy','exp','zel','karma','exception','shaMismatch')},economy_guard
+  assert economy_guard['restored'] and economy_guard['saveSame'] and economy_guard['progressSame']
   # A malformed later record must block selection of an otherwise valid first mission.
   # Restore the exact in-memory fixture without touching any persistent owner save.
   preflight=page.evaluate("""() => {
