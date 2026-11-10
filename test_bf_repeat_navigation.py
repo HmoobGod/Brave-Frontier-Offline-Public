@@ -45,6 +45,9 @@ with sync_playwright() as pw:
             BF_homeNav.go('quest');
             document.getElementById('mode').value='archive';BF_debug.reset();
             P.questClears[QUEST.missionId]=1;
+            // Commit only the disposable fixture's clear before the baseline.
+            // Native Auto Repeat now requires a matching canonical v7 receipt.
+            localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));
             S.over=true;S.phase='Victory';update();
             document.getElementById('speed').value='4';
             window.__navExecutions=0;
@@ -79,6 +82,9 @@ with sync_playwright() as pw:
                 if(timer){clearTimeout(timer);timer=null;}
                 S.over=true;S.phase='Victory';S.auto=false;E.auto.checked=false;
                 P.questClears[QUEST.missionId]++;
+                // This synthetic completed result must have a matching committed
+                // receipt before the later explicit restart eligibility check.
+                localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));
             }''')
             before = page.evaluate(SNAPSHOT)
         if phase != 'pending':

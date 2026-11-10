@@ -55,6 +55,12 @@ with sync_playwright() as pw:
  api='BFGlobalQoLQuestRepeatV9800'
  assert p.locator('#bf9800-auto-repeat').count()==1
  assert p.evaluate(api+'.statusSnapshot().active') is False
+ # An invalid canonical save receipt must prevent an unattended replay
+ # even if the old general stored boolean still reports success.
+ p.evaluate('BFGlobalBattleResultsV3000.committedClearCount=()=>0')
+ assert p.evaluate(api+'.start(2)') is False
+ assert p.evaluate('window.__repeatCount')==0
+ p.evaluate('delete BFGlobalBattleResultsV3000.committedClearCount')
  assert p.locator('#bf9800-repeat-count option').count()==6
  assert p.locator('#bf9800-repeat-count option').all_text_contents()==[
    '1 additional clears','2 additional clears','5 additional clears',
@@ -264,6 +270,27 @@ with sync_playwright() as pw:
   assert outcome=={'armed':True,'complete':length,'active':False,
                    'additionalReplays':length,'autoDisarmed':True,
                    'saveSame':True,'writesSame':True},outcome
+ # The live counter can advance before a save actually commits. The v322
+ # native v3000 receipt API must stop Auto before another replay begins.
+ p.evaluate("""()=>{QUEST.missionId=1;S.over=true;S.busy=false;
+   S.phase='Victory';document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.start(2)') is True
+ receipt_blocked=p.evaluate("""()=>{
+   const results=BFGlobalBattleResultsV3000,
+     old=__repeatCount,save=localStorage.getItem('bf_global_offline_demo_v7');
+   P.questClears[1]++;S.over=true;S.phase='Victory';
+   results.committedClearCount=id=>P.questClears[id]-1;
+   const stopped=BFGlobalQoLQuestRepeatV9800.poll(),
+     state=BFGlobalQoLQuestRepeatV9800.statusSnapshot();
+   delete results.committedClearCount;
+   return {stopped,active:state.active,reason:state.reason,
+     noNextReplay:__repeatCount===old,
+     saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===save,
+     autoDisarmed:!document.getElementById('auto').checked};
+ }""")
+ assert receipt_blocked=={'stopped':True,'active':False,
+   'reason':'Stopped: latest clear not committed to v7 save',
+   'noNextReplay':True,'saveUnchanged':True,'autoDisarmed':True},receipt_blocked
  # Cannot start before first successful clear of a mission.
  p.evaluate("""()=>{QUEST.missionId=2;P.questClears[2]=0;S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(2)') is False
