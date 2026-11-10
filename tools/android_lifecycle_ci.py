@@ -43,14 +43,14 @@ def install_ci_emulator_image(manager, image, env, log):
     """Bounded retry for SDK downloads; never skip native emulator acceptance."""
     command = [str(manager), '--install', 'emulator', image]
     for attempt in range(1, 4):
-        log.write(f'\\n[Android CI sdkmanager attempt {attempt}/3]\\n')
+        log.write(f'\n[Android CI sdkmanager attempt {attempt}/3]\n')
         log.flush()
         try:
-            subprocess.run(command, input='y\\n'*20, text=True, stdout=log,
+            subprocess.run(command, input='y\n'*20, text=True, stdout=log,
                            stderr=subprocess.STDOUT, env=env, check=True, timeout=600)
             return
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
-            log.write(f'\\n[SDK install attempt {attempt}/3 failed: {type(exc).__name__}]\\n')
+            log.write(f'\n[SDK install attempt {attempt}/3 failed: {type(exc).__name__}]\n')
             log.flush()
             if attempt < 3:
                 time.sleep(5 * attempt)
@@ -59,7 +59,7 @@ def install_ci_emulator_image(manager, image, env, log):
     log.seek(0)
     tail = log.read()[-3000:]
     raise RuntimeError('Required Android CI emulator image unavailable after 3 '
-                       'attempts; native acceptance was NOT run. sdkmanager tail:\\n'
+                       'attempts; native acceptance was NOT run. sdkmanager tail:\n'
                        + tail)
 
 
