@@ -66,6 +66,36 @@ with sync_playwright() as pw:
  candidates=p.evaluate(api+'.snapshot().possible')
  assert any(x['fromId']==10015 and x['sourceNextId']==10016 for x in candidates)
  assert p.evaluate('JSON.stringify(P)')==before2
+ readiness=p.evaluate(api+'.readiness(10011)')
+ assert readiness['fromId']==10015 and readiness['toId']==10016,readiness
+ assert readiness['rarity']==7 and readiness['originalZel']==1500000
+ assert readiness['unitMaterialsMatched']==0
+ assert readiness['unitMaterialsRequired']==4
+ assert len(readiness['materials'])==5
+ assert [r['type'] for r in readiness['materials']]==[1,1,1,1,2]
+ assert readiness['materials'][4]['id']==110100
+ assert readiness['materials'][4]['status']=='UNVERIFIED_ITEM_INVENTORY'
+ assert readiness['canEvolve'] is False and readiness['itemInventoryVerified'] is False
+ assert p.evaluate('Object.isFrozen(BFGlobalOriginalStarterTypedEvolutionV13000.readiness(10011))') is True
+ assert p.evaluate('Object.isFrozen(BFGlobalOriginalStarterTypedEvolutionV13000.readiness(10011).materials)') is True
+ assert p.evaluate(api+'.readiness(999999)') is None
+ p.select_option('#bf13000-select','10016')
+ assert 'material UNIT forms 0/4' in p.locator('#bf13000-readiness').inner_text()
+ assert 'Legend Stone item inventory UNVERIFIED' in p.locator('#bf13000-readiness').inner_text()
+ # A synthetic quantity at a generic DEMO materials key is NOT original
+ # 2022 type-2 item inventory and must not unlock 7-star evolution.
+ forged=p.evaluate("""()=>{
+   const had=Object.prototype.hasOwnProperty.call(P,'materials'),
+     previous=P.materials;
+   try{
+     P.materials={...(previous||{}),'110100':999};
+     return BFGlobalOriginalStarterTypedEvolutionV13000.readiness(10011);
+   }finally{if(had)P.materials=previous;else delete P.materials;}
+ }""")
+ assert forged['canEvolve'] is False
+ assert forged['materials'][4]['status']=='UNVERIFIED_ITEM_INVENTORY'
+ assert p.evaluate('JSON.stringify(P)')==before2
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
  p.add_script_tag(path=str(A/'bf13000_original_starter_typed_evolution.js'))
  assert p.locator('#bf13000-source-evolutions').count()==1
  assert not errors,errors
