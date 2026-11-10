@@ -39,6 +39,30 @@ def diagnostic_component(badging):
     return PACKAGE + '/' + activity[1]
 
 
+def install_ci_emulator_image(manager, image, env, log):
+    """Bounded retry for SDK downloads; never skip native emulator acceptance."""
+    command = [str(manager), '--install', 'emulator', image]
+    for attempt in range(1, 4):
+        log.write(f'\\n[Android CI sdkmanager attempt {attempt}/3]\\n')
+        log.flush()
+        try:
+            subprocess.run(command, input='y\\n'*20, text=True, stdout=log,
+                           stderr=subprocess.STDOUT, env=env, check=True, timeout=600)
+            return
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as exc:
+            log.write(f'\\n[SDK install attempt {attempt}/3 failed: {type(exc).__name__}]\\n')
+            log.flush()
+            if attempt < 3:
+                time.sleep(5 * attempt)
+    # The disposable sdk.log is deleted on failure. Preserve a bounded excerpt
+    # so persistent SDK/package/network failures can be diagnosed in CI.
+    log.seek(0)
+    tail = log.read()[-3000:]
+    raise RuntimeError('Required Android CI emulator image unavailable after 3 '
+                       'attempts; native acceptance was NOT run. sdkmanager tail:\\n'
+                       + tail)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--apk', type=Path, required=True)
@@ -80,10 +104,8 @@ def main():
                'ANDROID_EMULATOR_HOME': str(work/'emulator-home')}
         Path(env['ANDROID_AVD_HOME']).mkdir()
         Path(env['ANDROID_EMULATOR_HOME']).mkdir()
-        with (work/'sdk.log').open('w') as log:
-            subprocess.run([str(manager), '--install', 'emulator', IMAGE],
-                           input='y\n'*20, text=True, stdout=log,
-                           stderr=subprocess.STDOUT, env=env, check=True, timeout=600)
+        with (work/'sdk.log').open('w+', encoding='utf-8') as log:
+            install_ci_emulator_image(manager, IMAGE, env, log)
             subprocess.run([str(avdmanager), 'create', 'avd', '--name', 'bf-ci-lifecycle',
                             '--package', IMAGE, '--device', 'pixel_5',
                             '--path', str(work/'fresh.avd')], input='no\n', text=True,
