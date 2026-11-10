@@ -14,6 +14,10 @@ with sync_playwright() as pw:
  p.set_content('<html><body><div id="bf2000-run">Original battle</div></body></html>')
  p.evaluate("""()=>{
    window.P={version:7,roster:[10011],squad:[10011],questClears:{1:2}};
+   window.QUEST={missionId:1,battles:3};
+   window.BFGrandGaiaCampaignV100={waveReadiness:id=>({
+     missionId:id,verifiedWaveCount:3,enemyFormationsVerified:false,
+     dropsVerified:false,nativeMultiWaveEnabled:false})};
    window.S={mode:'archive',wave:0,totalWaves:3,round:1,busy:false,
    over:false,phase:'Action',
    party:[{name:'Vargas',unitId:10011,active:true,hp:600,maxHp:1000,bb:70,guard:false}],
@@ -26,12 +30,33 @@ with sync_playwright() as pw:
  api='BFGlobalQoLBattleDetailsV10300'
  s=p.evaluate(api+'.snapshot()')
  assert s['wave']==1 and s['totalWaves']==3 and s['round']==1
+ assert s['sourceRecordedWaveCount']==3 and s['sourceWaveStatus']=='MATCH'
  assert s['sourceScopedCriticalHits']==5
  assert s['allies'][0]['hpPercent']==60 and s['allies'][0]['bb']==70
  assert s['foes'][0]['hpPercent']==50
  p.locator('#bf10300-details > summary').click()
  assert 'Vargas' in p.locator('#bf10300-allies').inner_text()
  assert 'Enemy' in p.locator('#bf10300-enemies').inner_text()
+ assert '2022 recorded wave count: 3 (MATCH)' in p.locator('#bf10300-header').inner_text()
+ # Changing DEMO totals must not be mistaken for changed original source.
+ mismatch=p.evaluate("""()=>{
+   S.totalWaves=4;
+   const source=BFGlobalQoLBattleDetailsV10300.refresh();
+   S.totalWaves=3;
+   return {status:source.sourceWaveStatus,recorded:source.sourceRecordedWaveCount};
+ }""")
+ assert mismatch=={'status':'MISMATCH','recorded':3},mismatch
+ p.evaluate(api+'.refresh()')
+ assert '3 (MATCH)' in p.locator('#bf10300-header').inner_text()
+ # Reject a tampered/unavailable API even when the DEMO count looks valid.
+ unavailable=p.evaluate("""()=>{
+   const api=window.BFGrandGaiaCampaignV100;
+   try{
+     window.BFGrandGaiaCampaignV100={waveReadiness:()=>null};
+     return BFGlobalQoLBattleDetailsV10300.snapshot().sourceWaveStatus;
+   }finally{window.BFGrandGaiaCampaignV100=api;}
+ }""")
+ assert unavailable=='UNAVAILABLE',unavailable
  p.evaluate("S.party[0].hp=0")
  p.evaluate(api+'.refresh()')
  assert 'KO' in p.locator('#bf10300-allies').inner_text()
