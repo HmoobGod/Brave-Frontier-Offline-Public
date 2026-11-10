@@ -105,6 +105,13 @@
    }
    return null;
  }
+ // Frozen 2022 original mission master wave-count triples: missionId,
+ // dungeonId, waveCount; recovered from source_data/v142 pinned to
+ // ZIP 69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9.
+ // Mission master SHA-256: d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83.
+ // This is source evidence for counts ONLY, not enemy waves or AI.
+ const verifiedWaveRows=Object.freeze([[1,1,3],[2,1,3],[10,10,5],[11,10,5],[12,10,6],[20,20,5],[21,20,5],[22,20,5],[23,20,6],[30,30,5],[31,30,5],[32,30,5],[33,30,6],[40,40,5],[41,40,5],[42,40,5],[43,40,6],[50,50,5],[51,50,5],[52,50,5],[53,50,6],[60,60,6],[61,60,6],[62,60,6],[63,60,7],[70,70,6],[71,70,6],[72,70,6],[73,70,7],[81,80,7],[82,80,7],[83,80,7],[84,80,7],[85,80,8],[200,200,7],[201,200,7],[202,200,8],[203,200,8],[204,200,9],[210,210,7],[211,210,7],[212,210,8],[213,210,8],[214,210,9],[220,220,7],[221,220,7],[222,220,8],[223,220,8],[224,220,9],[230,230,7],[231,230,7],[232,230,8],[233,230,8],[234,230,9],[240,240,7],[241,240,7],[242,240,8],[243,240,8],[244,240,9],[250,250,7],[251,250,7],[252,250,8],[253,250,8],[254,250,9],[260,260,9],[261,260,9],[262,260,9],[263,260,9],[264,260,9],[265,260,10],[300,300,8],[301,300,8],[302,300,9],[303,300,9],[304,300,11],[310,310,8],[311,310,8],[312,310,9],[313,310,9],[314,310,11],[320,320,8],[321,320,8],[322,320,9],[323,320,9],[324,320,11],[330,330,8],[331,330,8],[332,330,9],[333,330,9],[334,330,11],[340,340,8],[341,340,8],[342,340,9],[343,340,9],[344,340,11],[350,350,8],[351,350,8],[352,350,9],[353,350,9],[354,350,11],[360,360,10],[361,360,10],[362,360,11],[363,360,11],[364,360,11],[365,360,12]].map(Object.freeze));
+ const verifiedWaveById=new Map(verifiedWaveRows.map(r=>[r[0],r]));
  // Read-only source-wave readiness for the 106 archived missions. A wave
  // count is not evidence of its enemy formation, drops, or native combat AI.
  // Refuse inconsistent catalog rows rather than silently inventing waves.
@@ -113,18 +120,23 @@
       !Array.isArray(QUESTS)||QUESTS.length!==106)return null;
    // A corrupt later row must not certify an earlier mission. Validate
    // the entire historical catalog, including unique IDs, before readiness.
+   if(verifiedWaveRows.length!==106||verifiedWaveById.size!==106)return null;
    const seen=new Set();
    for(const row of QUESTS){
      if(!row||!Number.isSafeInteger(row.missionId)||row.missionId<0||
         seen.has(row.missionId)||!idset.has(row.dungeonId)||
-        !Number.isSafeInteger(row.battles)||row.battles<1||row.battles>100)
-       return null;
+        !Number.isSafeInteger(row.battles))return null;
+     const expected=verifiedWaveById.get(row.missionId);
+     // A changed but still plausible runtime wave count must never be
+     // promoted to verified source evidence, even for an unrelated row.
+     if(!expected||row.dungeonId!==expected[1]||
+        row.battles!==expected[2])return null;
      seen.add(row.missionId);
    }
-   const q=QUESTS.find(row=>row.missionId===missionId);
-   if(!q)return null;
-   return Object.freeze({missionId,dungeonId:q.dungeonId,
-     verifiedWaveCount:q.battles,enemyFormationsVerified:false,
+   const source=verifiedWaveById.get(missionId);
+   if(!source)return null;
+   return Object.freeze({missionId,dungeonId:source[1],
+     verifiedWaveCount:source[2],enemyFormationsVerified:false,
      dropsVerified:false,nativeMultiWaveEnabled:false});
  }
  function refresh(){

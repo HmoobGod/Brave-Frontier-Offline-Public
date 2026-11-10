@@ -5,7 +5,7 @@ Original enemy identities, damage, AI, energy consumption and drops remain
 unverified; THIS IS NOT a replay of the native original battles.
 """
 from pathlib import Path
-import shutil,json
+import shutil,json,re
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parent
@@ -22,6 +22,15 @@ overlay=(ASSETS/'bf100_grand_gaia_campaign.js').read_text('utf8')
 assert overlay.count('/* BF_GRAND_GAIA_CAMPAIGN_V100 */')==1
 assert 'localStorage' not in overlay and 'saveProgress(' not in overlay
 assert 'Enemy' not in overlay or 'DEMO' in overlay
+# Pin every runtime wave count against the original 2022 mission-master
+# source, not any mutable live QUESTS field or fabricated formation.
+pinned=json.loads((ROOT/'source_data/bf_global_original_2022_live_quest_economy_v142.json').read_text('utf8'))
+assert pinned['readOnly'] is True and pinned['year']==2022 and pinned['total']==106
+assert pinned['sourceArchiveSha256']=='69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9'
+assert pinned['missionMasterSha256']=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83'
+source_rows=re.search(r'const verifiedWaveRows=Object\\.freeze\\((\\[\\[.*?\\]\\])\\.map\\(Object\\.freeze\\)\\);',overlay)
+assert source_rows,'pinned wave rows missing'
+assert json.loads(source_rows.group(1))==[[r[0],r[1],r[3]] for r in pinned['records']]
 
 with sync_playwright() as pw:
   browser=pw.chromium.launch(headless=True,
@@ -129,6 +138,27 @@ with sync_playwright() as pw:
   }""")
   assert corrupt=={'duplicate':None,'invalidLater':None,'restored':True,
                    'playerSame':True,'saveSame':True},corrupt
+  # Even a plausible but incorrect count and a valid but wrong dungeon
+  # must fail the source match for ALL missions, without saving anything.
+  source_tamper=page.evaluate("""() => {
+    const api=BFGrandGaiaCampaignV100,first=QUESTS[0],other=QUESTS[5],
+      originalCount=other.battles,originalDungeon=other.dungeonId,
+      originalPlayer=JSON.stringify(P),saved=localStorage.getItem('bf_global_offline_demo_v7');
+    let alteredCount,alteredDungeon;
+    try {
+      other.battles=originalCount+1;
+      alteredCount=api.waveReadiness(first.missionId);
+      other.battles=originalCount;
+      other.dungeonId=QUESTS[0].dungeonId;
+      alteredDungeon=api.waveReadiness(first.missionId);
+    } finally {other.battles=originalCount;other.dungeonId=originalDungeon;}
+    return {alteredCount,alteredDungeon,
+      restored:api.waveReadiness(first.missionId)?.verifiedWaveCount===first.battles,
+      sourceYearUnchanged:JSON.stringify(P)===originalPlayer,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert source_tamper=={'alteredCount':None,'alteredDungeon':None,'restored':True,
+                         'sourceYearUnchanged':True,'saveSame':True},source_tamper
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version
