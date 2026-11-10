@@ -84,6 +84,63 @@ with sync_playwright() as pw:
     'repeatBlocked':True,'repeatNoRoute':True,'brokenBlocked':True,
     'progressSame':True,'saveSame':True},owned
  assert page.locator('#bf101-continue').is_enabled()
+ # v341: a completed archived victory must have a precise committed v7
+ # clear receipt before the global 106-mission shortcut can route onward.
+ # The existing results module is loaded later than v101; simulated providers
+ # here exercise the same read-only API without modifying persisted saves.
+ receipt=page.evaluate("""()=>{
+   const provider=window.BFGlobalBattleResultsV3000,
+     button=document.getElementById('bf101-continue'),
+     old={mode:S.mode,over:S.over,busy:S.busy,phase:S.phase,auto:S.auto},
+     q=QUEST,oldClear=P.questClears[q.missionId],
+     originalEnabled=saveEnabled,originalPending=saveRecoveryPending,
+     beforeP=JSON.stringify(P),beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+   const result={};
+   try{
+     S.mode='archive';S.over=true;S.busy=false;
+     S.phase='Victory';S.auto=false;
+     saveEnabled=true;saveRecoveryPending=false;
+     P.questClears[q.missionId]=1;
+     delete window.BFGlobalBattleResultsV3000;
+     BFGrandGaiaContinueV101.refresh();
+     result.legacy=BFGrandGaiaContinueV101.nextMission===2&&!button.disabled;
+     window.BFGlobalBattleResultsV3000={committedClearCount:()=>0};
+     BFGrandGaiaContinueV101.refresh();
+     result.stale=button.disabled&&BFGrandGaiaContinueV101.nextMission===null&&
+       document.getElementById('bf101-next').textContent.includes('VICTORY NOT SAVED');
+     button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+     result.staleNoRoute=QUEST.missionId===q.missionId;
+     window.BFGlobalBattleResultsV3000={committedClearCount:()=>NaN};
+     BFGrandGaiaContinueV101.refresh();
+     result.corrupt=button.disabled;
+     window.BFGlobalBattleResultsV3000={committedClearCount:()=>{throw Error('receipt unavailable')}};
+     BFGrandGaiaContinueV101.refresh();
+     result.throws=button.disabled;
+     window.BFGlobalBattleResultsV3000={
+       get committedClearCount(){throw Error('broken receipt getter')}};
+     BFGrandGaiaContinueV101.refresh();
+     result.getterThrows=button.disabled;
+     window.BFGlobalBattleResultsV3000={};
+     BFGrandGaiaContinueV101.refresh();
+     result.missingApi=button.disabled;
+     window.BFGlobalBattleResultsV3000={committedClearCount:()=>1};
+     BFGrandGaiaContinueV101.refresh();
+     result.committed=BFGrandGaiaContinueV101.nextMission===2&&!button.disabled;
+     return {...result,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+       originalQuest:QUEST.missionId===q.missionId};
+   }finally{
+     Object.assign(S,old);
+     saveEnabled=originalEnabled;saveRecoveryPending=originalPending;
+     if(oldClear===undefined)delete P.questClears[q.missionId];
+     else P.questClears[q.missionId]=oldClear;
+     if(provider===undefined)delete window.BFGlobalBattleResultsV3000;
+     else window.BFGlobalBattleResultsV3000=provider;
+     BFGrandGaiaContinueV101.refresh();
+   }
+ }""")
+ assert receipt=={'legacy':True,'stale':True,'staleNoRoute':True,
+    'corrupt':True,'throws':True,'getterThrows':True,'missingApi':True,'committed':True,
+    'saveSame':True,'originalQuest':True},receipt
  # The button must fail closed with the same canonical full-catalog policy
  # as the campaign resolver. Keep test-only corrupt records atomic to avoid
  # exposing an invalid ledger to the live browser renderer between calls.

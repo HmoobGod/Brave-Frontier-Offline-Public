@@ -10,6 +10,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'CONTINUE STORY' in script
  assert 'unattendedOwnsNavigation' in script
  assert "repeat.statusSnapshot()?.active===true" in script
+ assert 'function uncommittedVictory()' in script
+ assert 'window.BFGlobalBattleResultsV3000' in script
+ assert 'results.committedClearCount(q.missionId)!==count' in script
+ assert 'uncommittedVictory()' in script
  assert 'localStorage' not in script and 'saveProgress(' not in script
  for name in ('bf100_grand_gaia_campaign.js','bf090_st_lamia_map.js','bf080_morgan_map.js'):
   assert 'assets/'+name in files
