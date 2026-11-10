@@ -49,6 +49,31 @@
  const status=document.createElement('p');status.id='bf9800-status';
  status.setAttribute('role','status');
  panel.append(heading,note,picker,go,halt,status);host.after(panel);
+ // Preserve v98 compatibility with older embedded pages lacking the
+ // original 2022 campaign gate. On the current Android page, refuse
+ // unattended repeats if ANY authenticated source wave tuple or live
+ // Energy/reward/prerequisite field is inconsistent. A recorded wave count
+ // is not evidence of original enemy formations, AI or drop schedules.
+ function sourceQuestMatches(missionId){
+   const campaign=window.BFGrandGaiaCampaignV100;
+   if(!campaign)return true;
+   if(!Number.isSafeInteger(missionId)||missionId<=0||
+      typeof campaign.waveReadiness!=='function')return false;
+   try{
+     const row=campaign.waveReadiness(missionId);
+     if(!row||row.missionId!==missionId||
+        !Number.isSafeInteger(row.verifiedWaveCount)||
+        row.verifiedWaveCount<1||
+        !Number.isSafeInteger(QUEST?.battles)||
+        QUEST.missionId!==missionId||
+        QUEST.battles!==row.verifiedWaveCount||
+        (Number.isSafeInteger(S.totalWaves)&&
+          S.totalWaves!==row.verifiedWaveCount))return false;
+     if(typeof campaign.sourceEconomyReadiness==='function'&&
+        campaign.sourceEconomyReadiness()===false)return false;
+     return true;
+   }catch(_){return false;}
+ }
  function hasCommittedReceipt(s){
    // v322: only a committed canonical v7 clear count authorizes unattended
    // replay. Older embedded/mock result providers may lack this read-only
@@ -121,7 +146,8 @@
    const s=results.snapshot();
    if(S.busy||S.mode!=='archive'||!s?.done||!s.victory||
       !s.archive||!s.stored||s.missionId!==session.missionId||
-      QUEST?.missionId!==session.missionId||!s.canReplay){
+      QUEST?.missionId!==session.missionId||!s.canReplay||
+      !sourceQuestMatches(session.missionId)){
      stop('Stopped: replay prerequisites changed',false);return false;
    }
    // Reset Auto at a completed result, then activate it on the fresh run.
@@ -150,7 +176,7 @@
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
       !Number.isSafeInteger(s.clears)||s.clears<1||
-      !hasCommittedReceipt(s))return false;
+      !hasCommittedReceipt(s)||!sourceQuestMatches(s.missionId))return false;
    session={missionId:s.missionId,target:count,completed:0,
      lastClear:s.clears,autoWasEnabled:auto.checked};
    complete=0;reason='Preparing replay';
@@ -165,6 +191,8 @@
       QUEST?.missionId!==session.missionId||
       S.mode!=='archive'||!s.archive)
      return stop('Stopped: quest or mode changed',false);
+   if(!sourceQuestMatches(session.missionId))
+     return stop('Stopped: verified 2022 quest record changed',false);
    // Native finish() deliberately unchecks Auto after every result, including
    // victory. Only treat Auto-off as cancellation while a battle is ongoing.
    if(!s.done){
