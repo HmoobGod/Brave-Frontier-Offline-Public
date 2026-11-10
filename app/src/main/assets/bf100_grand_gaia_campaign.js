@@ -111,11 +111,18 @@
  function waveReadiness(missionId){
    if(!Number.isSafeInteger(missionId)||missionId<0||
       !Array.isArray(QUESTS)||QUESTS.length!==106)return null;
-   const matches=QUESTS.filter(q=>q?.missionId===missionId);
-   if(matches.length!==1)return null;
-   const q=matches[0];
-   if(!idset.has(q.dungeonId)||!Number.isSafeInteger(q.battles)||
-      q.battles<1||q.battles>100)return null;
+   // A corrupt later row must not certify an earlier mission. Validate
+   // the entire historical catalog, including unique IDs, before readiness.
+   const seen=new Set();
+   for(const row of QUESTS){
+     if(!row||!Number.isSafeInteger(row.missionId)||row.missionId<0||
+        seen.has(row.missionId)||!idset.has(row.dungeonId)||
+        !Number.isSafeInteger(row.battles)||row.battles<1||row.battles>100)
+       return null;
+     seen.add(row.missionId);
+   }
+   const q=QUESTS.find(row=>row.missionId===missionId);
+   if(!q)return null;
    return Object.freeze({missionId,dungeonId:q.dungeonId,
      verifiedWaveCount:q.battles,enemyFormationsVerified:false,
      dropsVerified:false,nativeMultiWaveEnabled:false});
