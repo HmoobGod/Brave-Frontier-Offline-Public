@@ -12,7 +12,7 @@ assert "committedSquad(slot.squad)" in js
 assert "localStorage.getItem('bf_global_offline_demo_v7')" in js
 assert 'P.squad=previous' in js
 assert 'localStorage.setItem(key' in js
-assert "bf_global_offline_demo_v7" not in js
+assert "localStorage.setItem('bf_global_offline_demo_v7'" not in js
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,
    executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),
