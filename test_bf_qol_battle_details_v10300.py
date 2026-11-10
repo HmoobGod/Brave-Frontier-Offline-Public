@@ -46,6 +46,13 @@ with sync_playwright() as pw:
    return {status:source.sourceWaveStatus,recorded:source.sourceRecordedWaveCount};
  }""")
  assert mismatch=={'status':'MISMATCH','recorded':3},mismatch
+ # Fractional totals must not floor into a false verified match.
+ fractional=p.evaluate("""()=>{
+   S.totalWaves=3.5;
+   try{return BFGlobalQoLBattleDetailsV10300.refresh().sourceWaveStatus;}
+   finally{S.totalWaves=3;}
+ }""")
+ assert fractional=='MISMATCH',fractional
  p.evaluate(api+'.refresh()')
  assert '3 (MATCH)' in p.locator('#bf10300-header').inner_text()
  # Reject a tampered/unavailable API even when the DEMO count looks valid.
