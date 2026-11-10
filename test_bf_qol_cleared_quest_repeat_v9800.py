@@ -65,7 +65,8 @@ with sync_playwright() as pw:
      saved=localStorage.getItem('bf_global_offline_demo_v7'),
      player=JSON.stringify(P),before=__repeatCount;
    let invalidWave=false,invalidEconomy=false,brokenSource=false,
-       started=false,stopped=false,disarmed=false,noExtraReplay=false;
+       invalidLiveWave=false,started=false,stopped=false,
+       disarmed=false,noExtraReplay=false;
    try{
      QUEST.battles=3;S.totalWaves=3;
      const api={waveReadiness:()=>({missionId:1,verifiedWaveCount:4}),
@@ -78,6 +79,16 @@ with sync_playwright() as pw:
      api.sourceEconomyReadiness=()=>{throw Error('bad original source')};
      brokenSource=!repeat.start(2)&&__repeatCount===before;
      api.sourceEconomyReadiness=()=>true;
+     // The live battle's real totalWaves must be an exact source-matching
+     // safe integer. Previously NaN/undefined/text slipped through because
+     // a comparison ran only when totalWaves WAS already an integer.
+     const beforeTotals=__repeatCount;
+     invalidLiveWave=[undefined,null,NaN,Infinity,'3',3.5,0,-1,2]
+       .every(value=>{
+         S.totalWaves=value;
+         return !repeat.start(2)&&__repeatCount===beforeTotals;
+       });
+     S.totalWaves=3;
      started=repeat.start(2)&&repeat.statusSnapshot().active;
      const afterStart=__repeatCount;
      api.waveReadiness=()=>null;
@@ -98,14 +109,15 @@ with sync_playwright() as pw:
      document.getElementById('auto').checked=false;
      window.__repeatCount=before;
    }
-   return {invalidWave,invalidEconomy,brokenSource,
+   return {invalidWave,invalidEconomy,brokenSource,invalidLiveWave,
      started,stopped,disarmed,noExtraReplay,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
      playerSame:JSON.stringify(P)===player};
  }""")
  assert source_proof=={
    'invalidWave':True,'invalidEconomy':True,'brokenSource':True,
-   'started':True,'stopped':True,'disarmed':True,'noExtraReplay':True,
+   'invalidLiveWave':True,'started':True,'stopped':True,
+   'disarmed':True,'noExtraReplay':True,
    'saveSame':True,'playerSame':True},source_proof
  # An invalid canonical save receipt must prevent an unattended replay
  # even if the old general stored boolean still reports success.

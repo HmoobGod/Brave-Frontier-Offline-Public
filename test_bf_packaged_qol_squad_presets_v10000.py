@@ -7,7 +7,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert data.count('BF_GLOBAL_QOL_SQUAD_PRESETS_V10000')==1
     assert "P.squad=slot.squad.slice()" in data
     assert "try{saved=!!saveProgress();}catch(_){saved=false;}" in data
-    assert "if(!saved){" in data
+    assert "if(!saved||!committedSquad(slot.squad)){" in data
+    assert "const raw=localStorage.getItem('bf_global_offline_demo_v7')" in data
+    assert "data?.version===7&&Array.isArray(data.squad)" in data
+    assert "Canonical v7 squad save not verified; no battle reset." in data
     assert "P.squad=previous;" in data
     assert 'assets/bf9900_qol_battle_speed.js' in z.namelist()
     assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')

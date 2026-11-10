@@ -64,9 +64,12 @@
      const f=ranked[0]?.foe;
      return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp,atk:f.atk,def:f.def}):null;
    }
-   // Unknown optional ATK/DEF values are not ranked, while valid HP
-   // strategies and native slot ordering remain exactly as before.
-   const foes=living.filter(e=>Number.isFinite(e[key]));
+   // Missing ATK/DEF on ANY living foe makes its rank unknowable.
+   // Silently dropping that foe can change the target of a player command.
+   // Fail closed for that stat strategy; independent valid-HP priorities
+   // and native slot ordering remain unchanged.
+   if(living.some(e=>!Number.isFinite(e[key])))return null;
+   const foes=living.slice();
    foes.sort((a,b)=>{
      const diff=kind==='highest-atk'?b[key]-a[key]:
        kind==='highest-hp'?b.hp-a.hp:
@@ -79,13 +82,19 @@
  }
  function snapshot(){return Object.freeze({strategy:selected,target:lookup(selected),canQueue:legal()});}
  function refresh(){
-   const s=snapshot(),elemental=lookup('elemental');
-   // Element scripts may be loaded AFTER this panel. Include source
-   // availability in the refresh key to enable the button once ready.
-   const key=JSON.stringify([s,elemental?.slot??null]);
+   const s=snapshot();
+   // Every focus control has its own eligibility. An enemy's ATK/DEF can
+   // disappear while the selected focus and elemental availability remain
+   // unchanged. Include ALL strategies in the refresh signature so disabled
+   // buttons update immediately rather than retaining stale enabled state.
+   const eligible=new Map(strategies.map(([kind])=>[kind,!!lookup(kind)]));
+   const key=JSON.stringify([s,[...eligible]]);
    if(key===signature)return s;signature=key;
-   for(const b of options.querySelectorAll('button'))
-     b.disabled=!s.canQueue||(b.dataset.strategy==='elemental'&&!elemental);
+   for(const b of options.querySelectorAll('button')){
+     const strategy=b.dataset.strategy;
+     // An uncertain or missing native target never appears runnable.
+     b.disabled=!s.canQueue||(strategy?!eligible.get(strategy):!s.target);
+   }
    state.textContent=s.target?'Focus '+s.target.name+' · '+s.strategy.replaceAll('-',' ')+' · '+s.target.hp+' HP':'No eligible target';
    return s;
  }

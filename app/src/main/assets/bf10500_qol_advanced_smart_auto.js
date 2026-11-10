@@ -105,9 +105,15 @@
          let row;
          try{row=verified.waveReadiness(archived.missionId)}
          catch(_){return previous;}
+         // The live battle must have the same source-qualified wave count.
+         // Otherwise conserving a BB can withhold it until a nonexistent
+         // final wave (e.g. the archived mission says 3 but live has 2).
+         // Do not guess on absent, fractional, coercible or invalid totals.
          if(!row||row.missionId!==archived.missionId||
             !Number.isSafeInteger(row.verifiedWaveCount)||
-            row.verifiedWaveCount!==archived.battles)return previous;
+            row.verifiedWaveCount!==archived.battles||
+            !Number.isSafeInteger(S.totalWaves)||S.totalWaves<1||
+            S.totalWaves!==row.verifiedWaveCount)return previous;
        }
        return 'attack';
      }
