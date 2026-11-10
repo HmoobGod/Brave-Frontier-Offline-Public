@@ -6,6 +6,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  data=z.read('assets/bf10500_qol_advanced_smart_auto.js').decode('utf8')
  assert 'BF_GLOBAL_QOL_ADVANCED_SMART_AUTO_V10500' in data
  assert 'window.BF041SmartAuto=freeze({...smart,kindFor})' in data
+ assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
+ assert 'S.totalWaves!==row.verifiedWaveCount' in data
  assert 'assets/bf10400_qol_evolution_needs.js' in z.namelist()
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
