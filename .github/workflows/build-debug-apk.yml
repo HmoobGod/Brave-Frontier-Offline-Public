@@ -68,7 +68,9 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install original sprite atlas renderer
-        run: python -m pip install Pillow
+        # Deterministic PNG compositing: original CGG atlases are byte-exact
+        # under Pillow 13.0.0; 12.x changes verified art output.
+        run: python -m pip install Pillow==13.0.0
       - name: Prepare bundled HTML assets
         run: |
           python3 patch_bf_save_quarantine.py
@@ -142,6 +144,12 @@ jobs:
           node --check app/src/main/assets/bf20900_amdahl_original_opaque_mission_fields.js
           node test_bf_optional_imp_fusion_v16900.js
           node --check test_bf_original_type5_battle_audit_v16700.js
+      - name: Record generated index.html SHA-256
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s app/src/main/assets/index.html
+          sha256sum app/src/main/assets/index.html
       - name: Prepare verified BF1 Global home sprites
         run: |
           python3 prepare_original_home_assets.py
