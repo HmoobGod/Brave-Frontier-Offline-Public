@@ -37,6 +37,18 @@
    try{localStorage.setItem(key,JSON.stringify({version:1,slots}));return true}
    catch(_){return false}
  }
+ // A truthy native save response is not a durable receipt. Only reset the
+ // live battle if the canonical v7 record confirms the selected squad.
+ function committedSquad(ids){
+   try{
+     const raw=localStorage.getItem('bf_global_offline_demo_v7');
+     if(typeof raw!=='string'||raw.length<2||raw.length>1048576)return false;
+     const data=JSON.parse(raw);
+     return data?.version===7&&Array.isArray(data.squad)&&
+       data.squad.length===ids.length&&
+       data.squad.every((id,i)=>id===ids[i]);
+   }catch(_){return false;}
+ }
  let slots=load(),message='Preset changes are manual and local to this installation.';
  function info(){
    return freeze(slots.map((slot,index)=>freeze({
@@ -85,9 +97,10 @@
    // storage adapter throws, revert the in-memory party before any reset.
    let saved=false;
    try{saved=!!saveProgress();}catch(_){saved=false;}
-   if(!saved){
+   if(!saved||!committedSquad(slot.squad)){
      P.squad=previous;
-     message='Active save unavailable; squad was not changed.';
+     message=saved?'Canonical v7 squad save not verified; no battle reset. Export your current save.':
+       'Active save unavailable; squad was not changed.';
      refresh();return false;
    }
    reset();renderProgress();

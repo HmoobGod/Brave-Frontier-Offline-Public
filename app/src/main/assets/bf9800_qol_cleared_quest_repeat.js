@@ -67,8 +67,12 @@
         !Number.isSafeInteger(QUEST?.battles)||
         QUEST.missionId!==missionId||
         QUEST.battles!==row.verifiedWaveCount||
-        (Number.isSafeInteger(S.totalWaves)&&
-          S.totalWaves!==row.verifiedWaveCount))return false;
+        // The native DEMO engine always sets totalWaves on reset().
+        // Missing, fractional, NaN, text-coerced or infinite counts are
+        // NOT proof of source-backed live replay eligibility.
+        !Number.isSafeInteger(S.totalWaves)||
+        S.totalWaves<1||
+        S.totalWaves!==row.verifiedWaveCount)return false;
      if(typeof campaign.sourceEconomyReadiness==='function'&&
         campaign.sourceEconomyReadiness()===false)return false;
      return true;

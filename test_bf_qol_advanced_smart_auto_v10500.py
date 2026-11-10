@@ -334,12 +334,21 @@ with sync_playwright() as pw:
  # if a runtime quest record disagrees with its source count or fails closed.
  # This only affects the opt-in player Auto heuristic, not enemy or NPC AI.
  source_waves=p.evaluate("""()=>{
-   const old=window.BFGrandGaiaCampaignV100,actor=__party105[1];
+   const old=window.BFGrandGaiaCampaignV100,oldTotal=S.totalWaves,
+     actor=__party105[1];
    const before=localStorage.getItem('bf_global_offline_demo_v7');
-   const results={};
+   const beforePlayer=JSON.stringify(P),results={};
    try{
      window.BFGrandGaiaCampaignV100={waveReadiness:id=>({missionId:id,verifiedWaveCount:3})};
+     S.totalWaves=3;
      results.match=BF041SmartAuto.kindFor(actor);
+     // No offensive BB should be conserved for a recorded third wave when
+     // the running DEMO battle has a different or unknowable live wave count.
+     // Exact positive safe integer parity is required in source-backed mode.
+     results.badLiveWave=[undefined,null,NaN,Infinity,'3',3.5,0,-1,2,4]
+       .every(value=>{S.totalWaves=value;
+         return BF041SmartAuto.kindFor(actor)==='burst';});
+     S.totalWaves=3;
      window.BFGrandGaiaCampaignV100={waveReadiness:id=>({missionId:id,verifiedWaveCount:4})};
      results.mismatch=BF041SmartAuto.kindFor(actor);
      window.BFGrandGaiaCampaignV100={waveReadiness:()=>null};
@@ -348,11 +357,20 @@ with sync_playwright() as pw:
      results.exception=BF041SmartAuto.kindFor(actor);
      window.BFGrandGaiaCampaignV100={};
      results.missingApi=BF041SmartAuto.kindFor(actor);
-     return {...results,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before};
-   }finally{window.BFGrandGaiaCampaignV100=old;}
+     // Older isolated embeds without authenticated source campaign keep
+     // their preexisting heuristic; only production source-backed pages
+     // require the additional live wave count validation.
+     window.BFGrandGaiaCampaignV100=null;
+     S.totalWaves=undefined;
+     results.legacy=BF041SmartAuto.kindFor(actor);
+     return {...results,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before,
+       playerSame:JSON.stringify(P)===beforePlayer};
+   }finally{window.BFGrandGaiaCampaignV100=old;S.totalWaves=oldTotal;}
  }""")
- assert source_waves=={'match':'attack','mismatch':'burst','corrupt':'burst',
-                       'exception':'burst','missingApi':'burst','saveSame':True},source_waves
+ assert source_waves=={'match':'attack','badLiveWave':True,
+   'mismatch':'burst','corrupt':'burst','exception':'burst',
+   'missingApi':'burst','legacy':'attack','saveSame':True,
+   'playerSame':True},source_waves
  p.evaluate('S.wave=2')
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
  p.evaluate('S.wave=3')
