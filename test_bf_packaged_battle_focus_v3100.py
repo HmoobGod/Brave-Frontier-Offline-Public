@@ -10,6 +10,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  src=z.read('assets/bf3100_battle_focus.js').decode('utf8')
  assert src.count('/* BF_GLOBAL_PLAYABLE_FOCUS_ACTIONS_V3100 */')==1
  assert len(src.encode('utf8'))<65536
+ assert 'if(living.some(e=>!Number.isFinite(e[key])))return null' in src
+ assert 'const eligible=new Map(strategies.map' in src
+ assert 'JSON.stringify([s,[...eligible]])' in src
+ assert 'strategy?!eligible.get(strategy):!s.target' in src
  assert 'localStorage' not in src and 'saveProgress(' not in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 g=(R/'app/build.gradle').read_text('utf8')

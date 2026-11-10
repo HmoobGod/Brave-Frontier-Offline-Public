@@ -8,9 +8,11 @@ assert js.count('BF_GLOBAL_QOL_SQUAD_PRESETS_V10000')==1
 assert len(js.encode())<65536
 assert "P.squad=slot.squad.slice()" in js
 assert "try{saved=!!saveProgress();}catch(_){saved=false;}" in js
+assert "committedSquad(slot.squad)" in js
+assert "localStorage.getItem('bf_global_offline_demo_v7')" in js
 assert 'P.squad=previous' in js
 assert 'localStorage.setItem(key' in js
-assert "bf_global_offline_demo_v7" not in js
+assert "localStorage.setItem('bf_global_offline_demo_v7'" not in js
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,
    executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),
@@ -58,6 +60,24 @@ with sync_playwright() as pw:
  assert p.evaluate('window.__resetCalls')==1
  assert json.loads(p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')"))['squad']==[10011,20011]
  after=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ # An adapter may say success without committing the selected squad.
+ # In that case neither P nor the live battle is allowed to change.
+ p.evaluate("""()=>{window.__squadOriginalSave=window.saveProgress;
+   window.saveProgress=()=>true;}""")
+ assert p.evaluate(api+'.applyPreset(1)') is False
+ assert p.evaluate('P.squad')==[10011,20011]
+ assert p.evaluate('window.__resetCalls')==1
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==after
+ assert 'not verified' in p.locator('#bf10000-status').text_content()
+ # Even a plausible v7 record for the wrong squad is not a receipt.
+ p.evaluate("""()=>{window.saveProgress=()=>{
+   localStorage.setItem('bf_global_offline_demo_v7',
+     JSON.stringify({version:7,squad:[10011,20011]}));return true;};}""")
+ assert p.evaluate(api+'.applyPreset(1)') is False
+ assert p.evaluate('P.squad')==[10011,20011]
+ assert p.evaluate('window.__resetCalls')==1
+ p.evaluate("raw=>localStorage.setItem('bf_global_offline_demo_v7',raw)",after)
+ p.evaluate('window.saveProgress=window.__squadOriginalSave')
  p.evaluate('window.__savePossible=false')
  assert p.evaluate(api+'.applyPreset(1)') is False
  assert p.evaluate('P.squad')==[10011,20011]
