@@ -49,6 +49,17 @@
  const status=document.createElement('p');status.id='bf9800-status';
  status.setAttribute('role','status');
  panel.append(heading,note,picker,go,halt,status);host.after(panel);
+ function hasCommittedReceipt(s){
+   // v322: only a committed canonical v7 clear count authorizes unattended
+   // replay. Older embedded/mock result providers may lack this read-only
+   // API; keep their preexisting behavior without writing storage here.
+   const receipt=results.committedClearCount;
+   if(typeof receipt!=='function')return true;
+   if(!Number.isSafeInteger(s?.missionId)||
+      !Number.isSafeInteger(s?.clears)||s.clears<1)return false;
+   try{return receipt(s.missionId)===s.clears;}
+   catch(_){return false;}
+ }
  function statusSnapshot(){
    return freeze({active:!!session,missionId:session?.missionId||null,
      target:session?.target||0,completed:session?.completed??complete,
@@ -138,7 +149,8 @@
    if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
-      !Number.isSafeInteger(s.clears)||s.clears<1)return false;
+      !Number.isSafeInteger(s.clears)||s.clears<1||
+      !hasCommittedReceipt(s))return false;
    session={missionId:s.missionId,target:count,completed:0,
      lastClear:s.clears,autoWasEnabled:auto.checked};
    complete=0;reason='Preparing replay';
@@ -162,6 +174,8 @@
    }
    if(!s.victory)return stop('Stopped: battle lost',false);
    if(!s.stored)return stop('Stopped: game save unavailable',false);
+   if(!hasCommittedReceipt(s))
+     return stop('Stopped: latest clear not committed to v7 save',false);
    if(!Number.isSafeInteger(s.clears)||s.clears<=session.lastClear)
      return stop('Stopped: new clear not confirmed',false);
    // One completed native battle can only earn one additional quest clear.
