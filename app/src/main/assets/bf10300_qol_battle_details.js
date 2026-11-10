@@ -20,6 +20,23 @@
      active:kind==='ally'?!!u.active&&hp>0:hp>0,
      defending:kind==='ally'?!!u.guard:null});
  }
+ // The 2022 mission's recorded wave count is read-only provenance.
+ // It does not recover enemy formations, native AI, or drop probabilities.
+ // A corrupt catalog must never be described as source verified.
+ function recordedWaves(){
+   const api=window.BFGrandGaiaCampaignV100;
+   const q=typeof QUEST==='undefined'?null:QUEST;
+   if(S.mode!=='archive'||!Number.isSafeInteger(q?.missionId)||
+      typeof api?.waveReadiness!=='function')return null;
+   try{
+     const row=api.waveReadiness(q.missionId);
+     return row?.missionId===q.missionId&&
+       Number.isSafeInteger(row.verifiedWaveCount)&&
+       row.verifiedWaveCount>=1&&row.verifiedWaveCount<=100&&
+       row.enemyFormationsVerified===false&&row.dropsVerified===false&&
+       row.nativeMultiWaveEnabled===false?row.verifiedWaveCount:null;
+   }catch(_){return null;}
+ }
  function snapshot(){
    const allies=Array.isArray(S.party)?
      S.party.filter(u=>u&&u.active).map(u=>readUnit(u,'ally')).filter(Boolean):[];
@@ -27,8 +44,13 @@
      S.enemies.map(u=>readUnit(u,'enemy')).filter(Boolean):[];
    const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
    const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
+   const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
+   const quest=typeof QUEST==='undefined'?null:QUEST;
+   const provenance=recorded===null?'UNAVAILABLE':
+     recorded===liveTotal&&quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
-     mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:safe(S.totalWaves),
+     mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:liveTotal,
+     sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
      round:safe(S.round),busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
      sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
@@ -45,7 +67,9 @@
  const enemy=document.createElement('div');enemy.id='bf10300-enemies';
  const note=document.createElement('small');
  note.textContent='Read-only DEMO state. HP, BB and source-qualified critical counters '+
-   'are displayed without changing combat, original units, rewards or saves.';
+   'are displayed without changing combat, original units, rewards or saves. '+
+   'Source wave count checks use pinned repository 2022 fixtures only; '+
+   'original enemy formations, native AI and drops are not verified.';
  panel.append(title,header,ally,enemy,note);battle.after(panel);
  function group(host,label,units){
    host.replaceChildren();
@@ -73,7 +97,12 @@
    if(signature===last)return s;
    last=signature;
    header.textContent=(s.mode==='archive'?'STORY':'TRAINING')+
-     ' · Wave '+s.wave+'/'+s.totalWaves+' · Turn '+s.round+
+     ' · DEMO Wave '+s.wave+'/'+s.totalWaves+
+     (s.mode==='archive'?' · 2022 recorded wave count: '+
+       (s.sourceWaveStatus==='MATCH'?String(s.sourceRecordedWaveCount)+' (MATCH)':
+        s.sourceWaveStatus==='MISMATCH'?'MISMATCH — DEMO data differs':
+        'UNAVAILABLE'):'')+
+     ' · Turn '+s.round+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
      ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
    group(ally,'ALLIES · HP / BB',s.allies);
