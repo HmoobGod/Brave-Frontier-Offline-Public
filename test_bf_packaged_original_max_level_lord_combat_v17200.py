@@ -8,6 +8,8 @@ bridge=(A/'bf11100_original_starter_leader_combat.js').read_bytes()
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count(b'BF_GLOBAL_ORIGINAL_MAX_LEVEL_LORD_COMBAT_V17200')==1
 assert b'BFGlobalOriginalMaxLevelLordV17200?.apply?.(unit,i)' in bridge
+assert b'exp>=24750' in src and b'unit.level=100' in src
+assert b'original 2022 EXP pattern' in src
 assert java.index('readPackagedText("bf11600_original_lord_stats_reference.js")')<java.index(
  'readPackagedText("bf17200_original_max_level_lord_combat.js")')<java.index(
  'readPackagedText("bf16900_optional_imp_fusion.js")')
