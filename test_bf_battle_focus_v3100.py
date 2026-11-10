@@ -188,6 +188,78 @@ with sync_playwright() as pw:
  assert all(x['looked']==[None]*7 and x['focused'] is False and
             x['queued'] is False and x['targetUnchanged'] and
             x['actionsUnchanged'] for x in gated),gated
+ # A living foe with an unknown ATK or DEF is never silently dropped from
+ # the corresponding manual focus priority. Both actual commands and the
+ # displayed focus buttons fail closed; valid HP-based focus still works.
+ unknown_stat=page.evaluate("""()=> {
+   const original=S.enemies,seed=original[0],beforeTarget=S.target,
+     orders=S.party.map(p=>JSON.stringify(p.action)),
+     saved=localStorage.getItem('bf_global_offline_demo_v7'),
+     before=JSON.stringify(P);
+   try{
+     S.enemies=[
+       {...seed,slot:0,name:'Known foe',hp:40,maxHp:100,atk:30,def:40},
+       {...seed,slot:1,name:'Unknown foe',hp:75,maxHp:100,atk:undefined,def:undefined}
+     ];
+     const highest=BFGlobalBattleFocusV3100.lookup('highest-atk');
+     const lowest=BFGlobalBattleFocusV3100.lookup('lowest-def');
+     const hp=BFGlobalBattleFocusV3100.lookup('lowest-hp')?.slot;
+     BFGlobalBattleFocusV3100.refresh();
+     const buttons={
+       atk:document.querySelector('#bf3100-options button[data-strategy="highest-atk"]').disabled,
+       def:document.querySelector('#bf3100-options button[data-strategy="lowest-def"]').disabled,
+       hp:document.querySelector('#bf3100-options button[data-strategy="lowest-hp"]').disabled
+     };
+     const denied=[
+       BFGlobalBattleFocusV3100.focus('highest-atk')===false,
+       BFGlobalBattleFocusV3100.focus('lowest-def')===false,
+       BFGlobalBattleFocusV3100.queueFocus('highest-atk')===false,
+       BFGlobalBattleFocusV3100.queueFocus('lowest-def','burst')===false
+     ];
+     return {highest,lowest,hp,buttons,denied,
+       selectedSame:S.target===beforeTarget,
+       ordersSame:orders.every((s,i)=>s===JSON.stringify(S.party[i].action)),
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
+       playerSame:before===JSON.stringify(P),noTurn:!S.busy};
+   }finally{S.enemies=original;BFGlobalBattleFocusV3100.refresh();}
+ }""")
+ assert unknown_stat=={
+   'highest':None,'lowest':None,'hp':0,
+   'buttons':{'atk':True,'def':True,'hp':False},
+   'denied':[True]*4,'selectedSame':True,'ordersSame':True,
+   'saveSame':True,'playerSame':True,'noTurn':True},unknown_stat
+ # v333R1: eligibility can flip while the currently selected target and
+ # source-elemental focus remain unchanged. Refresh MUST recalculate every
+ # button's disabled state, not just the selected strategy.
+ refreshed=page.evaluate("""()=>{
+   const original=S.enemies,seed=original[0],oldTarget=S.target,
+     beforeP=JSON.stringify(P),beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     orders=S.party.map(u=>JSON.stringify(u.action));
+   try{
+     S.enemies=[
+       {...seed,slot:0,name:'Known',hp:40,maxHp:100,atk:30,def:40,element:'Unknown'},
+       {...seed,slot:1,name:'Changing',hp:75,maxHp:100,atk:50,def:20,element:'Unknown'}
+     ];
+     const ids=['highest-atk','lowest-def'].map(k=>
+       document.querySelector('#bf3100-options button[data-strategy="'+k+'"]'));
+     const get=()=>ids.map(b=>b.disabled);
+     BFGlobalBattleFocusV3100.refresh();
+     const enabled=get().every(v=>v===false);
+     S.enemies[1].atk=undefined;S.enemies[1].def=undefined;
+     BFGlobalBattleFocusV3100.refresh();
+     const blocked=get().every(v=>v===true);
+     S.enemies[1].atk=50;S.enemies[1].def=20;
+     BFGlobalBattleFocusV3100.refresh();
+     const restored=get().every(v=>v===false);
+     return {enabled,blocked,restored,targetSame:oldTarget===S.target,
+       ordersSame:orders.every((a,i)=>a===JSON.stringify(S.party[i].action)),
+       saveSame:beforeSave===localStorage.getItem('bf_global_offline_demo_v7'),
+       playerSame:beforeP===JSON.stringify(P),busy:S.busy};
+   }finally{S.enemies=original;BFGlobalBattleFocusV3100.refresh();}
+ }""")
+ assert refreshed=={'enabled':True,'blocked':True,'restored':True,
+   'targetSame':True,'ordersSame':True,'saveSame':True,
+   'playerSame':True,'busy':False},refreshed
  # With an entirely valid roster, percentage ranking still differs from
  # absolute HP ranking; ties retain the prior lower-slot ordering.
  ranks=page.evaluate("""()=>{const original=S.enemies,seed=original[0];
