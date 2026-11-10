@@ -84,10 +84,41 @@
      total:entries.reduce((n,x)=>n+x.total,0),
      dungeons:idset.size});
  }
+ // When the pinned v143 original 2022 mission economy module is loaded,
+ // confirm every live quest's prerequisite, energy and scalar rewards before
+ // allowing ANY next-story route. A source-valid wave count alone is not
+ // sufficient: a corrupted requires/energy/reward field must not unlock a
+ // different mission. Older embedded pages may not load v143.
+ function sourceEconomyReadiness(){
+   const source=window.BFOriginalGlobalQuestEnergyV14300;
+   if(!source)return null;
+   if(source.source?.year!==2022||source.source?.recordCount!==106||
+      source.source?.sourceSha256!==
+       'a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66'||
+      typeof source.lookup!=='function'||!Array.isArray(QUESTS)||
+      QUESTS.length!==106)return false;
+   try{
+     const seen=new Set();
+     for(const q of QUESTS){
+       if(!q||!Number.isSafeInteger(q.missionId)||seen.has(q.missionId))
+         return false;
+       seen.add(q.missionId);
+       const row=source.lookup(q.missionId);
+       if(!Array.isArray(row)||row.length!==8||
+          row.some(v=>!Number.isSafeInteger(v)||v<0))return false;
+       if(row[0]!==q.missionId||row[1]!==q.dungeonId||
+          row[2]!==q.requires||row[3]!==q.battles||
+          row[4]!==q.energy||row[5]!==q.exp||
+          row[6]!==q.zel||row[7]!==q.karma)return false;
+     }
+     return seen.size===106;
+   }catch(_){return false;}
+ }
  // Read-only next playable mission, following source catalog order and real unlocks.
  // Never synthesize a fight, award a clear, or modify canonical v7 progress.
  function nextPlayable(){
-   if(typeof P!=='object' || !P || !P.questClears || typeof questUnlocked!=='function')return null;
+   if(typeof P!=='object' || !P || !P.questClears || typeof questUnlocked!=='function'||
+      sourceEconomyReadiness()===false)return null;
    // Validate the entire source catalog and clear ledger before selecting a mission.
    // An invalid later record must not be hidden by an earlier playable mission.
    const seen=new Set();
@@ -162,6 +193,6 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  tabs.addEventListener('click',refresh);
  refresh();
- window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,waveReadiness,
+ window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,waveReadiness,sourceEconomyReadiness,
     get missionCount(){return 106},get dungeonCount(){return 23}});
 })();
