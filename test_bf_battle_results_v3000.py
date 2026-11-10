@@ -66,6 +66,28 @@ with sync_playwright() as pw:
  assert s['victory'] and s['archive'] and s['clears']==1,s
  assert s['exp']==5 and s['nextId']==2,s
  assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==1
+ # A stale/corrupt canonical receipt cannot be bypassed by a still-true
+ # saveEnabled flag. All post-victory navigation shares the stored-clear gate.
+ stale=page.evaluate("""()=> {
+   const key='bf_global_offline_demo_v7',
+     original=localStorage.getItem(key),progress=JSON.stringify(P),
+     receipt=JSON.parse(original),api=BFGlobalBattleResultsV3000;
+   try{
+     receipt.questClears[1]=0;
+     localStorage.setItem(key,JSON.stringify(receipt));
+     const now=api.refresh();
+     return {saveFlag:saveEnabled,stored:now.stored,next:now.nextId,
+       replay:now.canReplay,advance:api.advance(),
+       replayAction:api.replayBattle(),
+       rescue:!document.getElementById('bf3000-retry-save').hidden,
+       progressSame:JSON.stringify(P)===progress,
+       mission:QUEST.missionId};
+   }finally{localStorage.setItem(key,original);api.refresh();}
+ }""")
+ assert stale=={'saveFlag':True,'stored':False,'next':None,
+   'replay':False,'advance':False,'replayAction':False,
+   'rescue':True,'progressSame':True,'mission':1},stale
+ assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is True
  assert 'SIMULATED' in page.locator('#bf3000-reward').inner_text()
  assert not page.locator('#bf3000-next').is_disabled()
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is False
@@ -83,6 +105,24 @@ with sync_playwright() as pw:
  assert page.evaluate('QUEST.missionId')==10
  page.evaluate('finish(true)')
  assert page.evaluate('BFGlobalBattleResultsV3000.refresh().clearScene') is True
+ # Even an apparently successful victory must not unlock a source clear
+ # scene if its canonical save receipt no longer matches this mission.
+ stale_scene=page.evaluate("""()=>{
+   const key='bf_global_offline_demo_v7',saved=localStorage.getItem(key),
+     raw=JSON.parse(saved),api=BFGlobalBattleResultsV3000,
+     progress=JSON.stringify(P);
+   try{
+     delete raw.questClears[10];
+     localStorage.setItem(key,JSON.stringify(raw));
+     const result=api.refresh();
+     return {stored:result.stored,clearScene:result.clearScene,
+       readScene:api.readScene(),replay:result.canReplay,
+       progressSame:JSON.stringify(P)===progress};
+   }finally{localStorage.setItem(key,saved);api.refresh();}
+ }""")
+ assert stale_scene=={'stored':False,'clearScene':False,'readScene':False,
+   'replay':False,'progressSame':True},stale_scene
+ assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().clearScene') is True
  # Result-screen Next must agree with the campaign resolver even when a later
  # archived mission has just been cleared and earlier missions are unfinished.
  linked=page.evaluate("""()=>({

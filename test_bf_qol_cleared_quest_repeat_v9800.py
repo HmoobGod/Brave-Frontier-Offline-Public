@@ -55,6 +55,58 @@ with sync_playwright() as pw:
  api='BFGlobalQoLQuestRepeatV9800'
  assert p.locator('#bf9800-auto-repeat').count()==1
  assert p.evaluate(api+'.statusSnapshot().active') is False
+ # With the source-backed 2022 campaign module available, all original
+ # 2022 quest-wave and scalar-economy fields must match before unattended
+ # replay; a later source mismatch must disarm an already-running repeat.
+ source_proof=p.evaluate("""()=>{
+   const repeat=BFGlobalQoLQuestRepeatV9800,prev=window.BFGrandGaiaCampaignV100,
+     oldBattles=QUEST.battles,oldTotal=S.totalWaves,oldOver=S.over,
+     oldPhase=S.phase,oldAuto=S.auto,
+     saved=localStorage.getItem('bf_global_offline_demo_v7'),
+     player=JSON.stringify(P),before=__repeatCount;
+   let invalidWave=false,invalidEconomy=false,brokenSource=false,
+       started=false,stopped=false,disarmed=false,noExtraReplay=false;
+   try{
+     QUEST.battles=3;S.totalWaves=3;
+     const api={waveReadiness:()=>({missionId:1,verifiedWaveCount:4}),
+       sourceEconomyReadiness:()=>true};
+     window.BFGrandGaiaCampaignV100=api;
+     invalidWave=!repeat.start(2)&&__repeatCount===before;
+     api.waveReadiness=()=>({missionId:1,verifiedWaveCount:3});
+     api.sourceEconomyReadiness=()=>false;
+     invalidEconomy=!repeat.start(2)&&__repeatCount===before;
+     api.sourceEconomyReadiness=()=>{throw Error('bad original source')};
+     brokenSource=!repeat.start(2)&&__repeatCount===before;
+     api.sourceEconomyReadiness=()=>true;
+     started=repeat.start(2)&&repeat.statusSnapshot().active;
+     const afterStart=__repeatCount;
+     api.waveReadiness=()=>null;
+     stopped=repeat.poll()===true&&!repeat.statusSnapshot().active&&
+       repeat.statusSnapshot().reason===
+         'Stopped: verified 2022 quest record changed';
+     disarmed=!document.getElementById('auto').checked;
+     noExtraReplay=__repeatCount===afterStart;
+   }finally{
+     if(prev===undefined)delete window.BFGrandGaiaCampaignV100;
+     else window.BFGrandGaiaCampaignV100=prev;
+     if(oldBattles===undefined)delete QUEST.battles;
+     else QUEST.battles=oldBattles;
+     if(oldTotal===undefined)delete S.totalWaves;
+     else S.totalWaves=oldTotal;
+     S.over=oldOver;S.phase=oldPhase;
+     if(oldAuto===undefined)delete S.auto;else S.auto=oldAuto;
+     document.getElementById('auto').checked=false;
+     window.__repeatCount=before;
+   }
+   return {invalidWave,invalidEconomy,brokenSource,
+     started,stopped,disarmed,noExtraReplay,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
+     playerSame:JSON.stringify(P)===player};
+ }""")
+ assert source_proof=={
+   'invalidWave':True,'invalidEconomy':True,'brokenSource':True,
+   'started':True,'stopped':True,'disarmed':True,'noExtraReplay':True,
+   'saveSame':True,'playerSame':True},source_proof
  # An invalid canonical save receipt must prevent an unattended replay
  # even if the old general stored boolean still reports success.
  p.evaluate('BFGlobalBattleResultsV3000.committedClearCount=()=>0')

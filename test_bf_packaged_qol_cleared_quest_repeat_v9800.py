@@ -10,6 +10,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert src.count('BF_GLOBAL_QOL_CLEARED_QUEST_REPEAT_V9800')==1
     assert 'results.replayBattle()' in src
     assert 's.clears<=session.lastClear' in src
+    assert 'sourceQuestMatches' in src and 'campaign.waveReadiness' in src
+    assert 'campaign.sourceEconomyReadiness()===false' in src
     assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf9700_qol_rotating_backups.js")')<java.index('readPackagedText("bf9800_qol_cleared_quest_repeat.js")')

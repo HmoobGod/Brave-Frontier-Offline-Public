@@ -56,6 +56,19 @@
  // A won mission kept only in memory cannot open the next story stage.
  const progressStored=()=>typeof saveEnabled==='boolean'&&saveEnabled&&
    typeof saveRecoveryPending==='boolean'&&!saveRecoveryPending;
+ // The HUD initializes before v3000 Battle Results, so resolve its canonical
+ // read-only receipt API at action time. Current Android builds have v3000.
+ // Historical isolated v20 embeds without the optional results module keep
+ // their original core save-success behavior; never fabricate a receipt.
+ function committedVictory(q){
+   const read=window.BFGlobalBattleResultsV3000?.committedClearCount;
+   if(typeof read!=='function')return true;
+   const count=P.questClears?.[q?.missionId];
+   if(!Number.isSafeInteger(q?.missionId)||q.missionId<=0||
+      !Number.isSafeInteger(count)||count<1)return false;
+   try{return read(q.missionId)===count;}
+   catch(_){return false;}
+ }
  function upcoming(q){
    // Reuse the campaign's complete source-catalog and clear-ledger preflight.
    // An already-cleared later mission must not skip an earlier unfinished one.
@@ -82,7 +95,10 @@
    const current=total?(won?total:Math.min(total,completed+1)):0;
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
    const foes=Array.isArray(S.enemies)?S.enemies.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
-   const stored=progressStored();
+   // A stale saveEnabled flag alone never unlocks this separate Next button.
+   // Mirror the v3000 result-screen gate without writing or changing v7.
+   const stored=progressStored()&&
+     (!archive||!won||committedVictory(q));
    const upcomingQuest=archive&&won&&stored&&cleared(q)?upcoming(q):null;
    return Object.freeze({
      missionId:q.missionId,region:['Mistral','Morgan','St. Lamia'][region(q)],
