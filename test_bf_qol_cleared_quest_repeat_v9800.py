@@ -55,10 +55,15 @@ with sync_playwright() as pw:
  api='BFGlobalQoLQuestRepeatV9800'
  assert p.locator('#bf9800-auto-repeat').count()==1
  assert p.evaluate(api+'.statusSnapshot().active') is False
- assert p.locator('#bf9800-repeat-count option').count()==4
+ assert p.locator('#bf9800-repeat-count option').count()==6
+ assert p.locator('#bf9800-repeat-count option').all_text_contents()==[
+   '1 additional clears','2 additional clears','5 additional clears',
+   '10 additional clears','20 additional clears','50 additional clears']
  assert p.locator('#bf9800-repeat-count').input_value()=='2'
  assert p.evaluate(api+'.start(0)') is False
- assert p.evaluate(api+'.start(20)') is False
+ assert p.evaluate(api+'.start(21)') is False
+ assert p.evaluate(api+'.start(51)') is False
+ assert p.evaluate(api+'.start(1.5)') is False
  p.evaluate("window.__stored98=false")
  assert p.evaluate(api+'.start(2)') is False
  p.evaluate("window.__stored98=true")
@@ -225,6 +230,40 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.statusSnapshot().completed')==2
  assert not p.locator('#auto').is_checked()
  assert p.evaluate('window.__repeatCount')==3
+ # Long opt-in repeat runs still require one real stored-clear receipt for
+ # every additional replay. No direct save writes, hidden rewards, free
+ # clears or unbounded loops: 20 and 50 must both terminate exactly.
+ for length in (20,50):
+  outcome=p.evaluate("""count=>{
+    const api=BFGlobalQoLQuestRepeatV9800,
+      auto=document.getElementById('auto'),
+      originalWrites=__v98StorageWrites,
+      previousReplay=__repeatCount,
+      stored=localStorage.getItem('bf_global_offline_demo_v7');
+    S.over=true;S.busy=false;S.phase='Victory';
+    auto.checked=false;
+    if(!api.start(count))return {error:'start failed',count};
+    const armed=api.statusSnapshot().target===count;
+    for(let i=0;i<count;i++){
+      // Simulate one real result receipt at a time; the repeat module
+      // must never add quest clears or write the v7 save on its own.
+      P.questClears[1]++;
+      S.over=true;S.phase='Victory';auto.checked=false;
+      if(!api.poll())return {error:'poll failed',count,i};
+      const snap=api.statusSnapshot();
+      if(i<count-1&&(!snap.active||snap.completed!==i+1))
+        return {error:'early stop',count,i,snap};
+    }
+    const end=api.statusSnapshot();
+    return {armed,complete:end.completed,active:end.active,
+      additionalReplays:__repeatCount-previousReplay,
+      autoDisarmed:!auto.checked,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===stored,
+      writesSame:__v98StorageWrites===originalWrites};
+  }""",length)
+  assert outcome=={'armed':True,'complete':length,'active':False,
+                   'additionalReplays':length,'autoDisarmed':True,
+                   'saveSame':True,'writesSame':True},outcome
  # Cannot start before first successful clear of a mission.
  p.evaluate("""()=>{QUEST.missionId=2;P.questClears[2]=0;S.over=true;S.phase='Victory'}""")
  assert p.evaluate(api+'.start(2)') is False

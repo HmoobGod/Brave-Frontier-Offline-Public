@@ -64,6 +64,23 @@ with sync_playwright() as pw:
  assert p.evaluate('BFGlobalStarterLeaderCombatV11100.snapshot().appliedPartyUnits')==1
  p.evaluate('BFGlobalStarterLeaderCombatV11100.apply(S.party[0],0)')
  assert p.evaluate('S.party[0].atk')==first[0]['atk']
+ # Native constructor owns the source bonus; detached clones cannot gain a
+ # second buff, and calls outside construction never modify live progress.
+ denied=p.evaluate("""()=>{
+   const api=BFGlobalStarterLeaderCombatV11100,
+     original=S.party[0],saved=localStorage.getItem('bf_global_offline_demo_v7'),
+     progress=JSON.stringify(P),clone={...original},wrongSlot={...original,id:1};
+   const beforeClone=JSON.stringify(clone),beforeWrong=JSON.stringify(wrongSlot),
+     actorAtk=original.atk;
+   api.apply(clone,0);api.apply(wrongSlot,0);api.apply(original,1);
+   return {cloneSame:JSON.stringify(clone)===beforeClone,
+     wrongSlotSame:JSON.stringify(wrongSlot)===beforeWrong,
+     actorSame:original.atk===actorAtk,
+     progressSame:JSON.stringify(P)===progress,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+ }""")
+ assert denied=={'cloneSame':True,'wrongSlotSame':True,'actorSame':True,
+                 'progressSame':True,'saveSame':True},denied
  assert p.evaluate('BFGlobalStarterLeaderCombatV11100.fromSource(10011,20011)') is None
  # 3-star actual playable evolved form: same original 25% ATK and zero HP.
  p.evaluate('P.evolutions[10011]=10012;reset()')

@@ -36,6 +36,45 @@
    sourceItemAcquisitionKnown:false,
    playableExpansion:false,inventoryMutated:false,saveFieldsAdded:0});
  function lookup(id){return Number.isSafeInteger(id)?rows.get(id)||null:null;}
+ // v320: a source-typed eligibility audit, not a gameplay evolution.
+ // Match distinct OWNED base-unit identities to original type-1 materials;
+ // a type-2 Legend Stone is a different inventory class with no verified
+ // acquisition, source quantity or canonical v7 inventory representation.
+ // Therefore a source recipe is NEVER an executable spend/unlock request.
+ function readiness(baseId){
+   if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))return null;
+   let current;
+   try{current=effectiveUnit(baseId);}catch(_){return null;}
+   const recipe=lookup((current?.id||0)+1);
+   if(!recipe||recipe.fromId!==current?.id)return null;
+   const assigned=new Set([baseId]),materials=[];
+   for(const mat of recipe.materials){
+     if(mat.type===2){
+       materials.push(freeze({slot:mat.slot,type:mat.type,id:mat.id,
+         classification:'original item',ownedBaseId:null,
+         status:'UNVERIFIED_ITEM_INVENTORY'}));
+       continue;
+     }
+     let candidate=null;
+     for(const owned of P.roster){
+       if(!Number.isSafeInteger(owned)||assigned.has(owned))continue;
+       let effective;
+       try{effective=effectiveUnit(owned);}catch(_){return null;}
+       if(effective?.id===mat.id){candidate=owned;assigned.add(owned);break;}
+     }
+     materials.push(freeze({slot:mat.slot,type:mat.type,id:mat.id,
+       classification:'original unit',ownedBaseId:candidate,
+       status:candidate===null?'UNIT_NOT_OWNED':'OWNED_FORM_MATCH'}));
+   }
+   return freeze({ownedBaseId:baseId,fromId:recipe.fromId,
+     toId:recipe.unitId,rarity:recipe.rarity,originalZel:recipe.zel,
+     originalKarma:recipe.karma,materials:freeze(materials),
+     unitMaterialsMatched:materials.filter(m=>m.type===1&&
+       m.status==='OWNED_FORM_MATCH').length,
+     unitMaterialsRequired:materials.filter(m=>m.type===1).length,
+     itemInventoryVerified:false,originalCurrencyAvailable:null,
+     canEvolve:false,blocker:'ORIGINAL_ITEM_INVENTORY_NOT_IMPLEMENTED'});
+ }
  function snapshot(){
    const possible=[];
    for(const base of P.roster){
@@ -66,19 +105,32 @@
  }
  const list=document.createElement('ol');list.id='bf13000-materials';
  const costs=document.createElement('p');costs.id='bf13000-price';
+ const eligibility=document.createElement('p');eligibility.id='bf13000-readiness';
  const note=document.createElement('small');note.textContent=
    'Original 2022 typed recipe metadata only. Type 1 = material UNIT; '+
    'type 2 = separate original evolution ITEM #110100 (Legend Stone, 2022 Global English). '+
    'Item acquisition, current inventory and summoner resource handling are '+
    'not restored. No 7★/8★ units are playable here, and no resources or saved '+
    'evolutions are changed.';
- panel.append(title,select,costs,list,note);host.after(panel);
+ panel.append(title,select,costs,eligibility,list,note);host.after(panel);
  function refresh(){
    const row=lookup(Number(select.value));list.replaceChildren();
    if(!row)return null;
    costs.textContent=row.fromId+' → '+row.unitId+' · '+row.rarity+'★ · '+
      'original cost '+row.unitCost+' · max Lv '+row.maxLevel+' · '+
      row.zel.toLocaleString('en-US')+' Zel · '+row.karma.toLocaleString('en-US')+' Karma';
+   // Read-only, owner-specific prereq classification, never spend currency.
+   let current=null;
+   for(const baseId of P.roster){
+     const state=readiness(baseId);
+     if(state?.toId===row.unitId){current=state;break;}
+   }
+   eligibility.textContent=current?
+     'Owned predecessor #'+current.fromId+' · matching original material UNIT forms '+
+       current.unitMaterialsMatched+'/'+current.unitMaterialsRequired+
+       ' · Legend Stone item inventory UNVERIFIED · evolution BLOCKED':
+     'No owned predecessor at the required form. Original material UNIT and '+
+       'Legend Stone item inventories are not restored; evolution BLOCKED.';
    for(const m of row.materials){
      const item=document.createElement('li');item.textContent='Slot '+m.slot+': '+
        (m.type===1?'original material UNIT':'original evolution ITEM')+' #'+m.id+
@@ -89,5 +141,5 @@
  }
  select.addEventListener('change',refresh);refresh();
  window.BFGlobalOriginalStarterTypedEvolutionV13000=
-   freeze({source,lookup,snapshot,refresh});
+   freeze({source,lookup,readiness,snapshot,refresh});
 })();
