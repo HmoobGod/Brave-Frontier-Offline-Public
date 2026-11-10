@@ -8,6 +8,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert script.count('/* BF_GRAND_GAIA_CONTINUE_V101 */')==1
  assert 'QUESTS.length!==106' in script and 'questUnlocked(q)' in script
  assert 'CONTINUE STORY' in script
+ assert 'unattendedOwnsNavigation' in script
+ assert "repeat.statusSnapshot()?.active===true" in script
  assert 'localStorage' not in script and 'saveProgress(' not in script
  for name in ('bf100_grand_gaia_campaign.js','bf090_st_lamia_map.js','bf080_morgan_map.js'):
   assert 'assets/'+name in files
