@@ -82,6 +82,9 @@ with sync_playwright() as pw:
                 if(timer){clearTimeout(timer);timer=null;}
                 S.over=true;S.phase='Victory';S.auto=false;E.auto.checked=false;
                 P.questClears[QUEST.missionId]++;
+                // This synthetic completed result must have a matching committed
+                // receipt before the later explicit restart eligibility check.
+                localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));
             }''')
             before = page.evaluate(SNAPSHOT)
         if phase != 'pending':
