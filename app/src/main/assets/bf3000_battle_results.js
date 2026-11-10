@@ -70,7 +70,16 @@
    const status=story.snapshot();
    // A failed canonical v7 save cannot unlock another story mission. The
    // player must first restore writable storage or export their progress.
-   const stored=typeof saveEnabled==='boolean'&&saveEnabled&&!saveRecoveryPending;
+   // A saveEnabled flag can remain true after a stale/corrupt external
+   // restore or a failed write adapter. A playable archived victory is
+   // committed only when the canonical v7 save contains its exact clear
+   // count. Next, scene and replay must all share this gate.
+   const count=P.questClears?.[q.missionId];
+   const receiptOk=!archive||!victory||
+     (Number.isSafeInteger(count)&&count>0&&
+      committedClearCount(q.missionId)===count);
+   const stored=typeof saveEnabled==='boolean'&&saveEnabled&&
+     !saveRecoveryPending&&receiptOk;
    const after=archive&&victory&&cleared&&stored?status?.nextId||null:null;
    // A newly earned clear scene is also gated on committed v7 progress.
    const clearScene=archive&&victory&&cleared&&stored&&[10,11,21].includes(q.missionId)&&
