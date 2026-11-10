@@ -9,7 +9,8 @@ assert src.count('/* BF_GLOBAL_DEMO_BATTLE_RESULTS_V3000 */')==1
 assert len(src.encode('utf8'))<65536
 # Saving is explicitly user-triggered only by the rescue button. The module
 # never writes storage directly or adds an alternate save key/format.
-assert 'localStorage' not in src and src.count('saveProgress()')==1
+assert src.count('localStorage.getItem(')==1 and src.count('saveProgress()')==1
+assert 'localStorage.setItem(' not in src and 'localStorage.removeItem(' not in src
 assert src.count("document.getElementById('downloadsave')")==1
 assert java.index('readPackagedText("bf2900_original_event_expressions.js")') < java.index('readPackagedText("bf3000_battle_results.js")')
 with sync_playwright() as pw:
@@ -38,6 +39,9 @@ with sync_playwright() as pw:
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('P.version')==7
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==0
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(-1)') is None
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1.5)') is None
  assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().done') is False
  assert page.locator('#bf3000-result').is_hidden()
  assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is False
@@ -60,6 +64,7 @@ with sync_playwright() as pw:
  s=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert s['victory'] and s['archive'] and s['clears']==1,s
  assert s['exp']==5 and s['nextId']==2,s
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==1
  assert 'SIMULATED' in page.locator('#bf3000-reward').inner_text()
  assert not page.locator('#bf3000-next').is_disabled()
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is False
@@ -129,6 +134,9 @@ with sync_playwright() as pw:
  assert failed['done'] and failed['victory'] and failed['archive']
  assert failed['stored'] is False and failed['nextId'] is None
  assert failed['canReplay'] is False
+ # A fresh in-memory clear under quota failure cannot masquerade as a
+ # committed v7 receipt; only the PREVIOUS saved count is returned.
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')<page.evaluate('P.questClears[1]')
  assert page.locator('#bf3000-next').is_disabled()
  assert page.locator('#bf3000-replay').is_disabled()
  assert page.locator('#bf3000-retry-save').is_visible()
