@@ -18,6 +18,9 @@
  if(!mode||!host)return;
  const freeze=Object.freeze;
  const built=new WeakMap();
+ // An exact, short-lived native playerUnit construction token prevents
+ // public apply() from granting source bonuses to detached/cloned actors.
+ let constructingUnit=null,constructingSlot=-1;
  let applied=0,skipped=0;
  function fromSource(leaderBase,targetId){
    if(!Number.isSafeInteger(leaderBase)||!P.roster?.includes(leaderBase)||
@@ -32,6 +35,8 @@
  }
  function apply(unit,slot){
    if(!unit||typeof unit!=='object'||built.has(unit)||
+      unit!==constructingUnit||slot!==constructingSlot||
+      !Number.isSafeInteger(unit.id)||unit.id!==slot||
       mode.value!=='archive'||!unit.active||
       !Number.isSafeInteger(slot)||slot<0||slot>=6||
       !Number.isSafeInteger(unit.unitId)||
@@ -62,17 +67,21 @@
  }
  window.playerUnit=function(i){
    const unit=original.apply(this,arguments);
-   // v115: source-matched 2022 form cap before 2022 leader bonuses.
-   // Optional: absence of the cap module preserves v111/v113 behavior.
-   window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i);
-   // v168: exact 2022 zero-EXP Lord base stats before source leader buffs.
-   window.BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i);
-   // v172: exact source Lord max-level endpoint (DEMO EXP curve unchanged).
-   window.BFGlobalOriginalMaxLevelLordV17200?.apply?.(unit,i);
-   // v169: optional, locally saved Imp bonuses before 2022 leader buffs.
-   // Owned source-qualified forms only; never changes canonical v7 saves.
-   window.BFGlobalOptionalImpsV16900?.apply?.(unit,i);
-   return apply(unit,i);
+   // Never retain a builder token across turns, even if an optional
+   // source stat adapter throws during construction.
+   const previousUnit=constructingUnit,previousSlot=constructingSlot;
+   constructingUnit=unit;constructingSlot=i;
+   try{
+     // v115: original source max-level cap before leader bonuses.
+     window.BFGlobalOriginalUnitLevelCapsV11500?.apply?.(unit,i);
+     // v168: exact 2022 level-one Lord source base stats.
+     window.BFGlobalOriginalLevelOneLordV16800?.apply?.(unit,i);
+     // v172: exact 2022 Lord source max endpoint (DEMO EXP curve).
+     window.BFGlobalOriginalMaxLevelLordV17200?.apply?.(unit,i);
+     // v169: optional canonical Imp bonus before leader buffs.
+     window.BFGlobalOptionalImpsV16900?.apply?.(unit,i);
+     return apply(unit,i);
+   }finally{constructingUnit=previousUnit;constructingSlot=previousSlot;}
  };
  function snapshot(){
    const party=Array.isArray(S.party)?S.party:[];

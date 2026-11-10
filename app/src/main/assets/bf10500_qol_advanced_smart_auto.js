@@ -95,8 +95,22 @@
       Array.isArray(QUESTS)){
      const archived=QUESTS.find(q=>q.missionId===QUEST?.missionId);
      if(archived&&Number.isSafeInteger(archived.battles)&&archived.battles>1&&
-        archived.battles===QUEST.battles&&S.wave<archived.battles-1)
+        archived.battles===QUEST.battles&&S.wave<archived.battles-1){
+       // v100 source-wave readiness is optional in older pages. When present,
+       // only suppress a player BB if its immutable 2022 wave count agrees.
+       // A changed/ambiguous mission catalog must not delay a valid BB.
+       const verified=window.BFGrandGaiaCampaignV100;
+       if(verified){
+         if(typeof verified.waveReadiness!=='function')return previous;
+         let row;
+         try{row=verified.waveReadiness(archived.missionId)}
+         catch(_){return previous;}
+         if(!row||row.missionId!==archived.missionId||
+            !Number.isSafeInteger(row.verifiedWaveCount)||
+            row.verifiedWaveCount!==archived.battles)return previous;
+       }
        return 'attack';
+     }
    }
    return previous;
  }
