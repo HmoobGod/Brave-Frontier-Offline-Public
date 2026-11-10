@@ -5,7 +5,7 @@ Original enemy identities, damage, AI, energy consumption and drops remain
 unverified; THIS IS NOT a replay of the native original battles.
 """
 from pathlib import Path
-import shutil,json
+import shutil,json,re
 from playwright.sync_api import sync_playwright
 
 ROOT=Path(__file__).resolve().parent
@@ -22,6 +22,15 @@ overlay=(ASSETS/'bf100_grand_gaia_campaign.js').read_text('utf8')
 assert overlay.count('/* BF_GRAND_GAIA_CAMPAIGN_V100 */')==1
 assert 'localStorage' not in overlay and 'saveProgress(' not in overlay
 assert 'Enemy' not in overlay or 'DEMO' in overlay
+# Pin every runtime wave count against the original 2022 mission-master
+# source, not any mutable live QUESTS field or fabricated formation.
+pinned=json.loads((ROOT/'source_data/bf_global_original_2022_live_quest_economy_v142.json').read_text('utf8'))
+assert pinned['readOnly'] is True and pinned['year']==2022 and pinned['total']==106
+assert pinned['sourceArchiveSha256']=='69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9'
+assert pinned['missionMasterSha256']=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83'
+source_rows=re.search(r'const verifiedWaveRows=Object\.freeze\((\[\[.*?\]\])\.map\(Object\.freeze\)\);',overlay)
+assert source_rows,'pinned wave rows missing'
+assert json.loads(source_rows.group(1))==[[r[0],r[1],r[3]] for r in pinned['records']]
 
 with sync_playwright() as pw:
   browser=pw.chromium.launch(headless=True,
@@ -86,6 +95,70 @@ with sync_playwright() as pw:
   assert preflight['first']['missionId']==initial_next['missionId']
   assert preflight['invalidLater'] is None and preflight['nonfiniteLater'] is None
   assert page.evaluate('BFGrandGaiaCampaignV100.nextPlayable().missionId')==initial_next['missionId']
+  # Native Chromium: all 106 source wave counts are read-only metadata;
+  # neither enemy formations nor native wave execution is certified.
+  wave_report=page.evaluate("""() => {
+    const api=BFGrandGaiaCampaignV100;
+    const saved=localStorage.getItem('bf_global_offline_demo_v7');
+    const player=JSON.stringify(P);
+    const rows=QUESTS.map(q=>api.waveReadiness(q.missionId));
+    const q=QUESTS[0],old=q.battles;
+    let malformed;
+    try{q.battles=0;malformed=api.waveReadiness(q.missionId);}
+    finally{q.battles=old;}
+    return {rows,malformed,unknown:api.waveReadiness(-1),
+      playerSame:JSON.stringify(P)===player,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert len(wave_report['rows'])==106
+  assert all(row and row['verifiedWaveCount']>=1 and
+             row['enemyFormationsVerified'] is False and
+             row['dropsVerified'] is False and
+             row['nativeMultiWaveEnabled'] is False
+             for row in wave_report['rows'])
+  assert wave_report['malformed'] is None and wave_report['unknown'] is None
+  assert wave_report['playerSame'] and wave_report['saveSame']
+  # Fail closed globally: corrupting an unrelated later mission must also
+  # invalidate readiness for the first mission; duplicate IDs are ambiguous.
+  corrupt=page.evaluate("""() => {
+    const first=QUESTS[0],later=QUESTS[QUESTS.length-1],
+      oldId=later.missionId,oldWaves=later.battles,
+      progress=JSON.stringify(P),saved=localStorage.getItem('bf_global_offline_demo_v7');
+    let duplicate,invalidLater;
+    try {
+      later.missionId=first.missionId;
+      duplicate=BFGrandGaiaCampaignV100.waveReadiness(first.missionId);
+      later.missionId=oldId;later.battles=0;
+      invalidLater=BFGrandGaiaCampaignV100.waveReadiness(first.missionId);
+    } finally {later.missionId=oldId;later.battles=oldWaves;}
+    return {duplicate,invalidLater,
+      restored:BFGrandGaiaCampaignV100.waveReadiness(first.missionId)!==null,
+      playerSame:JSON.stringify(P)===progress,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert corrupt=={'duplicate':None,'invalidLater':None,'restored':True,
+                   'playerSame':True,'saveSame':True},corrupt
+  # Even a plausible but incorrect count and a valid but wrong dungeon
+  # must fail the source match for ALL missions, without saving anything.
+  source_tamper=page.evaluate("""() => {
+    const api=BFGrandGaiaCampaignV100,first=QUESTS[0],other=QUESTS[5],
+      originalCount=other.battles,originalDungeon=other.dungeonId,
+      originalPlayer=JSON.stringify(P),saved=localStorage.getItem('bf_global_offline_demo_v7');
+    let alteredCount,alteredDungeon;
+    try {
+      other.battles=originalCount+1;
+      alteredCount=api.waveReadiness(first.missionId);
+      other.battles=originalCount;
+      other.dungeonId=QUESTS[0].dungeonId;
+      alteredDungeon=api.waveReadiness(first.missionId);
+    } finally {other.battles=originalCount;other.dungeonId=originalDungeon;}
+    return {alteredCount,alteredDungeon,
+      restored:api.waveReadiness(first.missionId)?.verifiedWaveCount===first.battles,
+      sourceYearUnchanged:JSON.stringify(P)===originalPlayer,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert source_tamper=={'alteredCount':None,'alteredDungeon':None,'restored':True,
+                         'sourceYearUnchanged':True,'saveSame':True},source_tamper
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version

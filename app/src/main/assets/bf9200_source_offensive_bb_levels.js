@@ -28,8 +28,15 @@
      remainingEffectsNotModeled:!!v.secondaryUnmodeled});
  }
  function multiplierFor(unit,burst){
+   // The source-level player BB modifier must never apply to an enemy,
+   // partner, cloned, duplicated, or reassigned native actor reference.
+   // The prior DEMO multiplier remains authoritative for rejected calls.
    if(!burst||S.mode!=='archive'||S.over||!unit||
-      !Number.isSafeInteger(unit.unitId))return null;
+      !Number.isSafeInteger(unit.unitId)||
+      !Number.isSafeInteger(unit.id)||unit.id<0||unit.id>=6||
+      !Array.isArray(S.party)||S.party[unit.id]!==unit||
+      S.party.filter(actor=>actor===unit).length!==1||
+      unit.active!==true||!Number.isFinite(unit.hp)||unit.hp<=0)return null;
    const entry=sourceFor(unit.unitId);
    return entry?entry.multiplier:null;
  }
