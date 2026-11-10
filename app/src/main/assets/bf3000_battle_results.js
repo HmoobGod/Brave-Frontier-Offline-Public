@@ -45,6 +45,21 @@
  note.textContent='Offline simulated battle rewards. Original archived quest titles and reward amounts are source metadata; enemy AI, enemy waves, materials, drops, and Energy spending remain DEMO. Training grants no campaign rewards.';
  block.append(heading,reward,meta,buttons,note);
  nativeResult.append(block);
+ // Read-only authoritative receipt for a specific archived quest clear.
+ // The in-memory counter and saveEnabled boolean alone do not prove that
+ // the latest clear was committed to the canonical version-7 save.
+ function committedClearCount(missionId){
+   if(!Number.isSafeInteger(missionId)||missionId<=0)return null;
+   try{
+     const raw=localStorage.getItem('bf_global_offline_demo_v7');
+     if(typeof raw!=='string'||raw.length<2||raw.length>1048576)return null;
+     const data=JSON.parse(raw),clears=data?.questClears;
+     if(data?.version!==7||!clears||typeof clears!=='object'||
+        Array.isArray(clears))return null;
+     const n=clears[missionId]??0;
+     return Number.isSafeInteger(n)&&n>=0?n:null;
+   }catch(_){return null;}
+ }
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    if(!q||!S)return null;
@@ -148,5 +163,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh();},850);
  refresh();
- window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,advance,readScene});
+ window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,advance,readScene,committedClearCount});
 })();
