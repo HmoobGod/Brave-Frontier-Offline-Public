@@ -109,6 +109,26 @@ with sync_playwright() as pw:
              for row in wave_report['rows'])
   assert wave_report['malformed'] is None and wave_report['unknown'] is None
   assert wave_report['playerSame'] and wave_report['saveSame']
+  # Fail closed globally: corrupting an unrelated later mission must also
+  # invalidate readiness for the first mission; duplicate IDs are ambiguous.
+  corrupt=page.evaluate("""() => {
+    const first=QUESTS[0],later=QUESTS[QUESTS.length-1],
+      oldId=later.missionId,oldWaves=later.battles,
+      progress=JSON.stringify(P),saved=localStorage.getItem('bf_global_offline_demo_v7');
+    let duplicate,invalidLater;
+    try {
+      later.missionId=first.missionId;
+      duplicate=BFGrandGaiaCampaignV100.waveReadiness(first.missionId);
+      later.missionId=oldId;later.battles=0;
+      invalidLater=BFGrandGaiaCampaignV100.waveReadiness(first.missionId);
+    } finally {later.missionId=oldId;later.battles=oldWaves;}
+    return {duplicate,invalidLater,
+      restored:BFGrandGaiaCampaignV100.waveReadiness(first.missionId)!==null,
+      playerSame:JSON.stringify(P)===progress,
+      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""")
+  assert corrupt=={'duplicate':None,'invalidLater':None,'restored':True,
+                   'playerSame':True,'saveSame':True},corrupt
   first=page.evaluate("""() => ({
      roster:JSON.stringify(P.roster), squad:JSON.stringify(P.squad),
      unitExp:JSON.stringify(P.unitExp),version:P.version
