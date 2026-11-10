@@ -30,7 +30,9 @@
  picker.setAttribute('aria-label','Number of additional quest clears');
  picker.style.cssText='padding:7px;min-height:42px;background:#172820;'+
    'border:1px solid #a6b986;border-radius:5px;color:#f4f6e9';
- for(const n of [1,2,5,10]){
+ // Longer opt-in runs are still finite and remain subject to the exact
+ // saved-clear, active Auto, foreground, quest-change and defeat gates.
+ for(const n of [1,2,5,10,20,50]){
    const opt=document.createElement('option');opt.value=String(n);
    opt.textContent=n+' additional clears';picker.append(opt);
  }
@@ -130,7 +132,8 @@
    reason='Battle in progress';update();return true;
  }
  function start(count=Number(picker.value)){
-   if(session||!Number.isInteger(count)||![1,2,5,10].includes(count))return false;
+   if(session||!Number.isSafeInteger(count)||
+      ![1,2,5,10,20,50].includes(count))return false;
    const s=results.snapshot();
    if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
