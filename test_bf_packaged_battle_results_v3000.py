@@ -14,6 +14,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  # The results panel only invokes the existing canonical v7 save after
  # the player explicitly presses Retry; no direct or alternative store writes.
  assert src.count('localStorage.getItem(')==1 and src.count('saveProgress()')==1
+ assert 'committedClearCount(q.missionId)===count' in src
+ assert 'receiptOk' in src and '&&receiptOk' in src
  assert 'localStorage.setItem(' not in src and 'localStorage.removeItem(' not in src
  assert src.count("document.getElementById('downloadsave')")==1
  assert 'bf3000-retry-save' in src and 'bf3000-backup' in src
