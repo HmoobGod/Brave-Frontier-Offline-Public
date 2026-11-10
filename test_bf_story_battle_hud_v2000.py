@@ -73,6 +73,44 @@ with sync_playwright() as pw:
  assert page.evaluate("()=>{__hudDenySave=false;return saveProgress()}") is True
  s=page.evaluate('BFGlobalStoryBattleV2000.refresh()')
  assert s['won'] and s['stored'] and s['clears']>=1 and s['nextId']==2,s
+ # v331: v3000 loads AFTER this HUD on the real Android page. Its read-only
+ # canonical receipt gate must disable the HUD's separate Next button even
+ # when saveEnabled is stale/true. This isolated v20 page injects that API.
+ receipt=page.evaluate("""()=>{
+   const prior=window.BFGlobalBattleResultsV3000,
+         before=JSON.stringify(P),
+         saved=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     window.BFGlobalBattleResultsV3000={
+       committedClearCount:()=>0
+     };
+     const stale=BFGlobalStoryBattleV2000.refresh();
+     const staleBlocked=!stale.stored&&stale.nextId===null&&
+       !BFGlobalStoryBattleV2000.advance()&&
+       document.getElementById('bf2000-next').disabled;
+     window.BFGlobalBattleResultsV3000={
+       committedClearCount:()=>{throw Error('synthetic receipt failure')}
+     };
+     const throwsBlocked=!BFGlobalStoryBattleV2000.refresh().stored&&
+       !BFGlobalStoryBattleV2000.advance();
+     window.BFGlobalBattleResultsV3000={
+       committedClearCount:id=>P.questClears[id]
+     };
+     const restored=BFGlobalStoryBattleV2000.refresh();
+     const valid=restored.stored&&restored.nextId===2&&
+       !document.getElementById('bf2000-next').disabled;
+     return {staleBlocked,throwsBlocked,valid,
+       playerSame:JSON.stringify(P)===before,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
+       mission:QUEST.missionId};
+   }finally{
+     if(prior===undefined)delete window.BFGlobalBattleResultsV3000;
+     else window.BFGlobalBattleResultsV3000=prior;
+     BFGlobalStoryBattleV2000.refresh();
+   }
+ }""")
+ assert receipt=={'staleBlocked':True,'throwsBlocked':True,'valid':True,
+                 'playerSame':True,'saveSame':True,'mission':1},receipt
  # The battle HUD and results must use the NEW campaign-wide source order.
  # An already cleared later selection must not skip an earlier open mission,
  # even if the older local slice would have pointed after that later stage.
