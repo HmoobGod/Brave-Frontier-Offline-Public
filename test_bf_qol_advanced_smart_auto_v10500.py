@@ -330,6 +330,29 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
  p.evaluate('S.wave=1')
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
+ # When the pinned source-wave API exists, do not conserve offensive BB
+ # if a runtime quest record disagrees with its source count or fails closed.
+ # This only affects the opt-in player Auto heuristic, not enemy or NPC AI.
+ source_waves=p.evaluate("""()=>{
+   const old=window.BFGrandGaiaCampaignV100,actor=__party105[1];
+   const before=localStorage.getItem('bf_global_offline_demo_v7');
+   const results={};
+   try{
+     window.BFGrandGaiaCampaignV100={waveReadiness:id=>({missionId:id,verifiedWaveCount:3})};
+     results.match=BF041SmartAuto.kindFor(actor);
+     window.BFGrandGaiaCampaignV100={waveReadiness:id=>({missionId:id,verifiedWaveCount:4})};
+     results.mismatch=BF041SmartAuto.kindFor(actor);
+     window.BFGrandGaiaCampaignV100={waveReadiness:()=>null};
+     results.corrupt=BF041SmartAuto.kindFor(actor);
+     window.BFGrandGaiaCampaignV100={waveReadiness:()=>{throw Error('corrupt source')}};
+     results.exception=BF041SmartAuto.kindFor(actor);
+     window.BFGrandGaiaCampaignV100={};
+     results.missingApi=BF041SmartAuto.kindFor(actor);
+     return {...results,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before};
+   }finally{window.BFGrandGaiaCampaignV100=old;}
+ }""")
+ assert source_waves=={'match':'attack','mismatch':'burst','corrupt':'burst',
+                       'exception':'burst','missingApi':'burst','saveSame':True},source_waves
  p.evaluate('S.wave=2')
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='burst'
  p.evaluate('S.wave=3')
