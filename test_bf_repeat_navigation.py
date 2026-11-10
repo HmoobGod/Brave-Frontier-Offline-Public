@@ -45,6 +45,25 @@ with sync_playwright() as pw:
             BF_homeNav.go('quest');
             document.getElementById('mode').value='archive';BF_debug.reset();
             P.questClears[QUEST.missionId]=1;
+            // The source-backed replay gate now requires an explicit positive
+            // economy receipt and exact live/source wave parity. This isolated
+            // navigation fixture supplies those proofs without altering
+            // production campaign records or owner storage.
+            QUEST.battles=Number.isSafeInteger(QUEST.battles)&&QUEST.battles>0
+                ?QUEST.battles:1;
+            S.totalWaves=QUEST.battles;
+            // Keep the real campaign's navigation API: the battle HUD calls
+            // nextPlayable() while building its result snapshot. Replace only
+            // readiness responses in this disposable browser fixture.
+            const campaign=window.BFGrandGaiaCampaignV100;
+            if(!campaign||typeof campaign.nextPlayable!=='function')
+                throw Error('Source campaign navigation fixture unavailable');
+            // Copy frozen campaign methods into a writable, independent mock.
+            // Inheriting their read-only properties blocks Object.assign overrides.
+            window.BFGrandGaiaCampaignV100=Object.assign({},campaign,{
+                waveReadiness:id=>({missionId:id,verifiedWaveCount:QUEST.battles}),
+                sourceEconomyReadiness:()=>true
+            });
             // Commit only the disposable fixture's clear before the baseline.
             // Native Auto Repeat now requires a matching canonical v7 receipt.
             localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));

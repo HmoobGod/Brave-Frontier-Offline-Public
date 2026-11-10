@@ -73,8 +73,10 @@
         !Number.isSafeInteger(S.totalWaves)||
         S.totalWaves<1||
         S.totalWaves!==row.verifiedWaveCount)return false;
-     if(typeof campaign.sourceEconomyReadiness==='function'&&
-        campaign.sourceEconomyReadiness()===false)return false;
+     // A missing or indeterminate 2022 economy check cannot authorize
+     // unattended replay in a source-backed campaign.
+     if(typeof campaign.sourceEconomyReadiness!=='function'||
+        campaign.sourceEconomyReadiness()!==true)return false;
      return true;
    }catch(_){return false;}
  }
