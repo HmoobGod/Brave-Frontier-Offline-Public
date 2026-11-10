@@ -12,6 +12,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert len(src.encode('utf8'))<65536
  assert 'function snapshot()' in src and 'function advance()' in src
  assert 'localStorage' not in src and 'saveProgress(' not in src
+ assert 'BFGlobalBattleResultsV3000?.committedClearCount' in src
+ assert 'committedVictory(q)' in src and 'read(q.missionId)===count' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 gradle=(R/'app/build.gradle').read_text('utf8')
 assert "versionName '" in gradle
