@@ -46,8 +46,13 @@
    const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
    const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
    const quest=typeof QUEST==='undefined'?null:QUEST;
+   // A fractional, negative, or out-of-range DEMO total must not be
+   // normalized into an apparent match with immutable source metadata.
+   const liveValid=Number.isSafeInteger(S.totalWaves)&&
+     S.totalWaves>=1&&S.totalWaves<=100;
    const provenance=recorded===null?'UNAVAILABLE':
-     recorded===liveTotal&&quest?.battles===recorded?'MATCH':'MISMATCH';
+     liveValid&&recorded===S.totalWaves&&
+     quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
      mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:liveTotal,
      sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
