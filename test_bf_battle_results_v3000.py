@@ -39,7 +39,8 @@ with sync_playwright() as pw:
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('P.version')==7
- assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==0
+ # No canonical v7 receipt exists yet: missing storage must fail closed.
+ assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)') is None
  assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(-1)') is None
  assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1.5)') is None
  assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().done') is False
