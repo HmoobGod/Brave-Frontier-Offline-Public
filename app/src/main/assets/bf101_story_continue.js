@@ -12,13 +12,31 @@
  if(!host || !list || !tabs || tabs.querySelectorAll('button').length!==3 ||
     QUESTS[0]?.missionId!==1 || QUESTS[105]?.missionId!==365) return;
  const cleared=q=>(P.questClears?.[q.missionId]||0)>0;
- // Match the result screen: a failed canonical save must not enable another
- // mission through the global Continue Story shortcut. The failure flag
- // persists even if the battle display is later hidden or changes mode.
+ // A victory visible in memory is not proof that its clear was written.
+ // The v3000 results module loads after this shortcut: resolve its existing
+ // read-only canonical v7 receipt on each action, never cache a stale value.
+ // Older isolated embeds without v3000 retain their original save gate;
+ // a present but broken receipt provider must fail closed.
+ function uncommittedVictory(){
+   if(S?.mode!=='archive'||!S.over||S.phase!=='Victory')return false;
+   try{
+     const results=window.BFGlobalBattleResultsV3000;
+     if(results===undefined)return false;
+     if(typeof results?.committedClearCount!=='function')return true;
+     const q=typeof QUEST==='undefined'?null:QUEST;
+     const count=P.questClears?.[q?.missionId];
+     if(!Number.isSafeInteger(q?.missionId)||q.missionId<=0||
+        !Number.isSafeInteger(count)||count<1)return true;
+     return results.committedClearCount(q.missionId)!==count;
+   }catch(_){return true;}
+ }
+ // Match the result screen: an uncommitted canonical v7 victory never
+ // enables Continue Story, even if a save adapter reports success.
  const awaitingSave=()=>(
    (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
    (!!S?.over&&S.phase==='Victory'&&
-     (typeof saveEnabled!=='boolean'||!saveEnabled))
+     (typeof saveEnabled!=='boolean'||!saveEnabled))||
+   uncommittedVictory()
  );
  // A player Auto battle can be alive while S.busy is briefly false between
  // turns; a bounded repeat can own a victory screen while S.over is true.
