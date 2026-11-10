@@ -28,7 +28,7 @@ pinned=json.loads((ROOT/'source_data/bf_global_original_2022_live_quest_economy_
 assert pinned['readOnly'] is True and pinned['year']==2022 and pinned['total']==106
 assert pinned['sourceArchiveSha256']=='69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9'
 assert pinned['missionMasterSha256']=='d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83'
-source_rows=re.search(r'const verifiedWaveRows=Object\\.freeze\\((\\[\\[.*?\\]\\])\\.map\\(Object\\.freeze\\)\\);',overlay)
+source_rows=re.search(r'const verifiedWaveRows=Object\.freeze\((\[\[.*?\]\])\.map\(Object\.freeze\)\);',overlay)
 assert source_rows,'pinned wave rows missing'
 assert json.loads(source_rows.group(1))==[[r[0],r[1],r[3]] for r in pinned['records']]
 
