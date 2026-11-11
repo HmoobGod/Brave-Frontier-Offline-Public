@@ -12,6 +12,8 @@ const evidence = Object.freeze({
 // Synthetic evidence ONLY; formation 123 is deliberately NOT asserted to be historical.
 const baseline = plan(state,evidence);
 assert.equal(baseline.allowed,true);
+assert.equal(baseline.requestEpoch,12);
+assert.equal(baseline.sourceDigest,evidence.sourceDigest);
 assert.equal(baseline.nextWaveIndex,1);
 assert(Object.isFrozen(baseline));
 for(const [change,value] of [
@@ -38,7 +40,12 @@ for (const requestEpoch of [undefined,null,-1,0,11,1.5,NaN,Infinity,'12']) {
   assert.equal(plan({...state,requestEpoch},evidence).allowed,false,
     'invalid requestEpoch: '+String(requestEpoch));
 }
-// Missing intermediate consumption must never skip a wave or replay request.\nfor(const [requestEpoch,consumedEpoch] of [[13,11],[20,11],[Number.MAX_SAFE_INTEGER,11]]) {\n  assert.equal(plan({...state,requestEpoch,consumedEpoch},evidence).allowed,false,\n    'skipped epoch '+requestEpoch+'/'+consumedEpoch);\n}\n// A newer, strictly ordered request remains eligible with matching evidence.
+// Missing intermediate consumption must never skip a wave or replay request.
+for(const [requestEpoch,consumedEpoch] of [[13,11],[20,11],[Number.MAX_SAFE_INTEGER,11]]) {
+  assert.equal(plan({...state,requestEpoch,consumedEpoch},evidence).allowed,false,
+    'skipped epoch '+requestEpoch+'/'+consumedEpoch);
+}
+// A newer, strictly ordered request remains eligible with matching evidence.
 assert.equal(plan({...state,requestEpoch:13,consumedEpoch:12},evidence).allowed,true);
 // Read-only preflight must not mutate frozen source inputs.
 assert.equal(state.consumedEpoch,11);
