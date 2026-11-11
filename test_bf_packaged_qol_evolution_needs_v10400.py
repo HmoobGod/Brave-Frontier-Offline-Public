@@ -6,6 +6,13 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  data=z.read('assets/bf10400_qol_evolution_needs.js').decode('utf8')
  assert 'BF_GLOBAL_QOL_EVOLUTION_NEEDS_V10400' in data
  assert 'evo.sourceRecipes(current.id)' in data
+ assert 'BF_EvolutionRoadmapV039' in data
+ assert "['demo','DEMO costs/level covered']" in data
+ assert "['materials','All archived materials held']" in data
+ assert "['missing','Missing archived materials']" in data
+ assert 'bf10400-training-shortcut' in data
+ assert "window.BFInnerScreens?.setTab?.('training')" in data
+ assert not any(x in data for x in ('saveProgress(', 'localStorage', 'P.materials=', 'P.roster='))
  assert 'assets/bf10300_qol_battle_details.js' in z.namelist()
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
