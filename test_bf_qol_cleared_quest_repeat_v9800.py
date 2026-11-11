@@ -64,7 +64,8 @@ with sync_playwright() as pw:
      oldPhase=S.phase,oldAuto=S.auto,
      saved=localStorage.getItem('bf_global_offline_demo_v7'),
      player=JSON.stringify(P),before=__repeatCount;
-   let invalidWave=false,invalidEconomy=false,brokenSource=false,
+   let invalidWave=false,invalidEconomy=false,missingEconomy=false,
+       unknownEconomy=false,brokenSource=false,
        invalidLiveWave=false,started=false,stopped=false,
        disarmed=false,noExtraReplay=false;
    try{
@@ -76,6 +77,10 @@ with sync_playwright() as pw:
      api.waveReadiness=()=>({missionId:1,verifiedWaveCount:3});
      api.sourceEconomyReadiness=()=>false;
      invalidEconomy=!repeat.start(2)&&__repeatCount===before;
+     delete api.sourceEconomyReadiness;
+     missingEconomy=!repeat.start(2)&&__repeatCount===before;
+     api.sourceEconomyReadiness=()=>undefined;
+     unknownEconomy=!repeat.start(2)&&__repeatCount===before;
      api.sourceEconomyReadiness=()=>{throw Error('bad original source')};
      brokenSource=!repeat.start(2)&&__repeatCount===before;
      api.sourceEconomyReadiness=()=>true;
@@ -109,13 +114,15 @@ with sync_playwright() as pw:
      document.getElementById('auto').checked=false;
      window.__repeatCount=before;
    }
-   return {invalidWave,invalidEconomy,brokenSource,invalidLiveWave,
+   return {invalidWave,invalidEconomy,missingEconomy,unknownEconomy,
+     brokenSource,invalidLiveWave,
      started,stopped,disarmed,noExtraReplay,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
      playerSame:JSON.stringify(P)===player};
  }""")
  assert source_proof=={
-   'invalidWave':True,'invalidEconomy':True,'brokenSource':True,
+   'invalidWave':True,'invalidEconomy':True,'missingEconomy':True,
+   'unknownEconomy':True,'brokenSource':True,
    'invalidLiveWave':True,'started':True,'stopped':True,
    'disarmed':True,'noExtraReplay':True,
    'saveSame':True,'playerSame':True},source_proof
