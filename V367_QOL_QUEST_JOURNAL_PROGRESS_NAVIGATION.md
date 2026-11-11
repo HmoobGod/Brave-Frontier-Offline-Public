@@ -9,7 +9,7 @@
 
 ## Code scope
 
-Change only `app/src/main/assets/bf110_quest_journal.js` and its existing registered Chromium and packaged regression tests. No changes to base HTML, Java, manifest, Gradle, signing, original source archive, enemy/NPC partner AI, wave hooks, evolution patch (#362), precombat guard (#363), Save Retry story HUD (#364), or source capture research (#366). The patch uses the existing journal insertion point and public `BFGlobalQuestJournalV110` API.
+Change `app/src/main/assets/bf110_quest_journal.js`, the small shared `canNavigate()` export in `bf101_story_continue.js`, its registered Chromium and packaged journal tests, and this documentation. The journal consumes Continue Story's existing fail-closed save/Auto Repeat checks instead of duplicating those guards. No changes to base HTML, Java, manifest, Gradle, signing, original source archive, enemy/NPC partner AI, wave hooks, evolution patch (#362), precombat guard (#363), Save Retry story HUD (#364), or source capture research (#366).
 
 ## Safety / CI
 
