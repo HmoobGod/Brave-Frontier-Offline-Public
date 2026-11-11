@@ -10,6 +10,11 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
  assert "QUESTS.length!==106" in script
  assert 'BFGlobalQuestText.sourceFor' in script
  assert 'questUnlocked(row.q)' in script
+ assert 'bf110-sort' in script and 'bf110-next' in script
+ assert 'nextAvailableMission' in script and 'STORY COMPLETION:' in script
+ assert "['energy','Original Energy" in script
+ assert "['exp','Original EXP" in script
+ assert "['clears','Most clears first']" in script
  assert 'localStorage' not in script and 'saveProgress(' not in script
  for path in ('bf080_morgan_map.js','bf090_st_lamia_map.js',
               'bf100_grand_gaia_campaign.js','bf101_story_continue.js'):
