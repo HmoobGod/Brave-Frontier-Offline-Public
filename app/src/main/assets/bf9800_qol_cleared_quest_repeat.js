@@ -84,12 +84,29 @@
    // v322: only a committed canonical v7 clear count authorizes unattended
    // replay. Older embedded/mock result providers may lack this read-only
    // API; keep their preexisting behavior without writing storage here.
-   const receipt=results.committedClearCount;
-   if(typeof receipt!=='function')return true;
-   if(!Number.isSafeInteger(s?.missionId)||
-      !Number.isSafeInteger(s?.clears)||s.clears<1)return false;
-   try{return receipt(s.missionId)===s.clears;}
-   catch(_){return false;}
+   try{
+     // Even reading an optional provider method may invoke a throwing getter.
+     // Never let that escape poll() while unattended native Auto is armed.
+     const receipt=results.committedClearCount;
+     if(typeof receipt!=='function')return true;
+     if(!Number.isSafeInteger(s?.missionId)||
+        !Number.isSafeInteger(s?.clears)||s.clears<1)return false;
+     return receipt(s.missionId)===s.clears;
+   }catch(_){return false;}
+ }
+ // The native result provider is optional and can fail during a turn.
+ // In unattended mode, unknown results are not permission to replay.
+ function safeResultSnapshot(){
+   try{
+     const s=results.snapshot();
+     if(!s||typeof s!=='object')return null;
+     // Materialize only the fields this adapter reads. A throwing getter
+     // must not escape poll() while native Auto is still armed.
+     const out={};
+     for(const key of ['missionId','clears','done','victory','archive',
+       'stored','canReplay'])out[key]=s[key];
+     return out;
+   }catch(_){return null;}
  }
  function statusSnapshot(){
    return freeze({active:!!session,missionId:session?.missionId||null,
@@ -97,7 +114,7 @@
      reason});
  }
  function update(){
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    const cleared=Number(s?.clears)>0;
    const eligible=!session&&onQuest()&&!document.hidden&&!S.busy&&
      S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
@@ -154,7 +171,7 @@
  function playAgain(){
    if(!session)return false;
    if(!onQuest()){leaveQuest();return false;}
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    if(S.busy||S.mode!=='archive'||!s?.done||!s.victory||
       !s.archive||!s.stored||s.missionId!==session.missionId||
       QUEST?.missionId!==session.missionId||!s.canReplay||
@@ -188,7 +205,7 @@
  function start(count=Number(picker.value)){
    if(session||!Number.isSafeInteger(count)||
       ![1,2,5,10,20,50].includes(count))return false;
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
@@ -203,8 +220,9 @@
    if(!session){update();return false;}
    if(!onQuest())return leaveQuest();
    if(document.hidden)return stop('Stopped: app left foreground',false);
-   const s=results.snapshot();
-   if(!s||s.missionId!==session.missionId||
+   const s=safeResultSnapshot();
+   if(!s)return stop('Stopped: battle results unavailable',false);
+   if(s.missionId!==session.missionId||
       QUEST?.missionId!==session.missionId||
       S.mode!=='archive'||!s.archive)
      return stop('Stopped: quest or mode changed',false);

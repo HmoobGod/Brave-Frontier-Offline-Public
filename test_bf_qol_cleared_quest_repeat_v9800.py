@@ -370,6 +370,98 @@ with sync_playwright() as pw:
     'reason':'Stopped by player' if during_stop else 'Stopped: native Auto could not start',
     'nativeDisarmed':True,'replayDelta':1,
     'progressSame':True,'saveSame':True,'writesSame':True},broken_click
+ # A snapshot can return an object whose property getter throws later.
+ # Reading every used field inside the guard must disarm an active session.
+ getter_failure=p.evaluate("""()=>{
+   const api=BFGlobalQoLQuestRepeatV9800,
+     result=BFGlobalBattleResultsV3000,old=result.snapshot,
+     auto=document.getElementById('auto'),prev=S.auto,
+     count=__repeatCount,writes=__v98StorageWrites,
+     player=JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     delete S.auto;auto.checked=false;auto.disabled=false;
+     result.snapshot=()=>({get done(){throw Error('getter failed')}});
+     const refused=api.start(2)===false;
+     result.snapshot=old;
+     const started=api.start(2)===true;
+     S.auto=true;auto.checked=true;
+     result.snapshot=()=>({get missionId(){throw Error('getter failed')}});
+     const stopped=api.poll()===true;
+     return {refused,started,stopped,active:api.statusSnapshot().active,
+       reason:api.statusSnapshot().reason,disarmed:S.auto===false&&!auto.checked,
+       delta:__repeatCount-count,playerSame:JSON.stringify(P)===player,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save,
+       writesSame:__v98StorageWrites===writes};
+   }finally{
+     result.snapshot=old;auto.checked=false;auto.disabled=false;
+     if(prev===undefined)delete S.auto;else S.auto=prev;
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     __repeatCount=count;
+   }
+ }""")
+ assert getter_failure=={'refused':True,'started':True,'stopped':True,
+   'active':False,'reason':'Stopped: battle results unavailable',
+   'disarmed':True,'delta':1,'playerSame':True,'saveSame':True,
+   'writesSame':True},getter_failure
+ # Native results may throw before a repeat starts, between the initial
+ # snapshot and playAgain(), or in a timer poll while native Auto is armed.
+ # Never continue without a trusted result or modify the canonical v7 save.
+ snapshot_failures=p.evaluate("""()=>{
+   const api=BFGlobalQoLQuestRepeatV9800,
+     result=BFGlobalBattleResultsV3000,
+     original=result.snapshot,
+     auto=document.getElementById('auto'),
+     previousAuto=S.auto,beforeCount=__repeatCount,
+     beforeWrites=__v98StorageWrites,
+     beforePlayer=JSON.stringify(P),
+     beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+   let refusedStart=false,disabledUI=false,stagedFailure=false,
+     stagedReason='',started=false,stopped=false,disarmed=false,
+     stoppedReason='',delta=0;
+   try{
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     delete S.auto;auto.checked=false;auto.disabled=false;
+     result.snapshot=()=>{throw Error('read failed')};
+     refusedStart=api.start(2)===false;
+     disabledUI=api.poll()===false&&
+       document.getElementById('bf9800-start').disabled;
+     let reads=0;
+     result.snapshot=()=>{
+       if(++reads===2)throw Error('read failed after arming');
+       return original();
+     };
+     stagedFailure=api.start(2)===false&&!api.statusSnapshot().active;
+     stagedReason=api.statusSnapshot().reason;
+     result.snapshot=original;
+     started=api.start(2)===true;
+     const afterStart=__repeatCount;
+     S.auto=true;auto.checked=true;
+     result.snapshot=()=>{throw Error('poll read failed')};
+     stopped=api.poll()===true&&!api.statusSnapshot().active;
+     stoppedReason=api.statusSnapshot().reason;
+     disarmed=S.auto===false&&!auto.checked;
+     delta=__repeatCount-beforeCount;
+     return {refusedStart,disabledUI,stagedFailure,stagedReason,
+       started,stopped,stoppedReason,disarmed,delta,
+       noFurtherReplay:__repeatCount===afterStart,
+       playerSame:JSON.stringify(P)===beforePlayer,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+       writesSame:__v98StorageWrites===beforeWrites};
+   }finally{
+     result.snapshot=original;auto.checked=false;auto.disabled=false;
+     if(previousAuto===undefined)delete S.auto;else S.auto=previousAuto;
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     __repeatCount=beforeCount;
+   }
+ }""")
+ assert snapshot_failures=={
+   'refusedStart':True,'disabledUI':True,
+   'stagedFailure':True,'stagedReason':'Stopped: replay prerequisites changed',
+   'started':True,'stopped':True,
+   'stoppedReason':'Stopped: battle results unavailable',
+   'disarmed':True,'delta':1,'noFurtherReplay':True,
+   'playerSame':True,'saveSame':True,'writesSame':True},snapshot_failures
  # A one-clear player choice is a genuine bounded native replay: it executes
  # one additional quest, confirms the stored clear, then restores Auto OFF.
  assert p.evaluate(api+'.start(1)') is True
