@@ -9,11 +9,11 @@ function planPlayerWaveTransition(state, evidence) {
   const deny = reason => Object.freeze({allowed:false,reason});
   if (!state || !evidence || typeof state !== 'object' || typeof evidence !== 'object')
     return deny('missing-evidence');
-  const integer = n => Number.isSafeInteger(n) && n >= 0;
+  // Only a contiguous unconsumed request can authorize a next-wave plan.\n  // Caller must authenticate formation evidence independently.\n  const integer = n => Number.isSafeInteger(n) && n >= 0;
   if (!integer(state.missionId) || state.missionId === 0 ||
       !integer(state.waveIndex) || !integer(state.totalWaves) || state.totalWaves < 1 ||
       !integer(state.requestEpoch) || state.requestEpoch === 0 ||
-      !integer(state.consumedEpoch) || state.consumedEpoch >= state.requestEpoch)
+      !integer(state.consumedEpoch) || state.consumedEpoch !== state.requestEpoch - 1)
     return deny('invalid-state');
   if (state.actor !== 'player' || state.owner !== 'player0' ||
       state.mode !== 'archive' || state.terminal === true ||
