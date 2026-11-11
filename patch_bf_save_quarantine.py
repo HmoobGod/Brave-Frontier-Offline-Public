@@ -39,3 +39,7 @@ else:
 # builds. Idempotent, separately fail-closed; no original enemy formation claims.
 from patch_bf_source_wave_guard_v359 import apply as apply_wave_guard
 apply_wave_guard()
+
+# v360: additionally check live 2022 mission source before the first action.
+from patch_bf_wave_precombat_v360 import apply as apply_precombat_wave_guard
+apply_precombat_wave_guard()
