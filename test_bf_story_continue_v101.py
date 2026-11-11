@@ -41,7 +41,9 @@ with sync_playwright() as pw:
  # reference only once the source-qualified lookup is present.
  assert '2022 source reference:' not in page.locator('#bf101-next').text_content()
  page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
- page.evaluate('BFGrandGaiaContinueV101.refresh()')
+ # Native v143 boot must refresh the already-mounted Continue Story shortcut
+ # without requiring a manual tab or button click.
+ page.wait_for_function("()=>document.getElementById('bf101-next')?.textContent.includes('2022 source reference:')")
  preview=page.locator('#bf101-next').text_content()
  assert '2022 source reference: 3 waves · Energy 0 · EXP 5 · Zel 500 · Karma 100' in preview,preview
  assert '(not DEMO payouts)' in preview

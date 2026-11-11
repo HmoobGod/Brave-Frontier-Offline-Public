@@ -63,4 +63,8 @@
    lookup:id=>indexed.has(id)?Object.freeze([...indexed.get(id)]):null,
    refresh:decorate
  });
+ // Android injects the source module after the Continue Story shortcut.
+ // Notify that already-mounted read-only panel now that verified tuples exist.
+ // Never mutate route, player data or native battle state on source load.
+ try{window.BFGrandGaiaContinueV101?.refresh?.();}catch(_){}
 })();
