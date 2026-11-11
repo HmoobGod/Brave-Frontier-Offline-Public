@@ -146,6 +146,11 @@ with sync_playwright() as pw:
       playerSame:JSON.stringify(P)===player,
       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
   }""")
+  # Read-only source coverage must be explicit about native gameplay limits.
+  expected_waves=sum(row[3] for row in pinned['records'])
+  coverage=page.locator('#bf100-campaign .bf100-foot').text_content()
+  assert f'106 missions · {expected_waves} wave counts' in coverage,coverage
+  assert 'native multi-wave combat NOT verified' in coverage,coverage
   assert len(wave_report['rows'])==106
   assert all(row and row['verifiedWaveCount']>=1 and
              row['enemyFormationsVerified'] is False and
