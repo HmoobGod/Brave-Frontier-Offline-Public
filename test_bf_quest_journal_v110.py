@@ -9,6 +9,7 @@ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_te
 assert js.count('/* BF_GLOBAL_QUEST_JOURNAL_V110 */')==1
 assert 'localStorage' not in js and 'saveProgress(' not in js
 assert 'questUnlocked(row.q)' in js and 'BFQuestAreas.choose(row.q)' in js
+assert 'BFGrandGaiaContinueV101?.canNavigate' in js
 assert java.index('readPackagedText("bf101_story_continue.js")') < java.index('readPackagedText("bf110_quest_journal.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
