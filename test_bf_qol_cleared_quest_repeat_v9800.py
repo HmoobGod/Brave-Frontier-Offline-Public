@@ -370,6 +370,40 @@ with sync_playwright() as pw:
     'reason':'Stopped by player' if during_stop else 'Stopped: native Auto could not start',
     'nativeDisarmed':True,'replayDelta':1,
     'progressSame':True,'saveSame':True,'writesSame':True},broken_click
+ # A snapshot can return an object whose property getter throws later.
+ # Reading every used field inside the guard must disarm an active session.
+ getter_failure=p.evaluate("""()=>{
+   const api=BFGlobalQoLQuestRepeatV9800,
+     result=BFGlobalBattleResultsV3000,old=result.snapshot,
+     auto=document.getElementById('auto'),prev=S.auto,
+     count=__repeatCount,writes=__v98StorageWrites,
+     player=JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     delete S.auto;auto.checked=false;auto.disabled=false;
+     result.snapshot=()=>({get done(){throw Error('getter failed')}});
+     const refused=api.start(2)===false;
+     result.snapshot=old;
+     const started=api.start(2)===true;
+     S.auto=true;auto.checked=true;
+     result.snapshot=()=>({get missionId(){throw Error('getter failed')}});
+     const stopped=api.poll()===true;
+     return {refused,started,stopped,active:api.statusSnapshot().active,
+       reason:api.statusSnapshot().reason,disarmed:S.auto===false&&!auto.checked,
+       delta:__repeatCount-count,playerSame:JSON.stringify(P)===player,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save,
+       writesSame:__v98StorageWrites===writes};
+   }finally{
+     result.snapshot=old;auto.checked=false;auto.disabled=false;
+     if(prev===undefined)delete S.auto;else S.auto=prev;
+     S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+     __repeatCount=count;
+   }
+ }""")
+ assert getter_failure=={'refused':True,'started':True,'stopped':True,
+   'active':False,'reason':'Stopped: battle results unavailable',
+   'disarmed':True,'delta':1,'playerSame':True,'saveSame':True,
+   'writesSame':True},getter_failure
  # Native results may throw before a repeat starts, between the initial
  # snapshot and playAgain(), or in a timer poll while native Auto is armed.
  # Never continue without a trusted result or modify the canonical v7 save.
