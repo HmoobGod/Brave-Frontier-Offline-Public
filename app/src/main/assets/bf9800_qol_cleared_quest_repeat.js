@@ -84,12 +84,15 @@
    // v322: only a committed canonical v7 clear count authorizes unattended
    // replay. Older embedded/mock result providers may lack this read-only
    // API; keep their preexisting behavior without writing storage here.
-   const receipt=results.committedClearCount;
-   if(typeof receipt!=='function')return true;
-   if(!Number.isSafeInteger(s?.missionId)||
-      !Number.isSafeInteger(s?.clears)||s.clears<1)return false;
-   try{return receipt(s.missionId)===s.clears;}
-   catch(_){return false;}
+   try{
+     // Even reading an optional provider method may invoke a throwing getter.
+     // Never let that escape poll() while unattended native Auto is armed.
+     const receipt=results.committedClearCount;
+     if(typeof receipt!=='function')return true;
+     if(!Number.isSafeInteger(s?.missionId)||
+        !Number.isSafeInteger(s?.clears)||s.clears<1)return false;
+     return receipt(s.missionId)===s.clears;
+   }catch(_){return false;}
  }
  // The native result provider is optional and can fail during a turn.
  // In unattended mode, unknown results are not permission to replay.
