@@ -28,4 +28,19 @@ assert.equal(plan(state,null).allowed,false);
 assert.equal(plan(null,evidence).allowed,false);
 assert.equal(plan({...state,requestEpoch:12,consumedEpoch:12},evidence).allowed,false);
 assert.equal(plan({...state,waveIndex:1}, {...evidence,waveIndex:2}).allowed,true);
+
+// Fail closed when replay-consumption history is absent, corrupted, or ahead.
+for (const consumedEpoch of [undefined,null,-1,12,13,1.5,NaN,Infinity,'11']) {
+  assert.equal(plan({...state,consumedEpoch},evidence).allowed,false,
+    'invalid consumedEpoch: '+String(consumedEpoch));
+}
+for (const requestEpoch of [undefined,null,-1,0,11,1.5,NaN,Infinity,'12']) {
+  assert.equal(plan({...state,requestEpoch},evidence).allowed,false,
+    'invalid requestEpoch: '+String(requestEpoch));
+}
+// A newer, strictly ordered request remains eligible with matching evidence.
+assert.equal(plan({...state,requestEpoch:13,consumedEpoch:12},evidence).allowed,true);
+// Read-only preflight must not mutate frozen source inputs.
+assert.equal(state.consumedEpoch,11);
+assert.equal(evidence.formationId,123);
 console.log('PASS: synthetic player-only next-wave preflight; no combat/save side effects');
