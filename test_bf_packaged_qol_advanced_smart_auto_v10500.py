@@ -6,6 +6,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  data=z.read('assets/bf10500_qol_advanced_smart_auto.js').decode('utf8')
  assert 'BF_GLOBAL_QOL_ADVANCED_SMART_AUTO_V10500' in data
  assert 'window.BF041SmartAuto=freeze({...smart,kindFor})' in data
+ # Source-provider exceptions must return null, never the regular HP% fallback.
+ assert 'try{\n   const element=window.BFGlobalElementalCombatV6900;' in data
+ assert 'return ranked[0]?.foe||undefined;\n   }catch(_){return null;}' in data
+ assert 'return chosen===undefined?baseTarget(enemies):chosen;' in data
  assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
  assert 'S.totalWaves!==row.verifiedWaveCount' in data
  assert 'assets/bf10400_qol_evolution_needs.js' in z.namelist()

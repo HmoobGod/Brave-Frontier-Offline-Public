@@ -248,6 +248,40 @@ with sync_playwright() as pw:
    {'hp':5,'maxHp':100,'slot':1,'element':'Fire'},
    {'hp':1,'maxHp':100,'slot':2,'element':'Water'}]
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",typed_foes)==0
+ # Bad optional source helpers must not crash the player's live Auto turn,
+ # silently guess a legacy HP% target, or change orders/canonical v7 bytes.
+ source_failures=p.evaluate("""rows=>{
+   const original=window.BFGlobalElementalCombatV6900,
+     before=localStorage.getItem('bf_global_offline_demo_v7'),
+     player=JSON.stringify(P),selected=S.target,
+     orders=__party105.map(u=>JSON.stringify(u.action));
+   const providers=[
+     {normalize:()=>{throw Error('ally type unavailable')},
+       multiplier:original.multiplier},
+     {normalize:value=>{if(value==='Earth')throw Error('foe type unavailable');
+       return original.normalize(value);},multiplier:original.multiplier},
+     {normalize:original.normalize,
+       multiplier:()=>{throw Error('weakness unavailable')}},
+     Object.defineProperty({multiplier:original.multiplier},'normalize',
+       {get(){throw Error('source property unavailable')}})
+   ];
+   const rejected=[];
+   try{
+     for(const provider of providers){
+       window.BFGlobalElementalCombatV6900=provider;
+       rejected.push(BF042AutoCoordination.chooseTarget(rows)===null);
+     }
+   }finally{window.BFGlobalElementalCombatV6900=original}
+   return {rejected,normalRecovered:BF042AutoCoordination.chooseTarget(rows)?.slot===0,
+     targetSame:S.target===selected,
+     ordersSame:__party105.every((u,i)=>JSON.stringify(u.action)===orders[i]),
+     playerSame:JSON.stringify(P)===player,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before,
+     strictTarget:BFGlobalQoLAdvancedAutoV10500.requiresValidatedTarget()};
+ }""",typed_foes)
+ assert source_failures=={'rejected':[True]*4,'normalRecovered':True,
+   'targetSame':True,'ordersSame':True,'playerSame':True,'saveSame':True,
+   'strictTarget':True},source_failures
  # Ties favor lower remaining HP%, then native slot.
  same=[{'hp':50,'maxHp':500,'slot':5,'element':'Earth'},
        {'hp':10,'maxHp':100,'slot':2,'element':'Earth'}]
