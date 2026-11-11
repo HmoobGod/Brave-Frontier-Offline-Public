@@ -94,7 +94,16 @@
  // The native result provider is optional and can fail during a turn.
  // In unattended mode, unknown results are not permission to replay.
  function safeResultSnapshot(){
-   try{return results.snapshot();}catch(_){return null;}
+   try{
+     const s=results.snapshot();
+     if(!s||typeof s!=='object')return null;
+     // Materialize only the fields this adapter reads. A throwing getter
+     // must not escape poll() while native Auto is still armed.
+     const out={};
+     for(const key of ['missionId','clears','done','victory','archive',
+       'stored','canReplay'])out[key]=s[key];
+     return out;
+   }catch(_){return null;}
  }
  function statusSnapshot(){
    return freeze({active:!!session,missionId:session?.missionId||null,
