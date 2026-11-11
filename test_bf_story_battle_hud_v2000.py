@@ -38,6 +38,47 @@ with sync_playwright() as pw:
  assert s['current']==1 and s['completed']==0 and s['nextId'] is None,s
  assert 'DEMO' in page.locator('#bf2000-foot').inner_text()
  assert page.locator('#bf2000-waves span').count()==3
+ # v359: direct real core execute() next-wave and final-reward gates.
+ # No mocks of the native engine; only disposable source-provider corruption.
+ page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
+ wave_guard=page.evaluate("""async()=>{
+   const provider=window.BFOriginalGlobalQuestEnergyV14300,
+     player=JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7'),
+     originalMode=document.getElementById('mode').value,
+     result={};
+   const mismatched=id=>{
+     const row=[...provider.lookup(id)];row[3]+=1;return row;
+   };
+   const emptyWave=()=>{for(const e of S.enemies)e.hp=0;
+     for(const p of liveParty())p.action={kind:'guard',target:0};};
+   try{
+     reset();window.BFOriginalGlobalQuestEnergyV14300={
+       source:provider.source,lookup:mismatched};
+     emptyWave();await execute();
+     result.midBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto;
+     reset();S.wave=S.totalWaves-1;emptyWave();await execute();
+     result.finalBlocked=!S.over&&!S.busy&&
+       (P.questClears?.[QUEST.missionId]||0)===0;
+     window.BFOriginalGlobalQuestEnergyV14300=provider;
+     reset();emptyWave();await execute();
+     result.goodAdvance=S.wave===1&&S.totalWaves===3&&!S.over;
+     document.getElementById('mode').value='training';
+     reset();window.BFOriginalGlobalQuestEnergyV14300={
+       source:provider.source,lookup:()=>{throw Error('synthetic source fault')}};
+     emptyWave();await execute();
+     result.trainingUnchanged=S.mode==='training'&&S.wave===1&&!S.over;
+     result.playerSame=JSON.stringify(P)===player;
+     result.saveSame=localStorage.getItem('bf_global_offline_demo_v7')===save;
+     return result;
+   }finally{
+     window.BFOriginalGlobalQuestEnergyV14300=provider;
+     document.getElementById('mode').value=originalMode;
+     reset();BFGlobalStoryBattleV2000.refresh();
+   }
+ }""")
+ assert wave_guard=={'midBlocked':True,'finalBlocked':True,
+   'goodAdvance':True,'trainingUnchanged':True,'playerSame':True,
+   'saveSame':True},wave_guard
  assert page.locator('#bf2000-next').is_disabled()
  before=page.evaluate("""()=>({p:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  page.evaluate('()=>{S.wave=1;BFGlobalStoryBattleV2000.refresh()}')
