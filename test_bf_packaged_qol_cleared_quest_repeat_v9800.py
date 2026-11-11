@@ -14,6 +14,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert "try{auto.click();}" in src
     assert "catch(_){return false;}" in src
     assert "finally{internalToggle=false;}" in src
+    assert 'const receipt=results.committedClearCount;' in src
+    assert 'return receipt(s.missionId)===s.clears;' in src
     assert 'function safeResultSnapshot(){' in src
     assert 'const s=results.snapshot();' in src
     assert "for(const key of ['missionId','clears','done','victory','archive'," in src
