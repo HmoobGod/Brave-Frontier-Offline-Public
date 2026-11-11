@@ -9,7 +9,7 @@ with zipfile.ZipFile(A) as z:
  assert "staminaEnforced:false" in js
  assert '2022 original · Energy ' in js
  assert "' · EXP '+r[5]+' · Zel '+r[6]" in js
- assert 'EXP/Zel are not DEMO payouts' in js
+ assert 'DEMO credits EXP/Zel/Karma on clear' in js
  assert 'reference; stamina not enforced' in js
  assert 'bf_global_offline_demo_v7' in html
  assert 'window.BF_QUEST_CATALOG' in html
