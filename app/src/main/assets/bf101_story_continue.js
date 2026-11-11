@@ -139,7 +139,7 @@
          ' · '+regionName(q)+' · Mission '+q.missionId+
          (economy?' · 2022 source reference: '+economy.waves+' waves · Energy '+
            economy.energy+' · EXP '+economy.exp+' · Zel '+economy.zel+
-           ' · Karma '+economy.karma+' (not DEMO payouts)':'');
+           ' · Karma '+economy.karma+' (DEMO credits EXP/Zel/Karma on clear; stamina not enforced)':'');
     }else next.textContent=s.done===106?
       'All 106 archived story missions cleared (DEMO combat).' :
       'No further mission currently unlocked. Check the preceding requirement.';
