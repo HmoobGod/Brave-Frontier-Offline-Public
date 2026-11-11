@@ -47,7 +47,7 @@ with sync_playwright() as pw:
   assert 'Energy '+str(row[4])+' · Karma '+str(row[7]) in label.text_content()
   assert 'EXP '+str(row[5])+' · Zel '+str(row[6]) in label.text_content()
   assert 'DEMO credits EXP/Zel/Karma on clear' in label.text_content()
-   assert 'stamina not enforced' in label.text_content()
+  assert 'stamina not enforced' in label.text_content()
  p.evaluate('renderQuestList()')
  p.wait_for_function("""()=>document.querySelectorAll('button.questcard .bf143-original-cost').length===106""")
  p.evaluate('renderQuestList()')
