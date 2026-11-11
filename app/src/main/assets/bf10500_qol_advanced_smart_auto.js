@@ -124,6 +124,10 @@
  // Favor the foe weak to the largest number of living source-typed allies.
  // Unknown foe/ally elements are not inferred; default behavior survives.
  function elementalTarget(enemies){
+   // A throwing optional source provider cannot interrupt PLAYER Auto
+   // or authorize a guessed fallback target. Catch across getter checks,
+   // ally normalization, foe normalization and multiplier ranking.
+   try{
    const element=window.BFGlobalElementalCombatV6900;
    if(typeof S==='undefined'||S.mode!=='archive'||S.over||
       !element||typeof element.normalize!=='function'||
@@ -150,6 +154,7 @@
      a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
      a.foe.slot-b.foe.slot);
    return ranked[0]?.foe||undefined;
+   }catch(_){return null;}
  }
  function chooseTarget(enemies){
    if(!active()||config.target==='percent')return baseTarget(enemies);
