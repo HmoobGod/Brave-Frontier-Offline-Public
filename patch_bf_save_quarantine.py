@@ -34,3 +34,8 @@ elif s.count(NEW) == 1:
     print('Bundled HTML already patched; no change.')
 else:
     raise SystemExit('Refusing to patch unexpected HTML; original source not modified.')
+
+# Prepare the v359 native playable source-count gate for CI and direct Gradle
+# builds. Idempotent, separately fail-closed; no original enemy formation claims.
+from patch_bf_source_wave_guard_v359 import apply as apply_wave_guard
+apply_wave_guard()

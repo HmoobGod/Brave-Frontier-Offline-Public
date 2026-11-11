@@ -14,7 +14,13 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'localStorage' not in src and 'saveProgress(' not in src
  assert 'BFGlobalBattleResultsV3000?.committedClearCount' in src
  assert 'committedVictory(q)' in src and 'read(q.missionId)===count' in src
- assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
+ idx=z.read('assets/index.html').decode('utf8')
+ assert 'bf_global_offline_demo_v7' in idx
+ assert 'function sourceWaveCountReady()' in idx
+ assert "metadata.sourceSha256!=='a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66'" in idx
+ assert 'if(!sourceWaveCountReady()){' in idx
+ assert 'No next wave or clear reward granted' in idx
+ assert idx.index('if(!sourceWaveCountReady()){')<idx.index('if(S.wave>=S.totalWaves-1){finish(true);return}')
 gradle=(R/'app/build.gradle').read_text('utf8')
 assert "versionName '" in gradle
 assert "applicationId 'org.bravefrontier.offline'" in gradle
