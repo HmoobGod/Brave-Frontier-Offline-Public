@@ -45,6 +45,21 @@ with sync_playwright() as pw:
  page.locator('#bf110-journal summary').click()
  assert page.locator('[data-bf-journal-entry]').count()==20
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
+ # New read-only story completion, direct-next action and sortable source fields.
+ assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==1
+ assert '/106 cleared' in page.locator('#bf110-progress').text_content()
+ assert 'MISSION 1' in page.locator('#bf110-next').text_content()
+ p_before_sort=page.evaluate('JSON.stringify(P)')
+ page.locator('#bf110-sort').select_option('energy')
+ assert int(page.locator('[data-bf-journal-entry]').first.get_attribute(
+   'data-bf-journal-entry'))==page.evaluate('''()=>QUESTS.slice().sort((a,b)=>
+     a.energy-b.energy||a.missionId-b.missionId)[0].missionId''')
+ page.locator('#bf110-sort').select_option('exp')
+ assert int(page.locator('[data-bf-journal-entry]').first.get_attribute(
+   'data-bf-journal-entry'))==page.evaluate('''()=>QUESTS.slice().sort((a,b)=>
+     b.exp-a.exp||a.missionId-b.missionId)[0].missionId''')
+ page.locator('#bf110-sort').select_option('story')
+ assert page.evaluate('JSON.stringify(P)')==p_before_sort
  page.locator('#bf110-region').select_option('morgan')
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==36
  page.locator('#bf110-search').fill('burning desert')
@@ -63,6 +78,17 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(1)') is True
  assert page.evaluate('QUEST.missionId')==1
  page.evaluate('()=>{for(const q of QUESTS.slice(0,34))P.questClears[q.missionId]=1;renderQuestList()}')
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==200
+ assert '34/106 cleared' in page.locator('#bf110-progress').text_content()
+ page.evaluate('S.busy=true')
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ page.evaluate('S.busy=false')
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ page.locator('#bf110-next').click()
+ assert page.evaluate('QUEST.missionId')==200
+ assert page.locator('#bf080-morgan-map').is_visible()
  page.locator('#bf110-region').select_option('morgan')
  page.locator('#bf110-search').fill('burning desert')
  page.locator('#bf110-state').select_option('available')
@@ -82,6 +108,10 @@ with sync_playwright() as pw:
  page.locator('#bf110-search').fill('')
  page.locator('#bf110-state').select_option('cleared')
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==70
+ assert '70/106 cleared' in page.locator('#bf110-progress').text_content()
+ page.locator('#bf110-sort').select_option('clears')
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==70
+ assert page.locator('#bf110-progress').count()==1
  page.locator('#bf110-more').click()
  assert page.locator('[data-bf-journal-entry]').count()==40
  assert page.evaluate('P.version')==7
