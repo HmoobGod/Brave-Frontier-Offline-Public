@@ -70,7 +70,15 @@ with sync_playwright() as pw:
  page.locator('#bf110-region').select_option('morgan')
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==36
  page.locator('#bf110-search').fill('burning desert')
- assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==1
+ # Source-description search may match multiple original Morgan mission descriptions.
+ expected_burning=page.evaluate("""() => QUESTS.filter(q => {
+   if(q.dungeonId<200 || q.dungeonId>=300)return false;
+   const source=BFGlobalQuestText.sourceFor(q);
+   return [String(q.missionId),source.mission.name,source.dungeon.name,
+     source.mission.description].some(text=>text.toLocaleLowerCase().includes('burning desert'));
+ }).length""")
+ assert expected_burning>=1
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==expected_burning
  assert page.locator('[data-bf-journal-entry="200"]').count()==1
  page.locator('[data-bf-journal-preview="200"]').click()
  assert 'The Burning Desert' in page.locator('#bf110-preview').text_content()
