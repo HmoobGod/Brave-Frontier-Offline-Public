@@ -12,7 +12,8 @@ function planPlayerWaveTransition(state, evidence) {
   const integer = n => Number.isSafeInteger(n) && n >= 0;
   if (!integer(state.missionId) || state.missionId === 0 ||
       !integer(state.waveIndex) || !integer(state.totalWaves) || state.totalWaves < 1 ||
-      !integer(state.requestEpoch) || state.requestEpoch === 0)
+      !integer(state.requestEpoch) || state.requestEpoch === 0 ||
+      !integer(state.consumedEpoch) || state.consumedEpoch >= state.requestEpoch)
     return deny('invalid-state');
   if (state.actor !== 'player' || state.owner !== 'player0' ||
       state.mode !== 'archive' || state.terminal === true ||
