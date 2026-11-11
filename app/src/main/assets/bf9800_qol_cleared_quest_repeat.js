@@ -98,15 +98,22 @@
  }
  function update(){
    const s=results.snapshot();
-   const cleared=Number(s?.clears)>0;
-   const eligible=!session&&onQuest()&&!document.hidden&&!S.busy&&
+   // Keep the START button consistent with the actual start() gate.
+   // A read-only result screen is not enough: both the canonical v7
+   // clear receipt and the verified source quest economy must be valid.
+   const candidate=!session&&onQuest()&&!document.hidden&&!S.busy&&
      S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
-     !!s.canReplay&&cleared&&s.missionId===QUEST?.missionId;
+     !!s.canReplay&&Number.isSafeInteger(s.clears)&&s.clears>0&&
+     s.missionId===QUEST?.missionId;
+   const eligible=candidate&&hasCommittedReceipt(s)&&
+     sourceQuestMatches(s.missionId);
    go.disabled=!eligible;
    picker.disabled=!!session;halt.disabled=!session;
    status.textContent=session?
      'REPEATING MISSION '+session.missionId+' · '+session.completed+'/'+
        session.target+' additional clears complete · '+reason:
+     candidate&&!eligible?
+       'Auto-repeat unavailable: verified quest economy or saved clear receipt missing.':
      (reason==='Idle'?'Complete a previously cleared quest to enable auto-repeat':reason);
    return statusSnapshot();
  }

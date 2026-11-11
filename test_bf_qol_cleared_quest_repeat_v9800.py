@@ -77,6 +77,10 @@ with sync_playwright() as pw:
      api.waveReadiness=()=>({missionId:1,verifiedWaveCount:3});
      api.sourceEconomyReadiness=()=>false;
      invalidEconomy=!repeat.start(2)&&__repeatCount===before;
+     repeat.poll(); // The button must refuse the same unverified source.
+     const disabledEconomy=document.getElementById('bf9800-start').disabled;
+     const blockedMessage=document.getElementById('bf9800-status').textContent
+       .includes('verified quest economy or saved clear receipt missing');
      delete api.sourceEconomyReadiness;
      missingEconomy=!repeat.start(2)&&__repeatCount===before;
      api.sourceEconomyReadiness=()=>undefined;
@@ -94,6 +98,8 @@ with sync_playwright() as pw:
          return !repeat.start(2)&&__repeatCount===beforeTotals;
        });
      S.totalWaves=3;
+     repeat.poll();
+     const enabledValid=!document.getElementById('bf9800-start').disabled;
      started=repeat.start(2)&&repeat.statusSnapshot().active;
      const afterStart=__repeatCount;
      api.waveReadiness=()=>null;
@@ -115,23 +121,29 @@ with sync_playwright() as pw:
      window.__repeatCount=before;
    }
    return {invalidWave,invalidEconomy,missingEconomy,unknownEconomy,
-     brokenSource,invalidLiveWave,
-     started,stopped,disarmed,noExtraReplay,
+     brokenSource,invalidLiveWave,disabledEconomy,blockedMessage,
+     enabledValid,started,stopped,disarmed,noExtraReplay,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved,
      playerSame:JSON.stringify(P)===player};
  }""")
  assert source_proof=={
    'invalidWave':True,'invalidEconomy':True,'missingEconomy':True,
    'unknownEconomy':True,'brokenSource':True,
-   'invalidLiveWave':True,'started':True,'stopped':True,
+   'invalidLiveWave':True,'disabledEconomy':True,'blockedMessage':True,
+   'enabledValid':True,'started':True,'stopped':True,
    'disarmed':True,'noExtraReplay':True,
    'saveSame':True,'playerSame':True},source_proof
  # An invalid canonical save receipt must prevent an unattended replay
  # even if the old general stored boolean still reports success.
  p.evaluate('BFGlobalBattleResultsV3000.committedClearCount=()=>0')
+ p.evaluate(api+'.poll()')
+ assert p.locator('#bf9800-start').is_disabled()
+ assert 'saved clear receipt missing' in p.locator('#bf9800-status').inner_text()
  assert p.evaluate(api+'.start(2)') is False
  assert p.evaluate('window.__repeatCount')==0
  p.evaluate('delete BFGlobalBattleResultsV3000.committedClearCount')
+ p.evaluate(api+'.poll()')
+ assert p.locator('#bf9800-start').is_enabled()
  assert p.locator('#bf9800-repeat-count option').count()==6
  assert p.locator('#bf9800-repeat-count option').all_text_contents()==[
    '1 additional clears','2 additional clears','5 additional clears',

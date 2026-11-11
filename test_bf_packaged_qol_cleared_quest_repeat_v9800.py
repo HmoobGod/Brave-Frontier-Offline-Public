@@ -10,6 +10,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert src.count('BF_GLOBAL_QOL_CLEARED_QUEST_REPEAT_V9800')==1
     assert 'results.replayBattle()' in src
     assert 's.clears<=session.lastClear' in src
+    # The visible Start control must share start()'s source/receipt gates.
+    assert 'const eligible=candidate&&hasCommittedReceipt(s)&&' in src
+    assert 'sourceQuestMatches(s.missionId);' in src
+    assert 'verified quest economy or saved clear receipt missing' in src
     assert 'sourceQuestMatches' in src and 'campaign.waveReadiness' in src
     assert "typeof campaign.sourceEconomyReadiness!=='function'" in src
     assert 'campaign.sourceEconomyReadiness()!==true' in src
