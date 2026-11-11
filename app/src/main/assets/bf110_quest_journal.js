@@ -99,32 +99,11 @@
    if((P.questClears?.[row.id]||0)>0)return 'cleared';
    return questUnlocked(row.q)?'available':'locked';
  }
- // Mirror Continue Story's save/auto protections for all journal navigation.
- // A later corrupt clear must not bypass campaign-wide nextPlayable validation.
- function pendingSave(){
-   if(typeof saveRecoveryPending==='boolean' && saveRecoveryPending)return true;
-   if(S?.over&&S.phase==='Victory'&&
-      (typeof saveEnabled!=='boolean'||!saveEnabled))return true;
-   if(S?.mode!=='archive'||!S.over||S.phase!=='Victory')return false;
-   try{
-     const results=window.BFGlobalBattleResultsV3000;
-     if(results===undefined)return false;
-     if(typeof results?.committedClearCount!=='function')return true;
-     const q=typeof QUEST==='undefined'?null:QUEST;
-     const count=P.questClears?.[q?.missionId];
-     return !Number.isSafeInteger(q?.missionId)||q.missionId<=0||
-       !Number.isSafeInteger(count)||count<1||
-       results.committedClearCount(q.missionId)!==count;
-   }catch(_){return true;}
- }
+ // Reuse Continue Story's exact runtime gate, including pending v7 save,
+ // uncommitted receipts, live Auto and active/broken Auto Repeat.
  function navigationBlocked(){
-   if(S?.busy||pendingSave()||
-      (S?.mode==='archive'&&S.auto===true&&S.over===false))return true;
-   try{
-     const repeat=window.BFGlobalQoLQuestRepeatV9800;
-     return !!repeat&&(typeof repeat.statusSnapshot!=='function'||
-       repeat.statusSnapshot()?.active===true);
-   }catch(_){return true;}
+   try{return window.BFGrandGaiaContinueV101?.canNavigate?.()!==true;}
+   catch(_){return true;}
  }
  function nextAvailable(){
    // Use Continue Story's whole-ledger validator, not a filtered first match.
