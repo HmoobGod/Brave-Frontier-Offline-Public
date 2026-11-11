@@ -11,6 +11,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert 'results.replayBattle()' in src
     assert 'try{replayed=!!results.replayBattle();}' in src
     assert 'catch(_){replayed=false;}' in src
+    assert "try{auto.click();}" in src
+    assert "catch(_){return false;}" in src
+    assert "finally{internalToggle=false;}" in src
     assert "stop('Stopped: native mission replay failed',false)" in src
     assert 's.clears<=session.lastClear' in src
     assert 'sourceQuestMatches' in src and 'campaign.waveReadiness' in src
