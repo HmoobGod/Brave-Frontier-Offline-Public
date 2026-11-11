@@ -369,13 +369,16 @@ with sync_playwright() as pw:
      orders=__party105.map(u=>JSON.stringify(u.action)),
      beforePlayer=JSON.stringify(P),
      beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
-   let paralyzedThrows,paralyzedTrue,paralyzedFalse,
-     cursedThrows,cursedTrue,cursedFalse,cloneBaseline,recovered;
+   let paralyzedThrows,paralyzedGetterThrows,paralyzedTrue,paralyzedFalse,
+     cursedThrows,cursedGetterThrows,cursedTrue,cursedFalse,cloneBaseline,recovered;
    try{
      window.BFGlobalParalysisActionLockV6000={
        paralyzed:()=>{throw Error('paralysis service missing')},
      };
      paralyzedThrows=BF041SmartAuto.kindFor(actor);
+     window.BFGlobalParalysisActionLockV6000=Object.defineProperty({},'paralyzed',
+       {get(){throw Error('paralysis getter unavailable')}});
+     paralyzedGetterThrows=BF041SmartAuto.kindFor(actor);
      // A cloned actor must never consult optional player status providers.
      window.BFGlobalCurseBBLockV5900={
        cursed:()=>{throw Error('curse service missing')},
@@ -391,6 +394,9 @@ with sync_playwright() as pw:
        cursed:()=>{throw Error('curse service missing')},
      };
      cursedThrows=BF041SmartAuto.kindFor(actor);
+     window.BFGlobalCurseBBLockV5900=Object.defineProperty({},'cursed',
+       {get(){throw Error('curse getter unavailable')}});
+     cursedGetterThrows=BF041SmartAuto.kindFor(actor);
      window.BFGlobalCurseBBLockV5900={cursed:()=>true};
      cursedTrue=BF041SmartAuto.kindFor(actor);
      window.BFGlobalCurseBBLockV5900={cursed:()=>false};
@@ -401,15 +407,15 @@ with sync_playwright() as pw:
      window.BFGlobalCurseBBLockV5900=curse;
    }
    recovered=BF041SmartAuto.kindFor(actor);
-   return {paralyzedThrows,paralyzedTrue,paralyzedFalse,
-     cursedThrows,cursedTrue,cursedFalse,cloneBaseline,recovered,
+   return {paralyzedThrows,paralyzedGetterThrows,paralyzedTrue,paralyzedFalse,
+     cursedThrows,cursedGetterThrows,cursedTrue,cursedFalse,cloneBaseline,recovered,
      targetSame:S.target===nativeTarget,
      ordersSame:__party105.every((u,i)=>JSON.stringify(u.action)===orders[i]),
      playerSame:JSON.stringify(P)===beforePlayer,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave};
  }""")
- assert status_failures=={'paralyzedThrows':'burst','paralyzedTrue':'burst',
-   'paralyzedFalse':'guard','cursedThrows':'attack','cursedTrue':'attack',
+ assert status_failures=={'paralyzedThrows':'burst','paralyzedGetterThrows':'burst','paralyzedTrue':'burst',
+   'paralyzedFalse':'guard','cursedThrows':'attack','cursedGetterThrows':'attack','cursedTrue':'attack',
    'cursedFalse':'burst','cloneBaseline':'burst','recovered':'guard',
    'targetSame':True,'ordersSame':True,'playerSame':True,'saveSame':True},status_failures
  # Duplicate references are not unique player actors even if the native
