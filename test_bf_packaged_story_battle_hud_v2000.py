@@ -21,7 +21,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'bf_global_offline_demo_v7' in idx
  assert 'function sourceWaveCountReady()' in idx
  assert "metadata.sourceSha256!=='a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66'" in idx
- assert 'if(!sourceWaveCountReady()){' in idx
+ assert idx.count('if(!sourceWaveCountReady()){')==2
+ assert 'Combat paused before actions' in idx
+ assert idx.index('if(!sourceWaveCountReady()){')<idx.index("E.phase.textContent='Squad attacking'")
  assert 'No next wave or clear reward granted' in idx
  assert idx.index('if(!sourceWaveCountReady()){')<idx.index('if(S.wave>=S.totalWaves-1){finish(true);return}')
 gradle=(R/'app/build.gradle').read_text('utf8')
