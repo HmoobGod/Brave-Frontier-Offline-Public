@@ -63,6 +63,27 @@
    return q&&q.dungeonId===next.dungeonId&&q.battles===next.battles&&
      !cleared(q)&&questUnlocked(q)?q:null;
  };
+ // Read-only 2022 original economy preview; v143 loads after this UI.
+ // No source provider or mismatched tuple means no preview, never guessed
+ // costs, drops or demo rewards. This has no effect on route eligibility.
+ function sourceEconomyPreview(q){
+   try{
+     const api=window.BFOriginalGlobalQuestEnergyV14300;
+     if(!q||!api||typeof api.lookup!=='function'||
+        api.source?.year!==2022||api.source?.recordCount!==106||
+        api.source?.sourceSha256!=='a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66'||
+        api.source?.staminaEnforced!==false||api.source?.saveMutation!==false)
+       return null;
+     const row=api.lookup(q.missionId);
+     const expected=[q.missionId,q.dungeonId,q.requires,q.battles,
+       q.energy,q.exp,q.zel,q.karma];
+     if(!Array.isArray(row)||row.length!==8||
+        row.some((v,i)=>!Number.isSafeInteger(v)||v<0||v!==expected[i]))
+       return null;
+     return Object.freeze({waves:row[3],energy:row[4],
+       exp:row[5],zel:row[6],karma:row[7]});
+   }catch(_){return null;}
+ }
  const regionIndex=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
  const regionName=q=>['Mistral','Morgan','St. Lamia'][regionIndex(q)];
  const panel=document.createElement('section');
@@ -113,8 +134,12 @@
       next.textContent='AUTO BATTLE / REPEAT ACTIVE · Stop Auto or finish the current run before continuing.';
     }else if(q){
       const source=BFGlobalQuestText.sourceFor(q);
+      const economy=sourceEconomyPreview(q);
       next.textContent='NEXT: '+(source?.mission?.name||'Mission '+q.missionId)+
-         ' · '+regionName(q)+' · Mission '+q.missionId;
+         ' · '+regionName(q)+' · Mission '+q.missionId+
+         (economy?' · 2022 source reference: '+economy.waves+' waves · Energy '+
+           economy.energy+' · EXP '+economy.exp+' · Zel '+economy.zel+
+           ' · Karma '+economy.karma+' (not DEMO payouts)':'');
     }else next.textContent=s.done===106?
       'All 106 archived story missions cleared (DEMO combat).' :
       'No further mission currently unlocked. Check the preceding requirement.';

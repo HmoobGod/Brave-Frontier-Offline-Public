@@ -8,6 +8,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert script.count('/* BF_GRAND_GAIA_CONTINUE_V101 */')==1
  assert 'QUESTS.length!==106' in script and 'questUnlocked(q)' in script
  assert 'CONTINUE STORY' in script
+ assert 'function sourceEconomyPreview(q)' in script
+ assert 'window.BFOriginalGlobalQuestEnergyV14300' in script
+ assert 'row.some((v,i)=>!Number.isSafeInteger(v)||v<0||v!==expected[i])' in script
+ assert '2022 source reference:' in script and '(not DEMO payouts)' in script
  assert 'unattendedOwnsNavigation' in script
  assert "repeat.statusSnapshot()?.active===true" in script
  assert 'function uncommittedVictory()' in script
