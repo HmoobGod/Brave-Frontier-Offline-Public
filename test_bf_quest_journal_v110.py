@@ -45,6 +45,11 @@ with sync_playwright() as pw:
  page.locator('#bf110-journal summary').click()
  assert page.locator('[data-bf-journal-entry]').count()==20
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
+ # The authenticated original description should be searchable without mutation.
+ page.locator('#bf110-search').fill('basic combat techniques')
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==1
+ assert page.locator('[data-bf-journal-entry="1"]').count()==1
+ page.locator('#bf110-search').fill('')
  # New read-only story completion, direct-next action and sortable source fields.
  assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==1
  assert '/106 cleared' in page.locator('#bf110-progress').text_content()
