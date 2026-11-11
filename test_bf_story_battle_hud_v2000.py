@@ -8,7 +8,7 @@ src=(A/'bf2000_story_battle_hud.js').read_text('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count('/* BF_GLOBAL_STORY_BATTLE_HUD_V2000 */')==1
 assert len(src.encode('utf8'))<65536
-assert 'localStorage' not in src and 'saveProgress(' not in src
+assert 'localStorage' not in src and src.count('saveProgress();')==1
 assert java.index('readPackagedText("bf110_quest_journal.js")')<java.index('readPackagedText("bf2000_story_battle_hud.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -149,7 +149,14 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalStoryBattleV2000.advance()') is False
  assert page.evaluate('QUEST.missionId')==1
  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
- assert page.evaluate("()=>{__hudDenySave=false;return saveProgress()}") is True
+ # The player must explicitly retry; failed retries never unlock Next.
+ assert page.locator('#bf2000-retry-save').is_visible()
+ page.locator('#bf2000-retry-save').click()
+ assert page.locator('#bf2000-next').is_disabled()
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
+ page.evaluate('()=>{__hudDenySave=false}')
+ page.locator('#bf2000-retry-save').click()
+ assert page.locator('#bf2000-retry-save').is_hidden()
  s=page.evaluate('BFGlobalStoryBattleV2000.refresh()')
  assert s['won'] and s['stored'] and s['clears']>=1 and s['nextId']==2,s
  # v331: v3000 loads AFTER this HUD on the real Android page. Its read-only
