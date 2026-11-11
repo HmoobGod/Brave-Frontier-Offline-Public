@@ -45,9 +45,11 @@
  jump.id='bf2000-battle';jump.textContent='VIEW BATTLE ↓';
  const next=document.createElement('button');next.type='button';
  next.id='bf2000-next';next.textContent='NEXT STORY MISSION ›';
+ const retry=document.createElement('button');retry.type='button';
+ retry.id='bf2000-retry-save';retry.textContent='RETRY SAVE';retry.hidden=true;
  const foot=document.createElement('small');foot.id='bf2000-foot';
  foot.textContent='2022 Global mission names and recorded stage counts; active enemy formations, AI, damage, loot and Energy spending remain DEMO. Training battles are separate.';
- actions.append(jump,next);
+ actions.append(jump,next,retry);
  panel.append(heading,title,details,waves,status,actions,foot);
  questDetail.after(panel);
  const region=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
@@ -139,6 +141,9 @@
      ' · Allies '+state.allies+'/'+state.party+' · Enemies '+state.enemies+'/'+state.foes+
      (state.archive&&state.won&&!state.stored?
        ' · SAVE REQUIRED: retry save or export backup before advancing':'');
+   retry.hidden=!(state.archive&&state.won&&!state.stored);
+   retry.disabled=state.busy||typeof saveProgress!=='function';
+   retry.title='Retry the existing canonical v7 save; no separate save format';
    next.disabled=!!state.busy||!state.nextId;
    next.textContent=state.nextId?'NEXT: '+state.nextName+' ›':'NEXT STORY MISSION ›';
    next.title=state.nextId?'Continue to archived mission '+state.nextId:
@@ -157,6 +162,13 @@
    panel.scrollIntoView({block:'start',behavior:'smooth'});
    return true;
  }
+ retry.addEventListener('click',()=>{
+   const state=snapshot();
+   if(!state||!state.archive||!state.won||state.stored||state.busy||
+      typeof saveProgress!=='function')return;
+   try{saveProgress();}catch(_){/* Keep Next locked until persisted receipt verifies. */}
+   previous='';refresh();
+ });
  jump.addEventListener('click',()=>battle.scrollIntoView({block:'start',behavior:'smooth'}));
  next.addEventListener('click',advance);
  const observer=new MutationObserver(refresh);
