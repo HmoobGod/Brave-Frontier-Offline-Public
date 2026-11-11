@@ -359,6 +359,59 @@ with sync_playwright() as pw:
     __party105[1].hp=35;__party105[1].maxHp=100;}""")
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='guard'
  assert p.evaluate('BF041SmartAuto.kindFor({...__party105[1]})')=='burst'
+ # Broken optional paralysis/Curse providers may not crash player Auto,
+ # guess Guard under unknown paralysis, or authorize a BB under unknown Curse.
+ status_failures=p.evaluate("""()=>{
+   const paralysis=window.BFGlobalParalysisActionLockV6000,
+     curse=window.BFGlobalCurseBBLockV5900,
+     actor=__party105[1], hp=actor.hp,
+     nativeTarget=S.target,
+     orders=__party105.map(u=>JSON.stringify(u.action)),
+     beforePlayer=JSON.stringify(P),
+     beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+   let paralyzedThrows,paralyzedTrue,paralyzedFalse,
+     cursedThrows,cursedTrue,cursedFalse,cloneBaseline,recovered;
+   try{
+     window.BFGlobalParalysisActionLockV6000={
+       paralyzed:()=>{throw Error('paralysis service missing')},
+     };
+     paralyzedThrows=BF041SmartAuto.kindFor(actor);
+     // A cloned actor must never consult optional player status providers.
+     window.BFGlobalCurseBBLockV5900={
+       cursed:()=>{throw Error('curse service missing')},
+     };
+     cloneBaseline=BF041SmartAuto.kindFor({...actor});
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>true};
+     window.BFGlobalCurseBBLockV5900={cursed:()=>false};
+     paralyzedTrue=BF041SmartAuto.kindFor(actor);
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>false};
+     paralyzedFalse=BF041SmartAuto.kindFor(actor);
+     actor.hp=100; // leave Guard threshold, reach Curse branch
+     window.BFGlobalCurseBBLockV5900={
+       cursed:()=>{throw Error('curse service missing')},
+     };
+     cursedThrows=BF041SmartAuto.kindFor(actor);
+     window.BFGlobalCurseBBLockV5900={cursed:()=>true};
+     cursedTrue=BF041SmartAuto.kindFor(actor);
+     window.BFGlobalCurseBBLockV5900={cursed:()=>false};
+     cursedFalse=BF041SmartAuto.kindFor(actor);
+   }finally{
+     actor.hp=hp;
+     window.BFGlobalParalysisActionLockV6000=paralysis;
+     window.BFGlobalCurseBBLockV5900=curse;
+   }
+   recovered=BF041SmartAuto.kindFor(actor);
+   return {paralyzedThrows,paralyzedTrue,paralyzedFalse,
+     cursedThrows,cursedTrue,cursedFalse,cloneBaseline,recovered,
+     targetSame:S.target===nativeTarget,
+     ordersSame:__party105.every((u,i)=>JSON.stringify(u.action)===orders[i]),
+     playerSame:JSON.stringify(P)===beforePlayer,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave};
+ }""")
+ assert status_failures=={'paralyzedThrows':'burst','paralyzedTrue':'burst',
+   'paralyzedFalse':'guard','cursedThrows':'attack','cursedTrue':'attack',
+   'cursedFalse':'burst','cloneBaseline':'burst','recovered':'guard',
+   'targetSame':True,'ordersSame':True,'playerSame':True,'saveSame':True},status_failures
  # Duplicate references are not unique player actors even if the native
  # id slot still points to the same object. Do not grant optional Guard.
  duplicate=p.evaluate("""()=>{const originalSlot=S.party[3],actor=__party105[1];

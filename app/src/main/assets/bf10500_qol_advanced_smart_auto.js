@@ -66,11 +66,20 @@
    // Optional low-HP survival Guard on the live PLAYER-controlled Auto turn.
    // Check original battler identity and current health; clones and noncombat
    // planning calls cannot trigger the rule. No enemy/NPC AI is modified.
-   if(active()&&config.guard>0&&
-      unit.hp/unit.maxHp<=config.guard/100&&
-      !window.BFGlobalParalysisActionLockV6000?.paralyzed(unit.id))return 'guard';
-   // Curse and source-backed BB heuristics are player-only overrides.
-   if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';
+   // A broken optional paralysis checker must never authorize a Guard
+   // from an unknown status. Keep the precomputed source-aware action.
+   let guardAllowed=false;
+   try{
+     guardAllowed=active()&&config.guard>0&&
+       unit.hp/unit.maxHp<=config.guard/100&&
+       !window.BFGlobalParalysisActionLockV6000?.paralyzed(unit.id);
+   }catch(_){return previous;}
+   if(guardAllowed)return 'guard';
+   // Unknown Curse status must not authorize a Brave Burst. A regular
+   // attack is the conservative player-only decision until source recovers.
+   try{
+     if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';
+   }catch(_){return 'attack';}
    if(!active()||!Number.isFinite(unit.bb)||unit.bb<100)return previous;
    // Optional source skill and team-health providers can fail while the
    // real player Auto planner asks for an action. Fall back to the already

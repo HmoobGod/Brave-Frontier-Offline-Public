@@ -13,6 +13,11 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  # BB/support provider errors preserve the existing player's baseline action.
  assert 'let source;\n   try{' in data
  assert '}catch(_){return previous;}' in data
+ # Optional status providers cannot crash an owned player Auto decision.
+ assert 'guardAllowed=active()&&config.guard>0&&' in data
+ assert 'if(guardAllowed)return \'guard\';' in data
+ assert "if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';" in data
+ assert "}catch(_){return 'attack';}" in data
  assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
  assert 'S.totalWaves!==row.verifiedWaveCount' in data
  assert 'assets/bf10400_qol_evolution_needs.js' in z.namelist()
