@@ -52,10 +52,28 @@ with sync_playwright() as pw:
    const emptyWave=()=>{for(const e of S.enemies)e.hp=0;
      for(const p of liveParty())p.action={kind:'guard',target:0};};
    try{
+     // v360: corrupt source before combat must disarm player Auto and leave
+     // full-health enemies, player HP, wave, round, and save untouched.
      reset();window.BFOriginalGlobalQuestEnergyV14300={
        source:provider.source,lookup:mismatched};
+     const enemiesBefore=JSON.stringify(S.enemies.map(e=>e.hp)),
+       partyBefore=JSON.stringify(S.party.map(p=>p.hp));
+     for(const p of liveParty())p.action={kind:'guard',target:0};
+     S.auto=true;E.auto.checked=true;
+     await execute();
+     result.precombatBlocked=S.wave===0&&S.round===1&&!S.over&&!S.busy&&
+       !S.auto&&!E.auto.checked&&
+       JSON.stringify(S.enemies.map(e=>e.hp))===enemiesBefore&&
+       JSON.stringify(S.party.map(p=>p.hp))===partyBefore&&
+       S.party.every(p=>p.action===null);
+     // The post-attack v359 gate must still work if source changes AFTER
+     // precombat validation, rather than merely passing this new early gate.
+     reset();let midLookups=0;
+     window.BFOriginalGlobalQuestEnergyV14300={
+       source:provider.source,
+       lookup:id=>++midLookups===1?provider.lookup(id):mismatched(id)};
      emptyWave();await execute();
-     result.midBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto;
+     result.midBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto&&midLookups>=2;
      // A source with a forged header must fail even when its row is correct.
      reset();window.BFOriginalGlobalQuestEnergyV14300={
        source:{...provider.source,sourceSha256:'0'.repeat(64)},
@@ -63,14 +81,20 @@ with sync_playwright() as pw:
      emptyWave();await execute();
      result.forgedHeaderBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto;
      // A throwing source lookup must also stop before a final-wave clear.
-     reset();S.wave=S.totalWaves-1;
+     reset();S.wave=S.totalWaves-1;let throwLookups=0;
      window.BFOriginalGlobalQuestEnergyV14300={
-       source:provider.source,lookup:()=>{throw Error('synthetic source fault')}};
+       source:provider.source,
+       lookup:id=>{if(++throwLookups>1)throw Error('synthetic source fault');
+         return provider.lookup(id)}};
      emptyWave();await execute();
-     result.throwingFinalBlocked=!S.over&&!S.busy&&
+     result.throwingFinalBlocked=!S.over&&!S.busy&&throwLookups>=2&&
        (P.questClears?.[QUEST.missionId]||0)===0;
-     reset();S.wave=S.totalWaves-1;emptyWave();await execute();
-     result.finalBlocked=!S.over&&!S.busy&&
+     reset();S.wave=S.totalWaves-1;let finalLookups=0;
+     window.BFOriginalGlobalQuestEnergyV14300={
+       source:provider.source,
+       lookup:id=>++finalLookups===1?provider.lookup(id):mismatched(id)};
+     emptyWave();await execute();
+     result.finalBlocked=!S.over&&!S.busy&&finalLookups>=2&&
        (P.questClears?.[QUEST.missionId]||0)===0;
      window.BFOriginalGlobalQuestEnergyV14300=provider;
      reset();emptyWave();await execute();
@@ -89,7 +113,7 @@ with sync_playwright() as pw:
      reset();BFGlobalStoryBattleV2000.refresh();
    }
  }""")
- assert wave_guard=={'midBlocked':True,'finalBlocked':True,
+ assert wave_guard=={'precombatBlocked':True,'midBlocked':True,'finalBlocked':True,
    'forgedHeaderBlocked':True,'throwingFinalBlocked':True,
    'goodAdvance':True,'trainingUnchanged':True,'playerSame':True,
    'saveSame':True},wave_guard
