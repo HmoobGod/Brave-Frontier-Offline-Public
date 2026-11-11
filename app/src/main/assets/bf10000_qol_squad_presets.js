@@ -49,6 +49,27 @@
        data.squad.every((id,i)=>id===ids[i]);
    }catch(_){return false;}
  }
+ // Never reset a live archived victory from a preset while its latest
+ // clear/rewards are still uncommitted. A success flag or in-memory count
+ // alone is insufficient; use the existing read-only result/receipt APIs.
+ // Older embeds with no receipt provider fail closed ONLY at victory.
+ function victoryReceiptCommitted(){
+   if(S.mode!=='archive'||!S.over||S.phase!=='Victory')return true;
+   try{
+     const results=window.BFGlobalBattleResultsV3000;
+     const quest=typeof QUEST==='undefined'?null:QUEST;
+     if(!results||typeof results.snapshot!=='function'||
+        typeof results.committedClearCount!=='function'||
+        !Number.isSafeInteger(quest?.missionId)||quest.missionId<=0)
+       return false;
+     const result=results.snapshot(),count=P.questClears?.[quest.missionId];
+     return result?.done===true&&result.victory===true&&
+       result.archive===true&&result.stored===true&&
+       result.missionId===quest.missionId&&
+       Number.isSafeInteger(count)&&count>0&&
+       results.committedClearCount(quest.missionId)===count;
+   }catch(_){return false;}
+ }
  let slots=load(),message='Preset changes are manual and local to this installation.';
  function info(){
    return freeze(slots.map((slot,index)=>freeze({
@@ -80,6 +101,10 @@
    // Wait until Auto is stopped or the result screen is reached.
    if(S.auto===true&&!S.over){
      message='Stop Auto Battle before applying a squad preset.';
+     refresh();return false;
+   }
+   if(!victoryReceiptCommitted()){
+     message='Victory is not saved. Retry Save or export your progress before switching squads.';
      refresh();return false;
    }
    const slot=slots[index];
@@ -148,7 +173,8 @@
    const unavailable=!!S.busy;
    saveButton.disabled=unavailable||!goodIds(P.squad,true);
    equipButton.disabled=unavailable||(S.auto===true&&!S.over)||
-     !slot||!goodIds(slot.squad,true);
+     (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
+     !victoryReceiptCommitted()||!slot||!goodIds(slot.squad,true);
    removeButton.disabled=unavailable||!slot;
    selected.querySelectorAll('option').forEach((o,i)=>{
      o.textContent='Preset '+(i+1)+(slots[i]?' · '+slots[i].name:' · Empty');
