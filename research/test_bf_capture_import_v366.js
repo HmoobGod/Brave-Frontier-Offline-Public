@@ -17,6 +17,13 @@ const valid = verify(capture,digest,1,2);
 assert.equal(valid.accepted,true);
 assert.equal(valid.productionAuthorized,false);
 assert(Object.isFrozen(valid));
+assert.equal(valid.canonicalCapture.missionId,1);
+assert.equal(valid.canonicalCapture.waves[0].formationId,101);
+assert(Object.isFrozen(valid.canonicalCapture));
+assert(Object.isFrozen(valid.canonicalCapture.waves));
+assert(Object.isFrozen(valid.canonicalCapture.waves[0]));
+assert(Object.isFrozen(valid.canonicalCapture.waves[0].enemySlots));
+assert(Object.isFrozen(valid.canonicalCapture.waves[0].enemySlots[0]));
 const reject = (v,hash=digest,id=1,count=2) =>
   assert.equal(verify(v,hash,id,count).accepted,false);
 reject(capture,'0'.repeat(64));
@@ -36,6 +43,22 @@ reject({...capture,waves:[{...capture.waves[0],enemySlots:[
 reject({...capture,waves:[{...capture.waves[0],enemySlots:[
   {slot:0,unitId:'201'}]},capture.waves[1]]});
 reject(null);
+reject({...capture,secret:'unpinned-extra-field'});
+reject({...capture,waves:[{...capture.waves[0],enemyHp:1e9},capture.waves[1]]});
+reject({...capture,waves:[{...capture.waves[0],enemySlots:[
+  {...capture.waves[0].enemySlots[0],secret:'never-import'},
+  capture.waves[0].enemySlots[1]]},capture.waves[1]]});
+// The external pin binds the returned immutable snapshot, NOT the envelope:
+// a stateful getter cannot change an already accepted formation later.
+let formationReads=0;
+const statefulWave={...capture.waves[0],
+  get formationId(){return ++formationReads===1?101:999}};
+const stateful={...capture,waves:[statefulWave,capture.waves[1]]};
+const acceptedSnapshot=verify(stateful,digest,1,2);
+assert.equal(acceptedSnapshot.accepted,true);
+assert.equal(acceptedSnapshot.canonicalCapture.waves[0].formationId,101);
+assert.equal(stateful.waves[0].formationId,999);
+assert.equal(acceptedSnapshot.canonicalCapture.waves[0].formationId,101);
 // Untrusted JSON adapters/objects must deny throwing providers instead of
 // propagating exceptions into a future battle-starting caller.
 reject({...capture,get sourceYear(){throw new Error('unreadable-year')}});
