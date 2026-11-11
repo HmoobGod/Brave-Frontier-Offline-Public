@@ -97,6 +97,24 @@ with sync_playwright() as pw:
  page.evaluate('BFGlobalQuestJournalV110.refresh()')
  assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==200
  assert '34/106 cleared' in page.locator('#bf110-progress').text_content()
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
+ # A temporarily unavailable next route is not equivalent to completion.
+ page.evaluate("""() => {
+   window.__oldJournalContinue=window.BFGrandGaiaContinueV101;
+   window.BFGrandGaiaContinueV101={nextMission:null,canNavigate:()=>true};
+ }""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ assert 'NEXT MISSION UNAVAILABLE' in page.locator('#bf110-next').text_content()
+ assert page.evaluate('QUEST.missionId')==1
+ page.evaluate('()=>{window.BFGrandGaiaContinueV101=window.__oldJournalContinue}')
+ # An invalid later clear must suppress both navigation and completion.
+ page.evaluate("()=>{P.questClears[365]='invalid';BFGlobalQuestJournalV110.refresh()}")
+ assert page.locator('#bf110-next').is_disabled()
+ assert 'NEXT MISSION UNAVAILABLE' in page.locator('#bf110-next').text_content()
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
+ page.evaluate('()=>{delete P.questClears[365];BFGlobalQuestJournalV110.refresh()}')
+ assert page.locator('#bf110-next').is_enabled()
  page.evaluate('S.busy=true')
  page.evaluate('BFGlobalQuestJournalV110.refresh()')
  assert page.locator('#bf110-next').is_disabled()
@@ -112,6 +130,8 @@ with sync_playwright() as pw:
  }""")
  page.evaluate('BFGlobalQuestJournalV110.refresh()')
  assert page.locator('#bf110-next').is_disabled()
+ assert 'NEXT MISSION UNAVAILABLE' in page.locator('#bf110-next').text_content()
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
  assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
  assert page.evaluate('QUEST.missionId')==1
  page.evaluate("""() => {
@@ -172,6 +192,45 @@ with sync_playwright() as pw:
  assert page.locator('#bf110-progress').count()==1
  page.locator('#bf110-more').click()
  assert page.locator('[data-bf-journal-entry]').count()==40
+ # Completion is announced only with all 106 positive integer clear receipts.
+ # These are disposable in-memory test clears; never write an owner save.
+ page.evaluate("""() => {
+   for(const q of QUESTS)P.questClears[q.missionId]=1;
+   S.mode='archive';S.busy=false;S.over=false;S.phase='Idle';S.auto=false;
+   renderQuestList();
+ }""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').text_content()=='ALL 106 MISSIONS CLEARED'
+ assert page.locator('#bf110-next').is_disabled()
+ assert '106/106 cleared' in page.locator('#bf110-progress').text_content()
+ # A corrupt positive count must not masquerade as a verified 106th clear.
+ page.evaluate('()=>{P.questClears[365]=Infinity;BFGlobalQuestJournalV110.refresh()}')
+ assert page.locator('#bf110-next').is_disabled()
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
+ page.evaluate('()=>{P.questClears[365]=1}')
+ # A changed source wave count also invalidates the whole-catalog proof.
+ page.evaluate('()=>{QUESTS[105].battles++;BFGlobalQuestJournalV110.refresh()}')
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
+ page.evaluate('()=>{QUESTS[105].battles--;BFGlobalQuestJournalV110.refresh()}')
+ assert page.locator('#bf110-next').text_content()=='ALL 106 MISSIONS CLEARED'
+ # Even with 106 in memory, an uncommitted last victory is NOT completion.
+ page.evaluate("""() => {
+   window.__oldJournalResults=window.BFGlobalBattleResultsV3000;
+   window.BFGlobalBattleResultsV3000={committedClearCount:()=>0};
+   S.over=true;S.phase='Victory';
+ }""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert 'ALL 106 MISSIONS CLEARED' not in page.locator('#bf110-next').text_content()
+ assert page.locator('#bf110-next').is_disabled()
+ page.evaluate("""() => {
+   S.over=false;S.phase='Idle';
+   window.BFGlobalBattleResultsV3000=window.__oldJournalResults;
+ }""")
+ saved_snapshot=page.evaluate("""()=>({p:JSON.stringify(P),
+     save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert saved_snapshot==page.evaluate("""()=>({p:JSON.stringify(P),
+     save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
