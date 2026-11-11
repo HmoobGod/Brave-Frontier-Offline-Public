@@ -38,7 +38,7 @@ for (const requestEpoch of [undefined,null,-1,0,11,1.5,NaN,Infinity,'12']) {
   assert.equal(plan({...state,requestEpoch},evidence).allowed,false,
     'invalid requestEpoch: '+String(requestEpoch));
 }
-// A newer, strictly ordered request remains eligible with matching evidence.
+// Missing intermediate consumption must never skip a wave or replay request.\nfor(const [requestEpoch,consumedEpoch] of [[13,11],[20,11],[Number.MAX_SAFE_INTEGER,11]]) {\n  assert.equal(plan({...state,requestEpoch,consumedEpoch},evidence).allowed,false,\n    'skipped epoch '+requestEpoch+'/'+consumedEpoch);\n}\n// A newer, strictly ordered request remains eligible with matching evidence.
 assert.equal(plan({...state,requestEpoch:13,consumedEpoch:12},evidence).allowed,true);
 // Read-only preflight must not mutate frozen source inputs.
 assert.equal(state.consumedEpoch,11);
