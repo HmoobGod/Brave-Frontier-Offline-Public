@@ -173,6 +173,16 @@
  function refresh(){
    const info=summary();
    total.textContent=info.cleared+' / '+info.total+' original missions cleared';
+   // The pinned 2022 mission master authenticates counts, NOT enemy rosters.
+   // Report coverage only when the complete live catalog still matches source.
+   const sourceReady=waveReadiness(QUESTS[0]?.missionId);
+   const waveTotal=sourceReady?
+     verifiedWaveRows.reduce((sum,row)=>sum+row[2],0):null;
+   footer.textContent=waveTotal===null?
+     '2022 source wave-count verification unavailable; no native formations certified.':
+     '2022 source-verified: '+verifiedWaveRows.length+' missions · '+waveTotal+
+     ' wave counts. Enemy formations, drops and native multi-wave combat NOT verified. '+
+     'Archive Energy is not spent.';
    for(const r of info.regions){
      const {button,count,bar}=controls.get(r.key);
      const locked=!r.unlocked;
