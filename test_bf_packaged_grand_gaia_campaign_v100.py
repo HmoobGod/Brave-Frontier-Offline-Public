@@ -16,6 +16,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as apk:
   assert addon.count('/* BF_GRAND_GAIA_CAMPAIGN_V100 */')==1
   assert '106 archived missions' in addon
   assert 'sourceEconomyReadiness' in addon
+  assert 'verifiedWaveRows.reduce((sum,row)=>sum+row[2],0)' in addon
+  assert 'native multi-wave combat NOT verified' in addon
+  assert 'waveReadiness(QUESTS[0]?.missionId)' in addon
   assert 'sourceEconomyReadiness()===false' in addon
   assert 'assets/bf14300_original_quest_energy.js' in entries
   assert 'localStorage' not in addon and 'saveProgress(' not in addon
