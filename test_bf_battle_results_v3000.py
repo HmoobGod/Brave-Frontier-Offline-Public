@@ -182,8 +182,20 @@ with sync_playwright() as pw:
  assert page.locator('#bf3000-replay').is_disabled()
  assert page.locator('#bf3000-retry-save').is_visible()
  assert page.locator('#bf3000-backup').is_visible()
+ # The story shortcut must immediately reflect an uncommitted victory.
+ page.evaluate('BFGrandGaiaContinueV101.refresh()')
+ assert page.locator('#bf101-continue').is_disabled()
+ assert 'VICTORY NOT SAVED' in page.locator('#bf101-next').inner_text()
+ # Simulate stale onscreen button/text before Retry Save; the retry handler
+ # itself must restore the correct blocked UI without quest/nav events.
+ page.evaluate("""() => {
+   document.getElementById('bf101-continue').disabled=false;
+   document.getElementById('bf101-next').textContent='STALE RECEIPT';
+ }""")
  before_retry=page.evaluate('JSON.stringify(P)')
  page.locator('#bf3000-retry-save').click()
+ assert page.locator('#bf101-continue').is_disabled()
+ assert 'VICTORY NOT SAVED' in page.locator('#bf101-next').inner_text()
  assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is False
  assert page.evaluate('JSON.stringify(P)')==before_retry
  # An unexpected storage adapter exception must not escape the Retry Save
@@ -217,6 +229,10 @@ with sync_playwright() as pw:
  # A later *successful* manual save re-enables the same earned next mission.
  page.evaluate('window.__resultQuota=false')
  page.locator('#bf3000-retry-save').click()
+ # No explicit Continue refresh here: Retry Save must update the UI on its own.
+ assert page.locator('#bf101-continue').is_enabled()
+ assert page.locator('#bf101-next').inner_text().startswith('NEXT:')
+ assert page.evaluate('BFGrandGaiaContinueV101.nextMission') is not None
  saved=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert page.locator('#bf3000-retry-save').is_hidden()
  assert page.locator('#bf3000-backup').is_hidden()

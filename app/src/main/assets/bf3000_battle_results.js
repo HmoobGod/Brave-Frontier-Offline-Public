@@ -136,6 +136,14 @@
    let ok=false;
    try{ok=saveProgress()===true;}catch(_){ok=false;}
    rendered='';refresh();
+   // Retry Save may change the canonical victory receipt without rebuilding
+   // the quest list. Refresh the existing read-only Continue Story shortcut
+   // immediately on success or failure, never allowing optional UI failures
+   // to replace the native save result or write a second save.
+   try{
+     const storyShortcut=window.BFGrandGaiaContinueV101;
+     if(typeof storyShortcut?.refresh==='function')storyShortcut.refresh();
+   }catch(_){/* Older or broken optional UI must not block save recovery. */}
    return ok&&snapshot()?.stored===true;
  }
  function downloadBackup(){

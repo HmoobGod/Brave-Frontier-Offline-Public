@@ -19,6 +19,11 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'localStorage.setItem(' not in src and 'localStorage.removeItem(' not in src
  assert src.count("document.getElementById('downloadsave')")==1
  assert 'bf3000-retry-save' in src and 'bf3000-backup' in src
+ # Packaged recovery must immediately refresh the existing read-only story
+ # shortcut without adding a second save path or alternative storage key.
+ assert 'window.BFGrandGaiaContinueV101' in src
+ assert "storyShortcut?.refresh==='function'" in src
+ assert 'storyShortcut.refresh()' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 gradle=(R/'app/build.gradle').read_text('utf8')
 assert "versionName '" in gradle
