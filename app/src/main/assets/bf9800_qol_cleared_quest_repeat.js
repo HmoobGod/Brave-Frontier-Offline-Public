@@ -119,7 +119,12 @@
    // archive battle changes phase. Never assume Auto actually toggled.
    if(auto.disabled)return false;
    internalToggle=true;
-   try{auto.click();}finally{internalToggle=false;}
+   // Native checkbox handlers can throw after partially changing the DOM.
+   // Treat that as a failed toggle: stop() will forcibly disarm the repeat
+   // and live native Auto rather than leaving unattended rounds running.
+   try{auto.click();}
+   catch(_){return false;}
+   finally{internalToggle=false;}
    // A checked DOM checkbox is not an authoritative running Auto engine.
    // Fail closed if native combat explicitly reports Auto OFF.
    return auto.checked===on&&(!on||!auto.disabled)&&(!on||S.auto!==false);

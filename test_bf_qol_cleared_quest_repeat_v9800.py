@@ -321,6 +321,55 @@ with sync_playwright() as pw:
     'reason':'Stopped: native mission replay failed','nativeStopped':True,
     'replayDelta':1 if after_start else 0,
     'saveSame':True,'writesSame':True,'playerSame':True},replay_exception
+ # A throwing native Auto checkbox click handler must not leave a repeat
+ # session armed. Cover both re-arming after a replay starts and disarming
+ # an already-active session; neither may modify P or canonical v7 storage.
+ for during_stop in (False,True):
+  broken_click=p.evaluate("""duringStop=>{
+    const api=BFGlobalQoLQuestRepeatV9800,
+      auto=document.getElementById('auto'),
+      originalClick=auto.click,impl=BFGlobalBattleResultsV3000,
+      originalReplay=impl.replayBattle,
+      beforeCount=__repeatCount,beforeWrites=__v98StorageWrites,
+      beforePlayer=JSON.stringify(P),
+      beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+      previousAuto=S.auto;
+    try{
+      S.mode='archive';S.over=true;S.busy=false;S.phase='Victory';
+      delete S.auto;auto.disabled=false;auto.checked=false;
+      if(duringStop){
+        if(!api.start(2))return {fixtureFailed:true};
+      }else{
+        // Simulate a replay adapter that already reports native Auto ON,
+        // even though the checkbox handler subsequently fails to arm.
+        impl.replayBattle=()=>{
+          const started=originalReplay();
+          if(started)S.auto=true;
+          return started;
+        };
+      }
+      auto.click=()=>{throw Error('native checkbox handler failed');};
+      const accepted=duringStop?api.stop('Stopped by player',false):api.start(2);
+      const snapshot=api.statusSnapshot();
+      return {accepted,active:snapshot.active,
+        reason:snapshot.reason,
+        nativeDisarmed:S.auto===false&&!auto.checked,
+        replayDelta:__repeatCount-beforeCount,
+        progressSame:JSON.stringify(P)===beforePlayer,
+        saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+        writesSame:__v98StorageWrites===beforeWrites};
+    }finally{
+      impl.replayBattle=originalReplay;
+      auto.click=originalClick;auto.checked=false;auto.disabled=false;
+      if(previousAuto===undefined)delete S.auto;else S.auto=previousAuto;
+      S.over=true;S.busy=false;S.phase='Victory';__repeatCount=beforeCount;
+    }
+  }""",during_stop)
+  assert broken_click=={'accepted':True if during_stop else False,
+    'active':False,
+    'reason':'Stopped by player' if during_stop else 'Stopped: native Auto could not start',
+    'nativeDisarmed':True,'replayDelta':1,
+    'progressSame':True,'saveSame':True,'writesSame':True},broken_click
  # A one-clear player choice is a genuine bounded native replay: it executes
  # one additional quest, confirms the stored clear, then restores Auto OFF.
  assert p.evaluate(api+'.start(1)') is True
