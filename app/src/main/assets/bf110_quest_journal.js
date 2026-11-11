@@ -72,10 +72,10 @@
    ['story','Story progression'],['energy','Original Energy · lowest first'],
    ['exp','Original EXP · highest first'],['clears','Most clears first']]);
  const searchWrap=document.createElement('label');searchWrap.id='bf110-search-wrap';
- searchWrap.textContent='FIND BY NAME / DUNGEON / MISSION ID';
+ searchWrap.textContent='FIND BY NAME / DUNGEON / ID / ORIGINAL DESCRIPTION';
  const search=document.createElement('input');
  search.id='bf110-search';search.type='search';search.autocomplete='off';
- search.placeholder='Search all 106 original quests';
+ search.placeholder='Search names, dungeons and original quest descriptions';
  searchWrap.append(search);filters.append(searchWrap);
  const count=document.createElement('p');count.id='bf110-count';count.setAttribute('aria-live','polite');
  const completed=document.createElement('p');completed.id='bf110-progress';
@@ -107,7 +107,7 @@
    const query=search.value.trim().toLocaleLowerCase();
    const rows=archive.filter(row=>(regions.value==='all'||row.region===regions.value) &&
       (states.value==='all'||progress(row)===states.value) &&
-      (!query || [String(row.id),row.name,row.dungeon].some(t=>t.toLocaleLowerCase().includes(query))));
+      (!query || [String(row.id),row.name,row.dungeon,row.description].some(t=>t.toLocaleLowerCase().includes(query))));
    // Sort only a temporary list. The canonical 106-quest story order is immutable.
    const order=ordering.value;
    if(order==='energy')rows.sort((a,b)=>a.q.energy-b.q.energy||a.id-b.id);
