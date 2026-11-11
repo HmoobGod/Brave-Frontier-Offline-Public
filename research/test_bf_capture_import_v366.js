@@ -36,5 +36,15 @@ reject({...capture,waves:[{...capture.waves[0],enemySlots:[
 reject({...capture,waves:[{...capture.waves[0],enemySlots:[
   {slot:0,unitId:'201'}]},capture.waves[1]]});
 reject(null);
+// Untrusted JSON adapters/objects must deny throwing providers instead of
+// propagating exceptions into a future battle-starting caller.
+reject({...capture,get sourceYear(){throw new Error('unreadable-year')}});
+reject({...capture,get waves(){throw new Error('unreadable-waves')}});
+reject({...capture,waves:[new Proxy(capture.waves[0],{
+  get(target,prop){if(prop==='formationId')throw new Error('unreadable-formation');return target[prop]}
+}),capture.waves[1]]});
+reject({...capture,waves:[{...capture.waves[0],enemySlots:[{
+  get slot(){throw new Error('unreadable-slot')},unitId:201
+}]},capture.waves[1]]});
 assert.equal(verify(capture,digest,1,2).accepted,true);
 console.log('PASS synthetic capture provenance: no original formations certified');
