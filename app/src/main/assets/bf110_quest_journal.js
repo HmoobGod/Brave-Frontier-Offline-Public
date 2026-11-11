@@ -152,6 +152,22 @@
    document.getElementById('bf-quest-details')?.scrollIntoView({block:'start',behavior:'smooth'});
    return true;
  }
+ // Only a complete, source-valid, committed v7 clear ledger can announce
+ // full completion. A missing Next Mission may mean a failed save, an invalid
+ // future clear, or an unavailable unlock; none is proof of 106 clears.
+ function allMissionsCleared(){
+   try{
+     const campaign=window.BFGrandGaiaCampaignV100;
+     if(navigationBlocked() || archive.length!==106 ||
+        typeof campaign?.waveReadiness!=='function' ||
+        !campaign.waveReadiness(archive[0].id) ||
+        campaign.sourceEconomyReadiness?.()===false)return false;
+     return archive.every(row=>{
+       const count=P.questClears?.[row.id];
+       return Number.isSafeInteger(count)&&count>0;
+     });
+   }catch(_){return false;}
+ }
  function refresh(){
    const active=nextAvailable();
    const cleared=archive.filter(row=>progress(row)==='cleared').length;
@@ -163,7 +179,9 @@
        regions.value==='morgan'?'Morgan':'Mistral')+': '+regionCleared+'/'+regionRows.length;
    const blocked=navigationBlocked();
    nextButton.disabled=!active||blocked;
-   nextButton.textContent=active?'NEXT UNCLEARED · MISSION '+active.id:'ALL 106 MISSIONS CLEARED';
+   nextButton.textContent=active?'NEXT UNCLEARED · MISSION '+active.id:
+     allMissionsCleared()?'ALL 106 MISSIONS CLEARED':
+     'NEXT MISSION UNAVAILABLE · CHECK SAVE OR UNLOCKS';
    const rows=matching();
    count.textContent=rows.length+' matching missions · showing '+Math.min(visibleLimit,rows.length)+
      ' · '+rows.filter(r=>progress(r)==='available').length+' available and uncleared';
