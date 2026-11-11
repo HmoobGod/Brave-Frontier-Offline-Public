@@ -37,6 +37,41 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGrandGaiaContinueV101.snapshot()')=={
     'total':106,'done':0,'mistral':0,'morgan':0,'stlamia':0,'nextMission':1}
  assert page.locator('#bf101-continue').count()==1
+ # v358: native loader inserts v143 after v101; dynamically read the 2022
+ # reference only once the source-qualified lookup is present.
+ assert '2022 source reference:' not in page.locator('#bf101-next').text_content()
+ page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
+ # Native v143 boot must refresh the already-mounted Continue Story shortcut
+ # without requiring a manual tab or button click.
+ page.wait_for_function("()=>document.getElementById('bf101-next')?.textContent.includes('2022 source reference:')")
+ preview=page.locator('#bf101-next').text_content()
+ assert '2022 source reference: 3 waves · Energy 0 · EXP 5 · Zel 500 · Karma 100' in preview,preview
+ assert 'DEMO credits EXP/Zel/Karma on clear' in preview
+ assert 'stamina not enforced' in preview
+ checked=page.evaluate("""()=>{
+   const original=window.BFOriginalGlobalQuestEnergyV14300,
+     originalSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     originalP=JSON.stringify(P),before=QUEST.missionId;
+   try{
+     window.BFOriginalGlobalQuestEnergyV14300={
+       source:original.source,
+       lookup:id=>{const row=[...original.lookup(id)];row[5]+=1;return row;}
+     };
+     BFGrandGaiaContinueV101.refresh();
+     const forged=!document.getElementById('bf101-next').textContent.includes('2022 source reference:');
+     window.BFOriginalGlobalQuestEnergyV14300={
+       source:original.source,lookup:()=>{throw Error('read failed');}
+     };
+     BFGrandGaiaContinueV101.refresh();
+     const throwing=!document.getElementById('bf101-next').textContent.includes('2022 source reference:');
+     return {forged,throwing,saveSame:localStorage.getItem('bf_global_offline_demo_v7')===originalSave,
+       playerSame:JSON.stringify(P)===originalP,questSame:QUEST.missionId===before};
+   }finally{
+     window.BFOriginalGlobalQuestEnergyV14300=original;
+     BFGrandGaiaContinueV101.refresh();
+   }
+ }""")
+ assert checked=={'forged':True,'throwing':True,'saveSame':True,'playerSame':True,'questSame':True},checked
  before=page.evaluate("""()=>({p:JSON.stringify(P),
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  page.evaluate('BFGrandGaiaContinueV101.refresh()')

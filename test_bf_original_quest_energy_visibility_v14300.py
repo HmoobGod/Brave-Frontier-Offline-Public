@@ -45,6 +45,9 @@ with sync_playwright() as pw:
   label=p.locator('button.questcard .bf143-original-cost').nth(
       next(i for i,q in enumerate(tuples) if q[0]==row[0]))
   assert 'Energy '+str(row[4])+' · Karma '+str(row[7]) in label.text_content()
+  assert 'EXP '+str(row[5])+' · Zel '+str(row[6]) in label.text_content()
+  assert 'DEMO credits EXP/Zel/Karma on clear' in label.text_content()
+  assert 'stamina not enforced' in label.text_content()
  p.evaluate('renderQuestList()')
  p.wait_for_function("""()=>document.querySelectorAll('button.questcard .bf143-original-cost').length===106""")
  p.evaluate('renderQuestList()')
@@ -58,4 +61,4 @@ with sync_playwright() as pw:
  assert before==after
  assert not errors,errors
  b.close()
-print('PASS v143 original 2022 quest energy/karma visible for 106 live missions, repeat-render safe, v7 save untouched')
+print('PASS v143 original 2022 quest Energy/Karma/EXP/Zel references for 106 missions, repeat-render safe, v7 save untouched')
