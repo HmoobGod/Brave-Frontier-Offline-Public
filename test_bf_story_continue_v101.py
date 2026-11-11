@@ -46,7 +46,8 @@ with sync_playwright() as pw:
  page.wait_for_function("()=>document.getElementById('bf101-next')?.textContent.includes('2022 source reference:')")
  preview=page.locator('#bf101-next').text_content()
  assert '2022 source reference: 3 waves · Energy 0 · EXP 5 · Zel 500 · Karma 100' in preview,preview
- assert '(not DEMO payouts)' in preview
+ assert 'DEMO credits EXP/Zel/Karma on clear' in preview
+  assert 'stamina not enforced' in preview
  checked=page.evaluate("""()=>{
    const original=window.BFOriginalGlobalQuestEnergyV14300,
      originalSave=localStorage.getItem('bf_global_offline_demo_v7'),
