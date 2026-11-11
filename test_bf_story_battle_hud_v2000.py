@@ -56,6 +56,19 @@ with sync_playwright() as pw:
        source:provider.source,lookup:mismatched};
      emptyWave();await execute();
      result.midBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto;
+     // A source with a forged header must fail even when its row is correct.
+     reset();window.BFOriginalGlobalQuestEnergyV14300={
+       source:{...provider.source,sourceSha256:'0'.repeat(64)},
+       lookup:id=>provider.lookup(id)};
+     emptyWave();await execute();
+     result.forgedHeaderBlocked=S.wave===0&&!S.over&&!S.busy&&!S.auto;
+     // A throwing source lookup must also stop before a final-wave clear.
+     reset();S.wave=S.totalWaves-1;
+     window.BFOriginalGlobalQuestEnergyV14300={
+       source:provider.source,lookup:()=>{throw Error('synthetic source fault')}};
+     emptyWave();await execute();
+     result.throwingFinalBlocked=!S.over&&!S.busy&&
+       (P.questClears?.[QUEST.missionId]||0)===0;
      reset();S.wave=S.totalWaves-1;emptyWave();await execute();
      result.finalBlocked=!S.over&&!S.busy&&
        (P.questClears?.[QUEST.missionId]||0)===0;
@@ -77,6 +90,7 @@ with sync_playwright() as pw:
    }
  }""")
  assert wave_guard=={'midBlocked':True,'finalBlocked':True,
+   'forgedHeaderBlocked':True,'throwingFinalBlocked':True,
    'goodAdvance':True,'trainingUnchanged':True,'playerSame':True,
    'saveSame':True},wave_guard
  assert page.locator('#bf2000-next').is_disabled()
