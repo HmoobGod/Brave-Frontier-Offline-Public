@@ -11,7 +11,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert src.count('/* BF_GLOBAL_STORY_BATTLE_HUD_V2000 */')==1
  assert len(src.encode('utf8'))<65536
  assert 'function snapshot()' in src and 'function advance()' in src
- assert 'localStorage' not in src and 'saveProgress(' not in src
+ assert 'localStorage' not in src
+ assert src.count('saveProgress();')==1
+ assert "retry.id='bf2000-retry-save'" in src
+ assert 'state.archive&&state.won&&!state.stored' in src
  assert 'BFGlobalBattleResultsV3000?.committedClearCount' in src
  assert 'committedVictory(q)' in src and 'read(q.missionId)===count' in src
  idx=z.read('assets/index.html').decode('utf8')
