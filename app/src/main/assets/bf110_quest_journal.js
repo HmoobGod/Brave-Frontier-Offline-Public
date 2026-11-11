@@ -99,9 +99,41 @@
    if((P.questClears?.[row.id]||0)>0)return 'cleared';
    return questUnlocked(row.q)?'available':'locked';
  }
+ // Mirror Continue Story's save/auto protections for all journal navigation.
+ // A later corrupt clear must not bypass campaign-wide nextPlayable validation.
+ function pendingSave(){
+   if(typeof saveRecoveryPending==='boolean' && saveRecoveryPending)return true;
+   if(S?.over&&S.phase==='Victory'&&
+      (typeof saveEnabled!=='boolean'||!saveEnabled))return true;
+   if(S?.mode!=='archive'||!S.over||S.phase!=='Victory')return false;
+   try{
+     const results=window.BFGlobalBattleResultsV3000;
+     if(results===undefined)return false;
+     if(typeof results?.committedClearCount!=='function')return true;
+     const q=typeof QUEST==='undefined'?null:QUEST;
+     const count=P.questClears?.[q?.missionId];
+     return !Number.isSafeInteger(q?.missionId)||q.missionId<=0||
+       !Number.isSafeInteger(count)||count<1||
+       results.committedClearCount(q.missionId)!==count;
+   }catch(_){return true;}
+ }
+ function navigationBlocked(){
+   if(S?.busy||pendingSave()||
+      (S?.mode==='archive'&&S.auto===true&&S.over===false))return true;
+   try{
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     return !!repeat&&(typeof repeat.statusSnapshot!=='function'||
+       repeat.statusSnapshot()?.active===true);
+   }catch(_){return true;}
+ }
  function nextAvailable(){
-   // Original quest order, never the currently filtered/sorted list.
-   return archive.find(row=>progress(row)==='available')||null;
+   // Use Continue Story's whole-ledger validator, not a filtered first match.
+   try{
+     const id=window.BFGrandGaiaContinueV101?.nextMission;
+     if(!Number.isSafeInteger(id)||id<=0)return null;
+     const row=archive.find(r=>r.id===id);
+     return row&&progress(row)==='available'?row:null;
+   }catch(_){return null;}
  }
  function matching(){
    const query=search.value.trim().toLocaleLowerCase();
@@ -133,7 +165,7 @@
  }
  function chooseMission(id){
    const row=archive.find(r=>r.id===Number(id));
-   if(!row || !questUnlocked(row.q) || !!S?.busy)return false;
+   if(!row || !questUnlocked(row.q) || navigationBlocked())return false;
    if(!BFQuestAreas.choose(row.q))return false;
    const index=row.region==='stlamia'?2:row.region==='morgan'?1:0;
    tabs.querySelectorAll('button')[index]?.click();
@@ -150,7 +182,8 @@
      (regions.value==='all'?'All regions':
        regions.value==='stlamia'?'St. Lamia':
        regions.value==='morgan'?'Morgan':'Mistral')+': '+regionCleared+'/'+regionRows.length;
-   nextButton.disabled=!active||!!S?.busy;
+   const blocked=navigationBlocked();
+   nextButton.disabled=!active||blocked;
    nextButton.textContent=active?'NEXT UNCLEARED · MISSION '+active.id:'ALL 106 MISSIONS CLEARED';
    const rows=matching();
    count.textContent=rows.length+' matching missions · showing '+Math.min(visibleLimit,rows.length)+
@@ -173,7 +206,7 @@
      const go=document.createElement('button');go.type='button';
      go.dataset.bfJournalOpen=String(row.id);
      go.textContent=state==='locked'?'LOCKED':'OPEN';
-     go.disabled=state==='locked'||!!S?.busy;
+     go.disabled=state==='locked'||blocked;
      go.addEventListener('click',()=>chooseMission(row.id));
      actions.append(view,go);item.append(info,actions);fragment.append(item);
    }
@@ -187,7 +220,7 @@
  for(const s of [regions,states,ordering])s.addEventListener('change',changed);
  nextButton.addEventListener('click',()=>{
    const target=nextAvailable();
-   if(target&&!S?.busy)chooseMission(target.id);
+   if(target&&!navigationBlocked())chooseMission(target.id);
  });
  search.addEventListener('input',changed);
  more.addEventListener('click',()=>{visibleLimit+=20;refresh();});
