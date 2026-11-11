@@ -164,6 +164,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install playwright
+          node research/test_bf_capture_import_v366.js
           python test_bf_single_hit_critical_combat_v9300.py
           python test_bf_multihit_critical_combat_v9500.py
           python test_bf_critical_ko_guard_v9600.py
