@@ -46,7 +46,13 @@ def valid_route(candidate):
         return False
     if len({row[0] for row in candidate}) != 106:
         return False
-    if candidate[0][2] != 0:
+    if candidate[0][2] != 0 or candidate[0][0] != ids[0]:
+        return False
+    # A numerically valid route with a changed dungeon/region assignment
+    # is not authenticated 2022 data. Compare the complete source identity
+    # before any future native integration consumes this ledger.
+    if any(row[0] != original[0] or row[1] != original[1] or
+           row[2] != original[2] for row, original in zip(candidate, rows)):
         return False
     if any(row[3] < 1 for row in candidate):
         return False
