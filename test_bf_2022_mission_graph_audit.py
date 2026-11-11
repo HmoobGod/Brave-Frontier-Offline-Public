@@ -35,4 +35,53 @@ assert not (regions["mistral"] & regions["morgan"] or
 assert ids[0] == 1 and ids[-1] == 365
 assert rows[34][0] == 200 and rows[34][2] == 85
 assert rows[70][0] == 300 and rows[70][2] == 265
+
+# Source-only route readiness: validate copied records before any native
+# integration consumes the graph. The negative fixtures must be rejected.
+def valid_route(candidate):
+    if len(candidate) != 106:
+        return False
+    if any(len(row) != 8 or any(type(value) is not int or value < 0 for value in row)
+           for row in candidate):
+        return False
+    if len({row[0] for row in candidate}) != 106:
+        return False
+    if candidate[0][2] != 0:
+        return False
+    if any(row[3] < 1 for row in candidate):
+        return False
+    if any(row[2] != candidate[i - 1][0]
+           for i, row in enumerate(candidate) if i):
+        return False
+    return True
+
+assert valid_route(rows)
+for index, column, value in [
+    (35, 2, 999999),  # orphan prerequisite
+    (70, 2, 300),     # self-dependency at region transition
+    (10, 0, rows[9][0]),  # duplicate mission ID
+    (20, 3, 0),       # invalid zero-wave mission
+    (90, 3, -1),      # invalid negative count
+]:
+    altered = [list(row) for row in rows]
+    altered[index][column] = value
+    assert not valid_route(altered), (index, column, value)
+assert not valid_route(rows[:-1])
+
+# The count ledger is read-only evidence, not authorization to spawn
+# enemies, award drops, deduct energy or mark a mission completed.
+by_region = {}
+for name, dungeons in regions.items():
+    subset = [row for row in rows if row[1] in dungeons]
+    assert subset
+    by_region[name] = {
+        "missions": len(subset),
+        "source_wave_counts": sum(row[3] for row in subset),
+        "source_energy": sum(row[4] for row in subset),
+    }
+assert sum(entry["missions"] for entry in by_region.values()) == 106
+assert sum(entry["source_wave_counts"] for entry in by_region.values()) == sum(row[3] for row in rows)
+assert sum(entry["source_energy"] for entry in by_region.values()) == sum(row[4] for row in rows)
+print("PASS: route mutation guards and read-only regional wave/energy ledgers; native formations NOT certified.")
+
 print("PASS: 106 authenticated source mission records, 23 dungeons, 3 regions; complete prerequisite graph. Native formations/drops NOT certified.")
