@@ -32,6 +32,10 @@
    'padding:7px;border:1px solid #9e895e;border-radius:4px;background:#111c2b;color:white}',
    '#bf110-search-wrap{grid-column:1/-1}',
    '#bf110-count{margin:5px 0;color:#dde5ea}',
+   '#bf110-progress{margin:7px 0;color:#cddfe7}',
+   '#bf110-next{min-height:44px;padding:9px 12px;border:1px solid #c9a46c;',
+   'background:#304a61;border-radius:6px;color:#fff;font-weight:700;width:100%}',
+   '#bf110-next:disabled{opacity:.55}',
    '.bf110-entry{display:grid;grid-template-columns:1fr auto;align-items:center;gap:5px;',
    'border-top:1px solid #485970;padding:7px 0}',
    '.bf110-entry strong{display:block;font-size:12px}',
@@ -64,6 +68,9 @@
     ['all','All three regions'],['mistral','Mistral'],['morgan','Morgan'],['stlamia','St. Lamia']]);
  const states=selectFilter('bf110-state','PROGRESS',[
     ['all','All missions'],['available','Available · uncleared'],['cleared','Cleared'],['locked','Locked']]);
+ const ordering=selectFilter('bf110-sort','SORT MISSIONS',[
+   ['story','Story progression'],['energy','Original Energy · lowest first'],
+   ['exp','Original EXP · highest first'],['clears','Most clears first']]);
  const searchWrap=document.createElement('label');searchWrap.id='bf110-search-wrap';
  searchWrap.textContent='FIND BY NAME / DUNGEON / MISSION ID';
  const search=document.createElement('input');
@@ -71,6 +78,11 @@
  search.placeholder='Search all 106 original quests';
  searchWrap.append(search);filters.append(searchWrap);
  const count=document.createElement('p');count.id='bf110-count';count.setAttribute('aria-live','polite');
+ const completed=document.createElement('p');completed.id='bf110-progress';
+ completed.setAttribute('aria-live','polite');
+ const nextButton=document.createElement('button');nextButton.type='button';
+ nextButton.id='bf110-next';nextButton.textContent='GO TO NEXT AVAILABLE STORY MISSION';
+ nextButton.setAttribute('aria-label','Open first available uncleared story mission');
  const preview=document.createElement('div');preview.id='bf110-preview';
  preview.setAttribute('aria-live','polite');
  preview.textContent='Select DETAILS to read an original archived mission description.';
@@ -79,7 +91,7 @@
  more.textContent='SHOW MORE MISSIONS';
  const foot=document.createElement('small');foot.id='bf110-foot';
  foot.textContent='Original Global quest text and recorded battle/energy/reward totals. Native enemies, AI, drops, combat math and Energy deduction remain DEMO.';
- panel.append(title,filters,count,preview,results,more,foot);
+ panel.append(title,filters,completed,nextButton,count,preview,results,more,foot);
  host.after(panel);
  let visibleLimit=20, previewId=null;
 
@@ -87,11 +99,22 @@
    if((P.questClears?.[row.id]||0)>0)return 'cleared';
    return questUnlocked(row.q)?'available':'locked';
  }
+ function nextAvailable(){
+   // Original quest order, never the currently filtered/sorted list.
+   return archive.find(row=>progress(row)==='available')||null;
+ }
  function matching(){
    const query=search.value.trim().toLocaleLowerCase();
-   return archive.filter(row=>(regions.value==='all'||row.region===regions.value) &&
+   const rows=archive.filter(row=>(regions.value==='all'||row.region===regions.value) &&
       (states.value==='all'||progress(row)===states.value) &&
       (!query || [String(row.id),row.name,row.dungeon].some(t=>t.toLocaleLowerCase().includes(query))));
+   // Sort only a temporary list. The canonical 106-quest story order is immutable.
+   const order=ordering.value;
+   if(order==='energy')rows.sort((a,b)=>a.q.energy-b.q.energy||a.id-b.id);
+   else if(order==='exp')rows.sort((a,b)=>b.q.exp-a.q.exp||a.id-b.id);
+   else if(order==='clears')rows.sort((a,b)=>(P.questClears?.[b.id]||0)-
+     (P.questClears?.[a.id]||0)||a.id-b.id);
+   return rows;
  }
  function inspect(id){
    const row=archive.find(r=>r.id===Number(id));
@@ -119,6 +142,16 @@
    return true;
  }
  function refresh(){
+   const active=nextAvailable();
+   const cleared=archive.filter(row=>progress(row)==='cleared').length;
+   const regionRows=regions.value==='all'?archive:archive.filter(row=>row.region===regions.value);
+   const regionCleared=regionRows.filter(row=>progress(row)==='cleared').length;
+   completed.textContent='STORY COMPLETION: '+cleared+'/106 cleared · '+
+     (regions.value==='all'?'All regions':
+       regions.value==='stlamia'?'St. Lamia':
+       regions.value==='morgan'?'Morgan':'Mistral')+': '+regionCleared+'/'+regionRows.length;
+   nextButton.disabled=!active||!!S?.busy;
+   nextButton.textContent=active?'NEXT UNCLEARED · MISSION '+active.id:'ALL 106 MISSIONS CLEARED';
    const rows=matching();
    count.textContent=rows.length+' matching missions · showing '+Math.min(visibleLimit,rows.length)+
      ' · '+rows.filter(r=>progress(r)==='available').length+' available and uncleared';
@@ -151,7 +184,11 @@
    return rows.length;
  }
  function changed(){visibleLimit=20;refresh();}
- for(const s of [regions,states])s.addEventListener('change',changed);
+ for(const s of [regions,states,ordering])s.addEventListener('change',changed);
+ nextButton.addEventListener('click',()=>{
+   const target=nextAvailable();
+   if(target&&!S?.busy)chooseMission(target.id);
+ });
  search.addEventListener('input',changed);
  more.addEventListener('click',()=>{visibleLimit+=20;refresh();});
  new MutationObserver(refresh).observe(list,{childList:true});
@@ -161,6 +198,7 @@
    get total(){return archive.length},
    get matchingCount(){return matching().length},
    get previewMission(){return previewId},
+   get nextAvailableMission(){return nextAvailable()?.id??null},
    refresh,inspect,chooseMission
  });
 })();
