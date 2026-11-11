@@ -49,15 +49,21 @@
         typeof element.multiplier!=='function'||
         typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function'||
         !Array.isArray(S.party))return null;
-     const types=S.party.filter(u=>u&&u.active&&Number.isFinite(u.hp)&&u.hp>0)
-       .map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element)).filter(Boolean);
-     if(!types.length)return null;
-     const ranked=living.map(foe=>{
-       const targetType=element.normalize(foe.element);
-       const count=targetType?types.filter(type=>
-         element.multiplier(type,targetType)===1.5).length:0;
-       return {foe,count};
-     }).filter(row=>row.count>0);
+     // Both ally-type normalization and foe ranking read optional source
+     // helpers. Any provider exception must fail closed before touching
+     // a native target, queued order, or the canonical v7 save.
+     let ranked;
+     try{
+       const types=S.party.filter(u=>u&&u.active&&Number.isFinite(u.hp)&&u.hp>0)
+         .map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element)).filter(Boolean);
+       if(!types.length)return null;
+       ranked=living.map(foe=>{
+         const targetType=element.normalize(foe.element);
+         const count=targetType?types.filter(type=>
+           element.multiplier(type,targetType)===1.5).length:0;
+         return {foe,count};
+       }).filter(row=>row.count>0);
+     }catch(_){return null;}
      ranked.sort((a,b)=>b.count-a.count||
        a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
        a.foe.slot-b.foe.slot);

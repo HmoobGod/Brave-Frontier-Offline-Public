@@ -117,6 +117,36 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='elemental'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
  assert page.evaluate('S.busy') is False
+ # A broken optional elemental provider must not crash the native command
+ # tray, change the selected target, queue an action or write the v7 save.
+ broken_elemental=page.evaluate("""()=>{
+   const original=window.BFGlobalElementalCombatV6900;
+   const beforeTarget=S.target, beforeOrders=S.party.map(p=>JSON.stringify(p.action));
+   const beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     const cases=[];
+     for(const provider of [
+       {normalize:original.normalize,multiplier:()=>{throw Error('multiplier unavailable')}},
+       {normalize:()=>{throw Error('normalization unavailable')},multiplier:original.multiplier},
+       {normalize:value=>{if(value==='Earth')throw Error('foe normalization unavailable');
+         return original.normalize(value);},multiplier:original.multiplier}
+     ]){
+       window.BFGlobalElementalCombatV6900=provider;
+       const lookup=BFGlobalBattleFocusV3100.lookup('elemental');
+       const queued=BFGlobalBattleFocusV3100.queueFocus('elemental');
+       const refreshed=BFGlobalBattleFocusV3100.refresh();
+       cases.push({lookupNull:lookup===null,queued,refreshed:refreshed.target===null,
+         targetSame:S.target===beforeTarget,
+         ordersSame:beforeOrders.every((a,i)=>a===JSON.stringify(S.party[i].action)),
+         saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave});
+     }
+     return cases;
+   }finally{window.BFGlobalElementalCombatV6900=original;
+     BFGlobalBattleFocusV3100.refresh();}
+ }""")
+ expected_broken={'lookupNull':True,'queued':False,'refreshed':True,
+   'targetSame':True,'ordersSame':True,'saveSame':True}
+ assert broken_elemental==[expected_broken]*3,broken_elemental
  elemental_orders=page.evaluate('S.party.map(p=>JSON.stringify(p.action))')
  # Without a source-verified weakness, do not guess or overwrite orders.
  page.evaluate("S.enemies[1].element='Water';update()")
