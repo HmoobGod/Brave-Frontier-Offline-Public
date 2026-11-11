@@ -8,7 +8,7 @@ src=(A/'bf2000_story_battle_hud.js').read_text('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count('/* BF_GLOBAL_STORY_BATTLE_HUD_V2000 */')==1
 assert len(src.encode('utf8'))<65536
-assert 'localStorage' not in src and 'saveProgress(' not in src
+assert 'localStorage' not in src and src.count('saveProgress();')==1
 assert java.index('readPackagedText("bf110_quest_journal.js")')<java.index('readPackagedText("bf2000_story_battle_hud.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
