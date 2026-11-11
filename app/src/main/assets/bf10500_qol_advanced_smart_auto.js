@@ -72,14 +72,20 @@
    // Curse and source-backed BB heuristics are player-only overrides.
    if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';
    if(!active()||!Number.isFinite(unit.bb)||unit.bb<100)return previous;
-   const source=Number.isSafeInteger(unit.unitId)?
-     bfOriginalBB(unit.unitId):null;
-   if(!source)return previous;
-   const support=source.target==='support'?originalSupport(unit.unitId):null;
-   if(support?.kind==='heal_all'){
-     return liveParty().some(a=>a&&a.active&&a.hp>0&&a.maxHp>0&&
-       a.hp<a.maxHp&&a.hp/a.maxHp<=config.heal/100)?'burst':'attack';
-   }
+   // Optional source skill and team-health providers can fail while the
+   // real player Auto planner asks for an action. Fall back to the already
+   // computed source-aware baseline, never invent a BB or alter any actor.
+   let source;
+   try{
+     source=Number.isSafeInteger(unit.unitId)?
+       bfOriginalBB(unit.unitId):null;
+     if(!source)return previous;
+     const support=source.target==='support'?originalSupport(unit.unitId):null;
+     if(support?.kind==='heal_all'){
+       return liveParty().some(a=>a&&a.active&&a.hp>0&&a.maxHp>0&&
+         a.hp<a.maxHp&&a.hp/a.maxHp<=config.heal/100)?'burst':'attack';
+     }
+   }catch(_){return previous;}
    if(config.burst==='conserve'&&source.target!=='support'&&
       previous==='burst')return 'attack';
    // Player opt-in: keep offensive BB for the *last recorded quest wave*.

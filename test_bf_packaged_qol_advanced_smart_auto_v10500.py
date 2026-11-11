@@ -10,6 +10,9 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'try{\n   const element=window.BFGlobalElementalCombatV6900;' in data
  assert 'return ranked[0]?.foe||undefined;\n   }catch(_){return null;}' in data
  assert 'return chosen===undefined?baseTarget(enemies):chosen;' in data
+ # BB/support provider errors preserve the existing player's baseline action.
+ assert 'let source;\n   try{' in data
+ assert '}catch(_){return previous;}' in data
  assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
  assert 'S.totalWaves!==row.verifiedWaveCount' in data
  assert 'assets/bf10400_qol_evolution_needs.js' in z.namelist()
