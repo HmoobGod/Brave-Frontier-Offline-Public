@@ -47,7 +47,7 @@
      }
      label.textContent='2022 original · Energy '+r[4]+' · Karma '+r[7]+
        ' · EXP '+r[5]+' · Zel '+r[6]+
-       ' (reference; stamina not enforced; EXP/Zel are not DEMO payouts)';
+       ' (reference; stamina not enforced; DEMO credits EXP/Zel/Karma on clear)';
      shown++;
    }
    return shown;
