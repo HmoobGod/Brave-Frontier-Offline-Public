@@ -5,6 +5,7 @@
 1. **Next available story mission**: a 44px-tall explicit navigation control opens the first original story-order mission which is unlocked but has zero clears, independent of journal search, region filters or sort. This merely navigates to existing mission selection through the old `BFQuestAreas.choose(q)` and region tab handlers; it does **not** launch/complete a quest, spend Energy, award anything or save.
 2. **Source-stat sorting**: leave default original chronological order intact, or sort only visible matching rows by archived original Energy cost (ascending), archived original EXP (descending), or *actual local* clear count (descending), with stable mission-ID tie breakers. Energy and EXP are strictly **2022 archived reference values**, not an assertion that the DEMO enforces Energy or awards those original amounts.
 3. **Region completion status**: count unique original missions with one or more canonical in-memory clears out of all 106, and provide corresponding Mistral/Morgan/St. Lamia totals. Counts are read only, recalculated on existing list mutations, navigation refresh and filter changes. No new save key, progression mutation, misleading 2022 enemy formation claim.
+4. **Original description lookup**: search includes independently archived original English mission descriptions as well as the existing name/dungeon/mission ID fields. Original descriptions are already shown in the read-only DETAILS view; no additional source files or guessed translations are introduced.
 
 ## Code scope
 
@@ -15,7 +16,7 @@ Change only `app/src/main/assets/bf110_quest_journal.js` and its existing regist
 - Existing `questUnlocked(q)` and `S.busy` gates apply to the new one-tap navigation, just as to journal OPEN.
 - Sorting uses a fresh `archive.filter` array, leaving canonical QUESTS and original order unchanged. All inserted UI text uses DOM `textContent`; no untrusted HTML injection.
 - No `localStorage`, `saveProgress`, `P` mutation or retroactive quest clears added.
-- Chromium regression checks story vs archived-source sort, progress count, first genuinely available uncleared mission after earlier clears, S.busy gate, navigation and P/storage isolation.
+- Chromium regression checks description-only original text lookup, story vs archived-source sort, progress count, first genuinely available uncleared mission after earlier clears, S.busy gate, navigation and P/storage isolation.
 - Packaged APK regression checks the actual JS and unchanged v7 package.
 - This is **not** original-native combat development. Authentic 2022 enemy formation certification remains **0/106**.
 
