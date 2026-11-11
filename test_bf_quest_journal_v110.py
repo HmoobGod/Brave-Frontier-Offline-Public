@@ -46,7 +46,9 @@ with sync_playwright() as pw:
  assert page.locator('[data-bf-journal-entry]').count()==20
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
  # The authenticated original description should be searchable without mutation.
- page.locator('#bf110-search').fill('basic combat techniques')
+ original_description=page.evaluate('BFGlobalQuestText.sourceFor(QUESTS[0]).mission.description')
+ assert isinstance(original_description,str) and len(original_description.strip())>10
+ page.locator('#bf110-search').fill(original_description.strip())
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==1
  assert page.locator('[data-bf-journal-entry="1"]').count()==1
  page.locator('#bf110-search').fill('')
@@ -90,7 +92,49 @@ with sync_playwright() as pw:
  page.evaluate('BFGlobalQuestJournalV110.refresh()')
  assert page.locator('#bf110-next').is_disabled()
  page.evaluate('S.busy=false')
+ # An unsaved archive victory, including a failed quota-limited save,
+ # must not navigate through either NEXT UNCLEARED or journal OPEN.
+ page.evaluate("""() => {
+   window.__journalOldResults=window.BFGlobalBattleResultsV3000;
+   window.__journalOldSetItem=localStorage.setItem;
+   localStorage.setItem=()=>{throw new DOMException('Quota exceeded','QuotaExceededError')};
+   window.BFGlobalBattleResultsV3000={committedClearCount:()=>0};
+   S.mode='archive';S.over=true;S.phase='Victory';S.busy=false;
+ }""")
  page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
+ assert page.evaluate('QUEST.missionId')==1
+ page.evaluate("""() => {
+   localStorage.setItem=window.__journalOldSetItem;
+   window.BFGlobalBattleResultsV3000=window.__journalOldResults;
+   S.over=false;S.phase='Idle';S.auto=false;
+ }""")
+ # Between-turn player Auto still owns navigation even with S.busy=false.
+ page.evaluate("()=>{S.mode='archive';S.auto=true;S.over=false;S.busy=false}")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
+ page.evaluate("()=>{S.auto=false}")
+ # Auto Repeat can also own navigation while S.busy is briefly false.
+ page.evaluate("""() => {
+   window.__journalOldRepeat=window.BFGlobalQoLQuestRepeatV9800;
+   window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+ }""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
+ # A present but broken repeat provider is fail-closed too.
+ page.evaluate("""() => {
+   window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('broken repeat provider')}};
+ }""")
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_disabled()
+ assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
+ assert page.evaluate('QUEST.missionId')==1
+ page.evaluate('()=>{window.BFGlobalQoLQuestRepeatV9800=window.__journalOldRepeat}')
+ page.evaluate('BFGlobalQuestJournalV110.refresh()')
+ assert page.locator('#bf110-next').is_enabled()
  page.locator('#bf110-next').click()
  assert page.evaluate('QUEST.missionId')==200
  assert page.locator('#bf080-morgan-map').is_visible()
