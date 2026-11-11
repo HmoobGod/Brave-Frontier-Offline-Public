@@ -91,13 +91,18 @@
    try{return receipt(s.missionId)===s.clears;}
    catch(_){return false;}
  }
+ // The native result provider is optional and can fail during a turn.
+ // In unattended mode, unknown results are not permission to replay.
+ function safeResultSnapshot(){
+   try{return results.snapshot();}catch(_){return null;}
+ }
  function statusSnapshot(){
    return freeze({active:!!session,missionId:session?.missionId||null,
      target:session?.target||0,completed:session?.completed??complete,
      reason});
  }
  function update(){
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    const cleared=Number(s?.clears)>0;
    const eligible=!session&&onQuest()&&!document.hidden&&!S.busy&&
      S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
@@ -154,7 +159,7 @@
  function playAgain(){
    if(!session)return false;
    if(!onQuest()){leaveQuest();return false;}
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    if(S.busy||S.mode!=='archive'||!s?.done||!s.victory||
       !s.archive||!s.stored||s.missionId!==session.missionId||
       QUEST?.missionId!==session.missionId||!s.canReplay||
@@ -188,7 +193,7 @@
  function start(count=Number(picker.value)){
    if(session||!Number.isSafeInteger(count)||
       ![1,2,5,10,20,50].includes(count))return false;
-   const s=results.snapshot();
+   const s=safeResultSnapshot();
    if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||
       s.missionId!==QUEST?.missionId||
@@ -203,8 +208,9 @@
    if(!session){update();return false;}
    if(!onQuest())return leaveQuest();
    if(document.hidden)return stop('Stopped: app left foreground',false);
-   const s=results.snapshot();
-   if(!s||s.missionId!==session.missionId||
+   const s=safeResultSnapshot();
+   if(!s)return stop('Stopped: battle results unavailable',false);
+   if(s.missionId!==session.missionId||
       QUEST?.missionId!==session.missionId||
       S.mode!=='archive'||!s.archive)
      return stop('Stopped: quest or mode changed',false);
