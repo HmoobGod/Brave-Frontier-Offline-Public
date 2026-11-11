@@ -60,6 +60,39 @@ with sync_playwright() as pw:
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'
  assert p.evaluate("""foes=>BF042AutoCoordination.chooseTarget(foes).slot""",foes)==1
+ # Player-owned source BB/support queries must not interrupt native Auto
+ # when the optional record provider or team-health helper throws.
+ provider_failures=p.evaluate("""()=>{
+   const originalBB=window.bfOriginalBB,originalSupport=window.originalSupport,
+     originalParty=window.liveParty,beforeTarget=S.target,
+     beforeActions=__party105.map(x=>JSON.stringify(x.action)),
+     beforePlayer=JSON.stringify(P),
+     beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+   let badBB, badSupport, badParty, recovered;
+   try{
+     window.bfOriginalBB=()=>{throw Error('BB table unavailable')};
+     badBB=BF041SmartAuto.kindFor(__party105[1]);
+     window.bfOriginalBB=originalBB;
+     window.originalSupport=()=>{throw Error('support table unavailable')};
+     badSupport=BF041SmartAuto.kindFor(__party105[0]);
+     window.originalSupport=originalSupport;
+     window.liveParty=()=>{throw Error('team health unavailable')};
+     badParty=BF041SmartAuto.kindFor(__party105[0]);
+   }finally{
+     window.bfOriginalBB=originalBB;
+     window.originalSupport=originalSupport;
+     window.liveParty=originalParty;
+   }
+   recovered=BF041SmartAuto.kindFor(__party105[0]);
+   return {badBB,badSupport,badParty,recovered,
+     targetSame:S.target===beforeTarget,
+     ordersSame:__party105.every((x,i)=>JSON.stringify(x.action)===beforeActions[i]),
+     playerSame:JSON.stringify(P)===beforePlayer,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave};
+ }""")
+ assert provider_failures=={'badBB':'burst','badSupport':'burst',
+   'badParty':'burst','recovered':'attack','targetSame':True,
+   'ordersSame':True,'playerSame':True,'saveSame':True},provider_failures
  # Optional targeting must not override the baseline in manual play,
  # training, or a completed fight. Selected-target mode already has its
  # separate fail-closed null policy and is covered below.
