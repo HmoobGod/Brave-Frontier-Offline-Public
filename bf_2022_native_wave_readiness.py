@@ -1,10 +1,12 @@
 """Read-only source-backed native-wave readiness report; never simulates combat."""
+import hashlib
 import json
 from pathlib import Path
 
 SOURCE = Path(__file__).resolve().parent / "source_data/bf_global_original_2022_live_quest_economy_v142.json"
 ARCHIVE_SHA = "69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9"
 MASTER_SHA = "d4e364b6c1c5a825c0153c57bdd4123cd35800c74db795d913d119b6c9a99f83"
+TUPLE_SHA = "a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66"
 COLUMNS = ["missionId", "missionDungeonId", "requiredMissionId", "missionBattleCount", "missionEnergyUse", "exp", "zel", "karma"]
 
 def report(data):
@@ -19,6 +21,12 @@ def report(data):
         raise ValueError("incomplete mission ledger")
     if any(not isinstance(row, list) or len(row) != 8 or any(type(v) is not int or v < 0 for v in row) or row[3] < 1 for row in rows):
         raise ValueError("invalid mission record")
+    # The source header is not proof that the underlying 106 numeric rows are unchanged.
+    # Pin the exact canonical JSON tuple sequence from verified original master.
+    if data.get("canonicalTupleSha256") != TUPLE_SHA or hashlib.sha256(
+        json.dumps(rows, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest() != TUPLE_SHA:
+        raise ValueError("source records diverge from pinned canonical tuples")
     if len({r[0] for r in rows}) != 106 or len({r[1] for r in rows}) != 23:
         raise ValueError("duplicate mission or invalid dungeon count")
     if rows[0][2] != 0 or any(row[2] != rows[i-1][0] for i,row in enumerate(rows) if i):
