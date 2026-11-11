@@ -163,7 +163,13 @@
    if(!setAuto(false)){
      stop('Stopped: native Auto control unavailable',false);return false;
    }
-   if(!results.replayBattle()||S.over||
+   // A native replay adapter may throw before reset or after starting
+   // the next battle. In either case cancel this bounded repeat session
+   // and disarm native Auto instead of leaving unattended turns armed.
+   let replayed=false;
+   try{replayed=!!results.replayBattle();}
+   catch(_){replayed=false;}
+   if(!replayed||S.over||
       QUEST?.missionId!==session.missionId){
      stop('Stopped: native mission replay failed',false);return false;
    }

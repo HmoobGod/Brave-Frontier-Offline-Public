@@ -280,6 +280,47 @@ with sync_playwright() as pw:
  assert toggle_lost=={'accepted':False,'armed':False,
    'reason':'Stopped: native Auto could not start','auto':False,
    'replayCount':1,'saveSame':True},toggle_lost
+ # A throwing native replay adapter must cancel the entire bounded session,
+ # including if the adapter already began the next battle before throwing.
+ # No fabricated clear, extra replay, owner save write or native Auto remains.
+ for after_start in (False,True):
+  replay_exception=p.evaluate("""afterStart=>{
+    const api=BFGlobalQoLQuestRepeatV9800,
+      impl=window.BFGlobalBattleResultsV3000,original=impl.replayBattle,
+      auto=document.getElementById('auto'),prevAuto=S.auto,
+      beforeCount=window.__repeatCount,
+      beforeWrites=window.__v98StorageWrites,
+      beforePlayer=JSON.stringify(P),
+      beforeSave=localStorage.getItem('bf_global_offline_demo_v7');
+    try{
+      S.over=true;S.busy=false;S.mode='archive';S.phase='Victory';
+      S.auto=false;auto.checked=false;
+      impl.replayBattle=()=>{
+        if(afterStart){
+          const started=original();
+          if(!started)throw Error('test fixture failed to start');
+          S.auto=true;auto.checked=true;
+        }
+        throw Error('native replay failed');
+      };
+      const accepted=api.start(2),state=api.statusSnapshot();
+      return {accepted,active:state.active,reason:state.reason,
+        nativeStopped:S.auto===false&&!auto.checked,
+        replayDelta:window.__repeatCount-beforeCount,
+        saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+        writesSame:window.__v98StorageWrites===beforeWrites,
+        playerSame:JSON.stringify(P)===beforePlayer};
+    }finally{
+      impl.replayBattle=original;auto.disabled=false;auto.checked=false;
+      if(prevAuto===undefined)delete S.auto;else S.auto=prevAuto;
+      S.over=true;S.busy=false;S.phase='Victory';
+      window.__repeatCount=beforeCount;
+    }
+  }""",after_start)
+  assert replay_exception=={'accepted':False,'active':False,
+    'reason':'Stopped: native mission replay failed','nativeStopped':True,
+    'replayDelta':1 if after_start else 0,
+    'saveSame':True,'writesSame':True,'playerSame':True},replay_exception
  # A one-clear player choice is a genuine bounded native replay: it executes
  # one additional quest, confirms the stored clear, then restores Auto OFF.
  assert p.evaluate(api+'.start(1)') is True
