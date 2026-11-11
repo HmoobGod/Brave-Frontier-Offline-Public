@@ -11,6 +11,9 @@ const crypto = require('node:crypto');
 function validateCaptureEnvelope(envelope, expectedDigest, expectedMissionId, expectedWaveCount) {
   const deny = reason => Object.freeze({accepted:false, reason});
   const positive = x => Number.isSafeInteger(x) && x > 0;
+  // Untrusted archive-derived adapters may contain throwing getters/proxies.
+  // A failed read must deny the capture, never escape into a future caller.
+  try {
   if (!envelope || typeof envelope !== 'object' || Array.isArray(envelope) ||
       !/^[a-f0-9]{64}$/.test(expectedDigest || '') ||
       !positive(expectedMissionId) || !positive(expectedWaveCount))
@@ -54,5 +57,8 @@ function validateCaptureEnvelope(envelope, expectedDigest, expectedMissionId, ex
     waveCount:expectedWaveCount, captureDigest:digest,
     // No production authorization; a separate trusted integration is required.
     productionAuthorized:false});
+  } catch (_) {
+    return deny('unreadable-capture');
+  }
 }
 module.exports = {validateCaptureEnvelope};
