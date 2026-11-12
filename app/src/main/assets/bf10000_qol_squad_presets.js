@@ -193,6 +193,48 @@
  help.textContent='Preset labels do not travel inside exported v7 saves. '+
    'No automatic selection or extra original unit slots.';
  panel.append(heading,explanation,selected,name,buttons,status,preview,help);anchor.after(panel);
+ // v402: Home's read-only preset overview is a navigation convenience, not
+ // a one-tap squad application. All existing canonical save/reset/victory
+ // checks remain exclusively inside the MANUAL APPLY PRESET control in Units.
+ const home=document.getElementById('bf-home');
+ const homeTools=home?.querySelector('.bf-scene-tools');
+ const homeShortcut=homeTools ? document.createElement('section') : null;
+ let homeText=null,homeOpen=null;
+ if(homeShortcut){
+   homeShortcut.id='bf10000-home-presets';
+   homeShortcut.setAttribute('aria-label','Saved squad presets overview');
+   homeShortcut.style.cssText='box-sizing:border-box;max-width:100%;min-width:0;'+
+     'margin:8px 0;padding:9px;border:1px solid #ab8957;border-radius:6px;'+
+     'background:linear-gradient(#263b4e,#142235);color:#f5e2ba;'+
+     'font:12px/1.4 Arial,sans-serif';
+   homeText=document.createElement('p');homeText.id='bf10000-home-count';
+   homeText.setAttribute('role','status');homeText.style.cssText='margin:0 0 6px';
+   homeOpen=document.createElement('button');homeOpen.type='button';
+   homeOpen.id='bf10000-home-manage';
+   homeOpen.textContent='MANAGE SAVED SQUADS ›';
+   homeOpen.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px;'+
+     'padding:8px 10px;border:1px solid #cda965;border-radius:5px;'+
+     'background:linear-gradient(#8b6940,#4d3826);color:#fff4d7;'+
+     'font:800 11px Arial,sans-serif;cursor:pointer';
+   homeOpen.addEventListener('click',()=>{
+     const nav=window.BF_homeNav;
+     if(!nav||typeof nav.go!=='function'||nav.go('units')!==true)return;
+     panel.open=true;refresh();
+     if(typeof panel.scrollIntoView==='function')panel.scrollIntoView({block:'start'});
+   });
+   homeShortcut.append(homeText,homeOpen);homeTools.after(homeShortcut);
+ }
+ function refreshHome(){
+   if(!homeShortcut)return;
+   const saved=slots.filter(Boolean).length;
+   const active=slots.findIndex(slot=>slot&&goodIds(slot.squad,true)&&
+     Array.isArray(P.squad)&&slot.squad.length===P.squad.length&&
+     slot.squad.every((id,i)=>P.squad[i]===id));
+   homeText.textContent='SAVED SQUADS · '+saved+' / '+max+
+     (active>=0?' · ACTIVE: '+slots[active].name:' · No saved preset matches active squad');
+   homeOpen.disabled=!window.BF_homeNav||
+     typeof window.BF_homeNav.go!=='function';
+ }
  function refresh(){
    const index=Number(selected.value)||0,slot=slots[index];
    const unavailable=!!S.busy;
@@ -224,12 +266,14 @@
        (missing.length?' · UNOWNED #'+missing.join(', #')+'; cannot apply':'')+
        (!added.length&&!removed.length&&!reordered?' · Already active':'');
    }
+   refreshHome();
    return info();
  }
  selected.addEventListener('change',()=>{
    name.value=slots[Number(selected.value)]?.name||'';
    refresh();
  });
+ if(homeShortcut)window.addEventListener('bf-route-change',refreshHome);
  panel.addEventListener('toggle',()=>{if(panel.open)refresh()});
  setInterval(()=>{if(!document.hidden&&panel.open)refresh()},1400);
  refresh();
