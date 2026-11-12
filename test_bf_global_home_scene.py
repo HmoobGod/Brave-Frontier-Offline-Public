@@ -104,24 +104,32 @@ with sync_playwright() as playwright:
       viewport:innerWidth})""")
     assert home_bounds["left"] >= 0 and home_bounds["right"] <= home_bounds["viewport"] + 1, home_bounds
     assert home_bounds["buttonRight"] <= home_bounds["right"] + 1, home_bounds
-    # Fixed footer must not add its own horizontal padding outside the
-    # device width; previously content-box 100% + 12px caused overshoot.
-    nav_bounds = page.locator(".bf-navbar").evaluate("""el => {
-      const r=el.getBoundingClientRect();
-      return {left:r.left,right:r.right,width:r.width,viewport:innerWidth,
-        box:getComputedStyle(el).boxSizing};
-    }""")
-    assert nav_bounds["box"] == "border-box", nav_bounds
-    assert nav_bounds["left"] >= -0.1 and nav_bounds["right"] <= nav_bounds["viewport"] + 0.1, nav_bounds
-    overflow = page.evaluate("""() => ({
-      width:document.documentElement.scrollWidth,
-      viewport:innerWidth,
-      protruding:[...document.querySelectorAll('body *')]
-        .filter(el=>{const r=el.getBoundingClientRect();
-          return r.width>0 && (r.right>innerWidth+0.1 || r.left < -0.1);})
-        .slice(0,8).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,80),
-          right:Math.round(el.getBoundingClientRect().right)}))})""")
-    assert overflow["width"] <= overflow["viewport"], overflow
+    # The known 1px defect is in the recovered Home header, not the
+    # bottom navigation. Test the header, footer, and whole document at
+    # three phone widths; do not clip or waive the document assertion.
+    for width in (320, 390, 540):
+        page.set_viewport_size({"width": width, "height": 844})
+        bounds = page.evaluate("""() => {
+          const r = document.querySelector('.bf-shell-head').getBoundingClientRect();
+          const n = document.querySelector('.bf-navbar').getBoundingClientRect();
+          return {
+            viewport: innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            headerLeft: r.left, headerRight: r.right,
+            navLeft: n.left, navRight: n.right,
+            protruding: [...document.querySelectorAll('body *')]
+              .filter(el => {
+                const box=el.getBoundingClientRect();
+                return box.width>0 && (box.left < -0.1 || box.right>innerWidth+0.1);
+              }).slice(0,8).map(el=>({tag:el.tagName,id:el.id,
+                cls:String(el.className).slice(0,80),
+                left:el.getBoundingClientRect().left,
+                right:el.getBoundingClientRect().right}))
+          };
+        }""")
+        assert bounds["headerLeft"] >= -0.1 and bounds["headerRight"] <= width + 0.1, bounds
+        assert bounds["navLeft"] >= -0.1 and bounds["navRight"] <= width + 0.1, bounds
+        assert bounds["documentWidth"] <= bounds["viewport"], bounds
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
