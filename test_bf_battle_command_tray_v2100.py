@@ -37,9 +37,22 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack")')
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().queued')==6
+ assert page.locator('#bf2100-orders').is_visible()
+ assert page.locator('#bf2100-orders').text_content().count(': Attack')==6
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ assert page.locator('#bf2100-orders').text_content().count(': Guard')==6
+ # Repeated read-only refresh must not mutate P, native queued actions, or save.
+ preview_stability=page.evaluate("""()=>{
+   const old=JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+   const actions=S.party.map(p=>p.action),api=BFGlobalBattleCommandsV2100;
+   api.refresh();api.refresh();
+   return {player:JSON.stringify(P)===old,
+     save:localStorage.getItem('bf_global_offline_demo_v7')===save,
+     actions:S.party.every((p,i)=>p.action===actions[i])};
+ }""")
+ assert preview_stability=={'player':True,'save':True,'actions':True},preview_stability
  assert page.locator('#bf2100-clear').is_visible()
  # This minimal Chromium fixture excludes the actual item reservation owner;
  # absence MUST fail closed rather than assume there are no paid item turns.
@@ -71,6 +84,7 @@ with sync_playwright() as pw:
    'targetSame':True,'roundSame':True,'waveSame':True,
    'playerSame':True,'saveSame':True,'idle':True,'empty':True},manual_clear
  assert page.locator('#bf2100-clear').is_disabled()
+ assert page.locator('#bf2100-orders').text_content().count(': Not queued')==6
  assert page.evaluate('BFGlobalBattleCommandsV2100.clearQueuedActions()') is False
  # Restore ordinary Guard queue for subsequent pre-existing native tests.
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
