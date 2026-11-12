@@ -50,6 +50,10 @@ with sync_playwright() as playwright:
     page.add_style_tag(path=str(ASSETS / "bf_home_nav.css"))
     page.add_script_tag(path=str(ASSETS / "bf_home_nav.js"))
     assert page.evaluate("BF_homeNav.current") == "home"
+    # Home story must display the actual playable QUESTS row's label, not a
+    # nonexistent name property or an untrusted provider-provided title.
+    nav = (ASSETS / "bf_home_nav.js").read_text(encoding="utf-8")
+    assert "quest.label" in nav
     # Source provider loads after the Home module in the Android WebView.
     # It must fail closed without inventing a mission or touching saved data.
     story = page.locator("#bf-home-story-progress")
@@ -64,7 +68,7 @@ with sync_playwright() as playwright:
         window.BFGrandGaiaCampaignV100={
           summary:()=>({total:106,cleared:0}),
           nextPlayable:()=>({missionId:q.missionId,dungeonId:q.dungeonId,
-            battles:q.battles,name:q.name})};
+            battles:q.battles,name:'UNVERIFIED SPOOFED TITLE'})};
         const valid=BFGlobalHome.refreshStory();
         window.BFGrandGaiaCampaignV100.nextPlayable=()=>({
           missionId:999999,dungeonId:q.dungeonId,battles:q.battles});
@@ -74,7 +78,7 @@ with sync_playwright() as playwright:
         window.BFGrandGaiaCampaignV100={
           summary:()=>({total:106,cleared:106}),nextPlayable:()=>null};
         const complete=BFGlobalHome.refreshStory();
-        return {valid,invalid,thrown,complete,
+        return {valid,invalid,thrown,complete,expectedLabel:q.label,
           playerSame:JSON.stringify(P)===player,
           saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save};
       } finally {
@@ -84,6 +88,10 @@ with sync_playwright() as playwright:
     }""")
     assert "0/106 missions cleared" in source_preview["valid"]
     assert "Next:" in source_preview["valid"]
+    assert isinstance(source_preview["expectedLabel"], str) and source_preview["expectedLabel"].strip(), source_preview
+    assert "Next: " + source_preview["expectedLabel"][:90] in source_preview["valid"], source_preview
+    assert "UNVERIFIED SPOOFED TITLE" not in source_preview["valid"], source_preview
+    assert "Mission 1 (#1)" not in source_preview["valid"], source_preview
     assert "Next mission not verified" in source_preview["invalid"]
     assert "unavailable" in source_preview["thrown"].lower()
     assert "All archived missions cleared" in source_preview["complete"]
