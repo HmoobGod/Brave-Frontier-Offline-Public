@@ -320,6 +320,16 @@ with sync_playwright() as pw:
      checks.repeat=!BFGrandGaiaContinueV101.canContinueAuto();
      window.BFGlobalQoLQuestRepeatV9800=previousRepeat;
      const auto=document.getElementById('auto');
+     const oldPending=saveRecoveryPending;
+     saveRecoveryPending=true;
+     checks.pendingSave=!BFGrandGaiaContinueV101.canContinueAuto();
+     saveRecoveryPending=oldPending;
+     if(S.party[0]){
+       const oldOrder=S.party[0].action;
+       S.party[0].action={kind:'attack',target:0};
+       checks.queuedOrder=!BFGrandGaiaContinueV101.canContinueAuto();
+       S.party[0].action=oldOrder;
+     }else checks.queuedOrder=false;
      auto.disabled=true;
      checks.disabled=!BFGrandGaiaContinueV101.canContinueAuto();
      auto.disabled=false;
@@ -337,7 +347,8 @@ with sync_playwright() as pw:
    }
  }""")
  assert guard=={'checks':{'unknownEconomy':True,'badWaves':True,
-   'repeat':True,'disabled':True,'alreadyAuto':True},'unchanged':True},guard
+   'repeat':True,'pendingSave':True,'queuedOrder':True,
+   'disabled':True,'alreadyAuto':True},'unchanged':True},guard
  # Use a REAL button click, not a direct helper invocation.
  before_auto=auto_page.evaluate("""()=>({mission:QUEST.missionId,
    version:P.version,clears:JSON.stringify(P.questClears),
@@ -355,6 +366,57 @@ with sync_playwright() as pw:
  assert started['clears']==before_auto['clears'] and started['version']==7,started
  # Starting native Auto does not itself grant a clear or schedule the next quest.
  assert auto_page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is False
+ # Native finish() disables its Auto checkbox on an ended battle; that is
+ # EXPECTED after a stored Victory, not a reason to block next-story routing.
+ auto_page.evaluate('finish(true); BFGrandGaiaContinueV101.refresh()')
+ victory=auto_page.evaluate("""()=>({
+   done:S.over,phase:S.phase,autoDisabled:document.getElementById('auto').disabled,
+   autoChecked:document.getElementById('auto').checked,
+   saved:localStorage.getItem('bf_global_offline_demo_v7'),
+   clears:JSON.stringify(P.questClears),next:BFGrandGaiaContinueV101.nextMission,
+   eligible:BFGrandGaiaContinueV101.canContinueAuto()})""")
+ assert victory['done'] and victory['phase']=='Victory',victory
+ assert victory['saved'] and victory['autoDisabled'] and not victory['autoChecked'],victory
+ assert victory['next']==2 and victory['eligible'],victory
+ assert btn.is_enabled(),'a stored victory must enable next story + native Auto'
+ # A real touch/click starts mission 2 once. Native quest selection may
+ # persist lastMission; it must not award a second clear or rewrite clear counts.
+ committed=auto_page.evaluate("""()=>({
+   memory:JSON.stringify(P.questClears),
+   stored:JSON.stringify(JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears),
+   saveVersion:JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).version})""")
+ assert committed['saveVersion']==7,committed
+ btn.click()
+ next_started=auto_page.evaluate("""()=>({
+   mission:QUEST.missionId,over:S.over,auto:S.auto,
+   checked:document.getElementById('auto').checked,
+   waves:S.totalWaves,clears:JSON.stringify(P.questClears),
+   stored:JSON.stringify(JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears),
+   saveVersion:JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).version})""")
+ assert next_started['mission']==2 and not next_started['over'],next_started
+ assert next_started['auto'] and next_started['checked'],next_started
+ assert next_started['waves']==auto_page.evaluate('QUESTS[1].battles'),next_started
+ assert next_started['clears']==committed['memory'],next_started
+ assert next_started['stored']==committed['stored'] and next_started['saveVersion']==7,next_started
+ assert auto_page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is False
+ # A native defeat also ends with a disabled Auto checkbox. The next
+ # original mission remains the same uncleared mission and is player-clickable.
+ auto_page.evaluate('finish(false); BFGrandGaiaContinueV101.refresh()')
+ defeat=auto_page.evaluate("""()=>({
+   done:S.over,phase:S.phase,disabled:document.getElementById('auto').disabled,
+   next:BFGrandGaiaContinueV101.nextMission,
+   eligible:BFGrandGaiaContinueV101.canContinueAuto(),
+   clears:JSON.stringify(P.questClears)})""")
+ assert defeat['done'] and defeat['phase']=='Defeat' and defeat['disabled'],defeat
+ assert defeat['next']==2 and defeat['eligible'] and defeat['clears']==committed['memory'],defeat
+ assert btn.is_enabled(),'a defeat must not strand the next manual mission'
+ btn.click()
+ retried=auto_page.evaluate("""()=>({
+   mission:QUEST.missionId,over:S.over,auto:S.auto,
+   checked:document.getElementById('auto').checked,
+   clears:JSON.stringify(P.questClears)})""")
+ assert retried['mission']==2 and not retried['over'],retried
+ assert retried['auto'] and retried['checked'] and retried['clears']==committed['memory'],retried
  assert not errors,errors
  auto_page.close()
  assert not errors,errors

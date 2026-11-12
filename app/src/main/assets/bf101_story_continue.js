@@ -178,7 +178,10 @@
      if(!q||!S||S.busy||S.auto===true||awaitingSave()||
         unattendedOwnsNavigation()||document.hidden||
         nav&&nav.current!=='quest'||!auto||
-        auto.type!=='checkbox'||auto.checked||auto.disabled||
+        auto.type!=='checkbox'||auto.checked||
+        // A completed victory/defeat disables native Auto until choosing
+        // the next mission. Only a LIVE disabled checkbox blocks routing.
+        (auto.disabled&&!S.over)||
         !Array.isArray(S.party)||
         // Never discard a manually queued live turn by changing missions.
         !S.over&&S.party.some(p=>p?.action)||

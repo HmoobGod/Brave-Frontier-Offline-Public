@@ -12,6 +12,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  # whole-source economy both required; only native mission/Auto controls.
  assert "autoButton.id='bf101-continue-auto'" in script
  assert 'function canContinueAuto(q)' in script
+ assert '(auto.disabled&&!S.over)' in script
+ assert 'auto.disabled||auto.checked' in script
  assert 'function sourceReadyForAuto(q)' in script
  assert 'source.sourceEconomyReadiness()!==true' in script
  assert 'source.waveReadiness(q.missionId)' in script
