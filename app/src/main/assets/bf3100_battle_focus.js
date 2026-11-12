@@ -162,7 +162,10 @@
    // unchanged. Include ALL strategies in the refresh signature so disabled
    // buttons update immediately rather than retaining stale enabled state.
    const eligible=new Map(strategies.map(([kind])=>[kind,!!lookup(kind)]));
-   const key=JSON.stringify([s,[...eligible]]);
+   // A queued manual order or foreground change can flip the one-turn
+   // eligibility without changing target stats or the standard snapshot.
+   const occupied=Array.isArray(S.party)?S.party.map(p=>p?.action!=null):null;
+   const key=JSON.stringify([s,[...eligible],occupied,document.hidden]);
    if(key===signature)return s;signature=key;
    for(const b of options.querySelectorAll('button')){
      if(b.id==='bf3100-run-turn'){
