@@ -50,6 +50,87 @@ with sync_playwright() as playwright:
     page.add_style_tag(path=str(ASSETS / "bf_home_nav.css"))
     page.add_script_tag(path=str(ASSETS / "bf_home_nav.js"))
     assert page.evaluate("BF_homeNav.current") == "home"
+    # Source provider loads after the Home module in the Android WebView.
+    # It must fail closed without inventing a mission or touching saved data.
+    story = page.locator("#bf-home-story-progress")
+    assert story.is_visible()
+    assert "unavailable" in story.inner_text().lower()
+    assert page.locator("#bf-home-story-open").is_visible()
+    source_preview = page.evaluate("""() => {
+      const original = window.BFGrandGaiaCampaignV100;
+      const player = JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+      const q=QUESTS[0];
+      try {
+        window.BFGrandGaiaCampaignV100={
+          summary:()=>({total:106,cleared:0}),
+          nextPlayable:()=>({missionId:q.missionId,dungeonId:q.dungeonId,
+            battles:q.battles,name:q.name})};
+        const valid=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100.nextPlayable=()=>({
+          missionId:999999,dungeonId:q.dungeonId,battles:q.battles});
+        const invalid=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100.nextPlayable=()=>{throw Error('unavailable')};
+        const thrown=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100={
+          summary:()=>({total:106,cleared:106}),nextPlayable:()=>null};
+        const complete=BFGlobalHome.refreshStory();
+        return {valid,invalid,thrown,complete,
+          playerSame:JSON.stringify(P)===player,
+          saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save};
+      } finally {
+        window.BFGrandGaiaCampaignV100=original;
+        BFGlobalHome.refreshStory();
+      }
+    }""")
+    assert "0/106 missions cleared" in source_preview["valid"]
+    assert "Next:" in source_preview["valid"]
+    assert "Next mission not verified" in source_preview["invalid"]
+    assert "unavailable" in source_preview["thrown"].lower()
+    assert "All archived missions cleared" in source_preview["complete"]
+    assert source_preview["playerSame"] and source_preview["saveSame"]
+    page.locator("#bf-home-story-open").click()
+    assert page.evaluate("BF_homeNav.current") == "quest"
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    assert page.evaluate("BF_homeNav.current") == "home"
+    page.set_viewport_size({"width": 320, "height": 844})
+    assert page.locator("#bf-home-story-open").is_visible()
+    # The new Home story panel must remain inside the viewport at 320px.
+    # If the full document still overflows, report protruding elements so
+    # the exact source of the mobile regression is actionable in CI logs.
+    home_bounds = page.locator(".bf-scene-story").evaluate("""el => ({
+      left:el.getBoundingClientRect().left,
+      right:el.getBoundingClientRect().right,
+      buttonRight:el.querySelector('button').getBoundingClientRect().right,
+      viewport:innerWidth})""")
+    assert home_bounds["left"] >= 0 and home_bounds["right"] <= home_bounds["viewport"] + 1, home_bounds
+    assert home_bounds["buttonRight"] <= home_bounds["right"] + 1, home_bounds
+    # The known 1px defect is in the recovered Home header, not the
+    # bottom navigation. Test the header, footer, and whole document at
+    # three phone widths; do not clip or waive the document assertion.
+    for width in (320, 390, 540):
+        page.set_viewport_size({"width": width, "height": 844})
+        bounds = page.evaluate("""() => {
+          const r = document.querySelector('.bf-shell-head').getBoundingClientRect();
+          const n = document.querySelector('.bf-navbar').getBoundingClientRect();
+          return {
+            viewport: innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            headerLeft: r.left, headerRight: r.right,
+            navLeft: n.left, navRight: n.right,
+            protruding: [...document.querySelectorAll('body *')]
+              .filter(el => {
+                const box=el.getBoundingClientRect();
+                return box.width>0 && (box.left < -0.1 || box.right>innerWidth+0.1);
+              }).slice(0,8).map(el=>({tag:el.tagName,id:el.id,
+                cls:String(el.className).slice(0,80),
+                left:el.getBoundingClientRect().left,
+                right:el.getBoundingClientRect().right}))
+          };
+        }""")
+        assert bounds["headerLeft"] >= -0.1 and bounds["headerRight"] <= width + 0.1, bounds
+        assert bounds["navLeft"] >= -0.1 and bounds["navRight"] <= width + 0.1, bounds
+        assert bounds["documentWidth"] <= bounds["viewport"], bounds
+    page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
     actual = page.locator("#bf-scene-party strong").all_text_contents()
