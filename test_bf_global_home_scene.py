@@ -104,12 +104,21 @@ with sync_playwright() as playwright:
       viewport:innerWidth})""")
     assert home_bounds["left"] >= 0 and home_bounds["right"] <= home_bounds["viewport"] + 1, home_bounds
     assert home_bounds["buttonRight"] <= home_bounds["right"] + 1, home_bounds
+    # Fixed footer must not add its own horizontal padding outside the
+    # device width; previously content-box 100% + 12px caused overshoot.
+    nav_bounds = page.locator(".bf-navbar").evaluate("""el => {
+      const r=el.getBoundingClientRect();
+      return {left:r.left,right:r.right,width:r.width,viewport:innerWidth,
+        box:getComputedStyle(el).boxSizing};
+    }""")
+    assert nav_bounds["box"] == "border-box", nav_bounds
+    assert nav_bounds["left"] >= -0.1 and nav_bounds["right"] <= nav_bounds["viewport"] + 0.1, nav_bounds
     overflow = page.evaluate("""() => ({
       width:document.documentElement.scrollWidth,
       viewport:innerWidth,
       protruding:[...document.querySelectorAll('body *')]
         .filter(el=>{const r=el.getBoundingClientRect();
-          return r.width>0 && r.right>innerWidth+1 && getComputedStyle(el).position!=='fixed';})
+          return r.width>0 && (r.right>innerWidth+0.1 || r.left < -0.1);})
         .slice(0,8).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,80),
           right:Math.round(el.getBoundingClientRect().right)}))})""")
     assert overflow["width"] <= overflow["viewport"], overflow
