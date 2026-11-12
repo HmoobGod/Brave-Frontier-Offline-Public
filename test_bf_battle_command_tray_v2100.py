@@ -197,6 +197,56 @@ with sync_playwright() as pw:
  page.evaluate("""()=>{S.party.forEach(p=>{if(p.active&&p.hp>0)p.hp=p.maxHp});update()}""")
  assert page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()') is None
  assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded()') is False
+ # Adjustable native manual tactics: 20% critical, 40% existing, 60%
+ # cautious. Every mode uses real player buttons, never an automatic Execute.
+ assert page.locator('#bf2100-protect-critical').is_visible()
+ assert page.locator('#bf2100-protect-cautious').is_visible()
+ assert page.locator('#bf2100-protect-critical').is_disabled()
+ assert page.locator('#bf2100-protect-cautious').is_disabled()
+ page.evaluate("""()=>{S.party.forEach((p,i)=>{
+   if(!p?.active||p.hp<=0)return;
+   p.hp=i===0?Math.max(1,Math.floor(p.maxHp*0.15)):
+     i===1?Math.max(1,Math.floor(p.maxHp*0.35)):
+     i===2?Math.max(1,Math.floor(p.maxHp*0.55)):p.maxHp;
+ });update();BFGlobalBattleCommandsV2100.refresh()}""")
+ critical=page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan(0.20)')
+ default=page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan()')
+ cautious=page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan(0.60)')
+ assert [o['kind'] for o in critical['orders']]==['guard']+['attack']*5,critical
+ assert [o['kind'] for o in default['orders']]==['guard','guard']+['attack']*4,default
+ assert [o['kind'] for o in cautious['orders']]==['guard']*3+['attack']*3,cautious
+ assert not page.locator('#bf2100-protect-critical').is_disabled()
+ assert not page.locator('#bf2100-protect-cautious').is_disabled()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded(0.60)') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action.kind)')==['guard']*3+['attack']*3
+ assert page.evaluate('S.busy') is False
+ assert page.evaluate('BFGlobalBattleCommandsV2100.protectWounded(0.20)') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action.kind)')==['guard']+['attack']*5
+ # Coercible thresholds and cloned/shuffled players cannot queue or
+ # overwrite native actions, selected target or canonical v7 save bytes.
+ guards=page.evaluate("""()=>{const party=S.party;
+   const before=party.map(p=>JSON.stringify(p.action)),selected=S.target;
+   const stored=localStorage.getItem('bf_global_offline_demo_v7');
+   let invalid,shuffled;
+   try{
+     invalid=[0.10,0.70,'0.40',NaN,null].every(t=>
+       BFGlobalBattleCommandsV2100.protectWounded(t)===false&&
+       BFGlobalBattleCommandsV2100.woundedPlan(t)===null);
+     S.party=[party[1],party[0],...party.slice(2)];
+     shuffled=BFGlobalBattleCommandsV2100.protectWounded(0.60)===false;
+     return {invalid,shuffled,targetSame:S.target===selected,
+       actionsSame:party.every((p,i)=>JSON.stringify(p.action)===before[i]),
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===stored,
+       noTurn:!S.busy};
+   }finally{S.party=party;}
+ }""")
+ assert guards=={'invalid':True,'shuffled':True,'targetSame':True,
+                'actionsSame':True,'saveSame':True,'noTurn':True},guards
+ page.evaluate("""()=>{S.party.forEach(p=>{
+   if(p?.active&&p.hp>0)p.hp=p.maxHp;
+ });update();BFGlobalBattleCommandsV2100.refresh()}""")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan(0.20)') is None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.woundedPlan(0.60)') is None
  # The original burst and target-selection shortcuts still work afterwards.
  page.evaluate('S.party[0].bb=100;update()')
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("burst")') is True

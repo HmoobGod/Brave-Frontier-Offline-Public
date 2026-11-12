@@ -11,6 +11,15 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert '/* BF_GLOBAL_BATTLE_COMMAND_TRAY_V2100 */' in src
  assert len(src.encode('utf8'))<65536
  assert 'localStorage' not in src and 'saveProgress(' not in src
+ # Every signed standard owner APK contains all native manual protection
+ # modes; the default 40% path remains and player slot validation is strict.
+ assert "'bf2100-protect-critical',()=>protectWounded(0.20)" in src
+ assert "'bf2100-protect',()=>protectWounded()" in src
+ assert "'bf2100-protect-cautious',()=>protectWounded(0.60)" in src
+ assert 'if(![0.20,0.40,0.60].includes(threshold)||!ready()' in src
+ assert 'S.party[p.id]!==p||!slots.children[p.id]' in src
+ assert 'protectCritical.disabled=!woundedPlan(0.20);' in src
+ assert 'protectCautious.disabled=!woundedPlan(0.60);' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 gradle=(R/'app/build.gradle').read_text('utf8')
 assert "versionName '" in gradle
