@@ -61,9 +61,44 @@
    '#bf-box-results .bf-box-card[data-bf-qol-favorite="true"]::after{',
    'content:"★ FAVORITE";font-size:10px;color:#ffdda1}',
    '#bf-box-results .bf-box-card[data-bf-qol-locked="true"]::before{',
-   'content:"🔒";font-size:13px}'
+   'content:"🔒";font-size:13px}',
+   '#bf-home .bf-scene-member{position:relative}',
+   '#bf-home .bf-home-unit-flags{position:absolute;top:2px;right:2px;',
+   'max-width:calc(100% - 4px);pointer-events:none;',
+   'font:700 10px/1.1 system-ui,sans-serif;color:#ffe3a1;',
+   'padding:2px 3px;border:1px solid #aa8750;',
+   'border-radius:3px;background:#101c30ed}'
  ].join('');
  document.head.append(style);
+ // v394: reflect only existing LOCAL advisory markers on Home portraits.
+ // Preserve base-unit IDs and the original Home portrait nodes; no new
+ // inventory permissions, enforcement, save writes, or gameplay controls.
+ const homeParty=document.querySelector('#bf-home .bf-scene-squad #bf-scene-party');
+ function refreshHomeBadges(){
+   if(!homeParty)return;
+   const members=homeParty.querySelectorAll(':scope > .bf-scene-member');
+   members.forEach((member,i)=>{
+     const baseId=Array.isArray(P.squad)?P.squad[i]:null;
+     const owned=validId(baseId);
+     const favorite=owned&&flags.favorites.includes(baseId);
+     const locked=owned&&flags.locked.includes(baseId);
+     const label=[favorite?'Favorite':'',locked?'Advisory lock':'']
+       .filter(Boolean).join(' and ');
+     let badge=member.querySelector('.bf-home-unit-flags');
+     if(!label){if(badge)badge.remove();return;}
+     if(!badge){
+       badge=document.createElement('span');
+       badge.className='bf-home-unit-flags';
+       member.append(badge);
+     }
+     badge.textContent=(favorite?'★':'')+(locked?' 🔒':'');
+     badge.setAttribute('aria-label',label);
+     badge.title=label+' (display only)';
+   });
+ }
+ if(homeParty)new MutationObserver(refreshHomeBadges)
+   .observe(homeParty,{childList:true});
+ window.addEventListener('bf-route-change',refreshHomeBadges);
  const panel=document.createElement('section');panel.id='bf10200-flags';
  const title=document.createElement('strong');
  title.textContent='QoL · UNIT FAVORITES & LOCK MARKERS';
@@ -110,6 +145,7 @@
    showLocks.setAttribute('aria-pressed',String(filterMode==='locked'));
    filterInfo.textContent=shown+' of '+total+' owned box cards shown'+
      (filterMode==='all'?'.':' · '+(filterMode==='favorites'?'Favorites':'Locked')+' only.');
+   refreshHomeBadges();
    return s;
  }
  function setFilter(mode){
