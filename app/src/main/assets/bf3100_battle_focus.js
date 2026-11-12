@@ -17,7 +17,7 @@
  const options=document.createElement('div');options.id='bf3100-options';
  const state=document.createElement('p');state.id='bf3100-status';
  const foot=document.createElement('small');
- foot.textContent='Targets use visible DEMO enemy stats. Wounded Threat prioritizes the highest ATK foe at or below 50% HP, Wounded Low DEF the least-armored one; both reject unknown foe stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual. Not recovered original AI or 2022 wave formations.';
+ foot.textContent='Targets use visible DEMO enemy stats. Wounded Threat prioritizes the highest ATK foe at or below 50% HP, Wounded Low DEF the least-armored one; both reject unknown foe stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual, except the explicitly clicked one-turn native Focus + Execute shortcut. Not recovered original AI or 2022 wave formations.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
@@ -162,9 +162,20 @@
    // unchanged. Include ALL strategies in the refresh signature so disabled
    // buttons update immediately rather than retaining stale enabled state.
    const eligible=new Map(strategies.map(([kind])=>[kind,!!lookup(kind)]));
-   const key=JSON.stringify([s,[...eligible]]);
+   // A queued manual order or foreground change can flip the one-turn
+   // eligibility without changing target stats or the standard snapshot.
+   const occupied=Array.isArray(S.party)?S.party.map(p=>p?.action!=null):null;
+   const key=JSON.stringify([s,[...eligible],occupied,document.hidden]);
    if(key===signature)return s;signature=key;
    for(const b of options.querySelectorAll('button')){
+     if(b.id==='bf3100-run-turn'){
+       // An explicit player click may execute one native round only when
+       // no manually queued order would be overwritten.
+       b.disabled=!s.canQueue||!s.target||S.mode!=='archive'||
+         document.hidden||!Array.isArray(S.party)||
+         S.party.some(p=>p?.action!=null);
+       continue;
+     }
      const strategy=b.dataset.strategy;
      // An uncertain or missing native target never appears runnable.
      b.disabled=!s.canQueue||(strategy?!eligible.get(strategy):!s.target);
@@ -193,6 +204,20 @@
    signature='';refresh();
    return !!target&&live.length>0&&live.every(p=>p.action?.target===target.slot);
  }
+ // One explicitly clicked player turn, not a new AI or repeat loop.
+ // Refuse to replace a manually queued action. The shared native command
+ // adapter owns final target legality and the actual Execute control.
+ function runFocusedTurn(kind=selected,action='attack'){
+   if(action!=='attack'&&action!=='burst'||!legal()||
+      S.mode!=='archive'||document.hidden||!Array.isArray(S.party)||
+      S.party.some(p=>p?.action!=null)||
+      typeof commands.queuedAttacksSafe!=='function'||
+      typeof commands.executeTurn!=='function')return false;
+   try{
+     if(!queueFocus(kind,action)||!commands.queuedAttacksSafe())return false;
+     return commands.executeTurn()===true;
+   }catch(_){return false;}
+ }
  for(const [kind,label] of strategies){
    const b=document.createElement('button');b.type='button';
    b.dataset.strategy=kind;b.textContent=label+' + ATTACK';
@@ -201,8 +226,12 @@
  const bursts=document.createElement('button');bursts.type='button';
  bursts.textContent='FOCUS + BB IF READY';bursts.id='bf3100-burst';
  bursts.addEventListener('click',()=>queueFocus(selected,'burst'));options.append(bursts);
+ const oneTurn=document.createElement('button');oneTurn.type='button';
+ oneTurn.id='bf3100-run-turn';oneTurn.textContent='FOCUS + EXECUTE ONE TURN';
+ oneTurn.setAttribute('aria-label','Execute one manually chosen player squad turn');
+ oneTurn.addEventListener('click',()=>runFocusedTurn());options.append(oneTurn);
  new MutationObserver(refresh).observe(document.getElementById('meta')||host,{childList:true,characterData:true,subtree:true});
  window.setInterval(()=>{if(!document.hidden)refresh()},900);
  refresh();
- window.BFGlobalBattleFocusV3100=Object.freeze({lookup,snapshot,refresh,focus,queueFocus});
+ window.BFGlobalBattleFocusV3100=Object.freeze({lookup,snapshot,refresh,focus,queueFocus,runFocusedTurn});
 })();

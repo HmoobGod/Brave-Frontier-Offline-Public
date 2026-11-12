@@ -55,8 +55,9 @@
  const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
  const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
+ const clear=btn('CLEAR QUEUED ACTIONS','bf2100-clear',()=>clearQueuedActions());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -499,6 +500,54 @@
    if(!queuedAttacksSafe()||execute.disabled)return false;
    execute.click();signature='';refresh();return true;
  }
+
+ // Explicit manual undo for unexecuted PLAYER orders only. No native
+ // Execute, save write, item reservation, quest transition or AI change.
+ // Inspect the entire party before mutating even one action.
+ function cancellableQueuedActors(){
+   if(!ready()||S.mode!=='archive'||document.hidden||
+      !Array.isArray(S.party)||!S.party.length||
+      typeof update!=='function')return null;
+   const all=S.party,squad=active(),ids=all.map(p=>p?.id);
+   if(!squad.length||all.some(p=>!p||!Number.isSafeInteger(p.id)||
+       p.id<0||all[p.id]!==p)||new Set(ids).size!==ids.length||
+      squad.some(p=>!Number.isFinite(p.hp)||p.hp<=0||
+       !Number.isFinite(p.maxHp)||p.maxHp<=0||
+       !slots.children[p.id]||slots.children[p.id].disabled)||
+      all.some(p=>p.action!=null&&!squad.includes(p)))return null;
+   // A paid-item turn is not a disposable manual Attack/Guard/BB queue.
+   // Optional reservation-provider failures also fail closed.
+   try{
+     const item=window.BFGlobalItemTurnReservationsV4500;
+     // If the native reservation owner is absent, an apparent Guard could
+     // conceal an item turn. Never assume that paid reservations are empty.
+     if(!item||typeof item.snapshot!=='function')return null;
+     const reservations=item.snapshot()?.reservations;
+     if(!Array.isArray(reservations)||reservations.length)return null;
+   }catch(_){return null;}
+   const queued=squad.filter(p=>p.action!=null);
+   if(!queued.length||queued.some(p=>!p.action||
+       !['attack','guard','burst'].includes(p.action.kind)))return null;
+   return queued;
+ }
+ function clearQueuedActions(){
+   const queued=cancellableQueuedActors();
+   if(!queued)return false;
+   const originals=queued.map(p=>p.action);
+   try{
+     for(const p of queued)p.action=null;
+     // Existing native UI redraw, not a battle-engine turn.
+     update();
+     signature='';refresh();
+     return !S.busy&&queued.every(p=>p.action===null);
+   }catch(_){
+     // If an unexpected renderer throws, recover original in-memory orders.
+     queued.forEach((p,i)=>{p.action=originals[i]});
+     try{update()}catch(_){}
+     signature='';try{refresh()}catch(_){}
+     return false;
+   }
+ }
  function refresh(){
    const st=snapshot(),key=JSON.stringify([st,active().map(p=>[
      p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
@@ -507,6 +556,7 @@
    // Revalidate Execute on every refresh, even when layout data is stable.
    if(key===signature){
      fire.disabled=!st.canExecute||!queuedAttacksSafe();
+     clear.disabled=!cancellableQueuedActors();
      return st;
    }
    signature=key;
@@ -521,6 +571,7 @@
    // Match the real pre-Execute target gate in the visible player UI.
    // Recheck every refresh: queued targets/BB profiles can change mid-turn.
    fire.disabled=!st.canExecute||!queuedAttacksSafe();
+   clear.disabled=!cancellableQueuedActors();
    const group=document.createDocumentFragment();
    for(const e of st.foes){
      const b=document.createElement('button');b.type='button';
@@ -545,5 +596,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions});
 })();
