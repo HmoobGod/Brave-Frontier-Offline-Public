@@ -336,6 +336,60 @@ with sync_playwright() as pw:
  assert denied['checked'] is False and denied['over'] is False,denied
  assert denied['mission']==before['mission'],denied
  assert denied['saved']==before['saved'] and denied['player']==before['player'],denied
+
+ # Player-clicked saved VICTORY replay starts exactly one native Auto battle.
+ # No auto-repeat session is created and no new reward or v7 write occurs.
+ trial.evaluate('finish(true)')
+ win=trial.evaluate('BFGlobalBattleResultsV3000.snapshot()')
+ assert win['victory'] and win['stored'] and win['canReplay'],win
+ assert trial.locator('#bf3000-replay-auto').is_enabled()
+ assert trial.evaluate('BFGlobalBattleResultsV3000.canReplayVictoryAuto()') is True
+ assert trial.evaluate('BFGlobalBattleResultsV3000.canRetryDefeatAuto()') is False
+ # If the in-memory clear exceeds the committed v7 receipt, fail closed.
+ forged=trial.evaluate("""()=>{const id=QUEST.missionId,old=P.questClears[id];
+   try{P.questClears[id]=old+1;
+     return {ready:BFGlobalBattleResultsV3000.canReplayVictoryAuto(),
+       stillWon:S.over};}
+   finally{P.questClears[id]=old;}
+ }""")
+ assert forged=={'ready':False,'stillWon':True},forged
+ # An existing repeat session owns its Auto state; do not start another.
+ blocked=trial.evaluate("""()=>{const prev=window.BFGlobalQoLQuestRepeatV9800;
+   try{window.BFGlobalQoLQuestRepeatV9800={statusSnapshot(){return {active:true}}};
+     return BFGlobalBattleResultsV3000.canReplayVictoryAuto();}
+   finally{window.BFGlobalQoLQuestRepeatV9800=prev;}
+ }""")
+ assert blocked is False
+ before_win=trial.evaluate("""()=>({saved:localStorage.getItem('bf_global_offline_demo_v7'),
+   player:JSON.stringify(P),mission:QUEST.missionId})""")
+ win_replay=trial.evaluate("""()=>{const auto=document.getElementById('auto');
+   const ok=BFGlobalBattleResultsV3000.replayVictoryAuto();
+   return {ok,checked:auto.checked,auto:S.auto,over:S.over,
+     mission:QUEST.missionId,saved:localStorage.getItem('bf_global_offline_demo_v7'),
+     player:JSON.stringify(P)};}""")
+ assert win_replay['ok'] and win_replay['checked'] and win_replay['auto'],win_replay
+ assert not win_replay['over'] and win_replay['mission']==before_win['mission'],win_replay
+ assert win_replay['saved']==before_win['saved'] and win_replay['player']==before_win['player'],win_replay
+ # A throwing native Auto control after an otherwise valid replay must
+ # disarm Auto and leave the new battle under safe MANUAL control.
+ trial.evaluate("""()=>{const auto=document.getElementById('auto');
+   if(auto.checked&&!auto.disabled)auto.click();
+   else{S.auto=false;auto.checked=false}
+   finish(true);}""")
+ assert trial.evaluate('BFGlobalBattleResultsV3000.canReplayVictoryAuto()') is True
+ before_failure=trial.evaluate("""()=>({saved:localStorage.getItem('bf_global_offline_demo_v7'),
+   player:JSON.stringify(P)})""")
+ failed=trial.evaluate("""()=>{const auto=document.getElementById('auto'),click=auto.click;
+   auto.click=()=>{throw Error('native Auto unavailable')};
+   try{const ok=BFGlobalBattleResultsV3000.replayVictoryAuto();
+     return {ok,over:S.over,auto:S.auto,checked:auto.checked,
+       saved:localStorage.getItem('bf_global_offline_demo_v7'),
+       player:JSON.stringify(P)};}
+   finally{auto.click=click;}
+ }""")
+ assert failed['ok'] is False and failed['over'] is False,failed
+ assert failed['auto'] is False and failed['checked'] is False,failed
+ assert failed['saved']==before_failure['saved'] and failed['player']==before_failure['player'],failed
  assert not trial_errors,trial_errors
  trial.close()
  browser.close()

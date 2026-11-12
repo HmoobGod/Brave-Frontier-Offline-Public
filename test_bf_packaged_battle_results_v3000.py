@@ -29,6 +29,13 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'S.auto=false;' in src
  assert 'row.verifiedWaveCount!==QUEST.battles' in src
  assert 'repeat.statusSnapshot()?.active!==false' in src
+ # One-click victorious replay with native Auto is separate from defeat retry.
+ assert "'bf3000-replay-auto'" in src
+ assert 'function canReplayVictoryAuto(s=snapshot())' in src
+ assert 'function replayVictoryAuto()' in src
+ assert 'committedClearCount(s.missionId)!==s.clears' in src
+ assert 'repeat.statusSnapshot()?.active!==false' in src
+ assert 'disarmRetryAuto();return false;' in src
  # Packaged recovery must immediately refresh the existing read-only story
  # shortcut without adding a second save path or alternative storage key.
  assert 'window.BFGrandGaiaContinueV101' in src
