@@ -157,6 +157,12 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGrandGaiaContinueV101=Object.freeze({snapshot,refresh,
+ // Shared fail-closed route gate for every story navigation shortcut.
+ // A disabled button is only presentation: callers must re-check on click.
+ function canNavigate(){
+   try{return !S?.busy&&!awaitingSave()&&!unattendedOwnsNavigation();}
+   catch(_){return false;}
+ }
+ window.BFGrandGaiaContinueV101=Object.freeze({snapshot,refresh,canNavigate,
    get nextMission(){return remaining()?.missionId||null}});
 })();
