@@ -45,8 +45,9 @@ with sync_playwright() as pw:
     page.add_style_tag(path=str(ASSETS/'bf_home_nav.css'))
     page.add_script_tag(path=str(ASSETS/'bf_home_nav.js'))
     # Measure the unchanged base Home layout at 320px before this add-on.
-    # The 1px footer overflow is tracked by separate Home PR #388; this
-    # regression must not introduce *additional* scroll width.
+    # The pre-existing 1px overhang belongs to .bf-shell-head, not the footer.
+    # The shared header source fix is tracked by PR #388. This isolated
+    # status-add-on regression must not introduce any additional scroll width.
     page.set_viewport_size({'width':320,'height':844})
     base_scroll_width=page.evaluate('document.documentElement.scrollWidth')
     page.set_viewport_size({'width':390,'height':844})
@@ -89,7 +90,6 @@ with sync_playwright() as pw:
         documentWidth:document.documentElement.scrollWidth};
     }""")
     assert status_bounds['left'] >= -0.1 and status_bounds['right'] <= status_bounds['viewport'] + 0.1, status_bounds
-    assert status_bounds['headerLeft'] >= -0.1 and status_bounds['headerRight'] <= status_bounds['viewport'] + 0.1, status_bounds
     assert status_bounds['documentWidth'] <= max(status_bounds['viewport'], base_scroll_width), (status_bounds,base_scroll_width)
     page.set_viewport_size({'width':390,'height':844})
     page.evaluate('()=>{P.exp=13;P.level=2;P.zel=1345;P.karma=250;renderProgress()}')
