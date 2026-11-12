@@ -505,7 +505,7 @@ with sync_playwright() as pw:
      beforePlayer=JSON.stringify(P),
      beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
      beforeTarget=S.target,
-     beforeActions=__party105.map(p=>JSON.stringify(p.action));
+     beforeActions=__party105.map(p=>JSON.stringify(p?.action));
    let noStatus,approved,blockedCurse,blockedParalysis,unknownSkill,
      unknownSupport,insufficientGauge,clone,duplicate,providerThrows;
    try{
@@ -553,7 +553,7 @@ with sync_playwright() as pw:
      playerSame:JSON.stringify(P)===beforePlayer,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
      targetSame:S.target===beforeTarget,
-     ordersSame:__party105.every((p,i)=>JSON.stringify(p.action)===beforeActions[i])};
+     ordersSame:__party105.every((p,i)=>JSON.stringify(p?.action)===beforeActions[i])};
  }""")
  assert healing_priority=={
    'noStatus':'guard','approved':'burst','blockedCurse':'guard',
