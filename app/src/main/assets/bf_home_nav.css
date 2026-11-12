@@ -1401,6 +1401,7 @@ body.bf-location-preview-open{overflow:hidden}
 
 /* v388: Source-validated, read-only next-story panel on the Global Home. */
 .bf-scene-story{
+  box-sizing:border-box;max-width:100%;min-width:0;
   display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
   gap:9px;margin:9px 0;padding:10px;border:2px ridge #a88754;
   border-radius:7px;background:linear-gradient(145deg,#2e394b,#142337);
@@ -1411,6 +1412,7 @@ body.bf-location-preview-open{overflow:hidden}
   font:700 11px/1.5 Arial,sans-serif;overflow-wrap:anywhere;
 }
 #bf-home-story-open{
+  box-sizing:border-box;max-width:100%;
   min-width:112px;min-height:45px;padding:7px 10px;
   border:2px ridge #d8b476;border-radius:6px;
   background:linear-gradient(#dfbb7a,#79542c);color:#fff7df;
