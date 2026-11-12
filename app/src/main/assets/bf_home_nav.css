@@ -40,7 +40,7 @@ body.bf-menu-mode{background:#080f1c}
 body.bf-menu-mode .wrap{max-width:540px}
 .bf-shell-head{
   position:sticky;top:0;z-index:11;display:block;
-  aspect-ratio:644/206;box-sizing:border-box;margin:0 -8px 7px;
+  aspect-ratio:644/206;box-sizing:border-box;margin:0 -7px 7px;
   padding:0;border:0;box-shadow:0 3px 13px #000b;
   background:#101b2c url("content/header/header_ui3.png") center/100% 100% no-repeat;
   font-family:Arial,sans-serif;
