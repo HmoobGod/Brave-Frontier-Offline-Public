@@ -663,6 +663,43 @@ with sync_playwright() as pw:
   assert p.evaluate('JSON.stringify(P)')==before_player,signal
   assert p.evaluate(api+'.poll()') is False,signal
   assert p.evaluate('window.__repeatCount')==previous_replays,signal
+ # Finish Current lets the player stop future replays without cancelling
+ # the current native Auto battle. A committed victory is still required.
+ p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;
+   S.phase='Victory';S.auto=false;
+   document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.start(5)') is True
+ assert p.locator('#bf9800-finish-current').is_enabled()
+ before_replays=p.evaluate('window.__repeatCount')
+ before_player=p.evaluate('JSON.stringify(P)')
+ p.locator('#bf9800-finish-current').click()
+ assert p.evaluate(api+'.statusSnapshot().active') is True
+ assert p.evaluate(api+'.statusSnapshot().finishingCurrent') is True
+ assert p.locator('#bf9800-finish-current').is_disabled()
+ assert p.locator('#auto').is_checked()
+ assert p.evaluate('window.__repeatCount')==before_replays
+ assert p.evaluate('JSON.stringify(P)')==before_player
+ p.evaluate("""()=>{P.questClears[1]++;S.over=true;S.phase='Victory';
+   document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.poll()') is True
+ assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert 'Finished current battle' in p.evaluate(api+'.statusSnapshot().reason')
+ assert p.evaluate('window.__repeatCount')==before_replays
+ # A failed save after Finish Current still disarms instead of granting
+ # a completed repeat or starting another battle.
+ p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;
+   S.phase='Victory';window.__stored98=true;
+   document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.start(5)') is True
+ p.locator('#bf9800-finish-current').click()
+ failed_replays=p.evaluate('window.__repeatCount')
+ p.evaluate("""()=>{S.over=true;S.phase='Victory';window.__stored98=false;
+   document.getElementById('auto').checked=false;}""")
+ assert p.evaluate(api+'.poll()') is True
+ assert p.evaluate(api+'.statusSnapshot().active') is False
+ assert 'save unavailable' in p.evaluate(api+'.statusSnapshot().reason')
+ assert p.evaluate('window.__repeatCount')==failed_replays
+ p.evaluate('window.__stored98=true')
  # Stop Repeating belongs to the player even while a battle action is
  # running. The ongoing round may complete, but an Auto setting owned by
  # the repeat session must not keep driving later rounds.
