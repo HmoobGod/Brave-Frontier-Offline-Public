@@ -17,7 +17,7 @@
  const options=document.createElement('div');options.id='bf3100-options';
  const state=document.createElement('p');state.id='bf3100-status';
  const foot=document.createElement('small');
- foot.textContent='Targets use visible DEMO enemy stats. Element Weakness requires a known advantage; Fewest Resists avoids source-known elemental disadvantages only when every living ally and enemy element is identified. Queuing uses native player controls; Execute remains manual. Not recovered original AI.';
+ foot.textContent='Targets use visible DEMO enemy stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual. Not recovered original AI.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
@@ -74,8 +74,8 @@
    // Distinct manual command: minimize the number of current squad members
    // facing a source-listed 0.5x ELEMENTAL disadvantage in this DEMO battle.
    // Unlike Element Weakness, this also works if no ally has an advantage.
-   // Do not fabricate enemy types: if ANY live combatant lacks a proven
-   // element, disable this shortcut without changing the native target.
+   // Enemy rosters remain DEMO, not authenticated 2022 formations. If ANY
+   // element in the DEMO battle, disable this shortcut without changing the target.
    if(kind==='element-safe'){
      const element=window.BFGlobalElementalCombatV6900;
      if(S.mode!=='archive'||!element||
