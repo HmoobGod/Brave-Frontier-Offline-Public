@@ -87,6 +87,9 @@ with sync_playwright() as pw:
  assert q.evaluate(api+'.favorites')==[10011,20011]
  assert q.evaluate(api+'.state().locked') is True
  q.close()
+ # Restore the original single-lock fixture for existing owned-only gates.
+ assert p.evaluate(api+'.change(20011,"locked",false)') is True
+ assert p.evaluate(api+'.locked')==[10011]
  # Browser-backed filter checks exercise real owned cards and clicks,
  # not only source strings. They must be reversible and must not mutate v7.
  assert p.evaluate(api+'.change(20011,"favorites",false)') is True
