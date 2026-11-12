@@ -281,6 +281,54 @@ with sync_playwright() as pw:
    {'hp':5,'maxHp':100,'slot':1,'element':'Fire'},
    {'hp':1,'maxHp':100,'slot':2,'element':'Water'}]
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",typed_foes)==0
+ # Source-backed elemental fallback should not blindly select a heavily
+ # resisted low-HP foe when NO squad member can exploit a weakness.
+ # Player squad: Fire, Fire, Water. Water resists both Fire attacks;
+ # Thunder resists the Water attack but is neutral against both Fire attacks.
+ no_weakness=[
+   {'hp':1,'maxHp':100,'slot':0,'element':'Water'},
+   {'hp':95,'maxHp':100,'slot':1,'element':'Thunder'}
+ ]
+ before_source_fallback=p.evaluate("""()=>({
+   player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   target:S.target,actions:__party105.map(x=>JSON.stringify(x.action))
+ })""")
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",no_weakness)==1
+ # If any enemy element is unknown, no resistance-based ranking is
+ # authorized: preserve the existing lowest HP% target exactly.
+ unknown_opponent=[
+   {'hp':1,'maxHp':100,'slot':0,'element':'Water'},
+   {'hp':95,'maxHp':100,'slot':1,'element':'Unknown'}
+ ]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",unknown_opponent)==0
+ # Missing ally source identity makes team-wide resistance counts uncertain.
+ p.evaluate('__party105[2].unitId=999999')
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",no_weakness)==0
+ p.evaluate('__party105[2].unitId=20011')
+ # Equal advantage counts prefer fewer resisted allied elements, rather
+ # than mistaking the smallest DEMO HP percentage for the best matchup.
+ p.evaluate('__party105[1].unitId=30011')
+ tied_advantage=[
+   {'hp':1,'maxHp':100,'slot':0,'element':'Earth'},
+   {'hp':80,'maxHp':100,'slot':1,'element':'Fire'}
+ ]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",tied_advantage)==1
+ p.evaluate('__party105[1].unitId=10011')
+ # A provider returning a non-source multiplier cannot authorize an
+ # Auto target, and its failure must not change live player actions.
+ invalid_matchup=p.evaluate("""rows=>{
+   const old=BFGlobalElementalCombatV6900;
+   try{
+     BFGlobalElementalCombatV6900={normalize:old.normalize,multiplier:()=>2};
+     return BF042AutoCoordination.chooseTarget(rows);
+   }finally{BFGlobalElementalCombatV6900=old}
+ }""",no_weakness)
+ assert invalid_matchup is None
+ after_source_fallback=p.evaluate("""()=>({
+   player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   target:S.target,actions:__party105.map(x=>JSON.stringify(x.action))
+ })""")
+ assert before_source_fallback==after_source_fallback
  # Bad optional source helpers must not crash the player's live Auto turn,
  # silently guess a legacy HP% target, or change orders/canonical v7 bytes.
  source_failures=p.evaluate("""rows=>{
