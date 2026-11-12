@@ -141,7 +141,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     '</section>',
     '<section class="bf-scene-story" aria-label="Story progress and quest navigation">',
       '<p id="bf-home-story-progress" role="status" aria-live="polite">Story status unavailable · browse Quests for available missions.</p>',
-      '<button id="bf-home-story-open" type="button" data-bf-goto="quest">VIEW QUESTS ›</button>',
+      '<button id="bf-home-story-open" type="button">VIEW QUESTS ›</button>',
     '</section>',
     '<section class="bf-scene-explore" aria-label="Global locations">',
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">ADVENTURE</strong><small>Recovered Global artwork</small></div>',
@@ -198,6 +198,11 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Home shows only source-validated campaign progress. No quest selection,
   // battle start, Auto toggle or canonical v7 save mutation occurs here.
   const storyStatus = document.getElementById('bf-home-story-progress');
+  // Explicit player click uses the existing Home router, without marking an
+  // Adventure portal available earlier than the original Quest/Summon cards.
+  document.getElementById('bf-home-story-open')?.addEventListener('click', () => {
+    window.BF_homeNav?.go('quest');
+  });
   function refreshStory() {
     let message = 'Story status unavailable · browse Quests for available missions.';
     try {
