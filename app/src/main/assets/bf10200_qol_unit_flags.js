@@ -72,10 +72,21 @@
  favorite.type='button';
  const locked=document.createElement('button');locked.id='bf10200-lock';
  locked.type='button';
+ const filters=document.createElement('div');filters.id='bf10200-filters';
+ const showFavorites=document.createElement('button');showFavorites.type='button';
+ showFavorites.id='bf10200-show-favorites';showFavorites.setAttribute('aria-pressed','false');
+ showFavorites.textContent='FAVORITES ONLY';
+ const showLocks=document.createElement('button');showLocks.type='button';
+ showLocks.id='bf10200-show-locks';showLocks.setAttribute('aria-pressed','false');
+ showLocks.textContent='LOCKED ONLY';
+ const filterInfo=document.createElement('p');filterInfo.id='bf10200-filter-info';
+ filterInfo.setAttribute('role','status');
+ filters.append(showFavorites,showLocks,filterInfo);
+ let filterMode='all';
  const caution=document.createElement('small');
  caution.textContent='Markers are stored locally and do not modify the game save. '+
    'Selling/fusion protection is not active because those mechanics are not reconstructed.';
- panel.append(title,info,favorite,locked,caution);detail.after(panel);
+ panel.append(title,info,favorite,locked,filters,caution);detail.after(panel);
  function refresh(){
    const s=state();
    favorite.disabled=!s.owned;locked.disabled=!s.owned;
@@ -83,13 +94,30 @@
    locked.textContent=s.locked?'REMOVE LOCK':'MARK LOCK';
    info.textContent=(s.owned?'Selected base unit #'+s.id:'Choose an owned unit')+
      ' · '+s.favorites+' favorites · '+s.locks+' locks';
+   let shown=0,total=0;
    for(const card of results.querySelectorAll('.bf-box-card')){
      const id=Number(card.dataset.bfUnitId);
      card.dataset.bfQolFavorite=String(flags.favorites.includes(id));
      card.dataset.bfQolLocked=String(flags.locked.includes(id));
+     const visible=filterMode==='all'||
+       (filterMode==='favorites'&&flags.favorites.includes(id))||
+       (filterMode==='locked'&&flags.locked.includes(id));
+     card.hidden=!visible;
+     card.style.display=visible?'':'none';
+     total++;if(visible)shown++;
    }
+   showFavorites.setAttribute('aria-pressed',String(filterMode==='favorites'));
+   showLocks.setAttribute('aria-pressed',String(filterMode==='locked'));
+   filterInfo.textContent=shown+' of '+total+' owned box cards shown'+
+     (filterMode==='all'?'.':' · '+(filterMode==='favorites'?'Favorites':'Locked')+' only.');
    return s;
  }
+ function setFilter(mode){
+   if(!['all','favorites','locked'].includes(mode))return false;
+   filterMode=mode;refresh();return true;
+ }
+ showFavorites.addEventListener('click',()=>setFilter(filterMode==='favorites'?'all':'favorites'));
+ showLocks.addEventListener('click',()=>setFilter(filterMode==='locked'?'all':'locked'));
  favorite.addEventListener('click',()=>{
    const s=state();if(s.owned)change(s.id,'favorites',!s.favorite);
  });
@@ -103,7 +131,8 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
  window.BFGlobalQoLUnitFlagsV10200=freeze({
-   key,state,change,refresh,
+   key,state,change,refresh,setFilter,
+   get filter(){return filterMode},
    get favorites(){return freeze(flags.favorites.slice())},
    get locked(){return freeze(flags.locked.slice())}
  });
