@@ -17,12 +17,17 @@
  const options=document.createElement('div');options.id='bf3100-options';
  const state=document.createElement('p');state.id='bf3100-status';
  const foot=document.createElement('small');
- foot.textContent='Targets use visible DEMO enemy stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual. Not recovered original AI.';
+ foot.textContent='Targets use visible DEMO enemy stats. Wounded Threat prioritizes the highest ATK foe at or below 50% HP, Wounded Low DEF the least-armored one; both reject unknown foe stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual. Not recovered original AI or 2022 wave formations.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
   ['highest-hp','HIGHEST HP'],['highest-hp-percent','HIGHEST HP %'],
   ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF'],
+  // User-only tactics: a visible DEMO foe below half HP can be singled
+  // out either by its live attack threat or low defense. These are current
+  // simulated combat stats, NEVER authenticated 2022 enemy formations.
+  ['wounded-threat','FINISH WOUNDED THREAT'],
+  ['wounded-armor','FINISH WOUNDED LOW DEF'],
   ['elemental','ELEMENT WEAKNESS'],
   ['element-safe','FEWEST RESISTS']
  ];
@@ -30,7 +35,8 @@
  const legal=()=>!S.busy&&!S.over&&!S.auto&&!!commands.snapshot()?.canQueue;
  function lookup(kind){
    if(!strategies.some(x=>x[0]===kind)||!Array.isArray(S.enemies))return null;
-   const key=kind==='highest-atk'?'atk':kind==='lowest-def'?'def':'hp';
+   const key=kind==='highest-atk'||kind==='wounded-threat'?'atk':
+     kind==='lowest-def'||kind==='wounded-armor'?'def':'hp';
    // Validate EVERY living native foe before any optional ranking.
    // Silently skipping a corrupt foe can mis-map the real target buttons,
    // even if the candidate itself has valid HP and a legal slot.
@@ -120,6 +126,20 @@
    // Fail closed for that stat strategy; independent valid-HP priorities
    // and native slot ordering remain unchanged.
    if(living.some(e=>!Number.isFinite(e[key])))return null;
+   // A wounded finisher uses a REAL current DEMO combat HP ratio. Check
+   // every living foe's HP range before choosing; zero valid wounded foes
+   // means no player command, not an arbitrary fallback target.
+   if(kind==='wounded-threat'||kind==='wounded-armor'){
+     if(S.mode!=='archive'||living.some(e=>e.hp>e.maxHp))return null;
+     const wounded=living.filter(e=>e.hp/e.maxHp<=0.5);
+     if(!wounded.length)return null;
+     wounded.sort((a,b)=>kind==='wounded-threat'?
+       b.atk-a.atk||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot:
+       a.def-b.def||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot);
+     const f=wounded[0];
+     return Object.freeze({slot:f.slot,name:f.name,hp:f.hp,
+       atk:f.atk,def:f.def});
+   }
    const foes=living.slice();
    foes.sort((a,b)=>{
      const diff=kind==='highest-atk'?b[key]-a[key]:

@@ -16,6 +16,15 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'strategy?!eligible.get(strategy):!s.target' in src
  # The rebuilt APK, not just a checked-in source tree, must contain the
  # opt-in manual action that really queues a target through native controls.
+ # Two opt-in 50%-HP player-only finishing tactics must use real native
+ # targeting and queue controls, never imagined 2022 enemy formations.
+ assert "['wounded-threat','FINISH WOUNDED THREAT']" in src
+ assert "['wounded-armor','FINISH WOUNDED LOW DEF']" in src
+ assert "const wounded=living.filter(e=>e.hp/e.maxHp<=0.5);" in src
+ assert "if(S.mode!=='archive'||living.some(e=>e.hp>e.maxHp))return null;" in src
+ assert "if(!wounded.length)return null;" in src
+ assert "b.atk-a.atk||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot:" in src
+ assert "a.def-b.def||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot);" in src
  assert "['element-safe','FEWEST RESISTS']" in src
  assert "if(kind==='element-safe'){" in src
  assert 'if(types.some(type=>!type))return null;' in src
