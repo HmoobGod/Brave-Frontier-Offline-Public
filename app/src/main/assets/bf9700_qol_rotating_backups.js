@@ -128,6 +128,37 @@
  selector.style.cssText='min-height:42px;max-width:100%;background:#193943;'+
    'border:1px solid #b0cfbf;color:#fff;padding:7px;border-radius:5px';
  panel.append(heading,status,caution,toggle,actions,selector);host.after(panel);
+ // v404 Home: show only verified local backup availability. Opening the
+ // EXISTING manager requires an explicit click and never exports, restores,
+ // overwrites the live v7 save or forces an automatic backup.
+ const homeTools=document.querySelector('#bf-home .bf-scene-tools');
+ const homeBackup=homeTools?document.createElement('section'):null;
+ let homeStatus=null;
+ if(homeBackup){
+   homeBackup.id='bf9700-home-status';
+   homeBackup.setAttribute('aria-label','Local save backup status');
+   homeBackup.style.cssText='box-sizing:border-box;max-width:100%;min-width:0;'+
+     'margin:8px 0;padding:8px;border:1px solid #8bbaaa;border-radius:6px;'+
+     'background:linear-gradient(#21423f,#132c31);color:#e8f6e9;'+
+     'font:12px/1.45 Arial,sans-serif';
+   homeStatus=document.createElement('p');homeStatus.id='bf9700-home-count';
+   homeStatus.style.cssText='margin:0 0 7px;overflow-wrap:anywhere';
+   const manage=document.createElement('button');
+   manage.id='bf9700-home-manage';manage.type='button';
+   manage.textContent='OPEN SAVE BACKUP MANAGER ›';
+   manage.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px;'+
+     'padding:9px;border:1px solid #accfba;border-radius:5px;'+
+     'color:#fff;background:#335b5a;font:800 11px Arial,sans-serif;cursor:pointer';
+   manage.addEventListener('click',()=>{
+     const nav=window.BF_homeNav;
+     if(!nav||typeof nav.go!=='function'||nav.go('quest')!==true)return;
+     panel.open=true;refresh();
+     if(typeof panel.scrollIntoView==='function')
+       panel.scrollIntoView({block:'start'});
+   });
+   homeBackup.append(homeStatus,manage);
+   homeTools.after(homeBackup);
+ }
  function refresh(){
    const slots=listing();
    checkbox.checked=enabled;
@@ -143,6 +174,13 @@
    selector.value=slots.some(x=>String(x.slot-1)===previous)?previous:'0';
    selector.disabled=!slots.length;exportButton.disabled=!slots.length;
    currentButton.disabled=!valid(safeGet(liveKey));
+   if(homeStatus){
+     const last=slots[0]?.time;
+     homeStatus.textContent='LOCAL SAVE BACKUPS · '+slots.length+'/'+limit+
+       ' verified snapshots · Auto '+(enabled?'ON':'OFF')+
+       (last?' · Latest '+new Date(last).toLocaleString():' · No local snapshot')+
+       ' · Keep an external export before changing APK versions.';
+   }
    return slots;
  }
  checkbox.addEventListener('change',()=>{if(!enable(checkbox.checked))refresh();});
