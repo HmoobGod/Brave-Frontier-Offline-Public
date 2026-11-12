@@ -164,10 +164,12 @@
  const equipButton=mk('bf10000-apply','APPLY PRESET',()=>applyPreset(Number(selected.value)));
  const removeButton=mk('bf10000-delete','DELETE PRESET',()=>deletePreset(Number(selected.value)));
  const status=document.createElement('p');status.id='bf10000-status';status.setAttribute('role','status');
+ const preview=document.createElement('p');preview.id='bf10000-preview';
+ preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
  const help=document.createElement('small');
  help.textContent='Preset labels do not travel inside exported v7 saves. '+
    'No automatic selection or extra original unit slots.';
- panel.append(heading,explanation,selected,name,buttons,status,help);anchor.after(panel);
+ panel.append(heading,explanation,selected,name,buttons,status,preview,help);anchor.after(panel);
  function refresh(){
    const index=Number(selected.value)||0,slot=slots[index];
    const unavailable=!!S.busy;
@@ -180,6 +182,23 @@
      o.textContent='Preset '+(i+1)+(slots[i]?' · '+slots[i].name:' · Empty');
    });
    status.textContent=message+(slot?' · '+slot.squad.length+' units saved.':' · Empty slot.');
+   // Preview the exact team difference without changing the canonical save.
+   // Missing units are displayed, never silently substituted.
+   if(!slot){preview.textContent='Preview: empty preset; no squad changes.';}
+   else{
+     const active=P.squad.slice(),wanted=slot.squad;
+     const added=wanted.filter(id=>!active.includes(id));
+     const removed=active.filter(id=>!wanted.includes(id));
+     const missing=wanted.filter(id=>!P.roster.includes(id));
+     const reordered=!added.length&&!removed.length&&
+       wanted.some((id,i)=>id!==active[i]);
+     preview.textContent='Preview · '+wanted.length+' units · '+
+       (added.length?'Add #'+added.join(', #'):'No additions')+' · '+
+       (removed.length?'Remove #'+removed.join(', #'):'No removals')+
+       (reordered?' · Reorder existing units':'')+
+       (missing.length?' · UNOWNED #'+missing.join(', #')+'; cannot apply':'')+
+       (!added.length&&!removed.length&&!reordered?' · Already active':'');
+   }
    return info();
  }
  selected.addEventListener('change',()=>{
