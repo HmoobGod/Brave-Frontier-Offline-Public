@@ -42,13 +42,17 @@
  go.id='bf9800-start';go.type='button';go.textContent='START AUTO-REPEAT';
  const halt=document.createElement('button');
  halt.id='bf9800-stop';halt.type='button';halt.textContent='STOP REPEATING';
- for(const b of [go,halt]){
+ const finish=document.createElement('button');
+ finish.id='bf9800-finish-current';finish.type='button';
+ finish.textContent='FINISH CURRENT BATTLE';
+ finish.setAttribute('aria-label','Finish this battle, then stop auto-repeat');
+ for(const b of [go,halt,finish]){
    b.style.cssText='margin:3px;min-height:42px;padding:8px;'+
      'background:#46633a;color:white;border:1px solid #afc39c;border-radius:5px';
  }
  const status=document.createElement('p');status.id='bf9800-status';
  status.setAttribute('role','status');
- panel.append(heading,note,picker,go,halt,status);host.after(panel);
+ panel.append(heading,note,picker,go,finish,halt,status);host.after(panel);
  // Preserve v98 compatibility with older embedded pages lacking the
  // original 2022 campaign gate. On the current Android page, refuse
  // unattended repeats if ANY authenticated source wave tuple or live
@@ -111,7 +115,7 @@
  function statusSnapshot(){
    return freeze({active:!!session,missionId:session?.missionId||null,
      target:session?.target||0,completed:session?.completed??complete,
-     reason});
+     finishingCurrent:!!session?.finishAfterCurrent,reason});
  }
  function update(){
    const s=safeResultSnapshot();
@@ -121,9 +125,11 @@
      !!s.canReplay&&cleared&&s.missionId===QUEST?.missionId;
    go.disabled=!eligible;
    picker.disabled=!!session;halt.disabled=!session;
+   finish.disabled=!session||!!session.finishAfterCurrent;
    status.textContent=session?
      'REPEATING MISSION '+session.missionId+' · '+session.completed+'/'+
-       session.target+' additional clears complete · '+reason:
+       session.target+' additional clears complete · '+
+       (session.finishAfterCurrent?'Finishing current battle · ':'')+reason:
      (reason==='Idle'?'Complete a previously cleared quest to enable auto-repeat':reason);
    return statusSnapshot();
  }
@@ -212,7 +218,7 @@
       !Number.isSafeInteger(s.clears)||s.clears<1||
       !hasCommittedReceipt(s)||!sourceQuestMatches(s.missionId))return false;
    session={missionId:s.missionId,target:count,completed:0,
-     lastClear:s.clears,autoWasEnabled:auto.checked};
+     lastClear:s.clears,autoWasEnabled:auto.checked,finishAfterCurrent:false};
    complete=0;reason='Preparing replay';
    return playAgain();
  }
@@ -248,6 +254,8 @@
      return stop('Stopped: unexpected saved clear count',false);
    session.completed++;
    session.lastClear=s.clears;
+   if(session.finishAfterCurrent)
+     return stop('Finished current battle by player request',true);
    if(session.completed>=session.target)
      return stop('Finished '+session.target+' additional clears',true);
    return playAgain();
@@ -262,6 +270,13 @@
    else update();
  });
  go.addEventListener('click',()=>start());
+ finish.addEventListener('click',()=>{
+   if(!session||session.finishAfterCurrent)return;
+   // Do not interrupt the active native battle or change its Auto state.
+   // After the next committed clear, poll() stops without replaying.
+   session.finishAfterCurrent=true;reason='Waiting for current battle to finish';
+   update();
+ });
  halt.addEventListener('click',()=>stop('Stopped by player',true));
  auto.addEventListener('change',()=>{
    if(session&&!internalToggle&&!auto.checked)stop('Stopped: Auto Battle disabled',false);

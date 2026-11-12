@@ -23,6 +23,11 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
     assert "stop('Stopped: battle results unavailable',false)" in src
     assert "stop('Stopped: native mission replay failed',false)" in src
     assert 's.clears<=session.lastClear' in src
+    assert "finish.id='bf9800-finish-current'" in src
+    assert 'finishAfterCurrent:true' not in src
+    assert 'session.finishAfterCurrent=true' in src
+    assert "stop('Finished current battle by player request',true)" in src
+    assert src.index('if(session.finishAfterCurrent)')<src.index('return playAgain();',src.index('session.completed++;'))
     assert 'sourceQuestMatches' in src and 'campaign.waveReadiness' in src
     assert "typeof campaign.sourceEconomyReadiness!=='function'" in src
     assert 'campaign.sourceEconomyReadiness()!==true' in src
