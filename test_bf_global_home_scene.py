@@ -94,7 +94,25 @@ with sync_playwright() as playwright:
     assert page.evaluate("BF_homeNav.current") == "home"
     page.set_viewport_size({"width": 320, "height": 844})
     assert page.locator("#bf-home-story-open").is_visible()
-    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    # The new Home story panel must remain inside the viewport at 320px.
+    # If the full document still overflows, report protruding elements so
+    # the exact source of the mobile regression is actionable in CI logs.
+    home_bounds = page.locator(".bf-scene-story").evaluate("""el => ({
+      left:el.getBoundingClientRect().left,
+      right:el.getBoundingClientRect().right,
+      buttonRight:el.querySelector('button').getBoundingClientRect().right,
+      viewport:innerWidth})""")
+    assert home_bounds["left"] >= 0 and home_bounds["right"] <= home_bounds["viewport"] + 1, home_bounds
+    assert home_bounds["buttonRight"] <= home_bounds["right"] + 1, home_bounds
+    overflow = page.evaluate("""() => ({
+      width:document.documentElement.scrollWidth,
+      viewport:innerWidth,
+      protruding:[...document.querySelectorAll('body *')]
+        .filter(el=>{const r=el.getBoundingClientRect();
+          return r.width>0 && r.right>innerWidth+1 && getComputedStyle(el).position!=='fixed';})
+        .slice(0,8).map(el=>({tag:el.tagName,id:el.id,cls:String(el.className).slice(0,80),
+          right:Math.round(el.getBoundingClientRect().right)}))})""")
+    assert overflow["width"] <= overflow["viewport"], overflow
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
