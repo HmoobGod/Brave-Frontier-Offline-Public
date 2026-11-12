@@ -245,7 +245,8 @@ function bfOfflineUnitPortraitV266(source, name) {
   if (picker) new MutationObserver(refreshParty).observe(picker, {childList:true});
   const nav = document.querySelector('.bf-navbar');
   if (nav) nav.addEventListener('click', refreshParty);
-  window.BFGlobalHome = {refreshParty,refreshStory};
+  window.BFGlobalHome = {refreshParty};
+  window.BFGlobalHome.refreshStory = refreshStory;
 })();
 
 
