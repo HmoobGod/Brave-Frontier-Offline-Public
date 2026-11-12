@@ -16,7 +16,7 @@
  const pref='bf_global_offline_qol_advanced_auto_v105';
  const baseKind=smart.kindFor.bind(smart);
  const baseTarget=coordinated.chooseTarget.bind(coordinated);
- const configDefaults=()=>({on:false,heal:60,target:'percent',burst:'normal',guard:0});
+ const configDefaults=()=>({on:false,heal:60,target:'percent',burst:'normal',guard:0,healBeforeGuard:false});
  function readPrefs(){
    try{
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
@@ -24,7 +24,8 @@
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
        target:['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','selected'].includes(raw?.target)?raw.target:'percent',
        burst:['normal','conserve','final-wave'].includes(raw?.burst)?raw.burst:'normal',
-       guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0};
+       guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0,
+       healBeforeGuard:raw?.healBeforeGuard===true};
    }catch(_){return configDefaults();}
  }
  let config=readPrefs();
@@ -34,16 +35,19 @@
      [35,50,60,75].includes(options.heal)&&
      ['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','selected'].includes(options.target)&&
      ['normal','conserve','final-wave'].includes(options.burst)&&
-     (options.guard===undefined||[0,20,35,50].includes(options.guard));
+     (options.guard===undefined||[0,20,35,50].includes(options.guard))&&
+     (options.healBeforeGuard===undefined||typeof options.healBeforeGuard==='boolean');
  }
  function set(next){
    if(!valid(next))return false;
    const requested={on:next.on,heal:next.heal,
      target:next.target,burst:next.burst,
-     guard:next.guard===undefined?config.guard:next.guard};
+     guard:next.guard===undefined?config.guard:next.guard,
+     healBeforeGuard:next.healBeforeGuard===undefined?
+       config.healBeforeGuard:next.healBeforeGuard};
    try{localStorage.setItem(pref,JSON.stringify({
      heal:requested.heal,target:requested.target,burst:requested.burst,
-     guard:requested.guard
+     guard:requested.guard,healBeforeGuard:requested.healBeforeGuard
    }));}catch(_){return false}
    config=requested;refresh();return true;
  }
@@ -74,7 +78,39 @@
        unit.hp/unit.maxHp<=config.guard/100&&
        !window.BFGlobalParalysisActionLockV6000?.paralyzed(unit.id);
    }catch(_){return previous;}
-   if(guardAllowed)return 'guard';
+   if(guardAllowed){
+     // Optional *player-selected* rescue tactic: a real source-verified
+     // heal-all BB may replace this actor's Guard, never any teammate's turn.
+     // Unknown status, provider data, squad ownership or gauge -> Guard.
+     // This does NOT recover native heal formulas or grant BB automatically.
+     if(config.healBeforeGuard&&Number.isSafeInteger(unit.unitId)&&
+        Number.isFinite(unit.bb)&&unit.bb>=100){
+       try{
+         const paralysis=window.BFGlobalParalysisActionLockV6000;
+         const curse=window.BFGlobalCurseBBLockV5900;
+         if(typeof paralysis?.paralyzed!=='function'||
+            paralysis.paralyzed(unit.id)!==false||
+            typeof curse?.cursed!=='function'||
+            curse.cursed(unit.id)!==false)return 'guard';
+         const bb=bfOriginalBB(unit.unitId);
+         if(bb?.target!=='support'||
+            originalSupport(unit.unitId)?.kind!=='heal_all')return 'guard';
+         const members=liveParty();
+         if(!Array.isArray(members)||!members.includes(unit)||
+            members.some(p=>p&&p.active&&p.hp>0&&!Number.isFinite(p.hp)))
+           return 'guard';
+         const living=members.filter(p=>p&&p.active&&
+           Number.isFinite(p.hp)&&p.hp>0);
+         if(!living.length||new Set(living).size!==living.length||
+            living.some(p=>!Number.isSafeInteger(p.id)||p.id<0||p.id>=6||
+              S.party[p.id]!==p||!Number.isFinite(p.maxHp)||
+              p.maxHp<=0||p.hp>p.maxHp))return 'guard';
+         if(living.some(p=>p.hp<p.maxHp&&p.hp/p.maxHp<=config.heal/100))
+           return 'burst';
+       }catch(_){return 'guard';}
+     }
+     return 'guard';
+   }
    // Unknown Curse status must not authorize a Brave Burst. A regular
    // attack is the conservative player-only decision until source recovers.
    try{
@@ -289,17 +325,25 @@
  const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-hp','Highest remaining HP'],['highest-hp-percent','Highest HP percentage'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)'],['selected','Keep the selected enemy (while alive)']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge'],['final-wave','Save offensive BB until final recorded quest wave']]);
  const guard=option('Low HP Auto defense','bf10500-guard',[[0,'Off (original default)'],[20,'Guard at or below 20% HP'],[35,'Guard at or below 35% HP'],[50,'Guard at or below 50% HP']]);
+ const healFirstLabel=document.createElement('label');
+ healFirstLabel.style.cssText='display:block;margin:9px 0';
+ const healFirst=document.createElement('input');
+ healFirst.type='checkbox';healFirst.id='bf10500-heal-before-guard';
+ healFirstLabel.append(healFirst,document.createTextNode(
+   ' Prefer source-verified heal-all BB before low-HP Auto Guard (optional)'));
+ settings.append(healFirstLabel);
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
    'Element targeting favors verified weaknesses, then fewer elemental resistances when all types are known; '+
    'unknown weaknesses revert to the existing HP% strategy. Selected-target Auto '+ 
    'requires a live legal player target; if it vanishes, Auto turns OFF instead of choosing another foe. Optional Guard applies '+
-   'only to active player Auto turns. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
+   'only to active player Auto turns. Optional heal-before-Guard is off by default and requires a verified heal-all skill, full BB gauge and known unblocked status. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
  function refresh(){
    toggle.checked=config.on;heal.value=String(config.heal);
    target.value=config.target;burst.value=config.burst;guard.value=String(config.guard);
+   healFirst.checked=config.healBeforeGuard;
    status.textContent='Advanced rules '+(config.on?'ON':'OFF')+
      (smart.enabled()?' · Smart Auto ready':' · Existing Smart Auto is disabled');
    return get();
@@ -309,6 +353,7 @@
  target.addEventListener('change',()=>set({...config,target:target.value}));
  burst.addEventListener('change',()=>set({...config,burst:burst.value}));
  guard.addEventListener('change',()=>set({...config,guard:Number(guard.value)}));
+ healFirst.addEventListener('change',()=>set({...config,healBeforeGuard:healFirst.checked}));
  host.addEventListener('change',refresh);
  refresh();
  window.BFGlobalQoLAdvancedAutoV10500=freeze({
