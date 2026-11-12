@@ -107,10 +107,18 @@
  const button=document.createElement('button');button.id='bf101-continue';
  button.type='button';button.textContent='CONTINUE STORY ›';
  button.style.cssText='min-height:42px;padding:8px 14px;color:#fff;background:#745529;border:1px solid #dfbc7c;border-radius:5px;font-weight:800';
+ // Explicit one-time native player action: route the NEXT verified story mission
+ // and click existing Auto. Never run an unattended next-quest chain.
+ const autoButton=document.createElement('button');
+ autoButton.type='button';autoButton.id='bf101-continue-auto';
+ autoButton.textContent='CONTINUE STORY + AUTO BATTLE';
+ autoButton.style.cssText='min-height:44px;margin:5px 0 0 7px;padding:8px 12px;'+
+   'background:#355b50;border:1px solid #8bc4b3;color:#fff;'+
+   'border-radius:5px;font-weight:800;max-width:100%';
  const foot=document.createElement('small');
  foot.textContent='Original unlock requirements. Combat, drops and Energy spending remain offline DEMO.';
  foot.style.cssText='display:block;margin-top:7px;color:#d5dae1';
- panel.append(heading,status,meter,next,button,foot);
+ panel.append(heading,status,meter,next,button,autoButton,foot);
  host.after(panel);
  function snapshot(){
    const n=arr=>arr.filter(cleared).length;
@@ -128,6 +136,7 @@
     meter.setAttribute('aria-valuenow',String(s.done));
     const unattended=unattendedOwnsNavigation();
     button.disabled=!!S?.busy||unattended||!q;
+    autoButton.disabled=!canContinueAuto(q);
     if(awaitingSave()){
       next.textContent='VICTORY NOT SAVED · Retry Save or download an unsaved backup before continuing.';
     }else if(unattended){
@@ -145,6 +154,73 @@
       'No further mission currently unlocked. Check the preceding requirement.';
     return s;
  }
+ // Full authenticated 2022 scalar economy and wave-COUNT only;
+ // this does NOT certify any original enemy formation, AI or drop table.
+ function sourceReadyForAuto(q){
+   try{
+     const source=window.BFGrandGaiaCampaignV100;
+     if(typeof source?.waveReadiness!=='function'||
+        typeof source?.sourceEconomyReadiness!=='function'||
+        source.sourceEconomyReadiness()!==true)return false;
+     const row=source.waveReadiness(q.missionId);
+     return !!row&&row.missionId===q.missionId&&
+       row.dungeonId===q.dungeonId&&
+       Number.isSafeInteger(row.verifiedWaveCount)&&
+       row.verifiedWaveCount===q.battles&&
+       Number.isSafeInteger(q.battles)&&q.battles>0;
+   }catch(_){return false;}
+ }
+ function canContinueAuto(q){
+   try{
+     if(q===undefined)q=remaining();
+     const auto=document.getElementById('auto');
+     const nav=window.BF_homeNav;
+     if(!q||!S||S.busy||S.auto===true||awaitingSave()||
+        unattendedOwnsNavigation()||document.hidden||
+        nav&&nav.current!=='quest'||!auto||
+        auto.type!=='checkbox'||auto.checked||
+        // A completed victory/defeat disables native Auto until choosing
+        // the next mission. Only a LIVE disabled checkbox blocks routing.
+        (auto.disabled&&!S.over)||
+        !Array.isArray(S.party)||
+        // Never discard a manually queued live turn by changing missions.
+        !S.over&&S.party.some(p=>p?.action)||
+        !sourceReadyForAuto(q))return false;
+     return true;
+   }catch(_){return false;}
+ }
+ function disarmContinueAuto(){
+   // A successful native mission selection followed by an Auto failure
+   // remains a normal MANUAL battle. Do not edit rewards, P or the v7 save.
+   S.auto=false;
+   const auto=document.getElementById('auto');
+   if(auto)auto.checked=false;
+ }
+ function continueAuto(){
+   const q=remaining();
+   if(!canContinueAuto(q))return false;
+   const auto=document.getElementById('auto');
+   let selected=false;
+   try{selected=BFQuestAreas.choose(q)===true;}catch(_){selected=false;}
+   if(!selected)return false;
+   // Keep the native region tabs consistent with normal Continue Story.
+   try{tabs.querySelectorAll('button')[regionIndex(q)]?.click();}
+   catch(_){disarmContinueAuto();refresh();return false;}
+   // Native selection/route and wave count must still match before Auto.
+   if(typeof QUEST==='undefined'||QUEST?.missionId!==q.missionId||
+      S.mode!=='archive'||S.busy||S.over||S.auto===true||
+      !Number.isSafeInteger(S.totalWaves)||
+      S.totalWaves!==q.battles||auto.disabled||auto.checked){
+     disarmContinueAuto();refresh();return false;
+   }
+   try{auto.click();}catch(_){disarmContinueAuto();refresh();return false;}
+   if(!auto.checked||auto.disabled||S.auto!==true||
+      S.over||QUEST?.missionId!==q.missionId){
+     disarmContinueAuto();refresh();return false;
+   }
+   refresh();return true;
+ }
+ autoButton.addEventListener('click',()=>continueAuto());
  button.addEventListener('click',()=>{
    const q=remaining();
    if(!q||S?.busy||awaitingSave()||unattendedOwnsNavigation()||
@@ -163,6 +239,6 @@
    try{return !S?.busy&&!awaitingSave()&&!unattendedOwnsNavigation();}
    catch(_){return false;}
  }
- window.BFGrandGaiaContinueV101=Object.freeze({snapshot,refresh,canNavigate,
+ window.BFGrandGaiaContinueV101=Object.freeze({snapshot,refresh,canNavigate,canContinueAuto,continueAuto,
    get nextMission(){return remaining()?.missionId||null}});
 })();
