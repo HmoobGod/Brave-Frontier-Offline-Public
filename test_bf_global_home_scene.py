@@ -91,7 +91,11 @@ with sync_playwright() as playwright:
     assert isinstance(source_preview["expectedLabel"], str) and source_preview["expectedLabel"].strip(), source_preview
     assert "Next: " + source_preview["expectedLabel"][:90] in source_preview["valid"], source_preview
     assert "UNVERIFIED SPOOFED TITLE" not in source_preview["valid"], source_preview
-    assert "Mission 1 (#1)" not in source_preview["valid"], source_preview
+    # The current archived catalog legitimately labels this row 'Mission 1';
+    # a generic-looking name alone is not proof the label field was ignored.
+    # Assert the scoped source reads label, never the absent name field.
+    home_section = nav.split('function refreshStory() {', 1)[1].split('  refreshParty();', 1)[0]
+    assert 'quest.label' in home_section and 'quest.name' not in home_section
     assert "Next mission not verified" in source_preview["invalid"]
     assert "unavailable" in source_preview["thrown"].lower()
     assert "All archived missions cleared" in source_preview["complete"]
