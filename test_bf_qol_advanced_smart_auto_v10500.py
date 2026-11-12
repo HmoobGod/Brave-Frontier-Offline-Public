@@ -304,7 +304,24 @@ with sync_playwright() as pw:
  # Missing ally source identity makes team-wide resistance counts uncertain.
  p.evaluate('__party105[2].unitId=999999')
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",no_weakness)==0
+ # An unknown ally must NOT erase a separately verified advantage:
+ # two known Fire allies still favor Earth despite a lower-HP Water foe.
+ unknown_ally_but_advantage=[
+   {'hp':1,'maxHp':100,'slot':0,'element':'Water'},
+   {'hp':80,'maxHp':100,'slot':1,'element':'Earth'}
+ ]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",
+                   unknown_ally_but_advantage)==1
  p.evaluate('__party105[2].unitId=20011')
+ # Equal resistance counts and equal HP percentages must preserve the
+ # native baseline tie-break of lower ABSOLUTE HP before native slot.
+ for element_name in ('Water','Earth'):
+  equal_ratio=[
+    {'hp':50,'maxHp':100,'slot':0,'element':element_name},
+    {'hp':5,'maxHp':10,'slot':7,'element':element_name}
+  ]
+  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",
+                    equal_ratio)==7,element_name
  # Equal advantage counts prefer fewer resisted allied elements, rather
  # than mistaking the smallest DEMO HP percentage for the best matchup.
  p.evaluate('__party105[1].unitId=30011')
