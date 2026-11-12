@@ -59,6 +59,51 @@ with sync_playwright() as pw:
   page.add_script_tag(path=str(ASSETS/'bf080_morgan_map.js'))
   page.add_script_tag(path=str(ASSETS/'bf090_st_lamia_map.js'))
   page.add_script_tag(path=str(ASSETS/'bf100_grand_gaia_campaign.js'))
+  # v403: the original Home section is collapsed by default, uses authentic
+  # three-region counts and navigates only after an explicit unlocked click.
+  home_regions=page.locator('#bf100-home-regions')
+  assert home_regions.count()==1
+  assert home_regions.get_attribute('open') is None
+  assert page.locator('#bf100-home-regions button').count()==3
+  snapshot=page.evaluate("""() => ({
+    player:JSON.stringify(P),
+    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+  page.set_viewport_size({'width':320,'height':844})
+  page.locator('#bf100-home-regions-title').click()
+  page.wait_for_function("""() => document.querySelector('#bf100-home-regions')?.open===true""")
+  assert page.locator('[data-bf-home-region="mistral"]').is_enabled()
+  assert page.locator('[data-bf-home-region="morgan"]').is_disabled()
+  assert page.locator('[data-bf-home-region="stlamia"]').is_disabled()
+  assert '0/106' in page.locator('#bf100-home-regions-title').inner_text()
+  home_fit=page.evaluate("""() => {
+    const buttons=[...document.querySelectorAll('#bf100-home-regions button')];
+    const host=document.getElementById('bf100-home-regions').getBoundingClientRect();
+    return {inside:buttons.every(b=>{
+      const r=b.getBoundingClientRect();
+      return r.left>=host.left-.5&&r.right<=host.right+.5&&r.height>=44;
+    }),noScroll:document.documentElement.scrollWidth<=innerWidth};
+  }""")
+  assert home_fit=={'inside':True,'noScroll':True},home_fit
+  # Even a previously enabled button must fail closed if one later source
+  # mission wave count is tampered. Restore only synthetic page memory.
+  tampered=page.evaluate("""() => {
+    const later=QUESTS[QUESTS.length-1],old=later.battles;
+    const p=JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+    try {
+      later.battles=old+1;BFGrandGaiaCampaignV100.refresh();
+      return {blocked:[...document.querySelectorAll('#bf100-home-regions button')]
+        .every(b=>b.disabled),label:document.querySelector('#bf100-home-regions-note').textContent,
+        saved:localStorage.getItem('bf_global_offline_demo_v7')===save,
+        state:JSON.stringify(P)===p};
+    } finally {later.battles=old;BFGrandGaiaCampaignV100.refresh();}
+  }""")
+  assert tampered['blocked'] and 'unavailable' in tampered['label'].lower(),tampered
+  assert tampered['saved'] and tampered['state']
+  page.locator('[data-bf-home-region="mistral"]').click()
+  assert page.evaluate('BF_homeNav.current')=='quest'
+  assert page.evaluate("""() => JSON.stringify(P)""")==snapshot['player']
+  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==snapshot['save']
+  page.set_viewport_size({'width':390,'height':844})
   page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
   assert page.evaluate('BFGlobalQuestText.missions.length')==106
   assert page.evaluate('BFGlobalQuestText.dungeons.length')==23
