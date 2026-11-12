@@ -76,6 +76,22 @@ with sync_playwright() as pw:
  assert p.evaluate('S.mode')=='archive'
  p.add_script_tag(path=str(A/'bf10800_2022_encounter_reference_ledger.js'))
  assert p.locator('#bf10800-encounter-ledger').count()==1
+ # v396: the unbroken 64-hex SHA-256 provenance line must wrap inside the
+ # opened ledger at 320px and 390px (it used to extend to ~395px and clip).
+ for width in (320,390):
+  p.set_viewport_size({'width':width,'height':740})
+  fit=p.evaluate("""()=>{
+    const panel=document.getElementById('bf10800-encounter-ledger');panel.open=true;
+    const r=panel.getBoundingClientRect();
+    const inside=e=>{const q=e.getBoundingClientRect();
+      return q.width>0&&q.left>=r.left-.5&&q.right<=r.right+.5};
+    const small=panel.querySelector('small');
+    return {small:inside(small),select:inside(panel.querySelector('select')),
+      page:document.documentElement.scrollWidth<=innerWidth,
+      digest:/SHA-256 [0-9a-f]{64} /.test(small.textContent)};
+  }""")
+  assert fit=={'small':True,'select':True,'page':True,'digest':True},(width,fit)
+ assert p.evaluate('JSON.stringify(P)')==p.evaluate('window.__saved108')
  assert not errors,errors
  b.close()
 print('PASS v108 all 70 original 2022 mission raw refs, 31 tokens, malformed reject, provenance, save isolation')

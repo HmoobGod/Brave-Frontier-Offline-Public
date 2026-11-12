@@ -105,6 +105,8 @@
  }
  const detail=document.createElement('p');detail.id='bf10800-raw';
  const evidence=document.createElement('small');
+ // v396: the unbroken 64-hex digest was clipped at 320/390px; wrap it.
+ evidence.style.cssText='display:block;max-width:100%;overflow-wrap:anywhere';
  evidence.textContent='2022 F_MISSION_MST_1_Ver1118.json · SHA-256 '+
     summary.sha256+' · raw MISSION_8f4NYKxb field · 34 Mistral / 36 Morgan';
  panel.append(heading,desc,select,detail,evidence);

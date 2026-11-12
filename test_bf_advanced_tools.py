@@ -25,6 +25,8 @@ with sync_playwright() as pw:
   original=p.locator('#hitevents').inner_text();p.locator('#hitmode').select_option('bb');p.locator('#hitunit').select_option(index=1);assert p.locator('#hitevents').inner_text()!=original
   assert p.evaluate('__saves.every(e=>e&&e===document.getElementById(e.id)&&document.querySelectorAll("#"+e.id).length===1)')
   assert summary.bounding_box()['height']>=44 and p.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+  # v396: the opened unit chooser must stay inside the tools card (long names were clipped to 368px at 320px; synthetic option removed again).
+  fit=p.evaluate('()=>{const long=document.createElement("option");long.textContent="Synthetic longest recovered Global unit display name · 999999";document.getElementById("hitunit").append(long);const r=document.getElementById("bf-advanced-tools").getBoundingClientRect();const out=["#hitunit",".hit-controls>.hit-choice"].map(q=>{const e=document.querySelector("#bf-advanced-tools "+q).getBoundingClientRect();return e.width>0&&e.left>=r.left-.5&&e.right<=r.right+.5&&e.right<=innerWidth});long.remove();return out}');assert fit==[True,True],(w,fit)
   summary.focus();assert summary.evaluate('(e)=>getComputedStyle(e).outlineWidth')=='3px';p.keyboard.press('Space');assert not p.locator('.hit-panel').is_visible()
   p.locator('.bf-navbar [data-bf-goto="home"]').click();assert not tools.is_visible();p.locator('.bf-navbar [data-bf-goto="menu"]').click();assert tools.is_visible()
   p.add_script_tag(content=MODULE);assert p.locator('#bf-advanced-tools').count()==1
