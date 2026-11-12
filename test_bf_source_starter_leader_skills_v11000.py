@@ -38,7 +38,7 @@ with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
  errors=[];p.on('pageerror',lambda e:errors.append(str(e)))
- p.set_content('<html><body><section id="squadpicker">SQUAD</section></body></html>')
+ p.set_content('<html><body><section id="bf-home"><section class="bf-scene-squad"><div id="bf-scene-party"></div></section></section><section id="squadpicker">SQUAD</section></body></html>')
  p.evaluate("""()=>{
   window.P={version:7,roster:[10011,10012,20011,40011,30011,60015],
     squad:[10011,10012,20011,40011,60015],questClears:{1:2}};
@@ -48,6 +48,9 @@ with sync_playwright() as pw:
  initial=p.evaluate('JSON.stringify(P)')
  p.add_script_tag(path=str(A/'bf11000_source_starter_leader_skills.js'))
  api='BFGlobalStarterLeaderSourceV11000'
+ assert p.locator('#bf11000-home-leader').count()==1
+ assert p.locator('#bf11000-home-leader').get_attribute('aria-live')=='polite'
+ assert 'Fire · ATK +25% · 2 matching squad unit(s) · source preview only' in p.locator('#bf11000-home-leader').inner_text()
  assert p.evaluate(api+'.source.sourceLeaderSkills')==18
  assert p.evaluate(api+'.lookup(10011).atkPercent')==25
  assert p.evaluate(api+'.lookup(10015).hpPercent')==10
@@ -69,20 +72,33 @@ with sync_playwright() as pw:
  p.wait_for_function("document.querySelector('#bf11000-targets').children.length===5")
  assert 'ATK +25%' in p.locator('#bf11000-targets').inner_text()
  p.evaluate("""()=>{P.squad=[60015,10011,20011]}""")
+ p.evaluate(api+'.refresh()')
+ assert 'Dark · ATK +50% · HP +10% · 1 matching squad unit(s)' in p.locator('#bf11000-home-leader').inner_text()
  a=p.evaluate(api+'.snapshot()')
  assert a['leaderId']==60015
  assert a['slots'][0]['effect']['atkPercent']==50
  assert a['slots'][0]['effect']['hpPercent']==10
  assert a['slots'][1]['effect']['atkPercent']==0
  p.evaluate("""()=>{P.squad=[123456,10011]}""")
+ p.evaluate(api+'.refresh()')
+ assert 'UNVERIFIED FOR CURRENT LEADER' in p.locator('#bf11000-home-leader').inner_text()
  assert p.evaluate(api+'.snapshot().leaderSupported') is False
  assert p.evaluate(api+'.snapshot().slots[1].effect') is None
  p.evaluate("""()=>{P.squad=[10011,123456]}""")
  assert p.evaluate(api+'.snapshot().slots[1].effect') is None
  p.evaluate("""()=>{P.squad=[10011,10012,20011,40011,60015]}""")
+ p.evaluate(api+'.refresh()')
  assert p.evaluate('JSON.stringify(P)')==initial
+ p.evaluate("""()=>{window.BFGlobalStarterLeaderCombatV11100={}}""")
+ p.evaluate(api+'.refresh()')
+ assert 'new archive DEMO battles' in p.locator('#bf11000-home-leader').inner_text()
+ p.evaluate("""()=>{delete window.BFGlobalStarterLeaderCombatV11100}""")
+ p.set_viewport_size({'width':320,'height':844})
+ r=p.locator('#bf11000-home-leader').bounding_box()
+ assert r and r['x']>=0 and r['x']+r['width']<=320.5,r
  p.add_script_tag(path=str(A/'bf11000_source_starter_leader_skills.js'))
  assert p.locator('#bf11000-leader-audit').count()==1
+ assert p.locator('#bf11000-home-leader').count()==1
  assert not errors,errors
  b.close()
 print('PASS v110 original 30 starter leader profiles, elements, HP/ATK, squad preview, fail-closed and v7 save integrity')
