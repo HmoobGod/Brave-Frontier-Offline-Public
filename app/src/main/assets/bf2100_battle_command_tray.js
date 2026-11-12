@@ -49,10 +49,12 @@
  const spreadBB=btn('SPREAD READY BB','bf2100-spread-bb',()=>spreadBursts());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
  const elementBB=btn('ELEMENT + BB IF READY','bf2100-element-bb',()=>elementBursts());
+ const protectCritical=btn('PROTECT CRITICAL · 20% HP','bf2100-protect-critical',()=>protectWounded(0.20));
  const protect=btn('PROTECT WOUNDED · 40% HP','bf2100-protect',()=>protectWounded());
+ const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Healing BB + Attack uses one source-verified party heal when an ally is at or below half HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Wounded Guards living allies at or below 40% HP and queues normal attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Healing BB + Attack uses one source-verified party heal when an ally is at or below half HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -381,14 +383,17 @@
  // Manual defensive turn planner. Use only existing native player Guard and
  // Attack buttons; do not modify HP, turn outcome, enemy AI or rewards.
  // Read-only planning keeps the UI refresh path free of hidden battle clicks.
- function woundedPlan(){
-   if(!ready()||!Array.isArray(S.party)||!Array.isArray(S.enemies))return null;
+ function woundedPlan(threshold=0.40){
+   // Explicit manual player-only options; reject arbitrary coerced or
+   // out-of-range percentages before touching any native commands.
+   if(![0.20,0.40,0.60].includes(threshold)||!ready()||
+      !Array.isArray(S.party)||!Array.isArray(S.enemies))return null;
    const squad=active(),ids=squad.map(p=>p.id);
    if(squad.some(p=>!Number.isFinite(p.hp)||!Number.isFinite(p.maxHp)||
-      p.maxHp<=0||!Number.isSafeInteger(p.id)||p.id<0||
-      !slots.children[p.id]||slots.children[p.id].disabled)||
+      p.maxHp<=0||!Number.isSafeInteger(p.id)||p.id<0||p.id>=6||
+      S.party[p.id]!==p||!slots.children[p.id]||slots.children[p.id].disabled)||
       new Set(ids).size!==ids.length)return null;
-   const wounded=new Set(squad.filter(p=>p.hp/p.maxHp<=0.40).map(p=>p.id));
+   const wounded=new Set(squad.filter(p=>p.hp/p.maxHp<=threshold).map(p=>p.id));
    if(!wounded.size)return null; // Normal Queue All Attacks covers healthy squads.
    const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
    if(!Array.isArray(reservations)||reservations.some(r=>!Number.isSafeInteger(r.slot)||
@@ -411,8 +416,8 @@
    }
    return Object.freeze({target:S.target,orders:Object.freeze(orders)});
  }
- function protectWounded(){
-   const plan=woundedPlan();
+ function protectWounded(threshold=0.40){
+   const plan=woundedPlan(threshold);
    if(!plan)return false;
    if(plan.orders.some(order=>order.kind==='attack')&&!setTarget(plan.target))
      return false;
@@ -504,7 +509,9 @@
    // the wounded threshold updates the button without a round change.
    const elementReady=!!elementPlan();
    element.disabled=elementBB.disabled=!elementReady;
+   protectCritical.disabled=!woundedPlan(0.20);
    protect.disabled=!woundedPlan();
+   protectCautious.disabled=!woundedPlan(0.60);
    return st;
  }
  new MutationObserver(refresh).observe(document.getElementById('meta')||area,
