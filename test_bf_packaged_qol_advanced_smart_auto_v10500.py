@@ -23,8 +23,23 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'let source;\n   try{' in data
  assert '}catch(_){return previous;}' in data
  # Optional status providers cannot crash an owned player Auto decision.
+ # Optional original 2022 heal-all BB can supersede low-HP Guard only
+ # when explicitly enabled for a real player-owned caster, with known
+ # unblocked Curse/Paralysis, source skill and valid squad state.
+ assert "healBeforeGuard:false" in data
+ assert "healBeforeGuard:raw?.healBeforeGuard===true" in data
+ assert "config.healBeforeGuard&&Number.isSafeInteger(unit.unitId)" in data
+ assert "paralysis.paralyzed(unit.id)!==false" in data
+ assert "curse.cursed(unit.id)!==false" in data
+ assert "bb?.target!=='support'" in data
+ assert "originalSupport(unit.unitId)?.kind!=='heal_all'" in data
+ assert "S.party[p.id]!==p" in data
+ assert "if(living.some(p=>p.hp<p.maxHp&&p.hp/p.maxHp<=config.heal/100))" in data
+ assert "'bf10500-heal-before-guard'" in data
+ assert "healFirst.addEventListener('change'" in data
  assert 'guardAllowed=active()&&config.guard>0&&' in data
- assert 'if(guardAllowed)return \'guard\';' in data
+ assert 'if(guardAllowed){' in data
+ assert "return 'guard';\n   }\n   // Unknown Curse status" in data
  assert "if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';" in data
  assert "}catch(_){return 'attack';}" in data
  assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
