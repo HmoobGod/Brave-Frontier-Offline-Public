@@ -131,6 +131,9 @@
    // means no player command, not an arbitrary fallback target.
    if(kind==='wounded-threat'||kind==='wounded-armor'){
      if(S.mode!=='archive'||living.some(e=>e.hp>e.maxHp))return null;
+     // Unknown/NaN or negative HP cannot establish that a foe is dead.
+     // Do not silently drop a malformed native foe and pick a false finisher.
+     if(S.enemies.some(e=>e&&(!Number.isFinite(e.hp)||e.hp<0)))return null;
      const wounded=living.filter(e=>e.hp/e.maxHp<=0.5);
      if(!wounded.length)return null;
      wounded.sort((a,b)=>kind==='wounded-threat'?
