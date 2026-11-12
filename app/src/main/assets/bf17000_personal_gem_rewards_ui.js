@@ -60,9 +60,48 @@
    panel.scrollIntoView({block:'start',behavior:'smooth'});
  });
  host.before(shortcut);
+ // Home header: the recovered Global header art has a Gem row above Zel and
+ // Karma that stayed empty. Show the committed personal balance there,
+ // read-only. Original reward mode shows a dash, matching the Quest shortcut,
+ // which also keeps personal Gems out of its label in that mode.
+ const shell=document.querySelector('.bf-shell-head');
+ let headGems=shell&&document.getElementById('bf17000-header-gems');
+ if(shell&&!headGems){
+   headGems=document.createElement('div');
+   headGems.id='bf17000-header-gems';
+   headGems.style.cssText='position:absolute;right:7%;top:24%;max-width:24%;'+
+     'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+
+     'pointer-events:none;color:#fff4c8;'+
+     'font:bold clamp(9px,2.6vw,13px) Arial,sans-serif;'+
+     'text-shadow:0 1px 3px #000,0 2px 2px #000';
+   const value=document.createElement('b');
+   value.style.cssText='color:#fff;font-weight:900';
+   headGems.append('Gems ',value);
+   shell.append(headGems);
+ }
+ function placeHeaderGems(){
+   // Sit one header row above Zel, using the live Zel/Karma row spacing so
+   // the readout follows either header crop (v054 or the base nav sheet).
+   const zel=shell.querySelector('.bf-global-zel');
+   const karma=shell.querySelector('.bf-global-karma');
+   const height=shell.clientHeight;
+   if(!zel||!karma||!(height>0))return;
+   const step=karma.offsetTop-zel.offsetTop,top=zel.offsetTop-step;
+   if(step>0&&top>=0)headGems.style.top=(top/height*100).toFixed(2)+'%';
+ }
  let message='';
  function render(){
    const s=api.snapshot(),personal=s.mode==='custom';
+   if(headGems){
+     const known=personal&&Number.isSafeInteger(s.balance)&&s.balance>=0;
+     const text=known?s.balance.toLocaleString('en-US'):'\u2014';
+     const value=headGems.lastElementChild;
+     if(value.textContent!==text)value.textContent=text;
+     headGems.setAttribute('aria-label',known?
+       'Personal offline Gems '+text:
+       'Personal offline Gems not shown in original reward mode');
+     placeHeaderGems();
+   }
    // The Quest shortcut displays the committed personal balance without
    // another panel tap. Original mode keeps personal Gems out of its label.
    shortcut.textContent='GEMS · DAILY REWARDS'+
