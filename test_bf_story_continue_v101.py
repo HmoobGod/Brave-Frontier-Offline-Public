@@ -351,7 +351,7 @@ with sync_playwright() as pw:
    stored:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert started['mission']==1 and started['mode']=='archive',started
  assert started['auto'] and started['checked'] and not started['over'],started
- assert not started['busy'] and started['waves']==QUESTS[0].battles,started
+ assert not started['busy'] and started['waves']==auto_page.evaluate('QUESTS[0].battles'),started
  assert started['clears']==before_auto['clears'] and started['version']==7,started
  # Starting native Auto does not itself grant a clear or schedule the next quest.
  assert auto_page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is False
