@@ -8,6 +8,14 @@ assert js.count('BF_GLOBAL_QOL_UNIT_FLAGS_V10200')==1
 assert len(js.encode())<65536
 assert 'saveProgress(' not in js and 'P.roster=' not in js and 'bf_global_offline_demo_v7' not in js
 assert 'advisoryOnly:true' in js
+# The standard Android workflow explicitly runs THIS Chromium script.
+# Execute the standalone three source-guard cases here as well, so
+# they cannot silently remain outside CI's collected test commands.
+import unittest
+from test_bf_unit_box_filter_v10201 import UnitBoxFilterSourceTests
+source_suite=unittest.defaultTestLoader.loadTestsFromTestCase(UnitBoxFilterSourceTests)
+assert source_suite.countTestCases()==3
+assert unittest.TextTestRunner(verbosity=1).run(source_suite).wasSuccessful()
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
