@@ -139,6 +139,10 @@ function bfOfflineUnitPortraitV266(source, name) {
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">CURRENT SQUAD</strong><button type="button" data-bf-goto="units">EDIT SQUAD ›</button></div>',
       '<div id="bf-scene-party" class="bf-scene-party" aria-live="polite"></div>',
     '</section>',
+    '<section class="bf-scene-story" aria-label="Story progress and quest navigation">',
+      '<p id="bf-home-story-progress" role="status" aria-live="polite">Story status unavailable · browse Quests for available missions.</p>',
+      '<button id="bf-home-story-open" type="button" data-bf-goto="quest">VIEW QUESTS ›</button>',
+    '</section>',
     '<section class="bf-scene-explore" aria-label="Global locations">',
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">ADVENTURE</strong><small>Recovered Global artwork</small></div>',
       '<div class="bf-scene-places">',
@@ -191,12 +195,52 @@ function bfOfflineUnitPortraitV266(source, name) {
     }
     party.replaceChildren(...nodes);
   }
+  // Home shows only source-validated campaign progress. No quest selection,
+  // battle start, Auto toggle or canonical v7 save mutation occurs here.
+  const storyStatus = document.getElementById('bf-home-story-progress');
+  function refreshStory() {
+    let message = 'Story status unavailable · browse Quests for available missions.';
+    try {
+      const api = window.BFGrandGaiaCampaignV100;
+      if (api && typeof api.summary === 'function' &&
+          typeof api.nextPlayable === 'function') {
+        const stats = api.summary(), next = api.nextPlayable();
+        if (stats?.total === 106 && Number.isSafeInteger(stats.cleared) &&
+            stats.cleared >= 0 && stats.cleared <= 106) {
+          const prefix = 'STORY · ' + stats.cleared + '/106 missions cleared';
+          if (next === null && stats.cleared === 106) {
+            message = prefix + ' · All archived missions cleared (DEMO combat).';
+          } else if (next && Number.isSafeInteger(next.missionId) &&
+                     Number.isSafeInteger(next.dungeonId) &&
+                     Number.isSafeInteger(next.battles) && next.battles > 0 &&
+                     typeof QUESTS !== 'undefined' && Array.isArray(QUESTS) &&
+                     QUESTS.length === 106) {
+            const quest = QUESTS.find(q => q?.missionId === next.missionId);
+            if (quest && quest.dungeonId === next.dungeonId &&
+                quest.battles === next.battles) {
+              message = prefix + ' · Next: ' +
+                String(quest.name || 'Mission ' + quest.missionId).slice(0, 90) +
+                ' (#' + next.missionId + ') · DEMO combat.';
+            } else message = prefix + ' · Next mission not verified.';
+          } else {
+            message = prefix + ' · No verified next mission currently unlocked.';
+          }
+        }
+      }
+    } catch (_) { message = 'Story status unavailable · browse Quests for available missions.'; }
+    if (storyStatus && storyStatus.textContent !== message) storyStatus.textContent = message;
+    return message;
+  }
   refreshParty();
+  refreshStory();
+  window.addEventListener('bf-route-change', event => {
+    if (event?.detail?.route === 'home') refreshStory();
+  });
   const picker = document.getElementById('squadpicker');
   if (picker) new MutationObserver(refreshParty).observe(picker, {childList:true});
   const nav = document.querySelector('.bf-navbar');
   if (nav) nav.addEventListener('click', refreshParty);
-  window.BFGlobalHome = {refreshParty};
+  window.BFGlobalHome = {refreshParty,refreshStory};
 })();
 
 
