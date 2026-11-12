@@ -66,6 +66,19 @@ with sync_playwright() as pw:
     assert 0.264 < css['height']/css['width'] < 0.279, css
     assert css['backgroundSize']=='100% auto',css
     assert page.evaluate('BF054HeaderStatus.state.percent')==0
+    # The new native Home disclosure is closed by default, read-only and
+    # reports genuinely unavailable Energy rather than fake regeneration.
+    details=page.locator('#bf054-home-details')
+    assert details.count()==1
+    assert details.get_attribute('open') is None
+    assert 'Energy unavailable' in page.locator('#bf054-home-values').text_content()
+    details.locator('summary').click()
+    assert details.get_attribute('open') is not None
+    assert 'Demo Lv.1' in page.locator('#bf054-home-values').inner_text()
+    assert 'Zel 0' in page.locator('#bf054-home-values').inner_text()
+    page.set_viewport_size({'width':320,'height':844})
+    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+    page.set_viewport_size({'width':390,'height':844})
     page.evaluate('()=>{P.exp=13;P.level=2;P.zel=1345;P.karma=250;renderProgress()}')
     page.wait_for_function("""()=>document.querySelector('#bf054-exp-text')?.textContent==='8 / 10'""")
     assert page.evaluate('Math.round(BF054HeaderStatus.state.percent)')==80
@@ -74,10 +87,16 @@ with sync_playwright() as pw:
     assert page.locator('#bf-nav-level').inner_text()=='2'
     assert '1,345' in page.locator('#bf-nav-zel').inner_text()
     assert '250' in page.locator('#bf-nav-karma').inner_text()
+    home_status=page.locator('#bf054-home-values').inner_text()
+    assert 'Demo Lv.2' in home_status
+    assert 'EXP 8/10' in home_status
+    assert 'Zel 1,345' in home_status and 'Karma 250' in home_status
+    assert 'Energy unavailable' in home_status
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     assert page.locator('#bf054-exp-text').inner_text()=='8 / 10'
     page.locator('.bf-navbar button[data-bf-goto="home"]').click()
     assert page.locator('#bf054-exp-text').inner_text()=='8 / 10'
+    assert details.get_attribute('open') is not None
     page.evaluate('()=>{P.exp=0;P.level=1;P.zel=0;P.karma=0;renderProgress()}')
     page.wait_for_function("""()=>document.querySelector('#bf054-exp-text')?.textContent==='0 / 5'""")
     end=page.evaluate("""() => ({version:P.version,exp:P.exp,level:P.level,
