@@ -17,6 +17,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert "if(!allAlliesTyped||ranked.some(row=>!row.known))return undefined;" in data
  assert 'advantages.sort((a,b)=>b.count-a.count||' in data
  assert 'ranked.sort((a,b)=>a.resisted-b.resisted||' in data
+ assert data.count('a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);')==2
+ assert 'Source-listed six-element circle (bf6900)' in data
  # BB/support provider errors preserve the existing player's baseline action.
  assert 'let source;\n   try{' in data
  assert '}catch(_){return previous;}' in data
