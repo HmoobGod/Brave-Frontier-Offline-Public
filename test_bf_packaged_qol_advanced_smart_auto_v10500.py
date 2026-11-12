@@ -10,6 +10,14 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'try{\n   const element=window.BFGlobalElementalCombatV6900;' in data
  assert 'return ranked[0]?.foe||undefined;\n   }catch(_){return null;}' in data
  assert 'return chosen===undefined?baseTarget(enemies):chosen;' in data
+ # Packaged player-only Smart Auto target improvements, no synthetic waves.
+ assert "['wounded-threat','Finish wounded high-ATK threat (<=50% HP)']" in data
+ assert "['wounded-armor','Finish wounded low-DEF foe (<=50% HP)']" in data
+ assert "const wounded=live.filter(e=>e.hp/e.maxHp<=0.5);" in data
+ assert "if(!wounded.length)return baseTarget(enemies);" in data
+ assert "if(enemies.some(e=>e&&(!Number.isFinite(e.hp)||e.hp<0))||" in data
+ assert "b.atk-a.atk||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot:" in data
+ assert "a.def-b.def||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot);" in data
  # The signed APK must contain the actual player-only resistance-aware
  # targeting branch, not just the Chromium test or a source-only note.
  assert 'const allAlliesTyped=types.length===allies.length;' in data
