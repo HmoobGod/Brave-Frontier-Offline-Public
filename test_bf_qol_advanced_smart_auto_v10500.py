@@ -505,7 +505,7 @@ with sync_playwright() as pw:
      beforePlayer=JSON.stringify(P),
      beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
      beforeTarget=S.target,
-     beforeActions=__party105.map(p=>JSON.stringify(p?.action));
+     beforeActions=__party105.map(p=>JSON.stringify(p.action));
    let noStatus,approved,blockedCurse,blockedParalysis,unknownSkill,
      unknownSupport,insufficientGauge,clone,duplicate,providerThrows;
    try{
@@ -535,9 +535,9 @@ with sync_playwright() as pw:
      insufficientGauge=BF041SmartAuto.kindFor(healer);
      healer.bb=100;
      clone=BF041SmartAuto.kindFor({...healer});
-     const fourth=S.party[3];
+     const beforeLength=S.party.length, fourth=S.party[3];
      try{S.party[3]=healer;duplicate=BF041SmartAuto.kindFor(healer)}
-     finally{S.party[3]=fourth;}
+     finally{S.party[3]=fourth;S.party.length=beforeLength;}
      window.originalSupport=()=>{throw Error('source unavailable')};
      providerThrows=BF041SmartAuto.kindFor(healer);
    }finally{
@@ -553,7 +553,7 @@ with sync_playwright() as pw:
      playerSame:JSON.stringify(P)===beforePlayer,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
      targetSame:S.target===beforeTarget,
-     ordersSame:__party105.every((p,i)=>JSON.stringify(p?.action)===beforeActions[i])};
+     ordersSame:__party105.every((p,i)=>JSON.stringify(p.action)===beforeActions[i])};
  }""")
  assert healing_priority=={
    'noStatus':'guard','approved':'burst','blockedCurse':'guard',
@@ -570,12 +570,13 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.get().healBeforeGuard') is False
  # Duplicate references are not unique player actors even if the native
  # id slot still points to the same object. Do not grant optional Guard.
- duplicate=p.evaluate("""()=>{const originalSlot=S.party[3],actor=__party105[1];
+ duplicate=p.evaluate("""()=>{const originalLength=S.party.length,
+   originalSlot=S.party[3],actor=__party105[1];
    const saved=localStorage.getItem('bf_global_offline_demo_v7');
    try{S.party[3]=actor;
      return {action:BF041SmartAuto.kindFor(actor),
        saveSame:localStorage.getItem('bf_global_offline_demo_v7')===saved};
-   }finally{S.party[3]=originalSlot;}
+   }finally{S.party[3]=originalSlot;S.party.length=originalLength;}
  }""")
  assert duplicate=={'action':'burst','saveSame':True},duplicate
  p.evaluate('S.auto=false')
