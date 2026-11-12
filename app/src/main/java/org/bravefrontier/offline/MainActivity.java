@@ -395,6 +395,14 @@ public class MainActivity extends Activity {
                     } catch (IOException headerError) {
                         android.util.Log.w("BraveFrontier", "Optional status overlay unavailable", headerError);
                     }
+                    // v391: optional reconstructed Home return shortcut, shown only
+                    // after a manual route visit; session-only and save-read-only.
+                    try {
+                        String lastHomeRoute = readPackagedText("bf39100_global_home_session_return.js");
+                        view.evaluateJavascript(lastHomeRoute, null);
+                    } catch (IOException homeReturnError) {
+                        android.util.Log.w("BraveFrontier", "Optional Home route shortcut unavailable", homeReturnError);
+                    }
                     // v0.80: source-backed Morgan map is a separate small optional
                     // navigation extension, after the existing Mistral UI is ready.
                     try {
