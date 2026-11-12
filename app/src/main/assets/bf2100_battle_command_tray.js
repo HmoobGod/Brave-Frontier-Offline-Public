@@ -27,6 +27,7 @@
   '#bf2100-buttons button{padding:8px 5px;min-height:44px;background:#6d4e2d;',
   'border:1px solid #bba06e;border-radius:5px;color:white;font-weight:bold}',
   '#bf2100-buttons button:disabled,#bf2100-targets button:disabled{opacity:.45}',
+  '#bf2100-orders{margin:8px 0;color:#d4e5ed;white-space:normal}',
   '#bf2100-info{display:block;margin-top:7px;color:#cad6df}'
  ].join('');document.head.append(css);
  const panel=document.createElement('section');panel.id='bf2100-tray';
@@ -56,9 +57,11 @@
  const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const clear=btn('CLEAR QUEUED ACTIONS','bf2100-clear',()=>clearQueuedActions());
+ const orders=document.createElement('p');orders.id='bf2100-orders';
+ orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- panel.append(title,status,targets,actions,foot);area.before(panel);
+ panel.append(title,status,targets,actions,orders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
  const enemies=()=>Array.isArray(S.enemies)?S.enemies.filter(e=>e&&e.hp>0):[];
@@ -548,7 +551,26 @@
      return false;
    }
  }
+ // Player-facing, read-only preview. The native Execute button remains the
+ // only way to commit commands; this never queues, clears, saves or advances.
+ function queuedTurnPreview(){
+   if(!Array.isArray(S.party))return 'Queued turn preview unavailable';
+   const squad=active();
+   if(!squad.length)return 'Queued turn preview · no active player units';
+   const ids=squad.map(p=>p.id);
+   if(squad.some(p=>!Number.isSafeInteger(p.id)||p.id<0||
+      S.party[p.id]!==p)||new Set(ids).size!==ids.length)
+     return 'Queued turn preview unavailable · actor identity not verified';
+   return 'Queued turn preview · '+squad.map(p=>{
+     const a=p.action;
+     if(!a)return 'Slot '+(p.id+1)+': Not queued';
+     const label=a.kind==='attack'?'Attack':a.kind==='guard'?'Guard':
+       a.kind==='burst'?'BB':'Other native order';
+     return 'Slot '+(p.id+1)+': '+label;
+   }).join(' · ');
+ }
  function refresh(){
+   orders.textContent=queuedTurnPreview();
    const st=snapshot(),key=JSON.stringify([st,active().map(p=>[
      p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
    // Native target-button availability can change without changing the
