@@ -51,14 +51,23 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-hp-percent").slot')==1
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("highest-atk").slot')==0
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-def").slot')==2
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("wounded-threat").slot')==0
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("wounded-armor").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
- assert page.locator('#bf3100-options button').count()==9
+ assert page.locator('#bf3100-options button').count()==11
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
+ # Real manual queued commands use the same native actor and target buttons
+ # as the existing focus presets, without executing or changing the save.
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("wounded-threat")') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===0)')
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("wounded-armor")') is True
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===2)')
+ assert page.evaluate('S.busy') is False
  # Native Focus changes S.target before calling the shared queue planner.
  # With shuffled or cloned player actors, its caller must reject the request
  # BEFORE mutating the old selected target or the existing squad actions.
@@ -235,7 +244,7 @@ with sync_playwright() as pw:
  # Keep synthetic corruption in one synchronous browser task, so the
  # normal battle renderer never observes these deliberately invalid rows.
  results=page.evaluate("""()=>{const original=S.enemies;
-   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','element-safe'];
+   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','wounded-threat','wounded-armor','elemental','element-safe'];
    try{
      S.enemies=[
        {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
@@ -250,9 +259,69 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[None]*8,results
- assert results['invalid']==[None]*8,results
+ assert results['valid']==[None]*10,results
+ assert results['invalid']==[None]*10,results
  assert results['rejected'],results
+ # Wounded player tactics: 50% is inclusive, unknown ATK/DEF
+ # anywhere in a live roster rejects the whole plan, and zero wounded
+ # enemies must not cause an arbitrary fallback or mutate existing orders.
+ finisher_cases=page.evaluate("""()=>{const original=S.enemies,oldTarget=S.target,
+   oldOrders=S.party.map(p=>JSON.stringify(p.action)),
+   saved=localStorage.getItem('bf_global_offline_demo_v7'),
+   beforePlayer=JSON.stringify(P),seed=original[0],
+   api=BFGlobalBattleFocusV3100;
+   try{
+     S.enemies=[
+       {...seed,slot:0,name:'Fifty percent threat',hp:50,maxHp:100,atk:200,def:90},
+       {...seed,slot:1,name:'Wounded low armor',hp:25,maxHp:100,atk:110,def:10},
+       {...seed,slot:2,name:'Healthy high threat',hp:70,maxHp:100,atk:900,def:1}
+     ];
+     const boundary={threat:api.lookup('wounded-threat')?.slot,
+       armor:api.lookup('wounded-armor')?.slot};
+     S.enemies[0].hp=51;
+     const crossed={threat:api.lookup('wounded-threat')?.slot,
+       armor:api.lookup('wounded-armor')?.slot};
+     S.enemies[1].hp=76;
+     const none={threat:api.lookup('wounded-threat'),
+       armor:api.lookup('wounded-armor'),
+       attack:api.queueFocus('wounded-threat'),
+       burst:api.queueFocus('wounded-armor','burst')};
+     S.enemies[1].hp=25;
+     S.enemies[2].atk=undefined;
+     const brokenAttack={lookup:api.lookup('wounded-threat'),
+       queued:api.queueFocus('wounded-threat')};
+     S.enemies[2].atk=900;S.enemies[2].def=undefined;
+     const brokenDefense={lookup:api.lookup('wounded-armor'),
+       queued:api.queueFocus('wounded-armor')};
+     // A malformed foe is not proof that it is dead: reject before
+     // changing native player targeting or queued actions.
+     S.enemies[2].def=1;S.enemies[2].hp=NaN;
+     const unknownHp={lookup:api.lookup('wounded-threat'),
+       queued:api.queueFocus('wounded-threat')};
+     S.enemies[2].hp=-1;
+     const negativeHp={lookup:api.lookup('wounded-armor'),
+       queued:api.queueFocus('wounded-armor')};
+     S.enemies[2].hp=101;
+     const impossible={lookup:api.lookup('wounded-threat'),
+       queued:api.queueFocus('wounded-threat')};
+     return {boundary,crossed,none,brokenAttack,brokenDefense,unknownHp,negativeHp,impossible,
+       sameTarget:oldTarget===S.target,
+       sameOrders:oldOrders.every((a,i)=>a===JSON.stringify(S.party[i].action)),
+       sameSave:saved===localStorage.getItem('bf_global_offline_demo_v7'),
+       samePlayer:beforePlayer===JSON.stringify(P),noTurn:!S.busy};
+   }finally{S.enemies=original;api.refresh()}
+ }""")
+ assert finisher_cases=={
+  'boundary':{'threat':0,'armor':1},
+  'crossed':{'threat':1,'armor':1},
+  'none':{'threat':None,'armor':None,'attack':False,'burst':False},
+  'brokenAttack':{'lookup':None,'queued':False},
+  'brokenDefense':{'lookup':None,'queued':False},
+  'unknownHp':{'lookup':None,'queued':False},
+  'negativeHp':{'lookup':None,'queued':False},
+  'impossible':{'lookup':None,'queued':False},
+  'sameTarget':True,'sameOrders':True,'sameSave':True,
+  'samePlayer':True,'noTurn':True},finisher_cases
  # Targeting and queued orders must remain untouched if ANY living record
  # is corrupt, including text-coerced Infinity or a duplicate valid slot.
  # Validate all seven focus strategies and actual queueFocus player controls.
@@ -269,7 +338,7 @@ with sync_playwright() as pw:
    try{
      return cases.map(foes=>{
        S.enemies=foes;
-       const looked=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental']
+       const looked=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','wounded-threat','wounded-armor','elemental']
          .map(k=>BFGlobalBattleFocusV3100.lookup(k));
        const focused=BFGlobalBattleFocusV3100.focus('highest-hp');
        const queued=BFGlobalBattleFocusV3100.queueFocus('highest-hp-percent','burst');
@@ -279,7 +348,7 @@ with sync_playwright() as pw:
    }finally{S.enemies=original;S.target=originalTarget;}
  }""")
  assert len(gated)==5,gated
- assert all(x['looked']==[None]*7 and x['focused'] is False and
+ assert all(x['looked']==[None]*9 and x['focused'] is False and
             x['queued'] is False and x['targetUnchanged'] and
             x['actionsUnchanged'] for x in gated),gated
  # A living foe with an unknown ATK or DEF is never silently dropped from
@@ -387,4 +456,4 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
  browser.close()
-print('PASS v31.00: eight manual focus strategies, source-known least-resisted targeting, native queue and v7 save isolation')
+print('PASS v31.00: ten manual focus strategies, 50% wounded threat/armor finishers, native queue and v7 save isolation')
