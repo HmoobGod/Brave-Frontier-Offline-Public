@@ -37,7 +37,7 @@
    const selected=kind==='favorites'?fav:lock;
    if(on)selected.add(id);else selected.delete(id);
    const next={favorites:[...fav].sort((a,b)=>a-b),locked:[...lock].sort((a,b)=>a-b)};
-   if(!write(next.favorites,next.lock))return false;
+   if(!write(next.favorites,next.locked))return false;
    flags=next;refresh();return true;
  }
  function state(id=current()){
