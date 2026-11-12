@@ -29,9 +29,11 @@ with sync_playwright() as pw:
     removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
     get length(){return Object.keys(db).length}}});
  }""")
- p.set_content('<html><body><section id="bf101-story-continue"></section></body></html>')
+ p.set_content('<html><body><section id="bf-home"><section class="bf-scene-tools"></section></section><section id="bf101-story-continue"></section></body></html>')
  p.evaluate("""()=>{
    window.P={version:7,roster:[10011],squad:[10011],questClears:{1:1}};
+   window.__routes404=[];
+   window.BF_homeNav={go:r=>{window.__routes404.push(r);return r==='quest'}};
    localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P));
    window.BFAndroid={exportSaveFile:(raw,name)=>{window.__export97={raw,name}}};
  }""")
@@ -41,7 +43,31 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.enabled') is True
  assert p.evaluate(api+'.listing().length')==1
  assert p.locator('#bf9700-backups').count()==1
+ assert p.locator('#bf9700-home-status').count()==1
+ assert '1/3 verified snapshots' in p.locator('#bf9700-home-count').inner_text()
+ assert 'Auto ON' in p.locator('#bf9700-home-count').inner_text()
  assert p.locator('#bf9700-auto').is_checked()
+ # Home only navigates to the EXISTING backup manager on user click;
+ # it must never export or capture the live save as a shortcut side effect.
+ home_snapshot=p.evaluate("""() => ({
+   live:localStorage.getItem('bf_global_offline_demo_v7'),
+   backups:localStorage.getItem(BFGlobalQoLBackupsV9700.key)})""")
+ p.locator('#bf9700-home-manage').click()
+ assert p.evaluate('window.__routes404')==['quest']
+ assert p.locator('#bf9700-backups').get_attribute('open') is not None
+ assert p.evaluate('window.__export97') is None
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==home_snapshot['live']
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==home_snapshot['backups']
+ p.set_viewport_size({'width':320,'height':844})
+ box=p.locator('#bf9700-home-manage').evaluate("""el => {
+   const r=el.getBoundingClientRect(),host=el.parentElement.getBoundingClientRect();
+   return {inside:r.left>=host.left-.5&&r.right<=host.right+.5&&
+     r.left>=0&&r.right<=innerWidth,large:r.height>=44,
+     page:document.documentElement.scrollWidth<=innerWidth};
+ }""")
+ assert box=={'inside':True,'large':True,'page':True},box
+ p.set_viewport_size({'width':390,'height':844})
+ p.evaluate("document.getElementById('bf9700-backups').open=false")
  assert p.evaluate(api+'.capture()') is False
  for n in [2,3,4]:
   p.evaluate("""n=>{
@@ -50,6 +76,7 @@ with sync_playwright() as pw:
   }""",n)
   assert p.evaluate(api+'.capture()') is True
  assert p.evaluate(api+'.listing().length')==3
+ assert '3/3 verified snapshots' in p.locator('#bf9700-home-count').inner_text()
  assert p.evaluate("""()=>{
    const data=JSON.parse(localStorage.getItem(BFGlobalQoLBackupsV9700.key));
    return data.slots.map(x=>JSON.parse(x.raw).questClears[1]);
@@ -99,6 +126,7 @@ with sync_playwright() as pw:
  p.evaluate("raw=>localStorage.setItem('bf_global_offline_demo_v7',raw)",previous_raw)
  p.locator('#bf9700-auto').uncheck()
  assert p.evaluate(api+'.enabled') is False
+ assert 'Auto OFF' in p.locator('#bf9700-home-count').inner_text()
  assert p.evaluate("localStorage.getItem('bf_global_offline_qol_backups_enabled_v97')")=='off'
  p.evaluate("localStorage.setItem('bf_global_offline_demo_v7',JSON.stringify(P))")
  assert p.evaluate(api+'.capture()') is False
@@ -109,6 +137,7 @@ with sync_playwright() as pw:
  # Re-enable catches up without wiping stored snapshots.
  p.locator('#bf9700-auto').check()
  assert p.evaluate(api+'.enabled') is True
+ assert 'Auto ON' in p.locator('#bf9700-home-count').inner_text()
  assert p.evaluate(api+'.listing().length')==3
  assert p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).version")==7
  # A previously saved state can become current again after an export/import
