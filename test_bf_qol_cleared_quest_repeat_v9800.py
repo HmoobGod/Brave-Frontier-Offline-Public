@@ -673,6 +673,10 @@ with sync_playwright() as pw:
    S.phase='Victory';S.auto=false;
    document.getElementById('auto').checked=false;}""")
  assert p.evaluate(api+'.start(5)') is True
+ # The real control is nested inside a collapsed <details> panel.
+ # Open the player-visible panel before clicking; do not force a hidden click.
+ p.locator('#bf9800-auto-repeat > summary').click()
+ assert p.locator('#bf9800-finish-current').is_visible()
  assert p.locator('#bf9800-finish-current').is_enabled()
  before_replays=p.evaluate('window.__repeatCount')
  before_player=p.evaluate('JSON.stringify(P)')
@@ -708,7 +712,7 @@ with sync_playwright() as pw:
  # running. The ongoing round may complete, but an Auto setting owned by
  # the repeat session must not keep driving later rounds. Reuse the already
  # attached single native Auto fixture handler, not a second listener.
- p.locator('#bf9800-auto-repeat > summary').click()
+ assert p.locator('#bf9800-finish-current').is_visible()
  for initial_auto in (False,True):
   p.evaluate("""before=>{
     QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
