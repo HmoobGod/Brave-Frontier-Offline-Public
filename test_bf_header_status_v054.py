@@ -91,6 +91,56 @@ with sync_playwright() as pw:
     }""")
     assert status_bounds['left'] >= -0.1 and status_bounds['right'] <= status_bounds['viewport'] + 0.1, status_bounds
     assert status_bounds['documentWidth'] <= max(status_bounds['viewport'], base_scroll_width), (status_bounds,base_scroll_width)
+    # v401: narrow Home physically reorders existing source-art Quest/Summon
+    # tiles above the optional squad/status stack, never clones links or
+    # changes keyboard versus visual order. Responsive return restores DOM.
+    page.wait_for_function("""() => {
+      const e=document.querySelector('#bf-home .bf-scene-explore');
+      return e?.nextElementSibling?.classList.contains('bf-scene-squad');
+    }""")
+    layout=page.evaluate("""() => {
+      const home=document.getElementById('bf-home');
+      const adventure=home.querySelector('.bf-scene-explore');
+      const squad=home.querySelector('.bf-scene-squad');
+      const tiles=[...adventure.querySelectorAll('button.bf-scene-active')];
+      const bar=document.querySelector('.bf-navbar').getBoundingClientRect();
+      return {first:home.contains(adventure)&&adventure.nextElementSibling===squad,
+        tileCount:tiles.length,
+        tileBottom:Math.max(...tiles.map(b=>b.getBoundingClientRect().bottom)),
+        navTop:bar.top,
+        noOverflow:document.documentElement.scrollWidth<=innerWidth};
+    }""")
+    assert layout['first'] and layout['tileCount']==2,layout
+    assert layout['tileBottom'] < layout['navTop'],layout
+    assert layout['noOverflow'],layout
+    # Future Home squad metadata from separately reviewed patches must not
+    # push the two actual playable locations below the first phone screen.
+    extra=page.evaluate("""() => {
+      const e=document.querySelector('#bf-home .bf-scene-squad');
+      for(let i=0;i<4;i++){
+        const n=document.createElement('p');n.className='bf401-test-metadata';
+        n.textContent='Supplemental source-backed Home status '+i;
+        n.style.height='48px';e.append(n);
+      }
+      return document.querySelector('.bf-scene-explore button.bf-scene-active')
+        .getBoundingClientRect().top;
+    }""")
+    assert extra < layout['navTop'],(extra,layout)
+    page.evaluate("""() => document.querySelectorAll('.bf401-test-metadata')
+      .forEach(e=>e.remove())""")
+    page.set_viewport_size({'width':390,'height':844})
+    page.wait_for_function("""() => {
+      const e=document.querySelector('#bf-home .bf-scene-explore');
+      return e?.nextElementSibling?.classList.contains('bf-scene-tools');
+    }""")
+    assert page.evaluate("""() => {
+      const h=document.getElementById('bf-home'),e=h.querySelector('.bf-scene-explore');
+      return e.previousElementSibling.classList.contains('bf-scene-story')&&
+        document.documentElement.scrollWidth<=innerWidth;
+    }""")
+    page.set_viewport_size({'width':540,'height':844})
+    assert page.evaluate("""() => document.querySelector('.bf-scene-explore')
+      .nextElementSibling.classList.contains('bf-scene-tools')""")
     page.set_viewport_size({'width':390,'height':844})
     page.evaluate('()=>{P.exp=13;P.level=2;P.zel=1345;P.karma=250;renderProgress()}')
     page.wait_for_function("""()=>document.querySelector('#bf054-exp-text')?.textContent==='8 / 10'""")
