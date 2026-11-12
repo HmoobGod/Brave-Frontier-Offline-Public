@@ -28,6 +28,11 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert "function queueAll(mode,healThreshold=0.50)" in src
  assert "healCritical.disabled=!healingAvailable(0.35);" in src
  assert "healEarly.disabled=!healingAvailable(0.75);" in src
+ assert "curse.cursed(p.id)!==false" in src
+ assert "paralysis.paralyzed(p.id)!==false" in src
+ assert "}catch(_){return null;}" in src
+ assert "try{reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];}" in src
+
  assert 'protectCritical.disabled=!woundedPlan(0.20);' in src
  assert 'protectCautious.disabled=!woundedPlan(0.60);' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')

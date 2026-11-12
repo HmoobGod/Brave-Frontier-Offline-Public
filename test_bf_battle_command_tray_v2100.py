@@ -154,6 +154,52 @@ with sync_playwright() as pw:
  assert blocks=={'curse':{'available':False,'success':False},
                  'item':{'available':False,'success':False},
                  'unchanged':True},blocks
+ # Live OPTIONAL Curse/Paralysis/source/reservation providers may throw or
+ # report unknown statuses. A manual HEAL request must fail closed before
+ # clicking any owned squad action button or changing canonical v7 state.
+ provider_failures=page.evaluate("""()=>{const originalCurse=window.BFGlobalCurseBBLockV5900,
+   originalParalysis=window.BFGlobalParalysisActionLockV6000,
+   originalSupport=window.originalSupport,originalBB=window.bfOriginalBB,
+   originalReservation=window.BFGlobalItemTurnReservationsV4500,
+   beforeOrders=S.party.map(p=>JSON.stringify(p.action)),
+   beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+   beforePlayer=JSON.stringify(P),beforeTarget=S.target,
+   boom=()=>{throw Error('provider offline')},statuses=[];
+   function check(){
+     let usable,queued,threw=false;
+     try{usable=BFGlobalBattleCommandsV2100.healingAvailable(0.75);
+       queued=BFGlobalBattleCommandsV2100.queueAll('heal',0.75);}
+     catch(_){threw=true}
+     statuses.push({usable,queued,threw});
+   }
+   try{
+     window.BFGlobalCurseBBLockV5900={cursed:boom};check();
+     window.BFGlobalCurseBBLockV5900={cursed:()=>undefined};check();
+     window.BFGlobalCurseBBLockV5900=originalCurse;
+     window.BFGlobalParalysisActionLockV6000={paralyzed:boom};check();
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>undefined};check();
+     window.BFGlobalParalysisActionLockV6000=originalParalysis;
+     window.bfOriginalBB=boom;check();
+     window.bfOriginalBB=originalBB;
+     window.originalSupport=boom;check();
+     window.originalSupport=originalSupport;
+     window.BFGlobalItemTurnReservationsV4500={snapshot:boom};check();
+     return {statuses,ordersSame:beforeOrders.every((a,i)=>
+         a===JSON.stringify(S.party[i].action)),
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+       playerSame:JSON.stringify(P)===beforePlayer,
+       targetSame:S.target===beforeTarget,noTurn:!S.busy};
+   }finally{
+     window.BFGlobalCurseBBLockV5900=originalCurse;
+     window.BFGlobalParalysisActionLockV6000=originalParalysis;
+     window.bfOriginalBB=originalBB;window.originalSupport=originalSupport;
+     window.BFGlobalItemTurnReservationsV4500=originalReservation;
+   }
+ }""")
+ assert provider_failures=={
+   'statuses':[{'usable':False,'queued':False,'threw':False}]*7,
+   'ordersSame':True,'saveSame':True,'playerSame':True,
+   'targetSame':True,'noTurn':True},provider_failures
  # A broken living foe or duplicate player actor must reject the entire
  # healing shortcut before selecting an actor or queueing even one action.
  bad_heal=page.evaluate("""()=>{const foes=S.enemies,party=S.party;

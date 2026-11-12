@@ -116,11 +116,25 @@
         !slots.children[p.id]||slots.children[p.id].disabled)||
         new Set(ids).size!==squad.length)return null;
    if(!squad.some(p=>p.hp/p.maxHp<=threshold))return null;
-   return squad.find(p=>!reserved.has(p.id)&&p.bb>=100&&
-     window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true&&
-     window.BFGlobalParalysisActionLockV6000?.paralyzed(p.id)!==true&&
-     bfOriginalBB(p.unitId)?.target==='support'&&
-     originalSupport(p.unitId)?.kind==='heal_all')?.id??null;
+   // Native optional status and original-skill providers can disappear or
+   // throw during a manual turn. Never let a broken provider crash the
+   // player command tray or authorize an unsupported healer.
+   for(const p of squad){
+     if(reserved.has(p.id)||p.bb<100)continue;
+     try{
+       const curse=window.BFGlobalCurseBBLockV5900;
+       const paralysis=window.BFGlobalParalysisActionLockV6000;
+       // A loaded provider with UNKNOWN/invalid status is not proof that
+       // the healer can act. Older standalone embeds may omit providers.
+       if(curse&&(typeof curse.cursed!=='function'||
+          curse.cursed(p.id)!==false))continue;
+       if(paralysis&&(typeof paralysis.paralyzed!=='function'||
+          paralysis.paralyzed(p.id)!==false))continue;
+       if(bfOriginalBB(p.unitId)?.target==='support'&&
+          originalSupport(p.unitId)?.kind==='heal_all')return p.id;
+     }catch(_){return null;}
+   }
+   return null;
  }
  function healingAvailable(threshold=0.50){
    if(!healThresholds.includes(threshold)||!ready()||S.mode!=='archive'||
@@ -130,7 +144,9 @@
       !live.length||live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
         !Number.isSafeInteger(e.slot)||e.slot<0)||
       new Set(live.map(e=>e.slot)).size!==live.length)return false;
-   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   let reservations;
+   try{reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];}
+   catch(_){return false;}
    if(!Array.isArray(reservations)||reservations.some(r=>
       !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
    return healingChoice(active(),new Set(reservations.map(r=>r.slot)),threshold)!==null;
@@ -172,7 +188,9 @@
    }
    // Preserve paid item turns, validating the optional reservation snapshot
    // before issuing any native player click.
-   const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
+   let reservations;
+   try{reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];}
+   catch(_){return false;}
    if(!Array.isArray(reservations)||reservations.some(r=>
        !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
    const reserved=new Set(reservations.map(r=>r.slot));
