@@ -520,6 +520,8 @@ with sync_playwright() as pw:
      window.BFGlobalCurseBBLockV5900={cursed:()=>true};
      blockedCurse=BF041SmartAuto.kindFor(healer);
      window.BFGlobalCurseBBLockV5900={cursed:()=>false};
+     // Paralysis blocks the native performUnit execution, so preserve its
+     // PREEXISTING baseline selected action; do not authorize an extra heal.
      window.BFGlobalParalysisActionLockV6000={paralyzed:()=>true};
      blockedParalysis=BF041SmartAuto.kindFor(healer);
      window.BFGlobalParalysisActionLockV6000={paralyzed:()=>false};
@@ -551,11 +553,11 @@ with sync_playwright() as pw:
      playerSame:JSON.stringify(P)===beforePlayer,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
      targetSame:S.target===beforeTarget,
-     ordersSame:__party105.every((p,i)=>JSON.stringify(p.action)===beforeActions)};
+     ordersSame:__party105.every((p,i)=>JSON.stringify(p.action)===beforeActions[i])};
  }""")
  assert healing_priority=={
    'noStatus':'guard','approved':'burst','blockedCurse':'guard',
-   'blockedParalysis':'guard','unknownSkill':'guard',
+   'blockedParalysis':'burst','unknownSkill':'guard',
    'unknownSupport':'guard','insufficientGauge':'guard',
    'clone':'burst','duplicate':'burst','providerThrows':'guard',
    'playerSame':True,'saveSame':True,'targetSame':True,
