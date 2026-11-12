@@ -176,6 +176,11 @@ with sync_playwright() as pw:
  # Weakness Focus and negative-guard regression suite.
  page.evaluate("""()=>{S.enemies[1].element='Earth';
    S.enemies[2].element='Light';update()}""")
+ # Return to the original Element Weakness strategy after the new separate
+ # Fewest Resists action. Later assertions inspect refresh().target, which
+ # reports the CURRENT selected strategy (not lookup('elemental')).
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("elemental")') is True
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='elemental'
  # A broken optional elemental provider must not crash the native command
  # tray, change the selected target, queue an action or write the v7 save.
  broken_elemental=page.evaluate("""()=>{
