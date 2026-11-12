@@ -1436,6 +1436,14 @@ public class MainActivity extends Activity {
                 } catch (IOException sbbFallbackError) {
                     android.util.Log.w("BraveFrontier", "Optional SBB fallback normalization unavailable", sbbFallbackError);
                 }
+                // v398: optional Quest section jump bar, loaded last so every Quest
+                // panel exists; scroll-only, never reads or writes the save.
+                try {
+                    String questJump = readPackagedText("bf39800_quest_section_jump.js");
+                    view.evaluateJavascript(questJump, null);
+                } catch (IOException questJumpError) {
+                    android.util.Log.w("BraveFrontier", "Optional Quest section jump bar unavailable", questJumpError);
+                }
             }
             // External navigation isn't needed for the bundled offline game.
             @Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
