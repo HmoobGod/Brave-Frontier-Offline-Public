@@ -159,7 +159,7 @@ with sync_playwright() as pw:
  # clicking any owned squad action button or changing canonical v7 state.
  provider_failures=page.evaluate("""()=>{const originalCurse=window.BFGlobalCurseBBLockV5900,
    originalParalysis=window.BFGlobalParalysisActionLockV6000,
-   originalSupport=window.originalSupport,originalBB=window.bfOriginalBB,
+   originalSupport=window.originalSupport,
    originalReservation=window.BFGlobalItemTurnReservationsV4500,
    beforeOrders=S.party.map(p=>JSON.stringify(p.action)),
    beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
@@ -179,8 +179,12 @@ with sync_playwright() as pw:
      window.BFGlobalParalysisActionLockV6000={paralyzed:boom};check();
      window.BFGlobalParalysisActionLockV6000={paralyzed:()=>undefined};check();
      window.BFGlobalParalysisActionLockV6000=originalParalysis;
-     window.bfOriginalBB=boom;check();
-     window.bfOriginalBB=originalBB;
+     // bfOriginalBB is a global lexical source binding, not a reliably
+     // writable window property. Reject a real UNKNOWN original unit ID
+     // rather than pretending window.bfOriginalBB overrides that source.
+     const originalUnitId=S.party[0].unitId;
+     try{S.party[0].unitId=999999;check();}
+     finally{S.party[0].unitId=originalUnitId;}
      window.originalSupport=boom;check();
      window.originalSupport=originalSupport;
      window.BFGlobalItemTurnReservationsV4500={snapshot:boom};check();
@@ -192,7 +196,7 @@ with sync_playwright() as pw:
    }finally{
      window.BFGlobalCurseBBLockV5900=originalCurse;
      window.BFGlobalParalysisActionLockV6000=originalParalysis;
-     window.bfOriginalBB=originalBB;window.originalSupport=originalSupport;
+     window.originalSupport=originalSupport;
      window.BFGlobalItemTurnReservationsV4500=originalReservation;
    }
  }""")
