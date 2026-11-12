@@ -26,11 +26,12 @@ with sync_playwright() as pw:
     removeItem:k=>delete values[k],key:i=>Object.keys(values)[i]??null,
     get length(){return Object.keys(values).length}}});
  }""")
- p.set_content('<html><body><div id="squadpicker"></div></body></html>')
+ p.set_content('<html><body><section id="bf-home"><section class="bf-scene-tools"></section></section><div id="squadpicker"></div></body></html>')
  p.evaluate("""()=>{
    window.P={version:7,roster:[10011,20011,30011],squad:[10011,20011],
      questClears:{1:2},exp:9};
    window.S={busy:false};
+   window.__routes=[];window.BF_homeNav={go:r=>{window.__routes.push(r);return r==='units'}};
    window.__savePossible=true;window.__resetCalls=0;window.__renderCalls=0;
    window.saveRecoveryPending=false;
    window.saveProgress=()=>{
@@ -45,16 +46,39 @@ with sync_playwright() as pw:
  p.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
  api='BFGlobalQoLSquadPresetsV10000'
  assert p.locator('#bf10000-squad-presets').count()==1
+ assert p.locator('#bf10000-home-presets').count()==1
+ assert p.locator('#bf10000-home-count').inner_text().startswith('SAVED SQUADS · 0 / 5')
+ assert p.locator('#bf10000-home-manage').is_enabled()
  assert p.evaluate(api+'.info().length')==5
  assert p.evaluate(api+'.savePreset(0,"Farming")') is True
  assert p.evaluate(api+'.savePreset(0,"Farming")') is True
  assert p.evaluate(api+'.info()[0].name')=='Farming'
  assert p.evaluate(api+'.info()[0].ids')==[10011,20011]
+ assert 'SAVED SQUADS · 1 / 5 · ACTIVE: Farming' in p.locator('#bf10000-home-count').inner_text()
+ # The Home button ONLY opens existing Units/preset manager. It must never
+ # apply a team, call saveProgress, reset a battle, or auto-select anything.
+ before_home=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ assert p.locator('#bf10000-squad-presets').get_attribute('open') is None
+ p.locator('#bf10000-home-manage').click()
+ assert p.evaluate('window.__routes')==['units']
+ assert p.locator('#bf10000-squad-presets').get_attribute('open') is not None
+ assert p.evaluate('window.__resetCalls')==0
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before_home
+ p.set_viewport_size({'width':320,'height':844})
+ box=p.locator('#bf10000-home-manage').evaluate("""el=>{
+   const r=el.getBoundingClientRect(),s=el.parentElement.getBoundingClientRect();
+   return {inside:r.left>=s.left-.5&&r.right<=s.right+.5&&
+     r.left>=0&&r.right<=innerWidth,height:r.height,
+     page:document.documentElement.scrollWidth<=innerWidth};
+ }""")
+ assert box['inside'] and box['height']>=44 and box['page'],box
+ p.set_viewport_size({'width':390,'height':844})
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==base
  # Rename and duplicate only the local preset metadata; never touch v7.
  assert p.evaluate(api+'.renamePreset(0,"Farming Prime")') is True
  assert p.evaluate(api+'.info()[0].name')=='Farming Prime'
+ assert 'ACTIVE: Farming Prime' in p.locator('#bf10000-home-count').inner_text()
  assert p.evaluate(api+'.duplicatePreset(0)') is True
  assert p.evaluate(api+'.info()[1].ids')==[10011,20011]
  assert p.evaluate(api+'.info()[1].name')=='Farming Prime Copy'
@@ -67,7 +91,10 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.renamePreset(0,"  ")') is False
  assert p.evaluate(api+'.info()[0].name')=='Farming Prime'
  p.evaluate('P.squad=[30011]')
+ p.evaluate(api+'.refresh()')
+ assert 'No saved preset matches' in p.locator('#bf10000-home-count').inner_text()
  assert p.evaluate(api+'.savePreset(1,"Boss")') is True
+ assert 'ACTIVE: Boss' in p.locator('#bf10000-home-count').inner_text()
  assert p.evaluate(api+'.info()[1].ids')==[30011]
  p.evaluate("document.getElementById('bf10000-slot').value='0'")
  p.evaluate(api+'.refresh()')
