@@ -71,6 +71,34 @@
     homeDetails.append(label,homeValues);
     homeTitle.after(homeDetails);
   }
+  // v401: On narrow phones, the playable original-art Quest and Summon
+  // location tiles should come before the growing read-only squad/status
+  // detail stack. Reorder EXISTING nodes (not clones/CSS order), so the
+  // visual, keyboard, and screen-reader orders stay aligned. Wider phones
+  // retain the accepted original reconstructed Home order.
+  const sceneSquad = home?.querySelector('.bf-scene-squad');
+  const sceneExplore = home?.querySelector('.bf-scene-explore');
+  const sceneTools = home?.querySelector('.bf-scene-tools');
+  const compactHome = typeof window.matchMedia === 'function' ?
+    window.matchMedia('(max-width:370px)') : null;
+  function syncNarrowHome() {
+    if (!home || !sceneSquad || !sceneExplore || !sceneTools || !compactHome)
+      return false;
+    if (compactHome.matches) {
+      if (sceneExplore.nextElementSibling !== sceneSquad)
+        home.insertBefore(sceneExplore,sceneSquad);
+    } else if (sceneExplore.nextElementSibling !== sceneTools) {
+      home.insertBefore(sceneExplore,sceneTools);
+    }
+    return compactHome.matches;
+  }
+  if (compactHome) {
+    if (typeof compactHome.addEventListener === 'function')
+      compactHome.addEventListener('change',syncNarrowHome);
+    else if (typeof compactHome.addListener === 'function')
+      compactHome.addListener(syncNarrowHome);
+    syncNarrowHome();
+  }
   const safeCount = x => Number.isSafeInteger(x) && x >= 0 ?
     x.toLocaleString('en-US') : '—';
 
