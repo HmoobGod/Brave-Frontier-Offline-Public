@@ -74,8 +74,8 @@
    // Distinct manual command: minimize the number of current squad members
    // facing a source-listed 0.5x ELEMENTAL disadvantage in this DEMO battle.
    // Unlike Element Weakness, this also works if no ally has an advantage.
-   // Enemy rosters remain DEMO, not authenticated 2022 formations. If ANY
-   // element in the DEMO battle, disable this shortcut without changing the target.
+   // Enemy rosters remain DEMO, not authenticated 2022 formations. If any
+   // living combatant has an unknown element, reject without moving the target.
    if(kind==='element-safe'){
      const element=window.BFGlobalElementalCombatV6900;
      if(S.mode!=='archive'||!element||
