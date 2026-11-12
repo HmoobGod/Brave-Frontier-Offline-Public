@@ -36,6 +36,10 @@
    b.type='button';b.addEventListener('click',cb);buttons.append(b);return b;
  };
  const replay=make('bf3000-replay','REPLAY MISSION ↻',()=>replayBattle());
+ // Explicit player action only: one original defeated-quest retry and one
+ // native Auto toggle. No unattended defeat loop or invented battle effect.
+ const retryAuto=make('bf3000-retry-auto',
+   'RETRY DEFEAT + AUTO BATTLE',()=>retryDefeatAuto());
  const next=make('bf3000-next','NEXT STORY MISSION ›',()=>advance());
  const scene=make('bf3000-scene','READ ORIGINAL CLEAR SCENE ›',()=>readScene());
  const retrySave=make('bf3000-retry-save','RETRY SAVE',()=>retrySaveResult());
@@ -120,6 +124,7 @@
      (s.victory&&s.archive?' · Summoner Lv.'+s.level:'')+
      (s.victory&&s.archive&&!s.stored?' · Save not confirmed; EXPORT your progress':'');
    replay.disabled=!s.canReplay;
+   retryAuto.disabled=!canRetryDefeatAuto(s);
    next.disabled=!s.nextId;next.textContent=s.nextId?'NEXT MISSION '+s.nextId+' ›':'NEXT STORY MISSION ›';
    scene.disabled=!s.clearScene;
    scene.hidden=!s.clearScene;
@@ -160,6 +165,60 @@
    retry.click();rendered='';refresh();
    return !S.over&&!S.busy&&QUEST.missionId===s.missionId;
  }
+ // A source-qualified archived DEMO defeat may be retried by player choice.
+ // The original retry button and native Auto checkbox remain authoritative.
+ function canRetryDefeatAuto(s=snapshot()){
+   if(!s?.done||s.victory||!s.archive||!s.canReplay||S.busy||
+      !S.over||S.auto===true||S.mode!=='archive'||document.hidden||
+      typeof QUEST==='undefined'||QUEST?.missionId!==s.missionId||
+      !Number.isSafeInteger(QUEST?.battles)||QUEST.battles<1||
+      !Number.isSafeInteger(S.totalWaves)||S.totalWaves!==QUEST.battles||
+      typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
+   const auto=document.getElementById('auto');
+   if(!auto||auto.type!=='checkbox')return false;
+   try{
+     const nav=window.BF_homeNav;
+     if(nav&&nav.current!=='quest')return false;
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     if(repeat&&(typeof repeat.statusSnapshot!=='function'||
+        repeat.statusSnapshot()?.active!==false))return false;
+     const campaign=window.BFGrandGaiaCampaignV100;
+     if(campaign){
+       if(typeof campaign.waveReadiness!=='function')return false;
+       const row=campaign.waveReadiness(s.missionId);
+       if(!row||row.missionId!==s.missionId||
+          row.dungeonId!==QUEST.dungeonId||
+          row.verifiedWaveCount!==QUEST.battles)return false;
+     }
+     return true;
+   }catch(_){return false;}
+ }
+ function disarmRetryAuto(){
+   // If Auto fails after a native reset, retain safe manual gameplay.
+   S.auto=false;
+   const auto=document.getElementById('auto');
+   if(auto)auto.checked=false;
+ }
+ function retryDefeatAuto(){
+   const s=snapshot();
+   if(!canRetryDefeatAuto(s))return false;
+   const auto=document.getElementById('auto');
+   let restarted=false;
+   try{restarted=replayBattle()===true;}
+   catch(_){restarted=false;}
+   if(!restarted||S.over||S.mode!=='archive'||
+      QUEST?.missionId!==s.missionId||S.auto===true){
+     disarmRetryAuto();return false;
+   }
+   if(auto.disabled){disarmRetryAuto();return false;}
+   try{if(!auto.checked)auto.click();}
+   catch(_){disarmRetryAuto();return false;}
+   if(!auto.checked||auto.disabled||S.auto!==true||S.over||
+      QUEST?.missionId!==s.missionId){
+     disarmRetryAuto();return false;
+   }
+   rendered='';refresh();return true;
+ }
  function advance(){
    const s=snapshot();if(!s||!s.stored||!s.nextId||!s.done||!s.victory||!s.archive)return false;
    const moved=story.advance();
@@ -180,5 +239,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh();},850);
  refresh();
- window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,advance,readScene,committedClearCount});
+ window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,retryDefeatAuto,canRetryDefeatAuto,advance,readScene,committedClearCount});
 })();

@@ -272,5 +272,71 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleResultsV3000.readScene()') is True
  assert page.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_demo_v7')).questClears[10]")>=1
  assert not errors,errors
+ # A fresh separate browser page proves player-clicked DEFEAT retry uses
+ # the native Auto checkbox exactly once, never rewrites P or canonical v7.
+ trial=browser.new_page(viewport={'width':390,'height':844})
+ trial_errors=[];trial.on('pageerror',lambda e:trial_errors.append(str(e)))
+ trial.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',
+   {configurable:true,value:{getItem:k=>db[k]??null,
+   setItem:(k,v)=>db[k]=String(v),removeItem:k=>delete db[k],
+   key:i=>Object.keys(db)[i]??null,get length(){return Object.keys(db).length}}});
+   window.alert=()=>{};window.confirm=()=>true;
+   HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
+   HTMLMediaElement.prototype.play=()=>Promise.resolve()}""")
+ trial.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
+ trial.add_style_tag(path=str(A/'bf_home_nav.css'))
+ for name in ('bf_home_nav.js','bf080_morgan_map.js','bf090_st_lamia_map.js',
+       'bf100_grand_gaia_campaign.js','bf101_story_continue.js',
+       'bf110_quest_journal.js','bf2000_story_battle_hud.js',
+       'bf2100_battle_command_tray.js','bf2200_original_event_reader.js',
+       'bf2300_morgan_event_dialogue.js','bf2400_st_lamia_event_dialogue.js',
+       'bf2500_story_event_prompt.js','bf2600_original_event_portraits.js',
+       'bf2700_original_event_stage.js','bf2800_dialogue_speaker_cues.js',
+       'bf2900_original_event_expressions.js','bf3000_battle_results.js'):
+  trial.add_script_tag(path=str(A/name))
+ trial.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ assert trial.locator('#bf3000-retry-auto').count()==1
+ assert trial.evaluate('BFGlobalBattleResultsV3000.retryDefeatAuto()') is False
+ trial.evaluate('finish(false)')
+ assert trial.evaluate('BFGlobalBattleResultsV3000.canRetryDefeatAuto()') is True
+ before=trial.evaluate("""()=>({
+    saved:localStorage.getItem('bf_global_offline_demo_v7'),
+    player:JSON.stringify(P),mission:QUEST.missionId})""")
+ # Unknown repeat session must deny retry BEFORE invoking native reset.
+ invalid=trial.evaluate("""()=>{const prior=window.BFGlobalQoLQuestRepeatV9800;
+  try{window.BFGlobalQoLQuestRepeatV9800={statusSnapshot(){
+    throw Error('repeat broken')}};
+    return {ready:BFGlobalBattleResultsV3000.canRetryDefeatAuto(),
+      action:BFGlobalBattleResultsV3000.retryDefeatAuto(),
+      stillDefeat:S.over};}
+  finally{window.BFGlobalQoLQuestRepeatV9800=prior}
+ }""")
+ assert invalid=={'ready':False,'action':False,'stillDefeat':True},invalid
+ success=trial.evaluate("""()=>{const auto=document.getElementById('auto');
+    const done=BFGlobalBattleResultsV3000.retryDefeatAuto();
+    const status={done,running:S.auto,checked:auto.checked,over:S.over,
+      mission:QUEST.missionId};
+    if(auto.checked&&!auto.disabled)auto.click();
+    else{S.auto=false;auto.checked=false}
+    return status;}""")
+ assert success['done'] and success['running'] and success['checked'],success
+ assert not success['over'] and success['mission']==before['mission'],success
+ trial.evaluate('finish(false)')
+ # Native Auto click failure after replay disarms Auto and preserves manual
+ # play; no P/version-7 quest save or reward is ever mutated by the shortcut.
+ denied=trial.evaluate("""()=>{const auto=document.getElementById('auto');
+    const click=auto.click;auto.click=()=>{throw Error('no native toggle')};
+    try{const ok=BFGlobalBattleResultsV3000.retryDefeatAuto();
+      return {ok,running:S.auto,checked:auto.checked,over:S.over,
+        mission:QUEST.missionId,saved:localStorage.getItem('bf_global_offline_demo_v7'),
+        player:JSON.stringify(P)};}
+    finally{auto.click=click}
+ }""")
+ assert denied['ok'] is False and denied['running'] is False,denied
+ assert denied['checked'] is False and denied['over'] is False,denied
+ assert denied['mission']==before['mission'],denied
+ assert denied['saved']==before['saved'] and denied['player']==before['player'],denied
+ assert not trial_errors,trial_errors
+ trial.close()
  browser.close()
 print('PASS v30.00: real demo victory/defeat results, retry and next via engine, original source scene, training isolation')
