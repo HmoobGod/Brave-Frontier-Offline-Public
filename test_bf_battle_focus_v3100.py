@@ -470,7 +470,14 @@ with sync_playwright() as pw:
    'unchangedOrders':True,'unchangedPlayer':True,'unchangedSave':True,
    'unchangedRound':True},one_turn_guard
  # Clear only transient manual orders inside this isolated browser fixture.
- page.evaluate("()=>{S.party.forEach(p=>p.action=null);update();BFGlobalBattleFocusV3100.refresh()}")
+ # The earlier strategy test intentionally left an unsupported elemental
+ # focus selected. Re-select a known valid native HP target before testing
+ # the one-click button's enabled state; do not relax its runtime gate.
+ assert page.evaluate("""()=>{
+   S.party.forEach(p=>p.action=null);
+   update();
+   return BFGlobalBattleFocusV3100.focus('lowest-hp');
+ }""") is True
  assert page.evaluate('BFGlobalBattleFocusV3100.runFocusedTurn("invalid")') is False
  assert page.evaluate('BFGlobalBattleFocusV3100.runFocusedTurn("lowest-hp","item")') is False
  assert not page.locator('#bf3100-run-turn').is_disabled()
