@@ -275,6 +275,88 @@ with sync_playwright() as pw:
  page.locator('#bf101-continue').click()
  assert page.evaluate('QUEST.missionId')==2
  assert page.evaluate('P.version')==7
+ # Real player click: only source-qualified next story mission + native Auto.
+ # Isolated browser ensures the pre-existing 106-mission and save-recovery
+ # regression suites above remain unchanged, including default manual play.
+ auto_page=browser.new_page(viewport={'width':390,'height':844})
+ auto_page.on('pageerror',lambda e:errors.append(str(e)))
+ auto_page.evaluate("""()=>{const db={};
+   Object.defineProperty(window,'localStorage',{configurable:true,value:{
+     getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
+     removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+     get length(){return Object.keys(db).length}}});
+   window.alert=()=>{};window.confirm=()=>true;
+   HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
+   HTMLMediaElement.prototype.play=()=>Promise.resolve()}""")
+ auto_page.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
+ auto_page.add_style_tag(path=str(A/'bf_home_nav.css'))
+ for name in ('bf_home_nav.js','bf080_morgan_map.js','bf090_st_lamia_map.js',
+     'bf100_grand_gaia_campaign.js','bf101_story_continue.js'):
+  auto_page.add_script_tag(path=str(A/name))
+ auto_page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ btn=auto_page.locator('#bf101-continue-auto')
+ assert btn.count()==1
+ assert btn.is_disabled(),'unknown original economy must block native Auto'
+ auto_page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
+ assert auto_page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is True
+ assert btn.is_enabled()
+ # The original story navigation stays manual by default.
+ assert auto_page.locator('#bf101-continue').is_enabled()
+ guard=auto_page.evaluate("""()=>{const base=window.BFGrandGaiaCampaignV100,
+   previousRepeat=window.BFGlobalQoLQuestRepeatV9800,
+   before=QUEST.missionId,checks={};
+   try{
+     window.BFGrandGaiaCampaignV100={
+       ...base,sourceEconomyReadiness:()=>null};
+     BFGrandGaiaContinueV101.refresh();
+     checks.unknownEconomy=!BFGrandGaiaContinueV101.canContinueAuto()&&
+       document.getElementById('bf101-continue-auto').disabled;
+     window.BFGrandGaiaCampaignV100={
+       ...base,waveReadiness:id=>({...base.waveReadiness(id),verifiedWaveCount:999})};
+     checks.badWaves=!BFGrandGaiaContinueV101.canContinueAuto();
+     window.BFGrandGaiaCampaignV100=base;
+     window.BFGlobalQoLQuestRepeatV9800={
+       statusSnapshot:()=>({active:true})};
+     checks.repeat=!BFGrandGaiaContinueV101.canContinueAuto();
+     window.BFGlobalQoLQuestRepeatV9800=previousRepeat;
+     const auto=document.getElementById('auto');
+     auto.disabled=true;
+     checks.disabled=!BFGrandGaiaContinueV101.canContinueAuto();
+     auto.disabled=false;
+     auto.checked=true;S.auto=true;
+     checks.alreadyAuto=!BFGrandGaiaContinueV101.canContinueAuto();
+     auto.checked=false;S.auto=false;
+     return {checks,unchanged:QUEST.missionId===before};
+   }finally{
+     window.BFGrandGaiaCampaignV100=base;
+     if(previousRepeat===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
+     else window.BFGlobalQoLQuestRepeatV9800=previousRepeat;
+     S.auto=false;document.getElementById('auto').checked=false;
+     document.getElementById('auto').disabled=false;
+     BFGrandGaiaContinueV101.refresh();
+   }
+ }""")
+ assert guard=={'checks':{'unknownEconomy':True,'badWaves':True,
+   'repeat':True,'disabled':True,'alreadyAuto':True},'unchanged':True},guard
+ # Use a REAL button click, not a direct helper invocation.
+ before_auto=auto_page.evaluate("""()=>({mission:QUEST.missionId,
+   version:P.version,clears:JSON.stringify(P.questClears),
+   saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert btn.is_enabled()
+ btn.click()
+ started=auto_page.evaluate("""()=>({
+   mission:QUEST.missionId,mode:S.mode,over:S.over,busy:S.busy,
+   auto:S.auto,checked:document.getElementById('auto').checked,
+   waves:S.totalWaves,version:P.version,clears:JSON.stringify(P.questClears),
+   stored:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert started['mission']==1 and started['mode']=='archive',started
+ assert started['auto'] and started['checked'] and not started['over'],started
+ assert not started['busy'] and started['waves']==QUESTS[0].battles,started
+ assert started['clears']==before_auto['clears'] and started['version']==7,started
+ # Starting native Auto does not itself grant a clear or schedule the next quest.
+ assert auto_page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is False
+ assert not errors,errors
+ auto_page.close()
  assert not errors,errors
  browser.close()
 print('PASS v1.01 Continue Story across 106 missions, 3 regions, save v7')
