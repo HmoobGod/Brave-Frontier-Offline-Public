@@ -50,6 +50,52 @@ with sync_playwright() as playwright:
     page.add_style_tag(path=str(ASSETS / "bf_home_nav.css"))
     page.add_script_tag(path=str(ASSETS / "bf_home_nav.js"))
     assert page.evaluate("BF_homeNav.current") == "home"
+    # Source provider loads after the Home module in the Android WebView.
+    # It must fail closed without inventing a mission or touching saved data.
+    story = page.locator("#bf-home-story-progress")
+    assert story.is_visible()
+    assert "unavailable" in story.inner_text().lower()
+    assert page.locator("#bf-home-story-open").is_visible()
+    source_preview = page.evaluate("""() => {
+      const original = window.BFGrandGaiaCampaignV100;
+      const player = JSON.stringify(P),save=localStorage.getItem('bf_global_offline_demo_v7');
+      const q=QUESTS[0];
+      try {
+        window.BFGrandGaiaCampaignV100={
+          summary:()=>({total:106,cleared:0}),
+          nextPlayable:()=>({missionId:q.missionId,dungeonId:q.dungeonId,
+            battles:q.battles,name:q.name})};
+        const valid=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100.nextPlayable=()=>({
+          missionId:999999,dungeonId:q.dungeonId,battles:q.battles});
+        const invalid=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100.nextPlayable=()=>{throw Error('unavailable')};
+        const thrown=BFGlobalHome.refreshStory();
+        window.BFGrandGaiaCampaignV100={
+          summary:()=>({total:106,cleared:106}),nextPlayable:()=>null};
+        const complete=BFGlobalHome.refreshStory();
+        return {valid,invalid,thrown,complete,
+          playerSame:JSON.stringify(P)===player,
+          saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save};
+      } finally {
+        window.BFGrandGaiaCampaignV100=original;
+        BFGlobalHome.refreshStory();
+      }
+    }""")
+    assert "0/106 missions cleared" in source_preview["valid"]
+    assert "Next:" in source_preview["valid"]
+    assert "Next mission not verified" in source_preview["invalid"]
+    assert "unavailable" in source_preview["thrown"].lower()
+    assert "All archived missions cleared" in source_preview["complete"]
+    assert source_preview["playerSame"] and source_preview["saveSame"]
+    page.locator("#bf-home-story-open").click()
+    assert page.evaluate("BF_homeNav.current") == "quest"
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    assert page.evaluate("BF_homeNav.current") == "home"
+    page.set_viewport_size({"width": 320, "height": 844})
+    assert page.locator("#bf-home-story-open").is_visible()
+    assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+    page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
     actual = page.locator("#bf-scene-party strong").all_text_contents()
