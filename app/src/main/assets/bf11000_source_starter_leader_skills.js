@@ -76,6 +76,21 @@
    'Unknown leaders and other unit forms fail closed. '+
    'No squad, HP, ATK, save or rewards are changed.';
  panel.append(heading,status,targets,caution);host.after(panel);
+ // Source-qualified Home leader preview; the same archived v110 lookup drives
+ // the existing Units details. Never invent effects for unknown leaders.
+ const homeParty=document.querySelector('#bf-home .bf-scene-squad #bf-scene-party');
+ const homeLeader=homeParty?document.createElement('p'):null;
+ if(homeLeader){
+   homeLeader.id='bf11000-home-leader';
+   homeLeader.setAttribute('role','status');
+   homeLeader.setAttribute('aria-live','polite');
+   homeLeader.style.cssText='box-sizing:border-box;width:100%;max-width:100%;'+
+     'min-width:0;margin:7px 0;padding:8px 10px;background:#293244;'+
+     'border:1px solid #a89166;color:#f4e4bd;font:700 11px/1.5 system-ui,sans-serif;'+
+     'overflow-wrap:anywhere';
+   homeParty.before(homeLeader);
+ }
+ const elements=freeze(['','Fire','Water','Earth','Thunder','Light','Dark']);
  function refresh(){
    const state=snapshot();
    const archiveCombat=!!window.BFGlobalStarterLeaderCombatV11100;
@@ -94,6 +109,19 @@
        state.leader.atkPercent+'% ATK / +'+
        state.leader.hpPercent+'% max HP '+(archiveCombat?'(archive DEMO battles)':'(reference only)')):
      'Selected leader is not among the 30 source-verified starter forms.';
+   if(homeLeader){
+     if(!state.leader){
+       homeLeader.textContent='2022 ORIGINAL LEADER SKILL · '+ 
+         'UNVERIFIED FOR CURRENT LEADER (30 starter forms supported)';
+     }else{
+       const matched=state.slots.filter(slot=>slot.effect?.sameElement===true).length;
+       homeLeader.textContent='2022 LEADER SKILL · '+elements[state.leader.element]+
+         ' · ATK +'+state.leader.atkPercent+'%'+
+         (state.leader.hpPercent?' · HP +'+state.leader.hpPercent+'%':'')+
+         ' · '+matched+' matching squad unit(s) · '+
+         (archiveCombat?'new archive DEMO battles':'source preview only');
+     }
+   }
    targets.replaceChildren();
    if(panel.open){
      state.slots.forEach((slot,i)=>{
@@ -110,9 +138,8 @@
  }
  panel.addEventListener('toggle',refresh);
  host.addEventListener('click',()=>{if(panel.open)refresh();});
- document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
-   if(panel.open)refresh();
- });
+ document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
+ window.addEventListener('bf-route-change',refresh);
  const timer=setInterval(()=>{if(!document.hidden&&panel.open)refresh();},2200);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  refresh();
