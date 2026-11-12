@@ -293,10 +293,18 @@ with sync_playwright() as pw:
      S.enemies[2].atk=900;S.enemies[2].def=undefined;
      const brokenDefense={lookup:api.lookup('wounded-armor'),
        queued:api.queueFocus('wounded-armor')};
-     S.enemies[2].def=1;S.enemies[2].hp=101;
+     // A malformed foe is not proof that it is dead: reject before
+     // changing native player targeting or queued actions.
+     S.enemies[2].def=1;S.enemies[2].hp=NaN;
+     const unknownHp={lookup:api.lookup('wounded-threat'),
+       queued:api.queueFocus('wounded-threat')};
+     S.enemies[2].hp=-1;
+     const negativeHp={lookup:api.lookup('wounded-armor'),
+       queued:api.queueFocus('wounded-armor')};
+     S.enemies[2].hp=101;
      const impossible={lookup:api.lookup('wounded-threat'),
        queued:api.queueFocus('wounded-threat')};
-     return {boundary,crossed,none,brokenAttack,brokenDefense,impossible,
+     return {boundary,crossed,none,brokenAttack,brokenDefense,unknownHp,negativeHp,impossible,
        sameTarget:oldTarget===S.target,
        sameOrders:oldOrders.every((a,i)=>a===JSON.stringify(S.party[i].action)),
        sameSave:saved===localStorage.getItem('bf_global_offline_demo_v7'),
@@ -309,6 +317,8 @@ with sync_playwright() as pw:
   'none':{'threat':None,'armor':None,'attack':False,'burst':False},
   'brokenAttack':{'lookup':None,'queued':False},
   'brokenDefense':{'lookup':None,'queued':False},
+  'unknownHp':{'lookup':None,'queued':False},
+  'negativeHp':{'lookup':None,'queued':False},
   'impossible':{'lookup':None,'queued':False},
   'sameTarget':True,'sameOrders':True,'sameSave':True,
   'samePlayer':True,'noTurn':True},finisher_cases
