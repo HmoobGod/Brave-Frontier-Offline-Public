@@ -124,7 +124,7 @@ with sync_playwright() as pw:
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",good)==1
  # Optional player strategies add visible demo enemy ATK/DEF priorities without
  # touching the original default, battle commands, save or enemy-owned AI.
- assert p.locator('#bf10500-target option').count()==8
+ assert p.locator('#bf10500-target option').count()==10
  candidates=[
    {'hp':30,'maxHp':100,'slot':0,'atk':12,'def':99},
    {'hp':90,'maxHp':100,'slot':1,'atk':88,'def':51},
@@ -167,6 +167,52 @@ with sync_playwright() as pw:
  settings['target']='lowest-def'
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",candidates)==2
+ # Player Auto finishers use real native foe HP and ATK/DEF. They only
+ # activate when both Smart Auto and Advanced Auto are on, never enemy AI.
+ wounded=[
+   {'hp':50,'maxHp':100,'slot':0,'atk':200,'def':80},
+   {'hp':30,'maxHp':100,'slot':1,'atk':100,'def':10},
+   {'hp':80,'maxHp':100,'slot':2,'atk':900,'def':1}
+ ]
+ settings['target']='wounded-threat'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",wounded)==0
+ assert p.locator('#bf10500-target').input_value()=='wounded-threat'
+ settings['target']='wounded-armor'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",wounded)==1
+ boundary=p.evaluate("""rows=>{const copy=rows.map(x=>({...x}));
+   copy[0].hp=51;return BF042AutoCoordination.chooseTarget(copy)?.slot;}""",wounded)
+ assert boundary==1,boundary
+ # Neither wounded foe exists now: fallback to the original HP% planner,
+ # not an invented target or an inappropriate automatic turn shutdown.
+ healthy=[{**row,'hp':hp} for row,hp in zip(wounded,[90,80,70])]
+ assert p.evaluate("""rows=>BF042AutoCoordination.chooseTarget(rows)?.slot""",healthy)==2
+ # Unknown HP anywhere or missing/NaN ranking data on a healthy foe
+ # must reject without a baseline fallback (ambiguous combat snapshot).
+ for mode,missing in [('wounded-threat','atk'),('wounded-armor','def')]:
+  settings['target']=mode
+  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+  for invalid in ('nan-hp','negative-hp','unknown-stat','impossible-hp'):
+   invalid_choice=p.evaluate("""({rows,kind,field})=>{
+     const copy=rows.map(x=>({...x}));
+     if(kind==='nan-hp')copy[2].hp=NaN;
+     if(kind==='negative-hp')copy[2].hp=-1;
+     if(kind==='unknown-stat')delete copy[2][field];
+     if(kind==='impossible-hp')copy[2].hp=101;
+     return BF042AutoCoordination.chooseTarget(copy);
+   }""",{'rows':wounded,'kind':invalid,'field':missing})
+   assert invalid_choice is None,(mode,invalid)
+ # Explicit advanced target choices cannot change the archived v7 save.
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
+ # Turn ownership scope: manual mode retains the original coordinated
+ # target even when a player has an advanced wounded preference stored.
+ settings['target']='wounded-threat'
+ assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
+ manual_target=p.evaluate("""rows=>{const old=S.auto;try{
+   S.auto=false;return BF042AutoCoordination.chooseTarget(rows)?.slot;
+ }finally{S.auto=old;}}""",wounded)
+ assert manual_target==1,manual_target
  # New opt-in boss-focused choices have distinct absolute and relative HP
  # semantics. Both use native slots; ties prefer the lower original slot.
  hp_choices=[

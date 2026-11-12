@@ -22,7 +22,7 @@
      const raw=JSON.parse(localStorage.getItem(pref)||'null');
      return {on:false,
        heal:[35,50,60,75].includes(raw?.heal)?raw.heal:60,
-       target:['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','selected'].includes(raw?.target)?raw.target:'percent',
+       target:['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','wounded-threat','wounded-armor','elemental','selected'].includes(raw?.target)?raw.target:'percent',
        burst:['normal','conserve','final-wave'].includes(raw?.burst)?raw.burst:'normal',
        guard:[0,20,35,50].includes(raw?.guard)?raw.guard:0,
        healBeforeGuard:raw?.healBeforeGuard===true};
@@ -33,7 +33,7 @@
  function valid(options){
    return options&&typeof options==='object'&&typeof options.on==='boolean'&&
      [35,50,60,75].includes(options.heal)&&
-     ['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','selected'].includes(options.target)&&
+     ['percent','absolute','highest-hp','highest-hp-percent','highest-atk','lowest-def','wounded-threat','wounded-armor','elemental','selected'].includes(options.target)&&
      ['normal','conserve','final-wave'].includes(options.burst)&&
      (options.guard===undefined||[0,20,35,50].includes(options.guard))&&
      (options.healBeforeGuard===undefined||typeof options.healBeforeGuard==='boolean');
@@ -266,8 +266,8 @@
    // Player-selected DEMO priorities, not recovered enemy or original AI.
    // Keep the native planner's positive HP/max HP and legal slot gate before
    // ranking by an optional visible enemy statistic. Unknown stats fail closed.
-   const key=config.target==='highest-atk'?'atk':
-     config.target==='lowest-def'?'def':'hp';
+   const key=config.target==='highest-atk'||config.target==='wounded-threat'?'atk':
+     config.target==='lowest-def'||config.target==='wounded-armor'?'def':'hp';
    // Do not silently discard a corrupt *living* enemy and queue a command
    // against a possibly ambiguous native slot. Match elemental fail-closed.
    const live=enemies.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
@@ -279,6 +279,21 @@
    // native enemy. Skipping one unknown stat would silently attack a different
    // enemy despite explicit player targeting and the strict Auto gate.
    if(live.some(e=>!Number.isFinite(e[key])))return null;
+   // Opt-in PLAYER Smart Auto uses actual DEMO wounded foe stats only.
+   // An unknown or negative HP row is not proof that a foe is dead.
+   // Never silently omit one and select an unsafe native target slot.
+   if(config.target==='wounded-threat'||config.target==='wounded-armor'){
+     if(enemies.some(e=>e&&(!Number.isFinite(e.hp)||e.hp<0))||
+        live.some(e=>e.hp>e.maxHp))return null;
+     const wounded=live.filter(e=>e.hp/e.maxHp<=0.5);
+     // When all foes are healthy, continue using the source-aware baseline
+     // instead of halting player Auto or inventing a substitute formation.
+     if(!wounded.length)return baseTarget(enemies);
+     wounded.sort((a,b)=>config.target==='wounded-threat'?
+       b.atk-a.atk||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot:
+       a.def-b.def||a.hp/a.maxHp-b.hp/b.maxHp||a.slot-b.slot);
+     return wounded[0]||null;
+   }
    const eligible=live.slice();
    eligible.sort((a,b)=>{
      // Both high-HP options are opt-in: absolute HP favors large remaining
@@ -322,7 +337,7 @@
  onLabel.append(toggle,document.createTextNode(' Enable advanced rules (Smart Auto must also be enabled)'));
  settings.append(onLabel);
  const heal=option('Heal-all BB threshold','bf10500-heal',[[35,'35%'],[50,'50%'],[60,'60% (existing)'],[75,'75%']]);
- const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-hp','Highest remaining HP'],['highest-hp-percent','Highest HP percentage'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['elemental','Most allied elemental advantages (known types)'],['selected','Keep the selected enemy (while alive)']]);
+ const target=option('Enemy target','bf10500-target',[['percent','Lowest HP percentage (existing)'],['absolute','Lowest remaining HP'],['highest-hp','Highest remaining HP'],['highest-hp-percent','Highest HP percentage'],['highest-atk','Highest enemy ATK'],['lowest-def','Lowest enemy DEF'],['wounded-threat','Finish wounded high-ATK threat (<=50% HP)'],['wounded-armor','Finish wounded low-DEF foe (<=50% HP)'],['elemental','Most allied elemental advantages (known types)'],['selected','Keep the selected enemy (while alive)']]);
  const burst=option('Offensive BB','bf10500-burst',[['normal','Use as normal'],['conserve','Conserve offensive BB gauge'],['final-wave','Save offensive BB until final recorded quest wave']]);
  const guard=option('Low HP Auto defense','bf10500-guard',[[0,'Off (original default)'],[20,'Guard at or below 20% HP'],[35,'Guard at or below 35% HP'],[50,'Guard at or below 50% HP']]);
  const healFirstLabel=document.createElement('label');
@@ -336,7 +351,8 @@
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
    'Element targeting favors verified weaknesses, then fewer elemental resistances when all types are known; '+
-   'unknown weaknesses revert to the existing HP% strategy. Selected-target Auto '+ 
+   'unknown weaknesses revert to the existing HP% strategy. Wounded tactics use real DEMO foe stats, '+ 
+   'reject unknown HP/ATK/DEF, and fall back to normal targeting when no foe is wounded. Selected-target Auto '+ 
    'requires a live legal player target; if it vanishes, Auto turns OFF instead of choosing another foe. Optional Guard applies '+
    'only to active player Auto turns. Optional heal-before-Guard is off by default and requires a verified heal-all skill, full BB gauge and known unblocked status. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
