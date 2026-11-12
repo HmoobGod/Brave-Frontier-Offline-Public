@@ -40,6 +40,67 @@ with sync_playwright() as pw:
  assert not page.locator('#bf2100-execute').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
+ assert page.locator('#bf2100-clear').is_visible()
+ # This minimal Chromium fixture excludes the actual item reservation owner;
+ # absence MUST fail closed rather than assume there are no paid item turns.
+ assert page.locator('#bf2100-clear').is_disabled()
+ # Provide a strictly scoped empty reservation snapshot. Real packaged APK
+ # uses the native v4500 owner; no emulator item state is invented here.
+ manual_clear=page.evaluate("""()=>{
+   const old=window.BFGlobalItemTurnReservationsV4500;
+   window.BFGlobalItemTurnReservationsV4500={
+     snapshot:()=>({reservations:[]})};
+   try{
+     const api=BFGlobalBattleCommandsV2100;
+     api.refresh();
+     const enabled=!document.getElementById('bf2100-clear').disabled;
+     const before={target:S.target,round:S.round,wave:S.wave,
+       player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')};
+     const success=api.clearQueuedActions();
+     return {enabled,success,queued:api.snapshot().queued,
+       targetSame:S.target===before.target,roundSame:S.round===before.round,
+       waveSame:S.wave===before.wave,playerSame:JSON.stringify(P)===before.player,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before.save,
+       idle:!S.busy,empty:S.party.every(p=>p.action==null)};
+   }finally{
+     window.BFGlobalItemTurnReservationsV4500=old;
+     BFGlobalBattleCommandsV2100.refresh();
+   }
+ }""")
+ assert manual_clear=={'enabled':True,'success':True,'queued':0,
+   'targetSame':True,'roundSame':True,'waveSame':True,
+   'playerSame':True,'saveSame':True,'idle':True,'empty':True},manual_clear
+ assert page.locator('#bf2100-clear').is_disabled()
+ assert page.evaluate('BFGlobalBattleCommandsV2100.clearQueuedActions()') is False
+ # Restore ordinary Guard queue for subsequent pre-existing native tests.
+ assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
+ # Cancel must refuse item reservations and bad actor identities while
+ # leaving every player order intact, even when the provider throws.
+ clear_refusal=page.evaluate("""()=>{
+   const api=BFGlobalBattleCommandsV2100;
+   const party=S.party,before=party.map(p=>p.action),oldTarget=S.target,
+     beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     original=window.BFGlobalItemTurnReservationsV4500;
+   const unchanged=()=>party.every((p,i)=>p.action===before[i]);
+   let reservations,throws,swapped;
+   try{
+     window.BFGlobalItemTurnReservationsV4500={
+       snapshot:()=>({reservations:[{slot:0}]})};
+     reservations=api.clearQueuedActions()===false&&unchanged();
+     window.BFGlobalItemTurnReservationsV4500={
+       snapshot:()=>{throw Error('unavailable')}};
+     throws=api.clearQueuedActions()===false&&unchanged();
+     window.BFGlobalItemTurnReservationsV4500=original;
+     S.party=[party[1],party[0],...party.slice(2)];
+     swapped=api.clearQueuedActions()===false&&unchanged();
+     return {reservations,throws,swapped,
+       targetSame:S.target===oldTarget,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+       idle:!S.busy};
+   }finally{S.party=party;window.BFGlobalItemTurnReservationsV4500=original;}
+ }""")
+ assert clear_refusal=={'reservations':True,'throws':True,'swapped':True,
+   'targetSame':True,'saveSame':True,'idle':True},clear_refusal
  # A valid-but-swapped actor slot must not let native action buttons queue
  # attacks/guards/bursts for the wrong party member. This must fail before
  # selecting ANY actor, without altering queued orders or the v7 save.
