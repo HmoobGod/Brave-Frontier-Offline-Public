@@ -54,6 +54,20 @@ with sync_playwright() as pw:
  p.locator('#bf10400-filter').select_option('demo')
  p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('0 missing')")
  assert '0 missing' in p.locator('#bf10400-rows').inner_text()
+ # Search is read-only, case-insensitive, and matches next-form names/IDs.
+ # Baseline after deliberate fixture inventory/EXP updates; searching/sorting are read-only.
+ save_before_nav=p.evaluate('JSON.stringify(P)')
+ p.locator('#bf10400-search').fill('burning')
+ assert p.locator('#bf10400-rows').inner_text().count('Burning Vargas')==1
+ p.locator('#bf10400-search').fill('no such unit')
+ p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('No recorded evolution paths')")
+ assert p.locator('#bf10400-rows > div').count()==0
+ p.locator('#bf10400-search').fill('10012')
+ p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('Burning Vargas')")
+ p.locator('#bf10400-sort').select_option('missing')
+ p.locator('#bf10400-sort').select_option('name')
+ assert p.evaluate('JSON.stringify(P)')==save_before_nav
+ p.locator('#bf10400-search').fill('')
  p.locator('#bf10400-filter').select_option('missing')
  p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('No recorded evolution paths')")
  assert p.locator('#bf10400-rows > div').count()==0
