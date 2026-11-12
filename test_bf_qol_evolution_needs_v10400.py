@@ -55,6 +55,8 @@ with sync_playwright() as pw:
  p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('0 missing')")
  assert '0 missing' in p.locator('#bf10400-rows').inner_text()
  # Search is read-only, case-insensitive, and matches next-form names/IDs.
+ # Baseline after deliberate fixture inventory/EXP updates; searching/sorting are read-only.
+ save_before_nav=p.evaluate('JSON.stringify(P)')
  p.locator('#bf10400-search').fill('burning')
  assert p.locator('#bf10400-rows').inner_text().count('Burning Vargas')==1
  p.locator('#bf10400-search').fill('no such unit')
