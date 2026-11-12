@@ -14,6 +14,16 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'const eligible=new Map(strategies.map' in src
  assert 'JSON.stringify([s,[...eligible]])' in src
  assert 'strategy?!eligible.get(strategy):!s.target' in src
+ # The rebuilt APK, not just a checked-in source tree, must contain the
+ # opt-in manual action that really queues a target through native controls.
+ assert "['element-safe','FEWEST RESISTS']" in src
+ assert "if(kind==='element-safe'){" in src
+ assert 'if(types.some(type=>!type))return null;' in src
+ assert 'if(!targetType)return null;' in src
+ assert "else if(factor!==1)throw Error('unverified-element-matchup');" in src
+ assert 'ranked.sort((a,b)=>a.resisted-b.resisted||' in src
+ assert "a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);" in src
+ assert "return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp," in src
  assert 'localStorage' not in src and 'saveProgress(' not in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')
 g=(R/'app/build.gradle').read_text('utf8')
