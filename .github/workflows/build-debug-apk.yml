@@ -424,6 +424,8 @@ jobs:
           python test_bf_unit_box_quest_details.py
           python test_bf_quest_areas_unit_filters.py
           python test_bf_quest_path_evolution.py
+          node --check app/src/main/assets/bf39800_quest_section_jump.js
+          python test_bf_quest_section_jump_v39800.py
           python test_bf_global_english_quests.py
           python test_bf_cave_of_flames_expansion.py
           python test_bf_original_offline_bgm.py
