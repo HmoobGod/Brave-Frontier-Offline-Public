@@ -1,0 +1,38 @@
+name: Diagnose GitHub artifact upload (strict, isolated)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/ci-artifact-upload-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  artifact-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Prepare one deterministic local evidence file
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p source_audit_reports/ci-upload-probe
+          printf 'Brave Frontier upload probe\n' > source_audit_reports/ci-upload-probe/probe.txt
+          test -s source_audit_reports/ci-upload-probe/probe.txt
+          test "$(find source_audit_reports/ci-upload-probe -type f | wc -l)" -eq 1
+          sha256sum source_audit_reports/ci-upload-probe/probe.txt
+          du -ah source_audit_reports/ci-upload-probe
+      - name: Upload small isolated artifact (must fail on upload error)
+        uses: actions/upload-artifact@v4
+        with:
+          name: BraveFrontier-ci-artifact-upload-probe
+          path: source_audit_reports/ci-upload-probe/probe.txt
+          if-no-files-found: error
+          retention-days: 1
+      - name: Confirm upload did not silently skip
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'Small artifact upload action returned success; full Android CI remains mandatory.'
