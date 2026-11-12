@@ -55,7 +55,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("wounded-armor").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
- assert page.locator('#bf3100-options button').count()==11
+ assert page.locator('#bf3100-options button').count()==12
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
@@ -452,6 +452,36 @@ with sync_playwright() as pw:
  page.locator('#auto').check()
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp")') is False
  page.locator('#auto').uncheck()
+ # New one-click action is explicitly player initiated and never overwrites
+ # an already-queued native manual order.
+ one_turn_guard=page.evaluate("""()=>{
+   const api=BFGlobalBattleFocusV3100;
+   const before={target:S.target,orders:S.party.map(p=>JSON.stringify(p.action)),
+     player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+     round:S.round};
+   const rejected=api.runFocusedTurn('lowest-hp')===false;
+   return {rejected,unchangedTarget:S.target===before.target,
+     unchangedOrders:before.orders.every((v,i)=>v===JSON.stringify(S.party[i].action)),
+     unchangedPlayer:JSON.stringify(P)===before.player,
+     unchangedSave:localStorage.getItem('bf_global_offline_demo_v7')===before.save,
+     unchangedRound:S.round===before.round};
+ }""")
+ assert one_turn_guard=={'rejected':True,'unchangedTarget':True,
+   'unchangedOrders':True,'unchangedPlayer':True,'unchangedSave':True,
+   'unchangedRound':True},one_turn_guard
+ # Clear only transient manual orders inside this isolated browser fixture.
+ page.evaluate("()=>{S.party.forEach(p=>p.action=null);update();BFGlobalBattleFocusV3100.refresh()}")
+ assert page.evaluate('BFGlobalBattleFocusV3100.runFocusedTurn("invalid")') is False
+ assert page.evaluate('BFGlobalBattleFocusV3100.runFocusedTurn("lowest-hp","item")') is False
+ assert not page.locator('#bf3100-run-turn').is_disabled()
+ page.evaluate("""()=>{window.__focusExecuteClicks=0;
+   document.getElementById('execute').addEventListener('click',
+     ()=>window.__focusExecuteClicks++)}""")
+ page.locator('#bf3100-run-turn').click()
+ assert page.evaluate('window.__focusExecuteClicks')==1
+ assert page.evaluate('S.auto') is False
+ assert page.evaluate('P.version')==7
+ page.wait_for_function('S.busy===false',timeout=30000)
  page.evaluate('finish(false)')
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
