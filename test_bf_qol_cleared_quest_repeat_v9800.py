@@ -665,6 +665,10 @@ with sync_playwright() as pw:
   assert p.evaluate('window.__repeatCount')==previous_replays,signal
  # Finish Current lets the player stop future replays without cancelling
  # the current native Auto battle. A committed victory is still required.
+ # Mirror native checkbox->S.auto updates BEFORE the Finish Current suite;
+ # the older synthetic fixture did not attach that change handler until later.
+ p.evaluate("""()=>{const a=document.getElementById('auto');
+   a.addEventListener('change',()=>{S.auto=a.checked;});}""")
  p.evaluate("""()=>{QUEST.missionId=1;S.busy=false;S.over=true;
    S.phase='Victory';S.auto=false;
    document.getElementById('auto').checked=false;}""")
@@ -702,9 +706,8 @@ with sync_playwright() as pw:
  p.evaluate('window.__stored98=true')
  # Stop Repeating belongs to the player even while a battle action is
  # running. The ongoing round may complete, but an Auto setting owned by
- # the repeat session must not keep driving later rounds.
- p.evaluate("""()=>{const a=document.getElementById('auto');
-   a.addEventListener('change',()=>{S.auto=a.checked;});}""")
+ # the repeat session must not keep driving later rounds. Reuse the already
+ # attached single native Auto fixture handler, not a second listener.
  p.locator('#bf9800-auto-repeat > summary').click()
  for initial_auto in (False,True):
   p.evaluate("""before=>{
