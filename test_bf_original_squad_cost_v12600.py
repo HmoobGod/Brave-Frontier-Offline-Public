@@ -40,6 +40,11 @@ with sync_playwright() as playwright:
  HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
  HTMLMediaElement.prototype.play=()=>Promise.resolve()}""")
  page.set_content(html,wait_until='load',timeout=90000)
+ # v392: load the existing Home before the source-cost module, mirroring
+ # Android's established optional injection order without touching the loader.
+ page.add_style_tag(path=str(A/'bf_home_nav.css'))
+ page.add_script_tag(path=str(A/'bf_home_nav.js'))
+ assert page.evaluate('BF_homeNav.current')=='home'
  assert page.evaluate('P.version')==7
  assert page.evaluate("typeof effectiveUnit")=='function'
  page.evaluate("""rows=>{
@@ -53,6 +58,9 @@ with sync_playwright() as playwright:
  assert observed[3] is None
  assert page.locator('#bf12600-original-squad-cost').count()==1
  assert page.locator('#bf12600-original-squad-cost summary').count()==1
+ assert page.locator('#bf12600-home-squad-cost').count()==1
+ assert page.locator('#bf12600-home-squad-cost').get_attribute('role')=='status'
+ assert page.locator('#bf12600-home-squad-cost').get_attribute('aria-live')=='polite'
  before=page.evaluate("""()=>({p:JSON.stringify(P),s:localStorage.getItem('bf_global_offline_demo_v7')})""")
  scenarios=page.evaluate("""()=>{
  const saved={roster:P.roster,squad:P.squad,evolutions:P.evolutions};
@@ -73,6 +81,38 @@ with sync_playwright() as playwright:
  assert scenarios['unknown']['complete'] is False and scenarios['unknown']['count']==1
  assert scenarios['unknown']['originalSquadCost']==2 and len(scenarios['unknown']['unsupported'])==1
  assert scenarios['unknown']['capacityKnown'] is False and scenarios['unknown']['originalCapacityLimit'] is None
+ # v392: real Home player-facing source reference must update on the existing
+ # refresh hook; do not infer or enforce the unrecovered summoner cap.
+ # Test memory mutations occur only in this synthetic browser profile.
+ home=page.evaluate("""()=>{
+   const el=document.getElementById('bf12600-home-squad-cost'),
+     old={squad:P.squad,roster:P.roster,evolutions:P.evolutions};
+   try{
+     P.roster=[10011,20011];P.squad=[10011,20011];P.evolutions={};
+     BFGlobalOriginalSquadCostV12600.refresh();
+     const known=el.textContent;
+     P.evolutions={10011:123456789};
+     BFGlobalOriginalSquadCostV12600.refresh();
+     const unknown=el.textContent;
+     P.squad=[];P.evolutions={};
+     BFGlobalOriginalSquadCostV12600.refresh();
+     const empty=el.textContent;
+     return {known,unknown,empty,home:BF_homeNav.current,
+       bounds:(()=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right}})()};
+   }finally{
+     P.squad=old.squad;P.roster=old.roster;P.evolutions=old.evolutions;
+     BFGlobalOriginalSquadCostV12600.refresh();
+   }
+ }""")
+ assert 'SQUAD COST · 4 (2 verified units) · capacity unknown' in home['known'],home
+ assert 'SOURCE INCOMPLETE' in home['unknown'] and '1 unverified' in home['unknown'],home
+ assert 'NO OWNED UNITS SELECTED' in home['empty'],home
+ assert home['home']=='home' and 0<=home['bounds']['left']<home['bounds']['right']<=390,home
+ page.set_viewport_size({'width':320,'height':844})
+ bounds=page.locator('#bf12600-home-squad-cost').bounding_box()
+ assert bounds and bounds['x']>=-0.5 and bounds['x']+bounds['width']<=320.5,bounds
+ page.add_script_tag(content=code)
+ assert page.locator('#bf12600-home-squad-cost').count()==1
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert after==before,(before,after)
  assert not errors,errors

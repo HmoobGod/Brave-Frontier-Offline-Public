@@ -63,6 +63,21 @@
     'original summoner-level cost limit, roster restrictions and enforcement are '+
     'not reconstructed. No changes to battle, units, EXP, summons or saves.';
   panel.append(heading,list,note);host.after(panel);
+  // Home-first original-source cost preview beside the existing six-unit
+  // portrait grid. No new navigation, cap enforcement or persistent state.
+  // This is loaded by the existing v126 native optional module injection.
+  const homeParty=document.querySelector('#bf-home .bf-scene-squad #bf-scene-party');
+  const homeCost=homeParty?document.createElement('p'):null;
+  if(homeCost){
+    homeCost.id='bf12600-home-squad-cost';
+    homeCost.setAttribute('role','status');
+    homeCost.setAttribute('aria-live','polite');
+    homeCost.style.cssText='box-sizing:border-box;max-width:100%;min-width:0;'+
+      'margin:7px 0;padding:8px 10px;background:#22374a;'+
+      'border:1px solid #ab8e5c;color:#f4e6c6;'+
+      'font:700 11px/1.5 system-ui,sans-serif;overflow-wrap:anywhere';
+    homeParty.before(homeCost);
+  }
   function refresh(){
     const state=snapshot();
     heading.textContent='ORIGINAL 2022 SQUAD COST · '+
@@ -79,6 +94,15 @@
       entry.textContent='Slot '+row.slot+' · #'+row.unitId+' · cost unknown (excluded)';
       list.append(entry);
     }
+    if(homeCost){
+      homeCost.textContent=!state.complete?
+        'ORIGINAL 2022 SQUAD COST · SOURCE INCOMPLETE · '+
+          state.unsupported.length+' unverified unit(s) · capacity unknown':
+        state.count===0?
+          'ORIGINAL 2022 SQUAD COST · NO OWNED UNITS SELECTED · capacity unknown':
+          'ORIGINAL 2022 SQUAD COST · '+state.originalSquadCost+
+          ' ('+state.count+' verified units) · capacity unknown';
+    }
     return state;
   }
   // Read-only updates on squad/evolution interactions, no game render wrappers.
@@ -88,6 +112,7 @@
       setTimeout(refresh,0);
   });
   panel.addEventListener('toggle',refresh);
+  window.addEventListener('bf-route-change',refresh);
   refresh();
   window.BFGlobalOriginalSquadCostV12600=freeze({provenance,lookup,snapshot,refresh});
 })();
