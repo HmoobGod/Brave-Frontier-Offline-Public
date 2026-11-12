@@ -93,6 +93,27 @@
    slots=next;message='Deleted preset '+(index+1)+'; active squad unchanged.';
    refresh();return true;
  }
+ // Local-only organization: rename without replacing units or applying a squad.
+ function renamePreset(index,name){
+   if(!Number.isInteger(index)||index<0||index>=max||!slots[index]||
+      S.busy||typeof name!=='string'||!name.trim())return false;
+   const next=slots.slice();
+   next[index]={name:normalizeName(name,index),squad:slots[index].squad.slice()};
+   if(!store(next)){message='Could not rename preset; unchanged.';refresh();return false;}
+   slots=next;message='Renamed preset '+(index+1)+' without changing squad.';
+   refresh();return true;
+ }
+ // Duplicate only into the first empty slot. Never overwrite another preset.
+ function duplicatePreset(index){
+   if(!Number.isInteger(index)||index<0||index>=max||!slots[index]||S.busy)return false;
+   const target=slots.findIndex(slot=>slot===null);
+   if(target<0){message='All five preset slots are occupied.';refresh();return false;}
+   const next=slots.slice(),source=slots[index];
+   next[target]={name:normalizeName(source.name+' Copy',target),squad:source.squad.slice()};
+   if(!store(next)){message='Could not duplicate preset; unchanged.';refresh();return false;}
+   slots=next;message='Copied preset '+(index+1)+' to empty preset '+(target+1)+'.';
+   refresh();return true;
+ }
  function applyPreset(index){
    if(!Number.isInteger(index)||index<0||index>=max||S.busy||
       typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
@@ -163,6 +184,8 @@
  const saveButton=mk('bf10000-save','SAVE CURRENT',()=>savePreset(Number(selected.value),name.value));
  const equipButton=mk('bf10000-apply','APPLY PRESET',()=>applyPreset(Number(selected.value)));
  const removeButton=mk('bf10000-delete','DELETE PRESET',()=>deletePreset(Number(selected.value)));
+ const renameButton=mk('bf10000-rename','RENAME PRESET',()=>renamePreset(Number(selected.value),name.value));
+ const copyButton=mk('bf10000-copy','COPY TO EMPTY',()=>duplicatePreset(Number(selected.value)));
  const status=document.createElement('p');status.id='bf10000-status';status.setAttribute('role','status');
  const preview=document.createElement('p');preview.id='bf10000-preview';
  preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
@@ -178,6 +201,8 @@
      (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
      !victoryReceiptCommitted()||!slot||!goodIds(slot.squad,true);
    removeButton.disabled=unavailable||!slot;
+   renameButton.disabled=unavailable||!slot;
+   copyButton.disabled=unavailable||!slot||!slots.some(s=>s===null);
    selected.querySelectorAll('option').forEach((o,i)=>{
      o.textContent='Preset '+(i+1)+(slots[i]?' · '+slots[i].name:' · Empty');
    });
@@ -209,6 +234,6 @@
  setInterval(()=>{if(!document.hidden&&panel.open)refresh()},1400);
  refresh();
  window.BFGlobalQoLSquadPresetsV10000=freeze({
-   key,info,savePreset,applyPreset,deletePreset,refresh
+   key,info,savePreset,applyPreset,deletePreset,renamePreset,duplicatePreset,refresh
  });
 })();
