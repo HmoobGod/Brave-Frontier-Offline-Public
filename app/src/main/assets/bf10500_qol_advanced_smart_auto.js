@@ -157,17 +157,44 @@
        !Number.isSafeInteger(e.slot)||e.slot<0)||
        new Set(live.map(e=>e.slot)).size!==live.length)
      return null; // Ambiguous target roster: fail closed, never guess slots.
-   const types=liveParty().filter(u=>u&&u.active&&Number.isFinite(u.hp)&&u.hp>0)
-     .map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element)).filter(Boolean);
+   const allies=liveParty().filter(u=>u&&u.active&&
+     Number.isFinite(u.hp)&&u.hp>0);
+   const types=allies.map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element))
+     .filter(Boolean);
    if(!types.length)return undefined;
+   // Source-listed six-element circle (bf6900), applied to
+   // the player's opt-in DEMO target selection. Do not infer a 2022 enemy
+   // formation, element or AI from an unknown opponent.
+   const allAlliesTyped=types.length===allies.length;
    const ranked=live.map(foe=>{
      const kind=element.normalize(foe.element);
-     const count=kind?types.filter(a=>element.multiplier(a,kind)===1.5).length:0;
-     return {foe,count};
-   }).filter(row=>row.count>0);
-   ranked.sort((a,b)=>b.count-a.count||
+     if(!kind)return {foe,known:false,count:0,resisted:0};
+     let count=0,resisted=0;
+     for(const type of types){
+       const factor=element.multiplier(type,kind);
+       if(factor===1.5)count++;
+       else if(factor===0.5)resisted++;
+       else if(factor!==1)throw Error('unverified-element-matchup');
+     }
+     return {foe,known:true,count,resisted};
+   });
+   // Keep favoring confirmed weaknesses first, but avoid a heavily
+   // resisted foe when equal numbers of allies have an advantage.
+   const advantages=ranked.filter(row=>row.count>0);
+   if(advantages.length){
+     advantages.sort((a,b)=>b.count-a.count||
+       a.resisted-b.resisted||
+       a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
+       a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);
+     return advantages[0].foe;
+   }
+   // When no advantage exists, prefer the enemy resisting fewer living
+   // allied elements. Require complete known types on BOTH sides, or keep
+   // the original percentage-HP target unchanged.
+   if(!allAlliesTyped||ranked.some(row=>!row.known))return undefined;
+   ranked.sort((a,b)=>a.resisted-b.resisted||
      a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
-     a.foe.slot-b.foe.slot);
+     a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);
    return ranked[0]?.foe||undefined;
    }catch(_){return null;}
  }
@@ -265,7 +292,7 @@
  const status=document.createElement('p');status.id='bf10500-status';
  const caution=document.createElement('small');
  caution.textContent='Only applies when both optional Smart Auto and Advanced Auto are on. '+
-   'Element targeting uses known original unit types and visible, identified enemy types; '+
+   'Element targeting favors verified weaknesses, then fewer elemental resistances when all types are known; '+
    'unknown weaknesses revert to the existing HP% strategy. Selected-target Auto '+ 
    'requires a live legal player target; if it vanishes, Auto turns OFF instead of choosing another foe. Optional Guard applies '+
    'only to active player Auto turns. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
