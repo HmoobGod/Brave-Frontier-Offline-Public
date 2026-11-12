@@ -94,7 +94,19 @@
  training.id='bf10400-training-shortcut';
  training.textContent='OPEN DEMO TRAINING';
  training.style.cssText='min-height:44px;background:#314f69;color:#fff;border:1px solid #bca277;border-radius:5px;padding:8px';
- controls.append(label,training);
+ const search=document.createElement('input');search.type='search';
+ search.id='bf10400-search';search.setAttribute('aria-label','Find owned evolution by unit name or ID');
+ search.placeholder='Find owned unit or next form';
+ search.style.cssText='min-height:44px;max-width:100%;padding:8px;background:#314f69;color:white;border:1px solid #bca277;border-radius:5px';
+ const sortLabel=document.createElement('label');sortLabel.textContent='Sort: ';
+ const sort=document.createElement('select');sort.id='bf10400-sort';
+ sort.setAttribute('aria-label','Sort owned evolution paths');
+ sort.style.cssText=filter.style.cssText;
+ for(const [value,name] of [['roster','Owned roster order'],['missing','Fewest missing materials first'],['name','Next form A to Z']]){
+   const option=document.createElement('option');option.value=value;option.textContent=name;sort.append(option);
+ }
+ sortLabel.append(sort);
+ controls.append(label,search,sortLabel,training);
  const results=document.createElement('div');results.id='bf10400-rows';
  const note=document.createElement('small');
  note.textContent='Reference only: exact recovered 2022 recipe entries compared with DEMO '+
@@ -107,13 +119,22 @@
  let previous='';
  function refresh(){
    const s=snapshot();
-   const signature=JSON.stringify({open:panel.open,filter:filter.value,paths:s.paths});
+   const signature=JSON.stringify({open:panel.open,filter:filter.value,
+     search:search.value,sort:sort.value,paths:s.paths});
    if(signature===previous)return s;
    previous=signature;
-   const visible=s.paths.filter(row=>filter.value==='all'||
+   const query=search.value.trim().toLocaleLowerCase();
+   const visible=s.paths.filter(row=>(filter.value==='all'||
      (filter.value==='demo'&&row.demoCostsReady)||
      (filter.value==='materials'&&row.missingCount===0)||
-     (filter.value==='missing'&&row.missingCount>0));
+     (filter.value==='missing'&&row.missingCount>0))&&
+     (!query||[row.fromName,row.toName,String(row.baseId),String(row.to)]
+       .some(value=>value.toLocaleLowerCase().includes(query))));
+   // Sort a temporary array only: never mutate the owned roster or recipe order.
+   if(sort.value==='missing')visible.sort((a,b)=>a.missingCount-b.missingCount||
+     a.to-b.to);
+   else if(sort.value==='name')visible.sort((a,b)=>
+     a.toName.localeCompare(b.toName)||a.to-b.to);
    status.textContent=s.recordedPaths+' source-listed next-form recipes · '+
      s.readyMaterialPaths+' with all archived materials · '+
      s.demoCostsReadyPaths+' appear DEMO level/cost ready · '+visible.length+' shown';
@@ -147,6 +168,8 @@
  }
  panel.addEventListener('toggle',()=>{previous='';refresh()});
  filter.addEventListener('change',()=>{previous='';refresh()});
+ search.addEventListener('input',()=>{previous='';refresh()});
+ sort.addEventListener('change',()=>{previous='';refresh()});
  training.addEventListener('click',()=>{
    try{
      if(window.BF_homeNav?.go?.('units')===false)return;
