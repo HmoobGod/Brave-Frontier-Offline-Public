@@ -38,7 +38,8 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert "'bf10500-heal-before-guard'" in data
  assert "healFirst.addEventListener('change'" in data
  assert 'guardAllowed=active()&&config.guard>0&&' in data
- assert 'if(guardAllowed)return \'guard\';' in data
+ assert 'if(guardAllowed){' in data
+ assert "return 'guard';\n   }\n   // Unknown Curse status" in data
  assert "if(window.BFGlobalCurseBBLockV5900?.cursed(unit.id))return 'attack';" in data
  assert "}catch(_){return 'attack';}" in data
  assert '!Number.isSafeInteger(S.totalWaves)||S.totalWaves<1' in data
