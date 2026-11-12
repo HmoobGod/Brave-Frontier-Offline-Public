@@ -154,6 +154,56 @@ with sync_playwright() as pw:
  assert blocks=={'curse':{'available':False,'success':False},
                  'item':{'available':False,'success':False},
                  'unchanged':True},blocks
+ # Live OPTIONAL Curse/Paralysis/source/reservation providers may throw or
+ # report unknown statuses. A manual HEAL request must fail closed before
+ # clicking any owned squad action button or changing canonical v7 state.
+ provider_failures=page.evaluate("""()=>{const originalCurse=window.BFGlobalCurseBBLockV5900,
+   originalParalysis=window.BFGlobalParalysisActionLockV6000,
+   originalSupport=window.originalSupport,
+   originalReservation=window.BFGlobalItemTurnReservationsV4500,
+   beforeOrders=S.party.map(p=>JSON.stringify(p.action)),
+   beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+   beforePlayer=JSON.stringify(P),beforeTarget=S.target,
+   boom=()=>{throw Error('provider offline')},statuses=[];
+   function check(){
+     let usable,queued,threw=false;
+     try{usable=BFGlobalBattleCommandsV2100.healingAvailable(0.75);
+       queued=BFGlobalBattleCommandsV2100.queueAll('heal',0.75);}
+     catch(_){threw=true}
+     statuses.push({usable,queued,threw});
+   }
+   try{
+     window.BFGlobalCurseBBLockV5900={cursed:boom};check();
+     window.BFGlobalCurseBBLockV5900={cursed:()=>undefined};check();
+     window.BFGlobalCurseBBLockV5900=originalCurse;
+     window.BFGlobalParalysisActionLockV6000={paralyzed:boom};check();
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>undefined};check();
+     window.BFGlobalParalysisActionLockV6000=originalParalysis;
+     // bfOriginalBB is a global lexical source binding, not a reliably
+     // writable window property. Reject a real UNKNOWN original unit ID
+     // rather than pretending window.bfOriginalBB overrides that source.
+     const originalUnitId=S.party[0].unitId;
+     try{S.party[0].unitId=999999;check();}
+     finally{S.party[0].unitId=originalUnitId;}
+     window.originalSupport=boom;check();
+     window.originalSupport=originalSupport;
+     window.BFGlobalItemTurnReservationsV4500={snapshot:boom};check();
+     return {statuses,ordersSame:beforeOrders.every((a,i)=>
+         a===JSON.stringify(S.party[i].action)),
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+       playerSame:JSON.stringify(P)===beforePlayer,
+       targetSame:S.target===beforeTarget,noTurn:!S.busy};
+   }finally{
+     window.BFGlobalCurseBBLockV5900=originalCurse;
+     window.BFGlobalParalysisActionLockV6000=originalParalysis;
+     window.originalSupport=originalSupport;
+     window.BFGlobalItemTurnReservationsV4500=originalReservation;
+   }
+ }""")
+ assert provider_failures=={
+   'statuses':[{'usable':False,'queued':False,'threw':False}]*7,
+   'ordersSame':True,'saveSame':True,'playerSame':True,
+   'targetSame':True,'noTurn':True},provider_failures
  # A broken living foe or duplicate player actor must reject the entire
  # healing shortcut before selecting an actor or queueing even one action.
  bad_heal=page.evaluate("""()=>{const foes=S.enemies,party=S.party;
@@ -171,6 +221,50 @@ with sync_playwright() as pw:
  }""")
  assert bad_heal=={'invalidFoe':True,'duplicateActor':True,
                    'targetUnchanged':True,'ordersUnchanged':True},bad_heal
+ # Three manual healing choices use the SAME source-verified party
+ # healer with native click-only orders; no auto execution, rewards or save.
+ heal_levels=page.evaluate("""()=>{
+   const patient=S.party[1],originalHp=patient.hp,
+     oldTarget=S.target,originalSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     originalPlayer=JSON.stringify(P),
+     before=S.party.map(p=>JSON.stringify(p.action));
+   try{
+     patient.hp=Math.floor(patient.maxHp*0.65);
+     BFGlobalBattleCommandsV2100.refresh();
+     const critical=BFGlobalBattleCommandsV2100.healingAvailable(0.35),
+       normal=BFGlobalBattleCommandsV2100.healingAvailable(),
+       early=BFGlobalBattleCommandsV2100.healingAvailable(0.75);
+     const buttons={
+       critical:document.getElementById('bf2100-heal-critical').disabled,
+       normal:document.getElementById('bf2100-heal-bb').disabled,
+       early:document.getElementById('bf2100-heal-early').disabled
+     };
+     const invalid=[0.351,0.85,-1,'0.75',NaN,undefined===null].every(t=>
+       BFGlobalBattleCommandsV2100.queueAll('heal',t)===false);
+     const refusedNormal=BFGlobalBattleCommandsV2100.queueAll('heal')===false;
+     const unchanged=before.every((a,i)=>a===JSON.stringify(S.party[i].action));
+     const earlyQueued=BFGlobalBattleCommandsV2100.queueAll('heal',0.75);
+     const earlyOrders=S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action.kind);
+     patient.hp=Math.floor(patient.maxHp*0.20);
+     BFGlobalBattleCommandsV2100.refresh();
+     const emergencyAvailable=BFGlobalBattleCommandsV2100.healingAvailable(0.35),
+       emergencyQueued=BFGlobalBattleCommandsV2100.queueAll('heal',0.35);
+     const emergencyOrders=S.party.filter(p=>p.active&&p.hp>0).map(p=>p.action.kind);
+     return {critical,normal,early,buttons,invalid,refusedNormal,unchanged,
+       earlyQueued,earlyOrders,emergencyAvailable,emergencyQueued,emergencyOrders,
+       targetSame:S.target===oldTarget,playerSame:JSON.stringify(P)===originalPlayer,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===originalSave,
+       noExecution:!S.busy};
+   }finally{patient.hp=originalHp;BFGlobalBattleCommandsV2100.refresh()}
+ }""")
+ assert heal_levels=={
+   'critical':False,'normal':False,'early':True,
+   'buttons':{'critical':True,'normal':True,'early':False},
+   'invalid':True,'refusedNormal':True,'unchanged':True,
+   'earlyQueued':True,'earlyOrders':['burst']+['attack']*5,
+   'emergencyAvailable':True,'emergencyQueued':True,
+   'emergencyOrders':['burst']+['attack']*5,
+   'targetSame':True,'playerSame':True,'saveSame':True,'noExecution':True},heal_levels
  # Restore the exact owned source identity and ally health for other tactics.
  page.evaluate("""id=>{S.party[0].unitId=id;
    S.party.forEach(p=>{if(p.active&&p.hp>0){p.hp=p.maxHp;p.bb=0;}});
