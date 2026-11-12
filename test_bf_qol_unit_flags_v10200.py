@@ -8,6 +8,14 @@ assert js.count('BF_GLOBAL_QOL_UNIT_FLAGS_V10200')==1
 assert len(js.encode())<65536
 assert 'saveProgress(' not in js and 'P.roster=' not in js and 'bf_global_offline_demo_v7' not in js
 assert 'advisoryOnly:true' in js
+# The standard Android workflow explicitly runs THIS Chromium script.
+# Execute the standalone three source-guard cases here as well, so
+# they cannot silently remain outside CI's collected test commands.
+import unittest
+from test_bf_unit_box_filter_v10201 import UnitBoxFilterSourceTests
+source_suite=unittest.defaultTestLoader.loadTestsFromTestCase(UnitBoxFilterSourceTests)
+assert source_suite.countTestCases()==3
+assert unittest.TextTestRunner(verbosity=1).run(source_suite).wasSuccessful()
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
@@ -45,6 +53,30 @@ with sync_playwright() as pw:
  p.wait_for_function("BFGlobalQoLUnitFlagsV10200.state().id===20011")
  assert p.evaluate(api+'.change(20011,"favorites",true)') is True
  assert p.evaluate(api+'.favorites')==[10011,20011]
+ # Browser-backed filter checks exercise real owned cards and clicks,
+ # not only source strings. They must be reversible and must not mutate v7.
+ assert p.evaluate(api+'.change(20011,"favorites",false)') is True
+ p.locator('#bf10200-show-favorites').click()
+ assert p.evaluate(api+'.filter')=='favorites'
+ assert p.locator('[data-bf-unit-id="10011"]').is_visible()
+ assert p.locator('[data-bf-unit-id="20011"]').is_hidden()
+ assert p.locator('#bf10200-show-favorites').get_attribute('aria-pressed')=='true'
+ assert p.locator('#bf10200-filter-info').inner_text().startswith('1 of 2')
+ assert p.evaluate(api+'.setFilter("not-a-filter")') is False
+ assert p.evaluate(api+'.filter')=='favorites'
+ p.locator('#bf10200-show-locks').click()
+ assert p.evaluate(api+'.filter')=='locked'
+ assert p.locator('[data-bf-unit-id="10011"]').is_visible()
+ assert p.locator('[data-bf-unit-id="20011"]').is_hidden()
+ assert p.locator('#bf10200-show-favorites').get_attribute('aria-pressed')=='false'
+ assert p.locator('#bf10200-show-locks').get_attribute('aria-pressed')=='true'
+ p.locator('#bf10200-show-locks').click()
+ assert p.evaluate(api+'.filter')=='all'
+ assert p.locator('[data-bf-unit-id="10011"]').is_visible()
+ assert p.locator('[data-bf-unit-id="20011"]').is_visible()
+ assert p.locator('#bf10200-filter-info').inner_text().startswith('2 of 2')
+ assert p.evaluate(api+'.change(20011,"favorites",true)') is True
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
  assert p.evaluate(api+'.change(999,"locked",true)') is False
  p.evaluate("P.roster=[20011]")
  assert p.evaluate(api+'.state().locks')==0
