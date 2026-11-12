@@ -773,6 +773,31 @@ with sync_playwright() as pw:
  assert p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_qol_advanced_auto_v105')).on") is None
  p.add_script_tag(path=str(A/'bf10500_qol_advanced_smart_auto.js'))
  assert p.locator('#bf10500-auto-settings').count()==1
+ # v396: on a 320px phone the real battle action bar gives this flex item
+ # 268px. The opened panel and every select must stay inside it instead of
+ # keeping the widest option's min-content width (previously 299px, clipped).
+ p.set_viewport_size({'width':320,'height':740})
+ fit=p.evaluate("""()=>{
+   const host=document.createElement('div');
+   host.style.cssText='display:flex;flex-wrap:wrap;box-sizing:border-box;width:268px';
+   const panel=document.getElementById('bf10500-auto-settings');
+   const home=panel.parentNode,next=panel.nextSibling;
+   document.body.append(host);host.append(panel);panel.open=true;
+   const h=host.getBoundingClientRect(),r=panel.getBoundingClientRect();
+   const selects=[...panel.querySelectorAll('select')].map(e=>{
+     const q=e.getBoundingClientRect();
+     return {id:e.id,inside:q.left>=r.left-.5&&q.right<=r.right+.5,height:q.height};
+   });
+   const result={panel:r.left>=h.left-.5&&r.right<=h.right+.5,
+     noScroll:host.scrollWidth<=host.clientWidth,selects,
+     options:panel.querySelectorAll('#bf10500-target option').length};
+   panel.open=false;home.insertBefore(panel,next);host.remove();
+   return result;
+ }""")
+ assert fit['panel'] and fit['noScroll'],fit
+ assert len(fit['selects'])==4 and all(x['inside'] and x['height']>=40 for x in fit['selects']),fit
+ assert fit['options']>=6,fit
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
  assert not errors,errors
  b.close()
 print('PASS v105 Smart Auto defaults, low-HP Guard, final-wave offensive BB, heal, elemental targeting and v7 isolation')

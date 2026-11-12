@@ -312,7 +312,10 @@
  window.BF041SmartAuto=freeze({...smart,kindFor});
  window.BF042AutoCoordination=freeze({...coordinated,chooseTarget});
  const panel=document.createElement('details');panel.id='bf10500-auto-settings';
- panel.style.cssText='padding:10px;margin:8px 2px;border:1px solid #87a68c;'+
+ // v396: as a flex item the panel kept its min-content width (widest
+ // select) and overflowed the 320px battle action bar once opened.
+ panel.style.cssText='box-sizing:border-box;min-width:0;max-width:calc(100% - 4px);'+
+   'padding:10px;margin:8px 2px;border:1px solid #87a68c;'+
    'border-radius:7px;background:#1d332b;color:#e8f6e9;font:12px/1.5 system-ui,sans-serif';
  const title=document.createElement('summary');title.textContent='QoL · ADVANCED SMART AUTO';
  title.style.cssText='cursor:pointer;font-weight:800;min-height:36px';
@@ -324,7 +327,10 @@
    const label=document.createElement('label');label.textContent=text;
    label.style.cssText='display:block;margin:7px 0';
    const select=document.createElement('select');select.id=id;
+   // v396: long option text must shrink/wrap inside the panel at 320px
+   // instead of being clipped by the Quest panel (presentation only).
    select.style.cssText='margin-left:7px;min-height:40px;padding:7px;'+
+     'box-sizing:border-box;max-width:calc(100% - 7px);min-width:0;'+
      'background:#324f43;border:1px solid #92b9a4;color:#fff';
    for(const [value,name] of entries){
      const opt=document.createElement('option');opt.value=String(value);
