@@ -170,8 +170,9 @@
        Number.isSafeInteger(q.battles)&&q.battles>0;
    }catch(_){return false;}
  }
- function canContinueAuto(q=remaining()){
+ function canContinueAuto(q){
    try{
+     if(q===undefined)q=remaining();
      const auto=document.getElementById('auto');
      const nav=window.BF_homeNav;
      if(!q||!S||S.busy||S.auto===true||awaitingSave()||
