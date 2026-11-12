@@ -483,6 +483,89 @@ with sync_playwright() as pw:
    'paralyzedFalse':'guard','cursedThrows':'attack','cursedGetterThrows':'attack','cursedTrue':'attack',
    'cursedFalse':'burst','cloneBaseline':'burst','recovered':'guard',
    'targetSame':True,'ordersSame':True,'playerSame':True,'saveSame':True},status_failures
+ # Opt-in source-backed PLAYER healing can take priority over optional
+ # low-HP Guard. No unverified healer, status or cloned actor may gain a BB.
+ assert p.locator('#bf10500-heal-before-guard').count()==1
+ assert p.evaluate(api+'.get().healBeforeGuard') is False
+ settings['healBeforeGuard']=True
+ assert p.evaluate("opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)",settings) is True
+ assert p.evaluate(api+'.get().healBeforeGuard') is True
+ assert p.locator('#bf10500-heal-before-guard').is_checked()
+ assert p.evaluate("""()=>JSON.parse(localStorage.getItem(
+   'bf_global_offline_qol_advanced_auto_v105')).healBeforeGuard""") is True
+ # Caller must be the ORIGINAL player-owned caster with a known heal-all BB.
+ healing_priority=p.evaluate("""()=>{
+   const healer=__party105[0],teammate=__party105[1],
+     originalHp=healer.hp,originalTeammateHp=teammate.hp,
+     originalBB=healer.bb, originalMode=S.mode, originalAuto=S.auto,
+     paralysis=window.BFGlobalParalysisActionLockV6000,
+     curse=window.BFGlobalCurseBBLockV5900,
+     sourceBB=window.bfOriginalBB,
+     support=window.originalSupport,
+     beforePlayer=JSON.stringify(P),
+     beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     beforeTarget=S.target,
+     beforeActions=__party105.map(p=>JSON.stringify(p.action));
+   let noStatus,approved,blockedCurse,blockedParalysis,unknownSkill,
+     unknownSupport,insufficientGauge,clone,duplicate,providerThrows;
+   try{
+     healer.hp=20;teammate.hp=15;healer.bb=100;
+     S.mode='archive';S.auto=true;
+     window.BFGlobalParalysisActionLockV6000=undefined;
+     window.BFGlobalCurseBBLockV5900=undefined;
+     noStatus=BF041SmartAuto.kindFor(healer);
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>false};
+     window.BFGlobalCurseBBLockV5900={cursed:()=>false};
+     approved=BF041SmartAuto.kindFor(healer);
+     window.BFGlobalCurseBBLockV5900={cursed:()=>true};
+     blockedCurse=BF041SmartAuto.kindFor(healer);
+     window.BFGlobalCurseBBLockV5900={cursed:()=>false};
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>true};
+     blockedParalysis=BF041SmartAuto.kindFor(healer);
+     window.BFGlobalParalysisActionLockV6000={paralyzed:()=>false};
+     window.bfOriginalBB=()=>null;
+     unknownSkill=BF041SmartAuto.kindFor(healer);
+     window.bfOriginalBB=sourceBB;
+     window.originalSupport=()=>null;
+     unknownSupport=BF041SmartAuto.kindFor(healer);
+     window.originalSupport=support;
+     healer.bb=99;
+     insufficientGauge=BF041SmartAuto.kindFor(healer);
+     healer.bb=100;
+     clone=BF041SmartAuto.kindFor({...healer});
+     const fourth=S.party[3];
+     try{S.party[3]=healer;duplicate=BF041SmartAuto.kindFor(healer)}
+     finally{S.party[3]=fourth;}
+     window.originalSupport=()=>{throw Error('source unavailable')};
+     providerThrows=BF041SmartAuto.kindFor(healer);
+   }finally{
+     healer.hp=originalHp;teammate.hp=originalTeammateHp;
+     healer.bb=originalBB;S.mode=originalMode;S.auto=originalAuto;
+     window.BFGlobalParalysisActionLockV6000=paralysis;
+     window.BFGlobalCurseBBLockV5900=curse;
+     window.bfOriginalBB=sourceBB;
+     window.originalSupport=support;
+   }
+   return {noStatus,approved,blockedCurse,blockedParalysis,unknownSkill,
+     unknownSupport,insufficientGauge,clone,duplicate,providerThrows,
+     playerSame:JSON.stringify(P)===beforePlayer,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===beforeSave,
+     targetSame:S.target===beforeTarget,
+     ordersSame:__party105.every((p,i)=>JSON.stringify(p.action)===beforeActions)};
+ }""")
+ assert healing_priority=={
+   'noStatus':'guard','approved':'burst','blockedCurse':'guard',
+   'blockedParalysis':'guard','unknownSkill':'guard',
+   'unknownSupport':'guard','insufficientGauge':'guard',
+   'clone':'burst','duplicate':'burst','providerThrows':'guard',
+   'playerSame':True,'saveSame':True,'targetSame':True,
+   'ordersSame':True},healing_priority
+ settings['healBeforeGuard']='yes'
+ assert p.evaluate("opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)",settings) is False
+ assert p.evaluate(api+'.get().healBeforeGuard') is True
+ settings['healBeforeGuard']=False
+ assert p.evaluate("opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)",settings) is True
+ assert p.evaluate(api+'.get().healBeforeGuard') is False
  # Duplicate references are not unique player actors even if the native
  # id slot still points to the same object. Do not grant optional Guard.
  duplicate=p.evaluate("""()=>{const originalSlot=S.party[3],actor=__party105[1];
