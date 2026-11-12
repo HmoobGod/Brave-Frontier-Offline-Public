@@ -23,9 +23,6 @@ body.bf-menu-mode .mast{display:none}
 .bf-home-tile span{font:500 10px Arial,sans-serif;color:#c9d6e6;letter-spacing:0}
 .bf-home-tile:active,.bf-hero button:active{transform:translateY(2px)}
 .bf-home-notice{font-size:10px;line-height:1.5;color:#becbda;margin:13px 3px;padding:9px;background:#172639;border:1px solid #50657c}
-/* v388: The fixed bottom navigation width must include its horizontal padding.
-   Otherwise 100% width plus 12px padding can protrude on 320px devices. */
-.bf-navbar{box-sizing:border-box}
 .bf-navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:20;width:min(100%,540px);padding:5px 6px calc(5px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;background:linear-gradient(#485168,#182333 70%);border-top:2px solid #a58e63;box-shadow:0 -3px 13px #000b}
 .bf-navbar button{min-height:58px;padding:7px 2px 4px;display:flex;flex-direction:column;justify-content:center;gap:5px;align-items:center;font-weight:800;font-size:10px;color:#dce7f4;background:linear-gradient(#34485e,#18283b);border:1px solid #667d97;border-radius:5px;cursor:pointer}
 .bf-navbar button[aria-current="page"]{color:#ffe8ad;border-color:#e1b968;box-shadow:inset 0 0 0 1px #c59d5b;background:linear-gradient(#6a5d48,#2c3342)}
@@ -43,7 +40,7 @@ body.bf-menu-mode{background:#080f1c}
 body.bf-menu-mode .wrap{max-width:540px}
 .bf-shell-head{
   position:sticky;top:0;z-index:11;display:block;
-  aspect-ratio:644/206;box-sizing:border-box;margin:0 -8px 7px;
+  aspect-ratio:644/206;box-sizing:border-box;margin:0 -7px 7px;
   padding:0;border:0;box-shadow:0 3px 13px #000b;
   background:#101b2c url("content/header/header_ui3.png") center/100% 100% no-repeat;
   font-family:Arial,sans-serif;
