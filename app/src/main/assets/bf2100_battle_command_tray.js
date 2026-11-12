@@ -519,11 +519,11 @@
    // Optional reservation-provider failures also fail closed.
    try{
      const item=window.BFGlobalItemTurnReservationsV4500;
-     if(item){
-       if(typeof item.snapshot!=='function')return null;
-       const reservations=item.snapshot()?.reservations;
-       if(!Array.isArray(reservations)||reservations.length)return null;
-     }
+     // If the native reservation owner is absent, an apparent Guard could
+     // conceal an item turn. Never assume that paid reservations are empty.
+     if(!item||typeof item.snapshot!=='function')return null;
+     const reservations=item.snapshot()?.reservations;
+     if(!Array.isArray(reservations)||reservations.length)return null;
    }catch(_){return null;}
    const queued=squad.filter(p=>p.action!=null);
    if(!queued.length||queued.some(p=>!p.action||
