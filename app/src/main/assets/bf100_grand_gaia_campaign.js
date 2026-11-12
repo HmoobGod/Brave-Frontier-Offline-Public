@@ -71,6 +71,51 @@
  }
  section.append(header,hint,total,grid,footer);
  tabs.before(section);
+ // v403 HOME: a compact, collapsed read-only original story-region shortcut.
+ // No new quest unlock, reward, save or auto-battle behavior is introduced.
+ const homeTools=document.querySelector('#bf-home .bf-scene-tools');
+ const homeRegions=homeTools?document.createElement('details'):null;
+ const homeButtons=new Map();
+ let homeCaption=null;
+ if(homeRegions){
+   homeRegions.id='bf100-home-regions';
+   homeRegions.setAttribute('aria-label','Original Grand Gaia story regions');
+   homeRegions.style.cssText='box-sizing:border-box;max-width:100%;margin:8px 0;'+
+     'padding:8px;border:1px solid #b69a70;border-radius:6px;'+
+     'background:linear-gradient(#233549,#142339);color:#f8e3c2;font:12px Arial,sans-serif';
+   const title=document.createElement('summary');title.id='bf100-home-regions-title';
+   title.textContent='GRAND GAIA REGIONS · View progress';
+   title.style.cssText='min-height:44px;cursor:pointer;font-weight:800';
+   homeCaption=document.createElement('p');homeCaption.id='bf100-home-regions-note';
+   homeCaption.style.cssText='margin:4px 0 8px;font:11px/1.45 Arial,sans-serif';
+   const buttons=document.createElement('div');
+   buttons.style.cssText='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px';
+   for(const [i,region] of regions.entries()){
+     const button=document.createElement('button');
+     button.type='button';button.dataset.bfHomeRegion=region.key;
+     button.disabled=true;
+     button.style.cssText='min-width:0;min-height:48px;box-sizing:border-box;'+
+       'padding:7px 3px;border:1px solid #9c875f;border-radius:5px;'+
+       'color:#f7ebd7;background:#3b5066;font:800 10px/1.35 Arial,sans-serif;'+
+       'overflow-wrap:anywhere;cursor:pointer';
+     button.addEventListener('click',()=>{
+       // Never allow a stale enabled button to bypass changed source state.
+       const current=summary().regions.find(r=>r.key===region.key);
+       if(!current?.unlocked || sourceEconomyReadiness()===false ||
+          !waveReadiness(QUESTS[0]?.missionId))return;
+       const nav=window.BF_homeNav;
+       if(!nav || typeof nav.go!=='function'||nav.go('quest')!==true)return;
+       tabs.children[i]?.click(); // existing quest-region handler is authoritative
+     });
+     buttons.append(button);homeButtons.set(region.key,button);
+   }
+   homeRegions.append(title,homeCaption,buttons);
+   homeTools.after(homeRegions);
+   homeRegions.addEventListener('toggle',()=>{if(homeRegions.open)refresh()});
+   window.addEventListener('bf-route-change',event=>{
+     if(event?.detail?.route==='home')refresh();
+   });
+ }
  function summary(){
    const entries=regions.map(r=>{
      const quests=QUESTS.filter(q=>r.ids.includes(q.dungeonId));
@@ -172,6 +217,25 @@
  }
  function refresh(){
    const info=summary();
+   if(homeRegions){
+     const verified=!!waveReadiness(QUESTS[0]?.missionId)&&
+       sourceEconomyReadiness()!==false;
+     homeCaption.textContent=verified ?
+       'Source-verified mission totals; combat formations remain DEMO.' :
+       'Original quest source verification unavailable; region shortcuts disabled.';
+     homeRegions.querySelector('summary').textContent=
+       'GRAND GAIA REGIONS · '+(verified?info.cleared+'/'+info.total:'UNVERIFIED');
+     for(const region of info.regions){
+       const button=homeButtons.get(region.key);
+       if(!button)continue;
+       button.disabled=!verified||!region.unlocked;
+       button.textContent=region.name+' · '+region.cleared+'/'+region.total+
+         (!region.unlocked?' · LOCKED':'');
+       button.setAttribute('aria-label',region.name+', '+
+         region.cleared+' of '+region.total+' archived missions cleared'+
+         (!verified?', source unverified':!region.unlocked?', locked':', view Quest region'));
+     }
+   }
    total.textContent=info.cleared+' / '+info.total+' original missions cleared';
    // The pinned 2022 mission master authenticates counts, NOT enemy rosters.
    // Report coverage only when the complete live catalog still matches source.
