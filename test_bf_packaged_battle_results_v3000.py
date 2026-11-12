@@ -19,6 +19,16 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'localStorage.setItem(' not in src and 'localStorage.removeItem(' not in src
  assert src.count("document.getElementById('downloadsave')")==1
  assert 'bf3000-retry-save' in src and 'bf3000-backup' in src
+ # Defeat Auto retry is an explicit native player command: no new storage
+ # key, no invented auto engine, no automatic quest replay loop.
+ assert "'bf3000-retry-auto'" in src
+ assert 'function canRetryDefeatAuto(s=snapshot())' in src
+ assert 'function retryDefeatAuto()' in src
+ assert 'try{restarted=replayBattle()===true;}' in src
+ assert 'if(!auto.checked)auto.click();' in src
+ assert 'S.auto=false;' in src
+ assert 'row.verifiedWaveCount!==QUEST.battles' in src
+ assert 'repeat.statusSnapshot()?.active!==false' in src
  # Packaged recovery must immediately refresh the existing read-only story
  # shortcut without adding a second save path or alternative storage key.
  assert 'window.BFGrandGaiaContinueV101' in src
