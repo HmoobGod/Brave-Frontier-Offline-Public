@@ -55,9 +55,18 @@ with sync_playwright() as pw:
  p.evaluate('P.squad=[30011]')
  assert p.evaluate(api+'.savePreset(1,"Boss")') is True
  assert p.evaluate(api+'.info()[1].ids')==[30011]
+ p.evaluate("document.getElementById('bf10000-slot').value='0'")
+ p.evaluate(api+'.refresh()')
+ preview=p.locator('#bf10000-preview').text_content()
+ assert 'Add #10011, #20011' in preview,preview
+ assert 'Remove #30011' in preview,preview
+ assert p.evaluate('P.squad')==[30011]
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==base
  assert p.evaluate(api+'.applyPreset(0)') is True
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate('window.__resetCalls')==1
+ p.evaluate(api+'.refresh()')
+ assert 'Already active' in p.locator('#bf10000-preview').text_content()
  assert json.loads(p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')"))['squad']==[10011,20011]
  after=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
  # An adapter may say success without committing the selected squad.
