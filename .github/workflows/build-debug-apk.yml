@@ -372,6 +372,8 @@ jobs:
           python test_bf_morgan_original_v080.py
           python test_bf_v0131.py
           python test_bf_home_nav.py
+          node --check app/src/main/assets/bf39100_global_home_session_return.js
+          python test_bf_home_session_return_v39100.py
           python test_bf_android_back_home_v22500.py
           python test_bf_engine_webview_recovery_v22600.py
           python3 test_bf_offline_page_recovery_v22900.py
