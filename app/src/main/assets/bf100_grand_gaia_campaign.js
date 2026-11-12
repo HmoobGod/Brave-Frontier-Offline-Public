@@ -205,4 +205,7 @@
  refresh();
  window.BFGrandGaiaCampaignV100=Object.freeze({summary,refresh,nextPlayable,waveReadiness,sourceEconomyReadiness,
     get missionCount(){return 106},get dungeonCount(){return 23}});
+ // The Home navigation loads before this source-backed campaign module in
+ // Android. Refresh only its display after the verified provider is ready.
+ try { window.BFGlobalHome?.refreshStory?.(); } catch (_) {}
 })();
