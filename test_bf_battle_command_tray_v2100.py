@@ -41,23 +41,35 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="guard")')
  assert page.locator('#bf2100-clear').is_visible()
- assert not page.locator('#bf2100-clear').is_disabled()
- # The player can cancel unexecuted native orders without running a turn,
- # changing target, mutating the P v7 state, or writing the saved game.
+ # This minimal Chromium fixture excludes the actual item reservation owner;
+ # absence MUST fail closed rather than assume there are no paid item turns.
+ assert page.locator('#bf2100-clear').is_disabled()
+ # Provide a strictly scoped empty reservation snapshot. Real packaged APK
+ # uses the native v4500 owner; no emulator item state is invented here.
  manual_clear=page.evaluate("""()=>{
-   const api=BFGlobalBattleCommandsV2100;
-   const before={target:S.target,round:S.round,wave:S.wave,
-     player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')};
-   const success=api.clearQueuedActions();
-   return {success,queued:api.snapshot().queued,
-     targetSame:S.target===before.target,roundSame:S.round===before.round,
-     waveSame:S.wave===before.wave,playerSame:JSON.stringify(P)===before.player,
-     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before.save,
-     idle:!S.busy,empty:S.party.every(p=>p.action==null)};
+   const old=window.BFGlobalItemTurnReservationsV4500;
+   window.BFGlobalItemTurnReservationsV4500={
+     snapshot:()=>({reservations:[]})};
+   try{
+     const api=BFGlobalBattleCommandsV2100;
+     api.refresh();
+     const enabled=!document.getElementById('bf2100-clear').disabled;
+     const before={target:S.target,round:S.round,wave:S.wave,
+       player:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')};
+     const success=api.clearQueuedActions();
+     return {enabled,success,queued:api.snapshot().queued,
+       targetSame:S.target===before.target,roundSame:S.round===before.round,
+       waveSame:S.wave===before.wave,playerSame:JSON.stringify(P)===before.player,
+       saveSame:localStorage.getItem('bf_global_offline_demo_v7')===before.save,
+       idle:!S.busy,empty:S.party.every(p=>p.action==null)};
+   }finally{
+     window.BFGlobalItemTurnReservationsV4500=old;
+     BFGlobalBattleCommandsV2100.refresh();
+   }
  }""")
- assert manual_clear=={'success':True,'queued':0,'targetSame':True,
-   'roundSame':True,'waveSame':True,'playerSame':True,'saveSame':True,
-   'idle':True,'empty':True},manual_clear
+ assert manual_clear=={'enabled':True,'success':True,'queued':0,
+   'targetSame':True,'roundSame':True,'waveSame':True,
+   'playerSame':True,'saveSame':True,'idle':True,'empty':True},manual_clear
  assert page.locator('#bf2100-clear').is_disabled()
  assert page.evaluate('BFGlobalBattleCommandsV2100.clearQueuedActions()') is False
  # Restore ordinary Guard queue for subsequent pre-existing native tests.
