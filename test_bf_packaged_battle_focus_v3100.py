@@ -12,7 +12,14 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert len(src.encode('utf8'))<65536
  assert 'if(living.some(e=>!Number.isFinite(e[key])))return null' in src
  assert 'const eligible=new Map(strategies.map' in src
- assert 'JSON.stringify([s,[...eligible]])' in src
+ # One-turn eligibility depends on BOTH native queued player actions
+ # and foreground visibility; the previous signature was too narrow.
+ assert 'const occupied=Array.isArray(S.party)?S.party.map(p=>p?.action!=null):null;' in src
+ assert 'JSON.stringify([s,[...eligible],occupied,document.hidden])' in src
+ assert "if(b.id==='bf3100-run-turn'){" in src
+ assert "S.party.some(p=>p?.action!=null);" in src
+ assert "oneTurn.id='bf3100-run-turn';" in src
+ assert 'oneTurn.addEventListener(\'click\',()=>runFocusedTurn());' in src
  assert 'strategy?!eligible.get(strategy):!s.target' in src
  # The rebuilt APK, not just a checked-in source tree, must contain the
  # opt-in manual action that really queues a target through native controls.
