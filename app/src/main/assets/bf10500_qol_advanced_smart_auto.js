@@ -162,7 +162,7 @@
    const types=allies.map(u=>element.normalize(UNIT_BY_ID.get(u.unitId)?.element))
      .filter(Boolean);
    if(!types.length)return undefined;
-   // Original 2022 six-element advantage/resistance circle, applied to
+   // Source-listed six-element circle (bf6900), applied to
    // the player's opt-in DEMO target selection. Do not infer a 2022 enemy
    // formation, element or AI from an unknown opponent.
    const allAlliesTyped=types.length===allies.length;
@@ -185,7 +185,7 @@
      advantages.sort((a,b)=>b.count-a.count||
        a.resisted-b.resisted||
        a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
-       a.foe.slot-b.foe.slot);
+       a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);
      return advantages[0].foe;
    }
    // When no advantage exists, prefer the enemy resisting fewer living
@@ -194,7 +194,7 @@
    if(!allAlliesTyped||ranked.some(row=>!row.known))return undefined;
    ranked.sort((a,b)=>a.resisted-b.resisted||
      a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
-     a.foe.slot-b.foe.slot);
+     a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);
    return ranked[0]?.foe||undefined;
    }catch(_){return null;}
  }
