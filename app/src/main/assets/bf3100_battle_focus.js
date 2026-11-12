@@ -17,13 +17,14 @@
  const options=document.createElement('div');options.id='bf3100-options';
  const state=document.createElement('p');state.id='bf3100-status';
  const foot=document.createElement('small');
- foot.textContent='Targets use visible DEMO enemy stats. Element Weakness uses only source-known elements and requires a proven ally advantage. Queuing replaces earlier squad orders; Execute is manual. This is optional and not recovered original AI.';
+ foot.textContent='Targets use visible DEMO enemy stats. Element Weakness requires a known advantage; Fewest Resists uses source-listed elemental disadvantages for identified DEMO foes only when every live ally/foe element is known. Queuing uses native player controls; Execute remains manual. Not recovered original AI.';
  panel.append(title,options,state,foot);host.append(panel);
  const strategies=[
   ['lowest-hp','LOWEST HP'],['lowest-hp-percent','LOWEST HP %'],
   ['highest-hp','HIGHEST HP'],['highest-hp-percent','HIGHEST HP %'],
   ['highest-atk','HIGHEST ATK'],['lowest-def','LOWEST DEF'],
-  ['elemental','ELEMENT WEAKNESS']
+  ['elemental','ELEMENT WEAKNESS'],
+  ['element-safe','FEWEST RESISTS']
  ];
  let selected='lowest-hp',signature='';
  const legal=()=>!S.busy&&!S.over&&!S.auto&&!!commands.snapshot()?.canQueue;
@@ -69,6 +70,50 @@
        a.foe.slot-b.foe.slot);
      const f=ranked[0]?.foe;
      return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp,atk:f.atk,def:f.def}):null;
+   }
+   // Distinct manual command: minimize the number of current squad members
+   // facing a source-listed 0.5x ELEMENTAL disadvantage in this DEMO battle.
+   // Unlike Element Weakness, this also works if no ally has an advantage.
+   // Enemy rosters remain DEMO, not authenticated 2022 formations. If any
+   // living combatant has an unknown element, reject without moving the target.
+   if(kind==='element-safe'){
+     const element=window.BFGlobalElementalCombatV6900;
+     if(S.mode!=='archive'||!element||
+       typeof element.normalize!=='function'||
+       typeof element.multiplier!=='function'||
+       typeof UNIT_BY_ID==='undefined'||typeof UNIT_BY_ID.get!=='function'||
+       !Array.isArray(S.party))return null;
+     let ranked;
+     try{
+       const allies=S.party.filter(u=>u&&u.active&&
+         Number.isFinite(u.hp)&&u.hp>0);
+       if(!allies.length||allies.some(u=>!Number.isSafeInteger(u.id)||
+          u.id<0||S.party[u.id]!==u)||
+          new Set(allies.map(u=>u.id)).size!==allies.length)return null;
+       const types=allies.map(u=>
+         element.normalize(UNIT_BY_ID.get(u.unitId)?.element));
+       if(types.some(type=>!type))return null;
+       ranked=living.map(foe=>{
+         const targetType=element.normalize(foe.element);
+         if(!targetType)return null;
+         let resisted=0,advantaged=0;
+         for(const type of types){
+           const factor=element.multiplier(type,targetType);
+           if(factor===0.5)resisted++;
+           else if(factor===1.5)advantaged++;
+           else if(factor!==1)throw Error('unverified-element-matchup');
+         }
+         return {foe,resisted,advantaged};
+       });
+       if(ranked.some(row=>!row))return null;
+     }catch(_){return null;}
+     ranked.sort((a,b)=>a.resisted-b.resisted||
+       b.advantaged-a.advantaged||
+       a.foe.hp/a.foe.maxHp-b.foe.hp/b.foe.maxHp||
+       a.foe.hp-b.foe.hp||a.foe.slot-b.foe.slot);
+     const f=ranked[0]?.foe;
+     return f?Object.freeze({slot:f.slot,name:f.name,hp:f.hp,
+       atk:f.atk,def:f.def}):null;
    }
    // Missing ATK/DEF on ANY living foe makes its rank unknowable.
    // Silently dropping that foe can change the target of a player command.
