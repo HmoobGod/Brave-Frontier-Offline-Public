@@ -53,7 +53,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.lookup("lowest-def").slot')==2
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("highest-atk")') is True
  assert page.evaluate('S.target')==0
- assert page.locator('#bf3100-options button').count()==8
+ assert page.locator('#bf3100-options button').count()==9
  assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("lowest-hp-percent")') is True
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===0)')
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='lowest-hp-percent'
@@ -117,6 +117,65 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='elemental'
  assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.kind==="attack"&&p.action.target===1)')
  assert page.evaluate('S.busy') is False
+ # The new distinct MANUAL focus action uses source-listed player
+ # elements to avoid fighting heavily resistant foes in real demo combat.
+ # Unlike Element Weakness, it stays usable without a verified advantage.
+ page.evaluate("""()=>{S.enemies[1].element='Thunder';
+   S.enemies[2].element='Light';update()}""")
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("elemental")') is None
+ assert page.evaluate('BFGlobalBattleFocusV3100.lookup("element-safe")?.slot')==2
+ assert not page.locator('#bf3100-options button[data-strategy="element-safe"]').is_disabled()
+ assert page.evaluate('BFGlobalBattleFocusV3100.queueFocus("element-safe")') is True
+ assert page.evaluate('BFGlobalBattleFocusV3100.snapshot().strategy')=='element-safe'
+ assert page.evaluate('S.party.filter(p=>p.active&&p.hp>0).every(p=>p.action?.target===2)')
+ assert page.evaluate('S.busy') is False
+ # Unknown living foe or ally element must disable the new strategy
+ # without moving S.target, overwriting queued native actions, or saving.
+ manual_guard=page.evaluate("""()=>{const old=S.enemies[2].element;
+   const unit=S.party[0].unitId;
+   const before={target:S.target,actions:S.party.map(u=>JSON.stringify(u.action)),
+     save:localStorage.getItem('bf_global_offline_demo_v7'),player:JSON.stringify(P)};
+   const result={};
+   try{
+     S.enemies[2].element='Unknown';
+     result.unknownFoe=BFGlobalBattleFocusV3100.lookup('element-safe')===null&&
+       !BFGlobalBattleFocusV3100.queueFocus('element-safe');
+     S.enemies[2].element=old;
+     S.party[0].unitId=999999;
+     result.unknownAlly=BFGlobalBattleFocusV3100.lookup('element-safe')===null&&
+       !BFGlobalBattleFocusV3100.queueFocus('element-safe');
+   }finally{S.enemies[2].element=old;S.party[0].unitId=unit}
+   result.safe=S.target===before.target&&
+     S.party.every((u,i)=>JSON.stringify(u.action)===before.actions[i])&&
+     localStorage.getItem('bf_global_offline_demo_v7')===before.save&&
+     JSON.stringify(P)===before.player&&!S.busy;
+   return result;
+ }""")
+ assert manual_guard=={'unknownFoe':True,'unknownAlly':True,'safe':True},manual_guard
+ # The source element provider can be missing, throw, or return an invalid
+ # 2x multiplier. All three must fail closed, not guess a target.
+ safe_failures=page.evaluate("""()=>{const original=window.BFGlobalElementalCombatV6900;
+   const cases=[];
+   const target=S.target,orders=S.party.map(p=>JSON.stringify(p.action));
+   const before=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     for(const provider of [null,
+       {normalize:original.normalize,multiplier:()=>{throw Error('source unreadable')}},
+       {normalize:original.normalize,multiplier:()=>2}]){
+       window.BFGlobalElementalCombatV6900=provider;
+       cases.push(BFGlobalBattleFocusV3100.lookup('element-safe')===null&&
+         BFGlobalBattleFocusV3100.queueFocus('element-safe')===false);
+     }
+     return {cases,unchanged:S.target===target&&
+       orders.every((x,i)=>x===JSON.stringify(S.party[i].action))&&
+       localStorage.getItem('bf_global_offline_demo_v7')===before};
+   }finally{window.BFGlobalElementalCombatV6900=original}
+ }""")
+ assert safe_failures=={'cases':[True,True,True],'unchanged':True},safe_failures
+ # Restore original element assumptions before exercising the existing
+ # Weakness Focus and negative-guard regression suite.
+ page.evaluate("""()=>{S.enemies[1].element='Earth';
+   S.enemies[2].element='Light';update()}""")
  # A broken optional elemental provider must not crash the native command
  # tray, change the selected target, queue an action or write the v7 save.
  broken_elemental=page.evaluate("""()=>{
@@ -171,7 +230,7 @@ with sync_playwright() as pw:
  # Keep synthetic corruption in one synchronous browser task, so the
  # normal battle renderer never observes these deliberately invalid rows.
  results=page.evaluate("""()=>{const original=S.enemies;
-   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental'];
+   const seed=original[0],strategies=['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','elemental','element-safe'];
    try{
      S.enemies=[
        {...seed,slot:0,name:'Zero max',hp:5,maxHp:0,atk:9999,def:-99},
@@ -186,8 +245,8 @@ with sync_playwright() as pw:
      return {valid,invalid,rejected};
    }finally{S.enemies=original;}
  }""")
- assert results['valid']==[None]*7,results
- assert results['invalid']==[None]*7,results
+ assert results['valid']==[None]*8,results
+ assert results['invalid']==[None]*8,results
  assert results['rejected'],results
  # Targeting and queued orders must remain untouched if ANY living record
  # is corrupt, including text-coerced Infinity or a duplicate valid slot.
@@ -323,4 +382,4 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleFocusV3100.focus("lowest-def")') is False
  assert not errors,errors
  browser.close()
-print('PASS v31.00: seven manual focus strategies, source-known elemental focus, native queue and v7 save isolation')
+print('PASS v31.00: eight manual focus strategies, source-known least-resisted targeting, native queue and v7 save isolation')
