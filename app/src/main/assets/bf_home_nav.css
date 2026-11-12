@@ -1398,3 +1398,26 @@ body.bf-location-preview-open{overflow:hidden}
 .bf-about-body dt{font-weight:700;color:#e7cea0}
 .bf-about-body dd{margin:5px 0 0;overflow-wrap:anywhere}
 #bf-about-status{color:#c7d8e2}
+
+/* v388: Source-validated, read-only next-story panel on the Global Home. */
+.bf-scene-story{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;
+  gap:9px;margin:9px 0;padding:10px;border:2px ridge #a88754;
+  border-radius:7px;background:linear-gradient(145deg,#2e394b,#142337);
+  box-shadow:inset 0 1px #ffffff20,0 3px 7px #0008;
+}
+#bf-home-story-progress{
+  min-width:0;margin:0;color:#f6e1b6;
+  font:700 11px/1.5 Arial,sans-serif;overflow-wrap:anywhere;
+}
+#bf-home-story-open{
+  min-width:112px;min-height:45px;padding:7px 10px;
+  border:2px ridge #d8b476;border-radius:6px;
+  background:linear-gradient(#dfbb7a,#79542c);color:#fff7df;
+  font:800 11px/1.35 Arial,sans-serif;cursor:pointer;
+}
+#bf-home-story-open:focus-visible{outline:3px solid #b8ebff;outline-offset:2px}
+@media(max-width:359px){
+  .bf-scene-story{grid-template-columns:minmax(0,1fr);gap:6px}
+  #bf-home-story-open{width:100%;min-width:0}
+}
