@@ -18,6 +18,16 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert "'bf2100-protect-cautious',()=>protectWounded(0.60)" in src
  assert 'if(![0.20,0.40,0.60].includes(threshold)||!ready()' in src
  assert 'S.party[p.id]!==p||!slots.children[p.id]' in src
+ # Opt-in manual healing threshold selection must remain native click-only
+ # and never change save schema, provider identity or enemy AI.
+ assert "'bf2100-heal-critical',()=>queueAll('heal',0.35)" in src
+ assert "'bf2100-heal-early',()=>queueAll('heal',0.75)" in src
+ assert "const healThresholds=Object.freeze([0.35,0.50,0.75]);" in src
+ assert "function healingChoice(squad,reserved,threshold=0.50)" in src
+ assert "if(!healThresholds.includes(threshold)||!ready()" in src
+ assert "function queueAll(mode,healThreshold=0.50)" in src
+ assert "healCritical.disabled=!healingAvailable(0.35);" in src
+ assert "healEarly.disabled=!healingAvailable(0.75);" in src
  assert 'protectCritical.disabled=!woundedPlan(0.20);' in src
  assert 'protectCautious.disabled=!woundedPlan(0.60);' in src
  assert 'bf_global_offline_demo_v7' in z.read('assets/index.html').decode('utf8')

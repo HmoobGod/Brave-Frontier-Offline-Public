@@ -44,7 +44,9 @@
  const attacks=btn('QUEUE ALL ATTACKS','bf2100-attacks',()=>queueAll('attack'));
  const guards=btn('QUEUE ALL GUARDS','bf2100-guards',()=>queueAll('guard'));
  const bursts=btn('READY BB + ATTACK','bf2100-bursts',()=>queueAll('burst'));
+ const healCritical=btn('EMERGENCY HEAL · 35% HP','bf2100-heal-critical',()=>queueAll('heal',0.35));
  const healBB=btn('HEALING BB + ATTACK','bf2100-heal-bb',()=>queueAll('heal'));
+ const healEarly=btn('EARLY HEAL · 75% HP','bf2100-heal-early',()=>queueAll('heal',0.75));
  const spread=btn('SPREAD ATTACKS','bf2100-spread',()=>spreadAttacks());
  const spreadBB=btn('SPREAD READY BB','bf2100-spread-bb',()=>spreadBursts());
  const element=btn('ELEMENT ADVANTAGE','bf2100-elements',()=>elementAttacks());
@@ -54,7 +56,7 @@
  const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const foot=document.createElement('small');foot.id='bf2100-info';
- foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Healing BB + Attack uses one source-verified party heal when an ally is at or below half HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. No original 2022 enemy AI or damage formula is claimed.';
  panel.append(title,status,targets,actions,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -99,8 +101,10 @@
  // Manual emergency party heal: only an original Global BB explicitly
  // identified as heal_all may replace one attack. No guessed healing effect,
  // synthetic unit identity, automatic turn, or stored state mutation.
- function healingChoice(squad,reserved){
-   if(!ready()||S.mode!=='archive'||!Array.isArray(squad)||
+ const healThresholds=Object.freeze([0.35,0.50,0.75]);
+ function healingChoice(squad,reserved,threshold=0.50){
+   if(!healThresholds.includes(threshold)||!ready()||
+      S.mode!=='archive'||!Array.isArray(squad)||
       typeof bfOriginalBB!=='function'||typeof originalSupport!=='function'||
       !(reserved instanceof Set)||!squad.length)return null;
    const ids=squad.map(p=>p?.id);
@@ -111,15 +115,16 @@
         !Number.isFinite(p.bb)||p.bb<0||
         !slots.children[p.id]||slots.children[p.id].disabled)||
         new Set(ids).size!==squad.length)return null;
-   if(!squad.some(p=>p.hp/p.maxHp<=0.5))return null;
+   if(!squad.some(p=>p.hp/p.maxHp<=threshold))return null;
    return squad.find(p=>!reserved.has(p.id)&&p.bb>=100&&
      window.BFGlobalCurseBBLockV5900?.cursed(p.id)!==true&&
      window.BFGlobalParalysisActionLockV6000?.paralyzed(p.id)!==true&&
      bfOriginalBB(p.unitId)?.target==='support'&&
      originalSupport(p.unitId)?.kind==='heal_all')?.id??null;
  }
- function healingAvailable(){
-   if(!ready()||S.mode!=='archive'||!Array.isArray(S.enemies))return false;
+ function healingAvailable(threshold=0.50){
+   if(!healThresholds.includes(threshold)||!ready()||S.mode!=='archive'||
+      !Array.isArray(S.enemies))return false;
    const all=S.enemies,live=all.filter(e=>e&&e.hp>0);
    if(all.some(e=>e&&e.hp>0&&!Number.isFinite(e.hp))||
       !live.length||live.some(e=>!Number.isFinite(e.maxHp)||e.maxHp<=0||
@@ -128,10 +133,11 @@
    const reservations=window.BFGlobalItemTurnReservationsV4500?.snapshot()?.reservations??[];
    if(!Array.isArray(reservations)||reservations.some(r=>
       !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
-   return healingChoice(active(),new Set(reservations.map(r=>r.slot)))!==null;
+   return healingChoice(active(),new Set(reservations.map(r=>r.slot)),threshold)!==null;
  }
- function queueAll(mode){
-   if(!['attack','guard','burst','heal'].includes(mode)||!ready())return false;
+ function queueAll(mode,healThreshold=0.50){
+   if(!['attack','guard','burst','heal'].includes(mode)||!ready()||
+      (mode==='heal'&&!healThresholds.includes(healThreshold)))return false;
    const squad=active(),ids=squad.map(p=>p.id);
    // Native action buttons address S.party by player slot. A shuffled
    // actor with a valid id is still NOT the owner of that slot; reject the
@@ -170,7 +176,7 @@
    if(!Array.isArray(reservations)||reservations.some(r=>
        !Number.isSafeInteger(r?.slot)||r.slot<0))return false;
    const reserved=new Set(reservations.map(r=>r.slot));
-   const healerSlot=mode==='heal'?healingChoice(squad,reserved):null;
+   const healerSlot=mode==='heal'?healingChoice(squad,reserved,healThreshold):null;
    if(mode==='heal'&&healerSlot===null)return false;
    // Queue the healing caster first: if its native BB is unavailable,
    // fail without altering any teammate's previous queued action.
@@ -490,7 +496,9 @@
      ' · '+st.queued+'/'+st.alive+' commands ready · '+st.bbReady+' BB ready'+
      (st.auto?' · Auto Battle enabled':'');
    attacks.disabled=guards.disabled=bursts.disabled=spread.disabled=!st.canQueue;
+   healCritical.disabled=!healingAvailable(0.35);
    healBB.disabled=!healingAvailable();
+   healEarly.disabled=!healingAvailable(0.75);
    spreadBB.disabled=!spreadBurstPlan();
    // Match the real pre-Execute target gate in the visible player UI.
    // Recheck every refresh: queued targets/BB profiles can change mid-turn.
