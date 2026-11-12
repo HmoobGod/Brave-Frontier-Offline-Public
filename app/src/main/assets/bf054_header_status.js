@@ -28,6 +28,13 @@
     '#bf054-energy{position:absolute;left:8.3%;top:61%;width:20.6%;height:10%;',
     'display:flex;align-items:center;justify-content:center;color:#e1e6eb;',
     'font:700 clamp(8px,2vw,11px) Arial,sans-serif;text-shadow:0 1px 2px #000}',
+    '#bf054-home-details{margin:8px 0;padding:7px 10px;border:1px solid #a88d62;',
+    'border-radius:7px;background:linear-gradient(145deg,#27374c,#19253b);',
+    'color:#f3e2c2;font:12px/1.5 Arial,sans-serif}',
+    '#bf054-home-details summary{min-height:40px;display:flex;align-items:center;',
+    'cursor:pointer;font-weight:800;letter-spacing:.03em;list-style-position:inside}',
+    '#bf054-home-details summary:focus-visible{outline:3px solid #9fdbff;outline-offset:2px}',
+    '#bf054-home-details p{margin:5px 0 2px;overflow-wrap:anywhere}',
     '@media(max-width:360px){#bf054-exp-text,#bf054-energy{font-size:8px}}'
   ].join('');
   document.head.append(style);
@@ -47,6 +54,25 @@
   energy.title = 'Energy is not simulated in this offline build; no balance is stored or deducted.';
   energy.setAttribute('aria-label', 'Energy unavailable: offline demo does not simulate energy');
   header.append(track,energy);
+
+  // Optional native Home details disclosure: read existing local player state
+  // without changing the original BF1 header sprite or canonical v7 save.
+  const home = document.getElementById('bf-home');
+  const homeTitle = home?.querySelector('.bf-scene-title');
+  const homeDetails = homeTitle ? document.createElement('details') : null;
+  let homeValues = null;
+  if (homeDetails) {
+    homeDetails.id = 'bf054-home-details';
+    const label = document.createElement('summary');
+    label.textContent = 'SUMMONER STATUS · DETAILS';
+    homeValues = document.createElement('p');
+    homeValues.id = 'bf054-home-values';
+    homeValues.setAttribute('aria-live', 'polite');
+    homeDetails.append(label,homeValues);
+    homeTitle.after(homeDetails);
+  }
+  const safeCount = x => Number.isSafeInteger(x) && x >= 0 ?
+    x.toLocaleString('en-US') : '—';
 
   function summary() {
     const level = typeof P !== 'undefined' && Number.isInteger(P.level) ? P.level : 1;
@@ -75,6 +101,14 @@
     track.setAttribute('aria-valuenow',String(value.earned));
     track.setAttribute('aria-valuetext', value.capped
       ? 'Demo maximum level 99' : value.earned+' of '+value.threshold+' demo EXP');
+    if (homeValues) {
+      const p = typeof P !== 'undefined' && P ? P : {};
+      const text = 'Demo Lv.'+safeCount(p.level)+
+        ' · EXP '+(value.capped?'MAX':safeCount(value.earned)+'/'+safeCount(value.threshold))+
+        ' · Zel '+safeCount(p.zel)+' · Karma '+safeCount(p.karma)+
+        ' · Energy unavailable (offline, not deducted).';
+      if (homeValues.textContent !== text) homeValues.textContent = text;
+    }
   }
   const progress = document.getElementById('pexp');
   // Core renderProgress updates #pexp and #plevel whenever quest rewards,
