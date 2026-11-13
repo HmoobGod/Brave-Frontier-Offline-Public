@@ -141,7 +141,69 @@ with sync_playwright() as pw:
     page.set_viewport_size({'width':540,'height':844})
     assert page.evaluate("""() => document.querySelector('.bf-scene-explore')
       .nextElementSibling.classList.contains('bf-scene-tools')""")
+    # v401 R2: emulate the late-loaded #420 optional panel that follows
+    # Adventure in the latest main. The old branch predates the actual v420
+    # asset; verify DOM adjacency and no duplicate controls on every resize.
+    before_reorder=page.evaluate("""() => ({
+      p:JSON.stringify(P),quest:QUEST.missionId,
+      auto:S.auto,save:localStorage.getItem('bf_global_offline_demo_v7'),
+      keys:Object.keys(localStorage).sort().join(',')
+    })""")
+    page.evaluate("""() => {
+      const adventure=document.querySelector('#bf-home .bf-scene-explore');
+      const panel=document.createElement('section');
+      panel.id='bf420-home-readiness';
+      panel.setAttribute('aria-label','Late-loaded source preview fixture');
+      panel.textContent='2022 reference preview, no save changes';
+      adventure.after(panel);
+    }""")
+    for width in (320,390,370,371,540,320):
+      page.set_viewport_size({'width':width,'height':844})
+      page.wait_for_function("""() => {
+        const e=document.querySelector('#bf-home .bf-scene-explore'),
+              p=document.getElementById('bf420-home-readiness'),
+              squad=document.querySelector('#bf-home .bf-scene-squad'),
+              tools=document.querySelector('#bf-home .bf-scene-tools');
+        if(!e||!p||e.nextElementSibling!==p)return false;
+        return innerWidth<=370?p.nextElementSibling===squad:
+          p.nextElementSibling===tools;
+      }""")
+      structure=page.evaluate("""() => {
+        const home=document.getElementById('bf-home'),
+              adventure=home.querySelector('.bf-scene-explore'),
+              panel=home.querySelector('#bf420-home-readiness'),
+              squad=home.querySelector('.bf-scene-squad'),
+              story=home.querySelector('.bf-scene-story'),
+              tools=home.querySelector('.bf-scene-tools'),
+              buttons=[...home.querySelectorAll('.bf-scene-explore button.bf-scene-active')];
+        return {
+          sameParent:adventure.parentElement===story.parentElement,
+          adjacent:adventure.nextElementSibling===panel,
+          first:innerWidth<=370?panel.nextElementSibling===squad:
+            story.nextElementSibling===adventure,
+          next:innerWidth<=370?panel.nextElementSibling===squad:
+            panel.nextElementSibling===tools,
+          tiles:buttons.map(b=>b.dataset.bfGoto),
+          panelCount:home.querySelectorAll('#bf420-home-readiness').length,
+          scroll:document.documentElement.scrollWidth,viewport:innerWidth
+        };
+      }""")
+      assert structure['sameParent'] and structure['adjacent'],(width,structure)
+      assert structure['first'] and structure['next'],(width,structure)
+      assert structure['tiles']==['quest','summon'] and structure['panelCount']==1,(width,structure)
+      assert structure['scroll']<=max(width,base_scroll_width),(width,structure)
+    after_reorder=page.evaluate("""() => ({
+      p:JSON.stringify(P),quest:QUEST.missionId,
+      auto:S.auto,save:localStorage.getItem('bf_global_offline_demo_v7'),
+      keys:Object.keys(localStorage).sort().join(',')
+    })""")
+    assert before_reorder==after_reorder,(before_reorder,after_reorder)
+    page.evaluate("document.getElementById('bf420-home-readiness').remove()")
     page.set_viewport_size({'width':390,'height':844})
+    page.wait_for_function("""() => {
+      const e=document.querySelector('#bf-home .bf-scene-explore');
+      return e?.nextElementSibling?.classList.contains('bf-scene-tools');
+    }""")
     page.evaluate('()=>{P.exp=13;P.level=2;P.zel=1345;P.karma=250;renderProgress()}')
     page.wait_for_function("""()=>document.querySelector('#bf054-exp-text')?.textContent==='8 / 10'""")
     assert page.evaluate('Math.round(BF054HeaderStatus.state.percent)')==80
