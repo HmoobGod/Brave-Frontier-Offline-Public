@@ -260,6 +260,7 @@ jobs:
           python test_bf_grand_gaia_campaign_v100.py
           python test_bf_story_continue_v101.py
           python test_bf_home_battle_readiness_v420.py
+          python test_bf_home_cold_start_source_gate_v421.py
           python test_bf_quest_journal_v110.py
           python test_bf_historical_encounters_v120.py
           python test_bf_source_crosscheck_v150.py
