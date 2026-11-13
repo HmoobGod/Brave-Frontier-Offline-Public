@@ -3,6 +3,7 @@ Run: python test_bf_archive_mobile_touch_v406.py
 Uses synthetic DOM only; does not claim game/device acceptance.
 """
 from pathlib import Path
+import shutil
 from playwright.sync_api import sync_playwright
 
 CSS = Path(__file__).resolve().parent / "app/src/main/assets/bf_global_unit_archive.css"
@@ -22,7 +23,10 @@ HTML = """<section class="bf-global-original-unit-archive">
 </details></section>"""
 
 with sync_playwright() as pw:
-    browser = pw.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
+    browser = pw.chromium.launch(headless=True,
+        executable_path=shutil.which('chromium') or shutil.which('google-chrome')
+                        or shutil.which('google-chrome-stable'),
+        args=["--no-sandbox", "--disable-dev-shm-usage"])
     for width in (320, 390, 540):
         page = browser.new_page(viewport={"width": width, "height": 800})
         page.set_content(HTML)
