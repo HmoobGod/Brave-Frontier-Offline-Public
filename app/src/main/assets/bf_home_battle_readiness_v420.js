@@ -86,8 +86,16 @@
          archive.source?.staminaEnforced!==false ||
          !Array.isArray(P.squad) || P.squad.length>6 ||
          QUESTS.length!==106) return null;
-      const filled=P.squad.filter(id=>Number.isSafeInteger(id) &&
-        id>=0 && typeof effectiveUnit==='function' && !!effectiveUnit(id)).length;
+      // The count is of unique, currently owned, valid squad members; a
+      // malformed/duplicate/unowned slot never implies a playable actor.
+      if(!Array.isArray(P.roster) || typeof effectiveUnit!=='function')return null;
+      const seen=new Set();
+      const filled=P.squad.reduce((count,id)=>{
+        if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||
+           !P.roster.includes(id) || !effectiveUnit(id))return count;
+        seen.add(id);
+        return count+1;
+      },0);
       const progress=campaign.summary();
       if(progress?.total!==106 || !Number.isSafeInteger(progress.cleared) ||
          progress.cleared<0 || progress.cleared>106)return null;
