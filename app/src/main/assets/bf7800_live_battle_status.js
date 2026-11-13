@@ -27,7 +27,7 @@
  });
  const css=document.createElement('style');css.id='bf7800-style';
  css.textContent='#bf7800-status{margin:9px 11px;padding:8px;border:1px solid #978fba;border-radius:6px;background:#273347;color:#f5f4fc;font:12px/1.45 system-ui,sans-serif}'+
-  '#bf7800-status[hidden]{display:none!important}#bf7800-status summary{cursor:pointer;min-height:34px;font-weight:800}'+
+  '#bf7800-status[hidden]{display:none!important}#bf7800-status summary{cursor:pointer;min-height:44px;font-weight:800}'+
   '#bf7800-status .bf7800-row{border-top:1px solid #586178;padding:6px 0}'+
   '#bf7800-status .bf7800-unit{display:block;font-weight:750;margin:0 0 3px}'+
   '#bf7800-status .bf7800-chip{display:inline-block;margin:2px 5px 2px 0;padding:3px 6px;border:1px solid #929abb;border-radius:4px;background:#44465e;color:#fff}'+
@@ -56,13 +56,16 @@
    const entries=[];
    if(active)for(let slot=0;slot<6;slot++){
      const unit=S.party?.[slot];
-     if(!unit?.active||unit.hp<=0)continue;
+     if(!unit?.active||!Number.isFinite(unit.hp)||
+       !Number.isFinite(unit.maxHp)||unit.hp<=0||
+       unit.maxHp<=0||unit.hp>unit.maxHp)continue;
      const codes=ailments.codesFor(slot);
      const immune=immuneState.protectedSlots.includes(slot);
      const regen=regenState.active&&regenState.targetSlots.includes(slot);
      if(!codes.length&&!immune&&!regen)continue;
      entries.push(freeze({
        slot,name:String(unit.name||'Ally '+(slot+1)),
+       hp:unit.hp,maxHp:unit.maxHp,
        codes:freeze(Array.from(codes)),immune,regeneration:regen,
        immunityTurns:immune?immunityTurns:null,
        regenerationTurns:regen?regenTurns:null,
@@ -87,7 +90,8 @@
      const row=document.createElement('div');row.className='bf7800-row';
      row.dataset.slot=String(unit.slot);
      const title=document.createElement('strong');title.className='bf7800-unit';
-     title.textContent=(unit.slot+1)+'. '+unit.name;
+     title.textContent=(unit.slot+1)+'. '+unit.name+
+       ' · DEMO HP '+Math.round(unit.hp)+'/'+Math.round(unit.maxHp);
      row.append(title);
      function chip(label,protection=false){
        const span=document.createElement('span');
