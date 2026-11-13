@@ -94,10 +94,24 @@
      state:available?(s.won?'VICTORY':s.lost?'DEFEAT':s.busy?'TURN IN PROGRESS':'BATTLE'):null});
  }
  function refresh(){
-   const s=snapshot(),stage=story.snapshot();
+   let s,stage;
+   try{s=snapshot();stage=story.snapshot();}
+   catch(_){
+     // A broken optional story provider must never present a clickable
+     // 'return to battle' action or stale original source text on Home.
+     last='';
+     if(homeNotice){homeNotice.hidden=true;homeReturn.disabled=true;homeMessage.textContent='';}
+     panel.hidden=true;toggle.disabled=true;toggle.checked=false;
+     banner.hidden=true;banner.textContent='';
+     return Object.freeze({enabled,available:false,applied:false});
+   }
+   // S.round starts at 1 on a fresh idle Home. Round 1 alone is NOT
+   // evidence of an active battle; the first actual wave/action must exist.
+   const started=Number.isSafeInteger(S.wave)&&S.wave>0||
+     Number.isSafeInteger(S.round)&&S.round>1;
    const live=!!s.available&&(
      (s.state==='TURN IN PROGRESS')||
-     (s.state==='BATTLE'&&Number.isSafeInteger(S.round)&&S.round>0)||
+     (s.state==='BATTLE'&&started)||
      (s.state==='VICTORY'&&stage?.stored!==true)
    );
    const key=JSON.stringify({s,live,round:S.round,stored:stage?.stored});
