@@ -286,6 +286,7 @@ jobs:
           python test_bf_evolution_ab_v1900.py
           python test_bf_story_battle_hud_v2000.py
           python test_bf_battle_command_tray_v2100.py
+          python test_bf_manual_target_preview_v424.py
           python3 test_bf_command_tray_curse.py
           python3 test_bf_batch_item_guards.py
           python test_bf_original_event_reader_v2200.py

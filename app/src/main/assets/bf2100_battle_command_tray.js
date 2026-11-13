@@ -20,8 +20,8 @@
   '#bf2100-tray h3{font:800 15px Georgia,serif;margin:0 0 5px;color:#ffe4b7}',
   '#bf2100-status{margin:5px 0;font-weight:700}',
   '#bf2100-targets{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}',
-  '#bf2100-targets button{padding:6px 8px;background:#243c54;color:#fff;',
-  'border:1px solid #74869c;border-radius:5px;min-height:37px}',
+  '#bf2100-targets button{padding:8px 9px;background:#243c54;color:#fff;'
+  'border:1px solid #74869c;border-radius:5px;min-height:44px;touch-action:manipulation}',
   '#bf2100-targets button[aria-pressed=true]{border-color:#f6d786;outline:1px solid #f6d786}',
   '#bf2100-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}',
   '#bf2100-buttons button{padding:8px 5px;min-height:44px;background:#6d4e2d;',
@@ -61,7 +61,8 @@
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- panel.append(title,status,targets,actions,orders,foot);area.before(panel);
+ foot.textContent+=' The queued player Attack and offensive BB preview names only a uniquely verified living DEMO target; an ambiguous, defeated or malformed target is labelled UNVERIFIED and is never changed by this preview.';
+ panel.append(title,status,targets,actions,orders,foot);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
  const enemies=()=>Array.isArray(S.enemies)?S.enemies.filter(e=>e&&e.hp>0):[];
@@ -566,7 +567,24 @@
      if(!a)return 'Slot '+(p.id+1)+': Not queued';
      const label=a.kind==='attack'?'Attack':a.kind==='guard'?'Guard':
        a.kind==='burst'?'BB':'Other native order';
-     return 'Slot '+(p.id+1)+': '+label;
+     const prefix='Slot '+(p.id+1)+': '+label;
+     // v424: read-only player preview. Native Execute legality remains
+     // owned by queuedAttacksSafe, never by this display.
+     const offensive=a.kind==='attack'||a.kind==='burst'&&
+       window.BF_ARCHIVE_BB_HITS?.[String(p.unitId)]?.offensiveCandidate!==false;
+     if(!offensive)return prefix;
+     const all=Array.isArray(S.enemies)?S.enemies:[];
+     const living=all.filter(e=>e&&Number.isFinite(e.hp)&&e.hp>0);
+     const valid=Number.isSafeInteger(a.target)&&a.target>=0&&
+       living.length>0&&living.every(e=>
+         Number.isSafeInteger(e.slot)&&e.slot>=0&&
+         Number.isFinite(e.maxHp)&&e.maxHp>0)&&
+       new Set(living.map(e=>e.slot)).size===living.length;
+     const foe=valid?living.find(e=>e.slot===a.target):null;
+     if(!foe)return prefix+' → TARGET UNVERIFIED';
+     const name=typeof foe.name==='string'&&foe.name.trim()?
+       foe.name.trim().slice(0,48):'Enemy';
+     return prefix+' → '+name+' (enemy slot '+(a.target+1)+')';
    }).join(' · ');
  }
  function refresh(){
