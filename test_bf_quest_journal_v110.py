@@ -10,6 +10,7 @@ assert js.count('/* BF_GLOBAL_QUEST_JOURNAL_V110 */')==1
 assert 'localStorage' not in js and 'saveProgress(' not in js
 assert 'questUnlocked(row.q)' in js and 'BFQuestAreas.choose(row.q)' in js
 assert 'BFGrandGaiaContinueV101?.canNavigate' in js
+assert 'bf110-clear-filters' in js and 'min-height:44px' in js
 assert java.index('readPackagedText("bf101_story_continue.js")') < java.index('readPackagedText("bf110_quest_journal.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -87,6 +88,30 @@ with sync_playwright() as pw:
  # Locked entries must not be selectable even via the public API.
  assert page.evaluate('BFGlobalQuestJournalV110.chooseMission(200)') is False
  assert page.evaluate('QUEST.missionId')!=200
+ # v435: clearing multiple journal filters is read-only and restores the
+ # original story order without selecting quests or modifying canonical v7.
+ before_clear=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   selected:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ page.locator('#bf110-sort').select_option('exp')
+ page.locator('#bf110-state').select_option('locked')
+ page.locator('#bf110-clear-filters').click()
+ assert page.locator('#bf110-region').input_value()=='all'
+ assert page.locator('#bf110-state').input_value()=='all'
+ assert page.locator('#bf110-sort').input_value()=='story'
+ assert page.locator('#bf110-search').input_value()==''
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
+ assert page.locator('[data-bf-journal-entry]').count()==20
+ assert page.locator('[data-bf-journal-entry]').first.get_attribute('data-bf-journal-entry')=='1'
+ after_clear=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   selected:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert before_clear==after_clear,(before_clear,after_clear)
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for sel in ('#bf110-journal summary','#bf110-search','#bf110-clear-filters',
+              '#bf110-region','#bf110-state','#bf110-sort','#bf110-more'):
+   rect=page.locator(sel).bounding_box()
+   assert rect and rect['height']>=44,(width,sel,rect)
+ page.set_viewport_size({'width':390,'height':844})
  page.locator('#bf110-region').select_option('all')
  page.locator('#bf110-search').fill('')
  page.locator('#bf110-state').select_option('available')
