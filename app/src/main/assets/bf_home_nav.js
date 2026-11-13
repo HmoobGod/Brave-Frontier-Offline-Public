@@ -224,7 +224,8 @@ function bfOfflineUnitPortraitV266(source, name) {
             if (quest && quest.dungeonId === next.dungeonId &&
                 quest.battles === next.battles) {
               message = prefix + ' · Next: ' +
-                String(quest.name || 'Mission ' + quest.missionId).slice(0, 90) +
+                String(typeof quest.label === 'string' && quest.label.trim() ?
+                  quest.label : 'Mission ' + quest.missionId).slice(0, 90) +
                 ' (#' + next.missionId + ') · DEMO combat.';
             } else message = prefix + ' · Next mission not verified.';
           } else {
