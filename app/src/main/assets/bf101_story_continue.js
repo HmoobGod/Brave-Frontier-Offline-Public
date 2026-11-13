@@ -106,7 +106,7 @@
  next.style.cssText='margin:8px 0';
  const button=document.createElement('button');button.id='bf101-continue';
  button.type='button';button.textContent='CONTINUE STORY ›';
- button.style.cssText='min-height:42px;padding:8px 14px;color:#fff;background:#745529;border:1px solid #dfbc7c;border-radius:5px;font-weight:800';
+ button.style.cssText='min-height:44px;padding:8px 14px;color:#fff;background:#745529;border:1px solid #dfbc7c;border-radius:5px;font-weight:800';
  // Explicit one-time native player action: route the NEXT verified story mission
  // and click existing Auto. Never run an unattended next-quest chain.
  const autoButton=document.createElement('button');
@@ -120,6 +120,23 @@
  foot.style.cssText='display:block;margin-top:7px;color:#d5dae1';
  panel.append(heading,status,meter,next,button,autoButton,foot);
  host.after(panel);
+ // The original-art Home progress card is already a source-validated route.
+ // Offer one explicit MANUAL next-mission action there, without autoplay,
+ // reward handling, save writes, or a second independent quest resolver.
+ const homeStoryOpen=document.getElementById('bf-home-story-open');
+ const homeShortcut=homeStoryOpen?.parentElement?.classList.contains('bf-scene-story')?
+   document.createElement('button'):null;
+ if(homeShortcut){
+   homeShortcut.type='button';
+   homeShortcut.id='bf101-home-manual-continue';
+   homeShortcut.textContent='CONTINUE STORY · MANUAL';
+   homeShortcut.setAttribute('aria-label','Select next unlocked original story mission for manual play');
+   homeShortcut.style.cssText='min-height:44px;max-width:100%;margin:7px 0 0;'+
+     'padding:9px 12px;background:#745529;border:1px solid #dfbc7c;'+
+     'border-radius:5px;color:#fff;font-weight:800;white-space:normal;'+
+     'overflow-wrap:anywhere';
+   homeStoryOpen.after(homeShortcut);
+ }
  function snapshot(){
    const n=arr=>arr.filter(cleared).length;
    return Object.freeze({total:106,done:n(QUESTS),
@@ -137,6 +154,10 @@
     const unattended=unattendedOwnsNavigation();
     button.disabled=!!S?.busy||unattended||!q;
     autoButton.disabled=!canContinueAuto(q);
+    // A direct Home action must be disabled under the identical live battle,
+    // unsaved victory, source corruption, and unattended Auto/Repeat gates.
+    if(homeShortcut)homeShortcut.disabled=button.disabled||S?.auto===true||
+      window.BF_homeNav?.current!=='home';
     if(awaitingSave()){
       next.textContent='VICTORY NOT SAVED · Retry Save or download an unsaved backup before continuing.';
     }else if(unattended){
@@ -221,6 +242,20 @@
    refresh();return true;
  }
  autoButton.addEventListener('click',()=>continueAuto());
+ homeShortcut?.addEventListener('click',()=>{
+   // Revalidate the canonical v101 next quest before AND after the native
+   // Home -> Quest transition. Never call Auto, start a repeat, or save.
+   if(homeShortcut.disabled||window.BF_homeNav?.current!=='home'||
+      S?.auto===true||!canNavigate()||button.disabled)return;
+   const before=remaining();
+   if(!before||window.BF_homeNav.go('quest')!==true||
+      window.BF_homeNav.current!=='quest')return;
+   const after=remaining();
+   if(!after||after.missionId!==before.missionId||
+      !canNavigate()||button.disabled)return;
+   button.click(); // Existing exact 106-mission manual Continue Story action.
+ });
+ window.addEventListener('bf-route-change',refresh);
  button.addEventListener('click',()=>{
    const q=remaining();
    if(!q||S?.busy||awaitingSave()||unattendedOwnsNavigation()||
