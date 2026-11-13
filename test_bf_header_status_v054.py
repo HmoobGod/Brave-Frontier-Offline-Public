@@ -13,6 +13,8 @@ addon=(ASSETS/'bf054_header_status.js').read_text('utf-8')
 assert addon.count('/* BF_HEADER_STATUS_FIDELITY_V054 */')==1
 assert 'bf_global_offline_demo_v7' not in addon, 'header overlay must never write saves'
 assert 'localStorage.setItem' not in addon
+assert 'min-height:44px' in addon
+assert 'Number.isSafeInteger(P.level)' in addon and 'Number.isSafeInteger(P.exp)' in addon
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf-8')
 assert java.count('readPackagedText("bf054_header_status.js")')==1
 assert java.index('readPackagedText("bf_home_nav.js")') < java.index('readPackagedText("bf054_header_status.js")')
@@ -83,6 +85,48 @@ with sync_playwright() as pw:
     assert details.get_attribute('open') is not None
     assert 'Demo Lv.1' in page.locator('#bf054-home-values').inner_text()
     assert 'Zel 0' in page.locator('#bf054-home-values').inner_text()
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        summary_bounds=details.locator('summary').bounding_box()
+        assert summary_bounds and summary_bounds['height']>=44,(width,summary_bounds)
+    # Transient malformed v7 local data must not be represented as level one.
+    # All mutations remain in test memory and are explicitly restored.
+    invalid=page.evaluate("""()=>{
+      const oldLevel=P.level,oldExp=P.exp,oldVersion=P.version;
+      const save=localStorage.getItem('bf_global_offline_demo_v7');
+      const result={};
+      const inspect=()=>{
+        const state=BF054HeaderStatus.refresh();
+        return {state:BF054HeaderStatus.state,
+          text:document.getElementById('bf054-exp-text').textContent,
+          aria:document.getElementById('bf054-exp').getAttribute('aria-valuetext'),
+          home:document.getElementById('bf054-home-values').textContent};
+      };
+      try{
+        P.level=0;result.zeroLevel=inspect();
+        P.level='2';result.stringLevel=inspect();
+        P.level=100;result.outOfRangeLevel=inspect();
+        P.level=1;P.exp=-3;result.negativeExp=inspect();
+        P.exp=NaN;result.nanExp=inspect();
+        P.exp=Infinity;result.infiniteExp=inspect();
+        P.exp='13';result.stringExp=inspect();
+        P.exp=0;P.version=6;result.invalidVersion=inspect();
+      }finally{
+        P.level=oldLevel;P.exp=oldExp;P.version=oldVersion;
+        BF054HeaderStatus.refresh();
+      }
+      result.saveUnchanged=localStorage.getItem('bf_global_offline_demo_v7')===save;
+      result.normal=BF054HeaderStatus.state.valid;
+      return result;
+    }""")
+    for kind in ('zeroLevel','stringLevel','outOfRangeLevel','negativeExp',
+                 'nanExp','infiniteExp','stringExp','invalidVersion'):
+        item=invalid[kind]
+        assert item['state']['valid'] is False,(kind,item)
+        assert item['text']=='— / —',(kind,item)
+        assert 'unavailable' in item['aria'],(kind,item)
+        assert 'Lv./EXP unavailable' in item['home'],(kind,item)
+    assert invalid['saveUnchanged'] and invalid['normal'],invalid
     page.set_viewport_size({'width':320,'height':844})
     status_bounds = details.evaluate("""el => {
       const b=el.getBoundingClientRect(), h=document.querySelector('.bf-shell-head').getBoundingClientRect();
