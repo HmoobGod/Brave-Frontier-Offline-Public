@@ -7,6 +7,8 @@ src=(A/'bf4100_live_quest_banner.js').read_text('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count('/* BF_GLOBAL_LIVE_QUEST_BANNER_V4100 */')==1
 assert len(src.encode('utf8'))<65536 and 'localStorage' not in src and 'saveProgress(' not in src
+assert 'Number.isSafeInteger(s?.total)' in src
+assert 'q.battles===s.total' in src and "S.mode==='archive'" in src
 assert java.index('readPackagedText("bf4000_next_chapter_intro.js")')<java.index('readPackagedText("bf4100_live_quest_banner.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -52,6 +54,30 @@ with sync_playwright() as pw:
  assert page.evaluate('document.getElementById("bf4100-banner").getBoundingClientRect().height>0') is True
  assert s['name'] in page.locator('#bf4100-banner').inner_text()
  assert 'WAVE' in page.locator('#bf4100-banner').inner_text()
+ # v432: a corrupt/noninteger live wave total must hide the overlay even
+ # while the optional setting remains ON; never infer enemy formations.
+ gates=page.evaluate("""()=>{
+   const q=QUEST,original=q.battles;
+   const save=localStorage.getItem('bf_global_offline_demo_v7');
+   const result={};
+   try{
+     for(const value of [0,-1,3.5,101]){
+       q.battles=value;
+       const s=BFGlobalLiveQuestBannerV4100.refresh();
+       result[String(value)]={available:s.available,applied:s.applied,
+         hidden:document.getElementById('bf4100-banner').hidden,
+         enabled:s.enabled};
+     }
+   }finally{
+     q.battles=original;BFGlobalLiveQuestBannerV4100.refresh();
+   }
+   result.restored=BFGlobalLiveQuestBannerV4100.snapshot().applied;
+   result.sameSave=localStorage.getItem('bf_global_offline_demo_v7')===save;
+   return result;
+ }""")
+ for key in ('0','-1','3.5','101'):
+  assert gates[key]=={'available':False,'applied':False,'hidden':True,'enabled':True},(key,gates)
+ assert gates['restored'] and gates['sameSave'],gates
  assert page.evaluate('BFGlobalLiveQuestBannerV4100.setEnabled("true")') is False
  page.locator('#mode').select_option('training')
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
