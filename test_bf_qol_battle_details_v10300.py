@@ -67,12 +67,14 @@ with sync_playwright() as pw:
  for key in ('nan','overMax','stringHp','negativeMax'):
   assert invalid[key]['invalidFoes']==1 and invalid[key]['foes']==[],(key,invalid[key])
  assert invalid['unchanged'],invalid
+ # Expand before asserting visible warning text; keep panel open for the rest of the test.
+ p.locator('#bf10300-details > summary').click()
+ assert p.locator('#bf10300-details').get_attribute('open') is not None
  # Explanations are visible, not a forged HP display or false 1-HP unit.
  p.evaluate("S.enemies[0].maxHp=0;BFGlobalQoLBattleDetailsV10300.refresh()")
  assert '1 UNVERIFIED DEMO HP RECORD HIDDEN' in p.locator('#bf10300-enemies').inner_text()
  assert '1 HP' not in p.locator('#bf10300-enemies').inner_text()
  p.evaluate("S.enemies[0].maxHp=440;BFGlobalQoLBattleDetailsV10300.refresh()")
- p.locator('#bf10300-details > summary').click()
  for width in (320,390,540):
   p.set_viewport_size({'width':width,'height':844})
   rect=p.locator('#bf10300-details > summary').bounding_box()
