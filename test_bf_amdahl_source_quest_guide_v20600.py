@@ -162,6 +162,36 @@ with sync_playwright() as pw:
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256')==SOURCE['provenance']['questCanonSha256']
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.masterSha256.length')==64
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256.length')==64
+ # v436: source-only 2022 dungeon navigation is bounded and mobile-safe.
+ dungeon_ids=[d['id'] for d in SOURCE['dungeons']]
+ assert len(dungeon_ids)==7 and dungeon_ids[0]==400 and dungeon_ids[-1]==460
+ prev_dungeon=page.locator('#bf20600-previous-dungeon')
+ next_dungeon=page.locator('#bf20600-next-dungeon')
+ assert prev_dungeon.is_disabled() and next_dungeon.is_enabled()
+ for index,source_id in enumerate(dungeon_ids[1:],start=2):
+  next_dungeon.click()
+  assert page.locator('#bf20600-dungeon').input_value()==str(source_id)
+  assert page.evaluate('__lastArtPreview')==source_id
+  assert 'SOURCE DUNGEON '+str(index)+' / 7' in page.locator('#bf20600-dungeon-position').inner_text()
+  assert page.locator('#bf20600-quest-list li').count()>0
+ assert next_dungeon.is_disabled() and prev_dungeon.is_enabled()
+ # A prior search must not silently continue filtering after source navigation.
+ page.locator('#bf20600-search').fill('ceremony')
+ assert page.locator('#bf20600-clear-search').is_enabled()
+ prev_dungeon.click()
+ assert page.locator('#bf20600-search').input_value()==''
+ assert page.locator('#bf20600-clear-search').is_disabled()
+ for source_id in reversed(dungeon_ids[:-2]):
+  prev_dungeon.click()
+  assert page.locator('#bf20600-dungeon').input_value()==str(source_id)
+ assert prev_dungeon.is_disabled() and next_dungeon.is_enabled()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf20600-amdahl-guide > summary','#bf20600-dungeon',
+                   '#bf20600-previous-dungeon','#bf20600-next-dungeon'):
+   assert page.locator(selector).evaluate('(e)=>e.getBoundingClientRect().height')>=44,(width,selector)
+  assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'),width
+ page.set_viewport_size({'width':390,'height':844})
  # v414: search across all seven source dungeons, including mission-ID exact match.
  # This is read-only discovery, not playable 2022 encounter navigation.
  page.locator('#bf20600-search').fill('Malevolent Ceremony')
