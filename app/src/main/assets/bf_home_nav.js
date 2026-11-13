@@ -165,9 +165,21 @@ function bfOfflineUnitPortraitV266(source, name) {
         '<button type="button" class="bf-scene-tool-box" data-bf-goto="units" data-bf-open-box="1" aria-label="Open owned Unit Box"><img src="content/home/home_new_btn_box1.png" alt="" /><span>UNIT BOX</span></button>',
         '<div class="bf-scene-tool-locked" role="group" aria-label="Exchange Hall not implemented" aria-disabled="true"><img src="content/home/home_new_btn_exchange1.png" alt="" /><span>EXCHANGE · LATER</span></div>',
       '</div>',
+      '<button type="button" id="bf-home-build-info" aria-label="Open installed app build information" style="box-sizing:border-box;display:block;width:100%;min-height:44px;margin:8px 0 0;padding:9px 12px;color:#ffe2af;background:#21364d;border:1px solid #bca16a;border-radius:6px;font:800 12px Arial,sans-serif;text-align:center;cursor:pointer">VIEW BUILD VERSION / APP INFO</button>',
     '</section>',
     '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
   ].join('');
+  // v437: Home-to-existing-about-panel is a read-only, user-initiated route.
+  // No build identity or signing status is guessed when Android metadata is absent.
+  home.addEventListener('click',event=>{
+    if(!event.target.closest?.('#bf-home-build-info'))return;
+    if(window.BF_homeNav?.go('menu')!==true)return;
+    const info=document.getElementById('bf-about-build');
+    if(info){
+      info.open=true;
+      info.querySelector('summary')?.focus();
+    }
+  });
 
   const party = document.getElementById('bf-scene-party');
   // v423: A non-owned, duplicate or malformed base ID must never appear
