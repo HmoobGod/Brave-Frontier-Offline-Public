@@ -73,6 +73,7 @@
         '<label>Rarity<select id="bf-archive-rarity"><option value="all">All rarities</option></select></label>',
         '<label>Record type<select id="bf-archive-type"><option value="all">All original records</option><option value="0">Standard unit entries</option><option value="other">Other original kind codes</option></select></label>',
         '<label>Sort<select id="bf-archive-sort"><option value="id">Original ID</option><option value="name">English name</option><option value="rarity">Highest rarity</option></select></label>',
+        '<button id="bf-archive-reset" type="button">CLEAR FILTERS</button>',
       '</div>',
       '<div id="bf-archive-count" role="status" aria-live="polite"></div>',
       '<div id="bf-archive-results" class="bf-archive-results"></div>',
@@ -86,7 +87,7 @@
   const historicalArtToggle=get('bf-v188-historical-art');
   const historicalBattleToggle=get('bf-v189-historical-battle-art');
   const search=get('bf-archive-search'),element=get('bf-archive-element'),rarity=get('bf-archive-rarity'),kind=get('bf-archive-type'),sort=get('bf-archive-sort');
-  const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail');
+  const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail'),reset=get('bf-archive-reset');
   const pageSize=24;
   let page=0;
   const rarities=[...new Set(units.map(u=>u.rarity))].filter(Number.isInteger).sort((a,b)=>a-b);
@@ -108,7 +109,7 @@
     if(!u)return false;
     detail.replaceChildren();
     const close=document.createElement('button');close.type='button';close.className='bf-archive-close';close.textContent='CLOSE DETAILS';
-    close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();});
+    close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();const source=results.querySelector('.bf-archive-unit[data-unit-id="'+id+'"]');if(source)source.focus();else search.focus();});
     detail.append(close,item('h4','',u.name),item('p','','Original unit ID '+u.id+' · '+(elements[u.element]||'Element '+u.element)+' · '+u.rarity+'★'));
     detail.append(item('p','', 'Max level '+fmt(u.unitMaxLevel)+' · Cost '+fmt(u.unitCost)+' · '+(u.nameSource==='2022_Global_English'?'2022 Global English localization':u.nameSource==='master_literal'?'Literal master-table name':'Original English name not recovered')));
     // v189: exact historical source bytes, independently opted-in, read-only.
@@ -307,6 +308,7 @@
     for(const u of shown){
       const button=document.createElement('button');button.type='button';button.className='bf-archive-unit';
       button.setAttribute('aria-label',u.name+', original Global unit '+u.id+', view archived statistics');
+      button.dataset.unitId=String(u.id);
       const optInHistorical=!u.thumbnail && historicalArtToggle.checked && historicalArtIds.has(u.id);
       if(u.thumbnail || optInHistorical){
         const portrait=document.createElement('img');
@@ -325,8 +327,13 @@
     counter.textContent=matched.length.toLocaleString()+' matching archived forms · '+archive.stats.thumbnailCount+' original thumbnails bundled';
     pageLabel.textContent='Page '+(page+1)+' / '+total;
     prev.disabled=page===0;next.disabled=page>=total-1;
+    reset.disabled=!search.value && element.value==='all' && rarity.value==='all' && kind.value==='all' && sort.value==='id';
   }
   for(const select of [search,element,rarity,kind,sort])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
+  reset.addEventListener('click',()=>{
+    search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';
+    page=0;detail.hidden=true;detail.replaceChildren();render();search.focus();
+  });
   historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
   historicalBattleToggle.addEventListener('change',()=>{detail.hidden=true;detail.replaceChildren();render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});

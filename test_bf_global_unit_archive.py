@@ -77,10 +77,25 @@ with sync_playwright() as pw:
     assert page.locator('.bf-archive-unit').count()==2  # two original Natsu evolution forms
     page.locator('#bf-archive-search').fill('810547')
     assert page.locator('.bf-archive-unit').count()==1
+    assert page.locator('#bf-archive-reset').is_enabled()
     page.locator('.bf-archive-unit').click()
     assert page.locator('#bf-archive-detail').is_visible()
     assert 'Original unit ID 810547' in page.locator('#bf-archive-detail').inner_text()
     assert 'Leader skill ID' in page.locator('#bf-archive-detail').inner_text()
+    page.locator('#bf-archive-detail .bf-archive-close').click()
+    assert page.evaluate("document.activeElement?.dataset.unitId")=='810547'
+    page.locator('#bf-archive-element').select_option('1')
+    page.locator('#bf-archive-rarity').select_option('2')
+    page.locator('#bf-archive-sort').select_option('name')
+    page.locator('#bf-archive-reset').click()
+    assert page.locator('#bf-archive-search').input_value()==''
+    assert page.locator('#bf-archive-element').input_value()=='all'
+    assert page.locator('#bf-archive-rarity').input_value()=='all'
+    assert page.locator('#bf-archive-sort').input_value()=='id'
+    assert page.evaluate('BFGlobalUnitArchive.activePage')==1
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    assert page.evaluate("document.activeElement?.id")=='bf-archive-search'
+    assert page.locator('#bf-archive-reset').is_disabled()
     page.locator('#bf-archive-search').fill('10011')
     assert page.locator('.bf-archive-unit').count()==1
     assert page.locator('.bf-archive-unit img').count()==1
