@@ -16,6 +16,7 @@ assert len(js.encode('utf8'))<65536
 assert js.count('/* BF_GLOBAL_ARCHIVE_TRIALS_V200 */')==1
 assert '/* BF200_DATA_READY */' in js and 'BF200_DATA_PLACEHOLDER' not in js
 assert '/* BF200_M10_ALT_READY */' in js and 'BF200_M10_ALT_PLACEHOLDER' not in js
+assert '/* BF200_M10_AI_READY */' in js and 'BF200_M10_AI_PLACEHOLDER' not in js
 assert 'localStorage' not in js and 'saveProgress(' not in js and 'BFAndroid' not in js
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf150_source_crosscheck.js")')<java.index('readPackagedText("bf200_historical_wave_lab.js")')
@@ -105,16 +106,24 @@ with sync_playwright() as pw:
  assert page.evaluate('BFArchiveTrialsV200.startPractice(10)') is True
  assert page.evaluate('BFArchiveTrialsV200.practice.captureVariant')=='alternate'
  outcome=page.evaluate("""()=>{
-   let fourth=null;
+   let fourth=null, fourthAi=null;
    for(let i=0;i<150&&BFArchiveTrialsV200.practice.state==='running';i++){
      const state=BFArchiveTrialsV200.practice;
-     if(state.wave===4&&!fourth)fourth=state.enemies.map(e=>e.name);
+     if(state.wave===4&&!fourth){
+       fourth=state.enemies.map(e=>e.name);
+       BFArchiveTrialsV200.perform('guard');
+       fourthAi=BFArchiveTrialsV200.practice.recent.join(' | ');
+     }
      if(state.burst>=2)BFArchiveTrialsV200.perform('burst');
      else BFArchiveTrialsV200.perform('attack');
    }
-   return {result:BFArchiveTrialsV200.practice, fourth};
+   return {result:BFArchiveTrialsV200.practice, fourth, fourthAi};
  }""")
  assert outcome['fourth']==['Burny','Glowy','Mossy'],outcome
+ for unit,id in (('Burny',10030),('Glowy',50030),('Mossy',30030)):
+   assert f'{unit} #{id} ATTACK 100% (1 action)' in outcome['fourthAi'],outcome
+ assert '2014 source AI:' in outcome['fourthAi']
+ assert 'random target NOT simulated' in outcome['fourthAi']
  assert outcome['result']['state']=='won',outcome
  assert outcome['result']['wave']==5
  after=page.evaluate("""()=>({
