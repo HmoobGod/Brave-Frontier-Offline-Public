@@ -370,6 +370,7 @@ jobs:
           python test_bf_innate_status_resistance_v9100.py
           python test_bf_source_offensive_bb_levels_v9200.py
           python test_bf_morgan_original_v080.py
+          python test_bf_morgan_mobile_filter_v417.py
           python test_bf_v0131.py
           python test_bf_home_nav.py
           python test_bf_android_back_home_v22500.py
