@@ -7,6 +7,7 @@
     !window.BFGlobalSourceCrosscheckV150)return;
  const DATA=/* BF200_DATA_PLACEHOLDER */null;
  const M10_ALT=/* BF200_M10_ALT_PLACEHOLDER */null;
+ const M10_AI=/* BF200_M10_AI_PLACEHOLDER */null;
  if(DATA.schema!=='bf-global-2014-historical-wave-lab-v200' ||
     DATA.totals.missions!==21 || DATA.totals.waves!==112 ||
     DATA.totals.entries!==264 || DATA.totals.units!==42 ||
@@ -201,9 +202,43 @@
  // Fail closed to the legacy synthetic volley if the archive reference or
  // a wave/slot/source-stat join ever diverges.
  function sourceEnemyPlan2014(foes){
-    // Existing 08:07 source-action references must never be applied to the
-    // alternate 08:34 wave-4 roster; its simulated reply stays explicit.
-    if(current?.captureVariant==='alternate'&&current?.wave===3)return null;
+    // v413: Never apply the original 08:07 planner to the 08:34 wave 4.
+    // Use a separate FULLY MATCHED original 2014 source-action record.
+    // Only source attack CHOICE is recovered: damage and targeting remain
+    // synthetic. No story encounter/AI, capture, items or rewards are touched.
+    if(current?.captureVariant==='alternate'&&current?.wave===3){
+      const witness=M10_AI, action=witness?.normalAttack;
+      if(!m10Alternate||current.missionId!==10||!Array.isArray(foes)||
+         witness?.schema!=='bf-global-2014-m10-alternate-normal-attack-evidence-v413'||
+         witness.sourceEra!==2014||witness.original2022Confirmed!==false||
+         witness.changesCanonicalBattle!==false||
+         witness.changesRewardsOrSave!==false||
+         witness.missionId!==10||witness.wave!==4||
+         witness.source?.gitBlobSha!==m10Alternate.gitBlobSha||
+         witness.source?.sourcePath!==m10Alternate.sourcePath||
+         action?.type!=='attack'||action.parameters!=='-1'||
+         action.percent!==100||action.targetCondition!=='random'||
+         action.targetType!==2||action.conditions!==0||
+         action.actionsPerTurn!=='1~1'||action.skills!==0||
+         !Array.isArray(witness.enemies)||witness.enemies.length!==3||
+         foes.length!==3)return null;
+      const planned=[];
+      for(let slot=0;slot<foes.length;slot++){
+        const foe=foes[slot],source=witness.enemies[slot];
+        if(source?.slot!==slot||!foe||foe.name!==source.name||
+           foe.unitId!==source.unitId||foe.maxHp!==source.hp||
+           foe.atk!==source.atk||foe.def!==source.def||
+           foe.aiId!==source.aiId||!Number.isFinite(foe.hp)||
+           foe.hp<0||foe.hp>source.hp)return null;
+        if(foe.hp>0)planned.push(Object.freeze({
+          wave:4,slot,unitId:source.unitId,name:source.name,
+          action:'attack',sourceWeight:100,sourceBacked:true,
+          nativeRandomTargetImplemented:false,
+          syntheticHarm:Math.max(12,Math.ceil(source.atk/12))
+        }));
+      }
+      return Object.freeze(planned);
+    }
     // v144: remaining twelve archived 2014 Global missions.
     // Source-backed one-action normals only; complex source AI stays
     // explicitly labeled synthetic and never contaminates 2022 combat.
