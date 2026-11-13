@@ -49,12 +49,30 @@
    option.value=String(id);option.textContent=d.name+' ('+id+')';select.append(option);
  }
  label.append(select);
+ const searchLabel=document.createElement('label');
+ searchLabel.textContent='Find original Amdahl quest: ';
+ searchLabel.style.cssText='display:block;margin-top:10px';
+ const search=document.createElement('input');
+ search.id='bf20600-search';search.type='search';search.autocomplete='off';
+ search.placeholder='Quest name or source mission ID';
+ search.style.cssText='display:block;box-sizing:border-box;width:100%;min-height:44px;font-size:16px;padding:9px;color:#fff;background:#253950;border:1px solid #91806b';
+ searchLabel.append(search);
+ const reset=document.createElement('button');reset.type='button';
+ reset.id='bf20600-clear-search';reset.textContent='CLEAR SEARCH';
+ reset.style.cssText='margin-top:8px;min-height:44px;padding:8px 14px';
+ reset.disabled=true;
+ const status=document.createElement('p');status.id='bf20600-search-status';
+ status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const list=document.createElement('ol');list.id='bf20600-quest-list';
  list.style.cssText='padding-left:23px;margin:10px 0';
  function preview(id){
    if(!ids.includes(id))return 0;
    select.value=String(id);list.replaceChildren();
-   for(const r of rows.filter(x=>x[1]===id)){
+   const query=search.value.trim().toLocaleLowerCase('en');
+   const candidates=query
+     ?rows.filter(r=>String(r[0])===query || r[8].toLocaleLowerCase('en').includes(query))
+     :rows.filter(r=>r[1]===id);
+   for(const r of candidates){
      const li=document.createElement('li');li.dataset.missionId=String(r[0]);
      li.style.cssText='margin-bottom:12px;line-height:1.45';
      const name=document.createElement('strong');name.textContent=r[0]+' · '+r[8];
@@ -64,16 +82,22 @@
        ' · '+r[5]+' EXP · '+r[6]+' Zel · '+r[7]+' Karma · NOT PLAYABLE';
      li.append(name,desc,meta);list.append(li);
    }
+   status.textContent=query
+     ?list.children.length+' of 36 source-only quests match. Not playable.'
+     :list.children.length+' original source-only quests in this dungeon. Not playable.';
+   reset.disabled=!query;
    return list.children.length;
  }
+ search.addEventListener('input',()=>preview(Number(select.value)));
+ reset.addEventListener('click',()=>{search.value='';preview(Number(select.value));search.focus()});
  select.addEventListener('change',()=>{
-   const id=Number(select.value);preview(id);art.preview(id);
+   const id=Number(select.value);search.value='';preview(id);art.preview(id);
  });
  for(const pin of root.querySelectorAll('[data-bf14900-dungeon]')){
    const id=Number(pin.dataset.bf14900Dungeon);
-   if(ids.includes(id))pin.addEventListener('click',()=>preview(id));
+   if(ids.includes(id))pin.addEventListener('click',()=>{search.value='';preview(id)});
  }
- block.append(heading,disclaimer,label,list);root.append(block);preview(400);
+ block.append(heading,disclaimer,label,searchLabel,reset,status,list);root.append(block);preview(400);
  window.BFAmdahlSourceQuestGuideV20600=Object.freeze({
    source:Object.freeze({year:2022,masterSha256:MASTER_SHA256,
      canonicalQuestSha256:QUEST_SHA256,
