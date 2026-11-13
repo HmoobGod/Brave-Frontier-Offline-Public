@@ -38,7 +38,7 @@
     '.bf080-pin-layer{position:absolute;inset:0;pointer-events:none}',
     '.bf080-pin{pointer-events:auto;position:absolute;transform:translate(-50%,-50%);',
     'border:2px solid #eed49f;background:#513c24;color:#fff;border-radius:50%;',
-    'min-width:31px;min-height:31px;font:800 11px Arial;cursor:pointer}',
+    'min-width:44px;min-height:44px;font:800 11px Arial;cursor:pointer}',
     '.bf080-pin[aria-pressed=true]{background:#0b8099;border-color:#b7faff}',
     '.bf080-pin.bf080-locked{opacity:.66;background:#252b35}',
     '.bf080-map-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}',
@@ -47,6 +47,13 @@
     '.bf080-map-list button strong{display:block;font:800 12px Georgia,serif}',
     '.bf080-map-list button small{display:block;font:10px Arial,sans-serif}',
     '.bf080-map-list button.bf080-locked{opacity:.65}',
+    '.bf080-map-list button[hidden]{display:none!important}',
+    '.bf080-pin[hidden]{display:none!important}',
+    '.bf080-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}',
+    '.bf080-filter button{min-height:44px;padding:8px 12px;border:1px solid #b18e56;',
+    'border-radius:6px;background:#26384a;color:#fff;font-weight:700}',
+    '.bf080-filter button[aria-pressed=true]{background:#0b8099}',
+    '@media(max-width:360px){.bf080-map-list{grid-template-columns:1fr}}',
     '.bf080-map-list button[aria-pressed=true]{outline:2px solid #96def0}',
     '#bf080-morgan-map p{font:12px/1.4 Arial,sans-serif}',
     '#bf080-morgan-map .bf080-note{font:10px/1.45 Arial,sans-serif;color:#c4d1de}'
@@ -83,6 +90,26 @@
   const pins=panel.querySelector('.bf080-pin-layer'),items=panel.querySelector('.bf080-map-list');
   const status=panel.querySelector('#bf080-map-status');
   const controls=new Map();
+  const filterBar=document.createElement('div');
+  filterBar.className='bf080-filter';
+  filterBar.setAttribute('role','group');
+  filterBar.setAttribute('aria-label','Morgan dungeon completion filter');
+  const filterButton=document.createElement('button');
+  filterButton.type='button';
+  filterButton.textContent='SHOW UNCLEARED ONLY';
+  filterButton.setAttribute('aria-pressed','false');
+  const filterCount=document.createElement('span');
+  filterCount.setAttribute('role','status');
+  filterCount.setAttribute('aria-live','polite');
+  filterBar.append(filterButton,filterCount);
+  items.before(filterBar);
+  let unclearedOnly=false;
+  filterButton.addEventListener('click',()=>{
+    unclearedOnly=!unclearedOnly;
+    filterButton.setAttribute('aria-pressed',String(unclearedOnly));
+    filterButton.textContent=unclearedOnly?'SHOW ALL DUNGEONS':'SHOW UNCLEARED ONLY';
+    refresh();
+  });
   let selectedRegion='mistral';
   function chooseRegion(area){
      if(area!=='mistral' && area!=='morgan')return false;
@@ -128,6 +155,7 @@
     controls.set(d.id,{pin,button});
   }
   function refresh(){
+    let visible=0;
     for(const d of source.dungeons){
       const ok=unlocked(d);
       const selected=QUEST?.dungeonId===d.id;
@@ -136,6 +164,10 @@
           (P.questClears?.[q.missionId]||0)>0).length;
       const total=QUESTS.filter(q=>q.dungeonId===d.id).length;
       const label=(ok?'AVAILABLE':'LOCKED')+' · '+cleared+'/'+total+' cleared';
+      const show=!unclearedOnly || cleared<total;
+      pin.hidden=!show;
+      button.hidden=!show;
+      if(show)visible++;
       pin.classList.toggle('bf080-locked',!ok);
       button.classList.toggle('bf080-locked',!ok);
       pin.setAttribute('aria-pressed',String(selected));
@@ -144,6 +176,7 @@
       button.setAttribute('aria-label',d.name+', '+label);
       button.querySelector('small').textContent=label;
     }
+    filterCount.textContent=visible+' of '+source.dungeons.length+' dungeons shown';
   }
   chooseRegion('mistral');
   new MutationObserver(refresh).observe(list,{childList:true});
@@ -152,6 +185,7 @@
   window.BFMorganMapV080=Object.freeze({
     entries:source.dungeons,refresh,openDungeon,chooseRegion,
     isUnlocked(id){const d=source.dungeons.find(q=>q.id===id);return d?unlocked(d):false},
-    get selectedRegion(){return selectedRegion}
+    get selectedRegion(){return selectedRegion},
+    get unclearedOnly(){return unclearedOnly}
   });
 })();
