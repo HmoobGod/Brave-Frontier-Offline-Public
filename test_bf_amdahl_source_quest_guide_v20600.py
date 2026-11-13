@@ -169,6 +169,10 @@ with sync_playwright() as pw:
  assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='465'
  assert '1 of 36' in page.locator('#bf20600-search-status').inner_text()
  assert page.locator('#bf20600-clear-search').is_enabled()
+ # A mid-name substring must match: startsWith() is not an acceptable substitute.
+ page.locator('#bf20600-search').fill('ceremony')
+ assert page.locator('#bf20600-quest-list li').count()==1
+ assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='465'
  page.locator('#bf20600-search').fill('400')
  assert page.locator('#bf20600-quest-list li').count()==1
  assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='400'
@@ -185,7 +189,12 @@ with sync_playwright() as pw:
  assert page.locator('#bf20600-clear-search').evaluate('(e)=>e.getBoundingClientRect().height')>=44
  assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
  page.set_viewport_size({'width':390,'height':844})
+ # Changing the dungeon resets global search; no stale cross-area filter.
+ page.locator('#bf20600-search').fill('ceremony')
+ assert page.locator('#bf20600-quest-list li').count()==1
  page.locator('#bf20600-dungeon').select_option('460')
+ assert page.locator('#bf20600-search').input_value()==''
+ assert page.locator('#bf20600-clear-search').is_disabled()
  assert page.locator('#bf20600-quest-list li').count()==6
  assert 'Malevolent Ceremony' in page.locator('#bf20600-quest-list').inner_text()
  assert page.evaluate('__lastArtPreview')==460
