@@ -81,14 +81,27 @@
   const sceneTools = home?.querySelector('.bf-scene-tools');
   const compactHome = typeof window.matchMedia === 'function' ?
     window.matchMedia('(max-width:370px)') : null;
+  // #420 places its optional 2022 mission preview immediately after the
+  // Adventure region. Keep the two nodes adjacent when screen width changes.
+  // No extra Home art is cloned, no route is clicked, no player state is saved.
+  function adjacentPreview() {
+    const panel=home?.querySelector('#bf420-home-readiness');
+    return panel?.parentElement===home ? panel : null;
+  }
   function syncNarrowHome() {
     if (!home || !sceneSquad || !sceneExplore || !sceneTools || !compactHome)
       return false;
+    const preview=adjacentPreview();
     if (compactHome.matches) {
-      if (sceneExplore.nextElementSibling !== sceneSquad)
-        home.insertBefore(sceneExplore,sceneSquad);
-    } else if (sceneExplore.nextElementSibling !== sceneTools) {
+      // Put the two real playable Quest/Summon tiles ahead of the expanding
+      // squad/story stack; the optional preview always follows Adventure.
+      home.insertBefore(sceneExplore,sceneSquad);
+      if (preview) home.insertBefore(preview,sceneSquad);
+    } else {
+      // Restore DOM/keyboard order on larger phones, including the optional
+      // preview. Move the actual existing nodes, never duplicate controls.
       home.insertBefore(sceneExplore,sceneTools);
+      if (preview) home.insertBefore(preview,sceneTools);
     }
     return compactHome.matches;
   }
