@@ -97,6 +97,14 @@
    const current=total?(won?total:Math.min(total,completed+1)):0;
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
    const foes=Array.isArray(S.enemies)?S.enemies.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
+   // v426: live DEMO enemy health is an informational, read-only sum.
+   // Reject a partial/malformed wave rather than displaying a misleading bar.
+   const hpSource=Array.isArray(S.enemies)?S.enemies:null;
+   const hpValid=!!hpSource?.length&&hpSource.every(e=>e&&
+     Number.isFinite(e.hp)&&Number.isFinite(e.maxHp)&&
+     e.maxHp>0&&e.hp>=0&&e.hp<=e.maxHp);
+   const enemyHp=hpValid?Math.round(hpSource.reduce((sum,e)=>sum+e.hp,0)):null;
+   const enemyMaxHp=hpValid?Math.round(hpSource.reduce((sum,e)=>sum+e.maxHp,0)):null;
    // A stale saveEnabled flag alone never unlocks this separate Next button.
    // Mirror the v3000 result-screen gate without writing or changing v7.
    const stored=progressStored()&&
@@ -110,6 +118,7 @@
      phase:String(S.phase||''),clears:P.questClears?.[q.missionId]||0,
      allies:party.filter(u=>u.hp>0).length,party:party.length,
      enemies:foes.filter(u=>u.hp>0).length,foes:foes.length,
+     enemyHp,enemyMaxHp,
      nextId:upcomingQuest?.missionId||null,
      nextName:upcomingQuest?BFGlobalQuestText.sourceFor(upcomingQuest)?.mission?.name||'Mission '+upcomingQuest.missionId:null
    });
@@ -139,6 +148,8 @@
    status.textContent=(state.won?'VICTORY':state.lost?'DEFEAT':state.busy?'TURN IN PROGRESS':'BATTLE READY')+
      ' · Wave '+state.current+'/'+state.total+
      ' · Allies '+state.allies+'/'+state.party+' · Enemies '+state.enemies+'/'+state.foes+
+     ' · DEMO enemy HP '+(state.enemyHp===null||state.enemyMaxHp===null?
+       'unavailable':state.enemyHp+'/'+state.enemyMaxHp)+
      (state.archive&&state.won&&!state.stored?
        ' · SAVE REQUIRED: retry save or export backup before advancing':'');
    retry.hidden=!(state.archive&&state.won&&!state.stored);

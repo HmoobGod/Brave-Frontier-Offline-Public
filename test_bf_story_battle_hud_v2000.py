@@ -38,6 +38,40 @@ with sync_playwright() as pw:
  assert s['current']==1 and s['completed']==0 and s['nextId'] is None,s
  assert 'DEMO' in page.locator('#bf2000-foot').inner_text()
  assert page.locator('#bf2000-waves span').count()==3
+ # v426: the live HUD reports only verified in-memory DEMO foe HP totals.
+ # No battle action, original 2022 formation inference or v7 save writes.
+ hp_probe=page.evaluate("""() => {
+  const prior=S.enemies,oldP=JSON.stringify(P),oldS=JSON.stringify(S);
+  const oldSave=localStorage.getItem('bf_global_offline_demo_v7');
+  const result={};
+  try {
+    S.enemies=[{slot:0,hp:42,maxHp:100},{slot:1,hp:12,maxHp:40}];
+    let state=BFGlobalStoryBattleV2000.refresh();
+    result.first=[state.enemyHp,state.enemyMaxHp];
+    result.firstLabel=document.getElementById('bf2000-state').textContent;
+    S.enemies[1].hp=0;
+    state=BFGlobalStoryBattleV2000.refresh();
+    result.afterKo=[state.enemyHp,state.enemyMaxHp];
+    S.enemies[0].maxHp=0;
+    state=BFGlobalStoryBattleV2000.refresh();
+    result.invalid=[state.enemyHp,state.enemyMaxHp];
+    result.invalidLabel=document.getElementById('bf2000-state').textContent;
+    S.enemies[0].maxHp=100;S.enemies[0].hp=NaN;
+    state=BFGlobalStoryBattleV2000.refresh();
+    result.nonFinite=[state.enemyHp,state.enemyMaxHp];
+  } finally {
+    S.enemies=prior;
+    BFGlobalStoryBattleV2000.refresh();
+  }
+  result.unchanged=JSON.stringify(P)===oldP&&JSON.stringify(S)===oldS&&
+    localStorage.getItem('bf_global_offline_demo_v7')===oldSave;
+  return result;
+ }""")
+ assert hp_probe['first']==[54,140],hp_probe
+ assert 'DEMO enemy HP 54/140' in hp_probe['firstLabel'],hp_probe
+ assert hp_probe['afterKo']==[42,140],hp_probe
+ assert hp_probe['invalid']==[None,None] and 'DEMO enemy HP unavailable' in hp_probe['invalidLabel'],hp_probe
+ assert hp_probe['nonFinite']==[None,None] and hp_probe['unchanged'],hp_probe
  # v359: direct real core execute() next-wave and final-reward gates.
  # No mocks of the native engine; only disposable source-provider corruption.
  page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
