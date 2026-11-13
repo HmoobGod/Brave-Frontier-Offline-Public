@@ -170,12 +170,29 @@ function bfOfflineUnitPortraitV266(source, name) {
   ].join('');
 
   const party = document.getElementById('bf-scene-party');
+  // v423: A non-owned, duplicate or malformed base ID must never appear
+  // to be an owned Home squad member. This is presentation-only.
+  const partyReview = document.createElement('p');
+  partyReview.id = 'bf-scene-party-review';
+  partyReview.hidden = true;
+  partyReview.setAttribute('role', 'status');
+  partyReview.setAttribute('aria-live', 'polite');
+  party.insertAdjacentElement('afterend', partyReview);
   function refreshParty() {
     const members = typeof P !== 'undefined' && P && Array.isArray(P.squad) ? P.squad.slice(0, 6) : [];
-    const nodes = [];
+    const nodes = [], seen = new Set();
+    const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
+    let unverified = 0;
     for (let index = 0; index < 6; index++) {
       const baseId = members[index];
-      const unit = baseId != null && typeof effectiveUnit === 'function' ? effectiveUnit(baseId) : null;
+      const present = baseId !== undefined && baseId !== null;
+      const owned = present && Number.isSafeInteger(baseId) && baseId > 0 &&
+        Array.isArray(roster) && roster.includes(baseId) && !seen.has(baseId);
+      let unit = null;
+      if (owned && typeof effectiveUnit === 'function') {
+        try { unit = effectiveUnit(baseId); } catch (_) { unit = null; }
+      }
+      if (unit) seen.add(baseId);
       const card = document.createElement('div');
       card.className = 'bf-scene-member' + (unit ? '' : ' bf-scene-empty');
       if (unit) {
@@ -187,6 +204,10 @@ function bfOfflineUnitPortraitV266(source, name) {
         level.textContent = 'Lv.' + (typeof demoLevel === 'function' ? demoLevel(exp) : '1');
         card.setAttribute('aria-label', name.textContent + ', ' + level.textContent);
         card.append(img, name, level);
+      } else if (present) {
+        unverified++;
+        card.textContent = 'REVIEW';
+        card.setAttribute('aria-label', 'Unverified squad entry. Open Units to review.');
       } else {
         card.textContent = '—';
         card.setAttribute('aria-label', 'Empty squad slot');
@@ -194,6 +215,10 @@ function bfOfflineUnitPortraitV266(source, name) {
       nodes.push(card);
     }
     party.replaceChildren(...nodes);
+    partyReview.hidden = unverified === 0;
+    partyReview.textContent = unverified ?
+      unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
+      ' review · Open Units to inspect ownership.' : '';
   }
   // Home shows only source-validated campaign progress. No quest selection,
   // battle start, Auto toggle or canonical v7 save mutation occurs here.
