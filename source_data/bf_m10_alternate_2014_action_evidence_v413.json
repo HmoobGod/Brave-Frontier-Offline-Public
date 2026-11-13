@@ -1,0 +1,54 @@
+{
+  "schema": "bf-global-2014-m10-alternate-normal-attack-evidence-v413",
+  "sourceEra": 2014,
+  "missionId": 10,
+  "wave": 4,
+  "original2022Confirmed": false,
+  "changesCanonicalBattle": false,
+  "changesRewardsOrSave": false,
+  "source": {
+    "repository": "cheahjs/bravefrontier_data",
+    "sourcePath": "missions_parsed/Start of Adventure_2014-14-10-08-34.json",
+    "gitBlobSha": "c6a9d86b7e72a079ebdaa48b84864d078e5568e3"
+  },
+  "normalAttack": {
+    "type": "attack",
+    "parameters": "-1",
+    "percent": 100,
+    "targetCondition": "random",
+    "targetType": 2,
+    "conditions": 0,
+    "actionsPerTurn": "1~1",
+    "skills": 0
+  },
+  "enemies": [
+    {
+      "slot": 0,
+      "unitId": 10030,
+      "name": "Burny",
+      "hp": 800,
+      "atk": 320,
+      "def": 50,
+      "aiId": 1
+    },
+    {
+      "slot": 1,
+      "unitId": 50030,
+      "name": "Glowy",
+      "hp": 850,
+      "atk": 340,
+      "def": 60,
+      "aiId": 1
+    },
+    {
+      "slot": 2,
+      "unitId": 30030,
+      "name": "Mossy",
+      "hp": 830,
+      "atk": 340,
+      "def": 90,
+      "aiId": 1
+    }
+  ],
+  "note": "Original 2014 capture normal-attack decisions ONLY; practice harm remains synthetic and random target not simulated; no native 2022 authenticity."
+}
