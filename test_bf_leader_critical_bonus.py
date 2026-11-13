@@ -31,7 +31,7 @@ with sync_playwright() as pw:
                                 shutil.which('google-chrome'), args=['--no-sandbox'])
     page = browser.new_page()
     errors = []
-    page.on('pageerror', lambda error: errors.append(str(error)))
+    page.on('pageerror', lambda error: errors.append(str(error) + '\nJS STACK:\n' + str(getattr(error, 'stack', ''))))
     page.route('**/*', lambda route: route.abort())
     page.evaluate(INSTALL_STORAGE)
     page.evaluate('''()=>{HTMLMediaElement.prototype.play=()=>Promise.resolve();
