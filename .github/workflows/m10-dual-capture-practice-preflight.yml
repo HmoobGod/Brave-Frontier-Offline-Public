@@ -1,0 +1,27 @@
+name: Mission 10 Dual 2014 Capture Practice Preflight
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  historical-practice:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate two pinned 2014 captures and isolation
+        run: python3 test_bf_m10_2014_variants_v411.py
+      - name: Build historical practice asset offline
+        run: python3 prepare_historical_wave_lab_v200.py
+      - name: Parse prepared JS without executing gameplay
+        run: node --check app/src/main/assets/bf200_historical_wave_lab.js

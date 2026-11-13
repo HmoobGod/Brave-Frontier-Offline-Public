@@ -1,0 +1,104 @@
+{
+  "schema": "bf-global-mission10-dual-2014-capture-v411",
+  "sourceEra": 2014,
+  "missionId": 10,
+  "missionName": "Start of Adventure",
+  "historicalPracticeOnly": true,
+  "native2022FormationsVerified": false,
+  "native2022EnemyAIAndDropsVerified": false,
+  "originalGameRewardsEnabled": false,
+  "primary": {
+    "sourcePath": "missions_parsed/Start of Adventure_2014-14-10-08-07.json",
+    "gitBlobSha": "556829bc0639e417ecd4dbc99ef28c44da25c621"
+  },
+  "alternate": {
+    "sourcePath": "missions_parsed/Start of Adventure_2014-14-10-08-34.json",
+    "gitBlobSha": "c6a9d86b7e72a079ebdaa48b84864d078e5568e3",
+    "sourceOf": "joppe2001/bf-private-server-data archive/mission_sources.json (captured provenance)"
+  },
+  "waves": 5,
+  "enemySlots": 11,
+  "identicalOtherWaves": [
+    1,
+    2,
+    3,
+    5
+  ],
+  "onlyChangedWave": 4,
+  "wave4Original": [
+    {
+      "name": "Squirty",
+      "unitId": 20030,
+      "hp": 780,
+      "atk": 330,
+      "def": 20,
+      "aiId": 1
+    },
+    {
+      "name": "Gloomy",
+      "unitId": 60030,
+      "hp": 760,
+      "atk": 370,
+      "def": 0,
+      "aiId": 1
+    },
+    {
+      "name": "Sparky",
+      "unitId": 40030,
+      "hp": 760,
+      "atk": 370,
+      "def": 0,
+      "aiId": 1
+    }
+  ],
+  "wave4Alternate": [
+    {
+      "name": "Burny",
+      "unitId": 10030,
+      "hp": 800,
+      "atk": 320,
+      "def": 50,
+      "aiId": 1
+    },
+    {
+      "name": "Glowy",
+      "unitId": 50030,
+      "hp": 850,
+      "atk": 340,
+      "def": 60,
+      "aiId": 1
+    },
+    {
+      "name": "Mossy",
+      "unitId": 30030,
+      "hp": 830,
+      "atk": 340,
+      "def": 90,
+      "aiId": 1
+    }
+  ],
+  "observations": {
+    "originalCaptureWave4Names": [
+      "Squirty",
+      "Gloomy",
+      "Sparky"
+    ],
+    "alternateCaptureWave4Names": [
+      "Burny",
+      "Glowy",
+      "Mossy"
+    ],
+    "bothHaveOneNormalAttackPerEnemy": true,
+    "normalAttackWeightPercent": 100,
+    "targetSelection": "random",
+    "itemDropTablesUnchangedAcrossBothCaptures": true,
+    "historicalItemDropExample": "Green Grass (7%), Green Drop (7%) in wave 4; display/reference only, NOT earned in practice",
+    "serverGeneratorInferences": [
+      "enemy position layout",
+      "monster text ID mapped from English name",
+      "skill/AI resolving and fallback",
+      "mission reward scalars from MST"
+    ],
+    "warning": "Two distinct original 2014 captures; no original 2022 enemy formation, AI, item drop, or reward authenticity proven. Donor generated mission.json 56.7 MB was not inspected."
+  }
+}

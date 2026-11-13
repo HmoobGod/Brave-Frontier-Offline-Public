@@ -6,6 +6,7 @@
     !window.BFGlobalQuestJournalV110 || !window.BFGlobalUnitArchive ||
     !window.BFGlobalSourceCrosscheckV150)return;
  const DATA=/* BF200_DATA_PLACEHOLDER */null;
+ const M10_ALT=/* BF200_M10_ALT_PLACEHOLDER */null;
  if(DATA.schema!=='bf-global-2014-historical-wave-lab-v200' ||
     DATA.totals.missions!==21 || DATA.totals.waves!==112 ||
     DATA.totals.entries!==264 || DATA.totals.units!==42 ||
@@ -21,6 +22,31 @@
     archive.set(entry.id,Object.freeze({...entry,quest}));
  }
  if(archive.size!==21)return;
+ // v411: Alternate original 2014 capture is NOT a 2022 formation.
+ // Require the exact original five-wave roster before allowing a wave-4 swap.
+ const m10Base=archive.get(10);
+ const m10AltValid=M10_ALT?.schema==='bf-global-mission10-dual-2014-capture-v411'&&
+   M10_ALT.sourceEra===2014&&M10_ALT.historicalPracticeOnly===true&&
+   M10_ALT.native2022FormationsVerified===false&&
+   M10_ALT.originalGameRewardsEnabled===false&&
+   M10_ALT.missionId===10&&m10Base?.name==='Start of Adventure'&&
+   m10Base.gitBlobSha==='556829bc0639e417ecd4dbc99ef28c44da25c621'&&
+   M10_ALT.primary.gitBlobSha===m10Base.gitBlobSha&&
+   M10_ALT.alternate.gitBlobSha==='c6a9d86b7e72a079ebdaa48b84864d078e5568e3'&&
+   M10_ALT.waves===5&&M10_ALT.enemySlots===11&&
+   m10Base.waves.length===5&&m10Base.waves[3].wave===4&&
+   JSON.stringify(m10Base.waves[3].enemies)===JSON.stringify(M10_ALT.wave4Original)&&
+   JSON.stringify(M10_ALT.wave4Alternate.map(e=>e.unitId))==='[10030,50030,30030]'&&
+   M10_ALT.wave4Alternate.every(e=>Number.isInteger(e.hp)&&e.hp>0&&
+     Number.isInteger(e.atk)&&e.atk>=0&&Number.isInteger(e.def)&&e.def>=0&&e.aiId===1);
+ const m10Alternate=m10AltValid?Object.freeze({...m10Base,
+   sourcePath:M10_ALT.alternate.sourcePath,
+   gitBlobSha:M10_ALT.alternate.gitBlobSha,
+   captureVariant:'alternate',
+   waves:m10Base.waves.map((w,i)=>i===3?Object.freeze({
+      wave:4,enemies:M10_ALT.wave4Alternate.map(e=>Object.freeze({...e}))
+   }):w)
+ }):null;
  const host=document.getElementById('bf150-integrity');
  const list=document.getElementById('questlist');
  if(!host||!list)return;
@@ -36,6 +62,7 @@
   '#bf200-trials button{min-height:40px;margin:4px 4px 4px 0;padding:8px 10px;',
   'border:1px solid #bfa374;border-radius:5px;background:#3b526e;color:#fff;font-weight:700}',
   '#bf200-trials button:disabled{opacity:.5}',
+  '#bf200-capture-variant{min-height:44px;margin:8px 0}',
   '#bf200-status{font-weight:700}',
   '.bf200-wave{padding:6px 0;border-top:1px solid #5c6c7a}',
   '.bf200-foe{display:flex;align-items:center;gap:7px;margin:5px 0;',
@@ -57,6 +84,16 @@
     const option=document.createElement('option');option.value=String(row.id);
     option.textContent='Mission '+row.id+' · '+row.name;select.append(option);
  }
+ const capture=document.createElement('select');capture.id='bf200-capture-variant';
+ capture.setAttribute('aria-label','Mission 10 original 2014 capture version');
+ for(const [key,label] of [
+   ['primary','2014 capture 08:07 · original practice'],
+   ['alternate','2014 capture 08:34 · alternate wave 4']]){
+   const option=document.createElement('option');option.value=key;
+   option.textContent=label;capture.append(option);
+ }
+ const captureGuide=document.createElement('p');captureGuide.className='bf200-alert';
+ captureGuide.textContent='Two observed 2014 versions; wave 4 differs. Neither is authenticated 2022. All damage and reward behavior is simulated.';
  const origin=document.createElement('small');origin.id='bf200-source';
  const preview=document.createElement('div');preview.id='bf200-reference';
  const begin=document.createElement('button');begin.id='bf200-start';
@@ -82,14 +119,22 @@
  const note=document.createElement('p');note.className='bf200-alert';
  note.textContent='All practice damage, turn rules, HP, Burst and healing are synthetic. Only historical 2014 enemy names/stats/waves derive from the archive. Never changes the main game or save.';
  arena.append(target,actions,log);
- panel.append(title,context,select,origin,preview,begin,exit,status,arena,note);
+ panel.append(title,context,select,capture,captureGuide,origin,preview,begin,exit,status,arena,note);
  host.after(panel);
  let current=null;
- const selection=()=>archive.get(Number(select.value))||null;
+ const selection=()=>{
+    const row=archive.get(Number(select.value))||null;
+    return row?.id===10&&m10Alternate&&capture.value==='alternate'?
+      m10Alternate:row;
+ };
  const unlocked=()=>!!selection()&&questUnlocked(selection().quest);
  function showReference(){
     const row=selection();if(!row)return false;
-    origin.textContent='Archived 2014 source: '+row.sourcePath+' · Git blob '+row.gitBlobSha;
+    capture.hidden=row.id!==10||!m10Alternate;
+    capture.disabled=current?.state==='running';
+    captureGuide.hidden=capture.hidden;
+    origin.textContent='Archived 2014 source: '+row.sourcePath+' · Git blob '+row.gitBlobSha+
+      (row===m10Alternate?' · alternate capture; wave 4 changes only':'');
     preview.replaceChildren();
     const caption=document.createElement('p');
     caption.textContent=row.waves.length+' archived 2014 waves · '+
@@ -124,8 +169,10 @@
  }
  function state(){
     if(!current)return null;
-    const row=archive.get(current.missionId);
+    const row=current.captureVariant==='alternate'&&current.missionId===10?
+      m10Alternate:archive.get(current.missionId);
     return Object.freeze({missionId:current.missionId,state:current.state,
+      captureVariant:current.captureVariant,
       wave:current.wave+1,totalWaves:row.waves.length,hp:current.hp,
       burst:current.burst,kits:current.kits,turns:current.turns,
       enemies:current.enemies.map(e=>Object.freeze({
@@ -138,10 +185,12 @@
     current.log.push('Started archived 2014 wave '+(index+1)+'/'+row.waves.length+'.');
  }
  function startPractice(id=Number(select.value)){
-    const row=archive.get(Number(id));
+    const row=Number(id)===10&&Number(select.value)===10?
+      selection():archive.get(Number(id));
     if(!row||!questUnlocked(row.quest)||!!S?.busy)return false;
     select.value=String(row.id);
-    current={missionId:row.id,state:'running',wave:0,hp:12000,
+    current={missionId:row.id,captureVariant:row===m10Alternate?
+       'alternate':'primary',state:'running',wave:0,hp:12000,
        burst:0,kits:2,turns:0,enemies:[],log:[]};
     putWave(row,0);render();return true;
  }
@@ -152,6 +201,9 @@
  // Fail closed to the legacy synthetic volley if the archive reference or
  // a wave/slot/source-stat join ever diverges.
  function sourceEnemyPlan2014(foes){
+    // Existing 08:07 source-action references must never be applied to the
+    // alternate 08:34 wave-4 roster; its simulated reply stays explicit.
+    if(current?.captureVariant==='alternate'&&current?.wave===3)return null;
     // v144: remaining twelve archived 2014 Global missions.
     // Source-backed one-action normals only; complex source AI stays
     // explicitly labeled synthetic and never contaminates 2022 combat.
@@ -234,7 +286,8 @@
        current.log.push('Synthetic Heal Kit restored up to 3,000 HP.');}
     current.turns++;
     if(foes.every(e=>e.hp===0)){
-       const row=archive.get(current.missionId);
+       const row=current.captureVariant==='alternate'&&current.missionId===10?
+          m10Alternate:archive.get(current.missionId);
        if(current.wave+1>=row.waves.length){
           current.state='won';
           current.log.push('PRACTICE COMPLETE. No game progress or rewards granted.');
@@ -289,6 +342,7 @@
  }
  function resetPractice(){current=null;render();return true;}
  select.addEventListener('change',()=>{current=null;render();});
+ capture.addEventListener('change',()=>{current=null;render();});
  begin.addEventListener('click',()=>startPractice());
  exit.addEventListener('click',resetPractice);
  new MutationObserver(()=>{if(!current)showReference();})
@@ -300,6 +354,7 @@
     get historicalEntries(){return DATA.totals.entries},
     get distinctUnitIds(){return DATA.totals.units},
     sourceFor:id=>archive.get(Number(id))||null,
+    get mission10AlternateAvailable(){return !!m10Alternate},
     get practice(){return state()},
     startPractice,perform,resetPractice,showReference
  });

@@ -15,6 +15,7 @@ js=(A/'bf200_historical_wave_lab.js').read_text('utf8')
 assert len(js.encode('utf8'))<65536
 assert js.count('/* BF_GLOBAL_ARCHIVE_TRIALS_V200 */')==1
 assert '/* BF200_DATA_READY */' in js and 'BF200_DATA_PLACEHOLDER' not in js
+assert '/* BF200_M10_ALT_READY */' in js and 'BF200_M10_ALT_PLACEHOLDER' not in js
 assert 'localStorage' not in js and 'saveProgress(' not in js and 'BFAndroid' not in js
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf150_source_crosscheck.js")')<java.index('readPackagedText("bf200_historical_wave_lab.js")')
@@ -85,6 +86,46 @@ with sync_playwright() as pw:
  assert page.locator('#bf200-reference .bf200-wave').count()==7
  assert 'NOT native 2022' in page.locator('.bf200-alert').first.text_content()
  assert page.evaluate('P.version')==7
+ # v411: Two source-pinned 2014 captures are selectable IN PRACTICE ONLY.
+ # Synthetic test account unlocks #10 in memory; no save call is made.
+ page.evaluate("P.questClears[2]=1")
+ page.locator('#bf200-mission').select_option('10')
+ assert page.evaluate('BFArchiveTrialsV200.mission10AlternateAvailable') is True
+ assert page.locator('#bf200-capture-variant').is_visible()
+ assert 'Squirty' in page.locator('#bf200-reference .bf200-wave').nth(3).inner_text()
+ assert 'Gloomy' in page.locator('#bf200-reference .bf200-wave').nth(3).inner_text()
+ page.locator('#bf200-capture-variant').select_option('alternate')
+ wave4=page.locator('#bf200-reference .bf200-wave').nth(3).inner_text()
+ assert all(name in wave4 for name in ('Burny','Glowy','Mossy')),wave4
+ assert all(name not in wave4 for name in ('Squirty','Gloomy','Sparky')),wave4
+ assert '08-34.json' in page.locator('#bf200-source').inner_text()
+ before=page.evaluate("""()=>({
+    player:JSON.stringify(P),session:JSON.stringify(S),
+    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert page.evaluate('BFArchiveTrialsV200.startPractice(10)') is True
+ assert page.evaluate('BFArchiveTrialsV200.practice.captureVariant')=='alternate'
+ outcome=page.evaluate("""()=>{
+   let fourth=null;
+   for(let i=0;i<150&&BFArchiveTrialsV200.practice.state==='running';i++){
+     const state=BFArchiveTrialsV200.practice;
+     if(state.wave===4&&!fourth)fourth=state.enemies.map(e=>e.name);
+     if(state.burst>=2)BFArchiveTrialsV200.perform('burst');
+     else BFArchiveTrialsV200.perform('attack');
+   }
+   return {result:BFArchiveTrialsV200.practice, fourth};
+ }""")
+ assert outcome['fourth']==['Burny','Glowy','Mossy'],outcome
+ assert outcome['result']['state']=='won',outcome
+ assert outcome['result']['wave']==5
+ after=page.evaluate("""()=>({
+    player:JSON.stringify(P),session:JSON.stringify(S),
+    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert before==after,'Dual 2014 practice must never affect campaign or v7 save'
+ page.evaluate('BFArchiveTrialsV200.resetPractice()')
+ page.locator('#bf200-capture-variant').select_option('primary')
+ assert page.evaluate('BFArchiveTrialsV200.startPractice(10)') is True
+ assert page.evaluate('BFArchiveTrialsV200.practice.captureVariant')=='primary'
+ page.evaluate('BFArchiveTrialsV200.resetPractice()')
  assert not errors,errors
  browser.close()
 print('PASS v2.00: 21 historical missions, 112 waves, 264 enemies, independent no-save practice')
