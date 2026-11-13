@@ -82,18 +82,20 @@ with sync_playwright() as pw:
       .map(b=>Number((b.querySelector('strong')?.textContent||'').match(/Mission (\\d+)/)?.[1]))
       .filter(Number.isSafeInteger)""")
    assert sorted(visible)==sorted(expected),(width,key,visible,expected)
+   assert p.evaluate("""() => [...document.querySelectorAll('#questlist button.questcard')]
+      .filter(b=>b.hidden).every(b=>getComputedStyle(b).display==='none')"""),(width,key)
    assert p.locator('#bf143-energy-count').inner_text()==f'{len(expected)} of 106 source-matched quests shown'
-   assert p.locator('#questlist button.questcard:visible').count()==len(expected),(width,key)
+   assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==len(expected),(width,key)
   selector.select_option('7+')
   # A core Quest-list rerender must preserve the user's read-only discovery filter.
   p.evaluate('renderQuestList()')
   p.wait_for_function("""() => document.querySelectorAll(
       '#questlist button.questcard .bf143-original-cost').length===106""")
-  assert p.locator('#questlist button.questcard:visible').count()==len(groups['7+'])
+  assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==len(groups['7+'])
   clear.click()
   assert selector.input_value()=='all'
   assert p.evaluate('document.activeElement.id')=='bf143-energy-range'
-  assert p.locator('#questlist button.questcard:visible').count()==106
+  assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==106
  p.set_viewport_size({'width':390,'height':844})
  # Existing demo mission selection, Auto and canonical save must not be mutated by filtering.
  assert before==p.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
