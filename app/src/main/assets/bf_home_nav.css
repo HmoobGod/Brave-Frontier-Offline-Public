@@ -1423,3 +1423,10 @@ body.bf-location-preview-open{overflow:hidden}
   .bf-scene-story{grid-template-columns:minmax(0,1fr);gap:6px}
   #bf-home-story-open{width:100%;min-width:0}
 }
+
+/* v408 Home accessibility: the existing CURRENT SQUAD action was only
+   ~24px high. Meet a 44px touch target without changing routing or artwork. */
+#bf-home .bf-scene-squad .bf-scene-heading button[data-bf-goto="units"]{
+  box-sizing:border-box;min-height:44px;min-width:96px;max-width:100%;
+  padding:9px 10px;touch-action:manipulation;
+}
