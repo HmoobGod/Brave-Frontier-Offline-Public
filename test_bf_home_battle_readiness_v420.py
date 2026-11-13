@@ -14,6 +14,9 @@ assert JAVA.index('readPackagedText("bf100_grand_gaia_campaign.js")') < JAVA.ind
     'readPackagedText("bf14300_original_quest_energy.js")') < JAVA.index(
     'readPackagedText("bf_home_battle_readiness_v420.js")')
 assert "2022 archived" in JS and "Enemy formations" in JS
+assert 'bf420-home-hint' in JS and "aria-live','polite" in JS
+assert 'AUTO BATTLE ACTIVE' in JS and 'AUTO REPEAT ACTIVE' in JS
+assert 'REPEAT STATUS UNAVAILABLE' in JS
 with sync_playwright() as pw:
     browser=pw.chromium.launch(headless=True,
         executable_path=shutil.which("chromium") or
@@ -75,6 +78,8 @@ with sync_playwright() as pw:
         assert page.evaluate("BF_homeNav.current")=="home"
         panel=page.locator("#bf420-home-readiness")
         assert panel.count()==1 and panel.is_visible()
+        assert page.locator('#bf420-home-hint').get_attribute('role')=='status'
+        assert page.locator('#bf420-home-hint').is_hidden()
         assert page.locator("#bf420-home-mission").count()==1
         snap=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
         assert snap["missionId"]==1 and snap["waves"]==3 and snap["energy"]==0,snap
@@ -120,6 +125,19 @@ with sync_playwright() as pw:
         assert ownership["questEnabled"],ownership
         assert ownership["missingRoster"] and "unavailable" in ownership["missingText"],ownership
         assert ownership["unchanged"],ownership
+        # A visible missing-party explanation never auto-selects or starts.
+        zero=page.evaluate("""()=>{
+          const old=P.squad,save=localStorage.getItem('bf_global_offline_demo_v7');
+          try{
+            P.squad=[];BFHomeBattleReadinessV420.refresh();
+            return {text:document.getElementById('bf420-home-hint').textContent,
+              visible:!document.getElementById('bf420-home-hint').hidden,
+              questEnabled:!document.getElementById('bf420-home-quest').disabled,
+              saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===save};
+          }finally{P.squad=old;BFHomeBattleReadinessV420.refresh();}
+        }""")
+        assert zero['visible'] and 'NO VALID SQUAD' in zero['text'],zero
+        assert zero['questEnabled'] and zero['saveUnchanged'],zero
         before=page.evaluate("""() => ({
            p:JSON.stringify(P),quest:QUEST.missionId,auto:S.auto,
            save:localStorage.getItem('bf_global_offline_demo_v7'),
@@ -148,21 +166,25 @@ with sync_playwright() as pw:
         page.set_viewport_size({"width":390,"height":844})
         # A live automatic action must disable even read-only route shortcuts.
         page.evaluate("S.auto=true;BFHomeBattleReadinessV420.refresh()")
+        assert 'AUTO BATTLE ACTIVE' in page.locator('#bf420-home-hint').inner_text()
         assert page.locator("#bf420-home-quest").is_disabled()
         assert page.locator("#bf420-home-units").is_disabled()
         page.evaluate("""() => document.getElementById('bf420-home-quest').dispatchEvent(
            new MouseEvent('click',{bubbles:true}))""")
         assert page.evaluate("BF_homeNav.current")=="home"
         page.evaluate("S.auto=false;S.busy=true;BFHomeBattleReadinessV420.refresh()")
+        assert 'TURN IN PROGRESS' in page.locator('#bf420-home-hint').inner_text()
         assert page.locator("#bf420-home-quest").is_disabled()
         page.evaluate("S.busy=false;BFHomeBattleReadinessV420.refresh()")
+        assert page.locator('#bf420-home-hint').is_hidden()
         assert page.locator("#bf420-home-quest").is_enabled()
         # A broken or active optional repeat provider must fail closed.
         repeat_guards=page.evaluate("""() => {
           const previous=window.BFGlobalQoLQuestRepeatV9800;
           const read=()=>({
             quest:document.getElementById('bf420-home-quest').disabled,
-            units:document.getElementById('bf420-home-units').disabled
+            units:document.getElementById('bf420-home-units').disabled,
+            hint:document.getElementById('bf420-home-hint').textContent
           });
           try{
             window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
@@ -174,14 +196,18 @@ with sync_playwright() as pw:
             window.BFGlobalQoLQuestRepeatV9800={};
             BFHomeBattleReadinessV420.refresh();
             const missing=read();
-            return {active,throwing,missing};
+            return {active,throwing,missing,
+              activeHint:active.hint,throwingHint:throwing.hint,missingHint:missing.hint};
           }finally{
             if(previous===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
             else window.BFGlobalQoLQuestRepeatV9800=previous;
             BFHomeBattleReadinessV420.refresh();
           }
         }""")
-        assert all(v["quest"] and v["units"] for v in repeat_guards.values()),repeat_guards
+        assert all(v['quest'] and v['units'] for k,v in repeat_guards.items() if k in ('active','throwing','missing')),repeat_guards
+        assert 'AUTO REPEAT ACTIVE' in repeat_guards['activeHint'],repeat_guards
+        assert 'REPEAT STATUS UNAVAILABLE' in repeat_guards['throwingHint'],repeat_guards
+        assert 'REPEAT STATUS UNAVAILABLE' in repeat_guards['missingHint'],repeat_guards
         assert page.locator("#bf420-home-quest").is_enabled()
         # Every archived quest field must remain source-qualified.
         field_gates=page.evaluate("""() => {
@@ -206,8 +232,9 @@ with sync_playwright() as pw:
              disabled:document.getElementById('bf420-home-quest').disabled
           };}finally{q.battles=old;BFHomeBattleReadinessV420.refresh();}
         }""")
-        assert tamper["record"] is None and tamper["disabled"],tamper
-        assert "unavailable" in tamper["text"],tamper
+        assert tamper['record'] is None and tamper['disabled'],tamper
+        assert 'unavailable' in tamper['text'],tamper
+        # Source mismatch must still be fail-closed; the fixture restores the UI.
         # Both actions only navigate; original profile, mission and storage stay unchanged.
         page.locator("#bf420-home-units").click()
         assert page.evaluate("BF_homeNav.current")=="units"
@@ -231,6 +258,7 @@ with sync_playwright() as pw:
         final=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
         assert final["complete"] is True and final["missionId"] is None,final
         assert "All 106 archived missions cleared" in page.locator("#bf420-home-mission").inner_text()
+        assert 'STORY COMPLETE' in page.locator('#bf420-home-hint').inner_text()
         assert page.locator("#bf420-home-quest").is_disabled()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
         assert not errors,errors
