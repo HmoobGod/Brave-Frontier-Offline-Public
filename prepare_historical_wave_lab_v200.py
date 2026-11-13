@@ -51,6 +51,23 @@ assert [e['atk'] for e in alt['wave4Alternate']]==[320,340,340]
 assert [e['def'] for e in alt['wave4Alternate']]==[50,60,90]
 assert all(e['aiId']==1 for e in alt['wave4Alternate'])
 assert alt['observations']['bothHaveOneNormalAttackPerEnemy'] is True
+# v413: A second, independently pinned original 2014 raw capture proves
+# all three alternate wave-4 NORMAL action decisions, not original 2022 AI.
+ai=json.loads((D/'bf_m10_alternate_2014_action_evidence_v413.json').read_text('utf8'))
+assert ai['schema']=='bf-global-2014-m10-alternate-normal-attack-evidence-v413'
+assert ai['sourceEra']==2014 and ai['missionId']==10 and ai['wave']==4
+assert ai['original2022Confirmed'] is False
+assert ai['changesCanonicalBattle'] is False and ai['changesRewardsOrSave'] is False
+assert ai['source']['gitBlobSha']==alt['alternate']['gitBlobSha']
+assert ai['source']['sourcePath']==alt['alternate']['sourcePath']
+assert ai['normalAttack']=={
+ 'type':'attack','parameters':'-1','percent':100,
+ 'targetCondition':'random','targetType':2,'conditions':0,
+ 'actionsPerTurn':'1~1','skills':0}
+assert len(ai['enemies'])==len(alt['wave4Alternate'])==3
+assert [dict((k,e[k]) for k in ('name','unitId','hp','atk','def','aiId'))
+         for e in ai['enemies']]==alt['wave4Alternate']
+assert [e['slot'] for e in ai['enemies']]==[0,1,2]
 fixture={'schema':'bf-global-2014-historical-wave-lab-v200',
          'provenance':{
             'url':'https://github.com/cheahjs/bravefrontier_data',
@@ -82,6 +99,17 @@ if alt_placeholder in s:
     asset.write_text(s,'utf8')
 else:
     assert s.count(alt_prepared)==1 and 'BF200_M10_ALT_PLACEHOLDER' not in s
+# Bundle the local, original-2014-only attack evidence beside the alternate
+# roster. Byte size/JS parser remain mandatory; no network or user save.
+ai_prepared='/* BF200_M10_AI_READY */'+json.dumps(
+    ai,separators=(',',':'),ensure_ascii=True).replace('<',r'\u003c')
+ai_placeholder='/* BF200_M10_AI_PLACEHOLDER */null'
+if ai_placeholder in s:
+    assert s.count(ai_placeholder)==1
+    s=s.replace(ai_placeholder,ai_prepared,1)
+    asset.write_text(s,'utf8')
+else:
+    assert s.count(ai_prepared)==1 and 'BF200_M10_AI_PLACEHOLDER' not in s
 assert len(s.encode('utf8'))<65536,'WebView local JS resource must be under 64KiB'
 assert s.count('/* BF_GLOBAL_ARCHIVE_TRIALS_V200 */')==1
 print('PASS source-attributed 2014 archive: 21 quests, 112 wave groups, 264 enemy slots, 42 unique IDs, no 2022 gameplay changes')
