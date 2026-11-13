@@ -117,9 +117,11 @@ with sync_playwright() as pw:
  after_home=page.evaluate("""()=>({
    route:BF_homeNav.current,mission:QUEST.missionId,auto:S.auto,
    checked:document.getElementById('auto').checked,
+   focus:document.activeElement?.id,
    p:JSON.stringify(P),stored:localStorage.getItem('bf_global_offline_demo_v7')
  })""")
  assert after_home['route']=='quest' and after_home['mission']==1,after_home
+ assert after_home['focus']=='bf101-continue','Home only reveals the original manual confirmation'
  assert not after_home['auto'] and not after_home['checked'],after_home
  assert after_home['p']==before_home['p'] and after_home['stored']==before_home['stored'],after_home
  page.evaluate("BF_homeNav.go('home')")
