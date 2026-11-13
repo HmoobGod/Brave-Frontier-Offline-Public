@@ -46,6 +46,22 @@ with sync_playwright() as pw:
  # routine idle Home. Navigating to Quest changes no P/S or canonical save.
  assert page.locator('#bf4100-home-live').count()==1
  assert page.locator('#bf4100-home-live').is_hidden()
+ # v409 repair: inspect the REAL initial idle state on visible Home.
+ # The engine sets S.round=1 even before an actual player action.
+ idle_before=page.evaluate("""()=>({
+   round:S.round,wave:S.wave,phase:S.phase,busy:S.busy,
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')
+ })""")
+ assert idle_before['round']==1 and idle_before['wave']==0 and not idle_before['busy'],idle_before
+ page.evaluate("BF_homeNav.go('home');BFGlobalLiveQuestBannerV4100.refresh()")
+ assert page.evaluate('BF_homeNav.current')=='home'
+ assert page.evaluate("document.getElementById('bf4100-home-live').hidden") is True
+ assert page.locator('#bf4100-home-return').is_disabled()
+ assert page.evaluate("""()=>({
+   round:S.round,wave:S.wave,phase:S.phase,busy:S.busy,
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')
+ })""")==idle_before
+ page.evaluate("BF_homeNav.go('quest')")
  saved_round=page.evaluate("""() => ({
    round:S.round,over:S.over,phase:S.phase,auto:S.auto})""")
  page.evaluate("""() => {S.round=2;S.over=false;S.phase='Battle'}""")
