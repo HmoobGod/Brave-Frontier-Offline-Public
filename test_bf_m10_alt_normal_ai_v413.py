@@ -38,7 +38,7 @@ assert "BF200_M10_AI_PLACEHOLDER" in js
 assert "BF200_M10_AI_READY" in builder
 assert "BF200_M10_AI_READY" in fulltest
 assert "witness.source?.gitBlobSha!==m10Alternate.gitBlobSha" in js
-assert "action.type" in js and "action.targetType" in js
+assert "action?.type" in js and "action.targetType" in js
 assert "sourceBacked:true" in js
 assert "nativeRandomTargetImplemented:false" in js
 assert "syntheticHarm:Math.max(12,Math.ceil(source.atk/12))" in js
