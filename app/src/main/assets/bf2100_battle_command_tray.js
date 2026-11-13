@@ -20,7 +20,7 @@
   '#bf2100-tray h3{font:800 15px Georgia,serif;margin:0 0 5px;color:#ffe4b7}',
   '#bf2100-status{margin:5px 0;font-weight:700}',
   '#bf2100-targets{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}',
-  '#bf2100-targets button{padding:6px 8px;background:#243c54;color:#fff;'
+  '#bf2100-targets button{padding:6px 8px;background:#243c54;color:#fff;',
   'border:1px solid #74869c;border-radius:5px;min-height:44px;touch-action:manipulation}',
   '#bf2100-targets button[aria-pressed=true]{border-color:#f6d786;outline:1px solid #f6d786}',
   '#bf2100-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}',
