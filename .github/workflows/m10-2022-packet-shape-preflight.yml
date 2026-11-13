@@ -1,0 +1,26 @@
+name: Mission 10 Local Packet Shape Research Preflight
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mission10-2022-research:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source without credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run privacy and source-shape regressions
+        run: |
+          python3 test_bf_server_battle_capture_fields_v20200.py
+          python3 test_bf_server_battle_capture_colocation_v21200.py
+          python3 test_bf_server_battle_candidate_shapes_v41200.py
