@@ -1,0 +1,27 @@
+name: Mission 10 Historical Provenance Source Preflight
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mission10-source:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout source without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate Mission 10 2014-only provenance and negative gates
+        run: python3 -m unittest -v test_bf_mission10_provenance_v410
+      - name: Print read-only provenance report
+        run: python3 audit_bf_mission10_provenance_v410.py
