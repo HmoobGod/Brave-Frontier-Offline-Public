@@ -19,13 +19,16 @@
   '#bf400-dossier{margin:12px 2px;padding:11px;background:#1d3045;',
   'border:1px solid #a99169;color:#f5e8d1;border-radius:8px;',
   'font:12px/1.5 system-ui,sans-serif}',
-  '#bf400-dossier summary{cursor:pointer;min-height:33px;',
+  '#bf400-dossier summary{cursor:pointer;min-height:44px;',
   'font:bold 15px Georgia,serif}',
-  '#bf400-dossier select,#bf400-dossier button{min-height:40px;',
+  '#bf400-dossier select,#bf400-dossier button{min-height:44px;',
   'background:#314d6c;color:#f5f1e6;border:1px solid #af9a75;',
   'border-radius:5px;padding:7px;box-sizing:border-box}',
   '#bf400-dossier select{width:100%}',
   '#bf400-dossier button{margin:4px}',
+  '#bf400-wave-nav{display:flex;flex-wrap:wrap;gap:7px;margin:6px 0}',
+  '#bf400-wave-nav button{flex:1 1 128px;margin:0}',
+  '#bf400-wave-nav button:disabled{opacity:.5;cursor:not-allowed}',
   '.bf400-panel{border-top:1px solid #62758b;margin-top:8px;padding-top:8px}',
   '.bf400-row{display:flex;align-items:center;gap:8px;padding:6px;',
   'margin:5px 0;background:#273e56;border-radius:5px}',
@@ -70,12 +73,18 @@
  }
  const wave=document.createElement('select');wave.id='bf400-wave';
  wave.setAttribute('aria-label','Select historical wave');
+ const waveNav=document.createElement('div');waveNav.id='bf400-wave-nav';
+ const prevWave=document.createElement('button');prevWave.type='button';
+ prevWave.id='bf400-prev-wave';prevWave.textContent='PREVIOUS 2014 WAVE';
+ const nextWave=document.createElement('button');nextWave.type='button';
+ nextWave.id='bf400-next-wave';nextWave.textContent='NEXT 2014 WAVE';
+ waveNav.append(prevWave,nextWave);
  const origin=document.createElement('p');origin.id='bf400-source';
  const metrics=document.createElement('div');metrics.id='bf400-wave-metrics';
  metrics.className='bf400-kv';
  const foes=document.createElement('div');foes.id='bf400-wave-foes';
  const integrity=document.createElement('p');integrity.id='bf400-integrity';
- missionPanel.append(missionHeading,mission,wave,origin,metrics,foes,integrity);
+ missionPanel.append(missionHeading,mission,wave,waveNav,origin,metrics,foes,integrity);
  root.append(heading,caution,squadPanel,missionPanel);
  anchor.after(root);
  const elements={1:'Fire',2:'Water',3:'Earth',4:'Thunder',5:'Light',6:'Dark'};
@@ -193,6 +202,8 @@
    const row=selectedMission();if(!row)return false;
    const w=Number(n);if(!Number.isInteger(w)||w<1||w>row.waves.length)return false;
    wave.value=String(w);
+   prevWave.disabled=w<=1;
+   nextWave.disabled=w>=row.waves.length;
    const entries=waveRows();
    origin.replaceChildren(b('Historical 2014 data · '+row.name),
      tag(row.sourcePath+' · Git blob '+row.gitBlobSha),
@@ -239,6 +250,14 @@
  update.addEventListener('click',refreshSquad);
  mission.addEventListener('change',()=>showMission(Number(mission.value)));
  wave.addEventListener('change',()=>showWave(Number(wave.value)));
+ prevWave.addEventListener('click',()=>{
+   const w=Number(wave.value);
+   if(Number.isSafeInteger(w))showWave(w-1);
+ });
+ nextWave.addEventListener('click',()=>{
+   const w=Number(wave.value);
+   if(Number.isSafeInteger(w))showWave(w+1);
+ });
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
    if(!root.open)return;
    refreshSquad();
