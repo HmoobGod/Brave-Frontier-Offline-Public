@@ -1,0 +1,13 @@
+{
+  "schema": "bf-m10-donor-provenance-snapshot-v410",
+  "donorRepository": "joppe2001/bf-private-server-data",
+  "commit": "480a8e4f78e13b1501ca77adc5b50090a8405983",
+  "missionSourcesPath": "archive/mission_sources.json",
+  "missionSourcesGitBlob": "bb217fa9dd6bc10b709b33b3c076eba5904286e8",
+  "mission10": {
+    "method": "captured",
+    "source": "Start of Adventure_2014-14-10-08-34.json",
+    "replaced": "regenerated record"
+  },
+  "note": "Read-only provenance metadata only. Donor archive/mission.json is large and its mission 10 enemies, positions, stats, skills, drops, and AI were not inspected. The donor capture is not the same 2014 file as our existing capture, and neither authenticates 2022 formations."
+}
