@@ -447,6 +447,15 @@ public class MainActivity extends Activity {
                     } catch (IOException energyError) {
                         android.util.Log.w("BraveFrontier", "Optional original quest energy view unavailable", energyError);
                     }
+                    // v420: original-source-checked Home preview of the next
+                    // 2022 archived mission and currently selected squad slots.
+                    // Read-only manual navigation; no quest choice or save writes.
+                    try {
+                        String homeReadiness = readPackagedText("bf_home_battle_readiness_v420.js");
+                        view.evaluateJavascript(homeReadiness, null);
+                    } catch (IOException homeReadyError) {
+                        android.util.Log.w("BraveFrontier", "Optional Home battle-readiness preview unavailable", homeReadyError);
+                    }
                     // v145: owner-supplied 2022 original BGM, opt-in only.
                     // Uses the 3 original tracks already bundled in v124;
                     // all session-only, no save or network changes.

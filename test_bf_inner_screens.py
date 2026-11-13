@@ -48,7 +48,27 @@ with sync_playwright() as pw:
     })""")
     page.add_style_tag(path=str(ASSETS / "bf_home_nav.css"))
     page.add_script_tag(path=str(ASSETS / "bf_home_nav.js"))
-    page.locator('.bf-navbar button[data-bf-goto="units"]').click()
+    # v408: Home CURRENT SQUAD action must be independently tappable at
+    # 320/370/390/540, remain inside its source-art panel, and use the
+    # EXISTING manual route without writing the canonical v7 save.
+    home_edit=page.locator('#bf-home .bf-scene-squad .bf-scene-heading button[data-bf-goto="units"]')
+    assert home_edit.count()==1
+    for width in (320,370,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        rect=home_edit.evaluate("""el=>{
+          const r=el.getBoundingClientRect();
+          const parent=el.closest('.bf-scene-squad').getBoundingClientRect();
+          return {height:r.height,left:r.left,right:r.right,
+            panelLeft:parent.left,panelRight:parent.right,
+            page:document.documentElement.scrollWidth,viewport:innerWidth};
+        }""")
+        assert rect['height']>=44, (width,rect)
+        assert rect['left']>=max(-.5,rect['panelLeft']-.5), (width,rect)
+        assert rect['right']<=min(width+.5,rect['panelRight']+.5), (width,rect)
+        assert rect['page']<=width, (width,rect)
+    page.set_viewport_size({'width':390,'height':844})
+    home_edit.click()
+    assert page.evaluate('BF_homeNav.current')=='units'
     assert page.locator("#squadpicker").is_visible()
     assert not page.locator("#evolist").is_visible()
     assert not page.locator("#traininglist").is_visible()

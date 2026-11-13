@@ -133,6 +133,7 @@ jobs:
           python3 test_bf_imp_strict_caps_v17100.py
           # Catch JavaScript parser regressions before the long Chromium suite.
           node --check app/src/main/assets/bf_global_unit_archive.js
+          node --check app/src/main/assets/bf_home_battle_readiness_v420.js
           node --check app/src/main/assets/bf12900_original_seven_star_water_visual.js
           node --check app/src/main/assets/bf16600_original_type5_element_resist.js
           node --check app/src/main/assets/bf16800_original_level_one_lord_combat.js
@@ -258,6 +259,8 @@ jobs:
           python test_bf_original_st_lamia_v090.py
           python test_bf_grand_gaia_campaign_v100.py
           python test_bf_story_continue_v101.py
+          python test_bf_home_battle_readiness_v420.py
+          python test_bf_home_cold_start_source_gate_v421.py
           python test_bf_quest_journal_v110.py
           python test_bf_historical_encounters_v120.py
           python test_bf_source_crosscheck_v150.py
@@ -434,6 +437,7 @@ jobs:
           python test_bf_original_battle_controls.py
           python test_bf_global_collaboration_archive.py
           python test_bf_global_unit_archive.py
+          python test_bf_archive_mobile_touch_v406.py
           python test_bf_global_original_codex.py
           python test_bf_original_bb_targeting.py
           python test_bf_original_bb_support.py
@@ -498,6 +502,8 @@ jobs:
           python test_bf_original_quest_economy_v14200.py
           python test_bf_legacy_v7_save_loading_v20500.py
           python test_bf_original_quest_energy_visibility_v14300.py
+          python test_bf_quest_energy_filter_v415.py
+          python test_bf_original_quest_energy_full_injection_v415.py
           node --check app/src/main/assets/bf14500_original_global_music.js
           python test_bf_original_quest_music_v14500.py
           python test_bf_remains_mirza_v049.py

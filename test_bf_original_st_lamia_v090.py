@@ -58,6 +58,41 @@ with sync_playwright() as p:
         version:P.version
     })""")
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+    # v418: the St. Lamia map uses the real archived seven dungeons, with
+    # manual view-only filtering. Locked uncleared rows remain visible.
+    assert page.evaluate('BFStLamiaMapV090.chooseRegion()') is True
+    toggle=page.locator('#bf090-stlamia-map .bf090-filter button')
+    assert toggle.count()==1 and toggle.get_attribute('aria-pressed')=='false'
+    assert page.locator('[data-bf-st-lamia-pin]').count()==7
+    assert page.locator('[data-bf-st-lamia-list]').count()==7
+    assert '7 of 7' in page.locator('#bf090-stlamia-map .bf090-filter [role=status]').inner_text()
+    before_filter=page.evaluate("""() => ({
+      p:JSON.stringify(P),auto:S.auto,
+      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+    for width in (320,370,371,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        geometry=page.evaluate("""() => {
+          const panel=document.querySelector('#bf090-stlamia-map');
+          const b=panel.querySelector('.bf090-filter button').getBoundingClientRect();
+          const list=panel.querySelector('.bf090-map-list');
+          const pins=[...panel.querySelectorAll('.bf090-pin')];
+          return {height:b.height,left:b.left,right:b.right,
+            columns:getComputedStyle(list).gridTemplateColumns.split(' ').length,
+            pins:pins.map(p=>p.getBoundingClientRect().height),
+            pageWidth:document.documentElement.scrollWidth,viewport:innerWidth};
+        }""")
+        assert geometry['height']>=44 and geometry['left']>=0 and geometry['right']<=width,(width,geometry)
+        assert all(h>=44 for h in geometry['pins']),(width,geometry)
+        assert geometry['columns']==(1 if width<=360 else 2),(width,geometry)
+        assert geometry['pageWidth']<=width,(width,geometry)
+    page.set_viewport_size({'width':390,'height':844})
+    toggle.click()
+    assert page.evaluate('BFStLamiaMapV090.unclearedOnly') is True
+    assert toggle.get_attribute('aria-pressed')=='true'
+    assert '7 of 7' in page.locator('#bf090-stlamia-map .bf090-filter [role=status]').inner_text()
+    assert page.evaluate("""() => ({
+      p:JSON.stringify(P),auto:S.auto,
+      save:localStorage.getItem('bf_global_offline_demo_v7')})""")==before_filter
     assert page.evaluate('BFStLamiaMapV090.openDungeon(300)') is False
     page.evaluate('()=>{P.questClears[265]=1;renderQuestList()}')
     assert page.evaluate('BFStLamiaMapV090.isUnlocked(300)') is True
@@ -68,6 +103,14 @@ with sync_playwright() as p:
     assert page.evaluate('QUEST.background')=='dungeon_battle_30100.jpg'
     page.evaluate('()=>{for(let id=300;id<=304;id++)P.questClears[id]=1;renderQuestList()}')
     assert page.evaluate('BFStLamiaMapV090.isUnlocked(310)') is True
+    page.evaluate('BFStLamiaMapV090.refresh()')
+    assert page.locator('[data-bf-st-lamia-list="300"]').is_hidden()
+    assert page.locator('[data-bf-st-lamia-pin="300"]').is_hidden()
+    assert '6 of 7' in page.locator('#bf090-stlamia-map .bf090-filter [role=status]').inner_text()
+    toggle.click()
+    assert page.evaluate('BFStLamiaMapV090.unclearedOnly') is False
+    assert page.locator('[data-bf-st-lamia-list="300"]').is_visible()
+    assert page.locator('[data-bf-st-lamia-pin="300"]').is_visible()
     assert page.evaluate('BFStLamiaMapV090.openDungeon(310)') is True
     assert page.evaluate('QUEST.missionId')==310
     assert page.evaluate('P.version')==saved['version']==7

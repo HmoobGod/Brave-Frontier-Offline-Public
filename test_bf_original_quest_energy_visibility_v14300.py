@@ -48,6 +48,58 @@ with sync_playwright() as pw:
   assert 'EXP '+str(row[5])+' · Zel '+str(row[6]) in label.text_content()
   assert 'DEMO credits EXP/Zel/Karma on clear' in label.text_content()
   assert 'stamina not enforced' in label.text_content()
+ # v415 R2: interact with the ACTUAL live filter, not only source strings.
+ selector=p.locator('#bf143-energy-range')
+ clear=p.locator('#bf143-energy-clear')
+ assert selector.count()==1 and clear.count()==1
+ groups={
+   'all':[r[0] for r in tuples],
+   '0':[r[0] for r in tuples if r[4]==0],
+   '1-3':[r[0] for r in tuples if 1<=r[4]<=3],
+   '4-6':[r[0] for r in tuples if 4<=r[4]<=6],
+   '7+':[r[0] for r in tuples if r[4]>=7],
+ }
+ for width in (320,370,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  measure=p.evaluate("""() => {
+    const panel=document.querySelector('#bf143-energy-filter');
+    const range=document.querySelector('#bf143-energy-range').getBoundingClientRect();
+    const clear=document.querySelector('#bf143-energy-clear').getBoundingClientRect();
+    const outer=panel.getBoundingClientRect();
+    return {width:innerWidth,left:outer.left,right:outer.right,
+      rangeHeight:range.height,clearHeight:clear.height,
+      rangeLeft:range.left,rangeRight:range.right,
+      clearLeft:clear.left,clearRight:clear.right};
+  }""")
+  assert measure['rangeHeight']>=44 and measure['clearHeight']>=44,(width,measure)
+  assert measure['left']>=-1 and measure['right']<=width+1,(width,measure)
+  assert all(-1<=measure[k]<=width+1 for k in
+      ('rangeLeft','rangeRight','clearLeft','clearRight')),(width,measure)
+  for key,expected in groups.items():
+   selector.select_option(key)
+   visible=p.evaluate("""() => [...document.querySelectorAll('#questlist button.questcard')]
+      .filter(b=>!b.hidden)
+      .map(b=>Number((b.querySelector('strong')?.textContent||'').match(/Mission (\\d+)/)?.[1]))
+      .filter(Number.isSafeInteger)""")
+   assert sorted(visible)==sorted(expected),(width,key,visible,expected)
+   assert p.evaluate("""() => [...document.querySelectorAll('#questlist button.questcard')]
+      .filter(b=>b.hidden).every(b=>getComputedStyle(b).display==='none')"""),(width,key)
+   assert p.locator('#bf143-energy-count').inner_text()==f'{len(expected)} of 106 source-matched quests shown'
+   assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==len(expected),(width,key)
+  selector.select_option('7+')
+  # A core Quest-list rerender must preserve the user's read-only discovery filter.
+  p.evaluate('renderQuestList()')
+  p.wait_for_function("""() => document.querySelectorAll(
+      '#questlist button.questcard .bf143-original-cost').length===106""")
+  assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==len(groups['7+'])
+  clear.click()
+  assert selector.input_value()=='all'
+  assert p.evaluate('document.activeElement.id')=='bf143-energy-range'
+  assert p.evaluate("[...document.querySelectorAll('#questlist button.questcard')].filter(b=>!b.hidden).length")==106
+ p.set_viewport_size({'width':390,'height':844})
+ # Existing demo mission selection, Auto and canonical save must not be mutated by filtering.
+ assert before==p.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   local:localStorage.getItem('bf_global_offline_demo_v7')})""")
  p.evaluate('renderQuestList()')
  p.wait_for_function("""()=>document.querySelectorAll('button.questcard .bf143-original-cost').length===106""")
  p.evaluate('renderQuestList()')

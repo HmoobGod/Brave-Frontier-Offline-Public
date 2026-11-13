@@ -64,3 +64,22 @@
 .bf-v189-battle-preview figcaption{color:#c4dce9;font:11px/1.5 Arial,sans-serif;margin-bottom:7px}
 .bf-v189-battle-preview img{width:108px;height:108px;max-width:100%;object-fit:contain;image-rendering:auto;display:block}
 .bf-v189-battle-preview .bf-archive-noart{display:block}
+
+/* Home → Units: original archive phone accessibility, presentation only.
+   Keeps source sprites, catalog, game state and save behavior unchanged. */
+.bf-global-original-unit-archive{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}
+.bf-global-original-unit-archive button{touch-action:manipulation}
+.bf-archive-filters select,.bf-archive-filters input{min-height:44px;font-size:16px}
+.bf-archive-pagination{flex-wrap:wrap}
+.bf-archive-pagination button,.bf-archive-close,.bf-codex-evo-jump,#bf-archive-reset{min-height:44px;min-width:44px}
+#bf-archive-reset{box-sizing:border-box;grid-column:1/-1;max-width:100%}
+.bf-archive-detail{min-width:0;max-width:100%;box-sizing:border-box;overflow-x:auto}
+.bf-archive-detail table{min-width:0;max-width:100%;table-layout:fixed}
+.bf-archive-detail th,.bf-archive-detail td{overflow-wrap:anywhere;word-break:normal}
+.bf-archive-codex,.bf-archive-codex details{min-width:0;max-width:100%;box-sizing:border-box}
+@media(max-width:370px){
+  .bf-archive-filters{grid-template-columns:minmax(0,1fr)}
+  .bf-archive-filters label:first-child{grid-column:auto}
+  .bf-archive-pagination{justify-content:center}
+  .bf-archive-unit{min-height:76px}
+}
