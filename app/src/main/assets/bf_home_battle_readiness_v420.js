@@ -5,9 +5,11 @@
   // A read-only Home panel. Never choose a quest, save, start combat or Auto.
   const home=document.getElementById('bf-home');
   const story=home?.querySelector('.bf-scene-story');
+  const explore=home?.querySelector('.bf-scene-explore');
   const campaign=window.BFGrandGaiaCampaignV100;
   const archive=window.BFOriginalGlobalQuestEnergyV14300;
-  if(!story || !window.BF_homeNav || !campaign ||
+  if(!story || !explore || story.parentElement!==explore.parentElement ||
+     !window.BF_homeNav || !campaign ||
      !archive || typeof campaign.nextPlayable!=='function' ||
      typeof campaign.summary!=='function' ||
      typeof archive.lookup!=='function' ||
@@ -70,7 +72,9 @@
     'Enemy formations, rewards and battle logic remain an offline DEMO. '+
     'No automatic quest selection, combat or stamina spending.';
   card.append(heading,mission,party,actions,note);
-  story.insertAdjacentElement('afterend',card);
+  // Home first: do not push the original playable Quest/Summon artwork
+  // below the viewport. Append this optional preview AFTER Adventure.
+  explore.insertAdjacentElement('afterend',card);
   document.head.append(style);
 
   function snapshot(){
