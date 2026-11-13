@@ -42,6 +42,35 @@ with sync_playwright() as pw:
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.snapshot()')
  assert s['available'] and not s['enabled'] and not s['applied'],s
  assert page.evaluate('document.getElementById("bf4100-banner").hidden') is True
+ # v409: Home appears only for a live in-memory story battle, never on
+ # routine idle Home. Navigating to Quest changes no P/S or canonical save.
+ assert page.locator('#bf4100-home-live').count()==1
+ assert page.locator('#bf4100-home-live').is_hidden()
+ saved_round=page.evaluate("""() => ({
+   round:S.round,over:S.over,phase:S.phase,auto:S.auto})""")
+ page.evaluate("""() => {S.round=2;S.over=false;S.phase='Battle'}""")
+ assert page.evaluate('BFGlobalLiveQuestBannerV4100.refresh().available') is True
+ page.evaluate("BF_homeNav.go('home')")
+ assert page.locator('#bf4100-home-live').is_visible()
+ assert 'ACTIVE DEMO STORY' in page.locator('#bf4100-home-message').inner_text()
+ page.set_viewport_size({'width':320,'height':844})
+ bounds=page.locator('#bf4100-home-return').evaluate("""el => {
+   const r=el.getBoundingClientRect(),p=el.parentElement.getBoundingClientRect();
+   return {height:r.height,inside:r.left>=p.left-.5&&r.right<=p.right+.5,
+     width:document.documentElement.scrollWidth,viewport:innerWidth};
+ }""")
+ assert bounds['height']>=44 and bounds['inside'] and bounds['width']<=bounds['viewport'],bounds
+ on_home=page.evaluate("""() => ({
+   player:JSON.stringify(P),round:S.round,over:S.over,phase:S.phase,
+   auto:S.auto,wave:S.wave,save:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ page.locator('#bf4100-home-return').click()
+ assert page.evaluate('BF_homeNav.current')=='quest'
+ assert page.evaluate("""() => ({
+   player:JSON.stringify(P),round:S.round,over:S.over,phase:S.phase,
+   auto:S.auto,wave:S.wave,save:localStorage.getItem('bf_global_offline_demo_v7')})""")==on_home
+ page.evaluate("""s=>{S.round=s.round;S.over=s.over;S.phase=s.phase;S.auto=s.auto;}""",saved_round)
+ page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
+ page.set_viewport_size({'width':390,'height':844})
  before=page.evaluate("""()=>({save:localStorage.getItem('bf_global_offline_demo_v7'),
     clears:JSON.stringify(P.questClears),round:S.round,wave:S.wave})""")
  assert page.evaluate('BFGlobalLiveQuestBannerV4100.setEnabled(true)') is True
