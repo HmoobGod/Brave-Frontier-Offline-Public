@@ -51,19 +51,45 @@
     '.bf090-pin-layer{position:absolute;inset:0;pointer-events:none}',
     '.bf090-pin{pointer-events:auto;position:absolute;transform:translate(-50%,-50%);',
     'border:2px solid #eed49f;background:#522e31;color:#fff;border-radius:50%;',
-    'min-width:29px;min-height:29px;font:bold 10px Arial}',
+    'min-width:44px;min-height:44px;font:bold 10px Arial;cursor:pointer}',
     '.bf090-map-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:10px 0}',
     '.bf090-map-list button{padding:8px 6px;text-align:left;min-height:55px;',
     'background:#273547;color:#f1e5ca;border:1px solid #957a53;border-radius:5px}',
     '.bf090-map-list button strong,.bf090-map-list button small{display:block}',
     '.bf090-map-list button small{opacity:.8;margin-top:4px}',
     '.bf090-locked{opacity:.58}',
+    '.bf090-map-list button[hidden],.bf090-pin[hidden]{display:none!important}',
+    '.bf090-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}',
+    '.bf090-filter button{box-sizing:border-box;min-height:44px;padding:9px 12px;',
+    'border:1px solid #b18e56;border-radius:6px;background:#26384a;',
+    'color:#fff;font:700 12px Arial,sans-serif;cursor:pointer}',
+    '.bf090-filter button[aria-pressed=true]{background:#246078}',
+    '@media(max-width:360px){.bf090-map-list{grid-template-columns:1fr}}',
     '.bf090-pin[aria-pressed=true],.bf090-map-list button[aria-pressed=true]{outline:2px solid #9de3fa}'
   ].join('');
   document.head.append(css);
   const pins=panel.querySelector('.bf090-pin-layer'),
         rows=panel.querySelector('.bf090-map-list'),
         notice=panel.querySelector('#bf090-map-status'),controls=new Map();
+  // v418: view-only, source-backed completion filter for existing original
+  // St. Lamia dungeons. Never mutate clears, unlocks or selected mission.
+  const filterBar=document.createElement('div');filterBar.className='bf090-filter';
+  filterBar.setAttribute('role','group');
+  filterBar.setAttribute('aria-label','St. Lamia dungeon completion filter');
+  const filterButton=document.createElement('button');filterButton.type='button';
+  filterButton.textContent='SHOW UNCLEARED ONLY';
+  filterButton.setAttribute('aria-pressed','false');
+  const filterCount=document.createElement('span');
+  filterCount.setAttribute('role','status');
+  filterCount.setAttribute('aria-live','polite');
+  filterBar.append(filterButton,filterCount);rows.before(filterBar);
+  let unclearedOnly=false;
+  filterButton.addEventListener('click',()=>{
+    unclearedOnly=!unclearedOnly;
+    filterButton.setAttribute('aria-pressed',String(unclearedOnly));
+    filterButton.textContent=unclearedOnly?'SHOW ALL DUNGEONS':'SHOW UNCLEARED ONLY';
+    refresh();
+  });
   let selected=false;
   function access(id){return QUESTS.some(q=>q.dungeonId===id&&questUnlocked(q))}
   function chooseRegion(){
@@ -107,22 +133,29 @@
     controls.set(d.id,{pin,row});
   }
   function refresh(){
+    let visible=0;
     for(const d of source.dungeons){
       const {pin,row}=controls.get(d.id),ok=access(d.id);
-      const clear=QUESTS.filter(q=>q.dungeonId===d.id && P.questClears?.[q.missionId]).length;
+      const members=QUESTS.filter(q=>q.dungeonId===d.id);
+      const clear=members.filter(q=>(P.questClears?.[q.missionId]||0)>0).length;
+      const show=!unclearedOnly||clear<members.length;
+      pin.hidden=!show;row.hidden=!show;
+      if(show)visible++;
       pin.classList.toggle('bf090-locked',!ok);row.classList.toggle('bf090-locked',!ok);
       pin.setAttribute('aria-pressed',String(QUEST?.dungeonId===d.id));
       row.setAttribute('aria-pressed',String(QUEST?.dungeonId===d.id));
-      const text=(ok?'AVAILABLE':'LOCKED')+' · '+clear+'/'+QUESTS.filter(q=>q.dungeonId===d.id).length+' cleared';
+      const text=(ok?'AVAILABLE':'LOCKED')+' · '+clear+'/'+members.length+' cleared';
       row.querySelector('small').textContent=text;
       pin.setAttribute('aria-label',d.name+', '+text);
     }
+    filterCount.textContent=visible+' of '+source.dungeons.length+' dungeons shown';
   }
   new MutationObserver(refresh).observe(list,{childList:true});
   refresh();
   if(ids.includes(QUEST?.dungeonId))chooseRegion();
   window.BFStLamiaMapV090=Object.freeze({
     entries:Object.freeze(source.dungeons.slice()),refresh,openDungeon,chooseRegion,
-    isUnlocked:access,get selectedRegion(){return selected?'stlamia':null}
+    isUnlocked:access,get selectedRegion(){return selected?'stlamia':null},
+    get unclearedOnly(){return unclearedOnly}
   });
 })();
