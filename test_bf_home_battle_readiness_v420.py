@@ -39,8 +39,38 @@ with sync_playwright() as pw:
         page.add_style_tag(path=str(ASSETS/"bf_home_nav.css"))
         for name in ("bf_home_nav.js","bf080_morgan_map.js","bf090_st_lamia_map.js",
                      "bf100_grand_gaia_campaign.js","bf101_story_continue.js",
-                     "bf14300_original_quest_energy.js","bf_home_battle_readiness_v420.js"):
+                     "bf14300_original_quest_energy.js"):
             page.add_script_tag(path=str(ASSETS/name))
+        # Capture original playable tile positions BEFORE the optional card.
+        # v420 must NOT push them further down the small-phone viewport.
+        baseline={}
+        for width in (320,390):
+            page.set_viewport_size({"width":width,"height":844})
+            baseline[width]=page.evaluate("""() => {
+              const explore=document.querySelector('.bf-scene-explore');
+              return {
+                explore:explore.getBoundingClientRect().top,
+                quest:explore.querySelector('button[data-bf-goto="quest"]').getBoundingClientRect().top,
+                summon:explore.querySelector('button[data-bf-goto="summon"]').getBoundingClientRect().top
+              };
+            }""")
+        page.add_script_tag(path=str(ASSETS/"bf_home_battle_readiness_v420.js"))
+        for width in (320,390):
+            page.set_viewport_size({"width":width,"height":844})
+            geometry=page.evaluate("""() => {
+              const explore=document.querySelector('.bf-scene-explore');
+              const preview=document.getElementById('bf420-home-readiness');
+              return {
+                followsAdventure:explore.nextElementSibling===preview,
+                explore:explore.getBoundingClientRect().top,
+                quest:explore.querySelector('button[data-bf-goto="quest"]').getBoundingClientRect().top,
+                summon:explore.querySelector('button[data-bf-goto="summon"]').getBoundingClientRect().top
+              };
+            }""")
+            assert geometry["followsAdventure"],(width,geometry)
+            for key in ("explore","quest","summon"):
+                assert abs(geometry[key]-baseline[width][key])<=1,(width,key,baseline[width],geometry)
+        page.set_viewport_size({"width":390,"height":844})
         assert page.evaluate("P.version")==7
         assert page.evaluate("BF_homeNav.current")=="home"
         panel=page.locator("#bf420-home-readiness")
@@ -91,6 +121,46 @@ with sync_playwright() as pw:
         assert page.locator("#bf420-home-quest").is_disabled()
         page.evaluate("S.busy=false;BFHomeBattleReadinessV420.refresh()")
         assert page.locator("#bf420-home-quest").is_enabled()
+        # A broken or active optional repeat provider must fail closed.
+        repeat_guards=page.evaluate("""() => {
+          const previous=window.BFGlobalQoLQuestRepeatV9800;
+          const read=()=>({
+            quest:document.getElementById('bf420-home-quest').disabled,
+            units:document.getElementById('bf420-home-units').disabled
+          });
+          try{
+            window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+            BFHomeBattleReadinessV420.refresh();
+            const active=read();
+            window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('bad repeat provider');}};
+            BFHomeBattleReadinessV420.refresh();
+            const throwing=read();
+            window.BFGlobalQoLQuestRepeatV9800={};
+            BFHomeBattleReadinessV420.refresh();
+            const missing=read();
+            return {active,throwing,missing};
+          }finally{
+            if(previous===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
+            else window.BFGlobalQoLQuestRepeatV9800=previous;
+            BFHomeBattleReadinessV420.refresh();
+          }
+        }""")
+        assert all(v["quest"] and v["units"] for v in repeat_guards.values()),repeat_guards
+        assert page.locator("#bf420-home-quest").is_enabled()
+        # Every archived quest field must remain source-qualified.
+        field_gates=page.evaluate("""() => {
+          const q=QUESTS.find(x=>x.missionId===1),result={};
+          for(const key of ['dungeonId','requires','battles','energy','exp','zel','karma']){
+            const original=q[key];
+            try{
+              q[key]=original+1;
+              result[key]=BFHomeBattleReadinessV420.snapshot()===null;
+            }finally{q[key]=original;}
+          }
+          BFHomeBattleReadinessV420.refresh();
+          return result;
+        }""")
+        assert all(field_gates.values()),field_gates
         # Corrupted live quest metadata must NOT yield a fabricated '2022' preview.
         tamper=page.evaluate("""() => {
           const q=QUESTS.find(x=>x.missionId===1),old=q.battles;
