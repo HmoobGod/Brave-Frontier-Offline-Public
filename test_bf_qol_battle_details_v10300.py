@@ -7,6 +7,9 @@ src=(A/'bf10300_qol_battle_details.js').read_text('utf8')
 assert src.count('BF_GLOBAL_QOL_BATTLE_DETAILS_V10300')==1
 assert len(src.encode())<65536
 assert not any(t in src for t in ('localStorage','saveProgress(', 'awardDemoRewards(', 'S.party=','S.enemies=','P.squad='))
+assert 'min-height:44px' in src
+assert 'Number.isFinite(u.maxHp)' in src
+assert 'UNVERIFIED DEMO HP RECORD' in src
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
@@ -34,7 +37,47 @@ with sync_playwright() as pw:
  assert s['sourceScopedCriticalHits']==5
  assert s['allies'][0]['hpPercent']==60 and s['allies'][0]['bb']==70
  assert s['foes'][0]['hpPercent']==50
+ assert s['invalidAllies']==0 and s['invalidFoes']==0
+ # v430: refuse to invent 1 HP or valid HP for invalid live DEMO data.
+ invalid=p.evaluate("""()=>{
+   const api=BFGlobalQoLBattleDetailsV10300;
+   const ally=S.party[0],foe=S.enemies[0];
+   const old={aHp:ally.hp,aMax:ally.maxHp,fHp:foe.hp,fMax:foe.maxHp};
+   const original=JSON.stringify({P,S});const result={};
+   try {
+     ally.maxHp=0;
+     result.zeroMax=api.refresh();
+     ally.maxHp=old.aMax;foe.hp=NaN;
+     result.nan=api.refresh();
+     foe.hp=old.fHp;foe.hp=foe.maxHp+1;
+     result.overMax=api.refresh();
+     foe.hp='220';
+     result.stringHp=api.refresh();
+     foe.hp=old.fHp;foe.maxHp=-5;
+     result.negativeMax=api.refresh();
+   }finally{
+     ally.hp=old.aHp;ally.maxHp=old.aMax;
+     foe.hp=old.fHp;foe.maxHp=old.fMax;
+     api.refresh();
+   }
+   result.unchanged=JSON.stringify({P,S})===original;
+   return result;
+ }""")
+ assert invalid['zeroMax']['invalidAllies']==1 and invalid['zeroMax']['allies']==[]
+ for key in ('nan','overMax','stringHp','negativeMax'):
+  assert invalid[key]['invalidFoes']==1 and invalid[key]['foes']==[],(key,invalid[key])
+ assert invalid['unchanged'],invalid
+ # Explanations are visible, not a forged HP display or false 1-HP unit.
+ p.evaluate("S.enemies[0].maxHp=0;BFGlobalQoLBattleDetailsV10300.refresh()")
+ assert '1 UNVERIFIED DEMO HP RECORD HIDDEN' in p.locator('#bf10300-enemies').inner_text()
+ assert '1 HP' not in p.locator('#bf10300-enemies').inner_text()
+ p.evaluate("S.enemies[0].maxHp=440;BFGlobalQoLBattleDetailsV10300.refresh()")
  p.locator('#bf10300-details > summary').click()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  rect=p.locator('#bf10300-details > summary').bounding_box()
+  assert rect and rect['height']>=44,(width,rect)
+ p.set_viewport_size({'width':390,'height':844})
  assert 'Vargas' in p.locator('#bf10300-allies').inner_text()
  assert 'Enemy' in p.locator('#bf10300-enemies').inner_text()
  assert '2022 recorded wave count: 3 (MATCH)' in p.locator('#bf10300-header').inner_text()
