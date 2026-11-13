@@ -46,6 +46,39 @@
  banner.setAttribute('aria-label','Archived quest and demo wave status');
  banner.setAttribute('aria-live','off');
  arena.append(banner);
+ // v409 HOME FIRST: small return-to-battle notice only while a real demo
+ // story battle is underway or a victory result is not durably committed.
+ // All actions route through the existing manual Quest navigation; never
+ // toggle Auto, start encounters, replay, award rewards or persist state.
+ const tools=document.querySelector('#bf-home .bf-scene-tools');
+ const homeNotice=tools?document.createElement('section'):null;
+ let homeMessage=null,homeReturn=null;
+ if(homeNotice){
+   homeNotice.id='bf4100-home-live';
+   homeNotice.hidden=true;
+   homeNotice.setAttribute('aria-label','Unfinished offline story battle');
+   homeNotice.style.cssText='box-sizing:border-box;max-width:100%;min-width:0;'+
+     'margin:8px 0;padding:9px;border:1px solid #b4a16d;border-radius:6px;'+
+     'background:#203849;color:#f7e8c8;font:12px/1.45 Arial,sans-serif';
+   homeMessage=document.createElement('p');
+   homeMessage.id='bf4100-home-message';
+   homeMessage.style.cssText='margin:0 0 7px;overflow-wrap:anywhere';
+   homeReturn=document.createElement('button');homeReturn.type='button';
+   homeReturn.id='bf4100-home-return';
+   homeReturn.textContent='RETURN TO EXISTING BATTLE ›';
+   homeReturn.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px;'+
+     'padding:9px;border:1px solid #c8b27b;border-radius:5px;'+
+     'background:#4d5b68;color:#fff1cd;font:800 11px Arial,sans-serif';
+   homeReturn.addEventListener('click',()=>{
+     if(!homeNotice.hidden && homeReturn.disabled===false &&
+        typeof window.BF_homeNav?.go==='function' &&
+        window.BF_homeNav.go('quest')===true){
+       // The existing battle stays authoritative; this is navigation only.
+       battle.scrollIntoView?.({block:'start'});
+     }
+   });
+   homeNotice.append(homeMessage,homeReturn);tools.after(homeNotice);
+ }
  let enabled=false,last='';
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
@@ -61,9 +94,24 @@
      state:available?(s.won?'VICTORY':s.lost?'DEFEAT':s.busy?'TURN IN PROGRESS':'BATTLE'):null});
  }
  function refresh(){
-   const s=snapshot(),key=JSON.stringify(s);
+   const s=snapshot(),stage=story.snapshot();
+   const live=!!s.available&&(
+     (s.state==='TURN IN PROGRESS')||
+     (s.state==='BATTLE'&&Number.isSafeInteger(S.round)&&S.round>0)||
+     (s.state==='VICTORY'&&stage?.stored!==true)
+   );
+   const key=JSON.stringify({s,live,round:S.round,stored:stage?.stored});
    if(key===last)return s;
    last=key;
+   if(homeNotice){
+     homeNotice.hidden=!live;
+     homeReturn.disabled=!live;
+     homeMessage.textContent=!live?'':
+       s.state==='VICTORY'?
+         'UNSAVED STORY RESULT · Review the existing Quest result and save it.':
+         'ACTIVE DEMO STORY · '+String(s.name).slice(0,90)+
+         ' · WAVE '+s.wave+'/'+s.total+' · Manual navigation only.';
+   }
    panel.hidden=!s.available;
    toggle.disabled=!s.available;
    toggle.checked=enabled;
