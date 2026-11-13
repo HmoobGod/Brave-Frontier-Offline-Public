@@ -162,7 +162,39 @@ with sync_playwright() as pw:
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256')==SOURCE['provenance']['questCanonSha256']
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.masterSha256.length')==64
  assert page.evaluate('BFAmdahlSourceQuestGuideV20600.source.canonicalQuestSha256.length')==64
+ # v414: search across all seven source dungeons, including mission-ID exact match.
+ # This is read-only discovery, not playable 2022 encounter navigation.
+ page.locator('#bf20600-search').fill('Malevolent Ceremony')
+ assert page.locator('#bf20600-quest-list li').count()==1
+ assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='465'
+ assert '1 of 36' in page.locator('#bf20600-search-status').inner_text()
+ assert page.locator('#bf20600-clear-search').is_enabled()
+ # A mid-name substring must match: startsWith() is not an acceptable substitute.
+ page.locator('#bf20600-search').fill('ceremony')
+ assert page.locator('#bf20600-quest-list li').count()==1
+ assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='465'
+ page.locator('#bf20600-search').fill('400')
+ assert page.locator('#bf20600-quest-list li').count()==1
+ assert page.locator('#bf20600-quest-list li').first.get_attribute('data-mission-id')=='400'
+ page.locator('#bf20600-search').fill('not a real source quest')
+ assert page.locator('#bf20600-quest-list li').count()==0
+ assert '0 of 36' in page.locator('#bf20600-search-status').inner_text()
+ page.locator('#bf20600-clear-search').click()
+ assert page.locator('#bf20600-search').input_value()==''
+ assert page.locator('#bf20600-clear-search').is_disabled()
+ assert page.locator('#bf20600-quest-list li').count()==5
+ assert page.evaluate('document.activeElement.id')=='bf20600-search'
+ page.set_viewport_size({'width':320,'height':700})
+ assert page.locator('#bf20600-search').evaluate('(e)=>e.getBoundingClientRect().height')>=44
+ assert page.locator('#bf20600-clear-search').evaluate('(e)=>e.getBoundingClientRect().height')>=44
+ assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth')
+ page.set_viewport_size({'width':390,'height':844})
+ # Changing the dungeon resets global search; no stale cross-area filter.
+ page.locator('#bf20600-search').fill('ceremony')
+ assert page.locator('#bf20600-quest-list li').count()==1
  page.locator('#bf20600-dungeon').select_option('460')
+ assert page.locator('#bf20600-search').input_value()==''
+ assert page.locator('#bf20600-clear-search').is_disabled()
  assert page.locator('#bf20600-quest-list li').count()==6
  assert 'Malevolent Ceremony' in page.locator('#bf20600-quest-list').inner_text()
  assert page.evaluate('__lastArtPreview')==460
