@@ -30,6 +30,23 @@ with sync_playwright() as pw:
     page = browser.new_page(viewport={"width": 390, "height": 844})
     errors = []
     page.on("pageerror", lambda e: errors.append(str(e)))
+    # about:blank is an opaque origin; establish disposable browser storage
+    # before loading the real index, and detect all transient writes.
+    page.evaluate("""() => {
+        const items = {};
+        let writes = 0;
+        Object.defineProperty(window, 'localStorage', {configurable:true,value:{
+          getItem(k){return items[k] ?? null;},
+          setItem(k,v){writes++;items[k]=String(v)},
+          removeItem(k){writes++;delete items[k]},
+          clear(){writes++;for(const k of Object.keys(items))delete items[k]},
+          key(i){return Object.keys(items)[i] ?? null},
+          get length(){return Object.keys(items).length}
+        }});
+        window.__v416SaveWrites = () => writes;
+        window.alert = () => {};
+        window.confirm = () => true;
+    }""")
     page.set_content((ASSETS / "index.html").read_text("utf8"),
                      wait_until="load", timeout=90000)
     assert page.evaluate("P.version") == 7
@@ -47,9 +64,9 @@ with sync_playwright() as pw:
     before = page.evaluate("""() => ({
         player: JSON.stringify(P), battle: JSON.stringify(S),
         quest: JSON.stringify(window.QUEST ?? null),
-        auto: JSON.stringify(window.BFGlobalAutoSettings ?? null),
+        auto: JSON.stringify(S.auto),
         save: localStorage.getItem('bf_global_offline_demo_v7'),
-        length: localStorage.length
+        length: localStorage.length, writes: __v416SaveWrites()
     })""")
     page.locator('.bf-navbar button[data-bf-goto="units"]').click()
     assert page.evaluate("BF_homeNav.current") == "units"
@@ -87,21 +104,74 @@ with sync_playwright() as pw:
         assert geometry["right"] <= width + 0.5, (width, geometry)
         assert geometry["scrollWidth"] <= width, (width, geometry)
 
+    # Independently exercise both text branches, using only temporary demo EXP.
+    probe = page.evaluate("""() => {
+      const baseId = P.squad[0], u = effectiveUnit(baseId);
+      return {baseId, unitId:u.id, had:Object.prototype.hasOwnProperty.call(P.unitExp,baseId),
+              old:P.unitExp[baseId]};
+    }""")
+    cap = caps[probe["unitId"]]
+    assert 1 < cap < 99, (probe, cap)
+    exact = page.evaluate("""({baseId,cap}) => {
+      let low = 0, high = 10000000;
+      if(demoLevel(high) < cap)throw Error('cap not reachable by demoLevel');
+      while(low < high){
+        const mid = Math.floor((low + high) / 2);
+        if(demoLevel(mid) >= cap)high = mid;
+        else low = mid + 1;
+      }
+      if(demoLevel(low) !== cap)throw Error('no exact cap demo level');
+      P.unitExp[baseId] = low;
+      return demoLevel(P.unitExp[baseId]);
+    }""", {"baseId": probe["baseId"], "cap": cap})
+    assert exact == cap
+    page.evaluate(api + ".refresh()")
+    rows = page.locator("#bf11300-squad-cap-preview li").all_text_contents()
+    assert ("Slot 1 · Unit #%s · DEMO level %s / original cap %s · at/above source cap" %
+            (probe["unitId"], cap, cap)) in rows, rows
+    page.evaluate("(baseId) => {P.unitExp[baseId]=999999;}", probe["baseId"])
+    above = page.evaluate("(baseId)=>demoLevel(P.unitExp[baseId])", probe["baseId"])
+    assert above > cap, (above, cap)
+    page.evaluate(api + ".refresh()")
+    rows = page.locator("#bf11300-squad-cap-preview li").all_text_contents()
+    assert ("Slot 1 · Unit #%s · DEMO level %s / original cap %s · at/above source cap" %
+            (probe["unitId"], above, cap)) in rows, rows
+    page.evaluate("""({baseId,had,old}) => {
+        if(had) P.unitExp[baseId] = old;
+        else delete P.unitExp[baseId];
+    }""", probe)
+    page.evaluate(api + ".refresh()")
+
+    # A valid but unowned form MUST be rejected specifically by P.roster guard.
+    unowned = page.evaluate("""() => {
+      for(const baseId of [10012,20012,30012,40012,50012,60012,
+                          10013,20013,30013,40013,50013,60013]){
+        if(P.roster.includes(baseId))continue;
+        const u = effectiveUnit(baseId);
+        if(u && Number.isSafeInteger(u.id) &&
+           BFGlobalOriginalUnitLevelCapsV11500.lookup(u.id))return baseId;
+      }
+      return null;
+    }""")
+    assert unowned is not None, "no valid unowned form available for ownership negative"
+    page.evaluate("(id) => {window.__v416Unowned=id;}", unowned)
+
     # No unit may appear merely because its ID is in a squad slot.
     page.evaluate("""() => {
       window.__v416OriginalSquad=P.squad.slice();
-      P.squad=[10011,99999,20011,-1,null,60011,40011,50011];
+      P.squad=[10011,window.__v416Unowned,99999,-1,null,60011,40011,50011];
     }""")
     page.evaluate(api + ".refresh()")
     changed = page.locator("#bf11300-squad-cap-preview").inner_text()
     assert "99999" not in changed and "Slot 7" not in changed and "Slot 8" not in changed
+    assert "Slot 2 ·" not in changed, "unowned valid form was rendered: " + changed
     assert page.locator("#bf11300-squad-cap-preview li").count() <= 6
     page.evaluate("P.squad=[]")
     page.evaluate(api + ".refresh()")
     assert page.locator("#bf11300-squad-cap-preview li").all_text_contents() == [
         "No eligible owned squad forms to preview."
     ]
-    page.evaluate("P.squad=window.__v416OriginalSquad;delete window.__v416OriginalSquad")
+    page.evaluate("P.squad=window.__v416OriginalSquad;delete window.__v416OriginalSquad;delete window.__v416Unowned")
     page.evaluate(api + ".refresh()")
     page.locator('.bf-navbar button[data-bf-goto="home"]').click()
     assert page.evaluate("BF_homeNav.current") == "home"
@@ -111,9 +181,9 @@ with sync_playwright() as pw:
     after = page.evaluate("""() => ({
         player: JSON.stringify(P), battle: JSON.stringify(S),
         quest: JSON.stringify(window.QUEST ?? null),
-        auto: JSON.stringify(window.BFGlobalAutoSettings ?? null),
+        auto: JSON.stringify(S.auto),
         save: localStorage.getItem('bf_global_offline_demo_v7'),
-        length: localStorage.length
+        length: localStorage.length, writes: __v416SaveWrites()
     })""")
     assert before == after, (before, after)
     assert not errors, errors
