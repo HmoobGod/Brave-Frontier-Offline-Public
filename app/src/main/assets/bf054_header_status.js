@@ -31,7 +31,7 @@
     '#bf054-home-details{margin:8px 0;padding:7px 10px;border:1px solid #a88d62;',
     'border-radius:7px;background:linear-gradient(145deg,#27374c,#19253b);',
     'color:#f3e2c2;font:12px/1.5 Arial,sans-serif}',
-    '#bf054-home-details summary{min-height:40px;display:flex;align-items:center;',
+    '#bf054-home-details summary{min-height:44px;display:flex;align-items:center;',
     'cursor:pointer;font-weight:800;letter-spacing:.03em;list-style-position:inside}',
     '#bf054-home-details summary:focus-visible{outline:3px solid #9fdbff;outline-offset:2px}',
     '#bf054-home-details p{margin:5px 0 2px;overflow-wrap:anywhere}',
@@ -116,12 +116,18 @@
     x.toLocaleString('en-US') : '—';
 
   function summary() {
-    const level = typeof P !== 'undefined' && Number.isInteger(P.level) ? P.level : 1;
-    const total = typeof P !== 'undefined' && Number.isFinite(P.exp) ? P.exp : 0;
+    // Never invent level-one EXP for a malformed canonical v7 player.
+    // This observer is read-only: invalid values are unavailable, not fixed.
+    const valid = typeof P !== 'undefined' && P?.version===7 &&
+      Number.isSafeInteger(P.level) && P.level>=1 && P.level<=99 &&
+      Number.isSafeInteger(P.exp) && P.exp>=0;
+    if(!valid)return {valid:false,level:null,total:null,
+      threshold:1,earned:0,percent:0,capped:false};
+    const level=P.level,total=P.exp;
     const threshold = Math.max(1,5*level);
     const earned = Math.max(0, Math.min(threshold,total-5*(level-1)*level/2));
     const capped = level >= 99;
-    return {level, total, threshold, earned:capped?threshold:earned,
+    return {valid:true,level, total, threshold, earned:capped?threshold:earned,
       percent:capped?100:Math.min(100,Math.max(0,earned/threshold*100)), capped};
   }
   function refresh() {
@@ -136,16 +142,20 @@
     if (zel && pzel) zel.textContent = pzel.textContent || '0';
     if (karma && pkarma) karma.textContent = pkarma.textContent || '0';
     fill.style.width = value.percent.toFixed(2)+'%';
-    label.textContent = value.capped ? 'MAX' : value.earned+' / '+value.threshold;
+    label.textContent = !value.valid?'— / —':value.capped?'MAX':
+      value.earned+' / '+value.threshold;
     track.setAttribute('aria-valuemin','0');
     track.setAttribute('aria-valuemax',String(value.threshold));
     track.setAttribute('aria-valuenow',String(value.earned));
-    track.setAttribute('aria-valuetext', value.capped
-      ? 'Demo maximum level 99' : value.earned+' of '+value.threshold+' demo EXP');
+    track.setAttribute('aria-valuetext', !value.valid?
+      'Demo summoner experience unavailable: invalid local state':
+      value.capped?'Demo maximum level 99':
+        value.earned+' of '+value.threshold+' demo EXP');
     if (homeValues) {
       const p = typeof P !== 'undefined' && P ? P : {};
-      const text = 'Demo Lv.'+safeCount(p.level)+
-        ' · EXP '+(value.capped?'MAX':safeCount(value.earned)+'/'+safeCount(value.threshold))+
+      const text = (value.valid?'Demo Lv.'+safeCount(p.level)+' · EXP '+
+        (value.capped?'MAX':safeCount(value.earned)+'/'+safeCount(value.threshold)):
+        'Demo Lv./EXP unavailable (invalid local state)')+
         ' · Zel '+safeCount(p.zel)+' · Karma '+safeCount(p.karma)+
         ' · Energy unavailable (offline, not deducted).';
       if (homeValues.textContent !== text) homeValues.textContent = text;
