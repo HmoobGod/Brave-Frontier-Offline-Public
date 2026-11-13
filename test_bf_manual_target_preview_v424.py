@@ -43,6 +43,9 @@ with sync_playwright() as pw:
                      "bf2000_story_battle_hud.js","bf2100_battle_command_tray.js"):
             page.add_script_tag(path=str(A/file))
         page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+        # Regression: panel must be inserted into the real DOM, not just built.
+        assert page.locator('#bf2100-tray').count()==1
+        assert page.locator('#bf2100-tray').is_visible()
         api="BFGlobalBattleCommandsV2100"
         assert page.evaluate("P.version")==7
         assert page.evaluate(api+'.queueAll("attack")') is True
