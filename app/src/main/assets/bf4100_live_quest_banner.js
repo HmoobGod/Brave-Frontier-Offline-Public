@@ -50,10 +50,17 @@
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    const s=story.snapshot();
-   const available=!!q&&!!s&&s.archive&&mode.value==='archive'&&
+   // The optional overlay must not call invalid DEMO wave counters a 2022
+   // source-matched mission. Fail closed instead of rendering WAVE 1/0.
+   const validWaves=Number.isSafeInteger(s?.total)&&
+     Number.isSafeInteger(s?.current)&&Number.isSafeInteger(q?.battles)&&
+     s.total>=1&&s.total<=100&&s.current>=1&&
+     s.current<=s.total&&q.battles===s.total;
+   const available=!!q&&!!s&&s.archive&&S.mode==='archive'&&
+     mode.value==='archive'&&validWaves&&
      questUnlocked(q)&&s.missionId===q.missionId&&
-     typeof s.name==='string'&&s.name.length>0&&
-     typeof s.dungeon==='string'&&s.dungeon.length>0;
+     typeof s.name==='string'&&s.name.trim().length>0&&
+     typeof s.dungeon==='string'&&s.dungeon.trim().length>0;
    return Object.freeze({enabled,available,applied:enabled&&available,
      missionId:available?q.missionId:null,
      name:available?s.name:null,dungeon:available?s.dungeon:null,
