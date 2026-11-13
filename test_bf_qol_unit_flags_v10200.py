@@ -48,11 +48,48 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.change(10011,"locked",true)') is True
  assert p.evaluate(api+'.state().favorite') is True
  assert p.evaluate(api+'.state().locked') is True
+ # v399: advisory locks must persist in the separate local marker key.
+ # The prior implementation passed next.lock (undefined) and omitted the
+ # locked property from JSON, so locks disappeared after a restart.
+ marker='bf_global_offline_qol_unit_flags_v102'
+ persisted=p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_qol_unit_flags_v102'))")
+ assert persisted=={'version':1,'favorites':[10011],'locked':[10011]},persisted
  assert p.locator('[data-bf-unit-id="10011"]').get_attribute('data-bf-qol-favorite')=='true'
  p.locator('[data-bf-unit-id="20011"]').click()
  p.wait_for_function("BFGlobalQoLUnitFlagsV10200.state().id===20011")
  assert p.evaluate(api+'.change(20011,"favorites",true)') is True
  assert p.evaluate(api+'.favorites')==[10011,20011]
+ persisted=p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_qol_unit_flags_v102'))")
+ assert persisted['locked']==[10011] and persisted['favorites']==[10011,20011],persisted
+ # Lock a second owned form and then update favorites; both advisory lock
+ # records must survive another write, with no v7 game save mutation.
+ assert p.evaluate(api+'.change(20011,"locked",true)') is True
+ assert p.evaluate(api+'.change(10011,"favorites",false)') is True
+ persisted=p.evaluate("JSON.parse(localStorage.getItem('bf_global_offline_qol_unit_flags_v102'))")
+ assert persisted=={'version':1,'favorites':[20011],'locked':[10011,20011]},persisted
+ assert p.evaluate(api+'.change(10011,"favorites",true)') is True
+ # Open another isolated page with the persisted marker JSON to exercise
+ # cold-start loading (not merely the in-memory flags array).
+ q=b.new_page(viewport={'width':390,'height':844})
+ q.set_content("""<html><body><div id="bf-owned-box"><div id="bf-box-results">
+   <button class="bf-box-card" data-bf-unit-id="10011" aria-pressed="true">Vargas</button>
+   <button class="bf-box-card" data-bf-unit-id="20011" aria-pressed="false">Selena</button>
+   </div><section id="bf-box-detail"></section></div></body></html>""")
+ q.evaluate("""saved=>{const db={'bf_global_offline_qol_unit_flags_v102':saved};
+   Object.defineProperty(window,'localStorage',{configurable:true,value:{
+   getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
+   removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+   get length(){return Object.keys(db).length}}});
+   window.P={version:7,roster:[10011,20011],squad:[10011,20011],questClears:{}};
+ }""",p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')"))
+ q.add_script_tag(path=str(A/'bf10200_qol_unit_flags.js'))
+ assert q.evaluate(api+'.locked')==[10011,20011]
+ assert q.evaluate(api+'.favorites')==[10011,20011]
+ assert q.evaluate(api+'.state().locked') is True
+ q.close()
+ # Restore the original single-lock fixture for existing owned-only gates.
+ assert p.evaluate(api+'.change(20011,"locked",false)') is True
+ assert p.evaluate(api+'.locked')==[10011]
  # Browser-backed filter checks exercise real owned cards and clicks,
  # not only source strings. They must be reversible and must not mutate v7.
  assert p.evaluate(api+'.change(20011,"favorites",false)') is True

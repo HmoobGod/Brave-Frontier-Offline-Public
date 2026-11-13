@@ -30,11 +30,12 @@ class UnitBoxFilterSourceTests(unittest.TestCase):
         self.assertNotIn("localStorage.setItem(",segment)
         self.assertNotIn("P.roster=",segment)
 
-    def test_existing_favorite_lock_persistence_is_unchanged(self):
+    def test_favorite_and_lock_persistence_uses_both_arrays(self):
         s = self.source
         self.assertIn("bf_global_offline_qol_unit_flags_v102",s)
         self.assertIn("function change(id,kind,on)",s)
-        self.assertIn("if(!write(next.favorites,next.lock))return false",s)
+        self.assertIn("if(!write(next.favorites,next.locked))return false",s)
+        self.assertNotIn("write(next.favorites,next.lock)",s)
         self.assertNotIn("bf_global_offline_demo_v7",s)
 
 if __name__ == "__main__":
