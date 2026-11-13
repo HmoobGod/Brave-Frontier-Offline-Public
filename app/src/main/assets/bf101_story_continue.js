@@ -121,7 +121,7 @@
  panel.append(heading,status,meter,next,button,autoButton,foot);
  host.after(panel);
  // The original-art Home progress card is already a source-validated route.
- // Offer one explicit MANUAL next-mission action there, without autoplay,
+ // Offer one explicit view-only next-mission navigation there, without autoplay,
  // reward handling, save writes, or a second independent quest resolver.
  const homeStoryOpen=document.getElementById('bf-home-story-open');
  const homeShortcut=homeStoryOpen?.parentElement?.classList.contains('bf-scene-story')?
@@ -129,8 +129,8 @@
  if(homeShortcut){
    homeShortcut.type='button';
    homeShortcut.id='bf101-home-manual-continue';
-   homeShortcut.textContent='CONTINUE STORY · MANUAL';
-   homeShortcut.setAttribute('aria-label','Select next unlocked original story mission for manual play');
+   homeShortcut.textContent='VIEW NEXT STORY · MANUAL';
+   homeShortcut.setAttribute('aria-label','View the next original mission and manually confirm Continue Story without changing your save');
    homeShortcut.style.cssText='min-height:44px;max-width:100%;margin:7px 0 0;'+
      'padding:9px 12px;background:#745529;border:1px solid #dfbc7c;'+
      'border-radius:5px;color:#fff;font-weight:800;white-space:normal;'+
@@ -253,7 +253,11 @@
    const after=remaining();
    if(!after||after.missionId!==before.missionId||
       !canNavigate()||button.disabled)return;
-   button.click(); // Existing exact 106-mission manual Continue Story action.
+   // Stop at the existing manual confirmation. BFQuestAreas.choose()
+   // persists a selected mission, so do NOT invoke the existing button.
+   // The user may explicitly choose to continue from Quest afterwards.
+   button.scrollIntoView?.({block:'center',behavior:'smooth'});
+   button.focus();
  });
  window.addEventListener('bf-route-change',refresh);
  button.addEventListener('click',()=>{
