@@ -434,6 +434,7 @@ jobs:
           python test_bf_original_battle_controls.py
           python test_bf_global_collaboration_archive.py
           python test_bf_global_unit_archive.py
+          python test_bf_archive_mobile_touch_v406.py
           python test_bf_global_original_codex.py
           python test_bf_original_bb_targeting.py
           python test_bf_original_bb_support.py
