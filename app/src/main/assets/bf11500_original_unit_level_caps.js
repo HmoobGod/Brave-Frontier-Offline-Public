@@ -115,12 +115,44 @@
    'No changes to existing v7 saves or stored Unit EXP. '+
    'DEMO experience thresholds and per-level stat growth are NOT '+
    'original 2022 formulas; training is unchanged.';
- panel.append(summary,stats,list,caution);host.after(panel);
+ const squadTitle=document.createElement('h4');
+ squadTitle.textContent='CURRENT SQUAD · ORIGINAL MAX LEVEL REFERENCE';
+ squadTitle.style.cssText='margin:10px 0 4px;font-size:13px';
+ const squadPreview=document.createElement('ul');
+ squadPreview.id='bf11300-squad-cap-preview';
+ squadPreview.setAttribute('aria-label','Current squad original level caps');
+ const squadNote=document.createElement('small');
+ squadNote.textContent='Read-only: shows DEMO training level against the original 2022 max-level field. No EXP, training, roster or save changes.';
+ panel.append(summary,stats,list,squadTitle,squadPreview,squadNote,caution);host.after(panel);
  function refresh(){
    const state=snapshot();panel.hidden=state.mode!=='archive';
    stats.textContent=state.squadCappedThisBattle+
      ' active party members capped to original 2022 unit max levels';
    list.replaceChildren();
+   squadPreview.replaceChildren();
+   if(panel.open){
+     let occupied=0;
+     for(let slot=0;slot<Math.min(6,P.squad.length);slot++){
+       const baseId=P.squad[slot];
+       if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))continue;
+       const unit=effectiveUnit(baseId);
+       if(!unit||!Number.isSafeInteger(unit.id))continue;
+       const cap=lookup(unit.id);
+       if(!cap)continue;
+       const level=demoLevel(P.unitExp?.[baseId]);
+       if(!Number.isSafeInteger(level)||level<1)continue;
+       const li=document.createElement('li');
+       li.textContent='Slot '+(slot+1)+' · Unit #'+unit.id+
+         ' · DEMO level '+level+' / original cap '+cap+
+         (level>=cap?' · at/above source cap':' · below source cap');
+       squadPreview.append(li);occupied++;
+     }
+     if(!occupied){
+       const li=document.createElement('li');
+       li.textContent='No eligible owned squad forms to preview.';
+       squadPreview.append(li);
+     }
+   }
    if(panel.open)for(const row of state.rows){
      const li=document.createElement('li');
      li.textContent='Unit #'+row.unitId+' · DEMO level '+
