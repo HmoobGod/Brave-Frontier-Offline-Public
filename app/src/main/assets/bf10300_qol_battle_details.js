@@ -10,9 +10,10 @@
  const freeze=Object.freeze;
  function safe(n){return Number.isFinite(n)?Math.max(0,Math.floor(n)):0}
  function readUnit(u,kind){
-   if(!u||!Number.isFinite(u.hp))return null;
-   const max=Math.max(1,safe(u.maxHp));
-   const hp=Math.min(max,safe(u.hp));
+   // Never normalize corrupt live DEMO health into invented 1-HP units.
+   if(!u||!Number.isFinite(u.hp)||!Number.isFinite(u.maxHp)||
+      u.maxHp<=0||u.hp<0||u.hp>u.maxHp)return null;
+   const max=u.maxHp,hp=u.hp;
    return freeze({name:String(u.name||('Unit #'+(u.unitId||'?'))).slice(0,90),
      kind,unitId:Number.isSafeInteger(u.unitId)?u.unitId:null,
      hp,maxHp:max,hpPercent:Math.round(100*hp/max),
@@ -38,10 +39,12 @@
    }catch(_){return null;}
  }
  function snapshot(){
-   const allies=Array.isArray(S.party)?
-     S.party.filter(u=>u&&u.active).map(u=>readUnit(u,'ally')).filter(Boolean):[];
-   const foes=Array.isArray(S.enemies)?
-     S.enemies.map(u=>readUnit(u,'enemy')).filter(Boolean):[];
+   const allySource=Array.isArray(S.party)?S.party.filter(u=>u&&u.active):[];
+   const enemySource=Array.isArray(S.enemies)?S.enemies:[];
+   const allies=allySource.map(u=>readUnit(u,'ally')).filter(Boolean);
+   const foes=enemySource.map(u=>readUnit(u,'enemy')).filter(Boolean);
+   const invalidAllies=allySource.length-allies.length;
+   const invalidFoes=enemySource.length-foes.length;
    const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
    const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
    const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
@@ -58,6 +61,7 @@
      sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
      round:safe(S.round),busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
+     invalidAllies,invalidFoes,
      sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
      nativeFullDamageFormula:false,progressUnchanged:true
    });
@@ -66,7 +70,7 @@
  panel.style.cssText='margin:10px 2px;padding:10px;border:1px solid #a6b4cc;'+
    'border-radius:7px;background:#18293c;color:#e7effa;font:12px/1.5 system-ui,sans-serif';
  const title=document.createElement('summary');title.textContent='QoL · LIVE BATTLE DETAILS';
- title.style.cssText='cursor:pointer;min-height:36px;font-weight:800';
+ title.style.cssText='cursor:pointer;min-height:44px;font-weight:800';
  const header=document.createElement('p');header.id='bf10300-header';
  const ally=document.createElement('div');ally.id='bf10300-allies';
  const enemy=document.createElement('div');enemy.id='bf10300-enemies';
@@ -76,9 +80,10 @@
    'Source wave count checks use pinned repository 2022 fixtures only; '+
    'original enemy formations, native AI and drops are not verified.';
  panel.append(title,header,ally,enemy,note);battle.after(panel);
- function group(host,label,units){
+ function group(host,label,units,invalid){
    host.replaceChildren();
-   const h=document.createElement('strong');h.textContent=label;
+   const h=document.createElement('strong');h.textContent=label+
+     (invalid?' · '+invalid+' UNVERIFIED DEMO HP RECORD'+(invalid===1?'':'S')+' HIDDEN':'');
    host.append(h);
    for(const unit of units){
      const item=document.createElement('div');
@@ -110,8 +115,8 @@
      ' · Turn '+s.round+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
      ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
-   group(ally,'ALLIES · HP / BB',s.allies);
-   group(enemy,'ENEMIES · HP',s.foes);
+   group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
+   group(enemy,'ENEMIES · HP',s.foes,s.invalidFoes);
    return s;
  }
  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
