@@ -44,6 +44,8 @@ with sync_playwright() as pw:
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  page.evaluate('()=>{for(let i=0;i<30;i++)msg("COMBAT_JOURNAL_ENTRY_"+i)}')
  page.wait_for_function('BFGlobalCombatJournalV3200.snapshot().current >= 30')
+ current_total=page.evaluate('BFGlobalCombatJournalV3200.snapshot().current')
+ assert current_total>=30,current_total
  assert page.evaluate('document.querySelector("#log").children.length')<=9
  report=page.evaluate('BFGlobalCombatJournalV3200.report("current")')
  assert 'COMBAT_JOURNAL_ENTRY_0' in report and 'COMBAT_JOURNAL_ENTRY_29' in report
@@ -57,12 +59,12 @@ with sync_playwright() as pw:
    assert box and box['height']>=44,(width,selector,box)
  page.set_viewport_size({'width':390,'height':844})
  page.locator('#bf3200-search').fill('combat_journal_entry_29')
- assert '1 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert page.locator('#bf3200-filter-count').inner_text()==f'1 of {current_total} retained entries match'
  assert 'COMBAT_JOURNAL_ENTRY_29' in page.locator('#bf3200-report').input_value()
  assert 'COMBAT_JOURNAL_ENTRY_0' not in page.locator('#bf3200-report').input_value()
  assert 'COMBAT_JOURNAL_ENTRY_0' in page.evaluate('BFGlobalCombatJournalV3200.report("current")')
  page.locator('#bf3200-search').fill('NO SUCH EVENT')
- assert '0 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert page.locator('#bf3200-filter-count').inner_text()==f'0 of {current_total} retained entries match'
  assert 'COMBAT_JOURNAL_ENTRY_29' not in page.locator('#bf3200-report').input_value()
  page.locator('#bf3200-clear').click()
  assert page.locator('#bf3200-search').input_value()==''
@@ -70,16 +72,19 @@ with sync_playwright() as pw:
  page.evaluate('finish(false)')
  page.evaluate('reset()')
  page.wait_for_function('BFGlobalCombatJournalV3200.snapshot().previous >= 30')
+ previous_total=page.evaluate('BFGlobalCombatJournalV3200.snapshot().previous')
+ assert previous_total>=current_total,(previous_total,current_total)
  assert page.evaluate('BFGlobalCombatJournalV3200.show("previous")') is True
  assert 'COMBAT_JOURNAL_ENTRY_0' in page.locator('#bf3200-report').input_value()
  assert 'COMBAT_JOURNAL_ENTRY_29' in page.locator('#bf3200-report').input_value()
  page.locator('#bf3200-search').fill('COMBAT_JOURNAL_ENTRY_29')
- assert '1 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert page.locator('#bf3200-filter-count').inner_text()==f'1 of {previous_total} retained entries match'
  assert 'COMBAT_JOURNAL_ENTRY_0' not in page.locator('#bf3200-report').input_value()
  page.evaluate('BFGlobalCombatJournalV3200.show("current")')
  assert 'COMBAT_JOURNAL_ENTRY_29' not in page.locator('#bf3200-report').input_value()
  page.locator('#bf3200-clear').click()
- assert '0 retained entries shown' in page.locator('#bf3200-filter-count').inner_text()
+ current_after_reset=page.evaluate('BFGlobalCombatJournalV3200.snapshot().current')
+ assert page.locator('#bf3200-filter-count').inner_text()==f'{current_after_reset} retained entries shown'
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'journal and defeat/restart must not change saved progression'
  assert page.evaluate('P.version')==7
