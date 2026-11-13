@@ -53,6 +53,39 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==1
  assert page.locator('[data-bf-journal-entry="1"]').count()==1
  page.locator('#bf110-search').fill('')
+ # v407 Home → Quest usability: reset all local journal filters with one
+ # explicit tap. No story unlock, quest selection, Auto action or save write.
+ reset=page.locator('#bf110-clear')
+ assert reset.count()==1 and reset.is_disabled()
+ page.locator('#bf110-region').select_option('morgan')
+ page.locator('#bf110-state').select_option('locked')
+ page.locator('#bf110-sort').select_option('exp')
+ page.locator('#bf110-search').fill('desert')
+ assert reset.is_enabled()
+ unchanged=page.evaluate("""() => ({
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   mission:QUEST?.missionId,auto:S.auto})""")
+ page.set_viewport_size({'width':320,'height':844})
+ size=reset.evaluate("""el => {
+   const r=el.getBoundingClientRect(),h=el.parentElement.getBoundingClientRect();
+   return {inside:r.left>=h.left-.5&&r.right<=h.right+.5&&
+      r.left>=0&&r.right<=innerWidth,buttonHeight:r.height,
+      noPageOverflow:document.documentElement.scrollWidth<=innerWidth};
+ }""")
+ assert size['inside'] and size['buttonHeight']>=44 and size['noPageOverflow'],size
+ reset.click()
+ assert page.locator('#bf110-region').input_value()=='all'
+ assert page.locator('#bf110-state').input_value()=='all'
+ assert page.locator('#bf110-sort').input_value()=='story'
+ assert page.locator('#bf110-search').input_value()==''
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
+ assert page.locator('[data-bf-journal-entry]').count()==20
+ assert page.evaluate('document.activeElement?.id')=='bf110-search'
+ assert reset.is_disabled()
+ assert page.evaluate("""() => ({
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   mission:QUEST?.missionId,auto:S.auto})""")==unchanged
+ page.set_viewport_size({'width':390,'height':844})
  # New read-only story completion, direct-next action and sortable source fields.
  assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==1
  assert '/106 cleared' in page.locator('#bf110-progress').text_content()

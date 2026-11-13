@@ -31,6 +31,10 @@
    '.bf110-filters input,.bf110-filters select{box-sizing:border-box;width:100%;min-height:37px;',
    'padding:7px;border:1px solid #9e895e;border-radius:4px;background:#111c2b;color:white}',
    '#bf110-search-wrap{grid-column:1/-1}',
+   '#bf110-clear{grid-column:1/-1;min-height:44px;max-width:100%;'+
+   'padding:9px;border:1px solid #bda272;border-radius:5px;'+
+   'background:#455971;color:#ffe9c6;font:800 12px Arial,sans-serif;cursor:pointer}',
+   '#bf110-clear:disabled{opacity:.5;cursor:default}',
    '#bf110-count{margin:5px 0;color:#dde5ea}',
    '#bf110-progress{margin:7px 0;color:#cddfe7}',
    '#bf110-next{min-height:44px;padding:9px 12px;border:1px solid #c9a46c;',
@@ -77,6 +81,9 @@
  search.id='bf110-search';search.type='search';search.autocomplete='off';
  search.placeholder='Search names, dungeons and original quest descriptions';
  searchWrap.append(search);filters.append(searchWrap);
+ const clear=document.createElement('button');clear.type='button';
+ clear.id='bf110-clear';clear.textContent='CLEAR JOURNAL FILTERS';
+ clear.disabled=true;filters.append(clear);
  const count=document.createElement('p');count.id='bf110-count';count.setAttribute('aria-live','polite');
  const completed=document.createElement('p');completed.id='bf110-progress';
  completed.setAttribute('aria-live','polite');
@@ -183,6 +190,8 @@
      allMissionsCleared()?'ALL 106 MISSIONS CLEARED':
      'NEXT MISSION UNAVAILABLE · CHECK SAVE OR UNLOCKS';
    const rows=matching();
+   clear.disabled=regions.value==='all'&&states.value==='all'&&
+     ordering.value==='story'&&!search.value.trim();
    count.textContent=rows.length+' matching missions · showing '+Math.min(visibleLimit,rows.length)+
      ' · '+rows.filter(r=>progress(r)==='available').length+' available and uncleared';
    const fragment=document.createDocumentFragment();
@@ -220,6 +229,14 @@
    if(target&&!navigationBlocked())chooseMission(target.id);
  });
  search.addEventListener('input',changed);
+ // A single explicit action resets only local view state, not quest unlocks,
+ // selected battles, or the canonical v7 save. Keep keyboard focus usable.
+ clear.addEventListener('click',()=>{
+   regions.value='all';states.value='all';ordering.value='story';search.value='';
+   visibleLimit=20;previewId=null;
+   preview.textContent='Select DETAILS to read an original archived mission description.';
+   refresh();search.focus();
+ });
  more.addEventListener('click',()=>{visibleLimit+=20;refresh();});
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
