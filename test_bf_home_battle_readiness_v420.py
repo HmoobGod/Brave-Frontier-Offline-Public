@@ -1,0 +1,133 @@
+"""v420 read-only original 2022 Home next-adventure and squad-slot preview."""
+from pathlib import Path
+import shutil
+from playwright.sync_api import sync_playwright
+
+ROOT=Path(__file__).resolve().parent
+ASSETS=ROOT/"app/src/main/assets"
+JS=(ASSETS/"bf_home_battle_readiness_v420.js").read_text("utf8")
+JAVA=(ROOT/"app/src/main/java/org/bravefrontier/offline/MainActivity.java").read_text("utf8")
+assert JS.count("/* BF_HOME_BATTLE_READINESS_V420 */")==1
+assert len(JS.encode("utf8"))<16384
+assert all(k not in JS for k in ("localStorage", "saveGame(", "saveProgress(", "BFQuestAreas.choose(", "S.auto="))
+assert JAVA.index('readPackagedText("bf100_grand_gaia_campaign.js")') < JAVA.index(
+    'readPackagedText("bf14300_original_quest_energy.js")') < JAVA.index(
+    'readPackagedText("bf_home_battle_readiness_v420.js")')
+assert "2022 archived" in JS and "Enemy formations" in JS
+with sync_playwright() as pw:
+    browser=pw.chromium.launch(headless=True,
+        executable_path=shutil.which("chromium") or
+          shutil.which("google-chrome") or shutil.which("google-chrome-stable"),
+        args=["--no-sandbox","--disable-dev-shm-usage"])
+    try:
+        page=browser.new_page(viewport={"width":390,"height":844})
+        errors=[]
+        page.on("pageerror",lambda e:errors.append(str(e)))
+        page.evaluate("""() => {
+          const db={};
+          Object.defineProperty(window,'localStorage',{configurable:true,value:{
+             getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
+             removeItem:k=>{delete db[k]},key:i=>Object.keys(db)[i]??null,
+             get length(){return Object.keys(db).length}
+          }});
+          window.alert=()=>{};window.confirm=()=>true;
+          HTMLMediaElement.prototype.load=()=>{};
+          HTMLMediaElement.prototype.pause=()=>{};
+          HTMLMediaElement.prototype.play=()=>Promise.resolve();
+        }""")
+        page.set_content((ASSETS/"index.html").read_text("utf8"),wait_until="load",timeout=90000)
+        page.add_style_tag(path=str(ASSETS/"bf_home_nav.css"))
+        for name in ("bf_home_nav.js","bf080_morgan_map.js","bf090_st_lamia_map.js",
+                     "bf100_grand_gaia_campaign.js","bf101_story_continue.js",
+                     "bf14300_original_quest_energy.js","bf_home_battle_readiness_v420.js"):
+            page.add_script_tag(path=str(ASSETS/name))
+        assert page.evaluate("P.version")==7
+        assert page.evaluate("BF_homeNav.current")=="home"
+        panel=page.locator("#bf420-home-readiness")
+        assert panel.count()==1 and panel.is_visible()
+        assert page.locator("#bf420-home-mission").count()==1
+        snap=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
+        assert snap["missionId"]==1 and snap["waves"]==3 and snap["energy"]==0,snap
+        assert "2022 original 3 waves" in page.locator("#bf420-home-mission").inner_text()
+        assert "reference only" in page.locator("#bf420-home-mission").inner_text()
+        filled=page.evaluate("""() => P.squad.filter(id=>Number.isSafeInteger(id) &&
+          id>=0 && typeof effectiveUnit==='function' && !!effectiveUnit(id)).length""")
+        assert snap["filled"]==filled,snap
+        assert f"{filled}/6 filled slots" in page.locator("#bf420-home-party").inner_text()
+        before=page.evaluate("""() => ({
+           p:JSON.stringify(P),quest:QUEST.missionId,auto:S.auto,
+           save:localStorage.getItem('bf_global_offline_demo_v7'),
+           keys:Object.keys(localStorage).sort().join(',')
+        })""")
+        for width in (320,340,370,390,540):
+            page.set_viewport_size({"width":width,"height":844})
+            geometry=page.evaluate("""() => {
+              const root=document.getElementById('bf420-home-readiness');
+              const panel=root.getBoundingClientRect();
+              return {
+                panelLeft:panel.left,panelRight:panel.right,
+                buttons:[...root.querySelectorAll('button')].map(b=>{
+                  const r=b.getBoundingClientRect();
+                  return {height:r.height,left:r.left,right:r.right};
+                }),
+                scrollWidth:document.documentElement.scrollWidth,
+                viewport:innerWidth
+              };
+            }""")
+            assert geometry["panelLeft"]>=-1 and geometry["panelRight"]<=width+1,(width,geometry)
+            assert geometry["scrollWidth"]<=width,(width,geometry)
+            for button in geometry["buttons"]:
+                assert button["height"]>=44,(width,button)
+                assert button["left"]>=-1 and button["right"]<=width+1,(width,button)
+        page.set_viewport_size({"width":390,"height":844})
+        # A live automatic action must disable even read-only route shortcuts.
+        page.evaluate("S.auto=true;BFHomeBattleReadinessV420.refresh()")
+        assert page.locator("#bf420-home-quest").is_disabled()
+        assert page.locator("#bf420-home-units").is_disabled()
+        page.evaluate("""() => document.getElementById('bf420-home-quest').dispatchEvent(
+           new MouseEvent('click',{bubbles:true}))""")
+        assert page.evaluate("BF_homeNav.current")=="home"
+        page.evaluate("S.auto=false;S.busy=true;BFHomeBattleReadinessV420.refresh()")
+        assert page.locator("#bf420-home-quest").is_disabled()
+        page.evaluate("S.busy=false;BFHomeBattleReadinessV420.refresh()")
+        assert page.locator("#bf420-home-quest").is_enabled()
+        # Corrupted live quest metadata must NOT yield a fabricated '2022' preview.
+        tamper=page.evaluate("""() => {
+          const q=QUESTS.find(x=>x.missionId===1),old=q.battles;
+          try{q.battles=old+1;return {
+             record:BFHomeBattleReadinessV420.refresh(),
+             text:document.getElementById('bf420-home-mission').textContent,
+             disabled:document.getElementById('bf420-home-quest').disabled
+          };}finally{q.battles=old;BFHomeBattleReadinessV420.refresh();}
+        }""")
+        assert tamper["record"] is None and tamper["disabled"],tamper
+        assert "unavailable" in tamper["text"],tamper
+        # Both actions only navigate; original profile, mission and storage stay unchanged.
+        page.locator("#bf420-home-units").click()
+        assert page.evaluate("BF_homeNav.current")=="units"
+        page.evaluate("BF_homeNav.go('home')")
+        assert page.locator("#bf420-home-quest").is_enabled()
+        page.locator("#bf420-home-quest").click()
+        assert page.evaluate("BF_homeNav.current")=="quest"
+        after=page.evaluate("""() => ({
+           p:JSON.stringify(P),quest:QUEST.missionId,auto:S.auto,
+           save:localStorage.getItem('bf_global_offline_demo_v7'),
+           keys:Object.keys(localStorage).sort().join(',')
+        })""")
+        assert before==after,(before,after)
+        page.evaluate("BF_homeNav.go('home')")
+        assert page.locator("#bf420-home-readiness").is_visible()
+        # Test-only memory-only complete clears, never an owner save write.
+        page.evaluate("""() => {
+          for(const q of QUESTS)P.questClears[q.missionId]=1;
+          BFHomeBattleReadinessV420.refresh();
+        }""")
+        final=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
+        assert final["complete"] is True and final["missionId"] is None,final
+        assert "All 106 archived missions cleared" in page.locator("#bf420-home-mission").inner_text()
+        assert page.locator("#bf420-home-quest").is_disabled()
+        assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
+        assert not errors,errors
+    finally:
+        browser.close()
+print("PASS v420 original 2022 Home next-quest preview, manual only, 320-540px, no v7 writes")
