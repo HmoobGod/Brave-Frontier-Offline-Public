@@ -498,6 +498,7 @@ jobs:
           python test_bf_original_quest_economy_v14200.py
           python test_bf_legacy_v7_save_loading_v20500.py
           python test_bf_original_quest_energy_visibility_v14300.py
+          python test_bf_quest_energy_filter_v415.py
           node --check app/src/main/assets/bf14500_original_global_music.js
           python test_bf_original_quest_music_v14500.py
           python test_bf_remains_mirza_v049.py
