@@ -1,0 +1,29 @@
+name: Mission 10 Alternate 2014 AI Practice Source Preflight
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  alternate-2014-ai:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout without credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Use Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate both capture and alternate attack evidence
+        run: |
+          python3 test_bf_m10_2014_variants_v411.py
+          python3 test_bf_m10_alt_normal_ai_v413.py
+      - name: Build local practice asset
+        run: python3 prepare_historical_wave_lab_v200.py
+      - name: Parse prepared practice script
+        run: node --check app/src/main/assets/bf200_historical_wave_lab.js
