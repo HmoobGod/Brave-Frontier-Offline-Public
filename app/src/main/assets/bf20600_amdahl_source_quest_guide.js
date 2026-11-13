@@ -38,17 +38,32 @@
  block.style.cssText='margin:12px 0 4px;padding:10px;border:1px solid #95886e;border-radius:6px;background:#1b3047';
  const heading=document.createElement('summary');
  heading.textContent='ORIGINAL 2022 AMDAHL STORY · 36 QUESTS (READ-ONLY)';
- heading.style.cssText='font-weight:750;cursor:pointer;min-height:28px';
+ heading.style.cssText='font-weight:750;cursor:pointer;min-height:44px;display:flex;align-items:center';
  const disclaimer=document.createElement('p');
  disclaimer.textContent='Original English story text, prerequisites, wave counts, Energy, EXP, Zel and Karma. Amdahl battles are not playable; original enemies, AI and loot remain unverified. No Energy or Gems are spent here.';
  const label=document.createElement('label');label.textContent='Source dungeon: ';
  const select=document.createElement('select');select.id='bf20600-dungeon';
- select.style.cssText='max-width:100%;padding:7px;color:#fff;background:#253950;border:1px solid #91806b';
+ select.style.cssText='max-width:100%;min-height:44px;padding:9px;color:#fff;background:#253950;border:1px solid #91806b';
  for(const id of ids){
    const d=art.lookup(id),option=document.createElement('option');
    option.value=String(id);option.textContent=d.name+' ('+id+')';select.append(option);
  }
  label.append(select);
+ // v436: browse only the seven source-verified Amdahl dungeons.
+ // These controls never select a playable mission or alter saved progression.
+ const dungeonNav=document.createElement('div');dungeonNav.id='bf20600-dungeon-nav';
+ dungeonNav.style.cssText='display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px 0';
+ const previous=document.createElement('button');previous.type='button';
+ previous.id='bf20600-previous-dungeon';previous.textContent='◀ PREVIOUS SOURCE DUNGEON';
+ const next=document.createElement('button');next.type='button';
+ next.id='bf20600-next-dungeon';next.textContent='NEXT SOURCE DUNGEON ▶';
+ for(const button of [previous,next])
+   button.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px;padding:8px 12px;overflow-wrap:anywhere';
+ const dungeonPosition=document.createElement('span');
+ dungeonPosition.id='bf20600-dungeon-position';dungeonPosition.setAttribute('role','status');
+ dungeonPosition.setAttribute('aria-live','polite');
+ dungeonPosition.style.cssText='font-size:12px;color:#e8d7b6';
+ dungeonNav.append(previous,dungeonPosition,next);
  const searchLabel=document.createElement('label');
  searchLabel.textContent='Find original Amdahl quest: ';
  searchLabel.style.cssText='display:block;margin-top:10px';
@@ -68,6 +83,10 @@
  function preview(id){
    if(!ids.includes(id))return 0;
    select.value=String(id);list.replaceChildren();
+   const position=ids.indexOf(id);
+   previous.disabled=position<=0;
+   next.disabled=position===ids.length-1;
+   dungeonPosition.textContent='SOURCE DUNGEON '+(position+1)+' / '+ids.length+' · READ-ONLY';
    const query=search.value.trim().toLocaleLowerCase('en');
    const candidates=query
      ?rows.filter(r=>String(r[0])===query || r[8].toLocaleLowerCase('en').includes(query))
@@ -88,6 +107,13 @@
    reset.disabled=!query;
    return list.children.length;
  }
+ function moveDungeon(step){
+   const at=ids.indexOf(Number(select.value)), target=ids[at+step];
+   if(at<0 || !ids.includes(target))return false;
+   search.value='';preview(target);art.preview(target);return true;
+ }
+ previous.addEventListener('click',()=>moveDungeon(-1));
+ next.addEventListener('click',()=>moveDungeon(1));
  search.addEventListener('input',()=>preview(Number(select.value)));
  reset.addEventListener('click',()=>{search.value='';preview(Number(select.value));search.focus()});
  select.addEventListener('change',()=>{
@@ -97,7 +123,7 @@
    const id=Number(pin.dataset.bf14900Dungeon);
    if(ids.includes(id))pin.addEventListener('click',()=>{search.value='';preview(id)});
  }
- block.append(heading,disclaimer,label,searchLabel,reset,status,list);root.append(block);preview(400);
+ block.append(heading,disclaimer,label,dungeonNav,searchLabel,reset,status,list);root.append(block);preview(400);
  window.BFAmdahlSourceQuestGuideV20600=Object.freeze({
    source:Object.freeze({year:2022,masterSha256:MASTER_SHA256,
      canonicalQuestSha256:QUEST_SHA256,
