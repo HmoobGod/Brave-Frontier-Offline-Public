@@ -27,6 +27,30 @@ assert all(isinstance(e['name'],str) and e['name'] and
 totals={'missions':len(rows),'waves':sum(len(m['waves']) for m in rows),
         'entries':len(enemies),'units':len({e['unitId'] for e in enemies})}
 assert totals=={'missions':21,'waves':112,'entries':264,'units':42},totals
+# v411: Validate two independently observed 2014 Mission #10 captures.
+# The alternate differs only at wave 4. Never infer original 2022 waves.
+alt=json.loads((D/'bf_mission10_dual_2014_capture_v411.json').read_text('utf8'))
+m10=next(m for m in old if m['id']==10)
+assert alt['schema']=='bf-global-mission10-dual-2014-capture-v411'
+assert alt['sourceEra']==2014 and alt['missionId']==10 and alt['missionName']==m10['name']
+assert alt['historicalPracticeOnly'] is True
+assert alt['native2022FormationsVerified'] is False
+assert alt['native2022EnemyAIAndDropsVerified'] is False
+assert alt['originalGameRewardsEnabled'] is False
+assert alt['primary']=={
+ 'sourcePath':m10['sourcePath'],'gitBlobSha':m10['gitBlobSha']}
+assert alt['alternate']['sourcePath']=='missions_parsed/Start of Adventure_2014-14-10-08-34.json'
+assert alt['alternate']['gitBlobSha']=='c6a9d86b7e72a079ebdaa48b84864d078e5568e3'
+assert alt['waves']==len(m10['waves'])==5 and alt['enemySlots']==11
+assert alt['identicalOtherWaves']==[1,2,3,5] and alt['onlyChangedWave']==4
+assert m10['waves'][3]['enemies']==alt['wave4Original']
+assert [e['name'] for e in alt['wave4Alternate']]==['Burny','Glowy','Mossy']
+assert [e['unitId'] for e in alt['wave4Alternate']]==[10030,50030,30030]
+assert [e['hp'] for e in alt['wave4Alternate']]==[800,850,830]
+assert [e['atk'] for e in alt['wave4Alternate']]==[320,340,340]
+assert [e['def'] for e in alt['wave4Alternate']]==[50,60,90]
+assert all(e['aiId']==1 for e in alt['wave4Alternate'])
+assert alt['observations']['bothHaveOneNormalAttackPerEnemy'] is True
 fixture={'schema':'bf-global-2014-historical-wave-lab-v200',
          'provenance':{
             'url':'https://github.com/cheahjs/bravefrontier_data',
@@ -48,6 +72,16 @@ if placeholder in s:
     asset.write_text(s,'utf8')
 else:
     assert s.count(prepared)==1 and s.count('BF200_DATA_PLACEHOLDER')==0
+# Insert separately pinned 2014 alternate data into the same bounded offline asset.
+alt_prepared='/* BF200_M10_ALT_READY */'+json.dumps(
+    alt,separators=(',',':'),ensure_ascii=True).replace('<',r'\\u003c')
+alt_placeholder='/* BF200_M10_ALT_PLACEHOLDER */null'
+if alt_placeholder in s:
+    assert s.count(alt_placeholder)==1
+    s=s.replace(alt_placeholder,alt_prepared,1)
+    asset.write_text(s,'utf8')
+else:
+    assert s.count(alt_prepared)==1 and 'BF200_M10_ALT_PLACEHOLDER' not in s
 assert len(s.encode('utf8'))<65536,'WebView local JS resource must be under 64KiB'
 assert s.count('/* BF_GLOBAL_ARCHIVE_TRIALS_V200 */')==1
 print('PASS source-attributed 2014 archive: 21 quests, 112 wave groups, 264 enemy slots, 42 unique IDs, no 2022 gameplay changes')
