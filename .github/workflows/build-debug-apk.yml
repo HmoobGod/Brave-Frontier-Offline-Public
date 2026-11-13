@@ -377,6 +377,7 @@ jobs:
           python test_bf_morgan_original_v080.py
           python test_bf_v0131.py
           python test_bf_home_nav.py
+          python test_bf_home_owned_squad_v423.py
           python test_bf_android_back_home_v22500.py
           python test_bf_engine_webview_recovery_v22600.py
           python3 test_bf_offline_page_recovery_v22900.py

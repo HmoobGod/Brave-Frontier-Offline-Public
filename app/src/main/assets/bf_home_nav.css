@@ -1430,3 +1430,10 @@ body.bf-location-preview-open{overflow:hidden}
   box-sizing:border-box;min-height:44px;min-width:96px;max-width:100%;
   padding:9px 10px;touch-action:manipulation;
 }
+
+/* v423: malformed/unowned squad entries get visible, compact Home feedback. */
+#bf-scene-party-review{box-sizing:border-box;max-width:100%;margin:7px 0 0;
+  padding:8px 10px;border:1px solid #d5ae6c;border-radius:5px;
+  color:#ffe4b0;background:#3f2b24;font:700 12px/1.45 Arial,sans-serif;
+  overflow-wrap:anywhere}
+#bf-scene-party-review[hidden]{display:none!important}
