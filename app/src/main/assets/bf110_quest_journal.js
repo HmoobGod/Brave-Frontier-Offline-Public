@@ -25,12 +25,15 @@
  style.textContent=[
    '#bf110-journal{margin:10px 0;padding:9px;border:1px solid #a78c60;',
    'border-radius:7px;background:#1b283b;color:#f7e9ce;font:12px/1.5 system-ui,sans-serif}',
-   '#bf110-journal summary{cursor:pointer;font:bold 14px Georgia,serif;min-height:30px}',
+   '#bf110-journal summary{cursor:pointer;font:bold 14px Georgia,serif;min-height:44px}',
    '.bf110-filters{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}',
    '.bf110-filters label{display:flex;flex-direction:column;gap:3px;font-size:11px}',
-   '.bf110-filters input,.bf110-filters select{box-sizing:border-box;width:100%;min-height:37px;',
+   '.bf110-filters input,.bf110-filters select{box-sizing:border-box;width:100%;min-height:44px;',
    'padding:7px;border:1px solid #9e895e;border-radius:4px;background:#111c2b;color:white}',
    '#bf110-search-wrap{grid-column:1/-1}',
+   '#bf110-clear-filters{grid-column:1/-1;min-height:44px;padding:8px 10px;',
+   'border:1px solid #bda375;border-radius:5px;background:#344c64;',
+   'color:#fff;font-weight:800;cursor:pointer}',
    '#bf110-count{margin:5px 0;color:#dde5ea}',
    '#bf110-progress{margin:7px 0;color:#cddfe7}',
    '#bf110-next{min-height:44px;padding:9px 12px;border:1px solid #c9a46c;',
@@ -41,7 +44,7 @@
    '.bf110-entry strong{display:block;font-size:12px}',
    '.bf110-entry small{display:block;color:#c9d1d9}',
    '.bf110-actions{display:flex;gap:4px;flex-wrap:wrap}',
-   '.bf110-actions button,#bf110-more{min-height:34px;padding:5px 7px;border:1px solid #ad986e;',
+   '.bf110-actions button,#bf110-more{min-height:44px;padding:7px 9px;border:1px solid #ad986e;',
    'border-radius:4px;background:#31465c;color:#fff;font-weight:700}',
    '.bf110-actions button:disabled{opacity:.5;background:#30343c}',
    '#bf110-preview{margin:8px 0;padding:8px;border:1px solid #7c94a3;background:#172034;',
@@ -77,6 +80,11 @@
  search.id='bf110-search';search.type='search';search.autocomplete='off';
  search.placeholder='Search names, dungeons and original quest descriptions';
  searchWrap.append(search);filters.append(searchWrap);
+ const clear=document.createElement('button');clear.type='button';
+ clear.id='bf110-clear-filters';
+ clear.textContent='CLEAR JOURNAL FILTERS';
+ clear.setAttribute('aria-label','Clear quest journal filters and restore story order');
+ filters.append(clear);
  const count=document.createElement('p');count.id='bf110-count';count.setAttribute('aria-live','polite');
  const completed=document.createElement('p');completed.id='bf110-progress';
  completed.setAttribute('aria-live','polite');
@@ -220,6 +228,11 @@
    if(target&&!navigationBlocked())chooseMission(target.id);
  });
  search.addEventListener('input',changed);
+ clear.addEventListener('click',()=>{
+   // Reset only optional journal presentation; never select a mission.
+   regions.value='all';states.value='all';ordering.value='story';
+   search.value='';visibleLimit=20;refresh();
+ });
  more.addEventListener('click',()=>{visibleLimit+=20;refresh();});
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
