@@ -78,6 +78,55 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'passive refresh must not change save'
+ # v419: direct Home -> next original mission must be an explicit MANUAL
+ # action, 44px accessible on 320px phones, never an Auto/save shortcut.
+ page.set_viewport_size({'width':320,'height':740})
+ home_next=page.locator('#bf101-home-manual-continue')
+ assert page.evaluate('BF_homeNav.current')=='home'
+ assert home_next.count()==1 and home_next.is_visible() and home_next.is_enabled()
+ home_metrics=home_next.evaluate("""el=>({
+   height:el.getBoundingClientRect().height,
+   left:el.getBoundingClientRect().left,
+   right:el.getBoundingClientRect().right,
+   width:innerWidth
+ })""")
+ assert home_metrics['height']>=44 and home_metrics['left']>=0,home_metrics
+ assert home_metrics['right']<=home_metrics['width']+1,home_metrics
+ blocked_home=page.evaluate("""()=>{
+   const btn=document.getElementById('bf101-home-manual-continue');
+   const old={busy:S.busy,auto:S.auto};
+   const mission=QUEST.missionId,save=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     S.busy=true;BFGrandGaiaContinueV101.refresh();
+     const busy=btn.disabled;
+     btn.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+     const noBusyRoute=BF_homeNav.current==='home';
+     S.busy=false;S.auto=true;BFGrandGaiaContinueV101.refresh();
+     const auto=btn.disabled;
+     btn.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+     return {busy,noBusyRoute,auto,noAutoRoute:BF_homeNav.current==='home',
+       sameMission:QUEST.missionId===mission,
+       sameSave:localStorage.getItem('bf_global_offline_demo_v7')===save};
+   }finally{Object.assign(S,old);BFGrandGaiaContinueV101.refresh();}
+ }""")
+ assert all(blocked_home.values()),blocked_home
+ before_home=page.evaluate("""()=>({
+    p:JSON.stringify(P),stored:localStorage.getItem('bf_global_offline_demo_v7')
+ })""")
+ home_next.click()
+ after_home=page.evaluate("""()=>({
+   route:BF_homeNav.current,mission:QUEST.missionId,auto:S.auto,
+   checked:document.getElementById('auto').checked,
+   focus:document.activeElement?.id,
+   p:JSON.stringify(P),stored:localStorage.getItem('bf_global_offline_demo_v7')
+ })""")
+ assert after_home['route']=='quest' and after_home['mission']==1,after_home
+ assert after_home['focus']=='bf101-continue','Home only reveals the original manual confirmation'
+ assert not after_home['auto'] and not after_home['checked'],after_home
+ assert after_home['p']==before_home['p'] and after_home['stored']==before_home['stored'],after_home
+ page.evaluate("BF_homeNav.go('home')")
+ assert home_next.is_enabled(),'Home shortcut must re-enable on native route event'
+ page.set_viewport_size({'width':390,'height':844})
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  # A live Auto player turn can have busy=false; a bounded repeat can
  # still own the victory screen. Neither state permits story rerouting.
