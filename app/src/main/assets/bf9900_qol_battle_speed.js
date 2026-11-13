@@ -30,6 +30,9 @@
  let skip=get(prefSkip)==='on';
  const nativeSpeed=()=>Number(speed.value)||2;
  function setSpeed(value){
+   // Preserve the speed sampled for an executing turn; offer changes only
+   // between turns, just like the animation-skip toggle.
+   if(S.busy)return false;
    const s=String(value);
    if(!allowed.has(s))return false;
    speed.value=s;
@@ -72,7 +75,7 @@
    'border-radius:7px;background:#172b44;color:#e7f0ff;font:12px/1.5 system-ui,sans-serif';
  const heading=document.createElement('summary');
  heading.textContent='QoL · BATTLE SPEED & ANIMATION SKIP';
- heading.style.cssText='min-height:36px;cursor:pointer;font-weight:800';
+ heading.style.cssText='min-height:44px;cursor:pointer;font-weight:800';
  const caption=document.createElement('p');
  caption.textContent='Extra 8×/12× speeds extend the existing round-speed control. '+
    'Optional animation skip shortens long presentation waits only. '+
@@ -80,7 +83,7 @@
  const group=document.createElement('label');
  group.textContent='BATTLE SPEED ';
  const control=document.createElement('select');control.id='bf9900-speed-select';
- control.style.cssText='margin:6px;min-height:42px;color:white;background:#2d4762;'+
+ control.style.cssText='margin:6px;min-height:44px;color:white;background:#2d4762;'+
    'border:1px solid #9db5d0;border-radius:5px;padding:7px';
  for(const value of [1,2,3,5,8,12]){
    const opt=document.createElement('option');opt.value=String(value);
@@ -104,13 +107,16 @@
    unchangedSaveSchema:P.version===7});}
  function refresh(){
    control.value=speed.value;
+   control.disabled=!!S.busy;
    checkbox.checked=skip;
    checkbox.disabled=!!S.busy;
    info.textContent='Speed '+nativeSpeed()+'× · Long animation skip '+
-     (skip?'ON':'OFF')+(S.busy?' · finish this turn to change skip':'');
+     (skip?'ON':'OFF')+(S.busy?' · finish this turn to change speed or skip':'');
    return snapshot();
  }
- control.addEventListener('change',()=>setSpeed(control.value));
+ control.addEventListener('change',()=>{
+   if(!setSpeed(control.value))refresh();
+ });
  checkbox.addEventListener('change',()=>{
    if(!setSkip(checkbox.checked))refresh();
  });
