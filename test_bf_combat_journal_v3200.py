@@ -8,6 +8,8 @@ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_te
 assert src.count('/* BF_GLOBAL_PLAYABLE_COMBAT_JOURNAL_V3200 */')==1
 assert len(src.encode('utf8'))<65536
 assert 'localStorage' not in src and 'saveProgress(' not in src
+assert 'bf3200-search' in src and 'bf3200-filter-count' in src
+assert 'min-height:44px' in src
 assert java.index('readPackagedText("bf3100_battle_focus.js")')<java.index('readPackagedText("bf3200_combat_journal.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -46,14 +48,38 @@ with sync_playwright() as pw:
  report=page.evaluate('BFGlobalCombatJournalV3200.report("current")')
  assert 'COMBAT_JOURNAL_ENTRY_0' in report and 'COMBAT_JOURNAL_ENTRY_29' in report
  assert 'Source enemy identities and AI are not restored' in report
+ # v429: search only the retained in-session entries, never native S/P or v7.
+ page.locator('#bf3200-journal > summary').click()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf3200-journal > summary','#bf3200-search','#bf3200-clear'):
+   box=page.locator(selector).bounding_box()
+   assert box and box['height']>=44,(width,selector,box)
+ page.set_viewport_size({'width':390,'height':844})
+ page.locator('#bf3200-search').fill('combat_journal_entry_29')
+ assert '1 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert 'COMBAT_JOURNAL_ENTRY_29' in page.locator('#bf3200-report').input_value()
+ assert 'COMBAT_JOURNAL_ENTRY_0' not in page.locator('#bf3200-report').input_value()
+ assert 'COMBAT_JOURNAL_ENTRY_0' in page.evaluate('BFGlobalCombatJournalV3200.report("current")')
+ page.locator('#bf3200-search').fill('NO SUCH EVENT')
+ assert '0 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert 'COMBAT_JOURNAL_ENTRY_29' not in page.locator('#bf3200-report').input_value()
+ page.locator('#bf3200-clear').click()
+ assert page.locator('#bf3200-search').input_value()==''
+ assert 'COMBAT_JOURNAL_ENTRY_0' in page.locator('#bf3200-report').input_value()
  page.evaluate('finish(false)')
  page.evaluate('reset()')
  page.wait_for_function('BFGlobalCombatJournalV3200.snapshot().previous >= 30')
  assert page.evaluate('BFGlobalCombatJournalV3200.show("previous")') is True
  assert 'COMBAT_JOURNAL_ENTRY_0' in page.locator('#bf3200-report').input_value()
  assert 'COMBAT_JOURNAL_ENTRY_29' in page.locator('#bf3200-report').input_value()
+ page.locator('#bf3200-search').fill('COMBAT_JOURNAL_ENTRY_29')
+ assert '1 of 30 retained entries match' in page.locator('#bf3200-filter-count').inner_text()
+ assert 'COMBAT_JOURNAL_ENTRY_0' not in page.locator('#bf3200-report').input_value()
  page.evaluate('BFGlobalCombatJournalV3200.show("current")')
  assert 'COMBAT_JOURNAL_ENTRY_29' not in page.locator('#bf3200-report').input_value()
+ page.locator('#bf3200-clear').click()
+ assert '0 retained entries shown' in page.locator('#bf3200-filter-count').inner_text()
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'journal and defeat/restart must not change saved progression'
  assert page.evaluate('P.version')==7
