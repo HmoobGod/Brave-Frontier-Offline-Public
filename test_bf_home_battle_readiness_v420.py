@@ -84,6 +84,42 @@ with sync_playwright() as pw:
           id>=0 && typeof effectiveUnit==='function' && !!effectiveUnit(id)).length""")
         assert snap["filled"]==filled,snap
         assert f"{filled}/6 filled slots" in page.locator("#bf420-home-party").inner_text()
+        # v425: invalid/duplicate/unowned entries cannot inflate the Home count.
+        # All negative fixtures are temporary memory edits, not save writes.
+        ownership=page.evaluate("""() => {
+          const originalSquad=P.squad, originalRoster=P.roster;
+          const before=JSON.stringify(P), beforeS=JSON.stringify(S);
+          const save=localStorage.getItem('bf_global_offline_demo_v7');
+          let result={};
+          try {
+            const owned=P.roster.find(id=>Number.isSafeInteger(id)&&id>0&&effectiveUnit(id));
+            const unowned=[10012,20012,30012,40012,50012,60012,
+                           10013,20013,30013,40013,50013,60013]
+              .find(id=>!P.roster.includes(id)&&effectiveUnit(id));
+            if(owned===undefined || unowned===undefined)
+              return {fixture:false};
+            P.squad=[owned,unowned,owned,-1,{},null];
+            const record=BFHomeBattleReadinessV420.refresh();
+            result={fixture:true,filled:record?.filled,
+              countText:document.getElementById('bf420-home-party').textContent,
+              questEnabled:!document.getElementById('bf420-home-quest').disabled};
+            P.roster=null;
+            result.missingRoster=BFHomeBattleReadinessV420.snapshot()===null;
+            BFHomeBattleReadinessV420.refresh();
+            result.missingText=document.getElementById('bf420-home-party').textContent;
+          } finally {
+            P.squad=originalSquad;P.roster=originalRoster;
+            BFHomeBattleReadinessV420.refresh();
+          }
+          return {...result,unchanged:JSON.stringify(P)===before&&
+            JSON.stringify(S)===beforeS&&
+            localStorage.getItem('bf_global_offline_demo_v7')===save};
+        }""")
+        assert ownership["fixture"] and ownership["filled"]==1,ownership
+        assert "1/6 filled slots" in ownership["countText"],ownership
+        assert ownership["questEnabled"],ownership
+        assert ownership["missingRoster"] and "unavailable" in ownership["missingText"],ownership
+        assert ownership["unchanged"],ownership
         before=page.evaluate("""() => ({
            p:JSON.stringify(P),quest:QUEST.missionId,auto:S.auto,
            save:localStorage.getItem('bf_global_offline_demo_v7'),
