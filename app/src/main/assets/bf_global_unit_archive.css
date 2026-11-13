@@ -71,7 +71,8 @@
 .bf-global-original-unit-archive button{touch-action:manipulation}
 .bf-archive-filters select,.bf-archive-filters input{min-height:44px;font-size:16px}
 .bf-archive-pagination{flex-wrap:wrap}
-.bf-archive-pagination button,.bf-archive-close,.bf-codex-evo-jump{min-height:44px;min-width:44px}
+.bf-archive-pagination button,.bf-archive-close,.bf-codex-evo-jump,#bf-archive-reset{min-height:44px;min-width:44px}
+#bf-archive-reset{box-sizing:border-box;grid-column:1/-1;max-width:100%}
 .bf-archive-detail{min-width:0;max-width:100%;box-sizing:border-box;overflow-x:auto}
 .bf-archive-detail table{min-width:0;max-width:100%;table-layout:fixed}
 .bf-archive-detail th,.bf-archive-detail td{overflow-wrap:anywhere;word-break:normal}
