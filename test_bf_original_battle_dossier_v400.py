@@ -8,6 +8,8 @@ java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_te
 assert js.count('/* BF_GLOBAL_ORIGINAL_BATTLE_DOSSIER_V400 */')==1
 assert len(js.encode('utf8'))<65536
 assert 'localStorage' not in js and 'saveProgress(' not in js and 'BFAndroid' not in js
+assert 'min-height:44px' in js
+assert 'PREVIOUS 2014 WAVE' in js and 'NEXT 2014 WAVE' in js
 assert java.index('readPackagedText("bf300_tactical_rounds.js")')<java.index('readPackagedText("bf400_original_battle_dossier.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -60,6 +62,18 @@ with sync_playwright() as pw:
  assert foe[0]['hp']==300 and foe[0]['unitId']==30030
  assert foe[0]['sourceYear']==2014
  assert page.evaluate('BFGlobalBattleDossierV400.showWave(2)') is True
+ # v431 historical-only prev/next controls and strict end boundaries.
+ assert page.locator('#bf400-prev-wave').is_enabled()
+ assert page.locator('#bf400-next-wave').is_enabled()
+ page.locator('#bf400-prev-wave').click()
+ assert page.locator('#bf400-wave').input_value()=='1'
+ assert page.locator('#bf400-prev-wave').is_disabled()
+ page.locator('#bf400-next-wave').click()
+ assert page.locator('#bf400-wave').input_value()=='2'
+ page.locator('#bf400-next-wave').click()
+ assert page.locator('#bf400-wave').input_value()=='3'
+ assert page.locator('#bf400-next-wave').is_disabled()
+ assert page.evaluate('BFGlobalBattleDossierV400.showWave(2)') is True
  foe=page.evaluate('BFGlobalBattleDossierV400.waveEntries')
  assert [x['name'] for x in foe]==['Sparky','Mossy']
  assert page.evaluate('BFGlobalBattleDossierV400.showWave(99)') is False
@@ -67,6 +81,21 @@ with sync_playwright() as pw:
  assert 'Verified native 2022 formations: 0' in page.locator('#bf400-integrity').inner_text()
  assert page.evaluate('BFGlobalBattleDossierV400.showMission(200)') is True
  assert page.locator('#bf400-wave option').count()==7
+ assert page.locator('#bf400-prev-wave').is_disabled()
+ page.locator('#bf400-next-wave').click()
+ assert page.locator('#bf400-wave').input_value()=='2'
+ assert page.locator('#bf400-prev-wave').is_enabled()
+ # Changing historical missions resets navigation to the first archived wave.
+ assert page.evaluate('BFGlobalBattleDossierV400.showMission(1)') is True
+ assert page.locator('#bf400-wave').input_value()=='1'
+ assert page.locator('#bf400-prev-wave').is_disabled()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf400-dossier > summary','#bf400-mission','#bf400-wave',
+                   '#bf400-refresh','#bf400-prev-wave','#bf400-next-wave'):
+   rect=page.locator(selector).bounding_box()
+   assert rect and rect['height']>=44,(width,selector,rect)
+ page.set_viewport_size({'width':390,'height':844})
  page.locator('#bf400-unit').select_option('20011')
  assert 'Selena' in page.locator('#bf400-unit-card').inner_text()
  page.evaluate('BFGlobalBattleDossierV400.refreshSquad()')
