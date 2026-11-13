@@ -69,13 +69,43 @@
  }
  range.addEventListener('change',()=>decorate());
  clear.addEventListener('click',()=>{range.value='all';decorate();range.focus();});
+ // Native renderQuestList and original English name injection both preserve
+ // the index ordering of QUESTS. The latter replaces <strong> with "Basics
+ // of Battle" and places "Mission N" inside <small>, so NEVER derive a
+ // mission ID by parsing visible titles.
+ function matchingQuest(q,r){
+   return !!q && !!r && r[0]===q.missionId &&
+     r[1]===q.dungeonId && r[2]===q.requires &&
+     r[3]===q.battles && r[4]===q.energy &&
+     r[5]===q.exp && r[6]===q.zel && r[7]===q.karma;
+ }
  function decorate(){
+   const buttons=Array.from(questList.querySelectorAll('button.questcard'));
+   // Fail closed if the real app's list no longer matches the original
+   // 106-row order, source tuple, or a previously stamped card identity.
+   // Do not label a wrong mission or hide a potentially playable quest.
+   const valid=buttons.length===106 && buttons.length===QUESTS.length &&
+     buttons.every((button,index)=>{
+       const q=QUESTS[index],r=known.get(q?.missionId);
+       const stamp=button.dataset.bf143MissionId;
+       return matchingQuest(q,r) &&
+         (stamp===undefined || stamp===String(q.missionId));
+     });
+   if(!valid){
+     range.disabled=true;
+     count.textContent='Original 2022 quest references unavailable · filter disabled';
+     for(const button of buttons){
+       button.hidden=false;
+       button.querySelector('.bf143-original-cost')?.remove();
+     }
+     return 0;
+   }
+   range.disabled=false;
    let shown=0;
-   for(const button of questList.querySelectorAll('button.questcard')){
-     const title=button.querySelector('strong')?.textContent||'';
-     const match=title.match(/Mission (\d+)/);
-     const r=match?known.get(Number(match[1])):null;
-     if(!r){button.hidden=false;continue;}
+   for(const [index,button] of buttons.entries()){
+     const q=QUESTS[index],r=known.get(q.missionId);
+     // A stamped ID also guards against silent reordering on later refresh.
+     button.dataset.bf143MissionId=String(q.missionId);
      button.hidden=!matchesEnergy(r[4]);
      let label=button.querySelector('.bf143-original-cost');
      if(!label){
@@ -88,7 +118,7 @@
        ' (reference; stamina not enforced; DEMO credits EXP/Zel/Karma on clear)';
      shown++;
    }
-   const visible=Array.from(questList.querySelectorAll('button.questcard')).filter(b=>!b.hidden).length;
+   const visible=buttons.filter(b=>!b.hidden).length;
    count.textContent=visible+' of '+shown+' source-matched quests shown';
    return shown;
  }
