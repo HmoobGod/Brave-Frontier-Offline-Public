@@ -136,8 +136,8 @@ with sync_playwright() as pw:
  p.evaluate("S.wave=0;BFGlobalQoLBattleDetailsV10300.refresh()")
  assert 'DEMO Wave 1/3' in p.locator('#bf10300-header').inner_text()
  p.evaluate("""()=>{window.__criticalOriginal=BFGlobalSingleHitCriticalV9300;
-   BFGlobalSingleHitCriticalV9300={snapshot:()=>{throw Error('unavailable')}}};
-   BFGlobalQoLBattleDetailsV10300.refresh()""")
+   BFGlobalSingleHitCriticalV9300={snapshot:()=>{throw Error('unavailable')}};
+   BFGlobalQoLBattleDetailsV10300.refresh()}""")
  assert 'critical count unavailable' in p.locator('#bf10300-header').inner_text()
  p.evaluate("""()=>{BFGlobalSingleHitCriticalV9300=window.__criticalOriginal;
    BFGlobalQoLBattleDetailsV10300.refresh()}""")
