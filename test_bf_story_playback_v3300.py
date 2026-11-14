@@ -7,6 +7,8 @@ src=(A/'bf3300_story_playback.js').read_text('utf8')
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert src.count('/* BF_GLOBAL_ORIGINAL_SCENE_PLAYBACK_V3300 */')==1
 assert len(src.encode('utf8'))<65536 and 'localStorage' not in src and 'saveProgress(' not in src
+assert 'expectedStep' in src and 'identity(s)!==scene' in src and 'blocked()' in src
+assert 'min-height:44px;min-width:130px' in src
 assert java.index('readPackagedText("bf3200_combat_journal.js")')<java.index('readPackagedText("bf3300_story_playback.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -42,7 +44,40 @@ with sync_playwright() as pw:
  assert page.locator('#bf3300-player').is_visible()
  before=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert page.evaluate('BFGlobalStoryPlaybackV3300.snapshot().step')==1
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for control in ('#bf3300-speed','#bf3300-play','#bf3300-pause','#bf3300-end'):
+   rect=page.locator(control).bounding_box()
+   assert rect and rect['height']>=44,(width,control,rect)
+ page.set_viewport_size({'width':390,'height':844})
  page.locator('#bf3300-speed').select_option('1500')
+ # v444: player Auto / busy combat cannot trigger archived autoplay or
+ # manual jump to last page. No actual DEMO battle action is invoked.
+ auto_before=page.evaluate('S.auto')
+ busy_before=page.evaluate('S.busy')
+ page.evaluate('S.auto=true')
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is False
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.lastPage()') is False
+ assert 'AUTO / BATTLE BUSY' in page.locator('#bf3300-state').inner_text() or page.evaluate('BFGlobalStoryPlaybackV3300.refresh().blocked') is True
+ page.evaluate('S.auto=false;S.busy=true')
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is False
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.lastPage()') is False
+ page.evaluate('S.busy=false')
+ # Even a transient programmatic Auto transition must stop a queued timer.
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is True
+ page.evaluate('S.auto=true')
+ page.wait_for_function('!BFGlobalStoryPlaybackV3300.snapshot().playing',timeout=5000)
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ page.evaluate('S.auto=false')
+ # Restarting same selected source while a later page is pending must not
+ # allow the old timer to page the new scene (unchanged source filename).
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is True
+ page.wait_for_function('BFGlobalOriginalEventsV2200.snapshot().step >= 2',timeout=4000)
+ assert page.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)') is True
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ page.wait_for_function('!BFGlobalStoryPlaybackV3300.snapshot().playing',timeout=5000)
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ # Existing normal opt-in progression still works.
  assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is True
  page.wait_for_function('BFGlobalOriginalEventsV2200.snapshot().step >= 2',timeout=4000)
  assert page.evaluate('BFGlobalStoryPlaybackV3300.snapshot().playing') is True
@@ -56,6 +91,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is False
  assert page.evaluate('BFGlobalStoryPlaybackV3300.snapshot().playing') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
+ assert page.evaluate('S.auto')==auto_before and page.evaluate('S.busy')==busy_before
  assert page.evaluate('P.version')==7
  assert not errors,errors
  browser.close()
