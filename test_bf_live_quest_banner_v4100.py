@@ -9,6 +9,13 @@ assert src.count('/* BF_GLOBAL_LIVE_QUEST_BANNER_V4100 */')==1
 assert len(src.encode('utf8'))<65536 and 'localStorage' not in src and 'saveProgress(' not in src
 assert 'Number.isSafeInteger(s?.total)' in src
 assert 'q.battles===s.total' in src and "S.mode==='archive'" in src
+assert 'sourceRow=Number.isSafeInteger(q?.missionId)' in src
+assert 'const originalMissions=new Map(QUESTS.map(row=>' in src
+assert 'originalMissions.size!==106' in src
+assert 'q.dungeonId===original.dungeonId' in src
+assert 'q.battles===original.battles' in src
+assert 'q.battles===sourceRow.battles' not in src
+assert 's?.name===source.mission.name&&s?.dungeon===source.dungeon.name' in src
 assert java.index('readPackagedText("bf4000_next_chapter_intro.js")')<java.index('readPackagedText("bf4100_live_quest_banner.js")')
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,
@@ -49,6 +56,10 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalLiveQuestBannerV4100.setEnabled(true)') is True
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
  assert s['applied'] and s['missionId']==1 and s['name'],s
+ assert s['sourceVerified'] is True,s
+ # The real app aliases its active QUEST and the 106-row QUESTS entry:
+ # the fixed original counts MUST therefore be captured independently.
+ assert page.evaluate('QUEST===QUESTS.find(r=>r.missionId===QUEST.missionId)') is True
  assert page.locator('#bf4100-banner').is_visible()
  assert page.evaluate('document.getElementById("bf4100-banner").parentElement.classList.contains("arena")') is True
  assert page.evaluate('document.getElementById("bf4100-banner").getBoundingClientRect().height>0') is True
@@ -78,6 +89,49 @@ with sync_playwright() as pw:
  for key in ('0','-1','3.5','101'):
   assert gates[key]=={'available':False,'applied':False,'hidden':True,'enabled':True},(key,gates)
  assert gates['restored'] and gates['sameSave'],gates
+ # v447 R2: an independently captured recorded-count copy must catch
+ # changes to QUEST.battles even though QUEST aliases a row in QUESTS.
+ # Comparing only HUD.total or the alias to mutable QUEST.battles fails.
+ # Also reject a mismatched original dungeon or unknown mission identity.
+ mismatches=page.evaluate("""()=>{
+   const q=QUEST;
+   const original={missionId:q.missionId,dungeonId:q.dungeonId,battles:q.battles};
+   const save=localStorage.getItem('bf_global_offline_demo_v7');
+   const baseline=BFGlobalLiveQuestBannerV4100.snapshot();
+   const found={};
+   const tests=[
+     ['stages','battles',original.battles+1],
+     ['dungeon','dungeonId',9999],
+     ['mission','missionId',9999],
+     ['fractional','battles',original.battles+0.5]
+   ];
+   try{
+     for(const [label,field,value] of tests){
+       q[field]=value;
+       const current=BFGlobalLiveQuestBannerV4100.refresh();
+       found[label]={
+         available:current.available,applied:current.applied,
+         sourceVerified:current.sourceVerified,enabled:current.enabled,
+         hidden:document.getElementById('bf4100-banner').hidden
+       };
+       q[field]=original[field];
+       BFGlobalLiveQuestBannerV4100.refresh();
+     }
+   }finally{
+     Object.assign(q,original);BFGlobalLiveQuestBannerV4100.refresh();
+   }
+   found.restored=BFGlobalLiveQuestBannerV4100.snapshot().applied&&
+     BFGlobalLiveQuestBannerV4100.snapshot().sourceVerified===true&&
+     baseline.missionId===BFGlobalLiveQuestBannerV4100.snapshot().missionId;
+   found.sameSave=localStorage.getItem('bf_global_offline_demo_v7')===save;
+   return found;
+ }""")
+ for key in ('stages','dungeon','mission','fractional'):
+  assert mismatches[key]=={
+    'available':False,'applied':False,'sourceVerified':False,
+    'enabled':True,'hidden':True
+  },(key,mismatches)
+ assert mismatches['restored'] and mismatches['sameSave'],mismatches
  assert page.evaluate('BFGlobalLiveQuestBannerV4100.setEnabled("true")') is False
  page.locator('#mode').select_option('training')
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')

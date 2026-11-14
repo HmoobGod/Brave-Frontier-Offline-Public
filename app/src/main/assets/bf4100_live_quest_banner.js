@@ -8,6 +8,13 @@
     typeof P==='undefined'||P.version!==7||
     typeof QUESTS==='undefined'||QUESTS.length!==106||
     typeof S==='undefined')return;
+ // Clone recorded mission counts once, before any mutable QUEST state can
+ // change them. QUEST aliases the corresponding QUESTS row in the real app;
+ // comparing one with the other would be a tautology.
+ const originalMissions=new Map(QUESTS.map(row=>[
+   row.missionId,Object.freeze({dungeonId:row.dungeonId,battles:row.battles})
+ ]));
+ if(originalMissions.size!==106)return;
  const battle=document.getElementById('battle');
  const hud=document.getElementById('bf2000-run');
  const mode=document.getElementById('mode');
@@ -38,7 +45,7 @@
  toggle.setAttribute('aria-label','Show original quest name and demo wave in battlefield');
  label.prepend(toggle);
  const note=document.createElement('small');
- note.textContent='Uses original 2022 Global quest and dungeon names. Wave status and all active combat remain DEMO. Display only; off by default.';
+ note.textContent='Shows only source-verified original 2022 Global quest and dungeon names. Wave status and combat remain DEMO. Overlay safely hides if source identity or stage count disagrees. Off by default.';
  panel.append(label,note);hud.append(panel);
  const banner=document.createElement('div');
  banner.id='bf4100-banner';
@@ -50,6 +57,23 @@
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    const s=story.snapshot();
+   // Resolve original names from the verified source accessor, with recorded
+   // counts captured at module load (not from mutable QUEST/QUESTS aliases).
+   const sourceRow=Number.isSafeInteger(q?.missionId)?
+     QUESTS.find(row=>row.missionId===q.missionId):null;
+   const original=sourceRow&&originalMissions.get(q.missionId);
+   const source=sourceRow&&window.BFGlobalQuestText?.sourceFor(sourceRow);
+   const sourceVerified=!!sourceRow&&!!original&&
+     Number.isSafeInteger(original.dungeonId)&&
+     Number.isSafeInteger(original.battles)&&
+     original.battles>=1&&original.battles<=100&&
+     q.dungeonId===original.dungeonId&&
+     q.battles===original.battles&&
+     typeof source?.mission?.name==='string'&&
+     source.mission.name.trim().length>0&&
+     typeof source?.dungeon?.name==='string'&&
+     source.dungeon.name.trim().length>0&&
+     s?.name===source.mission.name&&s?.dungeon===source.dungeon.name;
    // The optional overlay must not call invalid DEMO wave counters a 2022
    // source-matched mission. Fail closed instead of rendering WAVE 1/0.
    const validWaves=Number.isSafeInteger(s?.total)&&
@@ -57,11 +81,9 @@
      s.total>=1&&s.total<=100&&s.current>=1&&
      s.current<=s.total&&q.battles===s.total;
    const available=!!q&&!!s&&s.archive&&S.mode==='archive'&&
-     mode.value==='archive'&&validWaves&&
-     questUnlocked(q)&&s.missionId===q.missionId&&
-     typeof s.name==='string'&&s.name.trim().length>0&&
-     typeof s.dungeon==='string'&&s.dungeon.trim().length>0;
-   return Object.freeze({enabled,available,applied:enabled&&available,
+     mode.value==='archive'&&validWaves&&sourceVerified&&
+     questUnlocked(q)&&s.missionId===q.missionId;
+   return Object.freeze({enabled,available,sourceVerified,applied:enabled&&available,
      missionId:available?q.missionId:null,
      name:available?s.name:null,dungeon:available?s.dungeon:null,
      wave:available?s.current:null,total:available?s.total:null,
