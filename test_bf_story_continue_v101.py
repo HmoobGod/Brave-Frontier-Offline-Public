@@ -37,6 +37,63 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGrandGaiaContinueV101.snapshot()')=={
     'total':106,'done':0,'mistral':0,'morgan':0,'stlamia':0,'nextMission':1}
  assert page.locator('#bf101-continue').count()==1
+ # v462: all 106 DEMO clear receipts must be safe integer counts before
+ # showing progress or advertising all archived quests as complete.
+ # This exercises the live Continue Story module with disposable P state.
+ ledger_probe=page.evaluate("""() => {
+   const api=BFGrandGaiaContinueV101;
+   const original=P.questClears;
+   const beforeP=JSON.stringify(P),beforeS=JSON.stringify(S),
+     beforeQuest=QUEST.missionId,
+     saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const last=QUESTS[QUESTS.length-1].missionId;
+   const progress=document.querySelector('#bf101-story-continue [role="progressbar"]');
+   const manual=document.getElementById('bf101-continue');
+   const auto=document.getElementById('bf101-continue-auto');
+   const status=document.getElementById('bf101-status');
+   const next=document.getElementById('bf101-next');
+   const report=()=>({
+     done:api.refresh().done,hidden:progress.hidden,
+     aria:progress.getAttribute('aria-valuenow'),
+     status:status.textContent,next:next.textContent,
+     manualDisabled:manual.disabled,autoDisabled:auto.disabled,
+     nextMission:api.nextMission
+   });
+   const result={bad:[]};
+   try{
+     for(const bad of [Infinity,'1',1.5,-1,null,Number.MAX_SAFE_INTEGER+1,NaN]){
+       P.questClears=Object.fromEntries(QUESTS.map(q=>[q.missionId,1]));
+       P.questClears[last]=bad;
+       result.bad.push(report());
+     }
+     P.questClears=null;result.missingLedger=report();
+     P.questClears=Object.fromEntries(QUESTS.map(q=>[q.missionId,1]));
+     result.validFull=report();
+     P.questClears={};result.recovered=report();
+   }finally{
+     P.questClears=original;
+     api.refresh();
+   }
+   result.unchanged=JSON.stringify(P)===beforeP&&
+      JSON.stringify(S)===beforeS&&QUEST.missionId===beforeQuest&&
+      localStorage.getItem('bf_global_offline_demo_v7')===saved;
+   return result;
+ }""")
+ for item in ledger_probe['bad']+[ledger_probe['missingLedger']]:
+     assert item['done'] is None and item['hidden'] and item['aria'] is None,item
+     assert item['manualDisabled'] and item['autoDisabled'],item
+     assert item['nextMission'] is None and 'unavailable' in item['status'],item
+     assert 'All 106 archived' not in item['next'],item
+ full=ledger_probe['validFull']
+ assert full['done']==106 and not full['hidden'] and full['aria']=='106',full
+ assert 'All 106 archived story missions cleared' in full['next'],full
+ good=ledger_probe['recovered']
+ assert good['done']==0 and not good['hidden'] and good['aria']=='0',good
+ assert good['nextMission']==1 and ledger_probe['unchanged'],ledger_probe
+ assert page.locator('#bf101-continue').evaluate(
+     '(e)=>e.getBoundingClientRect().height')>=44
+ assert not errors,errors
+ print('PASS continue story full clear-ledger verification, fail-closed invalid receipt and recovery')
  # v358: native loader inserts v143 after v101; dynamically read the 2022
  # reference only once the source-qualified lookup is present.
  assert '2022 source reference:' not in page.locator('#bf101-next').text_content()
