@@ -382,12 +382,17 @@ function bfOfflineUnitPortraitV266(source, name) {
     note.setAttribute('aria-live', 'polite');
     note.setAttribute('aria-atomic', 'true');
     refreshTrainingAffordability = () => {
-      if (typeof P === 'undefined' || !P) return;
-      const shards = Number(P.trainingShards) || 0;
-      const zel = Number(P.zel) || 0;
-      const spent = Number(P.trainingSpent) || 0;
+      // v452: read-only affordability must never treat corrupt live resources
+      // as free, zero or enough currency. Training logic and saves are untouched.
+      const state = typeof P === 'undefined' ? null : P;
+      const shards = state?.trainingShards;
+      const zel = state?.zel;
+      const spent = state?.trainingSpent;
+      const validCount = value => Number.isSafeInteger(value) && value >= 0;
       let message = '';
-      if (spent > 99999) {
+      if (![shards, zel, spent].every(validCount)) {
+        message = 'Training resource status unavailable · invalid live Shards, Zel or spending data. No training started.';
+      } else if (spent > 99999) {
         message = 'Demo Training spending limit reached.';
       } else if (shards < 1 || zel < 150) {
         const need = [shards < 1 ? '1 Training Shard' : '', zel < 150 ? '150 Zel' : ''].filter(Boolean);

@@ -70,6 +70,52 @@ with sync_playwright() as playwright:
     assert not page.locator("#traininglist").is_visible()  # Squad tab is selected
     page.locator('.bf-unit-actions button[data-bf-unit-tab="training"]').click()
     assert page.locator("#traininglist").is_visible()
+    # v452: the read-only Training banner must not coerce malformed v7
+    # resources to zero or to an apparent affordable purchase.
+    training = page.evaluate("""() => {
+      const keys=['trainingShards','zel','trainingSpent'];
+      const original=keys.map(k=>({key:k,had:Object.prototype.hasOwnProperty.call(P,k),value:P[k]}));
+      const before=JSON.stringify({P,S});
+      const save=localStorage.getItem('bf_global_offline_demo_v7');
+      const tab=document.querySelector('.bf-unit-actions button[data-bf-unit-tab="training"]');
+      const note=document.querySelector('.bf-training-cost-note');
+      const result={bad:[]};
+      const show=(key,value)=>{
+        P.trainingShards=5;P.zel=750;P.trainingSpent=0;
+        if(key!==null)P[key]=value;
+        tab.click();
+        return note?.textContent || '';
+      };
+      try {
+        result.noteFound=!!note;
+        result.healthy=show(null,null);
+        result.cap=show('trainingSpent',100000);
+        for(const [key,value] of [
+          ['trainingShards',-1],['trainingShards',2.5],['trainingShards','5'],
+          ['trainingShards',null],['trainingShards',NaN],
+          ['trainingShards',Infinity],['trainingShards',Number.MAX_SAFE_INTEGER+1],
+          ['zel',-1],['zel','750'],['zel',750.5],
+          ['trainingSpent',-1],['trainingSpent','0'],
+          ['trainingSpent',0.5],['trainingSpent',Number.MAX_SAFE_INTEGER+1]
+        ]) result.bad.push([key,show(key,value)]);
+      } finally {
+        for(const {key,had,value} of original) {
+          if(had) P[key]=value; else delete P[key];
+        }
+        tab.click();
+      }
+      result.unchanged=JSON.stringify({P,S})===before &&
+        localStorage.getItem('bf_global_offline_demo_v7')===save;
+      return result;
+    }""")
+    assert training["noteFound"], training
+    assert "Resources support +10 or +50" in training["healthy"], training
+    assert "spending limit reached" in training["cap"], training
+    assert len(training["bad"])==14 and all(
+        "Training resource status unavailable" in message
+        for _,message in training["bad"]),training
+    assert training["unchanged"],training
+    print("PASS fail-closed read-only training affordability with corrupt resources and unchanged v7")
     page.locator('.bf-unit-actions button[data-bf-unit-tab="evolve"]').click()
     assert page.locator("#evolist").is_visible()
     page.locator('.bf-unit-actions button[data-bf-unit-tab="squad"]').click()
