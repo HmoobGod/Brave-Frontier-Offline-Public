@@ -14,7 +14,7 @@
  function goodIds(ids,checkOwnership=true){
    return Array.isArray(ids)&&ids.length>=1&&ids.length<=6&&
      ids.every(id=>Number.isSafeInteger(id)&&id>0&&
-       (!checkOwnership||P.roster.includes(id)))&&
+       (!checkOwnership||(Array.isArray(P.roster)&&P.roster.includes(id))))&&
      new Set(ids).size===ids.length;
  }
  function normalizeName(v,index){
@@ -133,6 +133,12 @@
      message='Preset contains an unowned or invalid unit. Nothing changed.';
      refresh();return false;
    }
+   // A damaged live squad/roster must not be overwritten by a preset
+   // or passed into the canonical save adapter. Leave player state intact.
+   if(!goodIds(P.squad,true)){
+     message='Active squad state unavailable; no save or battle reset.';
+     refresh();return false;
+   }
    const previous=P.squad.slice();
    if(previous.length===slot.squad.length&&
       previous.every((id,i)=>id===slot.squad[i])){
@@ -157,13 +163,13 @@
  panel.style.cssText='margin:10px 3px;padding:10px;border:1px solid #bd9f73;'+
    'border-radius:7px;background:#2e302d;color:#fff0d9;font:12px/1.5 system-ui,sans-serif';
  const heading=document.createElement('summary');heading.textContent='QoL · SAVED SQUAD PRESETS';
- heading.style.cssText='cursor:pointer;min-height:38px;font-weight:800';
+ heading.style.cssText='cursor:pointer;min-height:44px;font-weight:800';
  const explanation=document.createElement('p');
  explanation.textContent='Store up to five current squad loadouts. Applying a preset '+
    'only selects owned units, uses the original save system, and restarts '+
    'the current battle just like manual squad changes. Presets are local.';
  const selected=document.createElement('select');selected.id='bf10000-slot';
- selected.style.cssText='min-height:42px;padding:7px;color:white;background:#334253;'+
+ selected.style.cssText='min-height:44px;padding:7px;color:white;background:#334253;'+
    'border:1px solid #bdaa87;border-radius:5px';
  for(let i=0;i<max;i++){
    const opt=document.createElement('option');opt.value=String(i);
@@ -172,12 +178,12 @@
  const name=document.createElement('input');name.id='bf10000-name';
  name.type='text';name.maxLength=28;name.placeholder='Preset name';
  name.setAttribute('aria-label','Squad preset name');
- name.style.cssText='min-height:42px;padding:7px;box-sizing:border-box;'+
+ name.style.cssText='min-height:44px;padding:7px;box-sizing:border-box;'+
    'color:#fff;background:#334253;border:1px solid #bdaa87;border-radius:5px';
  const buttons=document.createElement('div');buttons.style.cssText='margin:8px 0;display:flex;flex-wrap:wrap;gap:6px';
  const mk=(id,label,fn)=>{
    const b=document.createElement('button');b.type='button';b.id=id;
-   b.textContent=label;b.style.cssText='min-height:42px;padding:8px;'+
+   b.textContent=label;b.style.cssText='min-height:44px;padding:8px;'+
      'border:1px solid #cfb88b;background:#574a37;color:#fff;border-radius:5px';
    b.addEventListener('click',fn);buttons.append(b);return b;
  };
@@ -195,9 +201,9 @@
  panel.append(heading,explanation,selected,name,buttons,status,preview,help);anchor.after(panel);
  function refresh(){
    const index=Number(selected.value)||0,slot=slots[index];
-   const unavailable=!!S.busy;
-   saveButton.disabled=unavailable||!goodIds(P.squad,true);
-   equipButton.disabled=unavailable||(S.auto===true&&!S.over)||
+   const unavailable=!!S.busy,validActive=goodIds(P.squad,true);
+   saveButton.disabled=unavailable||!validActive;
+   equipButton.disabled=unavailable||!validActive||(S.auto===true&&!S.over)||
      (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
      !victoryReceiptCommitted()||!slot||!goodIds(slot.squad,true);
    removeButton.disabled=unavailable||!slot;
@@ -209,7 +215,9 @@
    status.textContent=message+(slot?' · '+slot.squad.length+' units saved.':' · Empty slot.');
    // Preview the exact team difference without changing the canonical save.
    // Missing units are displayed, never silently substituted.
-   if(!slot){preview.textContent='Preview: empty preset; no squad changes.';}
+   if(!validActive){
+     preview.textContent='Preview unavailable: active squad or owned roster is invalid. No changes allowed.';
+   }else if(!slot){preview.textContent='Preview: empty preset; no squad changes.';}
    else{
      const active=P.squad.slice(),wanted=slot.squad;
      const added=wanted.filter(id=>!active.includes(id));
