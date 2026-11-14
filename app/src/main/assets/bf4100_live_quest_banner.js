@@ -8,6 +8,13 @@
     typeof P==='undefined'||P.version!==7||
     typeof QUESTS==='undefined'||QUESTS.length!==106||
     typeof S==='undefined')return;
+ // Clone recorded mission counts once, before any mutable QUEST state can
+ // change them. QUEST aliases the corresponding QUESTS row in the real app;
+ // comparing one with the other would be a tautology.
+ const originalMissions=new Map(QUESTS.map(row=>[
+   row.missionId,Object.freeze({dungeonId:row.dungeonId,battles:row.battles})
+ ]));
+ if(originalMissions.size!==106)return;
  const battle=document.getElementById('battle');
  const hud=document.getElementById('bf2000-run');
  const mode=document.getElementById('mode');
@@ -50,14 +57,18 @@
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    const s=story.snapshot();
-   // Resolve names and original recorded stage count from the fixed 106-row
-   // 2022 catalog, not solely from a mutable current quest or DEMO HUD.
+   // Resolve original names from the verified source accessor, with recorded
+   // counts captured at module load (not from mutable QUEST/QUESTS aliases).
    const sourceRow=Number.isSafeInteger(q?.missionId)?
      QUESTS.find(row=>row.missionId===q.missionId):null;
+   const original=sourceRow&&originalMissions.get(q.missionId);
    const source=sourceRow&&window.BFGlobalQuestText?.sourceFor(sourceRow);
-   const sourceVerified=!!sourceRow&&
-     q.dungeonId===sourceRow.dungeonId&&
-     q.battles===sourceRow.battles&&
+   const sourceVerified=!!sourceRow&&!!original&&
+     Number.isSafeInteger(original.dungeonId)&&
+     Number.isSafeInteger(original.battles)&&
+     original.battles>=1&&original.battles<=100&&
+     q.dungeonId===original.dungeonId&&
+     q.battles===original.battles&&
      typeof source?.mission?.name==='string'&&
      source.mission.name.trim().length>0&&
      typeof source?.dungeon?.name==='string'&&
