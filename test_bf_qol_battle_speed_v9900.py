@@ -11,6 +11,7 @@ assert 'nativeWait.call(this,40)' in js
 assert "S.mode!=='archive'" in js
 assert 'saveProgress(' not in js and 'awardDemoRewards(' not in js
 assert 'if(S.busy)return false;' in js
+assert 'if(S.busy||!allowed.has(speed.value))' in js and 'speed.value=confirmedSpeed' in js
 assert 'control.disabled=!!S.busy;' in js
 assert js.count('min-height:44px')>=2
 with sync_playwright() as pw:
@@ -80,8 +81,30 @@ with sync_playwright() as pw:
  assert p.evaluate("localStorage.getItem('bf_global_offline_qol_speed_v99')")=='12'
  assert p.evaluate(api+'.setSkip(false)') is False
  assert p.evaluate(api+'.snapshot().skip') is True
+ # v453: a stale stock/native speed change event must not bypass the
+ # same busy-turn lock that protects the optional QoL select.
+ p.evaluate("""()=>{const native=document.getElementById('speed');
+   native.value='5';native.dispatchEvent(new Event('change',{bubbles:true}));}""")
+ assert p.evaluate("document.getElementById('speed').value")=='12'
+ assert p.evaluate("document.getElementById('bf9900-speed-select').value")=='12'
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_speed_v99')")=='12'
+ assert p.evaluate(api+'.snapshot().speed')==12
  p.evaluate("S.busy=false;BFGlobalQoLBattleSpeedV9900.refresh()")
  assert p.locator('#bf9900-speed-select').is_enabled()
+ # Normal stock speed changes between turns remain functional and persistent.
+ p.evaluate("""()=>{const native=document.getElementById('speed');
+   native.value='5';native.dispatchEvent(new Event('change',{bubbles:true}));}""")
+ assert p.evaluate("document.getElementById('bf9900-speed-select').value")=='5'
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_speed_v99')")=='5'
+ assert p.evaluate(api+'.snapshot().speed')==5
+ # Tampered/unknown native values cannot be persisted or shown as valid.
+ p.evaluate("""()=>{const native=document.getElementById('speed');
+   const extra=document.createElement('option');extra.value='99';native.append(extra);
+   native.value='99';native.dispatchEvent(new Event('change',{bubbles:true}));
+   extra.remove();}""")
+ assert p.evaluate("document.getElementById('speed').value")=='5'
+ assert p.evaluate("document.getElementById('bf9900-speed-select').value")=='5'
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_speed_v99')")=='5'
  assert p.evaluate(api+'.setSkip(false)') is True
  normal2=p.evaluate("""async()=>{const t=performance.now();await window.wait(125);
     return performance.now()-t;}""")

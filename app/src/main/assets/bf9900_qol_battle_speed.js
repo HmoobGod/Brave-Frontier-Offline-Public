@@ -27,6 +27,10 @@
  const allowed=new Set(['1','2','3','5','8','12']);
  const stored=get(prefSpeed);
  if(allowed.has(stored)&&!S.busy)speed.value=stored;
+ // v453: the stock selector is also player-accessible. Track the last
+ // accepted speed so a queued native change cannot bypass busy-turn locks.
+ let confirmedSpeed=allowed.has(speed.value)?speed.value:'2';
+ if(!allowed.has(speed.value))speed.value=confirmedSpeed;
  let skip=get(prefSkip)==='on';
  const nativeSpeed=()=>Number(speed.value)||2;
  function setSpeed(value){
@@ -121,7 +125,14 @@
    if(!setSkip(checkbox.checked))refresh();
  });
  speed.addEventListener('change',()=>{
-   if(allowed.has(speed.value))put(prefSpeed,speed.value);
+   // v453: source control and stock control obey the same mid-turn guard.
+   // Do not persist or display a queued/stale native speed as accepted.
+   if(S.busy||!allowed.has(speed.value)){
+     speed.value=confirmedSpeed;
+     refresh();return;
+   }
+   confirmedSpeed=speed.value;
+   put(prefSpeed,confirmedSpeed);
    refresh();
  });
  setInterval(()=>{if(!document.hidden&&panel.open)refresh();},1100);
