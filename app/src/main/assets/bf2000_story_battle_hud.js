@@ -48,7 +48,7 @@
  const retry=document.createElement('button');retry.type='button';
  retry.id='bf2000-retry-save';retry.textContent='RETRY SAVE';retry.hidden=true;
  const foot=document.createElement('small');foot.id='bf2000-foot';
- foot.textContent='2022 Global mission names and recorded stage counts; active enemy formations, AI, damage, loot and Energy spending remain DEMO. Training battles are separate.';
+ foot.textContent='2022 Global mission names and recorded stage counts; ally/enemy HP totals are current local DEMO battle state, not original 2022 enemy formations. AI, damage, loot and Energy spending remain DEMO. Training battles are separate.';
  actions.append(jump,next,retry);
  panel.append(heading,title,details,waves,status,actions,foot);
  questDetail.after(panel);
