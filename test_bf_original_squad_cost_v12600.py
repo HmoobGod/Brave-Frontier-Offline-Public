@@ -140,10 +140,16 @@ with sync_playwright() as playwright:
   assert not identity[name]['complete'] and identity[name]['count']==1
   assert len(identity[name]['unsupported'])==1
  assert identity['emptyAllowed']['complete'] and identity['emptyAllowed']['count']==1
+ # Source-cost disclosure lives under the Units route and is deliberately
+ # hidden while Home is active. Navigate there before geometry checks.
+ page.locator('.bf-navbar button[data-bf-goto="units"]').click()
+ assert page.locator('#bf12600-original-squad-cost summary').is_visible()
  for width in (320,390,540):
   page.set_viewport_size({'width':width,'height':844})
   assert page.locator('#bf12600-original-squad-cost summary').evaluate('(e)=>e.getBoundingClientRect().height')>=44
   assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'),width
+ page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+ assert page.evaluate('BF_homeNav.current')=='home'
  page.set_viewport_size({'width':390,'height':844})
  page.set_viewport_size({'width':320,'height':844})
  bounds=page.locator('#bf12600-home-squad-cost').bounding_box()
