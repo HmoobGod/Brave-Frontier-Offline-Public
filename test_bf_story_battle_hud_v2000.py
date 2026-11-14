@@ -108,8 +108,16 @@ with sync_playwright() as pw:
  assert ally_probe['unchanged'],ally_probe
  for width in (320,390,540):
   page.set_viewport_size({'width':width,'height':844})
-  for selector in ('#bf2000-battle','#bf2000-next','#bf2000-retry-save'):
+  for selector in ('#bf2000-battle','#bf2000-next'):
    assert page.locator(selector).evaluate('(e)=>e.getBoundingClientRect().height')>=44,(width,selector)
+  # Retry Save is hidden until a failed victory save: measure CSS in a
+  # temporary visible fixture and restore the original hidden state.
+  retry_height=page.locator('#bf2000-retry-save').evaluate('''e=>{
+    const was=e.hidden;e.hidden=false;
+    try{return e.getBoundingClientRect().height;}
+    finally{e.hidden=was;}
+  }''')
+  assert retry_height>=44,(width,retry_height)
   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
  page.set_viewport_size({'width':390,'height':844})
  # v359: direct real core execute() next-wave and final-reward gates.
