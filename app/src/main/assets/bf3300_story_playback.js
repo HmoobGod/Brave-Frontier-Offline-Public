@@ -14,7 +14,7 @@
   '#bf3300-player{padding:10px 0;margin:9px 0;border-top:1px solid #a99a78;',
   'font:12px/1.45 system-ui,sans-serif;color:#f3e9d6}',
   '#bf3300-player label{display:block;margin:0 0 6px;font-weight:700}',
-  '#bf3300-player select{min-height:40px;min-width:130px;margin:0 8px 0 3px;',
+  '#bf3300-player select{min-height:44px;min-width:130px;margin:0 8px 0 3px;',
   'padding:5px;color:white;background:#20374c;border:1px solid #b6a082}',
   '#bf3300-player button{min-height:44px;margin:4px 7px 4px 0;padding:8px 12px;',
   'border:1px solid #d7b887;border-radius:5px;background:#63462c;color:#fff;font-weight:800}',
@@ -40,26 +40,35 @@
  const state=document.createElement('small');state.id='bf3300-state';
  state.setAttribute('aria-live','polite');
  const note=document.createElement('small');
- note.textContent='Uses original archived dialogue, backgrounds and expression sprites. Page delay is optional QoL, not original 2022 script timing. No quest, rewards or save modifications.';
+ note.textContent='Uses original archived dialogue, backgrounds and expression sprites. Page delay is optional QoL, not original 2022 script timing. Playback pauses during player Auto, busy combat, or a changed scene. No quest, rewards or save modifications.';
  panel.append(label,play,pauseButton,skip,state,note);
  nav.after(panel);
- let playing=false,scene=null,timer=null;
+ let playing=false,scene=null,timer=null,expectedStep=null;
+ const blocked=()=>typeof S!=='undefined'&&!!(S.auto||S.busy);
+ const valid=s=>!!s.chosen&&typeof s.source==='string'&&
+   s.source.length>0&&Number.isSafeInteger(s.step)&&
+   Number.isSafeInteger(s.lines)&&s.lines>=1&&
+   s.step>=1&&s.step<=s.lines;
+ const identity=s=>JSON.stringify([s.chosen,s.source,s.lines]);
  function snapshot(){
    const a=archive.snapshot();
-   return Object.freeze({playing,source:a?.source||null,step:a?.step||0,
-     lines:a?.lines||0,delay:Number(speed.value)||2500,scene});
+   return Object.freeze({playing,chosen:a?.chosen||null,source:a?.source||null,
+     step:a?.step??null,lines:a?.lines??null,
+     delay:Number(speed.value)||2500,scene,blocked:blocked()});
  }
  function refresh(){
    const s=snapshot();
-   const available=reader.open&&!!s.source&&s.lines>0;
+   const available=reader.open&&valid(s)&&!blocked();
    play.disabled=!available||playing||s.step>=s.lines;
    pauseButton.disabled=!playing;
    skip.disabled=!available||s.step>=s.lines;
-   state.textContent=(playing?'PLAYING':'PAUSED')+' · Page '+s.step+'/'+s.lines;
+   state.textContent=(s.blocked?'PAUSED · PLAYER AUTO / BATTLE BUSY':
+     playing?'PLAYING':'PAUSED')+' · Page '+
+     (valid(s)?s.step+'/'+s.lines:'UNAVAILABLE');
    return s;
  }
  function pause(){
-   playing=false;scene=null;
+   playing=false;scene=null;expectedStep=null;
    if(timer!==null){clearTimeout(timer);timer=null;}
    refresh();return true;
  }
@@ -67,24 +76,29 @@
    timer=null;
    if(!playing)return;
    const s=snapshot();
-   if(!reader.open||document.hidden||s.source!==scene||s.step>=s.lines||next.disabled){
-     pause();return;
-   }
+   // A new source, a restarted scene, a direct manual jump, or an unsafe
+   // DEMO turn cannot inherit a queued playback timer.
+   if(!reader.open||document.hidden||blocked()||!valid(s)||
+      identity(s)!==scene||s.step!==expectedStep||
+      s.step>=s.lines||next.disabled){pause();return;}
    next.click();
    const now=snapshot();
-   if(now.source!==scene||now.step>=now.lines){pause();return;}
+   if(!valid(now)||identity(now)!==scene||
+      now.step!==expectedStep+1||now.step>=now.lines){pause();return;}
+   expectedStep=now.step;
    timer=setTimeout(tick,Number(speed.value)||2500);
    refresh();
  }
  function start(){
    const s=snapshot();
-   if(!reader.open||document.hidden||!s.source||s.lines<2||s.step>=s.lines)return false;
-   pause();playing=true;scene=s.source;
+   if(!reader.open||document.hidden||blocked()||!valid(s)||
+      s.lines<2||s.step>=s.lines)return false;
+   pause();playing=true;scene=identity(s);expectedStep=s.step;
    timer=setTimeout(tick,s.delay);refresh();return true;
  }
  function lastPage(){
    const s=snapshot();
-   if(!reader.open||!s.source||s.step>=s.lines)return false;
+   if(!reader.open||blocked()||!valid(s)||s.step>=s.lines)return false;
    pause();
    for(let i=s.step;i<s.lines;i++){if(next.disabled)break;next.click();}
    refresh();
@@ -95,6 +109,11 @@
  skip.addEventListener('click',lastPage);
  reader.addEventListener('toggle',()=>{if(!reader.open)pause();else refresh()});
  selectScene.addEventListener('change',pause);
+ // Native player Auto switch is only a hint: the timer also checks actual
+ // S.auto and S.busy so programmatic/other-UI transitions still fail closed.
+ document.getElementById('auto')?.addEventListener('change',()=>{
+   if(blocked())pause();else refresh();
+ });
  prev.addEventListener('click',e=>{if(e.isTrusted)pause()});
  next.addEventListener('click',e=>{if(e.isTrusted)pause()});
  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
