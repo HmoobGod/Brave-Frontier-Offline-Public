@@ -34,8 +34,18 @@
    const scene=events.snapshot();
    const q=typeof QUEST==='undefined'?null:QUEST;
    const lookup=q?events.lookup('dungeon',q.dungeonId):null;
+   // v442: never present a playable handoff from a mismatched source quest,
+   // invalid live wave, or unattended Auto turn. Only the current manual
+   // story introduction can lead to the existing DEMO battle viewport.
+   const source=Number.isSafeInteger(q?.missionId)&&
+     QUESTS.find(row=>row.missionId===q.missionId);
+   const original=!!source&&q.dungeonId===source.dungeonId&&
+     q.battles===source.battles&&Number.isSafeInteger(q.battles)&&q.battles>0;
+   const live=Number.isSafeInteger(S.totalWaves)&&
+     S.totalWaves===q?.battles&&Number.isSafeInteger(S.wave)&&
+     S.wave>=0&&S.wave<S.totalWaves;
    const matched=reader.open&&mode.value==='archive'&&q&&
-     !S.busy&&!S.over&&questUnlocked(q)&&lookup&&
+     original&&live&&!S.auto&&!S.busy&&!S.over&&questUnlocked(q)&&lookup&&
      scene.chosen==='dungeon:'+q.dungeonId&&scene.source===lookup.source?.split('/').pop();
    return Object.freeze({
      available:!!matched,completed:!!matched&&scene.step===scene.lines,
