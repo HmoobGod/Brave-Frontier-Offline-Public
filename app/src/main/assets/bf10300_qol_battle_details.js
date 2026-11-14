@@ -38,6 +38,19 @@
        row.nativeMultiWaveEnabled===false?row.verifiedWaveCount:null;
    }catch(_){return null;}
  }
+ // Optional critical evidence providers are outside the battle engine.
+ // An unavailable or malformed provider must never break the read-only HUD
+ // or be displayed as an apparently verified zero criticals.
+ function criticalCount(){
+   try{
+     const one=window.BFGlobalSingleHitCriticalV9300?.snapshot?.();
+     const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot?.();
+     if(!Number.isSafeInteger(one?.criticals)||one.criticals<0||
+       !Number.isSafeInteger(multi?.criticalHits)||multi.criticalHits<0)return null;
+     const total=one.criticals+multi.criticalHits;
+     return Number.isSafeInteger(total)?total:null;
+   }catch(_){return null;}
+ }
  function snapshot(){
    const allySource=Array.isArray(S.party)?S.party.filter(u=>u&&u.active):[];
    const enemySource=Array.isArray(S.enemies)?S.enemies:[];
@@ -45,24 +58,25 @@
    const foes=enemySource.map(u=>readUnit(u,'enemy')).filter(Boolean);
    const invalidAllies=allySource.length-allies.length;
    const invalidFoes=enemySource.length-foes.length;
-   const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
-   const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
-   const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
+   const recorded=recordedWaves(),criticals=criticalCount();
    const quest=typeof QUEST==='undefined'?null:QUEST;
    // A fractional, negative, or out-of-range DEMO total must not be
    // normalized into an apparent match with immutable source metadata.
    const liveValid=Number.isSafeInteger(S.totalWaves)&&
      S.totalWaves>=1&&S.totalWaves<=100;
+   const liveWaveValid=liveValid&&Number.isSafeInteger(S.wave)&&
+     S.wave>=0&&S.wave<S.totalWaves;
    const provenance=recorded===null?'UNAVAILABLE':
      liveValid&&recorded===S.totalWaves&&
      quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
-     mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:liveTotal,
+     mode:String(S.mode||''),wave:liveWaveValid?S.wave+1:null,
+     totalWaves:liveValid?S.totalWaves:null,waveVerified:liveWaveValid,
      sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
      round:safe(S.round),busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
      invalidAllies,invalidFoes,
-     sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
+     sourceScopedCriticalHits:criticals,criticalCountsVerified:criticals!==null,
      nativeFullDamageFormula:false,progressUnchanged:true
    });
  }
@@ -107,14 +121,17 @@
    if(signature===last)return s;
    last=signature;
    header.textContent=(s.mode==='archive'?'STORY':'TRAINING')+
-     ' · DEMO Wave '+s.wave+'/'+s.totalWaves+
+     ' · '+(s.waveVerified?'DEMO Wave '+s.wave+'/'+s.totalWaves:
+       'DEMO wave unavailable')+
      (s.mode==='archive'?' · 2022 recorded wave count: '+
        (s.sourceWaveStatus==='MATCH'?String(s.sourceRecordedWaveCount)+' (MATCH)':
         s.sourceWaveStatus==='MISMATCH'?'MISMATCH — DEMO data differs':
         'UNAVAILABLE'):'')+
      ' · Turn '+s.round+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
-     ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
+     ' · '+(s.criticalCountsVerified?
+       s.sourceScopedCriticalHits+' source-eligible critical hits':
+       'source-eligible critical count unavailable');
    group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
    group(enemy,'ENEMIES · HP',s.foes,s.invalidFoes);
    return s;
