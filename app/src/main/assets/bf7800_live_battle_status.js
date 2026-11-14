@@ -44,22 +44,41 @@
  host.prepend(panel);
  const freeze=a=>Object.freeze(a);
  function snapshot(){
+   // v458: malformed live round/provider evidence is unavailable, never
+   // an invented NaN countdown or an unhandled polling exception.
+   const unavailable=()=>freeze({mode:S.mode,round:S.round,visible:false,
+     units:freeze([]),
+     source:'2022 Global item master and already-loaded battle states',
+     timing:'Current simulated battle rounds; not original native status lifetime'});
    // Only current in-battle ally identities; KO or replacements cannot inherit
    // stale protections or statuses from a previous unit object.
-   const immuneState=nullifier.snapshot();
-   const regenState=regeneration.snapshot();
    const active=S.mode==='archive'&&!S.over;
+   if(!active||!Number.isSafeInteger(S.round)||S.round<0||
+      !Array.isArray(S.party))return unavailable();
+   let immuneState,regenState;
+   try{immuneState=nullifier.snapshot();regenState=regeneration.snapshot();}
+   catch(_){return unavailable();}
+   const validDeadline=x=>x===null||(Number.isSafeInteger(x)&&x>=0);
+   if(!immuneState||!regenState||
+      !Array.isArray(immuneState.protectedSlots)||
+      !Array.isArray(regenState.targetSlots)||
+      typeof regenState.active!=='boolean'||
+      !validDeadline(immuneState.expiresAfterRound)||
+      !validDeadline(regenState.untilRound))return unavailable();
    const immunityTurns=immuneState.expiresAfterRound===null?null:
      Math.max(0,immuneState.expiresAfterRound-S.round+1);
    const regenTurns=regenState.untilRound===null?null:
      Math.max(0,regenState.untilRound-S.round+1);
    const entries=[];
-   if(active)for(let slot=0;slot<6;slot++){
+   for(let slot=0;slot<6;slot++){
      const unit=S.party?.[slot];
      if(!unit?.active||!Number.isFinite(unit.hp)||
        !Number.isFinite(unit.maxHp)||unit.hp<=0||
        unit.maxHp<=0||unit.hp>unit.maxHp)continue;
-     const codes=ailments.codesFor(slot);
+     let codes;
+     try{codes=ailments.codesFor(slot);}catch(_){return unavailable();}
+     if(!Array.isArray(codes)||codes.some(code=>
+        !Number.isSafeInteger(code)||code<1||code>6))return unavailable();
      const immune=immuneState.protectedSlots.includes(slot);
      const regen=regenState.active&&regenState.targetSlots.includes(slot);
      if(!codes.length&&!immune&&!regen)continue;
