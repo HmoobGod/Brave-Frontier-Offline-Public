@@ -40,6 +40,25 @@ with sync_playwright() as playwright:
     assert not page.locator("#questlist").is_visible()
     assert page.locator('.bf-navbar button[aria-current="page"]').count() == 1
     print("PASS home starts with quest content hidden")
+    # v437: Home build-info shortcut opens only the already-existing Menu
+    # metadata disclosure; browser previews must not invent APK identity.
+    for width in (320,390,540):
+        page.set_viewport_size({"width":width,"height":844})
+        button = page.locator("#bf-home-build-info")
+        assert button.is_visible()
+        assert button.evaluate("(e)=>e.getBoundingClientRect().height") >= 44
+        assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth"),width
+    page.set_viewport_size({"width":390,"height":844})
+    before_build = page.evaluate("({p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+    page.locator("#bf-home-build-info").click()
+    assert page.evaluate("BF_homeNav.current") == "menu"
+    assert page.locator("#bf-about-build").evaluate("(e)=>e.open")
+    assert page.locator("#bf-about-version").inner_text() == "Unavailable"
+    assert page.locator("#bf-about-package").inner_text() == "Unavailable"
+    assert page.evaluate("({p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})") == before_build
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    assert page.evaluate("BF_homeNav.current") == "home"
+    print("PASS Home build-info shortcut routes read-only without fabricated APK metadata")
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     assert page.evaluate("BF_homeNav.current") == "quest"
     assert page.locator("#questlist").is_visible()
