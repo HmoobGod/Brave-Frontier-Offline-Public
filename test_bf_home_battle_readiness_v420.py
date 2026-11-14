@@ -18,6 +18,9 @@ assert 'bf420-home-hint' in JS and "aria-live','polite" in JS
 assert 'AUTO BATTLE ACTIVE' in JS and 'AUTO REPEAT ACTIVE' in JS
 assert 'REPEAT STATUS UNAVAILABLE' in JS
 assert 'status?.active===true' in JS and 'status?.active!==false' in JS
+assert 'campaign.waveReadiness(QUESTS[0]?.missionId)' in JS
+assert 'campaign.sourceEconomyReadiness()!==true' in JS
+assert 'Number.isSafeInteger(count)' in JS and 'bf420-home-clear-bar' in JS
 with sync_playwright() as pw:
     browser=pw.chromium.launch(headless=True,
         executable_path=shutil.which("chromium") or
@@ -84,6 +87,11 @@ with sync_playwright() as pw:
         assert page.locator("#bf420-home-mission").count()==1
         snap=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
         assert snap["missionId"]==1 and snap["waves"]==3 and snap["energy"]==0,snap
+        assert snap["cleared"]==0,snap
+        assert 'DEMO STORY CLEARS · 0/106' in page.locator('#bf420-home-clears').inner_text()
+        assert page.locator('#bf420-home-clear-bar').is_visible()
+        assert page.locator('#bf420-home-clear-bar').get_attribute('value')=='0'
+        assert 'local DEMO' in page.locator('#bf420-home-clear-bar').get_attribute('aria-valuetext')
         assert "2022 original 3 waves" in page.locator("#bf420-home-mission").inner_text()
         assert "reference only" in page.locator("#bf420-home-mission").inner_text()
         filled=page.evaluate("""() => P.squad.filter(id=>Number.isSafeInteger(id) &&
@@ -151,6 +159,8 @@ with sync_playwright() as pw:
               const panel=root.getBoundingClientRect();
               return {
                 panelLeft:panel.left,panelRight:panel.right,
+                progress:(()=>{const bar=root.querySelector('progress'),
+                  r=bar.getBoundingClientRect();return {left:r.left,right:r.right}})(),
                 buttons:[...root.querySelectorAll('button')].map(b=>{
                   const r=b.getBoundingClientRect();
                   return {height:r.height,left:r.left,right:r.right};
@@ -161,6 +171,7 @@ with sync_playwright() as pw:
             }""")
             assert geometry["panelLeft"]>=-1 and geometry["panelRight"]<=width+1,(width,geometry)
             assert geometry["scrollWidth"]<=width,(width,geometry)
+            assert geometry['progress']['left']>=-1 and geometry['progress']['right']<=width+1,(width,geometry)
             for button in geometry["buttons"]:
                 assert button["height"]>=44,(width,button)
                 assert button["left"]>=-1 and button["right"]<=width+1,(width,button)
@@ -283,16 +294,63 @@ with sync_playwright() as pw:
         assert before==after,(before,after)
         page.evaluate("BF_homeNav.go('home')")
         assert page.locator("#bf420-home-readiness").is_visible()
-        # Test-only memory-only complete clears, never an owner save write.
+        # Test-only memory-only DEMO clear receipts, never an owner save write.
+        page.evaluate("""() => {
+          for(const q of QUESTS.slice(0,34))P.questClears[q.missionId]=1;
+          BFHomeBattleReadinessV420.refresh();
+        }""")
+        mid=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
+        assert mid['cleared']==34 and mid['complete'] is False,mid
+        assert '34/106' in page.locator('#bf420-home-clears').inner_text()
+        assert page.locator('#bf420-home-clear-bar').get_attribute('value')=='34'
+        assert page.locator('#bf420-home-quest').is_enabled()
         page.evaluate("""() => {
           for(const q of QUESTS)P.questClears[q.missionId]=1;
           BFHomeBattleReadinessV420.refresh();
         }""")
         final=page.evaluate("BFHomeBattleReadinessV420.snapshot()")
         assert final["complete"] is True and final["missionId"] is None,final
+        assert final['cleared']==106,final
+        assert '106/106' in page.locator('#bf420-home-clears').inner_text()
+        assert page.locator('#bf420-home-clear-bar').get_attribute('value')=='106'
         assert "All 106 archived missions cleared" in page.locator("#bf420-home-mission").inner_text()
         assert 'STORY COMPLETE' in page.locator('#bf420-home-hint').inner_text()
         assert page.locator("#bf420-home-quest").is_disabled()
+        # Previously a malformed positive DEMO clear looked like a fully
+        # verified 106/106 completion. The live Home view must fail closed.
+        faults=page.evaluate("""()=>{
+          const old=P.questClears[365],energy=QUESTS[105].energy;
+          const saved=localStorage.getItem('bf_global_offline_demo_v7');
+          const out={};
+          const read=()=>({
+            unavailable:BFHomeBattleReadinessV420.refresh()===null,
+            mission:document.getElementById('bf420-home-mission').textContent,
+            text:document.getElementById('bf420-home-clears').textContent,
+            hidden:document.getElementById('bf420-home-clear-bar').hidden,
+            questDisabled:document.getElementById('bf420-home-quest').disabled,
+            unitsDisabled:document.getElementById('bf420-home-units').disabled
+          });
+          try{
+            P.questClears[365]=Infinity;out.infinity=read();
+            P.questClears[365]='1';out.string=read();
+            P.questClears[365]=1.5;out.fraction=read();
+            P.questClears[365]=old;
+            QUESTS[105].energy=energy+1;out.sourceMismatch=read();
+          }finally{
+            P.questClears[365]=old;QUESTS[105].energy=energy;
+            BFHomeBattleReadinessV420.refresh();
+          }
+          return {checks:out,saveUnchanged:
+            localStorage.getItem('bf_global_offline_demo_v7')===saved};
+        }""")
+        for name,item in faults['checks'].items():
+            assert item['unavailable'] and item['hidden'],(name,item)
+            assert item['questDisabled'] and item['unitsDisabled'],(name,item)
+            assert 'unavailable' in item['mission'] and 'unavailable' in item['text'],(name,item)
+            assert '106/106' not in item['text'],(name,item)
+        assert faults['saveUnchanged'],faults
+        assert page.locator('#bf420-home-clear-bar').is_visible()
+        assert '106/106' in page.locator('#bf420-home-clears').inner_text()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
         assert not errors,errors
     finally:
