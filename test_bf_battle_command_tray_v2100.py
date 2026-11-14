@@ -32,6 +32,56 @@ with sync_playwright() as pw:
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.locator('#bf2100-tray').is_visible()
  assert page.evaluate('BFGlobalBattleCommandsV2100.snapshot().alive')==6
+ # v461: the manual focus readout reflects only verified living DEMO foes;
+ # it never picks targets or executes a turn. Original 2022 formations are
+ # not inferred from these sandbox combat identities.
+ focus_probe=page.evaluate("""() => {
+   const api=BFGlobalBattleCommandsV2100;
+   const originalTarget=S.target;
+   const foe=S.enemies.find(e=>Number.isSafeInteger(e?.slot)&&e.slot>=0&&
+     Number.isSafeInteger(e.hp)&&e.hp>0&&
+     Number.isSafeInteger(e.maxHp)&&e.maxHp>=e.hp&&
+     typeof e.name==='string'&&e.name.trim().length>0);
+   if(!foe)return {missingLiveFoe:true};
+   const savedFoe={hp:foe.hp,maxHp:foe.maxHp,name:foe.name};
+   const oldP=JSON.stringify(P),oldS=JSON.stringify(S);
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const view=()=>{api.refresh();return document.getElementById('bf2100-focus')?.textContent};
+   const result={};
+   try{
+     S.target=foe.slot;result.valid=view();
+     S.target=String(foe.slot);result.stringTarget=view();
+     S.target=-1;result.negative=view();
+     S.target=Number.MAX_SAFE_INTEGER+1;result.unsafe=view();
+     S.target=foe.slot;foe.hp=Infinity;result.infinityHp=view();
+     foe.hp=savedFoe.hp;foe.maxHp=NaN;result.invalidMaxHp=view();
+     foe.maxHp=savedFoe.maxHp;foe.name={fake:'name'};result.invalidName=view();
+     foe.name=savedFoe.name;result.recovered=view();
+   }finally{
+     Object.assign(foe,savedFoe);
+     S.target=originalTarget;
+     api.refresh();
+   }
+   result.unchanged=JSON.stringify(P)===oldP&&
+     JSON.stringify(S)===oldS&&
+     localStorage.getItem('bf_global_offline_demo_v7')===saved;
+   return result;
+ }""")
+ assert 'missingLiveFoe' not in focus_probe,focus_probe
+ assert 'Selected DEMO target' in focus_probe['valid'],focus_probe
+ assert ' · HP ' in focus_probe['valid'],focus_probe
+ assert focus_probe['recovered']==focus_probe['valid'],focus_probe
+ for bad in ('stringTarget','negative','unsafe','infinityHp','invalidMaxHp','invalidName'):
+     assert focus_probe[bad]=='Selected DEMO target unavailable',(bad,focus_probe)
+ assert focus_probe['unchanged'],focus_probe
+ for width in (320,390,540):
+     page.set_viewport_size({'width':width,'height':844})
+     sizes=page.locator('#bf2100-targets button').evaluate_all(
+         '(buttons)=>buttons.map(b=>b.getBoundingClientRect().height)')
+     assert sizes and all(h>=44 for h in sizes),(width,sizes)
+ page.set_viewport_size({'width':390,'height':844})
+ assert not errors,errors
+ print('PASS selected living DEMO target readout, fail-closed corruption, 44px target controls')
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("fake")') is False
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("attack")') is True
