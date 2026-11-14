@@ -17,6 +17,7 @@ assert "2022 archived" in JS and "Enemy formations" in JS
 assert 'bf420-home-hint' in JS and "aria-live','polite" in JS
 assert 'AUTO BATTLE ACTIVE' in JS and 'AUTO REPEAT ACTIVE' in JS
 assert 'REPEAT STATUS UNAVAILABLE' in JS
+assert 'status?.active===true' in JS and 'status?.active!==false' in JS
 with sync_playwright() as pw:
     browser=pw.chromium.launch(headless=True,
         executable_path=shutil.which("chromium") or
@@ -196,7 +197,31 @@ with sync_playwright() as pw:
             window.BFGlobalQoLQuestRepeatV9800={};
             BFHomeBattleReadinessV420.refresh();
             const missing=read();
-            return {active,throwing,missing,
+            // v457: provider existence with an ambiguous status must
+            // never be mistaken for an explicit idle/false state.
+            const invalid={};
+            const samples=[
+              ['null',null],['empty',{}],['stringFalse',{active:'false'}],
+              ['numericZero',{active:0}],['numericOne',{active:1}],
+              ['nullActive',{active:null}],['missingActive',{reason:'Idle'}]
+            ];
+            for(const [key,status] of samples){
+              window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>status};
+              BFHomeBattleReadinessV420.refresh();
+              // Even a synthetic event must not change routes.
+              document.getElementById('bf420-home-quest').dispatchEvent(
+                new MouseEvent('click',{bubbles:true}));
+              document.getElementById('bf420-home-units').dispatchEvent(
+                new MouseEvent('click',{bubbles:true}));
+              invalid[key]={...read(),route:BF_homeNav.current};
+            }
+            // Valid false remains the supported idle snapshot; shortcuts
+            // must recover without modifying the player's save or squad.
+            window.BFGlobalQoLQuestRepeatV9800={
+              statusSnapshot:()=>({active:false,reason:'Idle'})};
+            BFHomeBattleReadinessV420.refresh();
+            const idle=read();
+            return {active,throwing,missing,invalid,idle,
               activeHint:active.hint,throwingHint:throwing.hint,missingHint:missing.hint};
           }finally{
             if(previous===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
@@ -208,6 +233,14 @@ with sync_playwright() as pw:
         assert 'AUTO REPEAT ACTIVE' in repeat_guards['activeHint'],repeat_guards
         assert 'REPEAT STATUS UNAVAILABLE' in repeat_guards['throwingHint'],repeat_guards
         assert 'REPEAT STATUS UNAVAILABLE' in repeat_guards['missingHint'],repeat_guards
+        for kind,state in repeat_guards['invalid'].items():
+            assert state['quest'] and state['units'],(kind,state)
+            assert state['route']=='home',(kind,state)
+            assert 'REPEAT STATUS UNAVAILABLE' in state['hint'],(kind,state)
+        assert not repeat_guards['idle']['quest'],repeat_guards
+        assert not repeat_guards['idle']['units'],repeat_guards
+        assert repeat_guards['idle']['hint']=='',repeat_guards
+        assert page.evaluate('BF_homeNav.current')=='home'
         assert page.locator("#bf420-home-quest").is_enabled()
         # Every archived quest field must remain source-qualified.
         field_gates=page.evaluate("""() => {

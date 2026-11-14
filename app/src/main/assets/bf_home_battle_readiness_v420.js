@@ -138,8 +138,13 @@
       if(typeof repeat.statusSnapshot!=='function')
         return 'REPEAT STATUS UNAVAILABLE · Home shortcuts are safely paused.';
       try{
-        if(repeat.statusSnapshot()?.active)
+        // v457: only an explicit boolean false confirms Repeat is idle.
+        // A null/malformed provider response must not allow navigation.
+        const status=repeat.statusSnapshot();
+        if(status?.active===true)
           return 'AUTO REPEAT ACTIVE · Stop Repeat before changing screens.';
+        if(status?.active!==false)
+          return 'REPEAT STATUS UNAVAILABLE · Home shortcuts are safely paused.';
       }catch(_){return 'REPEAT STATUS UNAVAILABLE · Home shortcuts are safely paused.';}
     }
     return null;
