@@ -74,6 +74,10 @@ with sync_playwright() as pw:
  assert guards==dict(mismatched=True,shuffled=True,nanHp=True,zeroMax=True,
                      overheal=True,stockSame=True,locksSame=True,
                      playerSame=True,saveSame=True),guards
+ # Expand the disclosure before measuring nested controls; a closed details
+ # element intentionally hides the selectors, independent of their CSS height.
+ p.locator('#bf6400-remedies > summary').click()
+ assert p.locator('#bf6400-remedies').evaluate('(e)=>e.open')
  for width in (320,390,540):
   p.set_viewport_size({'width':width,'height':844})
   for selector in ('#bf6400-remedies summary','#bf6400-item',
