@@ -8,6 +8,9 @@ assert js.count('BF_GLOBAL_QOL_UNIT_FLAGS_V10200')==1
 assert len(js.encode())<65536
 assert 'saveProgress(' not in js and 'P.roster=' not in js and 'bf_global_offline_demo_v7' not in js
 assert 'advisoryOnly:true' in js
+assert 'const owned=validId(id)' in js
+assert "unowned or malformed cards hidden." in js
+assert "min-height:44px" in js
 # The standard Android workflow explicitly runs THIS Chromium script.
 # Execute the standalone three source-guard cases here as well, so
 # they cannot silently remain outside CI's collected test commands.
@@ -115,7 +118,53 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.change(20011,"favorites",true)') is True
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
  assert p.evaluate(api+'.change(999,"locked",true)') is False
+ # v446: a corrupted or foreign unit box card must never appear as
+ # 'owned', earn saved favorite/lock markings, or inflate filter counts.
+ p.evaluate("""()=>{const box=document.getElementById('bf-box-results');
+   for(const [id,label] of [['999','Unowned ghost'],['NaN','Malformed ghost']]){
+     const card=document.createElement('button');
+     card.className='bf-box-card';
+     card.dataset.bfUnitId=id;
+     card.setAttribute('aria-pressed','false');
+     card.textContent=label;box.append(card);
+   }
+ }""")
+ p.evaluate(api+'.refresh()')
+ assert p.locator('#bf10200-filter-info').inner_text().startswith('2 of 2 owned')
+ assert '2 unowned or malformed cards hidden' in p.locator('#bf10200-filter-info').inner_text()
+ for ghost in ('999','NaN'):
+  card=p.locator(f'.bf-box-card[data-bf-unit-id="{ghost}"]')
+  assert card.is_hidden(),ghost
+  assert card.get_attribute('data-bf-qol-favorite')=='false'
+  assert card.get_attribute('data-bf-qol-locked')=='false'
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for control in ('#bf10200-favorite','#bf10200-lock',
+                  '#bf10200-show-favorites','#bf10200-show-locks'):
+   rect=p.locator(control).bounding_box()
+   assert rect and rect['height']>=44,(width,control,rect)
+ p.set_viewport_size({'width':390,'height':844})
+ # A selected foreign card cannot receive an advisory marker or change P.
+ p.evaluate("""()=>{document.querySelectorAll('.bf-box-card')
+    .forEach(c=>c.setAttribute('aria-pressed',c.dataset.bfUnitId==='999'?'true':'false'))}""")
+ assert p.evaluate(api+'.state().owned') is False
+ p.evaluate(api+'.refresh()')
+ assert p.locator('#bf10200-favorite').is_disabled()
+ assert p.locator('#bf10200-lock').is_disabled()
+ assert p.evaluate(api+'.change(999,"favorites",true)') is False
+ p.evaluate("""()=>{document.querySelectorAll('.bf-box-card')
+    .forEach(c=>c.setAttribute('aria-pressed',c.dataset.bfUnitId==='20011'?'true':'false'))}""")
+ p.evaluate(api+'.refresh()')
+ assert p.evaluate(api+'.state().owned') is True
+ assert p.evaluate(api+'.state().favorite') is True
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
+ # If a formerly owned ID drops out of the live roster it becomes hidden,
+ # but the separately stored marker must not mutate the canonical save.
  p.evaluate("P.roster=[20011]")
+ p.evaluate(api+'.refresh()')
+ assert p.locator('.bf-box-card[data-bf-unit-id="10011"]').is_hidden()
+ assert p.locator('.bf-box-card[data-bf-unit-id="20011"]').is_visible()
+ assert p.locator('#bf10200-filter-info').inner_text().startswith('1 of 1 owned')
  assert p.evaluate(api+'.state().locks')==0
  assert p.evaluate(api+'.state().favorites')==1
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
