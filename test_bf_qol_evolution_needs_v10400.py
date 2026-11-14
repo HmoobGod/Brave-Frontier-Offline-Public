@@ -7,6 +7,8 @@ js=(A/'bf10400_qol_evolution_needs.js').read_text('utf8')
 assert js.count('BF_GLOBAL_QOL_EVOLUTION_NEEDS_V10400')==1
 assert len(js.encode())<65536
 assert not any(x in js for x in ('saveProgress(', 'localStorage', 'P.materials=', 'P.roster=', 'awardDemoRewards('))
+assert 'recipe.materials.some(raw=>!Number.isSafeInteger(raw?.id)||raw.id<=0)' in js
+assert 'const seen=new Set()' in js
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
@@ -40,6 +42,47 @@ with sync_playwright() as pw:
  assert s['paths'][0]['missingCount']==2
  assert s['paths'][0]['materials'][0]['required']==1
  assert s['paths'][0]['materials'][1]['required']==2
+ # v449: malformed source material IDs must not appear as zero-missing
+ # recipes, and duplicated/bad roster IDs must not inflate owned paths.
+ before_checks=p.evaluate('JSON.stringify(P)')
+ checks=p.evaluate("""()=>{
+   const api=BFGlobalQoLEvolutionNeedsV10400;
+   const source=BFOriginalEvolutionV1000.sourceRecipes;
+   const actual=window.effectiveUnit;
+   const prior=P.roster.slice();
+   const out={};
+   try{
+     P.roster=[10011,10011,'10011',0,-1,NaN];
+     out.dedup={owned:api.snapshot().ownedBases,paths:api.snapshot().recordedPaths};
+     P.roster=prior;
+     BFOriginalEvolutionV1000.sourceRecipes=()=>[{
+       target:10012,zel:2500,karma:0,materials:[
+         {id:10130,name:'Red Spirit'},
+         {id:0,name:'unknown original material'}]}];
+     out.invalid=api.snapshot().recordedPaths;
+     BFOriginalEvolutionV1000.sourceRecipes=()=>[{
+       target:10012,zel:2500,karma:0,materials:[]}];
+     out.empty=api.snapshot().recordedPaths;
+     BFOriginalEvolutionV1000.sourceRecipes=()=>{throw Error('missing source')};
+     out.throws=api.snapshot().recordedPaths;
+     BFOriginalEvolutionV1000.sourceRecipes=source;
+     window.effectiveUnit=()=>{throw Error('invalid unit')};
+     out.unitThrows=api.snapshot().recordedPaths;
+     window.effectiveUnit=actual;
+     out.restored={owned:api.snapshot().ownedBases,paths:api.snapshot().recordedPaths};
+   }finally{
+     P.roster=prior;
+     window.effectiveUnit=actual;
+     BFOriginalEvolutionV1000.sourceRecipes=source;
+   }
+   return out;
+ }""")
+ assert checks=={
+   'dedup':{'owned':1,'paths':1},
+   'invalid':0,'empty':0,'throws':0,'unitThrows':0,
+   'restored':{'owned':1,'paths':1}
+ },checks
+ assert p.evaluate('JSON.stringify(P)')==before_checks
  p.locator('#bf10400-evolution-needs > summary').click()
  # A <details> toggle event renders asynchronously; wait for the actual
  # source-backed missing-count row rather than racing the event queue.
