@@ -38,7 +38,7 @@
  toggle.setAttribute('aria-label','Show original quest name and demo wave in battlefield');
  label.prepend(toggle);
  const note=document.createElement('small');
- note.textContent='Uses original 2022 Global quest and dungeon names. Wave status and all active combat remain DEMO. Display only; off by default.';
+ note.textContent='Shows only source-verified original 2022 Global quest and dungeon names. Wave status and combat remain DEMO. Overlay safely hides if source identity or stage count disagrees. Off by default.';
  panel.append(label,note);hud.append(panel);
  const banner=document.createElement('div');
  banner.id='bf4100-banner';
@@ -50,6 +50,19 @@
  function snapshot(){
    const q=typeof QUEST==='undefined'?null:QUEST;
    const s=story.snapshot();
+   // Resolve names and original recorded stage count from the fixed 106-row
+   // 2022 catalog, not solely from a mutable current quest or DEMO HUD.
+   const sourceRow=Number.isSafeInteger(q?.missionId)?
+     QUESTS.find(row=>row.missionId===q.missionId):null;
+   const source=sourceRow&&window.BFGlobalQuestText?.sourceFor(sourceRow);
+   const sourceVerified=!!sourceRow&&
+     q.dungeonId===sourceRow.dungeonId&&
+     q.battles===sourceRow.battles&&
+     typeof source?.mission?.name==='string'&&
+     source.mission.name.trim().length>0&&
+     typeof source?.dungeon?.name==='string'&&
+     source.dungeon.name.trim().length>0&&
+     s?.name===source.mission.name&&s?.dungeon===source.dungeon.name;
    // The optional overlay must not call invalid DEMO wave counters a 2022
    // source-matched mission. Fail closed instead of rendering WAVE 1/0.
    const validWaves=Number.isSafeInteger(s?.total)&&
@@ -57,11 +70,9 @@
      s.total>=1&&s.total<=100&&s.current>=1&&
      s.current<=s.total&&q.battles===s.total;
    const available=!!q&&!!s&&s.archive&&S.mode==='archive'&&
-     mode.value==='archive'&&validWaves&&
-     questUnlocked(q)&&s.missionId===q.missionId&&
-     typeof s.name==='string'&&s.name.trim().length>0&&
-     typeof s.dungeon==='string'&&s.dungeon.trim().length>0;
-   return Object.freeze({enabled,available,applied:enabled&&available,
+     mode.value==='archive'&&validWaves&&sourceVerified&&
+     questUnlocked(q)&&s.missionId===q.missionId;
+   return Object.freeze({enabled,available,sourceVerified,applied:enabled&&available,
      missionId:available?q.missionId:null,
      name:available?s.name:null,dungeon:available?s.dungeon:null,
      wave:available?s.current:null,total:available?s.total:null,
