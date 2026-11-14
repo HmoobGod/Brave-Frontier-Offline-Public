@@ -25,7 +25,7 @@
   '#bf2000-waves span[aria-current=step]{border-color:#f8d584;outline:1px solid #f8d584}',
   '#bf2000-state{font-weight:700;margin:6px 0}',
   '#bf2000-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}',
-  '#bf2000-actions button{padding:8px 12px;min-height:42px;border:1px solid #d7b780;',
+  '#bf2000-actions button{padding:8px 12px;min-height:44px;border:1px solid #d7b780;',
   'border-radius:5px;background:#76582c;color:white;font-weight:800}',
   '#bf2000-actions button:disabled{opacity:.45}',
   '#bf2000-foot{display:block;margin-top:8px;color:#c2cbd3;font-size:11px}'
@@ -48,7 +48,7 @@
  const retry=document.createElement('button');retry.type='button';
  retry.id='bf2000-retry-save';retry.textContent='RETRY SAVE';retry.hidden=true;
  const foot=document.createElement('small');foot.id='bf2000-foot';
- foot.textContent='2022 Global mission names and recorded stage counts; active enemy formations, AI, damage, loot and Energy spending remain DEMO. Training battles are separate.';
+ foot.textContent='2022 Global mission names and recorded stage counts; ally/enemy HP totals are current local DEMO battle state, not original 2022 enemy formations. AI, damage, loot and Energy spending remain DEMO. Training battles are separate.';
  actions.append(jump,next,retry);
  panel.append(heading,title,details,waves,status,actions,foot);
  questDetail.after(panel);
@@ -97,6 +97,14 @@
    const current=total?(won?total:Math.min(total,completed+1)):0;
    const party=Array.isArray(S.party)?S.party.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
    const foes=Array.isArray(S.enemies)?S.enemies.filter(u=>u&&Number.isFinite(u.maxHp)&&u.maxHp>0):[];
+   // v440: informational live player-party DEMO HP only. A single malformed
+   // active ally invalidates the sum; no extrapolation, combat, or save write.
+   const allySource=Array.isArray(S.party)?S.party.filter(u=>u?.active):null;
+   const allyValid=!!allySource?.length&&allySource.length<=6&&
+     allySource.every(u=>Number.isFinite(u.hp)&&Number.isFinite(u.maxHp)&&
+       u.maxHp>0&&u.hp>=0&&u.hp<=u.maxHp);
+   const allyHp=allyValid?Math.round(allySource.reduce((n,u)=>n+u.hp,0)):null;
+   const allyMaxHp=allyValid?Math.round(allySource.reduce((n,u)=>n+u.maxHp,0)):null;
    // v426: live DEMO enemy health is an informational, read-only sum.
    // Reject a partial/malformed wave rather than displaying a misleading bar.
    const hpSource=Array.isArray(S.enemies)?S.enemies:null;
@@ -118,7 +126,7 @@
      phase:String(S.phase||''),clears:P.questClears?.[q.missionId]||0,
      allies:party.filter(u=>u.hp>0).length,party:party.length,
      enemies:foes.filter(u=>u.hp>0).length,foes:foes.length,
-     enemyHp,enemyMaxHp,
+     allyHp,allyMaxHp,enemyHp,enemyMaxHp,
      nextId:upcomingQuest?.missionId||null,
      nextName:upcomingQuest?BFGlobalQuestText.sourceFor(upcomingQuest)?.mission?.name||'Mission '+upcomingQuest.missionId:null
    });
@@ -148,6 +156,8 @@
    status.textContent=(state.won?'VICTORY':state.lost?'DEFEAT':state.busy?'TURN IN PROGRESS':'BATTLE READY')+
      ' · Wave '+state.current+'/'+state.total+
      ' · Allies '+state.allies+'/'+state.party+' · Enemies '+state.enemies+'/'+state.foes+
+     ' · DEMO ally HP '+(state.allyHp===null||state.allyMaxHp===null?
+       'unavailable':state.allyHp+'/'+state.allyMaxHp)+
      ' · DEMO enemy HP '+(state.enemyHp===null||state.enemyMaxHp===null?
        'unavailable':state.enemyHp+'/'+state.enemyMaxHp)+
      (state.archive&&state.won&&!state.stored?
