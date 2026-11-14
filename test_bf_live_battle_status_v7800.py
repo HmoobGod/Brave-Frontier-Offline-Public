@@ -9,6 +9,9 @@ assert len(js.encode('utf8'))<65536
 assert 'min-height:44px' in js
 assert 'Number.isFinite(unit.hp)' in js and 'Number.isFinite(unit.maxHp)' in js
 assert 'DEMO HP ' in js
+assert 'Number.isSafeInteger(S.round)' in js
+assert 'validDeadline(immuneState.expiresAfterRound)' in js
+assert 'validDeadline(regenState.untilRound)' in js
 assert all(t not in js for t in ('localStorage','saveProgress(', 'BFAndroid'))
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf7700_original_party_regen.js")')<java.index('readPackagedText("bf7800_live_battle_status.js")')
@@ -34,8 +37,29 @@ with sync_playwright() as pw:
  for name in names:p.add_script_tag(path=str(A/name))
  for name in ('bf6400_status_remedy_command.js','bf6500_sickness_recovery.js',
               'bf7500_original_saint_light.js','bf7600_original_status_nullifier.js',
-              'bf7700_original_party_regen.js','bf7800_live_battle_status.js'):
+              'bf7700_original_party_regen.js'):
   p.add_script_tag(path=str(A/name))
+ # v458: transparent browser-only wrappers expose malformed provider
+ # fixtures to the exact module instance captured on script load.
+ p.evaluate("""()=>{
+   const control={};window.__v458StatusFaults=control;
+   const ailments=window.BFGlobalOriginalAilmentStateV5700;
+   const immune=window.BFGlobalStatusNegationV7600;
+   const regen=window.BFGlobalOriginalPartyRegenV7700;
+   const guarded=(real,key)=>({...real,snapshot:()=>{
+     if(control[key]==='THROW')throw Error('v458 provider unavailable');
+     return Object.prototype.hasOwnProperty.call(control,key)?
+       control[key]:real.snapshot();
+   }});
+   window.BFGlobalStatusNegationV7600=guarded(immune,'immune');
+   window.BFGlobalOriginalPartyRegenV7700=guarded(regen,'regen');
+   window.BFGlobalOriginalAilmentStateV5700={...ailments,codesFor:slot=>{
+     if(control.codes==='THROW')throw Error('v458 codes unavailable');
+     return Object.prototype.hasOwnProperty.call(control,'codes')?
+       control.codes:ailments.codesFor(slot);
+   }};
+ }""")
+ p.add_script_tag(path=str(A/'bf7800_live_battle_status.js'))
  p.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert p.evaluate('P.version')==7
  assert p.evaluate('BFGlobalLiveBattleStatusV7800.snapshot().visible') is False
@@ -93,6 +117,55 @@ with sync_playwright() as pw:
  assert state['visible'] and len(state['units'])>=4
  assert all(u['immune'] and u['regeneration'] for u in state['units'])
  assert all(u['immunityTurns']==3 and u['regenerationTurns']==3 for u in state['units'])
+ # Invalid round values or malformed/throwing optional source providers must
+ # hide unknown status lifetimes rather than render NaN or break the timer.
+ before_faults=p.evaluate("""()=>({
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   s:JSON.stringify(S),round:S.round
+ })""")
+ bad_rounds=p.evaluate("""()=>{
+   const saved=S.round,out={};
+   try{
+     for(const [key,value] of [
+       ['negative',-1],['fraction',1.5],['string','2'],
+       ['nan',NaN],['infinity',Infinity],['unsafe',Number.MAX_SAFE_INTEGER+1]
+     ]){
+       S.round=value;
+       const state=BFGlobalLiveBattleStatusV7800.refresh();
+       out[key]={visible:state.visible,hidden:document.getElementById('bf7800-status').hidden};
+     }
+   }finally{S.round=saved;BFGlobalLiveBattleStatusV7800.refresh();}
+   return out;
+ }""")
+ assert all(not row['visible'] and row['hidden'] for row in bad_rounds.values()),bad_rounds
+ fixtures=p.evaluate("""()=>{
+   const faults=window.__v458StatusFaults,out={};
+   const bad=[
+     ['immuneNull','immune',null],['immuneEmpty','immune',{}],
+     ['immuneThrown','immune','THROW'],
+     ['immuneDeadline','immune',{protectedSlots:[0],expiresAfterRound:NaN}],
+     ['regenNull','regen',null],['regenEmpty','regen',{}],
+     ['regenThrown','regen','THROW'],
+     ['regenDeadline','regen',{active:true,targetSlots:[0],untilRound:Infinity}],
+     ['regenActiveString','regen',{active:'false',targetSlots:[],untilRound:null}],
+     ['codesInvalid','codes',[99]],['codesType','codes','Poison'],
+     ['codesThrown','codes','THROW']
+   ];
+   for(const [label,key,value] of bad){
+     try{
+       faults[key]=value;
+       const s=BFGlobalLiveBattleStatusV7800.refresh();
+       out[label]={visible:s.visible,hidden:document.getElementById('bf7800-status').hidden};
+     }finally{delete faults[key];BFGlobalLiveBattleStatusV7800.refresh();}
+   }
+   return out;
+ }""")
+ assert all(not row['visible'] and row['hidden'] for row in fixtures.values()),fixtures
+ assert p.evaluate('BFGlobalLiveBattleStatusV7800.refresh().visible') is True
+ assert p.evaluate("""()=>({
+   p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),
+   s:JSON.stringify(S),round:S.round
+ })""")==before_faults
  assert p.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(0,1)') is False
  p.evaluate('S.round++')
  state=p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')
