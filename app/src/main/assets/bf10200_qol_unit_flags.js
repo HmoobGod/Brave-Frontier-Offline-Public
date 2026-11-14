@@ -15,9 +15,12 @@
    const node=results.querySelector('.bf-box-card[aria-pressed="true"]')||
      results.querySelector('.bf-box-card');
    const id=Number(node?.dataset?.bfUnitId);
-   return Number.isSafeInteger(id)&&P.roster.includes(id)?id:null;
+   return validId(id)?id:null;
  }
- function validId(id){return Number.isSafeInteger(id)&&id>0&&P.roster.includes(id)}
+ function validId(id){
+   return Number.isSafeInteger(id)&&id>0&&
+     Array.isArray(P.roster)&&P.roster.includes(id);
+ }
  function load(){
    try{
      const obj=JSON.parse(localStorage.getItem(key)||'null');
@@ -53,7 +56,7 @@
    '#bf10200-flags{padding:10px;margin:9px 0;border:1px solid #c5b185;',
    'border-radius:6px;background:#253849;color:#f7eedb;',
    'font:12px/1.45 system-ui,sans-serif}',
-   '#bf10200-flags button{min-height:42px;margin:4px 5px 4px 0;',
+   '#bf10200-flags button{min-height:44px;margin:4px 5px 4px 0;',
    'padding:8px 11px;color:#fff;border:1px solid #bca780;',
    'background:#40596a;border-radius:5px;font-weight:800}',
    '#bf10200-flags button:disabled{opacity:.45}',
@@ -94,22 +97,26 @@
    locked.textContent=s.locked?'REMOVE LOCK':'MARK LOCK';
    info.textContent=(s.owned?'Selected base unit #'+s.id:'Choose an owned unit')+
      ' · '+s.favorites+' favorites · '+s.locks+' locks';
-   let shown=0,total=0;
+   let shown=0,total=0,invalid=0;
    for(const card of results.querySelectorAll('.bf-box-card')){
      const id=Number(card.dataset.bfUnitId);
-     card.dataset.bfQolFavorite=String(flags.favorites.includes(id));
-     card.dataset.bfQolLocked=String(flags.locked.includes(id));
-     const visible=filterMode==='all'||
-       (filterMode==='favorites'&&flags.favorites.includes(id))||
-       (filterMode==='locked'&&flags.locked.includes(id));
+     // Never label a malformed or unowned card as a favorite/lock, and
+     // never include it among the owned box-filter results.
+     const owned=validId(id);
+     card.dataset.bfQolFavorite=String(owned&&flags.favorites.includes(id));
+     card.dataset.bfQolLocked=String(owned&&flags.locked.includes(id));
+     const visible=owned&&(filterMode==='all'||
+       filterMode==='favorites'&&flags.favorites.includes(id)||
+       filterMode==='locked'&&flags.locked.includes(id));
      card.hidden=!visible;
      card.style.display=visible?'':'none';
-     total++;if(visible)shown++;
+     if(owned){total++;if(visible)shown++;}else invalid++;
    }
    showFavorites.setAttribute('aria-pressed',String(filterMode==='favorites'));
    showLocks.setAttribute('aria-pressed',String(filterMode==='locked'));
    filterInfo.textContent=shown+' of '+total+' owned box cards shown'+
-     (filterMode==='all'?'.':' · '+(filterMode==='favorites'?'Favorites':'Locked')+' only.');
+     (filterMode==='all'?'.':' · '+(filterMode==='favorites'?'Favorites':'Locked')+' only.')+
+     (invalid?' · '+invalid+' unowned or malformed cards hidden.':'');
    return s;
  }
  function setFilter(mode){
