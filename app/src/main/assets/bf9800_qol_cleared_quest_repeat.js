@@ -131,13 +131,17 @@
    go.disabled=!eligible;
    picker.disabled=!!session;halt.disabled=!session;
    finish.disabled=!session||!!session.finishAfterCurrent;
+   // A stale stop reason must not mask the CURRENT fail-closed gate:
+   // render receipt/source unavailability whenever the visible Start
+   // action would be rejected for that reason, including after a prior run.
    status.textContent=session?
      'REPEATING MISSION '+session.missionId+' · '+session.completed+'/'+
        session.target+' additional clears complete · '+
        (session.finishAfterCurrent?'Finishing current battle · ':'')+reason:
-     (reason==='Idle'?(resultReady&&!eligible?
+     resultReady&&!eligible?
        'Auto-repeat unavailable: verified save or source quest record is missing.':
-       'Complete a previously cleared quest to enable auto-repeat'):reason);
+       reason==='Idle'?
+       'Complete a previously cleared quest to enable auto-repeat':reason;
    return statusSnapshot();
  }
  function setAuto(on){
