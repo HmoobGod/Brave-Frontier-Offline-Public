@@ -33,15 +33,26 @@
   });
   function lookup(unitId){return Number.isSafeInteger(unitId)?byId.get(unitId)||null:null;}
   function snapshot(){
-    const rows=[],unsupported=[];
+    const rows=[],unsupported=[],seen=new Set();
     let total=0;
     for(let i=0;i<Math.min(6,P.squad.length);i++){
       const baseId=P.squad[i];
-      if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))continue;
-      const unit=effectiveUnit(baseId);
+      // v441: empty slots are allowed; malformed, unowned or duplicate
+      // members must NOT produce a falsely complete Home source-cost total.
+      if(baseId===null||baseId===undefined)continue;
+      const valid=Number.isSafeInteger(baseId)&&baseId>0&&P.roster.includes(baseId);
+      const duplicate=valid&&seen.has(baseId);
+      if(!valid||duplicate){
+        unsupported.push(freeze({slot:i+1,baseId,unitId:null,
+          reason:duplicate?'duplicate':'not verified owned'}));continue;
+      }
+      seen.add(baseId);
+      let unit=null;
+      try{unit=effectiveUnit(baseId);}catch(_){unit=null;}
       const unitId=unit?.id;
       const original=lookup(unitId);
-      if(!original){unsupported.push(freeze({slot:i+1,baseId,unitId:unitId??null}));continue;}
+      if(!original){unsupported.push(freeze({slot:i+1,baseId,unitId:unitId??null,
+        reason:'unknown original form'}));continue;}
       total+=original.cost;
       rows.push(freeze({slot:i+1,baseId,unitId,
         rarity:original.rarity,cost:original.cost}));
@@ -56,7 +67,7 @@
   panel.style.cssText='margin:8px 4px;padding:10px;border:1px solid #9fbaad;'+
     'border-radius:7px;background:#243c39;color:#edf8f2;font:12px/1.5 system-ui,sans-serif';
   const heading=document.createElement('summary');
-  heading.style.cssText='cursor:pointer;min-height:36px;font-weight:800';
+  heading.style.cssText='cursor:pointer;min-height:44px;font-weight:800';
   const list=document.createElement('ol');list.id='bf12600-squad-cost-rows';
   const note=document.createElement('small');
   note.textContent='Exact original 2022 unit costs for playable forms. Read-only reference: '+
@@ -91,13 +102,14 @@
     }
     for(const row of state.unsupported){
       const entry=document.createElement('li');
-      entry.textContent='Slot '+row.slot+' · #'+row.unitId+' · cost unknown (excluded)';
+      entry.textContent='Slot '+row.slot+' · base #'+row.baseId+
+        ' · '+row.reason+' · cost unknown (excluded)';
       list.append(entry);
     }
     if(homeCost){
       homeCost.textContent=!state.complete?
         'ORIGINAL 2022 SQUAD COST · SOURCE INCOMPLETE · '+
-          state.unsupported.length+' unverified unit(s) · capacity unknown':
+          state.unsupported.length+' unverified squad slot(s) · capacity unknown':
         state.count===0?
           'ORIGINAL 2022 SQUAD COST · NO OWNED UNITS SELECTED · capacity unknown':
           'ORIGINAL 2022 SQUAD COST · '+state.originalSquadCost+

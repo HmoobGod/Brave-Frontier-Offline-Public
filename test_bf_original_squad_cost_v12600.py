@@ -108,6 +108,49 @@ with sync_playwright() as playwright:
  assert 'SOURCE INCOMPLETE' in home['unknown'] and '1 unverified' in home['unknown'],home
  assert 'NO OWNED UNITS SELECTED' in home['empty'],home
  assert home['home']=='home' and 0<=home['bounds']['left']<home['bounds']['right']<=390,home
+ # v441: source-cost Home must reject invalid, unowned and duplicated
+ # saved references instead of presenting a misleading verified total.
+ identity=page.evaluate("""()=>{
+   const api=BFGlobalOriginalSquadCostV12600,old={squad:P.squad,roster:P.roster,
+     evolutions:P.evolutions},save=localStorage.getItem('bf_global_offline_demo_v7');
+   try{
+     P.roster=[10011,20011];P.evolutions={};
+     P.squad=[10011,10011,20011,null,null,null];
+     const duplicate=api.refresh(),duplicateText=
+       document.getElementById('bf12600-home-squad-cost').textContent;
+     P.squad=[10011,999999,null,null,null,null];
+     const unowned=api.refresh();
+     P.squad=[10011,'10011',null,null,null,null];
+     const stringSlot=api.refresh();
+     P.squad=[10011,null,null,null,null,null];
+     const emptyAllowed=api.refresh();
+     return {duplicate,duplicateText,unowned,stringSlot,emptyAllowed};
+   }finally{
+     P.squad=old.squad;P.roster=old.roster;P.evolutions=old.evolutions;
+     api.refresh();
+     if(localStorage.getItem('bf_global_offline_demo_v7')!==save)
+       throw Error('Read-only Home cost wrote canonical v7 save');
+   }
+ }""")
+ assert identity['duplicate']['complete'] is False
+ assert identity['duplicate']['count']==2 and identity['duplicate']['originalSquadCost']==4
+ assert identity['duplicate']['unsupported'][0]['reason']=='duplicate'
+ assert 'SOURCE INCOMPLETE' in identity['duplicateText'] and '1 unverified squad slot' in identity['duplicateText']
+ for name in ('unowned','stringSlot'):
+  assert not identity[name]['complete'] and identity[name]['count']==1
+  assert len(identity[name]['unsupported'])==1
+ assert identity['emptyAllowed']['complete'] and identity['emptyAllowed']['count']==1
+ # Source-cost disclosure lives under the Units route and is deliberately
+ # hidden while Home is active. Navigate there before geometry checks.
+ page.locator('.bf-navbar button[data-bf-goto="units"]').click()
+ assert page.locator('#bf12600-original-squad-cost summary').is_visible()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  assert page.locator('#bf12600-original-squad-cost summary').evaluate('(e)=>e.getBoundingClientRect().height')>=44
+  assert page.evaluate('document.documentElement.scrollWidth<=window.innerWidth'),width
+ page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+ assert page.evaluate('BF_homeNav.current')=='home'
+ page.set_viewport_size({'width':390,'height':844})
  page.set_viewport_size({'width':320,'height':844})
  bounds=page.locator('#bf12600-home-squad-cost').bounding_box()
  assert bounds and bounds['x']>=-0.5 and bounds['x']+bounds['width']<=320.5,bounds
