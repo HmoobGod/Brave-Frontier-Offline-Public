@@ -28,7 +28,7 @@
    'Native Energy costs and drops are not yet reconstructed.';
  const picker=document.createElement('select');picker.id='bf9800-repeat-count';
  picker.setAttribute('aria-label','Number of additional quest clears');
- picker.style.cssText='padding:7px;min-height:42px;background:#172820;'+
+ picker.style.cssText='padding:7px;min-height:44px;background:#172820;'+
    'border:1px solid #a6b986;border-radius:5px;color:#f4f6e9';
  // Longer opt-in runs are still finite and remain subject to the exact
  // saved-clear, active Auto, foreground, quest-change and defeat gates.
@@ -47,7 +47,7 @@
  finish.textContent='FINISH CURRENT BATTLE';
  finish.setAttribute('aria-label','Finish this battle, then stop auto-repeat');
  for(const b of [go,halt,finish]){
-   b.style.cssText='margin:3px;min-height:42px;padding:8px;'+
+   b.style.cssText='margin:3px;min-height:44px;padding:8px;'+
      'background:#46633a;color:white;border:1px solid #afc39c;border-radius:5px';
  }
  const status=document.createElement('p');status.id='bf9800-status';
@@ -119,10 +119,15 @@
  }
  function update(){
    const s=safeResultSnapshot();
-   const cleared=Number(s?.clears)>0;
-   const eligible=!session&&onQuest()&&!document.hidden&&!S.busy&&
+   // Keep Start-button readiness aligned with the strict start() gate.
+   // Previously string/fractional clears and missing v7 receipts could
+   // appear eligible even though start() correctly refused the replay.
+   const resultReady=!session&&onQuest()&&!document.hidden&&!S.busy&&
      S.mode==='archive'&&!!s?.done&&!!s.victory&&!!s.archive&&!!s.stored&&
-     !!s.canReplay&&cleared&&s.missionId===QUEST?.missionId;
+     !!s.canReplay&&Number.isSafeInteger(s?.clears)&&s.clears>=1&&
+     s.missionId===QUEST?.missionId;
+   const eligible=resultReady&&hasCommittedReceipt(s)&&
+     sourceQuestMatches(s.missionId);
    go.disabled=!eligible;
    picker.disabled=!!session;halt.disabled=!session;
    finish.disabled=!session||!!session.finishAfterCurrent;
@@ -130,7 +135,9 @@
      'REPEATING MISSION '+session.missionId+' · '+session.completed+'/'+
        session.target+' additional clears complete · '+
        (session.finishAfterCurrent?'Finishing current battle · ':'')+reason:
-     (reason==='Idle'?'Complete a previously cleared quest to enable auto-repeat':reason);
+     (reason==='Idle'?(resultReady&&!eligible?
+       'Auto-repeat unavailable: verified save or source quest record is missing.':
+       'Complete a previously cleared quest to enable auto-repeat'):reason);
    return statusSnapshot();
  }
  function setAuto(on){
