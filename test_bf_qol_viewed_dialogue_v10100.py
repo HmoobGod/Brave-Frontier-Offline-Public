@@ -7,7 +7,7 @@ src=(A/'bf10100_qol_viewed_dialogue.js').read_text('utf8')
 assert src.count('BF_GLOBAL_QOL_VIEWED_DIALOGUE_SKIP_V10100')==1
 assert len(src.encode())<65536
 assert 'timeline.jump(s.lines)' in src and 'playback.pause()' in src
-assert 'sourceBound(s)' in src and 'row.name===s.source' in src
+assert 'sourceBound(s)' in src and "row.source==='content/event/'+s.source" in src
 assert 'min-height:44px' in src
 assert "saveProgress(" not in src and "bf_global_offline_demo_v7" not in src
 with sync_playwright() as pw:
@@ -36,7 +36,7 @@ with sync_playwright() as pw:
    window.BFGlobalOriginalEventsV2200={
      snapshot:()=>({...__scene101}),
      lookup:(kind,id)=>kind==='dungeon'&&id===20?
-       {kind,id,name:'map1-dungeon1.txt',lines:['A','B','C']}:null
+       {kind,id,source:'content/event/map1-dungeon1.txt',lines:['A','B','C']}:null
    };
    window.BFGlobalStoryPlaybackV3300={pause:()=>{__paused101++}};
    window.BFGlobalDialogueTimelineV3500={jump:n=>{
@@ -109,5 +109,73 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.remember("__proto__")') is False
  assert p.evaluate(api+'.state().storedCount')==1
  assert not errors,errors
+ # Real public API contract, not only a hand-authored lookup stub:
+ # the v2200 reader's lookup returns source='content/event/'+filename,
+ # while snapshot().source carries only the bare filename.
+ real=b.new_page(viewport={'width':390,'height':844})
+ real_errors=[];real.on('pageerror',lambda e:real_errors.append(str(e)))
+ real.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{
+   configurable:true,value:{getItem:k=>db[k]??null,
+   setItem:(k,v)=>db[k]=String(v),removeItem:k=>delete db[k],
+   key:i=>Object.keys(db)[i]??null,get length(){return Object.keys(db).length}}});
+   window.alert=()=>{};window.confirm=()=>true;
+   HTMLMediaElement.prototype.load=()=>{};
+   HTMLMediaElement.prototype.pause=()=>{};
+   HTMLMediaElement.prototype.play=()=>Promise.resolve()}""")
+ real.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
+ real.add_style_tag(path=str(A/'bf_home_nav.css'))
+ for name in ('bf_home_nav.js','bf080_morgan_map.js',
+              'bf090_st_lamia_map.js','bf100_grand_gaia_campaign.js',
+              'bf101_story_continue.js','bf110_quest_journal.js',
+              'bf2000_story_battle_hud.js','bf2100_battle_command_tray.js',
+              'bf2200_original_event_reader.js'):
+  real.add_script_tag(path=str(A/name))
+ real.evaluate("""()=>{window.__realPaused=0;
+   window.BFGlobalStoryPlaybackV3300={pause:()=>{__realPaused++}};
+   window.BFGlobalDialogueTimelineV3500={jump:n=>{
+     const api=BFGlobalOriginalEventsV2200;
+     const initial=api.snapshot();
+     if(!document.getElementById('bf2200-reader').open||
+        !Number.isInteger(n)||n<1||n>initial.lines)return false;
+     const next=document.getElementById('bf2200-next');
+     while(api.snapshot().step<n){
+       if(next.disabled)return false;
+       next.click();
+     }
+     return api.snapshot().step===n;
+   }};
+ }""")
+ assert real.evaluate('P.version')==7
+ real.evaluate('()=>{P.questClears[10]=1;P.questClears[12]=1;renderQuestList()}')
+ assert real.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is True
+ contract=real.evaluate("""()=>({
+   row:BFGlobalOriginalEventsV2200.lookup('clear',10),
+   snapshot:BFGlobalOriginalEventsV2200.snapshot()
+ })""")
+ assert contract['row']['source']=='content/event/'+contract['snapshot']['source'],contract
+ assert 'name' not in contract['row'],contract
+ real_save=real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ real.add_script_tag(path=str(A/'bf10100_qol_viewed_dialogue.js'))
+ assert real.evaluate(api+'.state().sourceVerified') is True
+ assert real.evaluate(api+'.observed()') is False or real.evaluate(api+'.state().storedCount')==1
+ assert real.evaluate(api+'.state().storedCount')==1
+ assert real.evaluate(api+'.viewed')==['clear:10']
+ # Original multi-page dungeon reader must complete, remember and
+ # subsequently skip using the real public row lookup contract.
+ assert real.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)') is True
+ assert real.evaluate(api+'.state().sourceVerified') is True
+ assert real.evaluate(api+'.state().viewed') is False
+ real.evaluate("""()=>{const a=BFGlobalOriginalEventsV2200,
+   next=document.getElementById('bf2200-next');
+   while(!next.disabled)next.click();}""")
+ real.wait_for_function("BFGlobalQoLViewedDialogueV10100.state().viewed")
+ assert 'dungeon:20' in real.evaluate(api+'.viewed')
+ assert real.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)') is True
+ assert real.evaluate(api+'.state().available') is True
+ assert real.evaluate(api+'.skip()') is True
+ assert real.evaluate(api+'.state().step')==real.evaluate(api+'.state().lines')
+ assert real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==real_save
+ assert not real_errors,real_errors
+ real.close()
  b.close()
 print('PASS v101 viewed-only dialogue skip, replay and v7 save immutability')
