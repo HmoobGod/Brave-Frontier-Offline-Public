@@ -72,6 +72,46 @@ with sync_playwright() as pw:
  assert hp_probe['afterKo']==[42,140],hp_probe
  assert hp_probe['invalid']==[None,None] and 'DEMO enemy HP unavailable' in hp_probe['invalidLabel'],hp_probe
  assert hp_probe['nonFinite']==[None,None] and hp_probe['unchanged'],hp_probe
+ # v440: the player-facing HUD reports ALL verified live DEMO ally HP.
+ # Invalid/partial active ally data cannot be represented as a false total.
+ ally_probe=page.evaluate("""()=>{
+   const beforeParty=S.party, beforeS=JSON.stringify(S), beforeP=JSON.stringify(P),
+      beforeSave=localStorage.getItem('bf_global_offline_demo_v7'),
+      api=BFGlobalStoryBattleV2000,result={};
+   try{
+     S.party=[{id:0,active:true,hp:50,maxHp:100},
+              {id:1,active:true,hp:20,maxHp:40}];
+     let state=api.refresh();
+     result.valid=[state.allyHp,state.allyMaxHp];
+     result.validText=document.getElementById('bf2000-state').textContent;
+     S.party[1].hp=0;state=api.refresh();
+     result.ko=[state.allyHp,state.allyMaxHp];
+     S.party[0].hp=NaN;state=api.refresh();
+     result.nan=[state.allyHp,state.allyMaxHp];
+     result.nanText=document.getElementById('bf2000-state').textContent;
+     S.party[0].hp=50;S.party[1].maxHp=0;
+     state=api.refresh();result.zeroMax=[state.allyHp,state.allyMaxHp];
+     S.party[1].maxHp=40;S.party[1].hp=41;
+     state=api.refresh();result.overMax=[state.allyHp,state.allyMaxHp];
+     S.party=[{id:0,active:false,hp:1,maxHp:20}];
+     state=api.refresh();result.noActive=[state.allyHp,state.allyMaxHp];
+   }finally{S.party=beforeParty;api.refresh();}
+   result.unchanged=JSON.stringify(S)===beforeS&&JSON.stringify(P)===beforeP&&
+     localStorage.getItem('bf_global_offline_demo_v7')===beforeSave;
+   return result;
+ }""")
+ assert ally_probe['valid']==[70,140] and 'DEMO ally HP 70/140' in ally_probe['validText'],ally_probe
+ assert ally_probe['ko']==[50,140],ally_probe
+ for key in ('nan','zeroMax','overMax','noActive'):
+  assert ally_probe[key]==[None,None],(key,ally_probe)
+ assert 'DEMO ally HP unavailable' in ally_probe['nanText'],ally_probe
+ assert ally_probe['unchanged'],ally_probe
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf2000-battle','#bf2000-next','#bf2000-retry-save'):
+   assert page.locator(selector).evaluate('(e)=>e.getBoundingClientRect().height')>=44,(width,selector)
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+ page.set_viewport_size({'width':390,'height':844})
  # v359: direct real core execute() next-wave and final-reward gates.
  # No mocks of the native engine; only disposable source-provider corruption.
  page.add_script_tag(path=str(A/'bf14300_original_quest_energy.js'))
