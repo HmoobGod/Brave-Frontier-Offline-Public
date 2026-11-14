@@ -10,6 +10,9 @@ assert 'window.wait=function(ms)' in js
 assert 'nativeWait.call(this,40)' in js
 assert "S.mode!=='archive'" in js
 assert 'saveProgress(' not in js and 'awardDemoRewards(' not in js
+assert 'if(S.busy)return false;' in js
+assert 'control.disabled=!!S.busy;' in js
+assert js.count('min-height:44px')>=2
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,
    executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),
@@ -42,6 +45,14 @@ with sync_playwright() as pw:
  assert p.locator('#bf9900-speed-select option').count()==6
  assert p.evaluate(api+'.snapshot().speed')==2
  assert p.evaluate(api+'.snapshot().skip') is False
+ # The optional controls must meet minimum touch sizes at narrow widths.
+ p.locator('#bf9900-speed summary').click()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf9900-speed summary','#bf9900-speed-select'):
+   rect=p.locator(selector).bounding_box()
+   assert rect and rect['height']>=44,(width,selector,rect)
+ p.set_viewport_size({'width':390,'height':844})
  assert p.evaluate(api+'.setSpeed(9)') is False
  assert p.evaluate(api+'.setSpeed(12)') is True
  assert p.evaluate("document.getElementById('speed').value")=='12'
@@ -57,10 +68,20 @@ with sync_playwright() as pw:
  normal=p.evaluate("""async()=>{const t=performance.now();await window.wait(125);
     return performance.now()-t;}""")
  assert normal>=95,normal
- p.evaluate("""()=>{S.mode='archive';S.busy=true;}""")
+ p.evaluate("""()=>{S.mode='archive';S.busy=true;BFGlobalQoLBattleSpeedV9900.refresh()}""")
+ assert p.locator('#bf9900-speed-select').is_disabled()
+ assert p.locator('#bf9900-anim-skip').is_disabled()
+ assert p.evaluate(api+'.setSpeed(5)') is False
+ # A queued stale DOM event during a busy turn must restore the true speed.
+ p.evaluate("""()=>{const c=document.getElementById('bf9900-speed-select');
+   c.value='5';c.dispatchEvent(new Event('change',{bubbles:true}))}""")
+ assert p.evaluate("document.getElementById('speed').value")=='12'
+ assert p.evaluate("document.getElementById('bf9900-speed-select').value")=='12'
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_speed_v99')")=='12'
  assert p.evaluate(api+'.setSkip(false)') is False
  assert p.evaluate(api+'.snapshot().skip') is True
- p.evaluate("S.busy=false")
+ p.evaluate("S.busy=false;BFGlobalQoLBattleSpeedV9900.refresh()")
+ assert p.locator('#bf9900-speed-select').is_enabled()
  assert p.evaluate(api+'.setSkip(false)') is True
  normal2=p.evaluate("""async()=>{const t=performance.now();await window.wait(125);
     return performance.now()-t;}""")
