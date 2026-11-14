@@ -49,6 +49,37 @@ with sync_playwright() as pw:
  page.evaluate("""()=>{P.questClears[2]=1;renderQuestList();S.busy=false;if(!BFQuestAreas.choose(QUESTS.find(q=>q.missionId===10)))throw Error("Mission 10 not selected");P.questClears[10]=1;S.over=true;S.phase="Victory";renderQuestList()}""")
  s=page.evaluate('BFGlobalStoryEventCueV2500.refresh()')
  assert s['kind']=='clear' and s['id']==10,s
+ # v439: a real story prompt is available only for an existing source
+ # mission and a committed integer clear, never during unattended Auto.
+ event_guards=page.evaluate("""()=>{
+   const api=BFGlobalStoryEventCueV2500;
+   const save=localStorage.getItem('bf_global_offline_demo_v7');
+   const oldAuto=S.auto,oldCleared=P.questClears[10];
+   const oldDungeon=QUEST.dungeonId;
+   let autoRejected,badClearRejected,badDungeonRejected;
+   try{
+     S.auto=true;autoRejected=api.snapshot()===null && api.open()===false;
+     S.auto=false;P.questClears[10]='corrupt';
+     badClearRejected=api.snapshot()===null && api.open()===false;
+     P.questClears[10]=oldCleared;
+     QUEST.dungeonId=9999;
+     badDungeonRejected=api.snapshot()===null && api.open()===false;
+   }finally{
+     S.auto=oldAuto;P.questClears[10]=oldCleared;
+     QUEST.dungeonId=oldDungeon;
+   }
+   return {autoRejected,badClearRejected,badDungeonRejected,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save,
+     resumed:api.snapshot()?.kind==='clear'};
+ }""")
+ assert event_guards==dict(autoRejected=True,badClearRejected=True,badDungeonRejected=True,
+                           saveSame=True,resumed=True),event_guards
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf2500-read','#bf2500-dismiss'):
+   assert page.locator(selector).evaluate('(e)=>e.getBoundingClientRect().height')>=44,(width,selector)
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+ page.set_viewport_size({'width':390,'height':844})
  clear_saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert page.evaluate('BFGlobalStoryEventCueV2500.open()') is True
  assert 'Farm' in page.locator('#bf2200-text').inner_text()
