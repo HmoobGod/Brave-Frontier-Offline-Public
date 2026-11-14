@@ -28,7 +28,7 @@
    const [kind,id]=s.chosen.split(':');
    const row=readerApi.lookup(kind,Number(id));
    return !!row&&row.kind===kind&&row.id===Number(id)&&
-     row.name===s.source&&Array.isArray(row.lines)&&
+     row.source==='content/event/'+s.source&&Array.isArray(row.lines)&&
      row.lines.length===s.lines;
  }
  function load(){
