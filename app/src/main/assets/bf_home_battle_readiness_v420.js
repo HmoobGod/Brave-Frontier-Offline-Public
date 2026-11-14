@@ -29,6 +29,10 @@
     '#bf420-home-readiness .bf420-row{margin:6px 0;display:flex;',
     'gap:6px;justify-content:space-between;flex-wrap:wrap}',
     '#bf420-home-readiness .bf420-row strong{color:#f9e4b5}',
+    '#bf420-home-clears{margin:7px 0 3px;color:#dbe9fa;font-weight:700}',
+    '#bf420-home-clear-bar{display:block;box-sizing:border-box;width:100%;',
+    'height:13px;margin:0 0 8px;accent-color:#d8b36d}',
+    '#bf420-home-clear-bar[hidden]{display:none!important}',
     '#bf420-home-readiness .bf420-actions{display:grid;',
     'grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0 0}',
     '#bf420-home-readiness button{box-sizing:border-box;min-height:44px;',
@@ -57,6 +61,14 @@
   const party=document.createElement('div');
   party.id='bf420-home-party';
   party.className='bf420-row';
+  // v459: existing local DEMO clear receipts, not original native wins.
+  const clearLabel=document.createElement('p');
+  clearLabel.id='bf420-home-clears';
+  clearLabel.setAttribute('aria-live','polite');
+  const clearBar=document.createElement('progress');
+  clearBar.id='bf420-home-clear-bar';
+  clearBar.max=106;
+  clearBar.setAttribute('aria-label','Local DEMO story mission clears');
   const actions=document.createElement('div');
   actions.className='bf420-actions';
   const questButton=document.createElement('button');
@@ -76,7 +88,7 @@
   note.textContent='2022 archived mission and Energy references only. '+
     'Enemy formations, rewards and battle logic remain an offline DEMO. '+
     'No automatic quest selection, combat or stamina spending.';
-  card.append(heading,mission,party,actions,hint,note);
+  card.append(heading,mission,party,clearLabel,clearBar,actions,hint,note);
   // Home first: do not push the original playable Quest/Summon artwork
   // below the viewport. Append this optional preview AFTER Adventure.
   explore.insertAdjacentElement('afterend',card);
@@ -90,7 +102,13 @@
            'a1b36659dfc80bc6e1e0e244ba52b3c6d423b239cf684439a5488bf679764a66' ||
          archive.source?.staminaEnforced!==false ||
          !Array.isArray(P.squad) || P.squad.length>6 ||
-         QUESTS.length!==106) return null;
+         QUESTS.length!==106 ||
+         typeof campaign.sourceEconomyReadiness!=='function' ||
+         campaign.sourceEconomyReadiness()!==true ||
+         typeof campaign.waveReadiness!=='function' ||
+         !campaign.waveReadiness(QUESTS[0]?.missionId) ||
+         !P.questClears || typeof P.questClears!=='object' ||
+         Array.isArray(P.questClears)) return null;
       // The count is of unique, currently owned, valid squad members; a
       // malformed/duplicate/unowned slot never implies a playable actor.
       if(!Array.isArray(P.roster) || typeof effectiveUnit!=='function')return null;
@@ -101,12 +119,24 @@
         seen.add(id);
         return count+1;
       },0);
+      // An invalid positive string/fraction/infinite count can fool the
+      // legacy campaign summary into reporting 106/106. Require the complete
+      // 106-entry DEMO clear ledger to be valid before showing progress.
+      let cleared=0;
+      for(const q of QUESTS){
+        if(!Number.isSafeInteger(q?.missionId)||q.missionId<=0)return null;
+        const count=P.questClears[q.missionId];
+        if(count!==undefined&&
+           (!Number.isSafeInteger(count)||count<0))return null;
+        if(count>0)cleared++;
+      }
       const progress=campaign.summary();
       if(progress?.total!==106 || !Number.isSafeInteger(progress.cleared) ||
-         progress.cleared<0 || progress.cleared>106)return null;
+         progress.cleared!==cleared || cleared>106)return null;
       const next=campaign.nextPlayable();
-      if(next===null && progress.cleared===106)
-        return Object.freeze({complete:true,filled,missionId:null,waves:null,energy:null});
+      if(next===null && cleared===106)
+        return Object.freeze({complete:true,filled,cleared,
+          missionId:null,waves:null,energy:null});
       if(!next || !Number.isSafeInteger(next.missionId) ||
          !Number.isSafeInteger(next.dungeonId) ||
          !Number.isSafeInteger(next.battles) || next.battles<1)return null;
@@ -124,7 +154,7 @@
       const name=typeof fromSource?.mission?.name==='string' &&
         fromSource.mission.name.trim()?fromSource.mission.name.trim():'Mission '+q.missionId;
       return Object.freeze({complete:false,missionId:q.missionId,
-        waves:row[3],energy:row[4],name:name.slice(0,90),filled});
+        waves:row[3],energy:row[4],name:name.slice(0,90),filled,cleared});
     }catch(_){return null;}
   }
   // Explain the SAME fail-closed lock used for manual route controls.
@@ -159,6 +189,17 @@
       ' · 2022 original '+s.waves+' waves · Energy '+s.energy+' (reference only)';
     party.textContent=s?'CURRENT SQUAD · '+s.filled+'/6 filled slots':
       'CURRENT SQUAD · source state unavailable';
+    clearLabel.textContent=s?'DEMO STORY CLEARS · '+s.cleared+'/106':
+      'DEMO STORY CLEARS · unavailable (invalid source or save)';
+    clearBar.hidden=!s;
+    if(s){
+      clearBar.value=s.cleared;
+      clearBar.setAttribute('aria-valuetext',s.cleared+
+        ' of 106 local DEMO story missions cleared; native enemy formations not restored');
+    }else{
+      clearBar.removeAttribute('value');
+      clearBar.setAttribute('aria-valuetext','DEMO clear progress unavailable');
+    }
     questButton.disabled=!s || s.complete || !can;
     unitsButton.disabled=!s || !can;
     const message=!s?'SOURCE PREVIEW UNAVAILABLE · Open Quests for details.':
