@@ -37,6 +37,8 @@
     'border-radius:5px;font:800 11px Arial,sans-serif;cursor:pointer}',
     '#bf420-home-readiness button:disabled{opacity:.5;cursor:not-allowed}',
     '#bf420-home-readiness button:focus-visible{outline:3px solid #a7e2ff}',
+    '#bf420-home-readiness .bf420-hint{display:block;color:#ffe7b7;font:11px/1.5 Arial,sans-serif;margin:8px 0 0}',
+    '#bf420-home-readiness .bf420-hint[hidden]{display:none!important}',
     '#bf420-home-readiness .bf420-note{display:block;font:10px/1.5 Arial,sans-serif;',
     'color:#cedbea;margin:7px 0 0}',
     '@media(max-width:340px){#bf420-home-readiness .bf420-actions{',
@@ -66,12 +68,15 @@
   unitsButton.type='button';
   unitsButton.textContent='CHECK SQUAD';
   actions.append(questButton,unitsButton);
+  const hint=document.createElement('p');
+  hint.id='bf420-home-hint';hint.className='bf420-hint';hint.hidden=true;
+  hint.setAttribute('role','status');hint.setAttribute('aria-live','polite');
   const note=document.createElement('small');
   note.className='bf420-note';
   note.textContent='2022 archived mission and Energy references only. '+
     'Enemy formations, rewards and battle logic remain an offline DEMO. '+
     'No automatic quest selection, combat or stamina spending.';
-  card.append(heading,mission,party,actions,note);
+  card.append(heading,mission,party,actions,hint,note);
   // Home first: do not push the original playable Quest/Summon artwork
   // below the viewport. Append this optional preview AFTER Adventure.
   explore.insertAdjacentElement('afterend',card);
@@ -122,18 +127,26 @@
         waves:row[3],energy:row[4],name:name.slice(0,90),filled});
     }catch(_){return null;}
   }
-  function available(){
-    if(window.BF_homeNav?.current!=='home'||S?.busy===true||S?.auto===true)return false;
+  // Explain the SAME fail-closed lock used for manual route controls.
+  // Read-only and never a request to auto-start combat or change the save.
+  function blockedReason(){
+    if(window.BF_homeNav?.current!=='home')return 'HOME NOT ACTIVE · Return Home to use these shortcuts.';
+    if(S?.busy===true)return 'TURN IN PROGRESS · Finish the current battle action first.';
+    if(S?.auto===true)return 'AUTO BATTLE ACTIVE · Stop Auto before changing screens.';
     const repeat=window.BFGlobalQoLQuestRepeatV9800;
     if(repeat){
-      if(typeof repeat.statusSnapshot!=='function')return false;
-      try{if(repeat.statusSnapshot()?.active)return false;}
-      catch(_){return false;}
+      if(typeof repeat.statusSnapshot!=='function')
+        return 'REPEAT STATUS UNAVAILABLE · Home shortcuts are safely paused.';
+      try{
+        if(repeat.statusSnapshot()?.active)
+          return 'AUTO REPEAT ACTIVE · Stop Repeat before changing screens.';
+      }catch(_){return 'REPEAT STATUS UNAVAILABLE · Home shortcuts are safely paused.';}
     }
-    return true;
+    return null;
   }
+  function available(){return blockedReason()===null;}
   function refresh(){
-    const s=snapshot(),can=available();
+    const s=snapshot(),reason=blockedReason(),can=reason===null;
     mission.replaceChildren();
     if(!s)mission.textContent='Archived mission preview unavailable · inspect Quests.';
     else if(s.complete)mission.textContent='All 106 archived missions cleared (DEMO battles).';
@@ -143,6 +156,11 @@
       'CURRENT SQUAD · source state unavailable';
     questButton.disabled=!s || s.complete || !can;
     unitsButton.disabled=!s || !can;
+    const message=!s?'SOURCE PREVIEW UNAVAILABLE · Open Quests for details.':
+      reason || (s.complete?'STORY COMPLETE · All 106 DEMO missions cleared.':
+        s.filled===0?'NO VALID SQUAD · Check owned units before battle.':'');
+    hint.hidden=!message;
+    if(hint.textContent!==message)hint.textContent=message;
     return s;
   }
   function go(route){
