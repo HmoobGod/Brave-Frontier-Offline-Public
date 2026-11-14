@@ -55,18 +55,19 @@ with sync_playwright() as pw:
    const api=BFGlobalStoryEventCueV2500;
    const save=localStorage.getItem('bf_global_offline_demo_v7');
    const oldAuto=S.auto,oldCleared=P.questClears[10];
-   const oldDungeon=QUEST.dungeonId;
+   const sourceIndex=QUESTS.findIndex(row=>row.missionId===QUEST.missionId);
+   const originalSource=QUESTS[sourceIndex];
    let autoRejected,badClearRejected,badDungeonRejected;
    try{
      S.auto=true;autoRejected=api.snapshot()===null && api.open()===false;
      S.auto=false;P.questClears[10]='corrupt';
      badClearRejected=api.snapshot()===null && api.open()===false;
      P.questClears[10]=oldCleared;
-     QUEST.dungeonId=9999;
+     QUESTS[sourceIndex]={...originalSource,dungeonId:9999};
      badDungeonRejected=api.snapshot()===null && api.open()===false;
    }finally{
      S.auto=oldAuto;P.questClears[10]=oldCleared;
-     QUEST.dungeonId=oldDungeon;
+     QUESTS[sourceIndex]=originalSource;
    }
    return {autoRejected,badClearRejected,badDungeonRejected,
      saveSame:localStorage.getItem('bf_global_offline_demo_v7')===save,
