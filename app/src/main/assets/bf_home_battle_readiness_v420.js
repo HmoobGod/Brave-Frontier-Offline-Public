@@ -32,6 +32,7 @@
     '#bf420-home-clears{margin:7px 0 3px;color:#dbe9fa;font-weight:700}',
     '#bf420-home-clear-bar{display:block;box-sizing:border-box;width:100%;',
     'height:13px;margin:0 0 8px;accent-color:#d8b36d}',
+    '#bf420-home-clear-bar[hidden]{display:none!important}',
     '#bf420-home-readiness .bf420-actions{display:grid;',
     'grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:10px 0 0}',
     '#bf420-home-readiness button{box-sizing:border-box;min-height:44px;',
