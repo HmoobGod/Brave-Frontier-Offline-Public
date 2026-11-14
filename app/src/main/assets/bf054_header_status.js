@@ -118,9 +118,15 @@
   function summary() {
     // Never invent level-one EXP for a malformed canonical v7 player.
     // This observer is read-only: invalid values are unavailable, not fixed.
+    // v456: the core EXP meter is cumulative across levels. A level 2+
+    // player cannot have less EXP than was required to reach that level.
+    // Never turn impossible local progress into a plausible 0/next bar.
+    const levelFloor = typeof P !== 'undefined' &&
+      Number.isSafeInteger(P?.level) && P.level>=1 && P.level<=99 ?
+        5*(P.level-1)*P.level/2 : null;
     const valid = typeof P !== 'undefined' && P?.version===7 &&
-      Number.isSafeInteger(P.level) && P.level>=1 && P.level<=99 &&
-      Number.isSafeInteger(P.exp) && P.exp>=0;
+      levelFloor!==null &&
+      Number.isSafeInteger(P.exp) && P.exp>=levelFloor;
     if(!valid)return {valid:false,level:null,total:null,
       threshold:1,earned:0,percent:0,capped:false};
     const level=P.level,total=P.exp;
