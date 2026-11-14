@@ -93,6 +93,9 @@ with sync_playwright() as pw:
      state=api.refresh();result.zeroMax=[state.allyHp,state.allyMaxHp];
      S.party[1].maxHp=40;S.party[1].hp=41;
      state=api.refresh();result.overMax=[state.allyHp,state.allyMaxHp];
+     S.party=[{id:0,active:true,hp:30,maxHp:60},
+              {id:1,active:false,hp:100,maxHp:100}];
+     state=api.refresh();result.inactiveIgnored=[state.allyHp,state.allyMaxHp];
      S.party=[{id:0,active:false,hp:1,maxHp:20}];
      state=api.refresh();result.noActive=[state.allyHp,state.allyMaxHp];
    }finally{S.party=beforeParty;api.refresh();}
@@ -102,6 +105,7 @@ with sync_playwright() as pw:
  }""")
  assert ally_probe['valid']==[70,140] and 'DEMO ally HP 70/140' in ally_probe['validText'],ally_probe
  assert ally_probe['ko']==[50,140],ally_probe
+ assert ally_probe['inactiveIgnored']==[30,60],ally_probe
  for key in ('nan','zeroMax','overMax','noActive'):
   assert ally_probe[key]==[None,None],(key,ally_probe)
  assert 'DEMO ally HP unavailable' in ally_probe['nanText'],ally_probe
