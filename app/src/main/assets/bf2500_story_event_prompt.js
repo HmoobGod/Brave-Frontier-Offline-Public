@@ -16,7 +16,7 @@
   '#bf2500-cue strong{display:block;font:800 14px Georgia,serif}',
   '#bf2500-cue p{margin:6px 0;color:#dce8eb}',
   '#bf2500-cue-buttons{display:flex;gap:7px;flex-wrap:wrap}',
-  '#bf2500-cue button{min-height:40px;padding:8px 12px;border-radius:5px;',
+  '#bf2500-cue button{min-height:44px;padding:9px 12px;border-radius:5px;',
   'background:#654929;border:1px solid #d4bd90;color:white;font-weight:700}'
  ].join('');document.head.append(style);
  const panel=document.createElement('section');panel.id='bf2500-cue';
@@ -30,12 +30,19 @@
  let muted=null;
  function cue(){
    const q=typeof QUEST==='undefined'?null:QUEST;
-   if(!q||E?.mode?.value!=='archive'||!!S.busy)return null;
-   const cleared=(P.questClears?.[q.missionId]||0)>0;
+   // v439: original scenes are manual player actions, never an unattended
+   // Auto/busy preview or a cue from a corrupt quest-selection identity.
+   if(!q||E?.mode?.value!=='archive'||!!S.busy||!!S.auto||
+      !Number.isSafeInteger(q.missionId))return null;
+   const source=QUESTS.find(row=>row?.missionId===q.missionId);
+   if(!source||q.dungeonId!==source.dungeonId||
+      q.battles!==source.battles)return null;
+   const count=P.questClears?.[q.missionId];
+   const cleared=Number.isSafeInteger(count)&&count>0;
    if(S.over&&S.phase==='Victory'&&cleared&&[10,11,21].includes(q.missionId)&&
       archive.lookup('clear',q.missionId)){
      return Object.freeze({kind:'clear',id:q.missionId,missionId:q.missionId,
-       identity:'clear:'+q.missionId+':'+P.questClears[q.missionId],
+       identity:'clear:'+q.missionId+':'+count,
        title:'ORIGINAL QUEST-CLEAR DIALOGUE AVAILABLE'});
    }
    if(!S.over&&questUnlocked(q)&&archive.lookup('dungeon',q.dungeonId)){
