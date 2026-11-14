@@ -177,6 +177,12 @@ with sync_playwright() as pw:
  }""")
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==readiness_save
  assert p.evaluate("JSON.stringify(P)")==readiness_player
+ # The baseline later opens this same <details> for Finish Current. Undo
+ # our earlier geometry-test expansion so the original player workflow
+ # starts from its normal collapsed state instead of toggling it closed.
+ assert p.locator('#bf9800-auto-repeat').get_attribute('open') is not None
+ p.locator('#bf9800-auto-repeat > summary').click()
+ assert p.locator('#bf9800-auto-repeat').get_attribute('open') is None
  # An invalid canonical save receipt must prevent an unattended replay
  # even if the old general stored boolean still reports success.
  p.evaluate('BFGlobalBattleResultsV3000.committedClearCount=()=>0')
