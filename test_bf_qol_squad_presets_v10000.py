@@ -185,6 +185,49 @@ with sync_playwright() as pw:
  assert p.evaluate('P.squad')==[10011,20011]
  assert p.evaluate(api+'.savePreset(6,"No")') is False
  assert p.evaluate(api+'.applyPreset(-1)') is False
+ # v450: a damaged live roster/team must fail closed, even if a local
+ # preset still exists. In particular, refresh must not call .slice() on
+ # a non-array P.squad or .includes() on a non-array P.roster.
+ stored=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ # The older tests intentionally left a roster missing one active unit.
+ # Save and restore it, but use a genuinely valid baseline to test recovery.
+ original_live=p.evaluate("JSON.stringify({roster:P.roster,squad:P.squad})")
+ p.evaluate("()=>{P.roster=[10011,20011,30011];P.squad=[10011,20011]}")
+ old=p.evaluate("JSON.stringify({roster:P.roster,squad:P.squad})")
+ resets=p.evaluate('window.__resetCalls')
+ p.locator('#bf10000-squad-presets > summary').click()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf10000-squad-presets > summary',
+                   '#bf10000-slot','#bf10000-name',
+                   '#bf10000-save','#bf10000-apply',
+                   '#bf10000-delete','#bf10000-rename','#bf10000-copy'):
+   rect=p.locator(selector).bounding_box()
+   assert rect and rect['height']>=44,(width,selector,rect)
+ p.set_viewport_size({'width':390,'height':844})
+ for mutation in (
+   "()=>{P.squad='corrupt'}",
+   "()=>{P.squad=[10011,10011]}",
+   "()=>{P.squad=[10011,99999]}",
+   "()=>{P.squad=[10011,20011];P.roster=null}",
+   "()=>{P.roster='invalid'}",
+ ):
+  p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",old)
+  p.evaluate(mutation)
+  p.evaluate(api+'.refresh()')
+  assert p.locator('#bf10000-apply').is_disabled(),mutation
+  assert p.locator('#bf10000-save').is_disabled(),mutation
+  assert 'Preview unavailable' in p.locator('#bf10000-preview').text_content(),mutation
+  assert p.evaluate(api+'.applyPreset(1)') is False,mutation
+  assert p.evaluate(api+'.savePreset(1,"unsafe")') is False,mutation
+  assert p.evaluate('window.__resetCalls')==resets,mutation
+  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored,mutation
+ p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",old)
+ p.evaluate(api+'.refresh()')
+ assert 'Preview unavailable' not in p.locator('#bf10000-preview').text_content()
+ p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",original_live)
+ p.evaluate(api+'.refresh()')
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
  p.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
  assert p.locator('#bf10000-squad-presets').count()==1
  assert p.evaluate('P.version')==7
