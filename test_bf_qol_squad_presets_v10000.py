@@ -189,6 +189,10 @@ with sync_playwright() as pw:
  # preset still exists. In particular, refresh must not call .slice() on
  # a non-array P.squad or .includes() on a non-array P.roster.
  stored=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ # The older tests intentionally left a roster missing one active unit.
+ # Save and restore it, but use a genuinely valid baseline to test recovery.
+ original_live=p.evaluate("JSON.stringify({roster:P.roster,squad:P.squad})")
+ p.evaluate("()=>{P.roster=[10011,20011,30011];P.squad=[10011,20011]}")
  old=p.evaluate("JSON.stringify({roster:P.roster,squad:P.squad})")
  resets=p.evaluate('window.__resetCalls')
  p.locator('#bf10000-squad-presets > summary').click()
@@ -221,6 +225,8 @@ with sync_playwright() as pw:
  p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",old)
  p.evaluate(api+'.refresh()')
  assert 'Preview unavailable' not in p.locator('#bf10000-preview').text_content()
+ p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",original_live)
+ p.evaluate(api+'.refresh()')
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
  p.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
  assert p.locator('#bf10000-squad-presets').count()==1
