@@ -37,7 +37,7 @@ for forbidden in (
     assert forbidden not in PATCH, forbidden
 assert "'#bf2100-buttons button{padding:8px 5px;min-height:44px" in TRAY
 assert "'#bf2100-targets button{padding:6px 8px;background:" in TRAY
-assert "'#bf2000-actions button{padding:8px 12px;min-height:42px" in STORY
+assert "'#bf2000-actions button{padding:8px 12px;min-height:44px" in STORY
 assert "test_bf_battle_mobile_controls_v26000.py --source-only" in PRE
 assert WF.count("python3 test_bf_battle_mobile_controls_v26000.py") == 1
 assert "android.permission.INTERNET" not in MAN
@@ -95,7 +95,7 @@ runtime_css = """
 #bf2100-targets{display:flex;flex-wrap:wrap;gap:6px}
 #bf2100-targets button{padding:6px 8px;min-height:37px}
 #bf2000-actions{display:flex;flex-wrap:wrap;gap:7px}
-#bf2000-actions button{padding:8px 12px;min-height:42px}
+#bf2000-actions button{padding:8px 12px;min-height:44px}
 """
 
 with sync_playwright() as pw:
