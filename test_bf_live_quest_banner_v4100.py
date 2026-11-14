@@ -10,8 +10,11 @@ assert len(src.encode('utf8'))<65536 and 'localStorage' not in src and 'saveProg
 assert 'Number.isSafeInteger(s?.total)' in src
 assert 'q.battles===s.total' in src and "S.mode==='archive'" in src
 assert 'sourceRow=Number.isSafeInteger(q?.missionId)' in src
-assert 'q.dungeonId===sourceRow.dungeonId' in src
-assert 'q.battles===sourceRow.battles' in src
+assert 'const originalMissions=new Map(QUESTS.map(row=>' in src
+assert 'originalMissions.size!==106' in src
+assert 'q.dungeonId===original.dungeonId' in src
+assert 'q.battles===original.battles' in src
+assert 'q.battles===sourceRow.battles' not in src
 assert 's?.name===source.mission.name&&s?.dungeon===source.dungeon.name' in src
 assert java.index('readPackagedText("bf4000_next_chapter_intro.js")')<java.index('readPackagedText("bf4100_live_quest_banner.js")')
 with sync_playwright() as pw:
@@ -54,6 +57,9 @@ with sync_playwright() as pw:
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
  assert s['applied'] and s['missionId']==1 and s['name'],s
  assert s['sourceVerified'] is True,s
+ # The real app aliases its active QUEST and the 106-row QUESTS entry:
+ # the fixed original counts MUST therefore be captured independently.
+ assert page.evaluate('QUEST===QUESTS.find(r=>r.missionId===QUEST.missionId)') is True
  assert page.locator('#bf4100-banner').is_visible()
  assert page.evaluate('document.getElementById("bf4100-banner").parentElement.classList.contains("arena")') is True
  assert page.evaluate('document.getElementById("bf4100-banner").getBoundingClientRect().height>0') is True
@@ -83,8 +89,9 @@ with sync_playwright() as pw:
  for key in ('0','-1','3.5','101'):
   assert gates[key]=={'available':False,'applied':False,'hidden':True,'enabled':True},(key,gates)
  assert gates['restored'] and gates['sameSave'],gates
- # v447: a live quest's stage count must match the immutable source
- # mission; comparing only HUD.total to mutable QUEST.battles is insufficient.
+ # v447 R2: an independently captured recorded-count copy must catch
+ # changes to QUEST.battles even though QUEST aliases a row in QUESTS.
+ # Comparing only HUD.total or the alias to mutable QUEST.battles fails.
  # Also reject a mismatched original dungeon or unknown mission identity.
  mismatches=page.evaluate("""()=>{
    const q=QUEST;
