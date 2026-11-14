@@ -10,6 +10,9 @@ assert len(src.encode('utf8'))<65536
 assert not any(x in src for x in ('saveProgress(', 'localStorage', 'awardDemoRewards(', 'finish(true)', 'BFAndroid', 'fetch('))
 assert 'results.replayBattle()' in src
 assert 's.clears<=session.lastClear' in src
+assert 'const resultReady=' in src and 'sourceQuestMatches(s.missionId)' in src
+assert "verified save or source quest record is missing." in src
+assert src.count('min-height:44px')>=2
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert 'readPackagedText("bf9800_qol_cleared_quest_repeat.js")' in java
 
@@ -126,6 +129,60 @@ with sync_playwright() as pw:
    'invalidLiveWave':True,'started':True,'stopped':True,
    'disarmed':True,'noExtraReplay':True,
    'saveSame':True,'playerSame':True},source_proof
+ # v448: button readiness and start() must agree. A forged string or
+ # fractional result-clear count may not advertise unattended replay,
+ # and failure of the existing signed-v7 receipt/source gate disables Start.
+ readiness_save=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ readiness_player=p.evaluate("JSON.stringify(P)")
+ p.locator('#bf9800-auto-repeat summary').click()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf9800-repeat-count','#bf9800-start',
+                   '#bf9800-finish-current','#bf9800-stop'):
+   rect=p.locator(selector).bounding_box()
+   assert rect and rect['height']>=44,(width,selector,rect)
+ p.set_viewport_size({'width':390,'height':844})
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_enabled()
+ for invalid in ('1',1.5,-1,0,False,None):
+  p.evaluate("(v)=>{P.questClears[1]=v}",invalid)
+  assert p.evaluate(api+'.poll()') is False
+  assert p.locator('#bf9800-start').is_disabled(),invalid
+  assert p.evaluate(api+'.start(2)') is False,invalid
+ p.evaluate("P.questClears[1]=1")
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_enabled()
+ p.evaluate("BFGlobalBattleResultsV3000.committedClearCount=()=>0")
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_disabled()
+ assert 'verified save or source' in p.locator('#bf9800-status').inner_text()
+ p.evaluate("delete BFGlobalBattleResultsV3000.committedClearCount")
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_enabled()
+ p.evaluate("""()=>{
+   QUEST.battles=3;S.totalWaves=3;
+   window.BFGrandGaiaCampaignV100={
+     waveReadiness:()=>({missionId:1,verifiedWaveCount:4}),
+     sourceEconomyReadiness:()=>true
+   };
+ }""")
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_disabled()
+ p.evaluate("BFGrandGaiaCampaignV100.waveReadiness=()=>({missionId:1,verifiedWaveCount:3})")
+ assert p.evaluate(api+'.poll()') is False
+ assert p.locator('#bf9800-start').is_enabled()
+ p.evaluate("""()=>{
+   delete window.BFGrandGaiaCampaignV100;
+   delete QUEST.battles;delete S.totalWaves;
+ }""")
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==readiness_save
+ assert p.evaluate("JSON.stringify(P)")==readiness_player
+ # The baseline later opens this same <details> for Finish Current. Undo
+ # our earlier geometry-test expansion so the original player workflow
+ # starts from its normal collapsed state instead of toggling it closed.
+ assert p.locator('#bf9800-auto-repeat').get_attribute('open') is not None
+ p.locator('#bf9800-auto-repeat > summary').click()
+ assert p.locator('#bf9800-auto-repeat').get_attribute('open') is None
  # An invalid canonical save receipt must prevent an unattended replay
  # even if the old general stored boolean still reports success.
  p.evaluate('BFGlobalBattleResultsV3000.committedClearCount=()=>0')
