@@ -11,7 +11,18 @@
  const list=document.getElementById('questlist');
  if(!host || !list || !tabs || tabs.querySelectorAll('button').length!==3 ||
     QUESTS[0]?.missionId!==1 || QUESTS[105]?.missionId!==365) return;
- const cleared=q=>(P.questClears?.[q.missionId]||0)>0;
+ // A positive coercible value (Infinity, "1", 1.5) is not a completed
+ // canonical v7 DEMO quest. Read the entire 106-mission ledger first.
+ function clearLedgerValid(){
+   if(P?.version!==7||!P.questClears||
+      typeof P.questClears!=='object'||Array.isArray(P.questClears))return false;
+   return QUESTS.every(q=>!Object.prototype.hasOwnProperty.call(
+       P.questClears,q.missionId)||
+       (Number.isSafeInteger(P.questClears[q.missionId])&&
+        P.questClears[q.missionId]>=0));
+ }
+ const cleared=q=>Number.isSafeInteger(P.questClears?.[q.missionId])&&
+   P.questClears[q.missionId]>0;
  // A victory visible in memory is not proof that its clear was written.
  // The v3000 results module loads after this shortcut: resolve its existing
  // read-only canonical v7 receipt on each action, never cache a stale value.
@@ -55,7 +66,7 @@
  // campaign and post-victory Next controls. A corrupt later quest clear must
  // never be bypassed just because an earlier unlocked quest is available.
  const remaining=()=>{
-   if(awaitingSave()||
+   if(!clearLedgerValid()||awaitingSave()||
       typeof window.BFGrandGaiaCampaignV100?.nextPlayable!=='function')return null;
    const next=window.BFGrandGaiaCampaignV100.nextPlayable();
    if(!next)return null;
@@ -106,7 +117,7 @@
  next.style.cssText='margin:8px 0';
  const button=document.createElement('button');button.id='bf101-continue';
  button.type='button';button.textContent='CONTINUE STORY ›';
- button.style.cssText='min-height:42px;padding:8px 14px;color:#fff;background:#745529;border:1px solid #dfbc7c;border-radius:5px;font-weight:800';
+ button.style.cssText='min-height:44px;padding:8px 14px;color:#fff;background:#745529;border:1px solid #dfbc7c;border-radius:5px;font-weight:800';
  // Explicit one-time native player action: route the NEXT verified story mission
  // and click existing Auto. Never run an unattended next-quest chain.
  const autoButton=document.createElement('button');
@@ -121,6 +132,8 @@
  panel.append(heading,status,meter,next,button,autoButton,foot);
  host.after(panel);
  function snapshot(){
+   if(!clearLedgerValid())return Object.freeze({total:106,done:null,
+     mistral:null,morgan:null,stlamia:null,nextMission:null});
    const n=arr=>arr.filter(cleared).length;
    return Object.freeze({total:106,done:n(QUESTS),
       mistral:n(QUESTS.slice(0,34)),morgan:n(QUESTS.slice(34,70)),
@@ -128,6 +141,16 @@
  }
  function refresh(){
     const s=snapshot(),q=remaining();
+    if(s.done===null){
+      status.textContent='DEMO story clears unavailable · invalid local receipt ledger';
+      meter.hidden=true;
+      fill.style.width='0%';
+      meter.removeAttribute('aria-valuenow');
+      button.disabled=true;autoButton.disabled=true;
+      next.textContent='Story navigation unavailable · verify or restore local progress before continuing.';
+      return s;
+    }
+    meter.hidden=false;
     status.textContent='Mistral '+s.mistral+'/34 · Morgan '+s.morgan+
        '/36 · St. Lamia '+s.stlamia+'/36 · Total '+s.done+'/106';
     fill.style.width=(s.done*100/106).toFixed(2)+'%';
