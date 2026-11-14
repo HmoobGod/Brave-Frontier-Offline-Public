@@ -6,6 +6,9 @@ R=Path(__file__).resolve().parent;A=R/'app/src/main/assets'
 js=(A/'bf7800_live_battle_status.js').read_text('utf8')
 assert js.count('BF_GLOBAL_LIVE_BATTLE_STATUS_V7800')==1
 assert len(js.encode('utf8'))<65536
+assert 'min-height:44px' in js
+assert 'Number.isFinite(unit.hp)' in js and 'Number.isFinite(unit.maxHp)' in js
+assert 'DEMO HP ' in js
 assert all(t not in js for t in ('localStorage','saveProgress(', 'BFAndroid'))
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf7700_original_party_regen.js")')<java.index('readPackagedText("bf7800_live_battle_status.js")')
@@ -45,11 +48,36 @@ with sync_playwright() as pw:
   assert p.evaluate(f'{registry}.inflict(0,{code})') is True
  state=p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')
  assert state['visible'] and len(state['units'])==1
+ # Only a real finite, in-range live ally HP pair may appear in the read-only UI.
+ health=p.evaluate('''() => {
+   const unit=S.party[0], hp=unit.hp, maxHp=unit.maxHp;
+   const oldSave=localStorage.getItem('bf_global_offline_demo_v7');
+   let nan, maxZero, overheal;
+   try {
+     unit.hp=NaN;nan=BFGlobalLiveBattleStatusV7800.refresh().visible;
+     unit.hp=hp;unit.maxHp=0;
+     maxZero=BFGlobalLiveBattleStatusV7800.refresh().visible;
+     unit.maxHp=maxHp;unit.hp=maxHp+1;
+     overheal=BFGlobalLiveBattleStatusV7800.refresh().visible;
+   } finally {
+     unit.hp=hp;unit.maxHp=maxHp;
+     BFGlobalLiveBattleStatusV7800.refresh();
+   }
+   return {nan,maxZero,overheal,unchangedSave:
+     localStorage.getItem('bf_global_offline_demo_v7')===oldSave};
+ }''')
+ assert health=={'nan':False,'maxZero':False,'overheal':False,'unchangedSave':True},health
  ally=state['units'][0]
  assert ally['codes']==[1,2,3,4,5,6]
  assert ally['actionBlocked'] and ally['bbBlocked']
  p.locator('#bf7800-status summary').click()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  box=p.locator('#bf7800-status summary').bounding_box()
+  assert box and box['height']>=44,(width,box)
  content=p.locator('#bf7800-status').inner_text()
+ demo_hp=p.evaluate('Math.round(S.party[0].hp)+"/"+Math.round(S.party[0].maxHp)')
+ assert 'DEMO HP '+demo_hp in content,content
  for word in ('Poison','Weakness','Sickness','Injury','Curse','Paralysis'):
   assert word in content
  assert p.evaluate(f'{registry}.cure(0,20230).removed')==[6]

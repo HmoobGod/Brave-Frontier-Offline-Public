@@ -44,7 +44,7 @@ for forbidden in (
 ):
     assert forbidden not in PATCH, forbidden
 assert "'#bf3100-focus button{background:#35516b" in FOCUS
-assert "#bf7800-status summary{cursor:pointer;min-height:34px" in STATUS
+assert "#bf7800-status summary{cursor:pointer;min-height:44px" in STATUS
 for token in ("LOWEST HP", "HIGHEST ATK", "LOWEST DEF", "FOCUS + BB IF READY"):
     assert token in FOCUS
 for token in ("Poison", "Curse", "Paralysis", "DEMO round"):
@@ -102,7 +102,7 @@ runtime_css = """
 #bf3100-status{margin:9px 0}
 #bf7800-status{margin:9px 11px;padding:8px;border:1px solid #978fba}
 #bf7800-status[hidden]{display:none!important}
-#bf7800-status summary{cursor:pointer;min-height:34px;font-weight:800}
+#bf7800-status summary{cursor:pointer;min-height:44px;font-weight:800}
 #bf7800-status .bf7800-row{padding:6px 0}
 #bf7800-status .bf7800-chip{display:inline-block;margin:2px 5px 2px 0;padding:3px 6px}
 """
