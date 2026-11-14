@@ -42,6 +42,45 @@ with sync_playwright() as pw:
  p.evaluate('BFGlobalStatusRemedyCommandV6400.refresh()')
  assert p.locator('#bf6400-remedies').is_visible()
  assert p.evaluate('BFGlobalStatusRemedyCommandV6400.snapshot().available') is True
+ # v438: corrupt DEMO identities/health must fail before reserving any
+ # player-owned Guard turn, spending transient stock, or writing the v7 save.
+ guards=p.evaluate("""()=>{
+   const api=BFGlobalStatusRemedyCommandV6400;
+   const party=S.party, target=party[0], actor=party[2];
+   const oldSave=localStorage.getItem('bf_global_offline_demo_v7');
+   const oldP=JSON.stringify(P);
+   const before=JSON.stringify(api.snapshot().stock);
+   const beforeLocks=JSON.stringify(BFGlobalItemTurnReservationsV4500.snapshot().reservations);
+   const oldActorId=actor.id, oldTargetHp=target.hp, oldTargetMaxHp=target.maxHp;
+   const fail=()=>api.useRemedy(2,0,20200)===false;
+   let mismatched,shuffled,nanHp,zeroMax,overheal;
+   try{
+     actor.id=1;mismatched=fail();actor.id=oldActorId;
+     S.party=[party[0],party[2],party[1],...party.slice(3)];
+     shuffled=fail();S.party=party;
+     target.hp=NaN;nanHp=fail();target.hp=oldTargetHp;
+     target.maxHp=0;zeroMax=fail();target.maxHp=oldTargetMaxHp;
+     target.hp=oldTargetMaxHp+1;overheal=fail();
+   }finally{
+     S.party=party;actor.id=oldActorId;
+     target.hp=oldTargetHp;target.maxHp=oldTargetMaxHp;
+   }
+   return {mismatched,shuffled,nanHp,zeroMax,overheal,
+     stockSame:JSON.stringify(api.snapshot().stock)===before,
+     locksSame:JSON.stringify(BFGlobalItemTurnReservationsV4500.snapshot().reservations)===beforeLocks,
+     playerSame:JSON.stringify(P)===oldP,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===oldSave};
+ }""")
+ assert guards==dict(mismatched=True,shuffled=True,nanHp=True,zeroMax=True,
+                     overheal=True,stockSame=True,locksSame=True,
+                     playerSame=True,saveSame=True),guards
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf6400-remedies summary','#bf6400-item',
+                   '#bf6400-actor','#bf6400-target','#bf6400-use'):
+   assert p.locator(selector).evaluate('(e)=>e.getBoundingClientRect().height')>=44,(width,selector)
+  assert p.evaluate('document.documentElement.scrollWidth<=window.innerWidth'),width
+ p.set_viewport_size({'width':390,'height':844})
  assert p.evaluate('BFGlobalStatusRemedyCommandV6400.useRemedy(0,0,99999)') is False
  assert p.evaluate('BFGlobalStatusRemedyCommandV6400.useRemedy(0,0,20210)') is False
  assert p.evaluate('BFGlobalStatusRemedyCommandV6400.useRemedy(2,0,20200)') is True
