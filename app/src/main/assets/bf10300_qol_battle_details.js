@@ -47,19 +47,23 @@
    const invalidFoes=enemySource.length-foes.length;
    const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
    const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
-   const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
+   const recorded=recordedWaves();
    const quest=typeof QUEST==='undefined'?null:QUEST;
-   // A fractional, negative, or out-of-range DEMO total must not be
-   // normalized into an apparent match with immutable source metadata.
-   const liveValid=Number.isSafeInteger(S.totalWaves)&&
+   // DEMO counters must be verified independently: flooring a corrupt wave,
+   // turn or total produces plausible-looking but false live progress.
+   const liveTotalValid=Number.isSafeInteger(S.totalWaves)&&
      S.totalWaves>=1&&S.totalWaves<=100;
+   const liveWaveValid=liveTotalValid&&Number.isSafeInteger(S.wave)&&
+     S.wave>=0&&S.wave<S.totalWaves;
+   const liveRoundValid=Number.isSafeInteger(S.round)&&S.round>=0;
    const provenance=recorded===null?'UNAVAILABLE':
-     liveValid&&recorded===S.totalWaves&&
+     liveWaveValid&&recorded===S.totalWaves&&
      quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
-     mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:liveTotal,
+     mode:String(S.mode||''),wave:liveWaveValid?S.wave+1:null,
+     totalWaves:liveTotalValid?S.totalWaves:null,
      sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
-     round:safe(S.round),busy:!!S.busy,over:!!S.over,
+     round:liveRoundValid?S.round:null,busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
      invalidAllies,invalidFoes,
      sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
@@ -106,13 +110,15 @@
    const signature=JSON.stringify(s);
    if(signature===last)return s;
    last=signature;
+   const demoWave=s.wave===null||s.totalWaves===null?
+     'UNAVAILABLE':s.wave+'/'+s.totalWaves;
    header.textContent=(s.mode==='archive'?'STORY':'TRAINING')+
-     ' · DEMO Wave '+s.wave+'/'+s.totalWaves+
+     ' · DEMO Wave '+demoWave+
      (s.mode==='archive'?' · 2022 recorded wave count: '+
        (s.sourceWaveStatus==='MATCH'?String(s.sourceRecordedWaveCount)+' (MATCH)':
         s.sourceWaveStatus==='MISMATCH'?'MISMATCH — DEMO data differs':
         'UNAVAILABLE'):'')+
-     ' · Turn '+s.round+
+     ' · Turn '+(s.round===null?'UNAVAILABLE':s.round)+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
      ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
    group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
