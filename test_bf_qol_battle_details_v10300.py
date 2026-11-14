@@ -10,6 +10,8 @@ assert not any(t in src for t in ('localStorage','saveProgress(', 'awardDemoRewa
 assert 'min-height:44px' in src
 assert 'Number.isFinite(u.maxHp)' in src
 assert 'UNVERIFIED DEMO HP RECORD' in src
+assert 'liveWaveValid' in src and 'liveRoundValid' in src
+assert "'UNAVAILABLE':s.wave+'/'+s.totalWaves" in src
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=b.new_page(viewport={'width':390,'height':844})
@@ -98,6 +100,55 @@ with sync_playwright() as pw:
    finally{S.totalWaves=3;}
  }""")
  assert fractional=='MISMATCH',fractional
+ # v443: malformed DEMO wave / turn data must display UNAVAILABLE rather
+ # than a fabricated first wave, fractional wave or zero turn. The original
+ # source wave count may remain verified without trusting live state.
+ corrupt=p.evaluate("""()=>{
+   const api=BFGlobalQoLBattleDetailsV10300;
+   const saved=JSON.stringify({P,S});
+   const original={wave:S.wave,totalWaves:S.totalWaves,round:S.round};
+   const results={};
+   function probe(label,field,value){
+     S[field]=value;
+     const snapshot=api.refresh();
+     results[label]={wave:snapshot.wave,total:snapshot.totalWaves,
+       round:snapshot.round,source:snapshot.sourceWaveStatus,
+       header:document.getElementById('bf10300-header').textContent};
+     S[field]=original[field];
+   }
+   try{
+     probe('negativeWave','wave',-1);
+     probe('fractionalWave','wave',0.5);
+     probe('stringWave','wave','0');
+     probe('outOfRangeWave','wave',3);
+     probe('nanWave','wave',NaN);
+     probe('zeroTotal','totalWaves',0);
+     probe('nanTotal','totalWaves',NaN);
+     probe('fractionalTotal','totalWaves',3.5);
+     probe('badTurn','round',-1);
+     probe('stringTurn','round','1');
+     probe('fractionalTurn','round',1.5);
+   }finally{
+     Object.assign(S,original);
+     api.refresh();
+   }
+   results.noMutation=JSON.stringify({P,S})===saved;
+   return results;
+ }""")
+ for key in ('negativeWave','fractionalWave','stringWave','outOfRangeWave','nanWave'):
+  record=corrupt[key]
+  assert record['wave'] is None and record['total']==3,(key,record)
+  assert record['source']=='MISMATCH',(key,record)
+  assert 'DEMO Wave UNAVAILABLE' in record['header'],(key,record)
+ for key in ('zeroTotal','nanTotal','fractionalTotal'):
+  record=corrupt[key]
+  assert record['wave'] is None and record['total'] is None,(key,record)
+  assert record['source']=='MISMATCH' and 'DEMO Wave UNAVAILABLE' in record['header'],(key,record)
+ for key in ('badTurn','stringTurn','fractionalTurn'):
+  record=corrupt[key]
+  assert record['round'] is None and record['source']=='MATCH',(key,record)
+  assert 'Turn UNAVAILABLE' in record['header'],(key,record)
+ assert corrupt['noMutation'],corrupt
  p.evaluate(api+'.refresh()')
  assert '3 (MATCH)' in p.locator('#bf10300-header').inner_text()
  # Reject a tampered/unavailable API even when the DEMO count looks valid.
