@@ -158,6 +158,52 @@ with sync_playwright() as pw:
    return JSON.parse(localStorage.getItem(a.key)).slots
       .map(x=>JSON.parse(x.raw).questClears[1]);
  }""")==[12,10,11]
+ # v454: an integer timestamp can exceed the Date/ISO export range.
+ # Corrupt optional backup metadata must not crash listing or download, and
+ # inspecting it must never rewrite either the sidecar or canonical v7 save.
+ original_sidecar=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")
+ original_live=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")
+ corrupt=p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700;
+   const valid=JSON.parse(localStorage.getItem(a.key)).slots[0].raw;
+   const sidecar=JSON.stringify({version:1,slots:[
+     {time:Number.MAX_SAFE_INTEGER,raw:valid},
+     {time:1001,raw:valid}
+   ]});
+   localStorage.setItem(a.key,sidecar);
+   return {valid,sidecar};
+ }""")
+ assert p.evaluate(api+'.refresh().length')==1
+ assert p.evaluate(api+'.listing()[0].time')==1001
+ assert p.evaluate(api+'.download(1)') is False
+ assert p.evaluate(api+'.download(0)') is True
+ assert p.evaluate('window.__export97.raw')==corrupt['valid']
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==corrupt['sidecar']
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")==original_live
+ p.evaluate("""()=>{
+   const a=BFGlobalQoLBackupsV9700;
+   const raw=JSON.parse(localStorage.getItem(a.key)).slots[0].raw;
+   localStorage.setItem(a.key,JSON.stringify({version:1,
+      slots:[{time:Number.MAX_SAFE_INTEGER,raw}]}));
+ }""")
+ invalid_sidecar=p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")
+ assert p.evaluate(api+'.refresh().length')==0
+ assert p.locator('#bf9700-export').is_disabled()
+ assert p.evaluate(api+'.download(0)') is False
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==invalid_sidecar
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")==original_live
+ p.evaluate("raw=>localStorage.setItem(BFGlobalQoLBackupsV9700.key,raw)",original_sidecar)
+ assert p.evaluate(api+'.refresh().length')==3
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf9700-backups > summary',
+      '#bf9700-backups label','#bf9700-select',
+      '#bf9700-capture','#bf9700-export','#bf9700-export-current'):
+   rect=p.locator(selector).bounding_box()
+   assert rect and rect['height']>=44,(width,selector,rect)
+  assert p.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.key)")==original_sidecar
+ assert p.evaluate("localStorage.getItem(BFGlobalQoLBackupsV9700.liveKey)")==original_live
  p.add_script_tag(path=str(asset))
  assert p.locator('#bf9700-backups').count()==1
  assert not errors,errors

@@ -29,7 +29,10 @@
      if(!value||value.version!==1||!Array.isArray(value.slots))return [];
      const seen=new Set();
      return value.slots.slice(0,limit).filter(x=>{
+       // v454: a safe integer can still exceed JavaScript Date's range.
+       // Exclude bad backup timestamps before listing or ISO export.
        if(!x||!Number.isSafeInteger(x.time)||x.time<=0||
+          !Number.isFinite(new Date(x.time).getTime())||
           !valid(x.raw)||seen.has(x.raw))return false;
        seen.add(x.raw);return true;
      });
@@ -100,14 +103,14 @@
    'font:12px/1.5 system-ui,sans-serif';
  const heading=document.createElement('summary');
  heading.textContent='QoL · LOCAL SAVE BACKUPS';
- heading.style.cssText='font-weight:800;min-height:34px;cursor:pointer';
+ heading.style.cssText='font-weight:800;min-height:44px;cursor:pointer';
  const status=document.createElement('p');status.id='bf9700-status';
  const caution=document.createElement('small');
  caution.textContent='Keeps up to three different valid v7 snapshots on this device. '+
    'Never restores or overwrites progress automatically. '+
    'Before downgrading to an older APK, export the CURRENT save outside the app: older versions can discard newer save records on their next save.';
  const toggle=document.createElement('label');
- toggle.style.cssText='display:block;margin:9px 0';
+ toggle.style.cssText='display:flex;align-items:center;min-height:44px;gap:8px;margin:9px 0';
  const checkbox=document.createElement('input');
  checkbox.type='checkbox';checkbox.id='bf9700-auto';checkbox.checked=enabled;
  toggle.append(checkbox,document.createTextNode(' Enable automatic local backups'));
@@ -116,7 +119,7 @@
  function button(id,name){
    const b=document.createElement('button');b.type='button';b.id=id;
    b.textContent=name;
-   b.style.cssText='min-height:42px;padding:7px 10px;border-radius:5px;'+
+   b.style.cssText='min-height:44px;padding:7px 10px;border-radius:5px;'+
      'background:#335768;color:white;border:1px solid #b0cfbf';
    actions.append(b);return b;
  }
@@ -125,7 +128,7 @@
  const currentButton=button('bf9700-export-current','EXPORT CURRENT SAVE');
  const selector=document.createElement('select');selector.id='bf9700-select';
  selector.setAttribute('aria-label','Choose local backup');
- selector.style.cssText='min-height:42px;max-width:100%;background:#193943;'+
+ selector.style.cssText='min-height:44px;max-width:100%;background:#193943;'+
    'border:1px solid #b0cfbf;color:#fff;padding:7px;border-radius:5px';
  panel.append(heading,status,caution,toggle,actions,selector);host.after(panel);
  function refresh(){
