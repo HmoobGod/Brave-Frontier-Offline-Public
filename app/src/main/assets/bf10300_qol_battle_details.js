@@ -67,7 +67,7 @@
    const liveWaveValid=liveValid&&Number.isSafeInteger(S.wave)&&
      S.wave>=0&&S.wave<S.totalWaves;
    const provenance=recorded===null?'UNAVAILABLE':
-     liveValid&&recorded===S.totalWaves&&
+     liveWaveValid&&recorded===S.totalWaves&&
      quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
      mode:String(S.mode||''),wave:liveWaveValid?S.wave+1:null,
