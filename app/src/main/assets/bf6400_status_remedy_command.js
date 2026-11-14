@@ -18,8 +18,8 @@
  });
  const css=document.createElement('style');css.id='bf6400-style';
  css.textContent='#bf6400-remedies{margin:9px 0;padding:9px;border:1px solid #9ea5c5;border-radius:6px;background:#292e42;color:#f7f4e5}'+
-  '#bf6400-remedies[hidden]{display:none!important}#bf6400-remedies summary{cursor:pointer;min-height:36px;font-weight:700}'+
-  '#bf6400-remedies label{display:block;margin-top:6px}#bf6400-remedies select,#bf6400-use{width:100%;min-height:43px;box-sizing:border-box;background:#263e51;border:1px solid #94a5b7;color:white;border-radius:5px;padding:7px}'+
+  '#bf6400-remedies[hidden]{display:none!important}#bf6400-remedies summary{cursor:pointer;min-height:44px;font-weight:700}'+
+  '#bf6400-remedies label{display:block;margin-top:6px}#bf6400-remedies select,#bf6400-use{width:100%;min-height:44px;box-sizing:border-box;background:#263e51;border:1px solid #94a5b7;color:white;border-radius:5px;padding:7px}'+
   '#bf6400-use{margin-top:8px;font-weight:700}#bf6400-use:disabled{opacity:.55}';
  document.head.append(css);
  const panel=document.createElement('details');panel.id='bf6400-remedies';
@@ -46,14 +46,22 @@
  function sync(){if(S!==battle){battle=S;reset();last='';}}
  function validItem(itemId){return cureItems.find(x=>x.itemId===itemId)||null;}
  function ready(){return S.mode==='archive'&&!S.busy&&!S.over&&!S.auto;}
+ // v438: refuse corrupted DEMO actors before any item charge or Guard reservation.
+ // Native player slots must be exact live identities, not clones/shuffled actors.
+ function validLive(i){
+   const p=S.party?.[i];
+   return Number.isSafeInteger(i)&&i>=0&&i<6&&!!p&&p.active&&
+     Number.isSafeInteger(p.id)&&p.id===i&&S.party[i]===p&&
+     Number.isFinite(p.hp)&&Number.isFinite(p.maxHp)&&
+     p.maxHp>0&&p.hp>0&&p.hp<=p.maxHp;
+ }
  function canAct(i){
    const p=S.party?.[i];
-   return Number.isInteger(i)&&i>=0&&i<6&&!!p&&p.active&&p.hp>0&&
-     !p.action&&turns.free(i);
+   return validLive(i)&&!p.action&&turns.free(i);
  }
  function canCure(i,itemId){
-   const item=validItem(itemId),p=S.party?.[i];
-   return !!item&&Number.isInteger(i)&&i>=0&&i<6&&!!p&&p.active&&p.hp>0&&
+   const item=validItem(itemId);
+   return !!item&&validLive(i)&&
      ail.codesFor(i).some(code=>item.codes.includes(code));
  }
  function snapshot(){
