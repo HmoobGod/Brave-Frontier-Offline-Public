@@ -50,6 +50,44 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(BFGlobalOriginalEventsV2200.snapshot().lines)') is True
  assert page.evaluate('BFGlobalCinematicReaderV3700.enter()') is True
  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.refresh().completed') is True
+ # v442: the source intro handoff must fail closed on unattended Auto,
+ # corrupted selected mission identity or a stale live wave. No save writes.
+ guard=page.evaluate("""()=>{
+   const api=BFGlobalStoryBattleHandoffV3900;
+   const oldAuto=S.auto,oldTotal=S.totalWaves,oldWave=S.wave,
+     sourceIndex=QUESTS.findIndex(r=>r.missionId===QUEST.missionId),
+     oldSource=QUESTS[sourceIndex],
+     oldSave=localStorage.getItem('bf_global_offline_demo_v7'),
+     oldP=JSON.stringify(P);
+   let auto,wrongCount,badWave,wrongSource;
+   try{
+     S.auto=true;auto=!api.snapshot().available&&!api.returnToBattle();
+     S.auto=oldAuto;
+     S.totalWaves=oldTotal+1;
+     wrongCount=!api.snapshot().available&&!api.returnToBattle();
+     S.totalWaves=oldTotal;
+     S.wave=-1;badWave=!api.snapshot().available&&!api.returnToBattle();
+     S.wave=oldWave;
+     QUESTS[sourceIndex]={...oldSource,battles:oldSource.battles+1};
+     wrongSource=!api.snapshot().available&&!api.returnToBattle();
+   }finally{
+     S.auto=oldAuto;S.totalWaves=oldTotal;S.wave=oldWave;
+     QUESTS[sourceIndex]=oldSource;
+   }
+   return {auto,wrongCount,badWave,wrongSource,
+     readerStillOpen:document.getElementById('bf2200-reader').open,
+     playerSame:JSON.stringify(P)===oldP,
+     saveSame:localStorage.getItem('bf_global_offline_demo_v7')===oldSave,
+     ready:api.refresh().completed};
+ }""")
+ assert guard==dict(auto=True,wrongCount=True,badWave=True,
+                    wrongSource=True,readerStillOpen=True,
+                    playerSame=True,saveSame=True,ready=True),guard
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  assert page.locator('#bf3900-return').evaluate('(e)=>e.getBoundingClientRect().height')>=44
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+ page.set_viewport_size({'width':390,'height':844})
  before=page.evaluate("""()=>({save:localStorage.getItem("bf_global_offline_demo_v7"),
     quest:QUEST.missionId,mode:S.mode,round:S.round,wave:S.wave,over:S.over})""")
  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is True
