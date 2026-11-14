@@ -31,17 +31,31 @@
  }
  function entries(){
    const out=[];
+   // A malformed/duplicated roster must not inflate displayed owned recipes.
+   const seen=new Set();
    for(const baseId of P.roster){
-     if(!Number.isSafeInteger(baseId))continue;
-     const current=effectiveUnit(baseId);
-     if(!current||!Number.isSafeInteger(current.id))continue;
-     const recipes=evo.sourceRecipes(current.id);
+     if(!Number.isSafeInteger(baseId)||baseId<=0||seen.has(baseId))continue;
+     seen.add(baseId);
+     let current,recipes;
+     try{
+       current=effectiveUnit(baseId);
+       if(!current||!Number.isSafeInteger(current.id)||current.id<=0)continue;
+       recipes=evo.sourceRecipes(current.id);
+     }catch(_){continue;}
+     if(!Array.isArray(recipes))continue;
      for(const recipe of recipes){
-       if(!Number.isSafeInteger(recipe.target)||!archive.find(recipe.target)||
-         !Array.isArray(recipe.materials))continue;
+       // Incomplete or corrupt source recipes are UNKNOWN, not material
+       // complete. Never silently discard a missing material ID and report
+       // a false 0-missing or playable-ready outcome.
+       if(!recipe||!Number.isSafeInteger(recipe.target)||recipe.target<=0||
+         !Array.isArray(recipe.materials)||!recipe.materials.length||
+         recipe.materials.some(raw=>!Number.isSafeInteger(raw?.id)||raw.id<=0))
+         continue;
+       let target;
+       try{target=archive.find(recipe.target);}catch(_){continue;}
+       if(!target)continue;
        const needs=new Map();
        for(const raw of recipe.materials){
-         if(!Number.isSafeInteger(raw?.id)||raw.id<=0)continue;
          const prior=needs.get(raw.id)||{
            id:raw.id,name:String(raw.name||'').slice(0,80),
            required:0,owned:nonnegative(P.materials?.[raw.id])};
@@ -50,9 +64,11 @@
        const materials=[...needs.values()].map(item=>freeze({
          ...item,missing:Math.max(0,item.required-item.owned)
        }));
+       let origin;
+       try{origin=archive.find(current.id);}catch(_){origin=null;}
        out.push(freeze({baseId,from:current.id,to:recipe.target,
-         fromName:String(archive.find(current.id)?.name||current.name||'Unit'),
-         toName:String(archive.find(recipe.target)?.name||'Unit #'+recipe.target),
+         fromName:String(origin?.name||current.name||'Unit'),
+         toName:String(target?.name||'Unit #'+recipe.target),
          archivedZel:nonnegative(recipe.zel),archivedKarma:nonnegative(recipe.karma),
          materials:freeze(materials),
          missingCount:materials.reduce((n,item)=>n+item.missing,0),
@@ -63,7 +79,8 @@
  }
  function snapshot(){
    const rows=entries();
-   return freeze({ownedBases:P.roster.length,recordedPaths:rows.length,
+   return freeze({ownedBases:new Set(P.roster.filter(id=>
+     Number.isSafeInteger(id)&&id>0)).size,recordedPaths:rows.length,
      readyMaterialPaths:rows.filter(x=>x.missingCount===0).length,
      demoCostsReadyPaths:rows.filter(x=>x.demoCostsReady).length,
      paths:rows,source:'2022 original recipe archive; local DEMO material counts',
@@ -102,7 +119,8 @@
    'unrecovered recipe links are not inferred. Material-complete is not a guarantee '+
    'of playable evolution. DEMO readiness requires an exact Roadmap match, '+
    'level 2, demo Zel and materials; final restrictions still apply. '+
-   'Training shortcut only navigates. Nothing is consumed or saved.';
+   'Invalid or incomplete source recipes are excluded rather than shown '+ 
+   'as material-complete. Training only navigates; nothing is consumed or saved.';
  panel.append(heading,status,controls,results,note);host.after(panel);
  let previous='';
  function refresh(){
