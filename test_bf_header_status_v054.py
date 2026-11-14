@@ -143,6 +143,60 @@ with sync_playwright() as pw:
         assert item['state']['valid'] is True,(kind,item)
         assert item['text']==expected,(kind,item)
     assert invalid['saveUnchanged'] and invalid['normal'],invalid
+    # v460: the nav header must not present stale rendered strings as actual
+    # save values. Route navigation itself copies core text into the header;
+    # the read-only validator must immediately override that false display.
+    header_probe=page.evaluate("""() => {
+      const ids=['plevel','pzel','pkarma'];
+      const prev=Object.fromEntries(
+        ['version','level','exp','zel','karma'].map(k=>[k,P[k]]));
+      const rendered=Object.fromEntries(ids.map(id=>
+        [id,document.getElementById(id).textContent]));
+      const before=JSON.stringify(P),beforeS=JSON.stringify(S);
+      const save=localStorage.getItem('bf_global_offline_demo_v7');
+      const values=()=>({
+        level:document.getElementById('bf-nav-level').textContent,
+        zel:document.getElementById('bf-nav-zel').textContent,
+        karma:document.getElementById('bf-nav-karma').textContent,
+        detail:document.getElementById('bf054-home-values').textContent
+      });
+      const result={};
+      try {
+        P.version=7;P.level=2;P.exp=4;P.zel=-3;P.karma='9';
+        document.getElementById('plevel').textContent='99';
+        document.getElementById('pzel').textContent='9,999';
+        document.getElementById('pkarma').textContent='333';
+        BF054HeaderStatus.refresh();
+        result.invalid=values();
+        BF_homeNav.go('quest');result.quest=values();
+        BF_homeNav.go('home');result.home=values();
+        P.level=2;P.exp=5;P.zel=1234;P.karma=9;
+        BF054HeaderStatus.refresh();
+        result.recovered=values();
+        P.version=6;
+        BF054HeaderStatus.refresh();
+        result.invalidVersion=values();
+      } finally {
+        Object.assign(P,prev);
+        for(const id of ids)
+          document.getElementById(id).textContent=rendered[id];
+        BF_homeNav.go('home');
+        BF054HeaderStatus.refresh();
+      }
+      result.unchanged=JSON.stringify(P)===before &&
+        JSON.stringify(S)===beforeS &&
+        localStorage.getItem('bf_global_offline_demo_v7')===save;
+      return result;
+    }""")
+    for kind in ('invalid','quest','home','invalidVersion'):
+        item=header_probe[kind]
+        assert (item['level'],item['zel'],item['karma'])==('—','—','—'),(kind,item)
+        assert 'Lv./EXP unavailable' in item['detail'],(kind,item)
+    recovered=header_probe['recovered']
+    assert (recovered['level'],recovered['zel'],recovered['karma'])==(
+        '2','1,234','9'),recovered
+    assert 'Demo Lv.2' in recovered['detail'] and 'Zel 1,234' in recovered['detail']
+    assert header_probe['unchanged'],header_probe
     page.set_viewport_size({'width':320,'height':844})
     status_bounds = details.evaluate("""el => {
       const b=el.getBoundingClientRect(), h=document.querySelector('.bf-shell-head').getBoundingClientRect();
