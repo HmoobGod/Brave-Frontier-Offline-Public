@@ -14,7 +14,8 @@ assert addon.count('/* BF_HEADER_STATUS_FIDELITY_V054 */')==1
 assert 'bf_global_offline_demo_v7' not in addon, 'header overlay must never write saves'
 assert 'localStorage.setItem' not in addon
 assert 'min-height:44px' in addon
-assert 'Number.isSafeInteger(P.level)' in addon and 'Number.isSafeInteger(P.exp)' in addon
+assert 'Number.isSafeInteger(P?.level)' in addon and 'Number.isSafeInteger(P.exp)' in addon
+assert "P.exp>=levelFloor" in addon and "5*(P.level-1)*P.level/2" in addon
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf-8')
 assert java.count('readPackagedText("bf054_header_status.js")')==1
 assert java.index('readPackagedText("bf_home_nav.js")') < java.index('readPackagedText("bf054_header_status.js")')
@@ -111,6 +112,14 @@ with sync_playwright() as pw:
         P.exp=Infinity;result.infiniteExp=inspect();
         P.exp='13';result.stringExp=inspect();
         P.exp=0;P.version=6;result.invalidVersion=inspect();
+        // v456: EXP is cumulative; a level with too little total EXP
+        // is malformed even when both numbers are individually valid.
+        P.version=7;P.level=2;P.exp=4;result.level2MissingExp=inspect();
+        P.level=3;P.exp=14;result.level3MissingExp=inspect();
+        P.level=99;P.exp=24254;result.level99MissingExp=inspect();
+        P.level=2;P.exp=5;result.level2Floor=inspect();
+        P.level=3;P.exp=15;result.level3Floor=inspect();
+        P.level=99;P.exp=24255;result.level99Floor=inspect();
       }finally{
         P.level=oldLevel;P.exp=oldExp;P.version=oldVersion;
         BF054HeaderStatus.refresh();
@@ -120,12 +129,19 @@ with sync_playwright() as pw:
       return result;
     }""")
     for kind in ('zeroLevel','stringLevel','outOfRangeLevel','negativeExp',
-                 'nanExp','infiniteExp','stringExp','invalidVersion'):
+                 'nanExp','infiniteExp','stringExp','invalidVersion',
+                 'level2MissingExp','level3MissingExp','level99MissingExp'):
         item=invalid[kind]
         assert item['state']['valid'] is False,(kind,item)
         assert item['text']=='— / —',(kind,item)
         assert 'unavailable' in item['aria'],(kind,item)
         assert 'Lv./EXP unavailable' in item['home'],(kind,item)
+    for kind,expected in (('level2Floor','0 / 10'),
+                          ('level3Floor','0 / 15'),
+                          ('level99Floor','MAX')):
+        item=invalid[kind]
+        assert item['state']['valid'] is True,(kind,item)
+        assert item['text']==expected,(kind,item)
     assert invalid['saveUnchanged'] and invalid['normal'],invalid
     page.set_viewport_size({'width':320,'height':844})
     status_bounds = details.evaluate("""el => {
