@@ -14,7 +14,10 @@
  function current(){
    const node=results.querySelector('.bf-box-card[aria-pressed="true"]')||
      results.querySelector('.bf-box-card');
-   const id=Number(node?.dataset?.bfUnitId);
+   // v455: filters can hide an otherwise owned selected card. Never let
+   // Favorite/Lock controls mutate an invisible selection.
+   if(!node || node.hidden || node.style.display==='none')return null;
+   const id=Number(node.dataset.bfUnitId);
    return validId(id)?id:null;
  }
  function validId(id){
@@ -91,12 +94,8 @@
    'Selling/fusion protection is not active because those mechanics are not reconstructed.';
  panel.append(title,info,favorite,locked,filters,caution);detail.after(panel);
  function refresh(){
-   const s=state();
-   favorite.disabled=!s.owned;locked.disabled=!s.owned;
-   favorite.textContent=s.favorite?'REMOVE FAVORITE':'MARK FAVORITE';
-   locked.textContent=s.locked?'REMOVE LOCK':'MARK LOCK';
-   info.textContent=(s.owned?'Selected base unit #'+s.id:'Choose an owned unit')+
-     ' · '+s.favorites+' favorites · '+s.locks+' locks';
+   // v455: apply filter visibility before calculating current selection,
+   // so a newly hidden selected card fails closed on the same click.
    let shown=0,total=0,invalid=0;
    for(const card of results.querySelectorAll('.bf-box-card')){
      const id=Number(card.dataset.bfUnitId);
@@ -112,6 +111,17 @@
      card.style.display=visible?'':'none';
      if(owned){total++;if(visible)shown++;}else invalid++;
    }
+   const s=state();
+   favorite.disabled=!s.owned;locked.disabled=!s.owned;
+   favorite.textContent=s.favorite?'REMOVE FAVORITE':'MARK FAVORITE';
+   locked.textContent=s.locked?'REMOVE LOCK':'MARK LOCK';
+   const selected=results.querySelector('.bf-box-card[aria-pressed="true"]');
+   const hiddenSelection=!!selected&&
+     (selected.hidden||selected.style.display==='none');
+   info.textContent=(s.owned?'Selected base unit #'+s.id:
+     hiddenSelection?'Selected unit hidden by filter · choose a visible owned unit':
+     'Choose an owned unit')+
+     ' · '+s.favorites+' favorites · '+s.locks+' locks';
    showFavorites.setAttribute('aria-pressed',String(filterMode==='favorites'));
    showLocks.setAttribute('aria-pressed',String(filterMode==='locked'));
    filterInfo.textContent=shown+' of '+total+' owned box cards shown'+

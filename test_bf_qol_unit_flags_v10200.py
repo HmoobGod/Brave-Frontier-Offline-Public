@@ -11,6 +11,8 @@ assert 'advisoryOnly:true' in js
 assert 'const owned=validId(id)' in js
 assert "unowned or malformed cards hidden." in js
 assert "min-height:44px" in js
+assert "node.hidden || node.style.display==='none'" in js
+assert "hiddenSelection?'Selected unit hidden by filter" in js
 # The standard Android workflow explicitly runs THIS Chromium script.
 # Execute the standalone three source-guard cases here as well, so
 # they cannot silently remain outside CI's collected test commands.
@@ -102,6 +104,25 @@ with sync_playwright() as pw:
  assert p.locator('[data-bf-unit-id="20011"]').is_hidden()
  assert p.locator('#bf10200-show-favorites').get_attribute('aria-pressed')=='true'
  assert p.locator('#bf10200-filter-info').inner_text().startswith('1 of 2')
+ # v455: Selena was the selected card but is now hidden by Favorites Only.
+ # Marker buttons must fail closed instead of changing invisible selection.
+ hidden_sidecar=p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')")
+ assert p.evaluate(api+'.state().id') is None
+ assert p.locator('#bf10200-favorite').is_disabled()
+ assert p.locator('#bf10200-lock').is_disabled()
+ assert 'Selected unit hidden by filter' in p.locator('#bf10200-info').inner_text()
+ p.evaluate("""()=>document.querySelector('#bf10200-favorite')
+   .dispatchEvent(new MouseEvent('click',{bubbles:true}))""")
+ p.evaluate("""()=>document.querySelector('#bf10200-lock')
+   .dispatchEvent(new MouseEvent('click',{bubbles:true}))""")
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')")==hidden_sidecar
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
+ # A real selection of the visible owned card restores usable actions.
+ p.locator('.bf-box-card[data-bf-unit-id="10011"]').click()
+ p.wait_for_function("BFGlobalQoLUnitFlagsV10200.state().id===10011")
+ assert p.locator('#bf10200-favorite').is_enabled()
+ assert p.locator('#bf10200-lock').is_enabled()
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')")==hidden_sidecar
  assert p.evaluate(api+'.setFilter("not-a-filter")') is False
  assert p.evaluate(api+'.filter')=='favorites'
  p.locator('#bf10200-show-locks').click()
