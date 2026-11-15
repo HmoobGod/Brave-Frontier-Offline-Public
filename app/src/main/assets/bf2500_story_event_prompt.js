@@ -28,22 +28,33 @@
  const dismiss=document.createElement('button');dismiss.type='button';dismiss.id='bf2500-dismiss';dismiss.textContent='NOT NOW';
  actions.append(read,dismiss);panel.append(heading,description,actions);host.before(panel);
  let muted=null;
+ function sourceRecord(kind,id){
+   const record=archive.lookup(kind,id);
+   return record&&record.kind===kind&&record.id===id&&
+     typeof record.source==='string'&&/^content\/event\/map[123]-dungeon[0-7](?:-[1-3]end)?\.txt$/.test(record.source)&&
+     Array.isArray(record.lines)&&record.lines.length>0&&record.lines.every(line=>typeof line==='string')?record:null;
+ }
  function cue(){
+   try{
    const q=typeof QUEST==='undefined'?null:QUEST;
    if(!q||E?.mode?.value!=='archive'||!!S.busy)return null;
-   const cleared=(P.questClears?.[q.missionId]||0)>0;
+   const ledger=P.questClears;
+   const own=ledger&&typeof ledger==='object'&&!Array.isArray(ledger)?Object.getOwnPropertyDescriptor(ledger,q.missionId):null;
+   const receipt=own&&'value' in own?own.value:null;
+   const cleared=P.version===7&&Number.isSafeInteger(receipt)&&receipt>0;
    if(S.over&&S.phase==='Victory'&&cleared&&[10,11,21].includes(q.missionId)&&
-      archive.lookup('clear',q.missionId)){
+      sourceRecord('clear',q.missionId)){
      return Object.freeze({kind:'clear',id:q.missionId,missionId:q.missionId,
-       identity:'clear:'+q.missionId+':'+P.questClears[q.missionId],
+       identity:'clear:'+q.missionId+':'+receipt,
        title:'ORIGINAL QUEST-CLEAR DIALOGUE AVAILABLE'});
    }
-   if(!S.over&&questUnlocked(q)&&archive.lookup('dungeon',q.dungeonId)){
+   if(!S.over&&questUnlocked(q)&&sourceRecord('dungeon',q.dungeonId)){
      return Object.freeze({kind:'dungeon',id:q.dungeonId,missionId:q.missionId,
        identity:'dungeon:'+q.missionId+':'+q.dungeonId,
        title:'ORIGINAL DUNGEON INTRODUCTION'});
    }
    return null;
+   }catch(_){return null;}
  }
  function snapshot(){const state=cue();return state&&!Object.is(state.identity,muted)?state:null;}
  function refresh(){
