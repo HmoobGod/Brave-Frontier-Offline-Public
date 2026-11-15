@@ -32,19 +32,28 @@
  const note=document.createElement('small');note.id='bf4000-note';
  note.textContent='Optional link between DEMO victory and recovered 2022 original story. Does not skip missions, auto-play combat, grant rewards or create dialogue.';
  resultActions.after(note);
+ function unavailable(){return Object.freeze({available:false,missionId:null,nextId:null,dungeonId:null,source:null});}
  function snapshot(){
+   try{
    const r=results.snapshot();
    const target=r?.nextId?QUESTS.find(q=>q.missionId===r.nextId):null;
    const source=target?events.lookup('dungeon',target.dungeonId):null;
-   const active=r?.done&&r.victory&&r.archive&&!S.busy&&
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;
+   const idleRepeat=!repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);
+   const active=r?.done===true&&r.victory===true&&r.archive===true&&P.version===7&&
+     S.busy===false&&S.auto===false&&idleRepeat&&
      typeof QUEST!=='undefined'&&QUEST?.missionId===r.missionId&&
-     target&&questUnlocked(target)&&source&&source.lines.length>0;
+     target&&questUnlocked(target)&&source&&source.kind==='dungeon'&&source.id===target.dungeonId&&
+     typeof source.source==='string'&&/^content\/event\/map[123]-dungeon[1-7]\.txt$/.test(source.source)&&
+     Array.isArray(source.lines)&&source.lines.length>0&&source.lines.length<=1000&&
+     source.lines.every(line=>typeof line==='string');
    return Object.freeze({
      available:!!active,missionId:r?.missionId||null,
      nextId:active?target.missionId:null,
      dungeonId:active?target.dungeonId:null,
      source:active?source.source:null
    });
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const s=snapshot();

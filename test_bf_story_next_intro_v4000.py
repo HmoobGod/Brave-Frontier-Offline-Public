@@ -35,6 +35,13 @@ with sync_playwright() as pw:
  'bf3500_dialogue_timeline.js','bf3600_event_composite.js',
  'bf3700_cinematic_reader.js','bf3800_source_battle_backdrop.js',
  'bf3900_story_battle_handoff.js','bf4000_next_chapter_intro.js'):
+  if name=='bf4000_next_chapter_intro.js':
+   page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__introFault='';
+    window.BFGlobalOriginalEventsV2200={...original,lookup:(...args)=>{
+     if(__introFault==='throw')throw Error('source unavailable');if(__introFault==='null')return null;
+     const s=original.lookup(...args);if(!s)return s;
+     return {...s,...({empty:{lines:[]},invalid:{lines:['real',null]},wrongId:{id:999},wrongPath:{source:'../made-up.txt'}}[__introFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is False
@@ -61,6 +68,20 @@ with sync_playwright() as pw:
  page.evaluate('S.busy=true')
  assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is False
  assert page.evaluate('()=>{S.busy=false;return !S.busy}') is True
+ guarded=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','empty','invalid','wrongId','wrongPath'):
+  page.evaluate('(v)=>window.__introFault=v',case)
+  assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is False,case
+  assert page.evaluate('QUEST.missionId')==srcMission['prev']
+  page.evaluate("window.__introFault=''")
+ for status in (True,None,'false'):
+  page.evaluate('(v)=>window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:v})}',status)
+  assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is False
+ page.evaluate('delete window.BFGlobalQoLQuestRepeatV9800;S.auto=true')
+ assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is False
+ page.evaluate('S.auto=false;window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})}')
+ assert page.evaluate('BFGlobalNextChapterIntroV4000.refresh().available') is True
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==guarded
  assert page.evaluate('BFGlobalNextChapterIntroV4000.continueStory()') is True
  after=page.evaluate("""()=>({clears:JSON.stringify(P.questClears),
    level:P.level,round:S.round,wave:S.wave,quest:QUEST.missionId})""")
