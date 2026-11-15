@@ -85,9 +85,11 @@
  const showLocks=document.createElement('button');showLocks.type='button';
  showLocks.id='bf10200-show-locks';showLocks.setAttribute('aria-pressed','false');
  showLocks.textContent='LOCKED ONLY';
+ const showAll=document.createElement('button');showAll.type='button';
+ showAll.id='bf10200-show-all';showAll.textContent='SHOW ALL OWNED';
  const filterInfo=document.createElement('p');filterInfo.id='bf10200-filter-info';
  filterInfo.setAttribute('role','status');
- filters.append(showFavorites,showLocks,filterInfo);
+ filters.append(showFavorites,showLocks,showAll,filterInfo);
  let filterMode='all';
  const caution=document.createElement('small');
  caution.textContent='Markers are stored locally and do not modify the game save. '+
@@ -122,6 +124,7 @@
      hiddenSelection?'Selected unit hidden by filter · choose a visible owned unit':
      'Choose an owned unit')+
      ' · '+s.favorites+' favorites · '+s.locks+' locks';
+   showAll.disabled=filterMode==='all';
    showFavorites.setAttribute('aria-pressed',String(filterMode==='favorites'));
    showLocks.setAttribute('aria-pressed',String(filterMode==='locked'));
    filterInfo.textContent=shown+' of '+total+' owned box cards shown'+
@@ -133,6 +136,15 @@
    if(!['all','favorites','locked'].includes(mode))return false;
    filterMode=mode;refresh();return true;
  }
+ showAll.addEventListener('click',()=>{
+   setFilter('all');
+   // Recover keyboard context without selecting a different unit or setting markers.
+   const cards=[...results.querySelectorAll('.bf-box-card')];
+   const visible=cards.filter(card=>!card.hidden&&card.style.display!=='none'&&
+     validId(Number(card.dataset.bfUnitId)));
+   const target=visible.find(card=>card.getAttribute('aria-pressed')==='true')||visible[0];
+   target?.focus();
+ });
  showFavorites.addEventListener('click',()=>setFilter(filterMode==='favorites'?'all':'favorites'));
  showLocks.addEventListener('click',()=>setFilter(filterMode==='locked'?'all':'locked'));
  favorite.addEventListener('click',()=>{
