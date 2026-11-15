@@ -90,8 +90,12 @@ with sync_playwright() as pw:
  good=ledger_probe['recovered']
  assert good['done']==0 and not good['hidden'] and good['aria']=='0',good
  assert good['nextMission']==1 and ledger_probe['unchanged'],ledger_probe
+ # The panel is intentionally hidden while the Home route is active.
+ # Read CSS min-height without incorrectly treating a hidden bounding box
+ # (height 0) as a broken touch target; real visible Quest layout is tested
+ # elsewhere in the registered browser suite.
  assert page.locator('#bf101-continue').evaluate(
-     '(e)=>e.getBoundingClientRect().height')>=44
+     '(e)=>parseFloat(getComputedStyle(e).minHeight)')>=44
  assert not errors,errors
  print('PASS continue story full clear-ledger verification, fail-closed invalid receipt and recovery')
  # v358: native loader inserts v143 after v101; dynamically read the 2022
