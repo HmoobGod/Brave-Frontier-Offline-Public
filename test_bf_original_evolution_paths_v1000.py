@@ -52,6 +52,8 @@ with sync_playwright() as pw:
  assert len(nodes)<=100
  assert page.evaluate('BFOriginalEvolutionV1000.descendants(10011,21)')==[]
  assert page.evaluate('BFOriginalEvolutionV1000.descendants(999999)')==[]
+ for limit in (0,-1,0.5,'100',None,101):
+  assert page.evaluate('(n)=>BFOriginalEvolutionV1000.descendants(10011,12,n)',limit)==[]
  # Ensure every archived evolution link is exactly reversible in the viewer.
  data=page.evaluate("""() => JSON.parse(
    document.getElementById('bf-global-unit-catalog-data').textContent).units
@@ -78,6 +80,20 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Evolution source reading cannot unlock, evolve or save units'
+ source_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.locator('#bf1000-search').fill('')
+ assert page.locator('#bf1000-search-results .bf1000-row').count()==12
+ page.locator('#bf1000-more').click()
+ assert page.locator('#bf1000-search-results .bf1000-row').count()==24
+ assert '2291 source forms match' in page.locator('#bf1000-search-count').text_content()
+ page.locator('#bf1000-more').click()
+ assert page.locator('#bf1000-search-results .bf1000-row').count()==36
+ page.locator('#bf1000-search').fill('impossible_archival_form')
+ assert page.locator('#bf1000-more').is_hidden()
+ assert page.locator('#bf1000-search-results .bf1000-row').count()==0
+ page.locator('#bf1000-search').fill('')
+ assert page.locator('#bf1000-search-results .bf1000-row').count()==12
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==source_before
  assert not errors,errors
  browser.close()
 print('PASS v10.00: 2291 original forms, exact forward and reverse source links, no evolution/summon/save changes')

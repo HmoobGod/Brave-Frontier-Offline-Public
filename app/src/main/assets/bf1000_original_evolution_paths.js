@@ -39,7 +39,8 @@
  const previous=id=>(parent.get(Number(id))||[]).slice().sort((a,b)=>a-b);
  function descendants(id,maxDepth=12,maxNodes=100){
    if(!Number.isSafeInteger(Number(id))||!byId.has(Number(id))||
-      !Number.isInteger(maxDepth)||maxDepth<0||maxDepth>20)return [];
+      !Number.isInteger(maxDepth)||maxDepth<0||maxDepth>20||
+      !Number.isSafeInteger(maxNodes)||maxNodes<1||maxNodes>100)return [];
    const out=[],seen=new Set([Number(id)]);
    const queue=[{id:Number(id),depth:0,from:null}];
    while(queue.length && out.length<maxNodes){
@@ -81,13 +82,16 @@
  const input=document.createElement('input');input.type='search';input.id='bf1000-search';
  input.placeholder='Search original unit names or IDs';input.setAttribute('aria-label','Search 2022 evolution source');
  const results=document.createElement('div');results.id='bf1000-search-results';
+ const more=document.createElement('button');more.type='button';more.id='bf1000-more';more.textContent='SHOW MORE SOURCE FORMS';
+ more.style.minHeight='44px';
+ const found=document.createElement('p');found.id='bf1000-search-count';found.setAttribute('role','status');
  const detail=document.createElement('div');detail.id='bf1000-detail';
  const relations=document.createElement('div');relations.id='bf1000-relations';
  const count=document.createElement('p');count.id='bf1000-count';
  count.className='bf1000-note';
- panel.append(head,warning,input,results,detail,relations,count);
+ panel.append(head,warning,input,found,results,more,detail,relations,count);
  anchor.append(panel);
- let selected=10011;
+ let selected=10011,visibleLimit=12,lastQuery=null;
  const line=(u,btnText,callback)=>{
    const card=document.createElement('div');card.className='bf1000-row';
    const info=document.createElement('div'),name=document.createElement('strong');
@@ -184,14 +188,18 @@
  }
  function search(){
    const q=input.value.trim().toLocaleLowerCase();
+   if(q!==lastQuery){lastQuery=q;visibleLimit=12;}
    const rows=units.filter(u=>!q||String(u.id).includes(q)||
      u.name.toLocaleLowerCase().includes(q));
    results.replaceChildren();
-   for(const u of rows.slice(0,12)){
+   for(const u of rows.slice(0,visibleLimit)){
      results.append(line(u,'INSPECT',()=>show(u.id)));
    }
+   found.textContent=rows.length+' source forms match · showing '+Math.min(visibleLimit,rows.length);
+   more.hidden=visibleLimit>=rows.length;
    return rows.length;
  }
+ more.addEventListener('click',()=>{visibleLimit+=12;search();});
  input.addEventListener('input',search);
  search();show(10011);
  window.BFOriginalEvolutionV1000=Object.freeze({
