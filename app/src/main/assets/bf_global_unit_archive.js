@@ -88,6 +88,25 @@
   const historicalBattleToggle=get('bf-v189-historical-battle-art');
   const search=get('bf-archive-search'),element=get('bf-archive-element'),rarity=get('bf-archive-rarity'),kind=get('bf-archive-type'),sort=get('bf-archive-sort');
   const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail'),reset=get('bf-archive-reset');
+  const expLabel=document.createElement('label');expLabel.textContent='Original EXP pattern ID (source only)';
+  const expFilter=document.createElement('select');expFilter.id='bf-archive-exp-pattern';expFilter.style.minHeight='44px';
+  for(const id of ['all','10','15','20']){const o=document.createElement('option');o.value=id;o.textContent=id==='all'?'All source patterns':'Pattern '+id;expFilter.append(o);}
+  expLabel.append(expFilter);panel.querySelector('.bf-archive-filters').append(expLabel);
+  function patternCohorts(){
+    try{
+      const p=window.BFGlobalOriginalExpPatternIdsV12100;
+      if(p?.source?.originalUnitRecords!==2291||p.source.archiveSha256!=='69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9'||
+         p.source.numericExpThresholdsVerifiedFor2022!==false||typeof p.formsForPattern!=='function')return null;
+      const seen=new Set(),groups=new Map();
+      for(const [pattern,size] of [[10,248],[15,245],[20,1798]]){
+        const list=p.formsForPattern(pattern);
+        if(!Array.isArray(list)||list.length!==size)return null;
+        for(const id of list){if(!Number.isSafeInteger(id)||!byId.has(id)||seen.has(id)||p.lookup(id)!==pattern)return null;seen.add(id);}
+        groups.set(String(pattern),new Set(list));
+      }
+      return seen.size===2291?groups:null;
+    }catch(_){return null;}
+  }
   const pageSize=24;
   let page=0;
   const rarities=[...new Set(units.map(u=>u.rarity))].filter(Number.isInteger).sort((a,b)=>a-b);
@@ -96,7 +115,10 @@
   const item=(name,cls,value)=>{const e=document.createElement(name);if(cls)e.className=cls;e.textContent=String(value);return e;};
   function matches(){
     const q=search.value.trim().toLocaleLowerCase();
-    const data=units.filter(u=>(element.value==='all'||u.element===Number(element.value)) &&
+    const cohorts=patternCohorts();expFilter.disabled=!cohorts;
+    if(!cohorts)expFilter.value='all';
+    const data=units.filter(u=>(expFilter.value==='all'||cohorts?.get(expFilter.value)?.has(u.id))&&
+      (element.value==='all'||u.element===Number(element.value)) &&
       (rarity.value==='all'||u.rarity===Number(rarity.value)) &&
       (kind.value==='all'||(kind.value==='0'?u.unitKind===0:u.unitKind!==0)) &&
       (!q||String(u.id).includes(q)||u.name.toLocaleLowerCase().includes(q)));
@@ -327,17 +349,18 @@
     counter.textContent=matched.length.toLocaleString()+' matching archived forms · '+archive.stats.thumbnailCount+' original thumbnails bundled';
     pageLabel.textContent='Page '+(page+1)+' / '+total;
     prev.disabled=page===0;next.disabled=page>=total-1;
-    reset.disabled=!search.value && element.value==='all' && rarity.value==='all' && kind.value==='all' && sort.value==='id';
+    reset.disabled=!search.value && element.value==='all' && rarity.value==='all' && kind.value==='all' && sort.value==='id' && expFilter.value==='all';
   }
-  for(const select of [search,element,rarity,kind,sort])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
+  for(const select of [search,element,rarity,kind,sort,expFilter])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
   reset.addEventListener('click',()=>{
-    search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';
+    search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';expFilter.value='all';
     page=0;detail.hidden=true;detail.replaceChildren();render();search.focus();
   });
   historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
   historicalBattleToggle.addEventListener('change',()=>{detail.hidden=true;detail.replaceChildren();render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});
   next.addEventListener('click',()=>{if(page+1<Math.ceil(matches().length/pageSize)){page++;render();}});
+  window.addEventListener('bf-exp-pattern-source-ready',()=>{page=0;render();});
   render();
   window.BFGlobalUnitArchive=Object.freeze({
     get count(){return units.length;},
