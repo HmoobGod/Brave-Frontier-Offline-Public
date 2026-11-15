@@ -61,6 +61,11 @@
  reset.id='bf20600-clear-search';reset.textContent='CLEAR SEARCH';
  reset.style.cssText='margin-top:8px;min-height:44px;padding:8px 14px';
  reset.disabled=true;
+ const energy=document.createElement('select');energy.id='bf20600-energy';energy.setAttribute('aria-label','Filter source-only Amdahl Energy references');
+ energy.style.minHeight='44px';
+ for(const [value,text] of [['all','All original Energy'],['low','10 or less Energy'],['high','More than10 Energy']]){
+   const o=document.createElement('option');o.value=value;o.textContent=text;energy.append(o);
+ }
  const status=document.createElement('p');status.id='bf20600-search-status';
  status.setAttribute('role','status');status.setAttribute('aria-live','polite');
  const list=document.createElement('ol');list.id='bf20600-quest-list';
@@ -72,7 +77,8 @@
    const candidates=query
      ?rows.filter(r=>String(r[0])===query || r[8].toLocaleLowerCase('en').includes(query))
      :rows.filter(r=>r[1]===id);
-   for(const r of candidates){
+   const visible=candidates.filter(r=>energy.value==='all'||(energy.value==='low'?r[4]<=10:r[4]>10));
+   for(const r of visible){
      const li=document.createElement('li');li.dataset.missionId=String(r[0]);
      li.style.cssText='margin-bottom:12px;line-height:1.45';
      const name=document.createElement('strong');name.textContent=r[0]+' · '+r[8];
@@ -88,6 +94,7 @@
    reset.disabled=!query;
    return list.children.length;
  }
+ energy.addEventListener('change',()=>preview(Number(select.value)));
  search.addEventListener('input',()=>preview(Number(select.value)));
  reset.addEventListener('click',()=>{search.value='';preview(Number(select.value));search.focus()});
  select.addEventListener('change',()=>{
@@ -97,7 +104,7 @@
    const id=Number(pin.dataset.bf14900Dungeon);
    if(ids.includes(id))pin.addEventListener('click',()=>{search.value='';preview(id)});
  }
- block.append(heading,disclaimer,label,searchLabel,reset,status,list);root.append(block);preview(400);
+ block.append(heading,disclaimer,label,searchLabel,reset,energy,status,list);root.append(block);preview(400);
  window.BFAmdahlSourceQuestGuideV20600=Object.freeze({
    source:Object.freeze({year:2022,masterSha256:MASTER_SHA256,
      canonicalQuestSha256:QUEST_SHA256,

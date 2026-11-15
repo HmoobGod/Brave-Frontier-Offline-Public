@@ -207,6 +207,13 @@ with sync_playwright() as pw:
     quests:JSON.stringify(QUESTS),save:localStorage.getItem('bf_global_offline_demo_v7'),
     writes:__saveWrites()})""")
  assert before==after,(before,after)
+ page.locator('#bf20600-dungeon').select_option('400')
+ energy=page.locator('#bf20600-energy')
+ for band in ('low','high','all'):
+  energy.select_option(band)
+  expected=[q['id'] for q in SOURCE['quests'] if q['dungeonId']==400 and (band=='all' or (q['energy']<=10 if band=='low' else q['energy']>10))]
+  assert page.locator('#bf20600-quest-list li').evaluate_all('(nodes)=>nodes.map(n=>Number(n.dataset.missionId))')==expected
+ assert energy.bounding_box()['height']>=44
  # Claude N1: remove existing DOM; otherwise duplicate-DOM guard masks v7 gate.
  page.evaluate('''()=>{delete window.BFAmdahlSourceQuestGuideV20600;
    document.getElementById("bf20600-amdahl-guide").remove();P.version=8;}''')
