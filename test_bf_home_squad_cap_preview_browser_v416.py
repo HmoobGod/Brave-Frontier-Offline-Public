@@ -186,6 +186,80 @@ with sync_playwright() as pw:
         length: localStorage.length, writes: __v416SaveWrites()
     })""")
     assert before == after, (before, after)
+    # Home's comparison uses independent source caps and native DEMO levels.
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    panel.evaluate('(e)=>e.open=false')
+    home=page.locator('#bf11500-home-level-reference')
+    assert home.count()==1 and home.is_visible()
+    assert 'Original EXP/growth not restored' in home.text_content()
+    current=page.evaluate(api+'.homePreview()')
+    assert current['count']==len(expected) and current['complete'] is True,current
+    assert current['below']==len(expected) and current['at']==0 and current['above']==0,current
+    home_state=page.evaluate('JSON.stringify({P,S,QUEST})')
+    writes=page.evaluate('__v416SaveWrites()')
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        assert home.evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    # Exact threshold and one level higher; do not reset or save the battle.
+    thresholds=page.evaluate("""({baseId,cap})=>{
+      const find=level=>{let n=0;while(demoLevel(n)<level)n++;return n;};
+      return [find(cap),find(cap+1)];
+    }""",{'baseId':probe['baseId'],'cap':cap})
+    for amount,field in zip(thresholds,('at','above')):
+        page.evaluate('({id,n})=>{P.unitExp[id]=n}',{'id':probe['baseId'],'n':amount})
+        # Same-Home route sync must refresh a stale readout immediately.
+        page.evaluate("BF_homeNav.go('home')")
+        assert page.evaluate(api+'.homePreview()')[field]==1
+        assert '1 '+field in home.text_content()
+    page.evaluate('(state)=>{const old=JSON.parse(state);Object.assign(P,old.P)}',home_state)
+    for fault in ("P.unitExp[P.squad[0]]='10'","P.unitExp[P.squad[0]]=-1",
+                  "P.unitExp[P.squad[0]]=1.5","P.unitExp[P.squad[0]]=Infinity",
+                  "P.unitExp=[]","P.unitExp=null","P.unitExp='invalid'","P.unitExp=new Date()",
+                  "P.squad=Array(7)","P.squad=[P.squad[0],P.squad[0]]",
+                  "P.squad=Array(1)","P.squad=null","P.roster=[]","P.version=6"):
+        page.evaluate('(state)=>{Object.assign(P,JSON.parse(state).P)}',home_state)
+        page.evaluate(fault)
+        damaged=page.evaluate('JSON.stringify({P,S,QUEST})')
+        page.evaluate(api+'.refresh()')
+        assert page.evaluate(api+'.homePreview()') is None,fault
+        assert 'unavailable' in home.text_content(),fault
+        assert 'below' not in home.text_content(),fault
+        assert page.evaluate('JSON.stringify({P,S,QUEST})')==damaged,fault
+    page.evaluate('(state)=>{Object.assign(P,JSON.parse(state).P)}',home_state)
+    page.evaluate(api+'.refresh()')
+    # Missing source coverage or a failed unit resolver must not invent cap status.
+    providers=page.evaluate("""()=>{
+      const old=window.effectiveUnit,out={};
+      try{
+        window.effectiveUnit=id=>({...old(id),id:999999});
+        out.unknown=BFGlobalOriginalUnitLevelCapsV11500.homePreview();
+        BFGlobalOriginalUnitLevelCapsV11500.refresh();
+        out.text=document.querySelector('#bf11500-home-level-reference').textContent;
+        window.effectiveUnit=()=>{throw Error('missing unit data')};
+        out.throws=BFGlobalOriginalUnitLevelCapsV11500.homePreview();
+        window.effectiveUnit=()=>null;
+        out.missing=BFGlobalOriginalUnitLevelCapsV11500.homePreview();
+      }finally{window.effectiveUnit=old;BFGlobalOriginalUnitLevelCapsV11500.refresh()}
+      return out;
+    }""")
+    assert providers['unknown']['complete'] is False and providers['unknown']['unknown']==len(expected)
+    assert 'unavailable' in providers['text'] and 'below' not in providers['text']
+    assert providers['throws'] is None and providers['missing'] is None
+    page.evaluate('P.squad=[];'+api+'.refresh()')
+    assert page.evaluate(api+'.homePreview().count')==0
+    assert 'no squad units' in home.text_content()
+    page.evaluate('(state)=>{Object.assign(P,JSON.parse(state).P)}',home_state)
+    page.evaluate(api+'.refresh()')
+    assert 'unavailable' not in home.text_content()
+    assert page.evaluate('JSON.stringify({P,S,QUEST})')==home_state
+    assert page.evaluate('__v416SaveWrites()')==writes
+    page.locator('.bf-navbar button[data-bf-goto="units"]').click()
+    assert not home.is_visible()
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    page.add_script_tag(path=str(ASSETS/'bf11500_original_unit_level_caps.js'))
+    assert home.count()==1
+    assert page.evaluate('__v416SaveWrites()')==writes
     assert not errors, errors
     browser.close()
 print("PASS v416 real Units-route original-cap preview: 320/370/390/540, ownership, slot limit, no save writes")

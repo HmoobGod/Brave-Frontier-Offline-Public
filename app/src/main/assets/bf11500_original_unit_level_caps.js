@@ -124,7 +124,53 @@
  const squadNote=document.createElement('small');
  squadNote.textContent='Read-only: shows DEMO training level against the original 2022 max-level field. No EXP, training, roster or save changes.';
  panel.append(summary,stats,list,squadTitle,squadPreview,squadNote,caution);host.after(panel);
+ // Home is a read-only comparison, never original EXP/growth evidence.
+ function homePreview(){
+   try{
+     if(P.version!==7||!Array.isArray(P.squad)||P.squad.length>6||
+        !Array.isArray(P.roster)||!P.unitExp||typeof P.unitExp!=='object'||
+        Array.isArray(P.unitExp)||
+        ![Object.prototype,null].includes(Object.getPrototypeOf(P.unitExp)))return null;
+     const seen=new Set();let below=0,at=0,above=0,unknown=0;
+     for(const baseId of Array.from(P.squad)){
+       if(!Number.isSafeInteger(baseId)||baseId<=0||seen.has(baseId)||
+          !P.roster.includes(baseId))return null;
+       seen.add(baseId);
+       const raw=P.unitExp[baseId];
+       if(raw!==undefined&&(!Number.isSafeInteger(raw)||raw<0))return null;
+       const unit=effectiveUnit(baseId);
+       if(!unit||!Number.isSafeInteger(unit.id)||unit.id<=0)return null;
+       const cap=lookup(unit.id),level=demoLevel(raw??0);
+       if(!Number.isSafeInteger(level)||level<1)return null;
+       if(!cap){unknown++;continue;}
+       if(level<cap)below++;else if(level===cap)at++;else above++;
+     }
+     return freeze({count:P.squad.length,below,at,above,unknown,
+       complete:unknown===0,sourceYear:2022,demoTraining:true});
+   }catch(_){return null;}
+ }
+ let homeLevel=null;
+ function refreshHome(){
+   const party=document.querySelector('#bf-home #bf-scene-party');
+   if(!party)return;
+   if(!homeLevel||!homeLevel.isConnected){
+     homeLevel=document.createElement('p');homeLevel.id='bf11500-home-level-reference';
+     homeLevel.setAttribute('role','status');homeLevel.setAttribute('aria-live','polite');
+     homeLevel.setAttribute('aria-label','DEMO squad training compared with original 2022 level caps');
+     homeLevel.style.cssText='box-sizing:border-box;max-width:100%;margin:7px 0;'+
+       'font:12px/1.5 system-ui,sans-serif;overflow-wrap:anywhere';
+     party.after(homeLevel);
+   }
+   const s=homePreview();
+   const text=!s?'SQUAD LEVEL REFERENCE · unavailable (invalid squad or EXP).':
+     !s.count?'SQUAD LEVEL REFERENCE · no squad units selected.':
+     !s.complete?'SQUAD LEVEL REFERENCE · unavailable for '+s.unknown+' of '+s.count+' forms.':
+     'DEMO TRAINING vs 2022 CAPS · '+s.below+' below · '+s.at+' at · '+s.above+' above'+
+       ' · Original EXP/growth not restored.';
+   if(homeLevel.textContent!==text)homeLevel.textContent=text;
+ }
  function refresh(){
+   refreshHome();
    const state=snapshot();panel.hidden=state.mode!=='archive';
    stats.textContent=state.squadCappedThisBattle+
      ' active party members capped to original 2022 unit max levels';
@@ -162,10 +208,15 @@
    return state;
  }
  panel.addEventListener('toggle',refresh);
- const timer=setInterval(()=>{if(!document.hidden&&panel.open)refresh();},1800);
+ window.addEventListener('bf-route-sync',refreshHome);
+ const timer=setInterval(()=>{
+   if(document.hidden)return;
+   if(panel.open)refresh();
+   else if(window.BF_homeNav?.current==='home')refreshHome();
+ },1800);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  window.BFGlobalOriginalUnitLevelCapsV11500=freeze({
-   source,lookup,apply,snapshot,refresh
+   source,lookup,apply,snapshot,refresh,homePreview
  });
  refresh();
 })();
