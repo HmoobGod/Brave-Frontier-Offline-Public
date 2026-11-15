@@ -128,12 +128,15 @@
  selector.value='5';roundLabel.append(selector);
  const button=document.createElement('button');button.id='bf1900-run';
  button.type='button';button.textContent='RUN SOURCE SQUAD A/B BATTLE';
+ const clearButton=document.createElement('button');clearButton.type='button';clearButton.id='bf1900-clear';clearButton.textContent='CLEAR COMPARISON · KEEP DRAFT';
  const status=document.createElement('p');status.id='bf1900-status';
  const results=document.createElement('div');results.id='bf1900-results';
- panel.append(summary,note,roundLabel,button,status,results);
+ panel.append(summary,note,roundLabel,button,clearButton,status,results);
  anchor.after(panel);
  const el=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;return e;};
+ function clear(){if(!latest)return false;latest=null;render();return true;}
  function render(){
+   clearButton.disabled=!latest;
    const can=ready();
    button.disabled=!can;
    status.textContent=can?
@@ -168,6 +171,7 @@
    results.append(delta);
    return can;
  }
+ clearButton.addEventListener('click',clear);
  button.addEventListener('click',()=>run(Number(selector.value)));
  panel.addEventListener('toggle',()=>{if(panel.open)render();});
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
@@ -177,6 +181,6 @@
  window.BFGlobalEvolutionABV1900=Object.freeze({
    get result(){return latest?copy(latest):null;},
    get ready(){return ready();},
-   run,refresh:render
+   run,refresh:render,clear
  });
 })();

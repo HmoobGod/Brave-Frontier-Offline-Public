@@ -97,6 +97,11 @@ with sync_playwright() as pw:
  existing=page.evaluate('BFTacticalRoundsV300.snapshot')
  assert page.evaluate('BFGlobalEvolutionABV1900.run(1)') is None
  assert page.evaluate('BFTacticalRoundsV300.snapshot')==existing
+ assert page.evaluate('BFGlobalEvolutionABV1900.clear()') is True
+ assert page.evaluate('BFGlobalEvolutionABV1900.result') is None
+ assert page.evaluate('BFTacticalRoundsV300.snapshot')==existing
+ assert page.locator('#bf1900-results').text_content()==''
+ assert page.evaluate('BFGlobalEvolutionABV1900.clear()') is False
  assert page.evaluate('BFTacticalRoundsV300.exit()') is True
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
   saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
