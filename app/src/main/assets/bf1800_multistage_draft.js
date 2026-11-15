@@ -195,6 +195,10 @@
  clearBtn.id='bf1800-clear';clearBtn.textContent='CLEAR ROUTE CHOICES';
  const updateBtn=document.createElement('button');updateBtn.type='button';
  updateBtn.id='bf1800-refresh';updateBtn.textContent='REFRESH SOURCE PATHS';
+ const search=document.createElement('input');search.type='search';search.id='bf1800-search';
+ search.setAttribute('aria-label','Find multi-stage destination by name or ID');
+ search.style.cssText='box-sizing:border-box;width:100%;min-height:44px';
+ const clearSearch=document.createElement('button');clearSearch.type='button';clearSearch.id='bf1800-search-clear';clearSearch.textContent='CLEAR DESTINATION SEARCH';
  const entriesView=document.createElement('div');entriesView.id='bf1800-entries';
  const totalsView=document.createElement('div');totalsView.id='bf1800-total';
  const runBtn=document.createElement('button');runBtn.type='button';
@@ -202,7 +206,7 @@
  const undoBtn=document.createElement('button');undoBtn.type='button';
  undoBtn.id='bf1800-undo';undoBtn.textContent='UNDO LAST MULTI-STAGE BATCH';
  const status=document.createElement('p');status.id='bf1800-status';
- panel.append(title,caution,autoBtn,clearBtn,updateBtn,entriesView,totalsView,
+ panel.append(title,caution,autoBtn,clearBtn,updateBtn,search,clearSearch,entriesView,totalsView,
    runBtn,undoBtn,status);
  anchor.after(panel);
  const node=(tag,txt)=>{const d=document.createElement(tag);d.textContent=txt;return d;};
@@ -217,7 +221,8 @@
      select.setAttribute('aria-label','Multi-stage route for '+label(from));
      const none=document.createElement('option');none.value='';
      none.textContent='Keep original temporary form';select.append(none);
-     for(const d of destinations(from)){
+     const query=search.value.trim().toLocaleLowerCase('en');
+     for(const d of destinations(from).filter(d=>!query||planned.get(from)===d.id||String(d.id)===query||label(d.id).toLocaleLowerCase('en').includes(query))){
        const opt=document.createElement('option');opt.value=String(d.id);
        opt.textContent=label(d.id)+' · #'+d.id+' · '+d.steps+' source stages';
        select.append(opt);
@@ -253,6 +258,8 @@
        history.length+' reversible multi-stage batch(es) in this session.');
    return safeCopy(p);
  }
+ search.addEventListener('input',refresh);
+ clearSearch.addEventListener('click',()=>{search.value='';refresh();search.focus()});
  autoBtn.addEventListener('click',autoSelect);
  clearBtn.addEventListener('click',clearAll);
  updateBtn.addEventListener('click',refresh);
