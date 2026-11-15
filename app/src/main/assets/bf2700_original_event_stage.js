@@ -54,12 +54,19 @@
  note.textContent='Original archived event background (2022). Static scene preview only; source cutscene motion, expression frames and timing are not yet reproduced.';
  message.before(stage,note);
  let last='';
+ function unavailable(){return Object.freeze({scene:null,background:null,available:false,step:0,count:20});}
  function snapshot(){
+   try{
    const state=archive.snapshot();
+   const chosen=/^dungeon:([1-9][0-9]*)$/.exec(state?.chosen||'');
+   const record=chosen?archive.lookup('dungeon',Number(chosen[1])):null;
+   if(!record||record.source!=='content/event/'+state.source||!Array.isArray(record.lines)||
+     record.lines.length!==state.lines||!Number.isSafeInteger(state.step)||state.step<1||state.step>state.lines)return unavailable();
    const scene=state?.source||null;
    const background=scene?sourceBackgrounds[scene]||null:null;
    return Object.freeze({scene,background,available:!!background,step:state?.step||0,
      count:Object.keys(sourceBackgrounds).length});
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const state=snapshot();
