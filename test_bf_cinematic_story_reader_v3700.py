@@ -40,8 +40,10 @@ with sync_playwright() as pw:
  assert page.locator('#bf3700-bar').is_hidden()
  page.evaluate('()=>{P.questClears[12]=1;renderQuestList()}')
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)') is True
+ page.evaluate("()=>{document.getElementById('bf2200-reader').setAttribute('aria-label','Saved reader label');document.getElementById('bf2200-next').focus()}")
  before=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert page.evaluate('BFGlobalCinematicReaderV3700.enter()') is True
+ assert page.evaluate('document.activeElement.id')=='bf3700-toggle'
  assert page.locator('#bf2200-reader').evaluate('(el)=>getComputedStyle(el).position')=='fixed'
  assert page.locator('html').evaluate('(el)=>el.classList.contains("bf3700-lock")') is True
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(9)') is True
@@ -50,6 +52,8 @@ with sync_playwright() as pw:
  page.keyboard.press('Escape')
  assert page.evaluate('BFGlobalCinematicReaderV3700.snapshot().focused') is False
  assert page.locator('html').evaluate('(el)=>el.classList.contains("bf3700-lock")') is False
+ assert page.locator('#bf2200-reader').get_attribute('aria-label')=='Saved reader label'
+ assert page.evaluate('document.activeElement.id')=='bf2200-next'
  page.locator('#bf3700-toggle').click()
  assert page.evaluate('BFGlobalCinematicReaderV3700.snapshot().focused') is True
  page.locator('#bf3700-toggle').click()

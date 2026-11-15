@@ -33,7 +33,7 @@
  toggle.setAttribute('aria-pressed','false');
  bar.append(caption,toggle);
  reader.insertBefore(bar,title);
- let focused=false;
+ let focused=false,previousLabel=null,returnFocus=null;
  function snapshot(){
    const source=events.snapshot();
    return Object.freeze({focused,available:reader.open&&!!source?.source,
@@ -53,18 +53,26 @@
    reader.classList.remove('bf3700-focus');
    document.body.classList.remove('bf3700-lock');
    document.documentElement.classList.remove('bf3700-lock');
-   reader.removeAttribute('aria-label');
-   refresh();return true;
+   if(previousLabel===null)reader.removeAttribute('aria-label');
+   else reader.setAttribute('aria-label',previousLabel);
+   const target=returnFocus;returnFocus=null;
+   refresh();
+   if(!document.hidden){
+     if(target?.isConnected&&target.getClientRects().length&&!target.disabled)target.focus();
+     else if(toggle.getClientRects().length&&!toggle.disabled)toggle.focus();
+   }
+   return true;
  }
  function enter(){
    const s=snapshot();
    if(focused||!s.available||!reader.getClientRects().length)return false;
+   previousLabel=reader.getAttribute('aria-label');returnFocus=document.activeElement;
    focused=true;
    reader.classList.add('bf3700-focus');
    document.body.classList.add('bf3700-lock');
    document.documentElement.classList.add('bf3700-lock');
    reader.setAttribute('aria-label','Optional expanded original Global story reader');
-   refresh();return true;
+   refresh();toggle.focus();return true;
  }
  toggle.addEventListener('click',()=>{if(focused)exit();else enter()});
  reader.addEventListener('toggle',()=>{if(!reader.open)exit();else refresh()});
