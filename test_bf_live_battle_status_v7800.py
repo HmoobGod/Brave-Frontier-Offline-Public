@@ -80,6 +80,15 @@ with sync_playwright() as pw:
  assert 'DEMO HP '+demo_hp in content,content
  for word in ('Poison','Weakness','Sickness','Injury','Curse','Paralysis'):
   assert word in content
+ filter_before=p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ p.locator('#bf7800-filter').select_option('protection')
+ assert p.locator('#bf7800-rows .bf7800-row').count()==0
+ assert p.locator('#bf7800-empty').is_visible()
+ p.locator('#bf7800-filter').select_option('ailments')
+ assert p.locator('#bf7800-rows .bf7800-row').count()==1
+ assert p.locator('#bf7800-empty').is_hidden()
+ p.locator('#bf7800-filter').select_option('all')
+ assert p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==filter_before
  assert p.evaluate(f'{registry}.cure(0,20230).removed')==[6]
  assert p.evaluate(f'{registry}.cure(0,20220).removed')==[5]
  ally=p.evaluate('BFGlobalLiveBattleStatusV7800.snapshot().units[0]')
@@ -93,6 +102,18 @@ with sync_playwright() as pw:
  assert state['visible'] and len(state['units'])>=4
  assert all(u['immune'] and u['regeneration'] for u in state['units'])
  assert all(u['immunityTurns']==3 and u['regenerationTurns']==3 for u in state['units'])
+ protection_before=p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  p.locator('#bf7800-filter').select_option('ailments')
+  assert p.locator('#bf7800-rows .bf7800-row').count()==0
+  assert p.locator('#bf7800-status').is_visible()
+  p.locator('#bf7800-filter').select_option('protection')
+  assert p.locator('#bf7800-rows .bf7800-row').count()==len(state['units'])
+  assert p.locator('#bf7800-filter').evaluate('(el)=>el.getBoundingClientRect().height')>=44
+ p.locator('#bf7800-filter').select_option('all')
+ assert p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==protection_before
+
  assert p.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(0,1)') is False
  p.evaluate('S.round++')
  state=p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')

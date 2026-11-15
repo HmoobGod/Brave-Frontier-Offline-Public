@@ -38,9 +38,17 @@
  panel.setAttribute('aria-label','Live ally battle statuses and supported protection');
  const heading=document.createElement('summary');heading.id='bf7800-heading';
  const rows=document.createElement('div');rows.id='bf7800-rows';
+ const filter=document.createElement('select');filter.id='bf7800-filter';
+ filter.setAttribute('aria-label','Filter displayed battle statuses');
+ filter.style.minHeight='44px';filter.style.maxWidth='100%';
+ for(const [value,text] of [['all','All affected allies'],['ailments','Allies with ailments'],['protection','Allies with protection']]){
+   const option=document.createElement('option');option.value=value;option.textContent=text;filter.append(option);
+ }
+ const empty=document.createElement('p');empty.id='bf7800-empty';empty.setAttribute('role','status');
+ empty.textContent='No allies match this display filter. Other battle statuses remain active.';
  const foot=document.createElement('small');
  foot.textContent='Archived 2022 ailments, plus source-described status immunity and recovery. Combat effects, stacking and remaining-round timing are DEMO until native rules are recovered.';
- panel.append(heading,rows,foot);
+ panel.append(heading,filter,empty,rows,foot);
  host.prepend(panel);
  const freeze=a=>Object.freeze(a);
  function snapshot(){
@@ -81,12 +89,15 @@
  function refresh(){
    const st=snapshot();
    panel.hidden=!st.visible;
-   const signature=JSON.stringify(st.units);
+   const signature=JSON.stringify([st.units,filter.value]);
    if(signature===last)return st;
    last=signature;
    heading.textContent='BATTLE STATUS · '+st.units.length+
      (st.units.length===1?' AFFECTED ALLY':' AFFECTED ALLIES');
-   const nodes=st.units.map(unit=>{
+   const shown=st.units.filter(unit=>filter.value==='ailments'?unit.codes.length>0:
+     filter.value==='protection'?unit.immune||unit.regeneration:true);
+   empty.hidden=shown.length>0;
+   const nodes=shown.map(unit=>{
      const row=document.createElement('div');row.className='bf7800-row';
      row.dataset.slot=String(unit.slot);
      const title=document.createElement('strong');title.className='bf7800-unit';
@@ -109,6 +120,7 @@
    rows.replaceChildren(...nodes);
    return st;
  }
+ filter.addEventListener('change',refresh);
  mode.addEventListener('change',refresh);
  document.getElementById('reset')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},550);
