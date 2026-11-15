@@ -91,7 +91,36 @@
    return 'HP '+stats.hp+' · ATK '+stats.atk+' · DEF '+stats.def+
      ' · REC '+stats.rec;
  }
+ function homeReference(){
+   try{
+     if(P.version!==7||!Array.isArray(P.squad)||P.squad.length>6||!Array.isArray(P.roster))return null;
+     const totals={hp:0,atk:0,def:0,rec:0},seen=new Set();
+     for(const id of Array.from(P.squad)){
+       if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||!P.roster.includes(id))return null;
+       seen.add(id);const unit=effectiveUnit(id),row=lookup(unit?.id);
+       if(!row)return null;
+       for(const key of Object.keys(totals))totals[key]+=row.base[key];
+     }
+     return freeze({count:seen.size,totals:freeze(totals),level:1,sourceYear:2022,liveStats:false});
+   }catch(_){return null;}
+ }
+ let homeRef=null;
+ function refreshHome(){
+   const party=document.querySelector('#bf-home #bf-scene-party');if(!party)return;
+   if(!homeRef||!homeRef.isConnected){
+     homeRef=document.createElement('p');homeRef.id='bf11600-home-base-reference';
+     homeRef.setAttribute('role','status');homeRef.setAttribute('aria-live','polite');
+     homeRef.style.cssText='max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui,sans-serif';
+     party.after(homeRef);
+   }
+   const s=homeReference();
+   const text=!s?'2022 BASE STATS · unavailable for this squad':!s.count?'2022 BASE STATS · no squad selected':
+     '2022 LEVEL 1 REFERENCE · '+fmt(s.totals)+' · '+s.count+' forms · NOT live battle stats';
+   if(homeRef.textContent!==text)homeRef.textContent=text;
+ }
+ window.addEventListener('bf-route-sync',refreshHome);
  function refresh(){
+   refreshHome();
    const current=snapshot();
    list.replaceChildren();
    if(panel.open)for(const slot of current.slots){
@@ -119,7 +148,7 @@
  const timer=setInterval(()=>{if(panel.open&&!document.hidden)refresh();},2500);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  window.BFGlobalOriginalLordStatsV11600=freeze({
-   source:snapshot().source,lookup,endpoint,snapshot,refresh,
+   source:snapshot().source,lookup,endpoint,snapshot,refresh,homeReference,
    unitTypesRaw:rawType
  });
  refresh();
