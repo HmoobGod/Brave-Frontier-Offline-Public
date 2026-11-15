@@ -70,6 +70,19 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Optional lab hub must not mutate native game/save state'
+ proof=page.evaluate("""()=>{const original=P.questClears,before=JSON.stringify({P,S}),saved=localStorage.getItem('bf_global_offline_demo_v7');
+  let getterReads=0;const getter={};Object.defineProperty(getter,'1',{enumerable:true,get:()=>{getterReads++;return 1}});
+  const results=[];try{
+   for(const ledger of [null,[],{1:'1'},{1:-1},{1:Infinity},{1:0.5},{999999:1},Object.create({1:1}),getter]){
+    P.questClears=ledger;const out=BFOptionalLabsHubV900.refresh();
+    results.push(out.cleared===null&&document.querySelector('#bf900-coverage').textContent.includes('UNAVAILABLE'));
+   }
+   P.questClears={1:2,2:0};const valid=BFOptionalLabsHubV900.refresh().cleared;
+   return {results,valid,getterReads,saved:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }finally{P.questClears=original;BFOptionalLabsHubV900.refresh();window.__labsInvariant=JSON.stringify({P,S})===before;}
+ }""")
+ assert proof=={'results':[True]*9,'valid':1,'getterReads':0,'saved':True},proof
+ assert page.evaluate('__labsInvariant')
  assert not errors,errors
  browser.close()
 print('PASS v9.00 Quest screen uncluttered, five labs preserved under one disclosure and full v7 save isolation')
