@@ -38,6 +38,12 @@ with sync_playwright() as pw:
  'bf3700_cinematic_reader.js','bf3800_source_battle_backdrop.js',
  'bf3900_story_battle_handoff.js','bf4000_next_chapter_intro.js',
  'bf4100_live_quest_banner.js'):
+  if name=='bf4100_live_quest_banner.js':
+   page.evaluate("""()=>{const original=BFGlobalStoryBattleV2000;window.__bannerFault='';
+    window.BFGlobalStoryBattleV2000={...original,snapshot:()=>{
+     if(__bannerFault==='throw')throw Error('story unavailable');if(__bannerFault==='null')return null;
+     return {...original.snapshot(),...({archive:{archive:'false'},won:{won:'false'},lost:{lost:null},busy:{busy:0},both:{won:true,lost:true}}[__bannerFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('P.version')==7
@@ -78,6 +84,16 @@ with sync_playwright() as pw:
  for key in ('0','-1','3.5','101'):
   assert gates[key]=={'available':False,'applied':False,'hidden':True,'enabled':True},(key,gates)
  assert gates['restored'] and gates['sameSave'],gates
+ fault_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','archive','won','lost','busy','both'):
+  page.evaluate('(v)=>window.__bannerFault=v',case)
+  failed=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
+  assert failed['available'] is False and failed['applied'] is False,case
+  assert page.locator('#bf4100-banner').is_hidden()
+  assert page.locator('#bf4100-banner').text_content()==''
+  page.evaluate("window.__bannerFault=''")
+  assert page.evaluate('BFGlobalLiveQuestBannerV4100.refresh().applied') is True
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==fault_before
  assert page.evaluate('BFGlobalLiveQuestBannerV4100.setEnabled("true")') is False
  page.locator('#mode').select_option('training')
  s=page.evaluate('BFGlobalLiveQuestBannerV4100.refresh()')
