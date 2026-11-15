@@ -74,6 +74,13 @@
    paths.refresh();window.BFEvolutionMaterialPlannerV1400.refresh();
    refresh();return true;
  }
+ function clearHistory(){
+   try{
+     if(!draftReady()||!history.length||window.BFGlobalBatchDraftEvolutionV1700?.history?.length||
+        window.BFGlobalMultistageDraftV1800?.history?.length)return false;
+     history=[];refresh();return true;
+   }catch(_){return false;}
+ }
  const style=document.createElement('style');style.id='bf1600-evo-style';
  style.textContent=[
    '#bf1600-draft-evolution{margin:8px 0;padding:10px;',
@@ -105,8 +112,11 @@
  const undoButton=document.createElement('button');undoButton.type='button';
  undoButton.id='bf1600-undo';undoButton.textContent='UNDO LAST DRAFT EVOLUTION';
  const feedback=el('p','');feedback.id='bf1600-feedback';
+ const forgetHistory=document.createElement('button');forgetHistory.type='button';
+ forgetHistory.id='bf1600-clear-history';forgetHistory.textContent='DISCARD UNDO HISTORY · KEEP CURRENT DRAFT';
+ forgetHistory.style.minHeight='44px';forgetHistory.addEventListener('click',clearHistory);
  const historyView=el('div','');historyView.id='bf1600-history';
- panel.append(heading,warning,fromSel,toSel,summary,advance,undoButton,feedback,historyView);
+ panel.append(heading,warning,fromSel,toSel,summary,advance,undoButton,forgetHistory,feedback,historyView);
  host.after(panel);
  function options(sel,list,empty){
    sel.replaceChildren();
@@ -153,6 +163,7 @@
    feedback.textContent=draftReady()?
      'Source costs shown for reference only. The replacement keeps the same temporary party slot.':
      'Exit the current training battle before changing the temporary draft.';
+   forgetHistory.disabled=!draftReady()||!history.length;
    historyView.replaceChildren();
    historyView.append(el('strong','TEMPORARY EVOLUTION HISTORY · '+history.length+'/20'));
    for(const item of history.slice(-6).reverse()){
@@ -184,6 +195,6 @@
        ...s,materials:s.materials.map(m=>({...m}))})),
      totals:{...r.totals,materials:r.totals.materials.map(m=>({...m}))}
    }:null;},
-   available,choose,evolve,undo,refresh
+   available,choose,evolve,undo,refresh,clearHistory
  });
 })();
