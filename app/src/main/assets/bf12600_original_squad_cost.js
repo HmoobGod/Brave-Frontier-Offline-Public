@@ -78,6 +78,15 @@
       'font:700 11px/1.5 system-ui,sans-serif;overflow-wrap:anywhere';
     homeParty.before(homeCost);
   }
+  const homeDetails=homeCost?document.createElement('details'):null;
+  const homeRows=document.createElement('ol');homeRows.id='bf12600-home-cost-rows';
+  if(homeDetails){
+    homeDetails.id='bf12600-home-cost-details';
+    const title=document.createElement('summary');title.textContent='SHOW ORIGINAL COST BREAKDOWN';
+    title.style.cssText='min-height:44px;cursor:pointer';
+    const warning=document.createElement('small');warning.textContent='2022 reference only; summoner capacity unknown and not enforced.';
+    homeDetails.append(title,homeRows,warning);homeCost.after(homeDetails);
+  }
   function refresh(){
     const state=snapshot();
     heading.textContent='ORIGINAL 2022 SQUAD COST · '+
@@ -93,6 +102,17 @@
       const entry=document.createElement('li');
       entry.textContent='Slot '+row.slot+' · #'+row.unitId+' · cost unknown (excluded)';
       list.append(entry);
+    }
+    if(homeDetails){
+      homeRows.replaceChildren();
+      const valid=state.complete&&P.squad.length<=6&&state.rows.length===P.squad.length&&
+        new Set(P.squad).size===P.squad.length;
+      if(!valid||!state.rows.length){
+        const item=document.createElement('li');item.textContent=valid?'No squad selected.':'Source cost breakdown unavailable.';homeRows.append(item);
+      }else for(const row of state.rows){
+        const item=document.createElement('li');item.textContent='Slot '+row.slot+' · #'+row.unitId+' · '+row.rarity+'★ · cost '+row.cost;
+        homeRows.append(item);
+      }
     }
     if(homeCost){
       homeCost.textContent=!state.complete?

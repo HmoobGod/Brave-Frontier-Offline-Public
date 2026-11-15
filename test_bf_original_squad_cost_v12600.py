@@ -115,6 +115,23 @@ with sync_playwright() as playwright:
  assert page.locator('#bf12600-home-squad-cost').count()==1
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert after==before,(before,after)
+ detail=page.locator('#bf12600-home-cost-details')
+ assert detail.is_visible()
+ stable=page.evaluate('JSON.stringify(P)')
+ detail.locator('summary').focus();page.keyboard.press('Enter')
+ assert detail.evaluate('(e)=>e.open')
+ expected_rows=page.evaluate('BFGlobalOriginalSquadCostV12600.snapshot().rows')
+ lines=page.locator('#bf12600-home-cost-rows li').all_text_contents()
+ assert len(lines)==len(expected_rows)
+ for row,line in zip(expected_rows,lines):
+  assert f"Slot {row['slot']} · #{row['unitId']} · {row['rarity']}★ · cost {row['cost']}"==line
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  assert detail.locator('summary').bounding_box()['height']>=44
+  assert detail.evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+ invalid=page.evaluate("""()=>{const old=P.squad;try{P.squad=[old[0],old[0]];BFGlobalOriginalSquadCostV12600.refresh();return document.querySelector('#bf12600-home-cost-rows').textContent}finally{P.squad=old;BFGlobalOriginalSquadCostV12600.refresh()}}""")
+ assert 'unavailable' in invalid
+ assert page.evaluate('JSON.stringify(P)')==stable
  assert not errors,errors
  browser.close()
 print('PASS v126: 72 original 2022 playable unit cost/rarity values, live squad sums, incomplete-source rejection and v7 saves unchanged')
