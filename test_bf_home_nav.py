@@ -134,6 +134,21 @@ with sync_playwright() as playwright:
     assert page.locator("#bf-home").is_visible()
     assert page.evaluate("({squad:JSON.stringify(P.squad),zel:P.zel,save:localStorage.getItem('bf_global_offline_demo_v7')})") == state
     assert page.evaluate("BF_homeNav.routedPanels") >= 10
+    # Real route buttons, Enter activation and no player/battle/save changes.
+    focus_before=page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        for route in ('quest','units','summon','menu','home'):
+            button=page.locator('.bf-navbar button[data-bf-goto="'+route+'"]')
+            button.focus();page.keyboard.press('Enter')
+            target=page.locator('#bf-home .bf-scene-title' if route=='home' else '#bf-route-title')
+            assert target.is_visible()
+            assert target.evaluate('(el)=>document.activeElement===el'),(width,route)
+    assert page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')==focus_before
+    # API navigation does not steal a caller's deliberate focus destination.
+    page.locator('.bf-navbar button[data-bf-goto="home"]').focus()
+    assert page.evaluate('BF_homeNav.go("quest")') is True
+    assert page.evaluate('document.activeElement.dataset.bfGoto')=='home'
     assert not errors, errors
     print("PASS navigation changes no save, squad, or Zel and throws no JS errors")
     browser.close()
