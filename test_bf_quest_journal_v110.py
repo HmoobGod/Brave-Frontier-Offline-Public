@@ -257,6 +257,21 @@ with sync_playwright() as pw:
  assert saved_snapshot==page.evaluate("""()=>({p:JSON.stringify(P),
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert page.evaluate('P.version')==7
+ page.locator('#bf110-clear-filters').click()
+ exact_before=page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.locator('#bf110-search').fill('1')
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')>1
+ page.locator('#bf110-exact-id').check()
+ assert page.locator('[data-bf-journal-entry]').evaluate_all('(es)=>es.map(e=>e.dataset.bfJournalEntry)')==['1']
+ for invalid in ('01','1.0','-1','1e0','unknown','999999',''):
+  page.locator('#bf110-search').fill(invalid)
+  assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==0,invalid
+ page.locator('#bf110-search').fill('365')
+ assert page.locator('[data-bf-journal-entry]').evaluate_all('(es)=>es.map(e=>e.dataset.bfJournalEntry)')==['365']
+ page.locator('#bf110-clear-filters').click()
+ assert not page.locator('#bf110-exact-id').is_checked()
+ assert page.evaluate('BFGlobalQuestJournalV110.matchingCount')==106
+ assert page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')==exact_before
  assert not errors,errors
  browser.close()
 print('PASS v1.10 journal: 106 original English missions, gates/search/regions, v7 passive safety')
