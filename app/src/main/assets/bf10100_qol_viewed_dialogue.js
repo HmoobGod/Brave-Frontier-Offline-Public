@@ -38,6 +38,7 @@
      return new Set(data.viewed.slice(-limit).filter(sceneValid));
    }catch(_){return new Set();}
  }
+ let forgotten=null;
  let viewed=load(),message='Complete a story scene once to unlock quick skipping.';
  function persist(){
    try{localStorage.setItem(key,JSON.stringify({version:1,
@@ -54,7 +55,14 @@
  }
  function observed(){
    const s=readerApi.snapshot();
-   if(!panel.open||!sourceBound(s)||s.step!==s.lines)return false;
+   if(!panel.open||!sourceBound(s))return false;
+   // Do not immediately re-mark the still-visible final page after Forget.
+   // A later visit to an earlier page starts a fresh read-through.
+   if(forgotten===s.chosen){
+     if(s.step===s.lines)return false;
+     forgotten=null;
+   }
+   if(s.step!==s.lines)return false;
    return remember(s.chosen);
  }
  const ui=document.createElement('div');ui.id='bf10100-viewed-dialogue';
@@ -66,8 +74,11 @@
  quick.style.cssText='display:block;min-height:44px;margin:7px 0;'+
    'padding:8px 11px;border-radius:5px;border:1px solid #bb9f77;'+
    'background:#644a33;color:#fff;font-weight:800';
+ const forgetButton=document.createElement('button');forgetButton.type='button';
+ forgetButton.id='bf10100-forget';forgetButton.textContent='FORGET THIS VIEWED MARKER';
+ forgetButton.style.cssText=quick.style.cssText;
  const note=document.createElement('small');note.id='bf10100-note';
- ui.append(heading,quick,note);nav.after(ui);
+ ui.append(heading,quick,forgetButton,note);nav.after(ui);
  function state(){
    const s=readerApi.snapshot(),verified=sourceBound(s);
    return freeze({scene:s?.chosen||null,step:s?.step??null,lines:s?.lines??null,
@@ -78,11 +89,23 @@
  function render(){
    const s=state();
    quick.disabled=!s.available;
+   forgetButton.disabled=!panel.open||!s.sourceVerified||!s.viewed;
    note.textContent=(s.sourceVerified?message:
      'Source scene unavailable or inconsistent; skip safely disabled.')+
      ' · '+s.storedCount+' scenes marked as completed'+
      (s.viewed?' · This scene has been read before':'');
    return s;
+ }
+ function forget(){
+   const s=state();
+   if(!panel.open||!s.sourceVerified||!s.viewed)return false;
+   const old=viewed;viewed=new Set(viewed);viewed.delete(s.scene);
+   if(!persist()){
+     viewed=old;message='Could not forget viewed marker; unchanged.';render();return false;
+   }
+   forgotten=s.scene;
+   message='Viewed marker forgotten. Read this scene again to enable quick skip.';
+   render();return true;
  }
  function skip(){
    const s=state();
@@ -96,6 +119,7 @@
    return ok;
  }
  quick.addEventListener('click',skip);
+ forgetButton.addEventListener('click',forget);
  next.addEventListener('click',()=>queueMicrotask(observed));
  scenes.addEventListener('change',()=>queueMicrotask(render));
  panel.addEventListener('toggle',()=>{if(panel.open){observed();render()}});
@@ -108,7 +132,7 @@
  }).observe(textBox,{subtree:true,childList:true,characterData:true});
  render();
  window.BFGlobalQoLViewedDialogueV10100=freeze({
-   state,remember,skip,observed,render,
+   state,remember,skip,forget,observed,render,
    get viewed(){return freeze([...viewed])}
  });
 })();
