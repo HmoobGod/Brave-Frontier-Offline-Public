@@ -30,6 +30,12 @@ with sync_playwright() as pw:
   'bf2200_original_event_reader.js','bf2300_morgan_event_dialogue.js',
   'bf2400_st_lamia_event_dialogue.js','bf2500_story_event_prompt.js',
   'bf2600_original_event_portraits.js','bf2700_original_event_stage.js'):
+   if n=='bf2700_original_event_stage.js':
+    page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__stageFault='';
+     window.BFGlobalOriginalEventsV2200={...original,snapshot:()=>{
+      if(__stageFault==='throw')throw Error('source unavailable');if(__stageFault==='null')return null;
+      return {...original.snapshot(),...({chosen:{chosen:'dungeon:20'},lines:{lines:999},step:{step:999},source:{source:'map1-dungeon1.txt'}}[__stageFault]||{})};
+     }};}""")
    page.add_script_tag(path=str(A/n))
  assert page.evaluate('BFOriginalEventStageV2700.snapshot().count')==20
  assert page.locator('#bf2700-stage').is_hidden()
@@ -70,6 +76,17 @@ with sync_playwright() as pw:
  assert page.locator('#bf2700-stage').is_hidden()
  assert page.evaluate('P.version')==7
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
+ assert page.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",240)') is True
+ assert page.evaluate('BFOriginalEventStageV2700.refresh().available') is True
+ stage_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','chosen','lines','step','source'):
+  page.evaluate('(v)=>window.__stageFault=v',case)
+  assert page.evaluate('BFOriginalEventStageV2700.refresh().available') is False,case
+  assert page.locator('#bf2700-stage').is_hidden()
+  assert page.locator('#bf2700-art').get_attribute('src') is None
+  page.evaluate("window.__stageFault=''")
+  assert page.evaluate('BFOriginalEventStageV2700.refresh().available') is True
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==stage_before
  assert not errors,errors
  browser.close()
 print('PASS v27.00 exact source event background joins 20/20, read-only reader, three regions, v7 save unchanged')
