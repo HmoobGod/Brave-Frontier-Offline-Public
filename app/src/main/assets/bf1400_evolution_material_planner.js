@@ -102,7 +102,12 @@
  auto.textContent='PICK FIRST RECORDED RECIPE FOR EACH';
  const reset=document.createElement('button');reset.type='button';reset.id='bf1400-reset';
  reset.textContent='CLEAR RECIPE CHOICES';
- controls.append(auto,reset);
+ const search=document.createElement('input');search.type='search';search.id='bf1400-material-search';
+ search.setAttribute('aria-label','Find planned source material by name or ID');
+ search.style.cssText='box-sizing:border-box;width:100%;min-height:44px';
+ const clearSearch=document.createElement('button');clearSearch.type='button';clearSearch.id='bf1400-search-clear';
+ clearSearch.textContent='CLEAR MATERIAL SEARCH';clearSearch.style.minHeight='44px';
+ controls.append(auto,reset,search,clearSearch);
  const status=document.createElement('p');status.id='bf1400-status';status.setAttribute('aria-live','polite');
  const cards=document.createElement('div');cards.id='bf1400-choices';
  const report=document.createElement('div');report.id='bf1400-report';
@@ -154,7 +159,11 @@
    materials.append(word('strong','COMBINED ORIGINAL MATERIAL LIST'));
    if(!data.totals.materials.length)
      materials.append(word('p','No source-listed materials in current recipe choices.'));
-   for(const item of data.totals.materials){
+   const query=search.value.trim().toLocaleLowerCase('en');
+   const visible=data.totals.materials.filter(item=>!query||
+     String(item.id)===query||String(item.name||'').toLocaleLowerCase('en').includes(query));
+   materials.append(word('p',visible.length+' of '+data.totals.materials.length+' source material types shown'));
+   for(const item of visible){
      const row=document.createElement('div');row.className='bf1400-list';
      row.append(word('span',(item.name||'Unnamed archived material')+
        ' · #'+item.id+' · type '+item.type+' ×'+item.count));
@@ -163,6 +172,8 @@
    report.append(materials);
    return data;
  }
+ search.addEventListener('input',render);
+ clearSearch.addEventListener('click',()=>{search.value='';render();search.focus()});
  auto.addEventListener('click',autoSelect);
  reset.addEventListener('click',clear);
  panel.addEventListener('toggle',()=>{if(panel.open)render();});

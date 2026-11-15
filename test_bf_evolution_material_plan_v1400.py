@@ -110,6 +110,18 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
+ plan_before=page.evaluate('BFEvolutionMaterialPlannerV1400.plan')
+ mats=plan_before['totals']['materials'];assert mats
+ search=page.locator('#bf1400-material-search')
+ search.fill(str(mats[0]['id']))
+ assert page.locator('#bf1400-materials .bf1400-list').count()==sum(x['id']==mats[0]['id'] for x in mats)
+ assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan')==plan_before
+ search.fill('no-such-original-material')
+ assert page.locator('#bf1400-materials .bf1400-list').count()==0
+ page.locator('#bf1400-search-clear').click()
+ assert page.evaluate('document.activeElement.id')=='bf1400-material-search'
+ assert page.locator('#bf1400-materials .bf1400-list').count()==len(mats)
+ assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan')==plan_before
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
  assert not errors,errors
