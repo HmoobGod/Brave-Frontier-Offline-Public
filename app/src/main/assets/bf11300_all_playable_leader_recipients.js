@@ -98,9 +98,15 @@
    'enemy encounters remain DEMO. No save modifications.';
  panel.append(heading,summary,rows,caution);host.after(panel);
  function snapshot(){
-   const recorded=(Array.isArray(S.party)?S.party:[]).
-     map(u=>applied.get(u)).filter(Boolean);
-   return freeze({mode:S.mode,active:S.mode==='archive',
+   const readable=Array.isArray(S.party)&&S.party.length<=6;
+   const recorded=[];let suppressed=0;
+   if(readable)S.party.forEach((unit,slot)=>{
+     const record=unit&&typeof unit==='object'?applied.get(unit):null;
+     if(!record)return;
+     if(unit.id!==slot||record.slot!==slot||unit.unitId!==record.unitId){suppressed++;return;}
+     recorded.push(record);
+   });
+   return freeze({mode:S.mode,active:S.mode==='archive',readable,suppressedAuditRows:suppressed,
      expandedRecipientCount:recorded.length,
      appliedSinceLoad:count,rejectedSinceLoad:rejected,
      extraSourceForms:42,sourceForms:72,leaderForms:30,
@@ -111,8 +117,9 @@
  function refresh(){
    const s=snapshot();
    panel.hidden=s.mode!=='archive';
-   summary.textContent=s.expandedRecipientCount+
-     ' additional source-qualified squad recipients in this battle';
+   summary.textContent=!s.readable?'Recipient audit unavailable: invalid current battle party.':s.expandedRecipientCount+
+     ' verified current source-qualified recipient records'+
+     (s.suppressedAuditRows?' · '+s.suppressedAuditRows+' stale/ambiguous audit rows not shown':'');
    rows.replaceChildren();
    if(panel.open)for(const item of s.actualRows){
      const row=document.createElement('li');

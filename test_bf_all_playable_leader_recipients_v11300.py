@@ -82,6 +82,20 @@ with sync_playwright() as pw:
  snap=p.evaluate('BFGlobalAllLeaderRecipientsV11300.snapshot()')
  assert snap['expandedRecipientCount']==2
  assert {x['unitId'] for x in snap['actualRows']}=={10021,10041}
+ audit=p.evaluate("""()=>{const party=S.party,unitId=party[1].unitId,before=JSON.stringify({P,S});const out={};
+  try{
+   S.party=[...party];S.party[2]=party[1];out.duplicate=BFGlobalAllLeaderRecipientsV11300.refresh();
+   S.party=[...party];[S.party[1],S.party[2]]=[S.party[2],S.party[1]];out.swapped=BFGlobalAllLeaderRecipientsV11300.refresh();
+   S.party=party;party[1].unitId=999999;out.changed=BFGlobalAllLeaderRecipientsV11300.refresh();
+   party[1].unitId=unitId;S.party=null;out.invalid=BFGlobalAllLeaderRecipientsV11300.refresh();
+  }finally{S.party=party;party[1].unitId=unitId;BFGlobalAllLeaderRecipientsV11300.refresh();}
+  return {duplicate:[out.duplicate.expandedRecipientCount,out.duplicate.suppressedAuditRows],
+   swapped:[out.swapped.expandedRecipientCount,out.swapped.suppressedAuditRows],
+   changed:[out.changed.expandedRecipientCount,out.changed.suppressedAuditRows],
+   invalid:out.invalid.readable===false,same:before===JSON.stringify({P,S})};
+ }""")
+ assert audit=={'duplicate':[1,1],'swapped':[0,2],'changed':[1,1],'invalid':True,'same':True},audit
+
  assert snap['originalLeaderTypes31Or5Activated'] is False
  first=p.evaluate('S.party.map(u=>[u.atk,u.hp,u.maxHp])')
  p.evaluate('reset()')
