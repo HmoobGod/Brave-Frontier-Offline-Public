@@ -81,6 +81,7 @@ with sync_playwright() as pw:
     page.locator('.bf-archive-unit').click()
     assert page.locator('#bf-archive-detail').is_visible()
     assert 'Original unit ID 810547' in page.locator('#bf-archive-detail').inner_text()
+    assert page.locator('#bf-archive-detail > h4').first.evaluate('(el)=>document.activeElement===el')
     assert 'Leader skill ID' in page.locator('#bf-archive-detail').inner_text()
     page.locator('#bf-archive-detail .bf-archive-close').click()
     assert page.evaluate("document.activeElement?.dataset.unitId")=='810547'
@@ -111,6 +112,18 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    focus_before=page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+    page.locator('#bf-archive-reset').click()
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        page.locator('.bf-archive-unit').first.focus();page.keyboard.press('Enter')
+        assert page.locator('#bf-archive-detail > h4').first.evaluate('(el)=>document.activeElement===el')
+        page.locator('#bf-archive-detail .bf-archive-close').click()
+        assert page.evaluate('document.activeElement.matches(".bf-archive-unit")')
+    page.locator('#bf-archive-search').focus()
+    assert page.evaluate('BFGlobalUnitArchive.showDetail(10011)') is True
+    assert page.evaluate('document.activeElement.id')=='bf-archive-search'
+    assert page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem("bf_global_offline_demo_v7")})')==focus_before
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()

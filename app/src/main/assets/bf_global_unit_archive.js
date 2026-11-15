@@ -104,7 +104,7 @@
     if(sort.value==='rarity')data.sort((a,b)=>b.rarity-a.rarity||a.id-b.id);
     return data;
   }
-  function showDetail(id){
+  function showDetail(id,focus=false){
     const u=byId.get(id);
     if(!u)return false;
     detail.replaceChildren();
@@ -287,7 +287,7 @@
           if(target){
             const jump=document.createElement('button');jump.type='button';
             jump.className='bf-codex-evo-jump';jump.textContent='VIEW NEXT FORM ›';
-            jump.addEventListener('click',()=>{showDetail(target.id);detail.scrollIntoView({block:'start',behavior:'smooth'});});
+            jump.addEventListener('click',()=>{showDetail(target.id,true);detail.scrollIntoView({block:'start',behavior:'smooth'});});
             entry.append(jump);
           }
           recipes.append(entry);
@@ -297,6 +297,8 @@
       if(section.children.length>2)detail.append(section);
     }
     detail.hidden=false;
+    if(focus===true){const title=detail.querySelector('h4');
+      if(title){title.tabIndex=-1;title.focus();}}
     return true;
   }
   function render(){
@@ -321,7 +323,7 @@
       const text=document.createElement('span');text.className='bf-archive-unit-text';
       text.append(item('strong','',u.name),item('small','','#'+u.id+' · '+(elements[u.element]||'Unknown')+' · '+u.rarity+'★'));
       if(optInHistorical)text.append(item('small','bf-v188-art-provenance',historicalArtNote));
-      button.append(text);button.addEventListener('click',()=>showDetail(u.id));results.append(button);
+      button.append(text);button.addEventListener('click',()=>showDetail(u.id,true));results.append(button);
     }
     if(!shown.length)results.append(item('p','bf-archive-nohits','No matching original Global unit records.'));
     counter.textContent=matched.length.toLocaleString()+' matching archived forms · '+archive.stats.thumbnailCount+' original thumbnails bundled';
