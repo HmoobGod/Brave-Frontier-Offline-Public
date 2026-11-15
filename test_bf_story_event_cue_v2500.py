@@ -28,6 +28,13 @@ with sync_playwright() as pw:
    'bf2000_story_battle_hud.js','bf2100_battle_command_tray.js',
    'bf2200_original_event_reader.js','bf2300_morgan_event_dialogue.js',
    'bf2400_st_lamia_event_dialogue.js','bf2500_story_event_prompt.js'):
+  if n=='bf2500_story_event_prompt.js':
+   page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__cueFault='';
+    window.BFGlobalOriginalEventsV2200={...original,lookup:(...args)=>{
+     if(__cueFault==='throw')throw Error('source unavailable');if(__cueFault==='null')return null;
+     const s=original.lookup(...args);if(!s)return s;
+     return {...s,...({id:{id:999},path:{source:'../invented.txt'},lines:{lines:[null]}}[__cueFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/n))
  assert page.evaluate('BFGlobalStoryEventCueV2500.snapshot()') is None
  assert page.locator('#bf2500-cue').is_hidden()
@@ -49,6 +56,19 @@ with sync_playwright() as pw:
  page.evaluate("""()=>{P.questClears[2]=1;renderQuestList();S.busy=false;if(!BFQuestAreas.choose(QUESTS.find(q=>q.missionId===10)))throw Error("Mission 10 not selected");P.questClears[10]=1;S.over=true;S.phase="Victory";renderQuestList()}""")
  s=page.evaluate('BFGlobalStoryEventCueV2500.refresh()')
  assert s['kind']=='clear' and s['id']==10,s
+ receipt_guard=page.evaluate("""()=>{const own=P.questClears[10],before=JSON.stringify({P,S}),saved=localStorage.getItem('bf_global_offline_demo_v7');const out=[];
+  try{for(const value of [Infinity,NaN,1.5,'1',true,-1,0,null]){
+   P.questClears[10]=value;out.push(BFGlobalStoryEventCueV2500.refresh()===null&&BFGlobalStoryEventCueV2500.open()===false);
+  }}finally{P.questClears[10]=own;BFGlobalStoryEventCueV2500.refresh();}
+  return {out,same:before===JSON.stringify({P,S})&&saved===localStorage.getItem('bf_global_offline_demo_v7')};
+ }""")
+ assert receipt_guard=={'out':[True]*8,'same':True},receipt_guard
+ for case in ('throw','null','id','path','lines'):
+  page.evaluate('(v)=>window.__cueFault=v',case)
+  assert page.evaluate('BFGlobalStoryEventCueV2500.refresh()') is None,case
+  assert page.evaluate('BFGlobalStoryEventCueV2500.open()') is False
+  page.evaluate("window.__cueFault=''")
+ assert page.evaluate('BFGlobalStoryEventCueV2500.refresh().kind')=='clear'
  clear_saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert page.evaluate('BFGlobalStoryEventCueV2500.open()') is True
  assert 'Farm' in page.locator('#bf2200-text').inner_text()
