@@ -201,7 +201,8 @@ with sync_playwright() as pw:
   for selector in ('#bf10000-squad-presets > summary',
                    '#bf10000-slot','#bf10000-name',
                    '#bf10000-save','#bf10000-apply',
-                   '#bf10000-delete','#bf10000-rename','#bf10000-copy'):
+                   '#bf10000-delete','#bf10000-rename','#bf10000-copy',
+                   '#bf10000-up','#bf10000-down'):
    rect=p.locator(selector).bounding_box()
    assert rect and rect['height']>=44,(width,selector,rect)
  p.set_viewport_size({'width':390,'height':844})
@@ -231,6 +232,74 @@ with sync_playwright() as pw:
  p.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
  assert p.locator('#bf10000-squad-presets').count()==1
  assert p.evaluate('P.version')==7
+ # Real native app: organizing slots never applies a team or writes canonical v7.
+ q=b.new_page(viewport={'width':390,'height':844})
+ q.on('pageerror',lambda e:errors.append(str(e)))
+ q.evaluate("""()=>{
+   const data={};window.__writes=[];window.__failPreset=false;
+   Object.defineProperty(window,'localStorage',{value:{
+     getItem:k=>data[k]??null,setItem:(k,v)=>{
+       if(window.__failPreset&&k.includes('qol_squad_presets'))throw Error('storage full');
+       window.__writes.push(k);data[k]=String(v);
+     },removeItem:k=>delete data[k],key:i=>Object.keys(data)[i]??null,
+     get length(){return Object.keys(data).length}},configurable:true});
+   window.alert=()=>{};window.confirm=()=>true;
+ }""")
+ q.set_content((A/'index.html').read_text(),wait_until='load')
+ q.add_style_tag(path=str(A/'bf_home_nav.css'))
+ q.add_script_tag(path=str(A/'bf_home_nav.js'))
+ q.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
+ q.evaluate("BF_homeNav.go('units')")
+ q.locator('#bf10000-squad-presets').evaluate('(e)=>e.open=true')
+ assert q.evaluate(api+'.savePreset(0,"First")')
+ assert q.evaluate(api+'.savePreset(1,"Second")')
+ baseline=q.evaluate("JSON.stringify({p:P,s:S,quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7')})")
+ q.evaluate('window.__writes=[]')
+ q.locator('#bf10000-slot').select_option('0')
+ q.locator('#bf10000-name').fill('Unfinished name')
+ assert q.locator('#bf10000-up').is_disabled()
+ q.locator('#bf10000-down').focus()
+ q.keyboard.press('Enter')
+ assert q.locator('#bf10000-slot').input_value()=='1'
+ assert q.locator('#bf10000-name').input_value()=='Unfinished name'
+ assert q.evaluate(api+'.info().map(s=>s.name)')==['Second','First',None,None,None]
+ # Move into an empty slot with Space, preserving the entire displaced preset.
+ q.locator('#bf10000-down').focus();q.keyboard.press('Space')
+ assert q.evaluate(api+'.info().map(s=>s.name)')==['Second',None,'First',None,None]
+ saved=q.evaluate('JSON.stringify('+api+'.info())')
+ raw=q.evaluate('localStorage.getItem('+api+'.key)')
+ q.evaluate('window.__failPreset=true')
+ assert q.evaluate(api+'.movePreset(2,-1)') is False
+ assert q.evaluate('JSON.stringify('+api+'.info())')==saved
+ assert q.locator('#bf10000-slot').input_value()=='2'
+ assert q.locator('#bf10000-name').input_value()=='Unfinished name'
+ assert q.evaluate('localStorage.getItem('+api+'.key)')==raw
+ assert 'Could not move' in q.locator('#bf10000-status').text_content()
+ q.evaluate('window.__failPreset=false')
+ for call in ('movePreset(0,-1)','movePreset(4,1)','movePreset(1,1)',
+              'movePreset(2,0)','movePreset(2,"1")','movePreset(0.5,1)'):
+  assert q.evaluate(api+'.'+call) is False,call
+ q.evaluate('S.busy=true;'+api+'.refresh()')
+ assert q.locator('#bf10000-up').is_disabled()
+ assert q.locator('#bf10000-down').is_disabled()
+ assert q.evaluate(api+'.movePreset(2,1)') is False
+ q.evaluate('S.busy=false;'+api+'.refresh()')
+ # Both endpoints and mobile geometry, with no horizontal overflow.
+ assert q.evaluate(api+'.movePreset(2,1)')
+ assert q.evaluate(api+'.movePreset(3,1)')
+ assert q.locator('#bf10000-down').is_disabled()
+ for width in (320,390,540):
+  q.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf10000-up','#bf10000-down'):
+   assert q.locator(selector).bounding_box()['height']>=44
+  assert q.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+ assert q.evaluate("JSON.stringify({p:P,s:S,quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7')})")==baseline
+ assert q.evaluate('window.__writes')==[q.evaluate(api+'.key')]*4
+ # Reinitialize the module to read persisted ordering without native save calls.
+ q.evaluate("delete window.BFGlobalQoLSquadPresetsV10000;document.querySelector('#bf10000-squad-presets').remove()")
+ q.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
+ assert q.evaluate(api+'.info().map(s=>s.name)')==['Second',None,None,None,'First']
+ assert q.evaluate('window.__writes')==[q.evaluate(api+'.key')]*4
  assert not errors,errors
  b.close()
 print('PASS v100 five squad presets: owned-only, save rollback on failure, busy gate, deletion and v7 schema')
