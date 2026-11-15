@@ -254,6 +254,7 @@ jobs:
           python test_bf_original_sevenstar_bb_combat_v15000.py
           python test_bf_original_starter_typed_evolution_v13000.py
           python test_bf_original_mission_evidence_v060.py
+          python test_bf_opaque_reference_lookup_b20.py
           python test_bf_playable_attack_frames_v065.py
           python test_bf_playable_hit_inspector_v070.py
           python test_bf_complete_mistral_progression_v070.py
