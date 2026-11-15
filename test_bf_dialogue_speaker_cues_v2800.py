@@ -31,6 +31,14 @@ with sync_playwright() as pw:
   'bf2400_st_lamia_event_dialogue.js','bf2500_story_event_prompt.js',
   'bf2600_original_event_portraits.js','bf2700_original_event_stage.js',
   'bf2800_dialogue_speaker_cues.js'):
+  if n=='bf2800_dialogue_speaker_cues.js':
+   page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__speakerFault='';
+    window.BFGlobalOriginalEventsV2200={...original,snapshot:()=>{
+     if(__speakerFault==='throw')throw Error('source unavailable');
+     if(__speakerFault==='null')return null;
+     const s=original.snapshot();
+     return {...s,...({chosen:{chosen:'dungeon:20'},lines:{lines:999},step:{step:999},source:{source:'map1-dungeon1.txt'}}[__speakerFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/n))
  assert page.evaluate('BFGlobalDialogueSpeakerV2800.snapshot().supportedScenes')==20
  assert page.evaluate('BFGlobalDialogueSpeakerV2800.lookup("map3-dungeon6.txt",1)') is None
@@ -56,6 +64,15 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueSpeakerV2800.snapshot().step')==18
  assert page.evaluate('BFGlobalDialogueSpeakerV2800.refresh().character')=='Seria'
  assert page.evaluate('BFGlobalOriginalEventPortraitsV2600.snapshot.character')=='Seria'
+ guard_before=page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ['throw','null','chosen','lines','step','source']:
+  page.evaluate('(v)=>window.__speakerFault=v',case)
+  assert page.evaluate('BFGlobalDialogueSpeakerV2800.refresh().character') is None,case
+  assert page.locator('#bf2800-speaker').is_hidden()
+  assert page.locator('#bf2800-speaker').text_content()==''
+  page.evaluate("window.__speakerFault=''")
+  assert page.evaluate('BFGlobalDialogueSpeakerV2800.refresh().character')=='Seria'
+ assert page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==guard_before
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is True
  assert page.evaluate('BFGlobalDialogueSpeakerV2800.refresh().character') is None
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
