@@ -95,6 +95,35 @@ with sync_playwright() as pw:
     assert 'ORIGINAL NORMAL ATTACK FRAMES' in page.locator('#bf-archive-detail').inner_text()
     page.locator('#bf-archive-detail summary').filter(has_text='ORIGINAL NORMAL ATTACK FRAMES').click()
     assert 'NOT verified playback seconds' in page.locator('#bf-archive-detail').inner_text()
+    native=browser.new_page(viewport={'width':390,'height':844})
+    native.on('pageerror',lambda e:errors.append(str(e)))
+    native.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{value:{
+      getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),removeItem:k=>delete db[k],
+      key:i=>Object.keys(db)[i]??null,get length(){return Object.keys(db).length}}});window.alert=()=>{}}""")
+    native.set_content((A/'index.html').read_text(),wait_until='load')
+    native.add_style_tag(path=str(A/'bf_home_nav.css'))
+    native.add_script_tag(path=str(A/'bf_home_nav.js'))
+    stable=native.evaluate('JSON.stringify({P,S,QUEST})')
+    native.add_script_tag(path=str(A/'bf12500_full_original_normal_hits.js'))
+    native.wait_for_function('!!window.BFGlobalOriginalNormalHitArchiveV12500')
+    ids=native.evaluate('P.squad.map(id=>effectiveUnit(id).id)')
+    summary=native.evaluate('BFGlobalOriginalNormalHitArchiveV12500.ownedSquad()')
+    assert summary['hits']==sum(len(rows[id]) for id in ids) and summary['forms']==ids
+    label=native.locator('#bf12500-home-hit-reference')
+    for width in (320,390,540):
+      native.set_viewport_size({'width':width,'height':844})
+      assert label.is_visible() and label.evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+    assert 'DEMO damage/timing' in label.text_content()
+    rejected=native.evaluate("""()=>{const old=P.squad;const out=[];try{
+      for(const squad of [null,[old[0],old[0]],[999999],Array(1)]){
+        P.squad=squad;out.push(BFGlobalOriginalNormalHitArchiveV12500.ownedSquad());
+      }
+    }finally{P.squad=old}return out}""")
+    assert rejected==[None]*4
+    native.evaluate("BF_homeNav.go('units')")
+    assert not label.is_visible()
+    assert native.evaluate('JSON.stringify({P,S,QUEST})')==stable
+    native.close()
     assert not errors,errors
     browser.close()
 print('PASS v125: 2258/2291 original Global normal attack full frame tuples, 71 playable preserved, no live combat/save writes')

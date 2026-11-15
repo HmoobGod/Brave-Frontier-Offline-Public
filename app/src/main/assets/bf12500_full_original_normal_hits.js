@@ -44,8 +44,36 @@
       if(pos!==data.length||byId.size!==2258||byId.has(1)||byId.has(10023)||
          byId.get(10011)?.events.length!==3||byId.get(20926)?.events.length!==10||
          byId.get(840548)?.events.length!==25)return;
+      function ownedSquad(){
+        try{
+          if(typeof P==='undefined'||P.version!==7||!Array.isArray(P.squad)||P.squad.length>6||
+             !Array.isArray(P.roster)||typeof effectiveUnit!=='function')return null;
+          const seen=new Set(),forms=[];let hits=0;
+          for(const id of Array.from(P.squad)){
+            if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||!P.roster.includes(id))return null;
+            seen.add(id);const unit=effectiveUnit(id),row=byId.get(unit?.id);
+            if(!row)return null;
+            forms.push(unit.id);hits+=row.events.length;
+          }
+          return Object.freeze({count:forms.length,hits,forms:Object.freeze(forms),sourceYear:2022,liveDamage:false});
+        }catch(_){return null;}
+      }
+      let home=null;
+      function refreshHome(){
+        const party=document.querySelector('#bf-home #bf-scene-party');if(!party)return;
+        if(!home||!home.isConnected){
+          home=document.createElement('p');home.id='bf12500-home-hit-reference';
+          home.setAttribute('role','status');home.setAttribute('aria-live','polite');
+          home.style.cssText='max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui,sans-serif';party.after(home);
+        }
+        const s=ownedSquad();
+        const text=!s?'2022 NORMAL HITS · squad reference unavailable':!s.count?'2022 NORMAL HITS · no squad selected':
+          '2022 NORMAL HIT REFERENCE · '+s.hits+' hits across '+s.count+' forms · DEMO damage/timing';
+        if(home.textContent!==text)home.textContent=text;
+      }
+      window.addEventListener('bf-route-sync',refreshHome);refreshHome();
       window.BFGlobalOriginalNormalHitArchiveV12500=Object.freeze({
-        count:2258,sourceYear:2022,archivedForms:2291,excluded:33,
+        ownedSquad,count:2258,sourceYear:2022,archivedForms:2291,excluded:33,
         originalArchiveSha256:'69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9',
         canonicalSourceDigest:'e99e843c6d0c3c46b30fab217fb3c7415275ebf58782008a3a0127e90df0b836',
         lookup(id){return Number.isSafeInteger(id)?byId.get(id)||null:null;},
