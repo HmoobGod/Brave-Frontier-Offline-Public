@@ -60,7 +60,7 @@
   const home = document.getElementById('bf-home');
   const homeTitle = home?.querySelector('.bf-scene-title');
   const homeDetails = homeTitle ? document.createElement('details') : null;
-  let homeValues = null;
+  let homeValues = null, homeNext = null;
   if (homeDetails) {
     homeDetails.id = 'bf054-home-details';
     const label = document.createElement('summary');
@@ -68,7 +68,10 @@
     homeValues = document.createElement('p');
     homeValues.id = 'bf054-home-values';
     homeValues.setAttribute('aria-live', 'polite');
-    homeDetails.append(label,homeValues);
+    homeNext = document.createElement('p');
+    homeNext.id = 'bf054-home-next-level';
+    homeNext.setAttribute('aria-live', 'polite');
+    homeDetails.append(label,homeValues,homeNext);
     homeTitle.after(homeDetails);
   }
   // v401: On narrow phones, the playable original-art Quest and Summon
@@ -126,7 +129,11 @@
         5*(P.level-1)*P.level/2 : null;
     const valid = typeof P !== 'undefined' && P?.version===7 &&
       levelFloor!==null &&
-      Number.isSafeInteger(P.exp) && P.exp>=levelFloor;
+      Number.isSafeInteger(P.exp) && P.exp>=levelFloor &&
+      // Before the cap, reaching this ceiling already means the NEXT demo
+      // level. A stale lower level must not look like valid 100% progress
+      // or advertise a next-level target with zero EXP remaining.
+      (P.level===99 || P.exp<levelFloor+5*P.level);
     if(!valid)return {valid:false,level:null,total:null,
       threshold:1,earned:0,percent:0,capped:false};
     const level=P.level,total=P.exp;
@@ -168,6 +175,17 @@
         ' · Zel '+safeCount(p.zel)+' · Karma '+safeCount(p.karma)+
         ' · Energy unavailable (offline, not deducted).';
       if (homeValues.textContent !== text) homeValues.textContent = text;
+    }
+    if (homeNext) {
+      // The header bar measures EXP within this DEMO level; P.exp is a
+      // cumulative saved total. Explain both without inventing a Global
+      // rank curve, awarding EXP or normalizing invalid player data.
+      const text = !value.valid?'Next demo level unavailable · invalid local EXP state.':
+        value.capped?'Demo maximum level 99 · Total demo EXP '+safeCount(value.total)+'.':
+        'Next demo level '+(value.level+1)+' · '+
+          safeCount(value.threshold-value.earned)+' EXP remaining · Total demo EXP '+
+          safeCount(value.total)+'.';
+      if (homeNext.textContent !== text) homeNext.textContent = text;
     }
   }
   const progress = document.getElementById('pexp');

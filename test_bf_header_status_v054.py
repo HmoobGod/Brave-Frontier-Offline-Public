@@ -31,10 +31,10 @@ with sync_playwright() as pw:
     errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
     page.evaluate("""() => {
-      const saved={};
+      const saved={};let writes=0;window.__headerWrites=()=>writes;
       Object.defineProperty(window,'localStorage',{configurable:true,value:{
-        getItem:k=>saved[k]??null,setItem:(k,v)=>{saved[k]=String(v)},
-        removeItem:k=>{delete saved[k]},key:i=>Object.keys(saved)[i]??null,
+        getItem:k=>saved[k]??null,setItem:(k,v)=>{writes++;saved[k]=String(v)},
+        removeItem:k=>{writes++;delete saved[k]},key:i=>Object.keys(saved)[i]??null,
         get length(){return Object.keys(saved).length}}});
       window.alert=()=>{};window.confirm=()=>true;
       HTMLMediaElement.prototype.load=()=>{};
@@ -86,6 +86,8 @@ with sync_playwright() as pw:
     assert details.get_attribute('open') is not None
     assert 'Demo Lv.1' in page.locator('#bf054-home-values').inner_text()
     assert 'Zel 0' in page.locator('#bf054-home-values').inner_text()
+    assert page.locator('#bf054-home-next-level').inner_text()==(
+        'Next demo level 2 · 5 EXP remaining · Total demo EXP 0.')
     for width in (320,390,540):
         page.set_viewport_size({'width':width,'height':844})
         summary_bounds=details.locator('summary').bounding_box()
@@ -101,7 +103,8 @@ with sync_playwright() as pw:
         return {state:BF054HeaderStatus.state,
           text:document.getElementById('bf054-exp-text').textContent,
           aria:document.getElementById('bf054-exp').getAttribute('aria-valuetext'),
-          home:document.getElementById('bf054-home-values').textContent};
+          home:document.getElementById('bf054-home-values').textContent,
+          next:document.getElementById('bf054-home-next-level').textContent};
       };
       try{
         P.level=0;result.zeroLevel=inspect();
@@ -117,6 +120,13 @@ with sync_playwright() as pw:
         P.version=7;P.level=2;P.exp=4;result.level2MissingExp=inspect();
         P.level=3;P.exp=14;result.level3MissingExp=inspect();
         P.level=99;P.exp=24254;result.level99MissingExp=inspect();
+        P.level=1;P.exp=5;result.level1AtCeiling=inspect();
+        P.level=2;P.exp=15;result.level2AtCeiling=inspect();
+        P.level=3;P.exp=30;result.level3AtCeiling=inspect();
+        P.level=98;P.exp=24255;result.level98AtCeiling=inspect();
+        P.level=1;P.exp=4;result.level1BelowCeiling=inspect();
+        P.level=2;P.exp=14;result.level2BelowCeiling=inspect();
+        P.level=98;P.exp=24254;result.level98BelowCeiling=inspect();
         P.level=2;P.exp=5;result.level2Floor=inspect();
         P.level=3;P.exp=15;result.level3Floor=inspect();
         P.level=99;P.exp=24255;result.level99Floor=inspect();
@@ -130,19 +140,33 @@ with sync_playwright() as pw:
     }""")
     for kind in ('zeroLevel','stringLevel','outOfRangeLevel','negativeExp',
                  'nanExp','infiniteExp','stringExp','invalidVersion',
-                 'level2MissingExp','level3MissingExp','level99MissingExp'):
+                 'level2MissingExp','level3MissingExp','level99MissingExp',
+                 'level1AtCeiling','level2AtCeiling','level3AtCeiling',
+                 'level98AtCeiling'):
         item=invalid[kind]
         assert item['state']['valid'] is False,(kind,item)
         assert item['text']=='— / —',(kind,item)
         assert 'unavailable' in item['aria'],(kind,item)
         assert 'Lv./EXP unavailable' in item['home'],(kind,item)
+        assert item['next']=='Next demo level unavailable · invalid local EXP state.',(kind,item)
     for kind,expected in (('level2Floor','0 / 10'),
                           ('level3Floor','0 / 15'),
+                          ('level1BelowCeiling','4 / 5'),
+                          ('level2BelowCeiling','9 / 10'),
+                          ('level98BelowCeiling','489 / 490'),
                           ('level99Floor','MAX')):
         item=invalid[kind]
         assert item['state']['valid'] is True,(kind,item)
         assert item['text']==expected,(kind,item)
     assert invalid['saveUnchanged'] and invalid['normal'],invalid
+    assert invalid['level2Floor']['next']==(
+        'Next demo level 3 · 10 EXP remaining · Total demo EXP 5.')
+    assert invalid['level3Floor']['next']==(
+        'Next demo level 4 · 15 EXP remaining · Total demo EXP 15.')
+    assert invalid['level99Floor']['next']==(
+        'Demo maximum level 99 · Total demo EXP 24,255.')
+    for kind in ('level1BelowCeiling','level2BelowCeiling','level98BelowCeiling'):
+        assert '1 EXP remaining' in invalid[kind]['next'],(kind,invalid[kind])
     # v460: the nav header must not present stale rendered strings as actual
     # save values. Route navigation itself copies core text into the header;
     # the read-only validator must immediately override that false display.
@@ -336,6 +360,8 @@ with sync_playwright() as pw:
     assert 'EXP 8/10' in home_status
     assert 'Zel 1,345' in home_status and 'Karma 250' in home_status
     assert 'Energy unavailable' in home_status
+    assert page.locator('#bf054-home-next-level').inner_text()==(
+        'Next demo level 3 · 2 EXP remaining · Total demo EXP 13.')
     page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
     assert page.locator('#bf054-exp-text').inner_text()=='8 / 10'
     page.locator('.bf-navbar button[data-bf-goto="home"]').click()
@@ -347,6 +373,24 @@ with sync_playwright() as pw:
         zel:P.zel,karma:P.karma,save:localStorage.getItem('bf_global_offline_demo_v7'),
         roster:JSON.stringify(P.roster),squad:JSON.stringify(P.squad)})""")
     assert end==initial,(initial,end)
+    # Real native reward/level-up integration in this disposable page:
+    # mission 1 earns 5 cumulative EXP and reaches demo level 2. The Home
+    # readout must show the NEXT level's 10 EXP target, not reuse 5 or 0.
+    page.evaluate('finish(true)')
+    page.wait_for_function("""()=>document.querySelector('#bf054-home-next-level')
+      ?.textContent==='Next demo level 3 · 10 EXP remaining · Total demo EXP 5.'""")
+    assert page.evaluate('P.level')==2 and page.evaluate('P.exp')==5
+    reward_state=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+      quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
+      writes:__headerWrites()})""")
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        page.evaluate('BF054HeaderStatus.refresh()')
+        bounds=page.locator('#bf054-home-next-level').bounding_box()
+        assert bounds and bounds['x']>=0 and bounds['x']+bounds['width']<=width+1,(width,bounds)
+    assert page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+      quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
+      writes:__headerWrites()})""")==reward_state
     assert not errors,errors
     browser.close()
 print('PASS v0.54 native BF1 header crop, demo EXP live meter, unavailable Energy, v7 unchanged')
