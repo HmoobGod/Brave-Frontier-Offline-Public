@@ -93,10 +93,10 @@
    'border:1px solid #c5a471;border-radius:6px;',
    'font:12px/1.5 system-ui,sans-serif}',
    '#bf1500-chain>summary{font:bold 14px Georgia,serif;cursor:pointer;',
-   'min-height:36px}',
+   'min-height:44px}',
    '#bf1500-chain select,#bf1500-chain button{color:#fff;',
    'background:#31506c;border:1px solid #aa977a;',
-   'padding:7px;border-radius:5px;min-height:39px}',
+   'padding:7px;border-radius:5px;min-height:44px}',
    '#bf1500-chain select{width:100%;margin:5px 0}',
    '.bf1500-record{padding:7px;background:#2a4157;',
    'border-radius:5px;margin:5px 0}',
@@ -115,10 +115,16 @@
  toSel.setAttribute('aria-label','Recorded reachable evolution target');
  const refreshBtn=document.createElement('button');refreshBtn.type='button';
  refreshBtn.id='bf1500-refresh';refreshBtn.textContent='REFRESH DRAFT ROUTES';
+ const exportBtn=document.createElement('button');exportBtn.type='button';
+ exportBtn.id='bf1500-checklist';exportBtn.textContent='PREPARE TEXT CHECKLIST';
+ const textPlan=document.createElement('textarea');textPlan.id='bf1500-text-plan';
+ textPlan.readOnly=true;textPlan.hidden=true;textPlan.rows=10;
+ textPlan.setAttribute('aria-label','Read-only original evolution route checklist; select and copy');
+ textPlan.style.cssText='box-sizing:border-box;width:100%;min-height:44px;margin:8px 0';
  const report=document.createElement('div');report.id='bf1500-report';
  const steps=document.createElement('div');steps.id='bf1500-steps';
  const materials=document.createElement('div');materials.id='bf1500-materials';
- panel.append(summary,note,fromSel,toSel,refreshBtn,report,steps,materials);
+ panel.append(summary,note,fromSel,toSel,refreshBtn,exportBtn,textPlan,report,steps,materials);
  anchor.after(panel);
  let from=null,to=null;
  const el=(tag,txt)=>{const node=document.createElement(tag);
@@ -132,9 +138,24 @@
      opt.textContent=row.label;sel.append(opt);
    }
  }
+ function checklist(){
+   if(!draft.selected.includes(from)||to===null)return '';
+   const route=findRoute(from,to);if(!route)return '';
+   const lines=['2022 GLOBAL · RECORDED EVOLUTION ROUTE',
+     'Reference checklist only. No owned inventory checked, no native evolution or drop locations inferred.',
+     'Original forms: '+route.path.map(id=>'#'+id).join(' -> ')];
+   route.steps.forEach((row,i)=>lines.push((i+1)+'. '+row.fromName+' #'+row.from+
+     ' -> '+row.toName+' #'+row.to+' · '+row.zel+' recorded Zel · '+row.karma+' recorded Karma'));
+   lines.push('ALL STAGES: '+route.totals.zel+' recorded Zel · '+route.totals.karma+' recorded Karma');
+   for(const item of route.totals.materials)lines.push((item.name||'Unnamed source material')+
+     ' #'+item.id+' (type '+item.type+') x'+item.count);
+   lines.push('Temporary archive draft only; this does not apply a squad, evolve units, spend or save.');
+   return lines.join('\n');
+ }
  function showRoute(){
+   textPlan.value='';textPlan.hidden=true;exportBtn.disabled=true;
    report.replaceChildren();steps.replaceChildren();materials.replaceChildren();
-   if(from===null||to===null){
+   if(from===null||to===null||!draft.selected.includes(from)){
      report.append(el('p','Choose a drafted source and a target with recorded recipe links.'));
      return null;
    }
@@ -143,6 +164,7 @@
      report.append(el('p','No source-verified recipe path exists within 12 recorded hops.'));
      return null;
    }
+   exportBtn.disabled=false;
    report.append(el('strong','2022 Global source path · '+route.steps.length+' recipe stages'));
    report.append(el('p',route.path.map(id=>catalog.find(id)?.name||'#'+id).join(' → ')));
    report.append(el('p','Combined RECORDED costs: '+route.totals.zel+
@@ -205,6 +227,11 @@
      reachable(from).some(x=>x.id===id)?id:null;
    showRoute();
  });
+ exportBtn.addEventListener('click',()=>{
+   const text=checklist();
+   if(!text){showRoute();return;}
+   textPlan.value=text;textPlan.hidden=false;textPlan.focus();textPlan.select();
+ });
  refreshBtn.addEventListener('click',refresh);
  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
@@ -214,7 +241,7 @@
  window.BFGlobalEvolutionChainV1500=Object.freeze({
    get sourceHopCount(){return sourceHopCount;},
    get selected(){return {from,to};},
-   findRoute,reachable,choose,refresh,
+   findRoute,reachable,choose,refresh,checklist,
    get currentRoute(){return from===null||to===null?null:findRoute(from,to);}
  });
 })();

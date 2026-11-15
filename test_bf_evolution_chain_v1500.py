@@ -117,6 +117,34 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Recipe route lookup must never change saved game'
+ # A copyable checklist is generated only from the selected source route.
+ stable=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ assert page.locator('#bf1500-text-plan').is_hidden()
+ page.locator('#bf1500-checklist').focus();page.keyboard.press('Enter')
+ checklist=page.locator('#bf1500-text-plan').input_value()
+ assert checklist==page.evaluate('BFGlobalEvolutionChainV1500.checklist()')
+ assert f"#{direct['from']} -> #{direct['to']}" in checklist
+ assert '2022 GLOBAL' in checklist and 'No owned inventory checked' in checklist
+ assert f"ALL STAGES: {route['totals']['zel']} recorded Zel" in checklist
+ for mat in route['totals']['materials']:
+  assert f"#{mat['id']} (type {mat['type']}) x{mat['count']}" in checklist
+ assert page.locator('#bf1500-text-plan').get_attribute('readonly') is not None
+ assert page.evaluate('document.activeElement.id')=='bf1500-text-plan'
+ assert page.locator('#bf1500-text-plan').evaluate('(e)=>e.selectionEnd-e.selectionStart')==len(checklist)
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  assert page.locator('#bf1500-checklist').bounding_box()['height']>=44
+  assert page.locator('#bf1500-text-plan').evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==stable
+ # Refresh/selection changes clear stale text rather than exporting an old route.
+ page.evaluate('BFGlobalEvolutionChainV1500.refresh()')
+ assert page.locator('#bf1500-text-plan').is_hidden()
+ assert page.locator('#bf1500-text-plan').input_value()==''
+ page.evaluate('BFArchiveDraftV800.clear()')
+ assert page.evaluate('BFGlobalEvolutionChainV1500.checklist()')==''
+ page.evaluate('BFGlobalEvolutionChainV1500.refresh()')
+ assert page.locator('#bf1500-checklist').is_disabled()
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==before['saved']
  assert not errors,errors
  browser.close()
 print('PASS v15: strict source recipe BFS, 2022 cost/material totals, bounded routes and v7 safety')
