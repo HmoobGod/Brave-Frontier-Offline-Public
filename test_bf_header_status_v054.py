@@ -120,6 +120,13 @@ with sync_playwright() as pw:
         P.version=7;P.level=2;P.exp=4;result.level2MissingExp=inspect();
         P.level=3;P.exp=14;result.level3MissingExp=inspect();
         P.level=99;P.exp=24254;result.level99MissingExp=inspect();
+        P.level=1;P.exp=5;result.level1AtCeiling=inspect();
+        P.level=2;P.exp=15;result.level2AtCeiling=inspect();
+        P.level=3;P.exp=30;result.level3AtCeiling=inspect();
+        P.level=98;P.exp=24255;result.level98AtCeiling=inspect();
+        P.level=1;P.exp=4;result.level1BelowCeiling=inspect();
+        P.level=2;P.exp=14;result.level2BelowCeiling=inspect();
+        P.level=98;P.exp=24254;result.level98BelowCeiling=inspect();
         P.level=2;P.exp=5;result.level2Floor=inspect();
         P.level=3;P.exp=15;result.level3Floor=inspect();
         P.level=99;P.exp=24255;result.level99Floor=inspect();
@@ -133,7 +140,9 @@ with sync_playwright() as pw:
     }""")
     for kind in ('zeroLevel','stringLevel','outOfRangeLevel','negativeExp',
                  'nanExp','infiniteExp','stringExp','invalidVersion',
-                 'level2MissingExp','level3MissingExp','level99MissingExp'):
+                 'level2MissingExp','level3MissingExp','level99MissingExp',
+                 'level1AtCeiling','level2AtCeiling','level3AtCeiling',
+                 'level98AtCeiling'):
         item=invalid[kind]
         assert item['state']['valid'] is False,(kind,item)
         assert item['text']=='— / —',(kind,item)
@@ -142,6 +151,9 @@ with sync_playwright() as pw:
         assert item['next']=='Next demo level unavailable · invalid local EXP state.',(kind,item)
     for kind,expected in (('level2Floor','0 / 10'),
                           ('level3Floor','0 / 15'),
+                          ('level1BelowCeiling','4 / 5'),
+                          ('level2BelowCeiling','9 / 10'),
+                          ('level98BelowCeiling','489 / 490'),
                           ('level99Floor','MAX')):
         item=invalid[kind]
         assert item['state']['valid'] is True,(kind,item)
@@ -153,6 +165,8 @@ with sync_playwright() as pw:
         'Next demo level 4 · 15 EXP remaining · Total demo EXP 15.')
     assert invalid['level99Floor']['next']==(
         'Demo maximum level 99 · Total demo EXP 24,255.')
+    for kind in ('level1BelowCeiling','level2BelowCeiling','level98BelowCeiling'):
+        assert '1 EXP remaining' in invalid[kind]['next'],(kind,invalid[kind])
     # v460: the nav header must not present stale rendered strings as actual
     # save values. Route navigation itself copies core text into the header;
     # the read-only validator must immediately override that false display.

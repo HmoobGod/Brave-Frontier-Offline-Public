@@ -129,7 +129,11 @@
         5*(P.level-1)*P.level/2 : null;
     const valid = typeof P !== 'undefined' && P?.version===7 &&
       levelFloor!==null &&
-      Number.isSafeInteger(P.exp) && P.exp>=levelFloor;
+      Number.isSafeInteger(P.exp) && P.exp>=levelFloor &&
+      // Before the cap, reaching this ceiling already means the NEXT demo
+      // level. A stale lower level must not look like valid 100% progress
+      // or advertise a next-level target with zero EXP remaining.
+      (P.level===99 || P.exp<levelFloor+5*P.level);
     if(!valid)return {valid:false,level:null,total:null,
       threshold:1,earned:0,percent:0,capped:false};
     const level=P.level,total=P.exp;
