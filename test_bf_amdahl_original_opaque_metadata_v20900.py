@@ -207,6 +207,15 @@ with sync_playwright() as pw:
    stored:localStorage.getItem("bf_global_offline_demo_v7"),writes:__writes()
  })""")
  assert before==after,(before,after)
+ page.locator('#bf20900-raw-mission-fields').evaluate('(e)=>e.open=true')
+ stable=page.evaluate('JSON.stringify({P,S,QUESTS})')
+ checkbox=page.locator('#bf20900-reward-only');checkbox.check()
+ expected=[q['id'] for q in Q['quests'] if q['dungeonId']==460 and q['rawRewards']]
+ assert page.locator('#bf20900-source-fields li').evaluate_all('(nodes)=>nodes.map(n=>Number(n.dataset.sourceMission))')==expected
+ assert 'meanings unknown' in page.locator('#bf20900-filter-count').text_content()
+ checkbox.uncheck()
+ assert page.locator('#bf20900-source-fields li').count()==6
+ assert page.evaluate('JSON.stringify({P,S,QUESTS})')==stable
  assert not errors,errors
  b.close()
 print("PASS v209: all 36 exact source-only encounter/music/reward rows and all seven areas; no v7 gameplay/save mutation")
