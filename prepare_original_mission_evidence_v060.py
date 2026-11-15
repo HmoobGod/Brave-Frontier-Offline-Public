@@ -32,6 +32,14 @@ assert 'bf_global_offline_demo_v7' in s
 assert s.count('</script><!-- BF_GLOBAL_UNIT_ARCHIVE_BEGIN -->')==1
 marker='/* BF_ORIGINAL_MISSION_INSPECTOR_STAGED_V060 */'
 if s.count(marker)==1:
+    assert s.count('/* BF_ORIGINAL_MISSION_EVIDENCE_V057 */')==1
+    assert s.count('/* BF_ORIGINAL_MISSION_INSPECTOR_V058 */')==1
+    start=s.index('<script>'+marker)
+    end=s.index('</script><!-- BF_GLOBAL_UNIT_ARCHIVE_BEGIN -->',start)+len('</script>')
+    staged='<script>'+marker+script+'</script><script>'+inspector+'</script>'
+    if s[start:end]!=staged:
+        s=s[:start]+staged+s[end:]
+        html.write_text(s,'utf-8')
     assert s.count(script)==s.count(inspector)==1
     assert s.count('/* BF_ORIGINAL_MISSION_EVIDENCE_V057 */')==1
     assert s.count('/* BF_ORIGINAL_MISSION_INSPECTOR_V058 */')==1

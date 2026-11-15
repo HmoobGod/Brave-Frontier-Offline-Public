@@ -32,8 +32,14 @@
    classifications:source.source.limitations.slice(),
    archiveSha256:source.source.archiveSha256
  });
+ function findOpaqueReference(label,reference){
+   if(typeof label!=='string'||typeof reference!=='string'||
+      !/^[0-9]+$/.test(label)||!/^[0-9]+$/.test(reference)||label.length>20||reference.length>20)return null;
+   return Object.freeze([...map.values()].filter(row=>parseTokens(row.rawEncounterRef)
+     .some(pair=>pair.opaqueLabel===label&&pair.opaqueRef===reference)).map(row=>row.missionId));
+ }
  window.BFOriginalMissionEvidence=Object.freeze({
-   count:map.size,
+   findOpaqueReference,count:map.size,
    missionIds:Object.freeze(expected.slice()),
    lookup(id){return map.get(id)||null},
    parseOpaqueReferences:parseTokens,
