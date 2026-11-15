@@ -39,10 +39,25 @@
  hub.append(summary,caution,coverage,content);
  first.before(hub);
  for(const lab of labs)content.append(lab);
+ function verifiedClearCount(){
+   if(P.version!==7)return null;
+   const ledger=P.questClears;
+   if(!ledger||typeof ledger!=='object'||Array.isArray(ledger)||
+     ![Object.prototype,null].includes(Object.getPrototypeOf(ledger)))return null;
+   const ids=QUESTS.map(q=>q?.missionId);
+   if(ids.length!==106||new Set(ids).size!==106||ids.some(id=>!Number.isSafeInteger(id)||id<=0))return null;
+   const known=new Set(ids);
+   for(const key of Object.keys(ledger)){
+     const own=Object.getOwnPropertyDescriptor(ledger,key);
+     if(!/^[1-9][0-9]*$/.test(key)||!known.has(Number(key))||!own||!('value' in own)||
+       !Number.isSafeInteger(own.value)||own.value<0)return null;
+   }
+   return ids.filter(id=>Object.prototype.hasOwnProperty.call(ledger,id)&&ledger[id]>0).length;
+ }
  function refresh(){
-   const clears=QUESTS.filter(q=>(P.questClears?.[q.missionId]||0)>0).length;
+   const clears=verifiedClearCount();
    const tiles=[
-     [clears+' / 106','Original Global missions cleared in demo'],
+     [clears===null?'UNAVAILABLE':clears+' / 106',clears===null?'Invalid local clear ledger; no progress inferred':'Original Global missions cleared in demo'],
      ['23','Recorded original-region dungeons'],
      ['2,291','Recovered 2022 unit encyclopedia forms'],
      ['5','Source research and isolated training labs']
