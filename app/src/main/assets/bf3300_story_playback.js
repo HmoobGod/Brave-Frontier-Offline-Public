@@ -37,11 +37,13 @@
  pauseButton.textContent='PAUSE ⏸';
  const skip=document.createElement('button');skip.type='button';skip.id='bf3300-end';
  skip.textContent='LAST PAGE »';
+ const restartButton=document.createElement('button');restartButton.type='button';
+ restartButton.id='bf3300-restart';restartButton.textContent='READ FROM START «';
  const state=document.createElement('small');state.id='bf3300-state';
  state.setAttribute('aria-live','polite');
  const note=document.createElement('small');
  note.textContent='Uses original archived dialogue, backgrounds and expression sprites. Page delay is optional QoL, not original 2022 script timing. No quest, rewards or save modifications.';
- panel.append(label,play,pauseButton,skip,state,note);
+ panel.append(label,play,pauseButton,skip,restartButton,state,note);
  nav.after(panel);
  let playing=false,scene=null,timer=null;
  function snapshot(){
@@ -55,6 +57,7 @@
    play.disabled=!available||playing||s.step>=s.lines;
    pauseButton.disabled=!playing;
    skip.disabled=!available||s.step>=s.lines;
+   restartButton.disabled=!available||s.step<=1;
    state.textContent=(playing?'PLAYING':'PAUSED')+' · Page '+s.step+'/'+s.lines;
    return s;
  }
@@ -90,6 +93,26 @@
    refresh();
    return archive.snapshot().step===s.lines;
  }
+ // Explicit reader-only rewind. Validate the selected archived scene before
+ // using its native Previous control; never touch quest progression.
+ function restart(){
+   try{
+     const s=snapshot(),a=archive.snapshot();
+     if(!reader.open||document.hidden||typeof S!=='undefined'&&(S.busy||S.auto)||
+       typeof a.chosen!=='string'||!Number.isSafeInteger(s.step)||s.step<=1||
+       !Number.isSafeInteger(s.lines)||s.lines>1000||s.step>s.lines)return false;
+     const [kind,id]=a.chosen.split(':'),record=archive.lookup(kind,Number(id));
+     if(!record||record.source!=='content/event/'+s.source||record.lines.length!==s.lines)return false;
+     pause();
+     for(let i=s.step;i>1;i--){
+       const current=archive.snapshot();
+       if(current.source!==s.source||current.step!==i||prev.disabled)return false;
+       prev.click();
+     }
+     refresh();return archive.snapshot().source===s.source&&archive.snapshot().step===1;
+   }catch(_){return false;}
+ }
+ restartButton.addEventListener('click',restart);
  play.addEventListener('click',start);
  pauseButton.addEventListener('click',pause);
  skip.addEventListener('click',lastPage);
@@ -100,5 +123,5 @@
  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause()});
  speed.addEventListener('change',()=>{if(playing){pause();start()}else refresh()});
  refresh();
- window.BFGlobalStoryPlaybackV3300=Object.freeze({snapshot,refresh,start,pause,lastPage});
+ window.BFGlobalStoryPlaybackV3300=Object.freeze({snapshot,refresh,start,pause,lastPage,restart});
 })();
