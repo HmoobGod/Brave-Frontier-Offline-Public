@@ -413,6 +413,29 @@ with sync_playwright() as pw:
         assert page.locator('#bf420-home-clear-bar').is_visible()
         assert '106/106' in page.locator('#bf420-home-clears').inner_text()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
+        # Explain exactly which current slots need repair, without changing them.
+        diagnostics=page.evaluate("""()=>{
+          const squad=P.squad,roster=P.roster,unit=window.effectiveUnit;
+          const out=[];
+          const read=()=>{
+            const before=JSON.stringify({P,S,QUEST});const writes=__bf420StorageWrites();
+            const s=BFHomeBattleReadinessV420.refresh();
+            out.push({issues:s.issues,filled:s.filled,
+              lines:[...document.querySelectorAll('#bf420-home-squad-issues li')].map(x=>x.textContent),
+              same:before===JSON.stringify({P,S,QUEST})&&writes===__bf420StorageWrites()});
+          };
+          try{
+            P.roster=[10011];P.squad=[10011,10011,20011,'10011'];read();
+            P.squad=Array(1);read();
+            P.squad=[10011];window.effectiveUnit=()=>null;read();
+          }finally{P.squad=squad;P.roster=roster;window.effectiveUnit=unit;BFHomeBattleReadinessV420.refresh()}
+          return out;
+        }""")
+        assert diagnostics[0]['issues']==['Slot 2 · Duplicate unit','Slot 3 · Unit not owned','Slot 4 · Invalid unit ID'],diagnostics
+        assert diagnostics[0]['filled']==1
+        assert diagnostics[1]['issues']==['Slot 1 · Invalid unit ID']
+        assert diagnostics[2]['issues']==['Slot 1 · Unit data unavailable']
+        assert all(d['same'] and d['issues']==d['lines'] for d in diagnostics)
         assert not errors,errors
     finally:
         browser.close()
