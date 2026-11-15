@@ -21,11 +21,11 @@ with sync_playwright() as playwright:
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.evaluate("""() => {
-      const saved = {};
+      const saved = {};let writes=0;window.__homeNavWrites=()=>writes;
       Object.defineProperty(window,'localStorage',{configurable:true,value:{
         getItem(k){return saved[k] ?? null;},
-        setItem(k,v){saved[k]=String(v);},
-        removeItem(k){delete saved[k];},
+        setItem(k,v){writes++;saved[k]=String(v);},
+        removeItem(k){writes++;delete saved[k];},
         key(n){return Object.keys(saved)[n] ?? null;},
         get length(){return Object.keys(saved).length;}
       }});
@@ -134,6 +134,106 @@ with sync_playwright() as playwright:
     assert page.locator("#bf-home").is_visible()
     assert page.evaluate("({squad:JSON.stringify(P.squad),zel:P.zel,save:localStorage.getItem('bf_global_offline_demo_v7')})") == state
     assert page.evaluate("BF_homeNav.routedPanels") >= 10
+    # Home resolves the real optional journal AFTER shell injection. Missing
+    # components explain the problem without changing route or game state.
+    def journal_state():
+        return page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+          quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
+          writes:__homeNavWrites()})""")
+    before_journal=journal_state()
+    shortcut=page.locator('#bf-home-battle-log')
+    shortcut.click()
+    assert page.evaluate('BF_homeNav.current')=='home'
+    assert 'Session battle log unavailable' in page.locator('#bf-home-battle-log-status').inner_text()
+    assert journal_state()==before_journal
+    # Actual production dependency chain; no mock journal in the success path.
+    for name in ('bf080_morgan_map.js','bf090_st_lamia_map.js',
+                 'bf100_grand_gaia_campaign.js','bf101_story_continue.js',
+                 'bf2000_story_battle_hud.js','bf2200_original_event_reader.js',
+                 'bf3000_battle_results.js','bf3200_combat_journal.js'):
+        page.add_script_tag(path=str(ASSETS/name))
+    page.wait_for_function('!!window.BFGlobalCombatJournalV3200')
+    journal=page.locator('#bf3200-journal')
+    assert journal.is_hidden()  # Late journal summary must not leak onto Home.
+    before_journal=journal_state()
+    for width,key in ((320,None),(390,'Enter'),(540,'Space')):
+        page.set_viewport_size({'width':width,'height':844})
+        box=shortcut.bounding_box()
+        assert box and box['height']>=44 and box['x']>=-1 and box['x']+box['width']<=width+1,(width,box)
+        query=page.locator('#bf3200-search').input_value()
+        report=page.locator('#bf3200-report').input_value()
+        scope=page.locator('#bf3200-round')
+        round_view=scope.input_value() if scope.count() else None
+        if key:
+            shortcut.focus();shortcut.press(key)
+        else:
+            shortcut.click()
+        assert page.evaluate('BF_homeNav.current')=='quest'
+        assert journal.is_visible() and journal.evaluate('(e)=>e.open')
+        assert journal.locator('summary').evaluate('(e)=>document.activeElement===e')
+        assert page.locator('#bf3200-search').input_value()==query
+        assert page.locator('#bf3200-report').input_value()==report
+        if scope.count():
+            assert scope.input_value()==round_view
+        assert journal_state()==before_journal
+        if width==320:
+            page.locator('#bf3200-search').fill('preserve this session filter')
+            if scope.count():
+                scope.select_option('latest')
+        page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+        assert journal.is_hidden()
+    for route in ('units','summon','menu'):
+        page.locator(f'.bf-navbar button[data-bf-goto="{route}"]').click()
+        assert journal.is_hidden(),route
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    blocked=page.evaluate("""()=>{
+      const button=document.getElementById('bf-home-battle-log'),
+        journal=document.getElementById('bf3200-journal'),
+        old={state:S,version:P.version,busy:S.busy,auto:S.auto,
+          repeat:window.BFGlobalQoLQuestRepeatV9800,api:window.BFGlobalCombatJournalV3200},
+        hidden=Object.getOwnPropertyDescriptor(document,'hidden');
+      const out=[];
+      const probe=()=>{journal.open=false;button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+        out.push({route:BF_homeNav.current,open:journal.open,
+          explained:!document.getElementById('bf-home-battle-log-status').hidden})};
+      try{
+        S.busy=true;probe();S.busy=old.busy;
+        S.auto=true;probe();S.auto=old.auto;
+        P.version=6;probe();P.version=old.version;
+        S=null;probe();S=old.state;
+        for(const provider of [()=>({active:true}),()=>null,()=>({active:'false'}),
+              ()=>{throw Error('repeat unavailable')}]){
+          window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:provider};probe();
+        }
+        window.BFGlobalQoLQuestRepeatV9800=old.repeat;
+        window.BFGlobalCombatJournalV3200={};probe();
+        window.BFGlobalCombatJournalV3200={refresh:()=>{throw Error('journal unavailable')}};probe();
+        window.BFGlobalCombatJournalV3200={refresh:()=>false};probe();
+        window.BFGlobalCombatJournalV3200=old.api;
+        Object.defineProperty(document,'hidden',{configurable:true,value:true});probe();
+      }finally{
+        S=old.state;S.busy=old.busy;S.auto=old.auto;P.version=old.version;
+        window.BFGlobalQoLQuestRepeatV9800=old.repeat;
+        window.BFGlobalCombatJournalV3200=old.api;
+        if(hidden)Object.defineProperty(document,'hidden',hidden);else delete document.hidden;
+      }
+      return out;
+    }""")
+    assert len(blocked)==12 and all(r=={'route':'home','open':False,'explained':True} for r in blocked),blocked
+    assert journal_state()==before_journal
+    # A hidden Home control cannot route from another page or reopen a journal.
+    page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+    page.evaluate("""()=>{document.getElementById('bf3200-journal').open=false;
+      document.getElementById('bf-home-battle-log').dispatchEvent(new MouseEvent('click',{bubbles:true}))}""")
+    assert page.evaluate('BF_homeNav.current')=='quest' and not journal.evaluate('(e)=>e.open')
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    page.evaluate("""()=>{window.__homeJournalOldRepeat=window.BFGlobalQoLQuestRepeatV9800;
+      window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})}}""")
+    shortcut.click()
+    assert journal.is_visible() and journal.evaluate('(e)=>e.open')
+    page.evaluate('window.BFGlobalQoLQuestRepeatV9800=window.__homeJournalOldRepeat')
+    assert journal_state()==before_journal
+    print('PASS Home real session journal: late loading, route visibility, mobile/keyboard focus, filters and guarded state isolation')
     assert not errors, errors
     print("PASS navigation changes no save, squad, or Zel and throws no JS errors")
     browser.close()
