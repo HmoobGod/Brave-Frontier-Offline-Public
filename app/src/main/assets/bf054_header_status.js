@@ -144,9 +144,12 @@
     const plevel = document.getElementById('plevel');
     const pzel = document.getElementById('pzel');
     const pkarma = document.getElementById('pkarma');
-    if (lv && plevel) lv.textContent = plevel.textContent || String(value.level);
-    if (zel && pzel) zel.textContent = pzel.textContent || '0';
-    if (karma && pkarma) karma.textContent = pkarma.textContent || '0';
+    // v460 HOME: source #plevel/#pzel/#pkarma text can lag a bad import
+    // or a stale render. Never echo it as trusted v7 account state.
+    const player = typeof P !== 'undefined' && P?.version===7 ? P : null;
+    if (lv) lv.textContent = value.valid ? String(value.level) : '—';
+    if (zel) zel.textContent = player ? safeCount(player.zel) : '—';
+    if (karma) karma.textContent = player ? safeCount(player.karma) : '—';
     fill.style.width = value.percent.toFixed(2)+'%';
     label.textContent = !value.valid?'— / —':value.capped?'MAX':
       value.earned+' / '+value.threshold;
@@ -158,7 +161,7 @@
       value.capped?'Demo maximum level 99':
         value.earned+' of '+value.threshold+' demo EXP');
     if (homeValues) {
-      const p = typeof P !== 'undefined' && P ? P : {};
+      const p = typeof P !== 'undefined' && P?.version===7 ? P : {};
       const text = (value.valid?'Demo Lv.'+safeCount(p.level)+' · EXP '+
         (value.capped?'MAX':safeCount(value.earned)+'/'+safeCount(value.threshold)):
         'Demo Lv./EXP unavailable (invalid local state)')+
@@ -175,6 +178,10 @@
     const element = document.getElementById(id);
     if (element) observer.observe(element,{childList:true,characterData:true,subtree:true});
   }
+  // go() copies core DOM text even for a same-route Home click. Recheck the
+  // actual canonical v7 state after EVERY successful route sync, including
+  // repeated Home taps; never rely on route-change alone.
+  window.addEventListener('bf-route-sync', refresh);
   refresh();
   window.BF054HeaderStatus = Object.freeze({
     refresh,
