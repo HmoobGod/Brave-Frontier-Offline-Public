@@ -205,17 +205,48 @@ function bfOfflineUnitPortraitV266(source, name) {
         try { unit = effectiveUnit(baseId); } catch (_) { unit = null; }
       }
       if (unit) seen.add(baseId);
-      const card = document.createElement('div');
+      const card = document.createElement(unit ? 'button' : 'div');
       card.className = 'bf-scene-member' + (unit ? '' : ' bf-scene-empty');
       if (unit) {
+        card.type = 'button';
+        card.dataset.bfHomeUnitId = String(baseId);
         const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
         const exp = P.unitExp && P.unitExp[baseId] || 0;
         level.textContent = 'Lv.' + (typeof demoLevel === 'function' ? demoLevel(exp) : '1');
-        card.setAttribute('aria-label', name.textContent + ', ' + level.textContent);
+        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent);
+        card.title = 'Inspect owned unit';
         card.append(img, name, level);
+        card.addEventListener('click', () => {
+          // Recheck the live slot and ownership: this card may predate a
+          // roster import or squad edit. Navigation is a manual read only
+          // action, and must not interrupt a running player turn or Repeat.
+          if (window.BF_homeNav?.current !== 'home' || S?.busy || S?.auto ||
+              P?.version !== 7 || !Array.isArray(P.squad) || P.squad[index] !== baseId ||
+              P.squad.indexOf(baseId) !== index ||
+              !Array.isArray(P.roster) || !P.roster.includes(baseId)) return;
+          try { if (!effectiveUnit(baseId)) return; }
+          catch (_) { return; }
+          const repeat = window.BFGlobalQoLQuestRepeatV9800;
+          if (repeat) {
+            try { if (repeat.statusSnapshot?.()?.active !== false) return; }
+            catch (_) { return; }
+          }
+          if (typeof window.BFInnerScreens?.setTab !== 'function' ||
+              typeof window.BFUnitBox?.showDetail !== 'function') return;
+          if (window.BF_homeNav.go('units') !== true ||
+              window.BFInnerScreens.setTab('box') !== true) return;
+          window.BFUnitBox.showDetail(baseId);
+          const detail = document.getElementById('bf-box-detail');
+          const heading = detail?.querySelector('h3');
+          if (heading) {
+            heading.tabIndex = -1;
+            heading.focus({preventScroll:true});
+            detail.scrollIntoView({block:'center',behavior:'instant'});
+          }
+        });
       } else if (present) {
         unverified++;
         card.textContent = 'REVIEW';

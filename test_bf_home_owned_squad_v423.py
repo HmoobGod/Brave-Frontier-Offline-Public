@@ -45,6 +45,69 @@ with sync_playwright() as pw:
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
         warning = page.locator("#bf-scene-party-review")
         assert warning.count() == 1 and warning.is_hidden()
+        # Real Home portrait controls open the CURRENT owned profile through
+        # the existing Unit Box, including keyboard activation and narrow phones.
+        before_inspect = page.evaluate("""()=>({
+          p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+          save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
+        })""")
+        for width in (320,390,540):
+            page.set_viewport_size({"width":width,"height":844})
+            for slot in (0,5):
+                portrait = page.locator('#bf-scene-party button.bf-scene-member').nth(slot)
+                unit_id = portrait.get_attribute('data-bf-home-unit-id')
+                bounds = portrait.bounding_box()
+                assert bounds['width'] >= 44 and bounds['height'] >= 44,(width,bounds)
+                assert portrait.get_attribute('aria-label').startswith('Inspect ')
+                if slot == 0:
+                    portrait.click()
+                else:
+                    portrait.focus()
+                    portrait.press('Enter' if width == 390 else 'Space')
+                assert page.evaluate('BF_homeNav.current') == 'units'
+                assert page.evaluate('BFInnerScreens.unitTab') == 'box'
+                detail = page.locator('#bf-box-detail')
+                assert detail.is_visible()
+                assert f'Base roster ID {unit_id} ·' in detail.inner_text()
+                assert detail.locator('h3').evaluate('(e)=>document.activeElement===e')
+                assert page.locator(f'#bf-box-results [data-bf-unit-id="{unit_id}"]').get_attribute('aria-pressed') == 'true'
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+                page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+        after_inspect = page.evaluate("""()=>({
+          p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+          save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
+        })""")
+        assert before_inspect == after_inspect
+        # A painted portrait cannot bypass ownership or in-progress controls
+        # if the live state changes before a click. All fixtures are restored.
+        blocked = page.evaluate("""()=>{
+          const card=document.querySelector('#bf-scene-party button');
+          const original={squad:P.squad,roster:P.roster,busy:S.busy,auto:S.auto,
+            repeat:window.BFGlobalQoLQuestRepeatV9800};
+          const reports=[];
+          const click=()=>{card.click();reports.push(BF_homeNav.current)};
+          try{
+            S.busy=true;click();S.busy=original.busy;
+            S.auto=true;click();S.auto=original.auto;
+            for(const provider of [()=>({active:true}),()=>null,
+                ()=>{throw Error('unavailable') }]){
+              window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:provider};click();
+            }
+            window.BFGlobalQoLQuestRepeatV9800=original.repeat;
+            P.roster=[];click();P.roster=original.roster;
+            P.squad=[];click();P.squad=original.squad;
+          }finally{
+            P.squad=original.squad;P.roster=original.roster;
+            S.busy=original.busy;S.auto=original.auto;
+            window.BFGlobalQoLQuestRepeatV9800=original.repeat;
+          }
+          return reports;
+        }""")
+        assert len(blocked) == 7 and all(route == 'home' for route in blocked),blocked
+        assert page.evaluate("""()=>({
+          p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+          save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
+        })""") == before_inspect
         ids = page.evaluate("""() => {
            const owned = P.roster.find(id=>Number.isSafeInteger(id)&&id>0&&effectiveUnit(id));
            const unowned = [10012,20012,30012,40012,50012,60012,
@@ -67,6 +130,7 @@ with sync_playwright() as pw:
             page.evaluate("BFGlobalHome.refreshParty()")
             cards = page.locator("#bf-scene-party .bf-scene-member")
             assert cards.count() == 6
+            assert page.locator('#bf-scene-party button.bf-scene-member').count() == 1
             assert "REVIEW" not in cards.nth(0).inner_text()
             for i in (1,2,4,5):
                 assert cards.nth(i).inner_text() == "REVIEW", (width,i)
