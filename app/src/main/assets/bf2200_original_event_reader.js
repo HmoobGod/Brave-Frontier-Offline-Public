@@ -43,7 +43,14 @@
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ const findBox=document.createElement('section');findBox.setAttribute('aria-label','Find text in the selected original scene');
+ const findInput=document.createElement('input');findInput.id='bf2200-find';findInput.type='search';
+ findInput.setAttribute('aria-label','Source phrase in current scene');findInput.style.cssText='box-sizing:border-box;max-width:100%;min-height:44px';
+ const findButton=document.createElement('button');findButton.type='button';findButton.id='bf2200-find-next';
+ findButton.textContent='FIND NEXT SOURCE LINE';findButton.style.minHeight='44px';
+ const findStatus=document.createElement('p');findStatus.id='bf2200-find-status';findStatus.setAttribute('role','status');
+ findBox.append(findInput,findButton,findStatus);
+ panel.append(summary,choices,heading,message,controls,findBox,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -98,6 +105,25 @@
    next.disabled=position>=s.lines.length-1;
    return snapshot();
  }
+ function findNext(query){
+   try{
+     if(!panel.open||P.version!==7||typeof query!=='string'||!query.trim()||query.length>200||
+       typeof S!=='undefined'&&(S.busy||S.auto))return false;
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;
+     const s=unlocked().find(x=>keyOf(x)===selected),q=query.trim().toLocaleLowerCase();
+     if(!s)return false;
+     for(let offset=1;offset<=s.lines.length;offset++){
+       const index=(position+offset)%s.lines.length;
+       if(s.lines[index].toLocaleLowerCase().includes(q)){
+         position=index;refresh();findStatus.textContent='Matching original source line '+(index+1)+' of '+s.lines.length+'.';return true;
+       }
+     }
+     findStatus.textContent='No matching original source line in this scene.';return false;
+   }catch(_){return false;}
+ }
+ findButton.addEventListener('click',()=>findNext(findInput.value));
+ findInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();findButton.click();}});
  choices.addEventListener('change',()=>{
    const s=unlocked().find(x=>keyOf(x)===choices.value);
    choose(s);
@@ -124,7 +150,7 @@
    },
 
    get count(){return data.length},get lineCount(){return data.reduce((n,x)=>n+x.lines.length,0)},
-   snapshot,refresh,read,
+   snapshot,refresh,read,findNext,
    lookup(kind,id){const s=lookup(kind,id);return s?Object.freeze({
      kind:s.kind,id:s.id,title:s.title,source:'content/event/'+s.name,
      lines:Object.freeze(s.lines.slice())}):null}

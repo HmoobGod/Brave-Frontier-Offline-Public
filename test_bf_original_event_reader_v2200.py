@@ -61,6 +61,27 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ find_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ lines=page.evaluate('BFGlobalOriginalEventsV2200.lookup("dungeon",80).lines')
+ matches=[i+1 for i,text in enumerate(lines) if 'maxwell' in text.lower()]
+ assert len(matches)>1
+ for _ in range(len(matches)+1):
+  current=page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')
+  expected=next((n for n in matches if n>current),matches[0])
+  page.locator('#bf2200-find').fill('MAXWELL')
+  page.locator('#bf2200-find-next').click()
+  assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==expected
+ held=page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.findNext("impossible_source_phrase")') is False
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==held
+ for value in (None,True,123,'','a'*201):
+  assert page.evaluate('(q)=>BFGlobalOriginalEventsV2200.findNext(q)',value) is False
+ page.evaluate('S.auto=true')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.findNext("Maxwell")') is False
+ page.evaluate('S.auto=false;S.busy=true')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.findNext("Maxwell")') is False
+ page.evaluate('S.busy=false')
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==find_before
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')
