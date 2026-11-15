@@ -78,8 +78,17 @@
    return freeze(out);
  }
  function snapshot(){
+   let available=false;
+   try{
+     available=P.version===7&&Array.isArray(P.roster)&&!!P.materials&&
+       typeof P.materials === 'object'&&!Array.isArray(P.materials)&&
+       [Object.prototype,null].includes(Object.getPrototypeOf(P.materials))&&
+       Object.values(P.materials).every(n=>Number.isSafeInteger(n)&&n>=0);
+   }catch(_){available=false;}
+   if(!available)return freeze({available:false,ownedBases:null,recordedPaths:null,
+     readyMaterialPaths:null,demoCostsReadyPaths:null,paths:freeze([]),changesInventory:false});
    const rows=entries();
-   return freeze({ownedBases:new Set(P.roster.filter(id=>
+   return freeze({available:true,ownedBases:new Set(P.roster.filter(id=>
      Number.isSafeInteger(id)&&id>0)).size,recordedPaths:rows.length,
      readyMaterialPaths:rows.filter(x=>x.missingCount===0).length,
      demoCostsReadyPaths:rows.filter(x=>x.demoCostsReady).length,
@@ -125,13 +134,17 @@
  let previous='';
  function refresh(){
    const s=snapshot();
-   const signature=JSON.stringify({open:panel.open,filter:filter.value,paths:s.paths});
+   const signature=JSON.stringify({open:panel.open,filter:filter.value,available:s.available,paths:s.paths});
    if(signature===previous)return s;
    previous=signature;
    const visible=s.paths.filter(row=>filter.value==='all'||
      (filter.value==='demo'&&row.demoCostsReady)||
      (filter.value==='materials'&&row.missingCount===0)||
      (filter.value==='missing'&&row.missingCount>0));
+   if(!s.available){
+     status.textContent='Evolution inventory unavailable · invalid roster or material counts. Nothing changed.';
+     results.replaceChildren();return s;
+   }
    status.textContent=s.recordedPaths+' source-listed next-form recipes · '+
      s.readyMaterialPaths+' with all archived materials · '+
      s.demoCostsReadyPaths+' appear DEMO level/cost ready · '+visible.length+' shown';

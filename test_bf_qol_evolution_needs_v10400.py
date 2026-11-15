@@ -118,6 +118,25 @@ with sync_playwright() as pw:
  p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('2 missing')")
  p.add_script_tag(path=str(A/'bf10400_qol_evolution_needs.js'))
  assert p.locator('#bf10400-evolution-needs').count()==1
+ # A corrupt inventory is unavailable, never fabricated zero material counts.
+ original_state=p.evaluate('JSON.stringify(P)')
+ for mutation in ("P.materials=null","P.materials=[]","P.materials='bad'",
+                  "P.materials={10130:'1'}","P.materials={10130:-1}",
+                  "P.materials={10130:1.5}","P.materials={10130:Infinity}",
+                  "P.roster=null","P.roster='bad'","P.version=6"):
+  p.evaluate('(s)=>{window.P=JSON.parse(s)}',original_state)
+  p.evaluate(mutation)
+  damaged=p.evaluate('JSON.stringify(P)')
+  result=p.evaluate(api+'.refresh()')
+  assert result['available'] is False,mutation
+  assert result['readyMaterialPaths'] is None and result['paths']==[],mutation
+  assert 'inventory unavailable' in p.locator('#bf10400-summary').text_content(),mutation
+  assert p.locator('#bf10400-rows').text_content()=='',mutation
+  assert p.evaluate('JSON.stringify(P)')==damaged,mutation
+ p.evaluate('(s)=>{window.P=JSON.parse(s)}',original_state)
+ assert p.evaluate(api+'.refresh().available') is True
+ assert 'inventory unavailable' not in p.locator('#bf10400-summary').text_content()
+ assert p.evaluate('JSON.stringify(P)')==original_state
  assert not errors,errors
  b.close()
 print('PASS v104 source-only next-recipe material needs, demo inventory comparison, idempotence')
