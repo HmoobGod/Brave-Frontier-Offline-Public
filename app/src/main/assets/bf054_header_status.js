@@ -178,9 +178,10 @@
     const element = document.getElementById(id);
     if (element) observer.observe(element,{childList:true,characterData:true,subtree:true});
   }
-  // go() can copy stale core text into the nav header after a route change.
-  // Revalidate the actual player on that same synchronous route event.
-  window.addEventListener('bf-route-change', refresh);
+  // go() copies core DOM text even for a same-route Home click. Recheck the
+  // actual canonical v7 state after EVERY successful route sync, including
+  // repeated Home taps; never rely on route-change alone.
+  window.addEventListener('bf-route-sync', refresh);
   refresh();
   window.BF054HeaderStatus = Object.freeze({
     refresh,
