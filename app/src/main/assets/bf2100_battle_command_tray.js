@@ -19,9 +19,10 @@
   'border-radius:8px;background:#1b3044;color:#f5e9d4;font:12px/1.5 system-ui,sans-serif}',
   '#bf2100-tray h3{font:800 15px Georgia,serif;margin:0 0 5px;color:#ffe4b7}',
   '#bf2100-status{margin:5px 0;font-weight:700}',
+  '#bf2100-focus{margin:5px 0;color:#dbe8ff;overflow-wrap:anywhere}',
   '#bf2100-targets{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}',
   '#bf2100-targets button{padding:6px 8px;background:#243c54;color:#fff;',
-  'border:1px solid #74869c;border-radius:5px;min-height:37px}',
+  'border:1px solid #74869c;border-radius:5px;min-height:44px}',
   '#bf2100-targets button[aria-pressed=true]{border-color:#f6d786;outline:1px solid #f6d786}',
   '#bf2100-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}',
   '#bf2100-buttons button{padding:8px 5px;min-height:44px;background:#6d4e2d;',
@@ -35,6 +36,8 @@
  const title=document.createElement('h3');title.textContent='SQUAD COMMANDS · DEMO COMBAT';
  const status=document.createElement('p');status.id='bf2100-status';
  status.setAttribute('aria-live','polite');
+ const focus=document.createElement('p');focus.id='bf2100-focus';
+ focus.setAttribute('role','status');focus.setAttribute('aria-live','polite');
  const targets=document.createElement('div');targets.id='bf2100-targets';
  targets.setAttribute('role','group');targets.setAttribute('aria-label','Choose demo enemy target');
  const actions=document.createElement('div');actions.id='bf2100-buttons';
@@ -61,7 +64,7 @@
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- panel.append(title,status,targets,actions,orders,foot);area.before(panel);
+ panel.append(title,status,focus,targets,actions,orders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
  const enemies=()=>Array.isArray(S.enemies)?S.enemies.filter(e=>e&&e.hp>0):[];
@@ -571,7 +574,21 @@
  }
  function refresh(){
    orders.textContent=queuedTurnPreview();
-   const st=snapshot(),key=JSON.stringify([st,active().map(p=>[
+   const st=snapshot();
+   // Read only the CURRENT living native DEMO target. A stale, malformed,
+   // KO or ambiguous selection must not masquerade as an actionable focus.
+   const liveFocus=Number.isSafeInteger(st.selected)&&st.selected>=0&&
+     st.foes.filter(e=>e.slot===st.selected&&
+       Number.isSafeInteger(e.slot)&&e.slot>=0&&
+       typeof e.name==='string'&&e.name.trim().length>0&&
+       Number.isSafeInteger(e.hp)&&e.hp>0&&
+       Number.isSafeInteger(e.maxHp)&&e.maxHp>=e.hp);
+   const current=liveFocus&&liveFocus.length===1?liveFocus[0]:null;
+   const focusText=current?'Selected DEMO target · '+current.name+
+     ' · HP '+current.hp+'/'+current.maxHp:
+     'Selected DEMO target unavailable';
+   if(focus.textContent!==focusText)focus.textContent=focusText;
+   const key=JSON.stringify([st,active().map(p=>[
      p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
    // Native target-button availability can change without changing the
    // battle snapshot (for example, a DOM button is disabled mid-turn).
