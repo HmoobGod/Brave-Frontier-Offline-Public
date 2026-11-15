@@ -22,6 +22,8 @@
  caution.textContent='Only observed DEMO combat events with 2022 original source-valid profiles. These are generated reference rolls, NOT collected BC/HC. No BB gauge charging, HP healing, native enemy resistance, recipient selection or overkill assumed.';
  panel.append(title,text,detail,caution);host.append(panel);
  function validEvent(e,kind){
+   try{
+   if(!['normal','bb'].includes(kind))return false;
    if(!e||e.referenceOnly!==true||e.overkill!==false||
       !Number.isSafeInteger(e.unitId)||!Number.isSafeInteger(e.wave)||e.wave<1||
       !Number.isSafeInteger(e.battleCrystals)||e.battleCrystals<0||
@@ -36,9 +38,20 @@
    return !!p&&!!p.simpleDamageEvents&&p.skillId===e.skillId&&
      e.simpleDamageEvents===p.simpleDamageEvents&&e.checksPerTarget===p.checksPerTarget&&
      e.battleCrystals<=p.checksPerTarget&&e.heartCrystals<=p.simpleDamageEvents;
+   }catch(_){return false;}
  }
+ function unavailable(){return freeze({available:false,mode:S.mode,round:S.round,active:false,
+   totals:freeze({normalBC:null,normalHC:null,burstBC:null,burstHC:null,uncollectedBC:null,uncollectedHC:null}),
+   normalEvents:null,burstTargetEvents:null,recent:freeze([]),saved:false,collected:false,
+   source:'Source providers unavailable',interpretation:'No rolls or collection inferred'});}
  function snapshot(){
+   try{
    const n=normal.snapshot(),b=burst.snapshot();
+   const count=x=>Number.isSafeInteger(x)&&x>=0;
+   if(!n||!b||![n,b].every(s=>[s.battleCrystals,s.heartCrystals,s.observed].every(count)&&
+      Array.isArray(s.recent)&&s.recent.length<=64&&s.recent.length<=s.observed)||
+      !count(n.battleCrystals+b.battleCrystals)||!count(n.heartCrystals+b.heartCrystals)||
+      !n.recent.every(e=>validEvent(e,'normal'))||!b.recent.every(e=>validEvent(e,'bb')))return unavailable();
    const eligible=S.mode==='archive'&&!S.over;
    // v88 and v89 each maintain at most 64 in-memory records; totals are the
    // authoritative complete-session counters, whereas recent is a bounded UI.
@@ -52,15 +65,17 @@
      burstBC:b.battleCrystals,burstHC:b.heartCrystals,
      uncollectedBC:n.battleCrystals+b.battleCrystals,
      uncollectedHC:n.heartCrystals+b.heartCrystals});
-   return freeze({mode:S.mode,round:S.round,active:eligible,totals,
+   return freeze({available:true,mode:S.mode,round:S.round,active:eligible,totals,
      normalEvents:n.observed,burstTargetEvents:b.observed,
      recent:freeze(all),saved:false,collected:false,
      source:'2022 source-valid normal attack checks and simple offensive BB events',
      interpretation:'Uncollected reference rolls only; no HP/BB changes or rewards'});
+   }catch(_){return unavailable();}
  }
  function render(){
    const s=snapshot(),t=s.totals;
    panel.hidden=S.mode!=='archive';
+   if(!s.available){text.textContent='Crystal reference ledger unavailable; no rolls or collection inferred.';detail.replaceChildren();return s;}
    text.textContent='Normal '+s.normalEvents+' events: '+t.normalBC+' BC / '+t.normalHC+
      ' HC · BB '+s.burstTargetEvents+' target events: '+t.burstBC+' BC / '+t.burstHC+
      ' HC · Total uncollected '+t.uncollectedBC+' BC / '+t.uncollectedHC+' HC';

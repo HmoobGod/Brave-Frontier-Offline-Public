@@ -25,6 +25,12 @@ with sync_playwright() as pw:
               'bf8400_original_normal_crystal_checks.js','bf8500_original_all_bb_checks.js',
               'bf8800_live_normal_crystal_events.js','bf8900_live_simple_bb_crystals.js',
               'bf9000_live_crystal_provenance.js'):
+  if name=='bf9000_live_crystal_provenance.js':
+   p.evaluate("""()=>{const original=BFGlobalLiveNormalCrystalEventsV8800;window.__ledgerFault='';
+    window.BFGlobalLiveNormalCrystalEventsV8800={...original,snapshot:()=>{
+     if(__ledgerFault==='throw')throw Error('ledger unavailable');if(__ledgerFault==='null')return null;
+     const s=original.snapshot();return {...s,...({negative:{battleCrystals:-1},fraction:{observed:1.5},text:{heartCrystals:'3'},overflow:{battleCrystals:Number.MAX_SAFE_INTEGER},recent:{recent:null},forged:{recent:[{unitId:10011,wave:1,referenceOnly:false}]}}[__ledgerFault]||{})};
+    }};}""")
   p.add_script_tag(path=str(A/name))
  assert p.evaluate('P.version')==7
  api='BFGlobalLiveCrystalProvenanceV9000'
@@ -54,6 +60,16 @@ with sync_playwright() as pw:
  assert len(t['recent'])==2,t
  assert '11 BC / 8 HC' in p.locator('#bf9000-ledger-totals').text_content()
  assert p.evaluate("""()=>({P:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")==original
+ ledger_before=p.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','negative','fraction','text','overflow','recent','forged'):
+  p.evaluate('(v)=>window.__ledgerFault=v',case)
+  bad=p.evaluate(api+'.refresh()')
+  assert bad['available'] is False and bad['totals']['uncollectedBC'] is None,(case,bad)
+  assert 'unavailable' in p.locator('#bf9000-ledger-totals').text_content()
+  assert p.locator('#bf9000-ledger-lines li').count()==0
+  p.evaluate("window.__ledgerFault=''")
+  assert p.evaluate(api+'.refresh().available') is True
+ assert p.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==ledger_before
  p.evaluate('Math.random=window.__random90')
  p.locator('#reset').click()
  assert p.evaluate(api+'.snapshot().totals.uncollectedBC')==0
