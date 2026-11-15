@@ -114,6 +114,17 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Temporary source evolution and synthetic trial may not alter actual game or saved v7'
+ assert page.evaluate('([a,b])=>BFGlobalDraftEvolutionV1600.evolve(a,b)',[a,b]) is True
+ selected=page.evaluate('BFArchiveDraftV800.selected')
+ state=page.evaluate('JSON.stringify({P,S})')
+ page.evaluate('S.busy=true')
+ assert page.evaluate('BFGlobalDraftEvolutionV1600.clearHistory()') is False
+ page.evaluate('S.busy=false')
+ assert page.evaluate('BFGlobalDraftEvolutionV1600.clearHistory()') is True
+ assert page.evaluate('BFGlobalDraftEvolutionV1600.history')==[]
+ assert page.evaluate('BFArchiveDraftV800.selected')==selected
+ assert page.evaluate('BFGlobalDraftEvolutionV1600.undo()') is False
+ assert page.evaluate('JSON.stringify({P,S})')==state
  assert not errors,errors
  browser.close()
 print('PASS v16.00: original recipe-only draft evolution, retained slot, battle test, undo, invalid guards, save isolation')
