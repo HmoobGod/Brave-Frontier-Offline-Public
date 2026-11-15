@@ -39,7 +39,29 @@
  status.setAttribute('aria-live','polite');
  const note=document.createElement('small');
  note.textContent='Navigates only unlocked original archived dialogue. No saved story bookmarks, extra unlocks, reward or combat changes. Scene pages and expression art remain source-linked.';
- panel.append(label,line,go,progress,status,note);control.after(panel);
+ const mark=document.createElement('button');mark.type='button';mark.id='bf3500-mark';mark.textContent='MARK THIS LINE (SESSION)';
+ const recall=document.createElement('button');recall.type='button';recall.id='bf3500-recall';recall.textContent='RETURN TO MARK';
+ const marked=document.createElement('small');marked.id='bf3500-mark-status';marked.setAttribute('role','status');
+ let bookmark=null;
+ function verifiedPosition(){
+   try{
+     const a=archive.snapshot(),m=/^(dungeon|clear):([1-9][0-9]*)$/.exec(a?.chosen||'');
+     const record=m?archive.lookup(m[1],Number(m[2])):null;
+     if(!reader.open||P.version!==7||!record||record.source!=='content/event/'+a.source||
+       !Array.isArray(record.lines)||record.lines.length!==a.lines||
+       !Number.isSafeInteger(a.step)||a.step<1||a.step>a.lines)return null;
+     return {key:a.chosen,source:a.source,step:a.step,lines:a.lines};
+   }catch(_){return null;}
+ }
+ function markLine(){const p=verifiedPosition();if(!p)return false;bookmark=Object.freeze(p);refresh();return true;}
+ function returnToMark(){
+   const p=verifiedPosition();
+   if(!p||!bookmark||p.key!==bookmark.key||p.source!==bookmark.source||p.lines!==bookmark.lines||
+     typeof S!=='undefined'&&(S.busy||S.auto))return false;
+   return jump(bookmark.step);
+ }
+ mark.addEventListener('click',markLine);recall.addEventListener('click',returnToMark);
+ panel.append(label,line,go,progress,status,mark,recall,marked,note);control.after(panel);
  function snapshot(){
    const a=archive.snapshot();
    const available=reader.open&&!!a?.source&&a.lines>0;
@@ -57,6 +79,9 @@
        ' · '+(s.playing?'Auto-playing':'Manual reading');
    }
    go.disabled=!s.available;
+   const p=verifiedPosition();mark.disabled=!p;
+   recall.disabled=!p||!bookmark||p.key!==bookmark.key||p.source!==bookmark.source||p.lines!==bookmark.lines;
+   marked.textContent=bookmark?'Session mark: '+bookmark.source+' · line '+bookmark.step+' (not saved).':'No session mark; nothing is saved.';
    return s;
  }
  function jump(target){
@@ -79,5 +104,5 @@
  reader.addEventListener('toggle',refresh);
  new MutationObserver(refresh).observe(text,{childList:true,subtree:true,characterData:true});
  refresh();
- window.BFGlobalDialogueTimelineV3500=Object.freeze({snapshot,refresh,jump});
+ window.BFGlobalDialogueTimelineV3500=Object.freeze({snapshot,refresh,jump,markLine,returnToMark,get bookmark(){return bookmark;}});
 })();

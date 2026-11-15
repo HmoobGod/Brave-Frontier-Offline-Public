@@ -60,6 +60,20 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1000)') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ mark_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.locator('#bf3500-mark').click()
+ assert page.evaluate('Object.isFrozen(BFGlobalDialogueTimelineV3500.bookmark)')
+ assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(3)') is True
+ page.locator('#bf3500-recall').click()
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==9
+ page.evaluate('S.auto=true')
+ assert page.evaluate('BFGlobalDialogueTimelineV3500.returnToMark()') is False
+ page.evaluate('S.auto=false')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)') is True
+ assert page.evaluate('BFGlobalDialogueTimelineV3500.returnToMark()') is False
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ assert 'not saved' in page.locator('#bf3500-mark-status').text_content()
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==mark_before
  assert not errors,errors
  browser.close()
 print('PASS v35.00 source dialogue timeline line jumps, source expressions, no saves')
