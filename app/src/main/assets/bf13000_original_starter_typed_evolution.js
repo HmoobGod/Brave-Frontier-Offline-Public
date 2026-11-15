@@ -41,8 +41,12 @@
  // a type-2 Legend Stone is a different inventory class with no verified
  // acquisition, source quantity or canonical v7 inventory representation.
  // Therefore a source recipe is NEVER an executable spend/unlock request.
+ function readableRoster(){
+   return P.version===7&&Array.isArray(P.roster)&&
+     Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
+ }
  function readiness(baseId){
-   if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))return null;
+   if(!readableRoster()||!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))return null;
    let current;
    try{current=effectiveUnit(baseId);}catch(_){return null;}
    const recipe=lookup((current?.id||0)+1);
@@ -77,6 +81,8 @@
  }
  function snapshot(){
    const possible=[];
+   if(!readableRoster())return freeze({available:false,possible:freeze([]),source,playableFormCountChanged:false});
+   try{
    for(const base of P.roster){
      if(!Number.isSafeInteger(base))continue;
      const current=effectiveUnit(base);
@@ -85,7 +91,8 @@
        possible.push(freeze({ownedBaseId:base,fromId:current.id,
          sourceNextId:next.unitId,notYetPlayable:true}));
    }
-   return freeze({possible:freeze(possible),source,playableFormCountChanged:false});
+   return freeze({available:true,possible:freeze(possible),source,playableFormCountChanged:false});
+   }catch(_){return freeze({available:false,possible:freeze([]),source,playableFormCountChanged:false});}
  }
  const host=document.getElementById('bf12600-original-squad-cost')||
    document.getElementById('squadpicker');
@@ -121,11 +128,12 @@
      row.zel.toLocaleString('en-US')+' Zel · '+row.karma.toLocaleString('en-US')+' Karma';
    // Read-only, owner-specific prereq classification, never spend currency.
    let current=null;
-   for(const baseId of P.roster){
+   for(const baseId of readableRoster()?P.roster:[]){
      const state=readiness(baseId);
      if(state?.toId===row.unitId){current=state;break;}
    }
-   eligibility.textContent=current?
+   const available=snapshot().available;
+   eligibility.textContent=!available?'Owned predecessor preview unavailable: invalid roster or form source. Evolution remains BLOCKED.':current?
      'Owned predecessor #'+current.fromId+' · matching original material UNIT forms '+
        current.unitMaterialsMatched+'/'+current.unitMaterialsRequired+
        ' · Legend Stone item inventory UNVERIFIED · evolution BLOCKED':

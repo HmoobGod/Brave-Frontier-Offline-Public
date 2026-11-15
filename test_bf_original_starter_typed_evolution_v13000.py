@@ -96,6 +96,18 @@ with sync_playwright() as pw:
  assert forged['materials'][4]['status']=='UNVERIFIED_ITEM_INVENTORY'
  assert p.evaluate('JSON.stringify(P)')==before2
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
+ invalid=p.evaluate("""()=>{const roster=P.roster,version=P.version,resolve=window.effectiveUnit,before=JSON.stringify({P,S});const results=[];
+  try{
+   for(const value of [null,{},Array(2),[10011,10011],[10011,'10012'],[10011,-1]]){
+    P.roster=value;results.push(BFGlobalOriginalStarterTypedEvolutionV13000.snapshot().available===false&&BFGlobalOriginalStarterTypedEvolutionV13000.readiness(10011)===null);
+    BFGlobalOriginalStarterTypedEvolutionV13000.refresh();
+   }
+   P.roster=roster;window.effectiveUnit=()=>{throw Error('form unavailable')};
+   results.push(!BFGlobalOriginalStarterTypedEvolutionV13000.snapshot().available);BFGlobalOriginalStarterTypedEvolutionV13000.refresh();
+  }finally{P.roster=roster;P.version=version;window.effectiveUnit=resolve;BFGlobalOriginalStarterTypedEvolutionV13000.refresh();}
+  return {results,same:before===JSON.stringify({P,S})};
+ }""")
+ assert invalid=={'results':[True]*7,'same':True},invalid
  p.add_script_tag(path=str(A/'bf13000_original_starter_typed_evolution.js'))
  assert p.locator('#bf13000-source-evolutions').count()==1
  assert not errors,errors
