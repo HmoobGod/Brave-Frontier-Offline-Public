@@ -117,6 +117,17 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
   saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'No 2022 source research choice may write real game or v7 save'
+ plan=page.evaluate('BFGlobalMultistageDraftV1800.preview')
+ search=page.locator('#bf1800-search')
+ search.fill('10023')
+ options=page.locator('#bf1800-entries select[data-from="10021"] option').all_text_contents()
+ assert any('#10023' in x for x in options)
+ assert page.evaluate('BFGlobalMultistageDraftV1800.preview')==plan
+ search.fill('not-an-original-form')
+ assert page.locator('#bf1800-entries select[data-from="10021"] option').count()==1
+ page.locator('#bf1800-search-clear').click()
+ assert page.evaluate('document.activeElement.id')=='bf1800-search'
+ assert page.evaluate('BFGlobalMultistageDraftV1800.preview')==plan
  assert not errors,errors
  browser.close()
 print('PASS v18.00: 2x2-hop exact source recipes, group costs, batch battle, reversible undo, original save isolation')
