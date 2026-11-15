@@ -52,6 +52,11 @@
  const filter=document.createElement('input');filter.type='search';filter.id='bf800-search';
  filter.placeholder='Search archived unit name or ID';
  filter.setAttribute('aria-label','Find source-backed archived units for trial');
+ const availability=document.createElement('select');availability.id='bf800-availability';
+ availability.setAttribute('aria-label','Filter archived draft candidates');availability.style.minHeight='44px';
+ for(const [id,label] of [['all','All source candidates'],['available','Not in this temporary draft'],['selected','Already in this temporary draft']]){
+   const option=document.createElement('option');option.value=id;option.textContent=label;availability.append(option);
+ }
  const found=document.createElement('p');found.id='bf800-found';
  const results=document.createElement('div');results.id='bf800-results';results.className='bf800-results';
  const title=document.createElement('strong');title.textContent='TEMPORARY DRAFT · maximum six';
@@ -76,7 +81,7 @@
  const info=document.createElement('p');info.id='bf800-status';info.setAttribute('aria-live','polite');
  const foot=document.createElement('p');foot.className='bf800-note';
  foot.textContent='2022 unit base stats, names and optional thumbnails are original source references. ALL action, Burst, HP scaling, opponent and reward rules remain synthetic. Draft resets on exit/reload and never changes actual v7 save.';
- root.append(h,note,filter,found,results,title,selectedView,mission,start,info,foot);
+ root.append(h,note,filter,availability,found,results,title,selectedView,mission,start,info,foot);
  anchor.after(root);
  let chosen=[];
  let addedOrder=[];
@@ -115,8 +120,9 @@
  };
  function render(){
    const q=filter.value.trim().toLocaleLowerCase();
-   const matches=forms.filter(u=>!q||String(u.id).includes(q)||
-     u.name.toLocaleLowerCase().includes(q));
+   const matches=forms.filter(u=>(availability.value==='selected'?chosen.includes(u.id):
+     availability.value==='available'?!chosen.includes(u.id):true)&&
+     (!q||String(u.id).includes(q)||u.name.toLocaleLowerCase().includes(q)));
    found.textContent=forms.length+' source-backed standard forms with positive base stats · '+
      matches.length+' matches · showing '+Math.min(12,matches.length);
    results.replaceChildren();
@@ -196,6 +202,7 @@
    render();return ok;
  }
  filter.addEventListener('input',render);
+ availability.addEventListener('change',render);
  mission.addEventListener('change',render);
  start.addEventListener('click',startDraft);
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
