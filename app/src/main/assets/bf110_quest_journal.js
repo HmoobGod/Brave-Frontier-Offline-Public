@@ -80,6 +80,10 @@
  search.id='bf110-search';search.type='search';search.autocomplete='off';
  search.placeholder='Search names, dungeons and original quest descriptions';
  searchWrap.append(search);filters.append(searchWrap);
+ const exactLabel=document.createElement('label');exactLabel.style.cssText='grid-column:1/-1;min-height:44px;display:flex;align-items:center';
+ const exact=document.createElement('input');exact.type='checkbox';exact.id='bf110-exact-id';
+ exact.style.width='auto';exactLabel.append(exact,document.createTextNode('Match exact mission ID only'));
+ filters.append(exactLabel);
  const clear=document.createElement('button');clear.type='button';
  clear.id='bf110-clear-filters';
  clear.textContent='CLEAR JOURNAL FILTERS';
@@ -126,7 +130,8 @@
    const query=search.value.trim().toLocaleLowerCase();
    const rows=archive.filter(row=>(regions.value==='all'||row.region===regions.value) &&
       (states.value==='all'||progress(row)===states.value) &&
-      (!query || [String(row.id),row.name,row.dungeon,row.description].some(t=>t.toLocaleLowerCase().includes(query))));
+      (exact.checked?(/^[1-9][0-9]*$/.test(query)&&String(row.id)===query):
+       (!query || [String(row.id),row.name,row.dungeon,row.description].some(t=>t.toLocaleLowerCase().includes(query)))));
    // Sort only a temporary list. The canonical 106-quest story order is immutable.
    const order=ordering.value;
    if(order==='energy')rows.sort((a,b)=>a.q.energy-b.q.energy||a.id-b.id);
@@ -228,10 +233,11 @@
    if(target&&!navigationBlocked())chooseMission(target.id);
  });
  search.addEventListener('input',changed);
+ exact.addEventListener('change',changed);
  clear.addEventListener('click',()=>{
    // Reset only optional journal presentation; never select a mission.
    regions.value='all';states.value='all';ordering.value='story';
-   search.value='';visibleLimit=20;refresh();
+   search.value='';exact.checked=false;visibleLimit=20;refresh();
  });
  more.addEventListener('click',()=>{visibleLimit+=20;refresh();});
  new MutationObserver(refresh).observe(list,{childList:true});
