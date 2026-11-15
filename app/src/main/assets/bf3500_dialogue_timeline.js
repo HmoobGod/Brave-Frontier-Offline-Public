@@ -41,11 +41,18 @@
  note.textContent='Navigates only unlocked original archived dialogue. No saved story bookmarks, extra unlocks, reward or combat changes. Scene pages and expression art remain source-linked.';
  panel.append(label,line,go,progress,status,note);control.after(panel);
  function snapshot(){
-   const a=archive.snapshot();
-   const available=reader.open&&!!a?.source&&a.lines>0;
-   return Object.freeze({available,source:a?.source||null,
-     step:available?a.step:0,lines:available?a.lines:0,
-     playing:playback.snapshot().playing});
+   try{
+     const a=archive.snapshot(),match=/^(clear|dungeon):([1-9][0-9]{0,3})$/.exec(a?.chosen||'');
+     const row=match?archive.lookup(match[1],Number(match[2])):null;
+     const available=!!reader.open&&!!row&&row.kind===match[1]&&
+       row.id===Number(match[2])&&typeof a.source==='string'&&
+       row.source==='content/event/'+a.source&&Array.isArray(row.lines)&&
+       Number.isSafeInteger(a.lines)&&a.lines===row.lines.length&&a.lines>0&&
+       Number.isSafeInteger(a.step)&&a.step>=1&&a.step<=a.lines;
+     return Object.freeze({available,source:available?a.source:null,
+       chosen:available?a.chosen:null,step:available?a.step:0,lines:available?a.lines:0,
+       playing:playback.snapshot()?.playing===true});
+   }catch(_){return Object.freeze({available:false,source:null,chosen:null,step:0,lines:0,playing:false});}
  }
  function refresh(){
    const s=snapshot();panel.hidden=!s.available;
@@ -66,12 +73,15 @@
    // Use the existing, unlock-gated reader rather than changing private state.
    const moving=target>s.step?next:previous;
    for(let i=0;i<Math.abs(target-s.step);i++){
-     if(moving.disabled||archive.snapshot().source!==s.source)return false;
+     const current=snapshot(),expected=s.step+i*(target>s.step?1:-1);
+     if(moving.disabled||!current.available||current.source!==s.source||
+        current.chosen!==s.chosen||current.lines!==s.lines||current.step!==expected)return false;
      moving.click();
    }
-   const result=archive.snapshot();
+   const result=snapshot();
    refresh();
-   return result.source===s.source&&result.step===target;
+   return result.available&&result.chosen===s.chosen&&result.source===s.source&&
+     result.lines===s.lines&&result.step===target;
  }
  go.addEventListener('click',()=>{if(!jump(Number(line.value)))refresh()});
  line.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go.click()}});
