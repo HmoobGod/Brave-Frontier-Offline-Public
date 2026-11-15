@@ -33,6 +33,14 @@ with sync_playwright() as pw:
  'bf3000_battle_results.js','bf3100_battle_focus.js',
  'bf3200_combat_journal.js','bf3300_story_playback.js',
  'bf3400_source_scene_placement.js'):
+  if name=='bf3400_source_scene_placement.js':
+   page.evaluate("""()=>{const original=BFGlobalEventExpressionsV2900;window.__placementFault='';
+    window.BFGlobalEventExpressionsV2900={...original,snapshot:()=>{
+     if(__placementFault==='throw')throw Error('source unavailable');
+     if(__placementFault==='null')return null;
+     const s=original.snapshot();
+     return {...s,...({step:{step:999},source:{source:'map1-dungeon1.txt'},character:{character:'Tilith'},image:{image:'navi_chara1_0.png'}}[__placementFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('BFGlobalScenePlacementV3400.snapshot().speaker') is None
@@ -55,6 +63,16 @@ with sync_playwright() as pw:
  a=page.evaluate('BFGlobalScenePlacementV3400.refresh()')
  assert (a['speaker'],a['x'],a['y'])==('Seria',-50,20),a
  assert 'responsive approximation' in page.locator('#bf3400-position').inner_text()
+ guard_before=page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ['throw','null','step','source','character','image']:
+  page.evaluate('(v)=>window.__placementFault=v',case)
+  assert page.evaluate('BFGlobalScenePlacementV3400.refresh().speaker') is None,case
+  assert page.locator('#bf3400-position').is_hidden()
+  assert page.locator('#bf3400-position').text_content()==''
+  assert page.locator('#bf2600-portrait').evaluate('(el)=>el.style.gridColumn')==''
+  page.evaluate("window.__placementFault=''")
+  assert page.evaluate('BFGlobalScenePlacementV3400.refresh().speaker')=='Seria'
+ assert page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==guard_before
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert not errors,errors
  browser.close()

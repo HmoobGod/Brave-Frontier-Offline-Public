@@ -21,8 +21,19 @@
    Seria:Object.freeze({x:-50,y:20,side:'left'})
  });
  const supported=/^map[123]-dungeon[1-7]\.txt$/;
+ function unavailable(){return Object.freeze({source:null,step:0,speaker:null,
+   x:null,y:null,side:null,stageLabel:null});}
  function snapshot(){
+   try{
    const frame=frames.snapshot();
+   const archive=window.BFGlobalOriginalEventsV2200,current=archive?.snapshot();
+   const selected=/^dungeon:([0-9]+)$/.exec(current?.chosen||'');
+   const record=selected?archive.lookup('dungeon',Number(selected[1])):null;
+   if(!frame||!record||record.source!=='content/event/'+current.source||
+     record.lines.length!==current.lines||frame.source!==current.source||
+     frame.step!==current.step)return unavailable();
+   const exact=frames.lookup(frame.source,frame.step);
+   if(!exact||exact.character!==frame.character||exact.file!==frame.image)return unavailable();
    const person=frame?.character;
    const source=frame?.source;
    const p=person&&source&&supported.test(source)&&source!=='map3-dungeon6.txt'?coords[person]:null;
@@ -31,13 +42,19 @@
      speaker:p?person:null,x:p?.x??null,y:p?.y??null,
      side:p?.side||null,stageLabel:p?'2022 SCRIPT x '+p.x+' / y '+p.y:null
    });
+   }catch(_){return unavailable();}
  }
  let signature='';
  function refresh(){
    const s=snapshot(),key=JSON.stringify(s);
    if(signature===key)return s;signature=key;
    info.hidden=!s.side;
-   if(!s.side)return s;
+   if(!s.side){
+     info.textContent='';stage.style.gridTemplateColumns='';
+     portrait.style.gridColumn='';portrait.style.gridRow='';
+     stage.children[1].style.gridColumn='';stage.children[1].style.gridRow='';
+     return s;
+   }
    // Approximate a two-column mobile arrangement from signed X coordinate.
    // Do not claim this is the original pixel-perfect stage transform.
    if(s.side==='right'){
