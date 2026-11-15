@@ -35,6 +35,12 @@ with sync_playwright() as pw:
  'bf3400_source_scene_placement.js','bf3500_dialogue_timeline.js',
  'bf3600_event_composite.js','bf3700_cinematic_reader.js',
  'bf3800_source_battle_backdrop.js','bf3900_story_battle_handoff.js'):
+  if name=='bf3900_story_battle_handoff.js':
+   page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__handoffFault='';
+    window.BFGlobalOriginalEventsV2200={...original,snapshot:()=>{
+     if(__handoffFault==='throw')throw Error('source unavailable');if(__handoffFault==='null')return null;
+     return {...original.snapshot(),...({empty:{step:0,lines:0},forged:{step:999,lines:999},fraction:{step:1.5},chosen:{chosen:'dungeon:30'}}[__handoffFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is False
@@ -52,6 +58,22 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.refresh().completed') is True
  before=page.evaluate("""()=>({save:localStorage.getItem("bf_global_offline_demo_v7"),
     quest:QUEST.missionId,mode:S.mode,round:S.round,wave:S.wave,over:S.over})""")
+ handoff_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','empty','forged','fraction','chosen'):
+  page.evaluate('(v)=>window.__handoffFault=v',case)
+  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is False,case
+  assert page.evaluate('document.getElementById("bf2200-reader").open') is True
+  page.evaluate("window.__handoffFault=''")
+ for status in (True,None,'false'):
+  page.evaluate('(v)=>window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:v})}',status)
+  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is False
+ page.evaluate("window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('repeat unavailable')}}")
+ assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is False
+ page.evaluate('delete window.BFGlobalQoLQuestRepeatV9800;S.auto=true')
+ assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is False
+ page.evaluate('S.auto=false;window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})}')
+ assert page.evaluate('BFGlobalStoryBattleHandoffV3900.refresh().completed') is True
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==handoff_before
  assert page.evaluate('BFGlobalStoryBattleHandoffV3900.returnToBattle()') is True
  assert page.evaluate('document.getElementById("bf2200-reader").open') is False
  assert page.evaluate('BFGlobalCinematicReaderV3700.snapshot().focused') is False

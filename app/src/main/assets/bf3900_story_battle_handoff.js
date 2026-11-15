@@ -30,18 +30,25 @@
  const note=document.createElement('small');note.id='bf3900-note';
  note.textContent='Available after reading the final original intro line for your currently selected story dungeon. Returns to the existing demo battlefield without executing attacks or changing quest progress.';
  panel.append(button,note);controls.after(panel);
+ function unavailable(){return Object.freeze({available:false,completed:false,missionId:null,dungeonId:null,source:null,step:0,lines:0});}
  function snapshot(){
+   try{
    const scene=events.snapshot();
    const q=typeof QUEST==='undefined'?null:QUEST;
    const lookup=q?events.lookup('dungeon',q.dungeonId):null;
-   const matched=reader.open&&mode.value==='archive'&&q&&
-     !S.busy&&!S.over&&questUnlocked(q)&&lookup&&
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;
+   const idleRepeat=!repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);
+   const matched=reader.open&&P.version===7&&mode.value==='archive'&&S.mode==='archive'&&q&&
+     S.busy===false&&S.auto===false&&S.over===false&&idleRepeat&&questUnlocked(q)&&lookup&&scene&&
+     Array.isArray(lookup.lines)&&lookup.lines.length>0&&lookup.lines.length===scene.lines&&
+     Number.isSafeInteger(scene.step)&&scene.step>=1&&scene.step<=scene.lines&&
      scene.chosen==='dungeon:'+q.dungeonId&&scene.source===lookup.source?.split('/').pop();
    return Object.freeze({
      available:!!matched,completed:!!matched&&scene.step===scene.lines,
      missionId:q?.missionId||null,dungeonId:q?.dungeonId||null,
-     source:scene.source||null,step:scene.step||0,lines:scene.lines||0
+     source:scene?.source||null,step:scene?.step||0,lines:scene?.lines||0
    });
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const s=snapshot();panel.hidden=!s.available;button.disabled=!s.completed;
