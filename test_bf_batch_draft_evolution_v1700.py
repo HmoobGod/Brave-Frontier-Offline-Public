@@ -128,6 +128,19 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
   save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Batch source evolution/trials cannot affect actual saved game'
+ report=page.evaluate('BFGlobalBatchDraftEvolutionV1700.checklist()')
+ assert '2022 SOURCE BATCH PLAN' in report
+ preview=page.evaluate('BFGlobalBatchDraftEvolutionV1700.preview')
+ for row in preview['entries']:
+  assert f"#{row['from']} -> #{row['to']}" in report
+ stable=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ page.locator('#bf1700-refresh').click()
+ page.locator('#bf1700-checklist').click()
+ assert page.locator('#bf1700-checklist-text').input_value()==report
+ assert page.evaluate('document.activeElement.id')=='bf1700-checklist-text'
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==stable
+ page.evaluate('BFGlobalBatchDraftEvolutionV1700.refresh()')
+ assert page.locator('#bf1700-checklist-text').is_hidden()
  assert not errors,errors
  browser.close()
 print('PASS v17.00: two-source atomic draft evolutions, exact costs, group undo, conflict checks and v7 save')

@@ -110,6 +110,15 @@
    }
    batches.pop();refresh();return true;
  }
+ function checklist(){
+   const p=assess();if(!p.entries.length||p.issues.length)return '';
+   const lines=['2022 SOURCE BATCH PLAN · temporary draft only',
+     'Reference costs; no inventory checked or resources spent.'];
+   for(const row of p.entries)lines.push('#'+row.from+' -> #'+row.to+' · '+row.zel+' Zel · '+row.karma+' Karma');
+   for(const mat of p.totals.materials)lines.push((mat.name||'Source material')+' #'+mat.id+' x'+mat.count);
+   lines.push('TOTAL: '+p.totals.zel+' recorded Zel · '+p.totals.karma+' recorded Karma');
+   return lines.join('\n');
+ }
  const css=document.createElement('style');css.id='bf1700-batch-style';
  css.textContent=[
    '#bf1700-batch{padding:10px;margin:8px 0;background:#1b344a;',
@@ -141,12 +150,17 @@
  applyBtn.type='button';applyBtn.textContent='APPLY TEMPORARY BATCH EVOLUTION';
  const undoBtn=document.createElement('button');undoBtn.id='bf1700-undo';
  undoBtn.type='button';undoBtn.textContent='UNDO LAST TEMPORARY BATCH';
+ const copyButton=document.createElement('button');copyButton.type='button';copyButton.id='bf1700-checklist';copyButton.textContent='PREPARE SOURCE BATCH CHECKLIST';
+ const text=document.createElement('textarea');text.id='bf1700-checklist-text';text.readOnly=true;text.hidden=true;text.rows=8;
+ text.setAttribute('aria-label','Read-only batch source checklist');text.style.cssText='box-sizing:border-box;width:100%';
+ copyButton.addEventListener('click',()=>{const value=checklist();if(!value)return;text.value=value;text.hidden=false;text.focus();text.select()});
  const log=document.createElement('p');log.id='bf1700-log';
- panel.append(header,caution,auto,refreshBtn,state,applyBtn,undoBtn,log);
+ panel.append(header,caution,auto,refreshBtn,state,applyBtn,undoBtn,copyButton,text,log);
  anchor.after(panel);
  const dom=(tag,value)=>{const el=document.createElement(tag);el.textContent=value;return el;};
  function refresh(){
    const p=assess();
+   text.value='';text.hidden=true;copyButton.disabled=!p.entries.length||p.issues.length>0;
    state.replaceChildren();
    state.append(dom('strong','DOCUMENTED 2022 GLOBAL SOURCE PLAN · '+
      p.entries.length+' valid of '+p.selected.length+' temporary draft forms'));
@@ -191,6 +205,6 @@
  window.BFGlobalBatchDraftEvolutionV1700=Object.freeze({
    get preview(){return clone(assess());},
    get history(){return batches.map(row=>clone(row));},
-   apply,undo:undoBatch,canUndo,refresh
+   apply,undo:undoBatch,canUndo,refresh,checklist
  });
 })();
