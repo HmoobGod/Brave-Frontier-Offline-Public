@@ -47,7 +47,9 @@
  banner.setAttribute('aria-live','off');
  arena.append(banner);
  let enabled=false,last='';
+ function unavailable(){return Object.freeze({enabled,available:false,applied:false,missionId:null,name:null,dungeon:null,wave:null,total:null,state:null});}
  function snapshot(){
+   try{
    const q=typeof QUEST==='undefined'?null:QUEST;
    const s=story.snapshot();
    // The optional overlay must not call invalid DEMO wave counters a 2022
@@ -56,7 +58,8 @@
      Number.isSafeInteger(s?.current)&&Number.isSafeInteger(q?.battles)&&
      s.total>=1&&s.total<=100&&s.current>=1&&
      s.current<=s.total&&q.battles===s.total;
-   const available=!!q&&!!s&&s.archive&&S.mode==='archive'&&
+   const available=!!q&&!!s&&s.archive===true&&['won','lost','busy'].every(k=>typeof s[k]==='boolean')&&
+     !(s.won&&s.lost)&&S.mode==='archive'&&
      mode.value==='archive'&&validWaves&&
      questUnlocked(q)&&s.missionId===q.missionId&&
      typeof s.name==='string'&&s.name.trim().length>0&&
@@ -66,6 +69,7 @@
      name:available?s.name:null,dungeon:available?s.dungeon:null,
      wave:available?s.current:null,total:available?s.total:null,
      state:available?(s.won?'VICTORY':s.lost?'DEFEAT':s.busy?'TURN IN PROGRESS':'BATTLE'):null});
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const s=snapshot(),key=JSON.stringify(s);
