@@ -33,6 +33,7 @@
  panel.append(label,source,note);hud.append(panel);
  let enabled=false,last='';
  function lookup(){
+   try{
    const q=typeof QUEST==='undefined'?null:QUEST;
    if(!q||mode.value!=='archive'||!questUnlocked(q))return null;
    // v191: strictly proven 2022 mission->image joins for 29 currently
@@ -40,14 +41,18 @@
    // Keep the original v38 cinematic/event path as a fallback.
    const source2022=window.BFGlobalOriginalDungeonBackdropsV19100?.lookup?.(q.missionId);
    if(source2022?.original2022Background===true){
+     if(!/^dungeon_battle_[0-9]+\.jpg$/.test(source2022.image||''))return null;
      return Object.freeze({missionId:q.missionId,dungeonId:q.dungeonId,
        scene:'original 2022 mission background reference',background:source2022.image});
    }
    const a=events.lookup('dungeon',q.dungeonId);
    const filename=a?.source?.split('/').pop();
+   if(filename&&!/^map[123]-dungeon[1-7]\.txt$/.test(filename))return null;
    const jpg=filename?stage.backgroundFor(filename):null;
+   if(jpg&&!/^dungeon_battle_[0-9]+\.jpg$/.test(jpg))return null;
    return jpg?Object.freeze({missionId:q.missionId,dungeonId:q.dungeonId,
      scene:filename,background:jpg}):null;
+   }catch(_){return null;}
  }
  function snapshot(){
    const record=lookup();

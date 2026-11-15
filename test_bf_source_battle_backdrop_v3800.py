@@ -35,6 +35,14 @@ with sync_playwright() as pw:
  'bf3400_source_scene_placement.js','bf3500_dialogue_timeline.js',
  'bf3600_event_composite.js','bf3700_cinematic_reader.js',
  'bf3800_source_battle_backdrop.js'):
+  if name=='bf3800_source_battle_backdrop.js':
+   page.evaluate("""()=>{const original=BFOriginalEventStageV2700;window.__backdropFault='';
+    window.BFOriginalEventStageV2700={...original,backgroundFor:(...args)=>{
+     if(__backdropFault==='throw')throw Error('background unavailable');
+     if(__backdropFault==='null')return null;
+     if(__backdropFault==='invalid')return '../unproven.jpg';
+     return original.backgroundFor(...args);
+    }};}""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.evaluate('BFGlobalBattleBackdropV3800.snapshot().enabled') is False
@@ -49,6 +57,23 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalBattleBackdropV3800.setEnabled(true)') is True
  assert page.evaluate('BFGlobalBattleBackdropV3800.snapshot().applied') is True
  assert 'dungeon_battle_10200.jpg' in page.locator('#battle').evaluate('(el)=>el.style.backgroundImage')
+ fault_before=page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ['throw','null','invalid']:
+  page.evaluate('(v)=>window.__backdropFault=v',case)
+  failed=page.evaluate('BFGlobalBattleBackdropV3800.refresh()')
+  assert not failed['available'] and not failed['applied'],(case,failed)
+  assert 'dungeon_battle_10200.jpg' not in page.locator('#battle').evaluate('(el)=>el.style.backgroundImage')
+  assert page.locator('#bf3800-panel').is_hidden()
+  page.evaluate("window.__backdropFault=''")
+  assert page.evaluate('BFGlobalBattleBackdropV3800.refresh().applied') is True
+ # A higher-priority source provider must also fail closed and recover.
+ page.evaluate("window.BFGlobalOriginalDungeonBackdropsV19100={lookup:()=>{throw Error('proof unavailable')}}")
+ assert page.evaluate('BFGlobalBattleBackdropV3800.refresh().applied') is False
+ page.evaluate("window.BFGlobalOriginalDungeonBackdropsV19100={lookup:()=>({original2022Background:true,image:'../unproven.jpg'})}")
+ assert page.evaluate('BFGlobalBattleBackdropV3800.refresh().available') is False
+ page.evaluate('delete window.BFGlobalOriginalDungeonBackdropsV19100')
+ assert page.evaluate('BFGlobalBattleBackdropV3800.refresh().applied') is True
+ assert page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==fault_before
  page.locator('#mode').select_option('training')
  state=page.evaluate('BFGlobalBattleBackdropV3800.refresh()')
  assert not state['available'] and not state['applied'],state
