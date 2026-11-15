@@ -116,6 +116,32 @@ with sync_playwright() as pw:
  assert p.evaluate("P.version")==7
  p.add_script_tag(path=str(A/'bf10300_qol_battle_details.js'))
  assert p.locator('#bf10300-details').count()==1
+ # Optional instrumentation must not crash HP refresh or fabricate zero hits.
+ stable=p.evaluate('JSON.stringify({P,S})')
+ for field,provider in (('BFGlobalSingleHitCriticalV9300','criticals'),('BFGlobalMultiHitCriticalV9500','criticalHits')):
+  for value in ('null','{}','{snapshot:0}','{snapshot:()=>{throw Error("unavailable")}}',
+                '{snapshot:()=>null}',f'{{snapshot:()=>({{{provider}:"2"}})}}',
+                f'{{snapshot:()=>({{{provider}:-1}})}}',f'{{snapshot:()=>({{{provider}:1.5}})}}',
+                f'{{snapshot:()=>({{{provider}:Infinity}})}}'):
+   result=p.evaluate("""({field,value})=>{
+     const old=window[field];
+     try{window[field]=eval('('+value+')');
+       const s=BFGlobalQoLBattleDetailsV10300.refresh();
+       return {count:s.sourceScopedCriticalHits,hp:s.allies[0].hp};
+     }finally{window[field]=old;}
+   }""",{'field':field,'value':value})
+   assert result['count'] is None and result['hp']==0,(field,value,result)
+   assert 'critical hits unavailable' in p.locator('#bf10300-header').text_content()
+ assert p.evaluate('JSON.stringify({P,S})')==stable
+ assert p.evaluate(api+'.refresh().sourceScopedCriticalHits')==5
+ assert '5 source-eligible critical hits' in p.locator('#bf10300-header').text_content()
+ overflow=p.evaluate("""()=>{
+   const one=BFGlobalSingleHitCriticalV9300;
+   try{BFGlobalSingleHitCriticalV9300={snapshot:()=>({criticals:Number.MAX_SAFE_INTEGER})};
+     return BFGlobalQoLBattleDetailsV10300.refresh().sourceScopedCriticalHits;
+   }finally{BFGlobalSingleHitCriticalV9300=one;BFGlobalQoLBattleDetailsV10300.refresh()}
+ }""")
+ assert overflow is None
  assert not errors,errors
  b.close()
 print('PASS v103 read-only battle HP/BB/source critical HUD, no save or combat writes')

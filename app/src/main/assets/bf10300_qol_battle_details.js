@@ -38,6 +38,13 @@
        row.nativeMultiWaveEnabled===false?row.verifiedWaveCount:null;
    }catch(_){return null;}
  }
+ function criticalCount(provider,field){
+   try{
+     if(typeof provider?.snapshot!=='function')return null;
+     const count=provider.snapshot()?.[field];
+     return Number.isSafeInteger(count)&&count>=0?count:null;
+   }catch(_){return null;}
+ }
  function snapshot(){
    const allySource=Array.isArray(S.party)?S.party.filter(u=>u&&u.active):[];
    const enemySource=Array.isArray(S.enemies)?S.enemies:[];
@@ -45,8 +52,9 @@
    const foes=enemySource.map(u=>readUnit(u,'enemy')).filter(Boolean);
    const invalidAllies=allySource.length-allies.length;
    const invalidFoes=enemySource.length-foes.length;
-   const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
-   const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
+   const one=criticalCount(window.BFGlobalSingleHitCriticalV9300,'criticals');
+   const multi=criticalCount(window.BFGlobalMultiHitCriticalV9500,'criticalHits');
+   const criticals=one!==null&&multi!==null&&Number.isSafeInteger(one+multi)?one+multi:null;
    const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
    const quest=typeof QUEST==='undefined'?null:QUEST;
    // A fractional, negative, or out-of-range DEMO total must not be
@@ -62,7 +70,7 @@
      round:safe(S.round),busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
      invalidAllies,invalidFoes,
-     sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
+     sourceScopedCriticalHits:criticals,
      nativeFullDamageFormula:false,progressUnchanged:true
    });
  }
@@ -114,7 +122,8 @@
         'UNAVAILABLE'):'')+
      ' · Turn '+s.round+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
-     ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
+     ' · '+(s.sourceScopedCriticalHits===null?'Source-eligible critical hits unavailable':
+       s.sourceScopedCriticalHits+' source-eligible critical hits');
    group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
    group(enemy,'ENEMIES · HP',s.foes,s.invalidFoes);
    return s;
