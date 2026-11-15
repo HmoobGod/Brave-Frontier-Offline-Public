@@ -63,14 +63,20 @@
  header.textContent='2022 ORIGINAL MISSION DATA · RAW REFERENCES (NOT GAMEPLAY)';
  const disclaimer=document.createElement('p');
  disclaimer.textContent='These are verbatim original 2022 encounter tokens, music filenames, NPC IDs and reward tokens. Their meanings are not decoded. This view never loads music, determines enemy rosters, awards loot or changes any saves.';
+ const rewardLabel=document.createElement('label');rewardLabel.style.cssText='display:flex;align-items:center;gap:8px;min-height:44px';
+ const rewards=document.createElement('input');rewards.type='checkbox';rewards.id='bf20900-reward-only';
+ rewardLabel.append(rewards,document.createTextNode('Only non-empty raw reward tokens (meaning unknown)'));
+ const count=document.createElement('p');count.id='bf20900-filter-count';count.setAttribute('role','status');
  const result=document.createElement('ol');result.id='bf20900-source-fields';
  result.style.cssText='padding-left:23px;overflow-wrap:anywhere';
  function refresh(){
    const dungeon=Number(select.value);
    if(![400,410,420,430,440,450,460].includes(dungeon))return 0;
    result.replaceChildren();
-   for(const row of rows){
-     if(guide.lookup(row[0])?.[1]!==dungeon)continue;
+   const all=rows.filter(row=>guide.lookup(row[0])?.[1]===dungeon);
+   const visible=all.filter(row=>!rewards.checked||row[4]!=='');
+   count.textContent=visible.length+' of '+all.length+' source-only rows · reward meanings unknown';
+   for(const row of visible){
      const li=document.createElement('li');li.dataset.sourceMission=String(row[0]);
      const label=document.createElement('strong');label.textContent='Mission '+row[0];
      const content=document.createElement('p');
@@ -81,7 +87,8 @@
    }
    return result.children.length;
  }
- block.append(header,disclaimer,result);host.append(block);
+ block.append(header,disclaimer,rewardLabel,count,result);host.append(block);
+ rewards.addEventListener('change',refresh);
  const observer=new MutationObserver(refresh);
  observer.observe(questList,{childList:true});
  refresh();
