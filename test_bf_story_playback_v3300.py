@@ -55,6 +55,16 @@ with sync_playwright() as pw:
  assert s['step']==s['lines'] and s['lines']>30,s
  assert page.evaluate('BFGlobalStoryPlaybackV3300.start()') is False
  assert page.evaluate('BFGlobalStoryPlaybackV3300.snapshot().playing') is False
+ rewind_before=page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.evaluate('S.busy=true')
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.restart()') is False
+ page.evaluate('S.busy=false')
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.restart()') is True
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.snapshot().playing') is False
+ assert page.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7")})')==rewind_before
+ assert page.evaluate('BFGlobalStoryPlaybackV3300.restart()') is False
+ assert page.locator('#bf3300-restart').is_disabled()
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
  assert not errors,errors
