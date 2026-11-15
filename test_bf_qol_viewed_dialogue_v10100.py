@@ -176,14 +176,15 @@ with sync_playwright() as pw:
  assert real.evaluate(api+'.state().step')==real.evaluate(api+'.state().lines')
  assert real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==real_save
  # Forget is a manual, durable local-marker edit, not a save or page edit.
+ real.evaluate("BF_homeNav.go('quest')")
  before_forget=real.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,reader:BFGlobalOriginalEventsV2200.snapshot()})')
  marker_key='bf_global_offline_qol_viewed_scenes_v101'
  prior_markers=real.evaluate('(k)=>localStorage.getItem(k)',marker_key)
- real.evaluate("window.__markerSet=localStorage.setItem;localStorage.setItem=(k,v)=>{if(k.includes('viewed_scenes'))throw Error('full');__markerSet(k,v)}")
+ real.evaluate("()=>{window.__markerSet=localStorage.setItem;localStorage.setItem=(k,v)=>{if(k.includes('viewed_scenes'))throw Error('full');__markerSet(k,v)}}")
  assert real.evaluate(api+'.forget()') is False
  assert real.evaluate(api+'.state().viewed') is True
  assert real.evaluate('(k)=>localStorage.getItem(k)',marker_key)==prior_markers
- real.evaluate('localStorage.setItem=window.__markerSet')
+ real.evaluate('()=>{localStorage.setItem=window.__markerSet}')
  for width in (320,390,540):
   real.set_viewport_size({'width':width,'height':844})
   assert real.locator('#bf10100-forget').bounding_box()['height']>=44
