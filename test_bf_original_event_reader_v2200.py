@@ -46,6 +46,16 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==2
  assert 'Summoner' in page.locator('#bf2200-text').inner_text()
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is False
+ corrupt=page.evaluate("""()=>{const original=P.questClears,before=JSON.stringify({P,S}),saved=localStorage.getItem('bf_global_offline_demo_v7');let getterReads=0;
+  const getter={};Object.defineProperty(getter,'10',{enumerable:true,get:()=>{getterReads++;return 1}});
+  const out=[];try{
+   for(const ledger of [{10:Infinity},{10:NaN},{10:'1'},{10:1.5},{10:-1},Object.create({10:1}),getter,null,[]]){
+    P.questClears=ledger;out.push(BFGlobalOriginalEventsV2200.read('clear',10)===false);
+   }
+  }finally{P.questClears=original;}
+  return {out,getterReads,same:before===JSON.stringify({P,S})&&saved===localStorage.getItem('bf_global_offline_demo_v7')};
+ }""")
+ assert corrupt=={'out':[True]*9,'getterReads':0,'same':True},corrupt
  page.evaluate('()=>{P.questClears[10]=1;renderQuestList()}')
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is True
  assert 'Farm' in page.locator('#bf2200-text').inner_text()
