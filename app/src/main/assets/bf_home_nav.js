@@ -185,6 +185,79 @@ function bfOfflineUnitPortraitV266(source, name) {
     }
   });
 
+  // Read-only access to the existing session journal, resolved at click time
+  // because Android injects that component after this Home shell.
+  const logShortcut = document.createElement('button');
+  logShortcut.id = 'bf-home-battle-log';
+  logShortcut.type = 'button';
+  logShortcut.textContent = 'VIEW SESSION BATTLE LOG';
+  logShortcut.style.cssText = document.getElementById('bf-home-build-info').style.cssText;
+  const logHint = document.createElement('p');
+  logHint.id = 'bf-home-battle-log-status';
+  logHint.hidden = true;
+  logHint.setAttribute('role','status');
+  logHint.setAttribute('aria-live','polite');
+  logHint.style.cssText = 'margin:7px 0;color:#d5e4ef;font:12px/1.5 Arial,sans-serif;overflow-wrap:anywhere';
+  document.getElementById('bf-home-build-info').after(logShortcut,logHint);
+  logShortcut.addEventListener('click',()=>{
+    const nav = window.BF_homeNav;
+    if(nav?.current!=='home')return;
+    const unavailable = message => {logHint.textContent=message;logHint.hidden=false;};
+    if(document.hidden){unavailable('Return to the app before opening the battle log.');return;}
+    if(typeof P==='undefined'||P?.version!==7||typeof S==='undefined'||!S||typeof S!=='object'){
+      unavailable('Local battle information is unavailable. Open Quests to inspect your battle.');return;
+    }
+    if(S.busy!==false){unavailable('Finish the current turn before opening the battle log.');return;}
+    if(S.auto!==false){unavailable('Stop Auto Battle before opening the battle log.');return;}
+    const repeat = window.BFGlobalQoLQuestRepeatV9800;
+    if(repeat){
+      try{
+        if(repeat.statusSnapshot?.()?.active!==false){
+          unavailable('Check or stop Auto Repeat before opening the battle log.');return;
+        }
+      }catch(_){unavailable('Auto Repeat status is unavailable. Open Quests to inspect your battle.');return;}
+    }
+    const journal = document.getElementById('bf3200-journal');
+    const summary = journal?.querySelector('summary');
+    const api = window.BFGlobalCombatJournalV3200;
+    if(journal?.tagName!=='DETAILS'||!summary||typeof api?.refresh!=='function'){
+      unavailable('Session battle log unavailable. Open Quests for current battle controls.');return;
+    }
+    try{
+      const status=api.refresh();
+      if(!status||typeof status!=='object'){
+        unavailable('Session battle log unavailable. Open Quests for current battle controls.');return;
+      }
+    }
+    catch(_){unavailable('Session battle log unavailable. Open Quests for current battle controls.');return;}
+    if(nav.go('quest')!==true)return;
+    logHint.hidden=true;
+    journal.open=true;
+    summary.focus({preventScroll:true});
+    journal.scrollIntoView({block:'start',behavior:'instant'});
+  });
+  window.addEventListener('bf-route-change',event=>{
+    if(event?.detail?.route==='home')logHint.hidden=true;
+  });
+  function syncLogRoute(){
+    const journal=document.getElementById('bf3200-journal');
+    if(journal?.tagName!=='DETAILS')return false;
+    const hidden=window.BF_homeNav?.current!=='quest';
+    journal.classList.toggle('bf-hidden',hidden);
+    journal.setAttribute('aria-hidden',String(hidden));
+    return true;
+  }
+  window.addEventListener('bf-route-sync',syncLogRoute);
+  const logParent=document.querySelector('main.wrap');
+  if(logParent&&!syncLogRoute()){
+    // The journal is a late-added sibling of the native log panel. Bind it
+    // once so its summary cannot leak onto Home/Units; no polling is needed.
+    const waitingForLog=new MutationObserver(()=>{
+      if(syncLogRoute())waitingForLog.disconnect();
+    });
+    waitingForLog.observe(logParent,{childList:true});
+  }
+
   const party = document.getElementById('bf-scene-party');
   // v423: A non-owned, duplicate or malformed base ID must never appear
   // to be an owned Home squad member. This is presentation-only.
