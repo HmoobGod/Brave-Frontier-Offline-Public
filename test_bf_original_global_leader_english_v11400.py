@@ -35,6 +35,12 @@ with sync_playwright() as pw:
  before=p.evaluate('JSON.stringify(P)')
  p.add_script_tag(path=str(A/'bf11000_source_starter_leader_skills.js'))
  p.add_script_tag(path=str(A/'bf11200_all_playable_leader_source.js'))
+ p.evaluate("""()=>{const original=window.BFGlobalPlayableLeadersV11200;window.__leaderFault='';
+  window.BFGlobalPlayableLeadersV11200={...original,lookup:(id)=>{
+   if(__leaderFault==='throw')throw Error('leader source unavailable');if(__leaderFault==='null')return null;
+   const s=original.lookup(id);if(!s)return s;
+   return {...s,...({wrongId:{unitId:999},badSkill:{lsId:'100'},badType:{skillTypeRaw:'unknown'}}[__leaderFault]||{})};
+  }};}""")
  p.add_script_tag(path=str(A/'bf11400_original_global_leader_english.js'))
  api='BFGlobalOriginalLeaderEnglishV11400'
  assert p.evaluate(api+'.source.names')==36
@@ -53,6 +59,15 @@ with sync_playwright() as pw:
  p.locator('#bf11200-form').evaluate("""el=>{el.value='10041';el.dispatchEvent(new Event('change'));}""")
  assert "Fire's Protection" in p.locator('#bf11400-original-name').inner_text()
  assert '10% reduction in damage from Fire Types' in p.locator('#bf11400-original-description').inner_text()
+ leader_before=p.evaluate('JSON.stringify({P,S})')
+ for case in ('throw','null','wrongId','badSkill','badType'):
+  p.evaluate('(v)=>window.__leaderFault=v',case)
+  assert p.evaluate(api+'.refresh()') is None,case
+  assert 'unavailable' in p.locator('#bf11400-original-name').text_content()
+  assert '10% reduction' not in p.locator('#bf11400-original-description').text_content()
+  p.evaluate("window.__leaderFault=''")
+  assert p.evaluate(api+'.refresh().name')=="Fire's Protection"
+ assert p.evaluate('JSON.stringify({P,S})')==leader_before
  assert p.evaluate(api+'.snapshot().addsCombatEffects') is False
  assert p.evaluate('JSON.stringify(P)')==before
  p.add_script_tag(path=str(A/'bf11400_original_global_leader_english.js'))
