@@ -33,15 +33,35 @@
  const bossBtn=document.createElement('button');bossBtn.type='button';
  const stopBtn=document.createElement('button');stopBtn.type='button';
  mapBtn.textContent='Play map';bossBtn.textContent='Play boss';stopBtn.textContent='Stop';
- for(const b of [mapBtn,bossBtn,stopBtn]){
-  b.style.cssText='min-height:38px;margin:3px;padding:6px 9px;background:#2d4b62;border:1px solid #9cb4c5;border-radius:5px;color:white';
+ const muteBtn=document.createElement('button');muteBtn.type='button';
+ muteBtn.id='bf145-mute';muteBtn.textContent='MUTE';muteBtn.setAttribute('aria-pressed','false');
+ for(const b of [mapBtn,bossBtn,stopBtn,muteBtn]){
+  b.style.cssText='min-height:44px;margin:3px;padding:6px 9px;background:#2d4b62;border:1px solid #9cb4c5;border-radius:5px;color:white';
  }
  const status=document.createElement('p');status.id='bf145-original-music-status';
  status.setAttribute('aria-live','polite');
- box.append(title,note,mapBtn,bossBtn,stopBtn,status);
+ const volumeLabel=document.createElement('label');volumeLabel.htmlFor='bf145-volume';
+ volumeLabel.textContent='Session volume: ';
+ const volume=document.createElement('input');volume.id='bf145-volume';
+ volume.type='range';volume.min='0';volume.max='100';volume.step='1';volume.value='42';
+ volume.style.cssText='min-height:44px;max-width:100%;vertical-align:middle';
+ const volumeText=document.createElement('output');volumeText.htmlFor=volume.id;volumeText.textContent='42%';
+ volumeLabel.append(volume,volumeText);
+ box.append(title,note,mapBtn,bossBtn,stopBtn,muteBtn,volumeLabel,status);
  host.after(box);
- const sound=new Audio();sound.loop=true;sound.preload='none';sound.volume=0.42;
+ const sound=new Audio();sound.loop=true;sound.preload='none';sound.volume=0.42;sound.muted=false;
  let active=null;let intent=null;let stopped=true;let playRequest=0;
+ function setVolume(percent){
+   if(!Number.isInteger(percent)||percent<0||percent>100)return false;
+   sound.volume=percent/100;volume.value=String(percent);volumeText.textContent=percent+'%';
+   return true;
+ }
+ volume.addEventListener('input',()=>setVolume(Number(volume.value)));
+ muteBtn.addEventListener('click',()=>{
+   sound.muted=!sound.muted;
+   muteBtn.setAttribute('aria-pressed',String(sound.muted));
+   muteBtn.textContent=sound.muted?'UNMUTE':'MUTE';
+ });
  const onQuest=()=>!window.BF_homeNav||window.BF_homeNav.current==='quest';
  function current(){
    if(typeof QUEST==='undefined'||!QUEST||
@@ -115,7 +135,7 @@
    source:Object.freeze({year:2022,missions:106,sourceSha256:canonical,originalFiles:18,
      bundledTracks:3,nativePlaybackTimingKnown:false,
      autoplay:false,saveMutation:false}),
-   lookup:id=>map.get(id)||null,refresh,
-   get state(){return Object.freeze({active,stopped,src:sound.getAttribute('src')});}
+   lookup:id=>map.get(id)||null,refresh,setVolume,
+   get state(){return Object.freeze({active,stopped,src:sound.getAttribute('src'),volume:sound.volume,muted:sound.muted});}
  });
 })();

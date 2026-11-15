@@ -68,7 +68,7 @@ with sync_playwright() as pw:
           document.getElementById('mode').value='archive';
         }""")
         page.add_script_tag(content=JS)
-        assert page.locator('#bf145-original-music button').count()==3
+        assert page.locator('#bf145-original-music button').count()==4
         state="JSON.stringify({P,storage:window.__musicStorage})"
         original=page.evaluate(state)
         buttons=page.locator('#bf145-original-music button')
