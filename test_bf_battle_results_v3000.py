@@ -19,9 +19,10 @@ with sync_playwright() as pw:
   args=['--no-sandbox','--disable-dev-shm-usage'])
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
- getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
- removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+ page.evaluate("""()=>{const db={};let writes=0;window.__resultWrites=()=>writes;
+ Object.defineProperty(window,'localStorage',{configurable:true,value:{
+ getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+ removeItem:k=>{writes++;delete db[k]},key:i=>Object.keys(db)[i]??null,
  get length(){return Object.keys(db).length}}});
  window.alert=()=>{};window.confirm=()=>true;
  HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
@@ -58,6 +59,72 @@ with sync_playwright() as pw:
  assert page.locator('#bf3000-result').is_visible()
  assert 'DEFEAT' in page.locator('#bf3000-reward').inner_text()
  assert page.locator('#bf3000-next').is_disabled()
+ # Manual defeat recovery opens the existing Squad editor, preserving the
+ # defeated battle and all progress. No native replay/Auto/save is invoked.
+ defeat_before=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7'),
+   writes:__resultWrites()})""")
+ for width,old_tab,key in ((320,'training',None),(390,'box','Enter'),
+                           (540,'equipment','Space'),(390,'evolve',None)):
+  page.set_viewport_size({'width':width,'height':844})
+  page.evaluate("""tab=>{BF_homeNav.go('units');BFInnerScreens.setTab(tab);
+    BF_homeNav.go('quest');BFGlobalBattleResultsV3000.refresh()}""",old_tab)
+  review=page.locator('#bf3000-review-squad')
+  assert review.is_visible() and review.is_enabled()
+  assert review.bounding_box()['height']>=44
+  if key:
+   review.focus();review.press(key)
+  else:
+   review.click()
+  assert page.evaluate('BF_homeNav.current')=='units'
+  assert page.evaluate('BFInnerScreens.unitTab')=='squad'
+  assert page.locator('#squadpicker').is_visible()
+  assert page.locator('#bf-unit-tab-label').evaluate('(e)=>document.activeElement===e')
+  assert page.locator('#bf-owned-box').is_hidden()
+  assert page.locator('#bf-equipment-screen').is_hidden()
+  assert page.locator('section.training-panel').is_hidden()
+  assert page.locator('section.evo-panel').is_hidden()
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+  assert page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+    quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7'),
+    writes:__resultWrites()})""")==defeat_before
+ # A stale painted action cannot bypass new Auto/busy/Repeat/route/provider
+ # state. Refresh must also update disabled controls when only a gate changes.
+ blocked=page.evaluate("""()=>{
+   const api=BFGlobalBattleResultsV3000,repeat=window.BFGlobalQoLQuestRepeatV9800,
+     editor=window.BFInnerScreens;
+   const original={auto:S.auto,busy:S.busy,phase:S.phase,mode:S.mode,over:S.over};
+   const out=[];
+   const probe=()=>{const accepted=api.reviewSquad();api.refresh();out.push({
+     accepted,route:BF_homeNav.current,
+     disabled:document.getElementById('bf3000-review-squad').disabled})};
+   try{
+     S.auto=true;probe();S.auto=original.auto;
+     S.busy=true;probe();S.busy=original.busy;
+     S.phase='unknown';probe();S.phase=original.phase;
+     S.mode='training';probe();S.mode=original.mode;
+     S.over=false;probe();S.over=original.over;
+     for(const provider of [()=>({active:true}),()=>null,()=>({active:'false'}),
+          ()=>{throw Error('unavailable repeat')}]){
+       window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:provider};probe();
+     }
+     window.BFGlobalQoLQuestRepeatV9800=repeat;
+     window.BFInnerScreens={};probe();window.BFInnerScreens=editor;
+     BF_homeNav.go('home');probe();BF_homeNav.go('quest');
+   }finally{
+     Object.assign(S,original);window.BFGlobalQoLQuestRepeatV9800=repeat;
+     window.BFInnerScreens=editor;api.refresh();
+   }
+   return out;
+ }""")
+ assert len(blocked)==11 and all(not r['accepted'] and r['disabled'] for r in blocked),blocked
+ assert all(r['route']=='quest' for r in blocked[:-1]) and blocked[-1]['route']=='home',blocked
+ assert page.locator('#bf3000-review-squad').is_enabled()
+ assert page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7'),
+   writes:__resultWrites()})""")==defeat_before
+ page.set_viewport_size({'width':390,'height':844})
  assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is True
  assert page.evaluate('S.over') is False
  assert page.evaluate('QUEST.missionId')==1
@@ -65,6 +132,8 @@ with sync_playwright() as pw:
  s=page.evaluate('BFGlobalBattleResultsV3000.refresh()')
  assert s['victory'] and s['archive'] and s['clears']==1,s
  assert s['exp']==5 and s['nextId']==2,s
+ assert page.locator('#bf3000-review-squad').is_hidden()
+ assert page.evaluate('BFGlobalBattleResultsV3000.reviewSquad()') is False
  assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==1
  # A stale/corrupt canonical receipt cannot be bypassed by a still-true
  # saveEnabled flag. All post-victory navigation shares the stored-clear gate.
