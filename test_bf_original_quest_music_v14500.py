@@ -51,7 +51,7 @@ with sync_playwright() as pw:
   HTMLMediaElement.prototype.play=()=>Promise.resolve();
   window.__playCalls=0;window.__pauseCalls=0;
   window.Audio=class {
-   constructor(){this.src='';this.loop=false;this.preload='';this.volume=1}
+   constructor(){window.__cueSound=this;this.src='';this.loop=false;this.preload='';this.volume=1}
    pause(){window.__pauseCalls++}
    removeAttribute(k){if(k==='src')this.src=''}
    getAttribute(k){return k==='src'&&this.src?this.src:null}
@@ -70,7 +70,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFOriginalGlobalMusicV14500.source.saveMutation') is False
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
  assert page.evaluate('window.__playCalls')==0
- assert page.locator('#bf145-original-music button').count()==3
+ assert page.locator('#bf145-original-music button').count()==4
  assert page.evaluate('BFOriginalGlobalMusicV14500.lookup(1).map')=='bf010_map_grass.mp3'
  assert page.evaluate('BFOriginalGlobalMusicV14500.lookup(20).map')=='bf011_map_firecave.mp3'
  assert page.evaluate('BFOriginalGlobalMusicV14500.lookup(365).boss')=='bf028_map_space.mp3'
@@ -115,6 +115,32 @@ with sync_playwright() as pw:
  assert page.locator('#bf145-original-music').count()==1
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'music-only UI must not touch P, S or v7 saved data'
+ # Volume/mute are manual session preferences and never initiate playback.
+ calls=page.evaluate('__playCalls')
+ for invalid in ('-1','101','42.5','"42"','null'):
+  assert page.evaluate('BFOriginalGlobalMusicV14500.setVolume('+invalid+')') is False
+ assert page.evaluate('BFOriginalGlobalMusicV14500.state.volume')==0.42
+ for percent in (0,100,23):
+  assert page.evaluate('(n)=>BFOriginalGlobalMusicV14500.setVolume(n)',percent)
+  assert page.evaluate('__cueSound.volume')==percent/100
+  assert page.locator('#bf145-volume').input_value()==str(percent)
+  assert page.locator('#bf145-volume + output').text_content()==str(percent)+'%'
+ page.locator('#bf145-volume').focus();page.keyboard.press('ArrowLeft')
+ assert page.evaluate('__cueSound.volume')==0.22
+ page.locator('#bf145-mute').focus();page.keyboard.press('Enter')
+ assert page.evaluate('__cueSound.muted') is True
+ assert page.locator('#bf145-mute').get_attribute('aria-pressed')=='true'
+ page.locator('#bf145-mute').focus();page.keyboard.press('Space')
+ assert page.evaluate('__cueSound.muted') is False
+ assert page.evaluate('__playCalls')==calls
+ assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for selector in ('#bf145-volume','#bf145-mute'):
+   assert page.locator(selector).bounding_box()['height']>=44
+  assert page.locator('#bf145-original-music').evaluate('(e)=>e.scrollWidth<=e.clientWidth')
+ final=page.evaluate("()=>({p:JSON.stringify(P),s:JSON.stringify(S),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ assert final==before
  assert not errors,errors
  browser.close()
 print('PASS v145: original 106 mission music cues, original bundled MP3 source SHA, opt-in guarded playback and v7 save isolation')
