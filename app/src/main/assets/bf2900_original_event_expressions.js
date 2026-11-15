@@ -49,20 +49,27 @@
      file:filename(pair),source
    });
  }
+ function unavailable(){return Object.freeze({source:null,step:0,character:null,variant:null,image:null,frames:count,scenes:20,sprites:knownImages.size});}
  function snapshot(){
+   try{
    const state=archive.snapshot();
+   const chosen=/^dungeon:([1-9][0-9]*)$/.exec(state?.chosen||'');
+   const record=chosen?archive.lookup('dungeon',Number(chosen[1])):null;
+   if(!record||record.source!=='content/event/'+state.source||!Array.isArray(record.lines)||
+     record.lines.length!==state.lines)return unavailable();
    const frame=lookup(state?.source,state?.step);
    return Object.freeze({
      source:state?.source||null,step:state?.step||0,
      character:frame?.character||null,variant:frame?.variant??null,
      image:frame?.file||null,frames:count,scenes:20,sprites:knownImages.size
    });
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const state=snapshot(),image=state.image;
    notice.hidden=!image;
    controls.style.display=image?'none':'';
-   if(!image)return state;
+   if(!image){img.removeAttribute('src');img.alt='No verified expression for the current source scene';return state;}
    speaker.refresh();
    const path='content/event/'+image;
    if(img.getAttribute('src')!==path)img.setAttribute('src',path);
