@@ -28,7 +28,14 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert '2022 source reference:' in script
  assert 'DEMO credits EXP/Zel/Karma on clear; stamina not enforced' in script
  assert 'unattendedOwnsNavigation' in script
- assert "repeat.statusSnapshot()?.active===true" in script
+ # The signed artifact must carry the reviewed strict-idle source, not the
+ # superseded truthy-only Repeat guard.
+ assert z.read('assets/bf101_story_continue.js')==(R/'app/src/main/assets/bf101_story_continue.js').read_bytes()
+ assert 'function unattendedBlockReason()' in script
+ assert 'const status=repeat.statusSnapshot();' in script
+ assert 'status?.active===true' in script
+ assert 'return status?.active===false?null:unknown;' in script
+ assert 'REPEAT STATUS UNAVAILABLE' in script
  assert 'function uncommittedVictory()' in script
  assert 'window.BFGlobalBattleResultsV3000' in script
  assert 'results.committedClearCount(q.missionId)!==count' in script
