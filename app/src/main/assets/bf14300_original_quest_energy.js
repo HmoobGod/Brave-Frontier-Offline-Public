@@ -50,12 +50,18 @@
    const option=document.createElement('option');
    option.value=value;option.textContent=label;range.append(option);
  }
+ const unlockedLabel=document.createElement('label');
+ unlockedLabel.style.cssText='display:flex;align-items:center;gap:7px;min-height:44px';
+ const unlockedOnly=document.createElement('input');unlockedOnly.type='checkbox';
+ unlockedOnly.id='bf143-unlocked-only';
+ unlockedOnly.setAttribute('aria-describedby','bf143-energy-count');
+ unlockedLabel.append(unlockedOnly,document.createTextNode('Unlocked only (DEMO)'));
  const clear=document.createElement('button');clear.type='button';
- clear.id='bf143-energy-clear';clear.textContent='CLEAR ENERGY FILTER';
+ clear.id='bf143-energy-clear';clear.textContent='CLEAR QUEST FILTERS';
  clear.style.cssText='min-height:44px;padding:8px 12px;border-radius:5px';
  const count=document.createElement('span');count.id='bf143-energy-count';
  count.setAttribute('role','status');count.setAttribute('aria-live','polite');
- filter.append(filterLabel,range,clear,count);
+ filter.append(filterLabel,range,unlockedLabel,clear,count);
  questList.before(filter);
  style.textContent+='button.questcard[hidden]{display:none!important}';
  function matchesEnergy(cost){
@@ -68,7 +74,8 @@
    }
  }
  range.addEventListener('change',()=>decorate());
- clear.addEventListener('click',()=>{range.value='all';decorate();range.focus();});
+ unlockedOnly.addEventListener('change',()=>decorate());
+ clear.addEventListener('click',()=>{unlockedOnly.checked=false;range.value='all';decorate();range.focus();});
  // Native renderQuestList and original English name injection both preserve
  // the index ordering of QUESTS. The latter replaces <strong> with "Basics
  // of Battle" and places "Mission N" inside <small>, so NEVER derive a
@@ -78,6 +85,24 @@
      r[1]===q.dungeonId && r[2]===q.requires &&
      r[3]===q.battles && r[4]===q.energy &&
      r[5]===q.exp && r[6]===q.zel && r[7]===q.karma;
+ }
+ // Current DEMO unlocks are separate from immutable 2022 Energy evidence.
+ // Never interpret damaged progress or a failed eligibility provider as a
+ // reason to hide potentially playable cards. Keep Energy discovery usable.
+ function unlockedFlags(){
+   try{
+     const ledger=P.questClears;
+     if(P.version!==7||!ledger||typeof ledger!=='object'||Array.isArray(ledger)||
+        ![Object.prototype,null].includes(Object.getPrototypeOf(ledger))||
+        typeof questUnlocked!=='function')return null;
+     for(const q of QUESTS){
+       const value=ledger[q.missionId];
+       if(value!==undefined&&(!Object.prototype.hasOwnProperty.call(ledger,q.missionId)||
+          !Number.isSafeInteger(value)||value<0))return null;
+     }
+     const flags=QUESTS.map(q=>questUnlocked(q));
+     return flags.every(value=>typeof value==='boolean')?flags:null;
+   }catch(_){return null;}
  }
  function decorate(){
    const buttons=Array.from(questList.querySelectorAll('button.questcard'));
@@ -92,7 +117,7 @@
          (stamp===undefined || stamp===String(q.missionId));
      });
    if(!valid){
-     range.disabled=true;
+     range.disabled=true;unlockedOnly.disabled=true;
      count.textContent='Original 2022 quest references unavailable · filter disabled';
      for(const button of buttons){
        button.hidden=false;
@@ -101,12 +126,14 @@
      return 0;
    }
    range.disabled=false;
+   const unlocked=unlockedFlags();unlockedOnly.disabled=unlocked===null;
    let shown=0;
    for(const [index,button] of buttons.entries()){
      const q=QUESTS[index],r=known.get(q.missionId);
      // A stamped ID also guards against silent reordering on later refresh.
      button.dataset.bf143MissionId=String(q.missionId);
      button.hidden=!matchesEnergy(r[4]);
+     if(unlockedOnly.checked&&unlocked!==null)button.hidden=button.hidden||!unlocked[index];
      let label=button.querySelector('.bf143-original-cost');
      if(!label){
        label=document.createElement('small');
@@ -119,7 +146,9 @@
      shown++;
    }
    const visible=buttons.filter(b=>!b.hidden).length;
-   count.textContent=visible+' of '+shown+' source-matched quests shown';
+   count.textContent=visible+' of '+shown+' source-matched quests shown'+
+     (unlocked===null?' · Unlock status unavailable; showing Energy matches':
+       unlockedOnly.checked?' · unlocked only':'');
    return shown;
  }
  const watcher=new MutationObserver(()=>decorate());

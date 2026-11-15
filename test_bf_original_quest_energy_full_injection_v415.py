@@ -149,6 +149,19 @@ with sync_playwright() as pw:
             assert p.evaluate("document.activeElement.id") == "bf143-energy-range"
             assert p.evaluate("""() => [...document.querySelectorAll('#questlist button.questcard')]
               .filter(button=>!button.hidden).length""") == 106
+        # New discovery control also composes after the real native injection order.
+        unlock=p.locator('#bf143-unlocked-only')
+        for width in (320,390,540):
+            p.set_viewport_size({'width':width,'height':844})
+            unlock.check()
+            assert unlock.locator('..').bounding_box()['height']>=44
+            p.locator('#bf143-energy-range').select_option('0')
+            assert p.evaluate("[...document.querySelectorAll('button.questcard')].filter(c=>!c.hidden).map(c=>Number(c.dataset.bf143MissionId))")==[1]
+            p.locator('#bf143-energy-range').select_option('7+')
+            assert p.evaluate("[...document.querySelectorAll('button.questcard')].filter(c=>!c.hidden).length")==0
+            p.locator('#bf143-energy-clear').click()
+            assert not unlock.is_checked()
+            assert snapshot(p)==baseline
         # Reordered card identity or live source drift must fail closed, not
         # silently label or hide the wrong mission.
         first = p.locator("#questlist button.questcard").first
