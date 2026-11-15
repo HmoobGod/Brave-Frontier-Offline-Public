@@ -54,14 +54,22 @@
  // Never redirect either unattended action into another story mission.
  // The optional repeat module is source-tested separately and may be absent
  // on older embedded pages. If present but broken, refuse navigation.
- function unattendedOwnsNavigation(){
-   if(S?.mode==='archive'&&S.auto===true&&S.over===false)return true;
+ function unattendedBlockReason(){
+   const active='AUTO BATTLE / REPEAT ACTIVE · Stop Auto or finish the current run before continuing.';
+   const unknown='REPEAT STATUS UNAVAILABLE · Story shortcuts are paused until Repeat confirms it is idle.';
+   if(S?.mode==='archive'&&S.auto===true&&S.over===false)return active;
    const repeat=window.BFGlobalQoLQuestRepeatV9800;
-   if(!repeat)return false;
-   try{return typeof repeat.statusSnapshot!=='function'||
-       repeat.statusSnapshot()?.active===true;}
-   catch(_){return true;}
+   if(!repeat)return null;
+   try{
+     if(typeof repeat.statusSnapshot!=='function')return unknown;
+     const status=repeat.statusSnapshot();
+     if(status?.active===true)return active;
+     // Only an explicit boolean false proves the optional provider is idle.
+     // Unknown/malformed status must never reset a battle via story routing.
+     return status?.active===false?null:unknown;
+   }catch(_){return unknown;}
  }
+ function unattendedOwnsNavigation(){return unattendedBlockReason()!==null;}
  // Continue Story must use the SAME whole-catalog validation as the
  // campaign and post-victory Next controls. A corrupt later quest clear must
  // never be bypassed just because an earlier unlocked quest is available.
@@ -157,13 +165,13 @@
     meter.setAttribute('aria-valuemin','0');
     meter.setAttribute('aria-valuemax','106');
     meter.setAttribute('aria-valuenow',String(s.done));
-    const unattended=unattendedOwnsNavigation();
-    button.disabled=!!S?.busy||unattended||!q;
+    const unattended=unattendedBlockReason();
+    button.disabled=!!S?.busy||!!unattended||!q;
     autoButton.disabled=!canContinueAuto(q);
     if(awaitingSave()){
       next.textContent='VICTORY NOT SAVED · Retry Save or download an unsaved backup before continuing.';
     }else if(unattended){
-      next.textContent='AUTO BATTLE / REPEAT ACTIVE · Stop Auto or finish the current run before continuing.';
+      next.textContent=unattended;
     }else if(q){
       const source=BFGlobalQuestText.sourceFor(q);
       const economy=sourceEconomyPreview(q);
