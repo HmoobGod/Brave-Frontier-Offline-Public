@@ -50,14 +50,18 @@
  function lookup(lsId){return Number.isSafeInteger(lsId)?
    byLeader.get(lsId)||null:null;}
  function forUnit(unitId){
+   try{
+   if(!Number.isSafeInteger(unitId)||unitId<=0)return null;
    const unit=prior.lookup(unitId);
-   if(!unit)return null;
+   if(!unit||unit.unitId!==unitId||!Number.isSafeInteger(unit.lsId)||
+     !['2','5','31','31@34','31@48','31@49','31@32','31@29'].includes(unit.skillTypeRaw))return null;
    const skill=lookup(unit.lsId);
    return skill?freeze({unitId,lsId:unit.lsId,
      name:skill.originalEnglishName,
      description:skill.originalEnglishDescription,
      skillTypeRaw:unit.skillTypeRaw,
      originalEnglish:true,combatImplemented:unit.skillTypeRaw==='2'}):null;
+   }catch(_){return null;}
  }
  function refresh(){
    const row=forUnit(Number(select.value));
