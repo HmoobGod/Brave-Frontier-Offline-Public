@@ -134,6 +134,7 @@ with sync_playwright() as pw:
  for row in preview['entries']:
   assert f"#{row['from']} -> #{row['to']}" in report
  stable=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ page.locator('#bf1700-refresh').click()
  page.locator('#bf1700-checklist').click()
  assert page.locator('#bf1700-checklist-text').input_value()==report
  assert page.evaluate('document.activeElement.id')=='bf1700-checklist-text'
