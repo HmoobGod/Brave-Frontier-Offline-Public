@@ -52,23 +52,28 @@
    // Mid-level stats need a verified original type and leveling formula.
    return null;
  }
- function snapshot(){
-   const slots=P.squad.slice(0,6).map((baseId,index)=>{
-     if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))
-       return freeze({slot:index,baseId,formId:null,reference:null});
-     const current=effectiveUnit(baseId);
-     const id=Number.isSafeInteger(current?.id)?current.id:null;
-     return freeze({slot:index,baseId,formId:id,reference:lookup(id)});
-   });
-   return freeze({source:freeze({archive:'mst-decoded.zip',
+ const snapshotSource=freeze({archive:'mst-decoded.zip',
        originalUnitMaster:'2022 F_UNIT_MST_1/2_Ver1084.json',
        originalUnitTypeMaster:'2022 F_UNIT_TYPE_MST_Ver52.json',
        formCount:72,typeCount:6,
        baseAndLordMaxEndpointsVerified:true,
        nativeMidlevelGrowthVerified:false,
        typeRollsApplied:false,liveBattleStatsModified:false,
-       savedProgressModified:false}),
-     slots:freeze(slots)});
+       savedProgressModified:false});
+ function snapshot(){
+   let available=true,slots=[];
+   try{
+     if(P.version!==7||!Array.isArray(P.squad)||P.squad.length>6||!Array.isArray(P.roster)||
+       Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0)||new Set(P.roster).size!==P.roster.length)throw Error('Invalid owned containers');
+     const occupied=P.squad.filter(id=>Number.isSafeInteger(id)&&id>0);
+     if(new Set(occupied).size!==occupied.length)throw Error('Duplicate owned squad identity');
+     slots=Array.from(P.squad,(baseId,index)=>{
+       if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))return freeze({slot:index,baseId,formId:null,reference:null});
+       const current=effectiveUnit(baseId),id=Number.isSafeInteger(current?.id)?current.id:null;
+       return freeze({slot:index,baseId,formId:id,reference:lookup(id)});
+     });
+   }catch(_){available=false;slots=[];}
+   return freeze({available,source:snapshotSource,slots:freeze(slots)});
  }
  const panel=document.createElement('details');
  panel.id='bf11600-original-lord-stats';
@@ -94,6 +99,7 @@
  function refresh(){
    const current=snapshot();
    list.replaceChildren();
+   if(!current.available){list.textContent='Source squad profile unavailable: invalid or unreadable owned state.';return current;}
    if(panel.open)for(const slot of current.slots){
      const line=document.createElement('div');
      line.style.cssText='border-top:1px solid #506976;padding:6px 0';
