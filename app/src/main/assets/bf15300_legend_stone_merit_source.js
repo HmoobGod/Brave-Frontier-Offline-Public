@@ -60,6 +60,26 @@
  const iconCaption=document.createElement('figcaption');
  iconCaption.textContent='Original item artwork · reference only · no item awarded.';
  visual.append(icon,iconCaption);
+ // Historical arithmetic only: never inspect a balance or create a purchase.
+ function quote(quantity){
+   if(!Number.isSafeInteger(quantity)||quantity<1||quantity>99)return null;
+   return freeze({quantity,totalHistoricalMeritCost:quantity*source.originalPrice,
+     originalPerPeriodLimit:99,sourceCurrencyColumnVerified:false,
+     livePurchasable:false,itemsAwarded:0,saveChanged:false});
+ }
+ const quantityLabel=document.createElement('label');quantityLabel.textContent='Historical reference quantity (1–99)';
+ const quantity=document.createElement('input');quantity.id='bf15300-quantity';quantity.type='text';
+ quantity.inputMode='numeric';quantity.value='1';
+ quantity.style.cssText='display:block;box-sizing:border-box;max-width:100%;min-height:44px;margin:5px 0';
+ quantityLabel.append(quantity);
+ const estimate=document.createElement('p');estimate.id='bf15300-estimate';estimate.setAttribute('role','status');
+ function estimateCost(){
+   const q=/^[1-9][0-9]?$/.test(quantity.value)?quote(Number(quantity.value)):null;
+   estimate.textContent=q?q.quantity+' historical stones × 4,000 = '+q.totalHistoricalMeritCost.toLocaleString('en-US')+
+     ' Merit Points (historical reference only; no balance, purchase or items granted).':
+     'Historical cost unavailable: enter a whole quantity from 1 to 99. No purchase enabled.';
+ }
+ quantity.addEventListener('input',estimateCost);estimateCost();
  const history=document.createElement('p');
  history.textContent='Original source lists four consecutive monthly offer windows (January–April 2022), '+
    'ending May 1, 2022. These are historical source records, NOT a restriction on offline play.';
@@ -68,10 +88,10 @@
    'documentation, not an explicit currency field in this archived table. '+
    'No Merit Points balance, earning rules, spending, item inventory or 7★/8★ '+
    'evolution purchase is enabled. Existing DEMO progression and saved data are untouched.';
- panel.append(title,visual,paragraph,history,notice);
+ panel.append(title,visual,paragraph,quantityLabel,estimate,history,notice);
  host.after(panel);
  window.BFGlobalOriginalLegendStoneExchangeV15300=freeze({
-   source,offers:rows,
+   source,offers:rows,quote,
    lookup:id=>Number.isSafeInteger(id)?rows.find(r=>r.offerId===id)||null:null
  });
 })();
