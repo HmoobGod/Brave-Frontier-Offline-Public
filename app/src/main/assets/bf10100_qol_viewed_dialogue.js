@@ -57,9 +57,10 @@
    const s=readerApi.snapshot();
    if(!panel.open||!sourceBound(s))return false;
    // Do not immediately re-mark the still-visible final page after Forget.
-   // A later visit to an earlier page starts a fresh read-through.
-   if(forgotten===s.chosen){
-     if(s.step===s.lines)return false;
+   // A verified different scene also ends suppression: one-page scenes
+   // have no earlier page to visit when rereading them.
+   if(forgotten!==null){
+     if(forgotten===s.chosen&&s.step===s.lines)return false;
      forgotten=null;
    }
    if(s.step!==s.lines)return false;
