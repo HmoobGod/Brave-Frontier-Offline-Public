@@ -26,8 +26,18 @@
     if(!row)return;
     const q=typeof QUEST!=='undefined'?QUEST:null;
     const battleCount=q?.battles;
+    let recorded=null;
+    try{
+      const proof=window.BFGrandGaiaCampaignV100?.waveReadiness?.(q?.missionId);
+      if(proof?.missionId===q?.missionId&&Number.isSafeInteger(proof.verifiedWaveCount)&&
+         proof.verifiedWaveCount>0&&proof.verifiedWaveCount<=100&&
+         proof.enemyFormationsVerified===false&&proof.dropsVerified===false&&
+         proof.nativeMultiWaveEnabled===false)recorded=proof.verifiedWaveCount;
+    }catch(_){}
+
     const parts=[
-      'Mission '+row.missionId+' · '+(Number.isInteger(battleCount)?battleCount+' verified waves':'unknown wave count'),
+      'Mission '+row.missionId+' · 2022 recorded waves: '+(recorded??'unavailable')+
+        ' · DEMO quest count: '+(Number.isSafeInteger(battleCount)&&battleCount>0?battleCount:'unavailable'),
       'Original source: '+data.facts.sourceFile,
       'Uninterpreted mission reference: '+row.rawEncounterRef,
       'Archived mimic field: '+row.rawMimicInfo+' (mechanics unknown)',
