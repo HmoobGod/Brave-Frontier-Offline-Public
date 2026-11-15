@@ -44,6 +44,8 @@
  // native Auto toggle. No unattended defeat loop or invented battle effect.
  const retryAuto=make('bf3000-retry-auto',
    'RETRY DEFEAT + AUTO BATTLE',()=>retryDefeatAuto());
+ const squad=make('bf3000-review-squad','REVIEW SQUAD',()=>reviewSquad());
+ squad.title='Open your squad editor before retrying this defeated mission';
  const next=make('bf3000-next','NEXT STORY MISSION ›',()=>advance());
  const scene=make('bf3000-scene','READ ORIGINAL CLEAR SCENE ›',()=>readScene());
  const retrySave=make('bf3000-retry-save','RETRY SAVE',()=>retrySaveResult());
@@ -112,12 +114,15 @@
  function refresh(){
    const s=snapshot();
    if(!s)return null;
-   const sig=JSON.stringify(s);
+   const reviewReady=canReviewSquad(s);
+   const sig=JSON.stringify([s,reviewReady]);
    if(sig===rendered)return s;
    rendered=sig;
    block.hidden=!s.done;
    const rescue=s.done&&s.victory&&s.archive&&!s.stored;
    retrySave.hidden=backup.hidden=!rescue;
+   squad.hidden=!s.done||s.victory||!s.archive;
+   squad.disabled=!reviewReady;
    if(!s.done)return s;
    heading.textContent=(s.victory?'BATTLE CLEARED · ':'BATTLE DEFEAT · ')+s.name;
    reward.textContent=s.victory&&s.archive?
@@ -169,6 +174,34 @@
    const s=snapshot();if(!s?.canReplay||S.busy)return false;
    retry.click();rendered='';refresh();
    return !S.over&&!S.busy&&QUEST.missionId===s.missionId;
+ }
+ // Defeat recovery is a manual read-only route, never a reset, new battle,
+ // squad edit or save. Recheck live eligibility even for a stale button.
+ function canReviewSquad(s=snapshot()){
+   if(!s?.done||s.victory||!s.archive||P?.version!==7||
+      S.over!==true||S.phase!=='Defeat'||S.mode!=='archive'||S.busy!==false||S.auto!==false||
+      document.hidden||window.BF_homeNav?.current!=='quest'||
+      typeof window.BF_homeNav?.go!=='function'||
+      typeof window.BFInnerScreens?.setTab!=='function'||
+      !document.getElementById('squadpicker')||
+      !document.getElementById('bf-unit-tab-label')||
+      typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
+   try{
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     return !repeat||typeof repeat.statusSnapshot==='function'&&
+       repeat.statusSnapshot()?.active===false;
+   }catch(_){return false;}
+ }
+ function reviewSquad(){
+   if(!canReviewSquad())return false;
+   if(window.BF_homeNav.go('units')!==true||
+      window.BFInnerScreens.setTab('squad')!==true)return false;
+   const label=document.getElementById('bf-unit-tab-label');
+   label.tabIndex=-1;
+   label.focus({preventScroll:true});
+   label.scrollIntoView({block:'center',behavior:'instant'});
+   refresh();
+   return true;
  }
  // A source-qualified archived DEMO defeat may be retried by player choice.
  // The original retry button and native Auto checkbox remain authoritative.
@@ -301,5 +334,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh();},850);
  refresh();
- window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,retryDefeatAuto,canRetryDefeatAuto,replayVictoryAuto,canReplayVictoryAuto,advance,readScene,committedClearCount});
+ window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,reviewSquad,canReviewSquad,retryDefeatAuto,canRetryDefeatAuto,replayVictoryAuto,canReplayVictoryAuto,advance,readScene,committedClearCount});
 })();
