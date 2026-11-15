@@ -46,9 +46,14 @@
  panel.append(summary,choices,heading,message,controls,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
- const available=s=>s.kind==='clear'?
-   (P.questClears?.[s.id]||0)>0:
-   QUESTS.some(q=>q.dungeonId===s.id&&questUnlocked(q));
+ const available=s=>{
+   if(P.version!==7)return false;
+   if(s.kind!=='clear')return QUESTS.some(q=>q.dungeonId===s.id&&questUnlocked(q));
+   const ledger=P.questClears;
+   if(!ledger||typeof ledger!=='object'||Array.isArray(ledger))return false;
+   const own=Object.getOwnPropertyDescriptor(ledger,s.id);
+   return !!own&&'value' in own&&Number.isSafeInteger(own.value)&&own.value>0;
+ };
  const unlocked=()=>data.filter(available);
  let selected=null,position=0,lastList='';
  const lookup=(kind,id)=>data.find(s=>s.kind===kind&&s.id===Number(id))||null;
