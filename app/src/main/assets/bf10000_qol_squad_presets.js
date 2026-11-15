@@ -114,6 +114,19 @@
    slots=next;message='Copied preset '+(index+1)+' to empty preset '+(target+1)+'.';
    refresh();return true;
  }
+ // Swap local preset slots only; persist before changing memory or selection.
+ function movePreset(index,direction){
+   if(!Number.isInteger(index)||index<0||index>=max||!slots[index]||
+      (direction!==-1&&direction!==1)||S.busy)return false;
+   const target=index+direction;
+   if(target<0||target>=max)return false;
+   const next=slots.slice();
+   [next[index],next[target]]=[next[target],next[index]];
+   if(!store(next)){message='Could not move preset; saved slots unchanged.';refresh();return false;}
+   slots=next;selected.value=String(target);
+   message='Moved preset '+(index+1)+' to '+(target+1)+'; active squad unchanged.';
+   refresh();return true;
+ }
  function applyPreset(index){
    if(!Number.isInteger(index)||index<0||index>=max||S.busy||
       typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
@@ -192,12 +205,14 @@
  const removeButton=mk('bf10000-delete','DELETE PRESET',()=>deletePreset(Number(selected.value)));
  const renameButton=mk('bf10000-rename','RENAME PRESET',()=>renamePreset(Number(selected.value),name.value));
  const copyButton=mk('bf10000-copy','COPY TO EMPTY',()=>duplicatePreset(Number(selected.value)));
+ const upButton=mk('bf10000-up','MOVE PRESET UP',()=>movePreset(Number(selected.value),-1));
+ const downButton=mk('bf10000-down','MOVE PRESET DOWN',()=>movePreset(Number(selected.value),1));
  const status=document.createElement('p');status.id='bf10000-status';status.setAttribute('role','status');
  const preview=document.createElement('p');preview.id='bf10000-preview';
  preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
  const help=document.createElement('small');
  help.textContent='Preset labels do not travel inside exported v7 saves. '+
-   'No automatic selection or extra original unit slots.';
+   'Move swaps saved slots without applying a squad. No automatic selection or extra original unit slots.';
  panel.append(heading,explanation,selected,name,buttons,status,preview,help);anchor.after(panel);
  function refresh(){
    const index=Number(selected.value)||0,slot=slots[index];
@@ -206,6 +221,8 @@
    equipButton.disabled=unavailable||!validActive||(S.auto===true&&!S.over)||
      (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
      !victoryReceiptCommitted()||!slot||!goodIds(slot.squad,true);
+   upButton.disabled=unavailable||!slot||index===0;
+   downButton.disabled=unavailable||!slot||index===max-1;
    removeButton.disabled=unavailable||!slot;
    renameButton.disabled=unavailable||!slot;
    copyButton.disabled=unavailable||!slot||!slots.some(s=>s===null);
@@ -242,6 +259,6 @@
  setInterval(()=>{if(!document.hidden&&panel.open)refresh()},1400);
  refresh();
  window.BFGlobalQoLSquadPresetsV10000=freeze({
-   key,info,savePreset,applyPreset,deletePreset,renamePreset,duplicatePreset,refresh
+   key,info,savePreset,applyPreset,deletePreset,renamePreset,duplicatePreset,movePreset,refresh
  });
 })();
