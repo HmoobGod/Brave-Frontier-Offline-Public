@@ -88,6 +88,29 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==initial
  p.add_script_tag(path=str(A/'bf11600_original_lord_stats_reference.js'))
  assert p.locator('#bf11600-original-lord-stats').count()==1
+ p.add_style_tag(path=str(A/'bf_home_nav.css'))
+ p.add_script_tag(path=str(A/'bf_home_nav.js'))
+ p.evaluate(api+'.refresh()')
+ home=p.locator('#bf11600-home-base-reference')
+ assert home.is_visible()
+ ids=p.evaluate('P.squad.map(id=>effectiveUnit(id).id)')
+ expected_totals={k:sum(rows[id]['base'][k] for id in ids) for k in ('hp','atk','def','rec')}
+ assert p.evaluate(api+'.homeReference().totals')==expected_totals
+ stable=p.evaluate('JSON.stringify({P,S,QUEST})')
+ assert 'NOT live battle stats' in home.text_content()
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  assert home.evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+ old=p.evaluate('P.squad')
+ for bad in ([old[0],old[0]],[999999],None):
+  p.evaluate('(ids)=>{P.squad=ids}',bad)
+  assert p.evaluate(api+'.homeReference()') is None
+ p.evaluate('(ids)=>{P.squad=ids}',old)
+ p.evaluate("BF_homeNav.go('home')")
+ assert p.evaluate(api+'.homeReference().totals')==expected_totals
+ assert p.evaluate('JSON.stringify({P,S,QUEST})')==stable
+ p.evaluate("BF_homeNav.go('units')")
+ assert not home.is_visible()
  assert not errors,errors
  b.close()
 print('PASS v116 original 2022 base/Lord stat endpoints, 72 forms, type rows, no interpolation/save/combat mutation')
