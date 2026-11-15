@@ -161,7 +161,7 @@ with sync_playwright() as pw:
  for width in (320,390,540):
   p.set_viewport_size({'width':width,'height':844})
   for control in ('#bf10200-favorite','#bf10200-lock',
-                  '#bf10200-show-favorites','#bf10200-show-locks'):
+                  '#bf10200-show-favorites','#bf10200-show-locks','#bf10200-show-all'):
    rect=p.locator(control).bounding_box()
    assert rect and rect['height']>=44,(width,control,rect)
  p.set_viewport_size({'width':390,'height':844})
@@ -192,6 +192,29 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.state().advisoryOnly') is True
  p.add_script_tag(path=str(A/'bf10200_qol_unit_flags.js'))
  assert p.locator('#bf10200-flags').count()==1
+ # Empty locked view has an explicit recovery action; no implicit selection/write.
+ marker_before=p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')")
+ state_before=p.evaluate('JSON.stringify(P)')
+ p.evaluate('window.__boxClicks=0;document.querySelector("#bf-box-results").addEventListener("click",()=>__boxClicks++)')
+ assert p.evaluate(api+'.setFilter("locked")')
+ assert p.locator('.bf-box-card:visible').count()==0
+ assert not p.locator('#bf10200-show-all').is_disabled()
+ p.locator('#bf10200-show-all').focus();p.keyboard.press('Enter')
+ assert p.evaluate(api+'.filter')=='all'
+ assert p.locator('.bf-box-card:visible').count()==1
+ assert p.evaluate('document.activeElement.dataset.bfUnitId')=='20011'
+ assert p.evaluate('window.__boxClicks')==0
+ assert p.locator('#bf10200-show-all').is_disabled()
+ # Recovery also works when the old selected card is foreign/hidden.
+ p.evaluate("document.querySelectorAll('.bf-box-card').forEach(c=>c.setAttribute('aria-pressed',String(c.dataset.bfUnitId==='999')))")
+ p.evaluate(api+'.setFilter("locked")')
+ p.locator('#bf10200-show-all').focus();p.keyboard.press('Space')
+ assert p.evaluate('document.activeElement.dataset.bfUnitId')=='20011'
+ assert p.evaluate(api+'.state().owned') is False
+ assert p.locator('#bf10200-favorite').is_disabled()
+ assert p.evaluate('JSON.stringify(P)')==state_before
+ assert p.evaluate("localStorage.getItem('bf_global_offline_qol_unit_flags_v102')")==marker_before
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
  assert not errors,errors
  b.close()
 print('PASS v102 unit marker persistence, owned-only toggles, advisory scope and save isolation')
