@@ -110,6 +110,23 @@ with sync_playwright() as pw:
        progress:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')
     })""")
     assert after_panel==before_panel,(before_panel,after_panel)
+    proof=page.evaluate("""()=>{
+      const old=window.BFGrandGaiaCampaignV100,q=QUEST,oldCount=q.battles;const out={};
+      try{
+        q.battles=999;BFOriginalMissionInspector.refresh();
+        out.missing=document.querySelector('#bf058-source-content').textContent;
+        window.BFGrandGaiaCampaignV100={waveReadiness:()=>({missionId:q.missionId,
+          verifiedWaveCount:7,enemyFormationsVerified:false,dropsVerified:false,nativeMultiWaveEnabled:false})};
+        BFOriginalMissionInspector.refresh();out.valid=document.querySelector('#bf058-source-content').textContent;
+        window.BFGrandGaiaCampaignV100={waveReadiness:()=>{throw Error('missing proof')}};
+        BFOriginalMissionInspector.refresh();out.throws=document.querySelector('#bf058-source-content').textContent;
+      }finally{q.battles=oldCount;window.BFGrandGaiaCampaignV100=old;BFOriginalMissionInspector.refresh()}
+      return out;
+    }""")
+    assert '2022 recorded waves: unavailable' in proof['missing']
+    assert '999 verified waves' not in proof['missing']
+    assert '2022 recorded waves: 7' in proof['valid']
+    assert '2022 recorded waves: unavailable' in proof['throws']
     assert not errors,errors
     browser.close()
 print('PASS v0.60: 34 exact original mission source records, honest UI, no guessed waves/drops, v7 stable')
