@@ -108,6 +108,14 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.remember("clear:999")') is False
  assert p.evaluate(api+'.remember("__proto__")') is False
  assert p.evaluate(api+'.state().storedCount')==1
+ # An invalid/forged scene switch must not end suppression.
+ assert p.evaluate(api+'.forget()') is True
+ p.evaluate("__scene101.chosen='dungeon:30'")
+ assert p.evaluate(api+'.observed()') is False
+ p.evaluate("__scene101.chosen='dungeon:20'")
+ assert p.evaluate(api+'.observed()') is False
+ assert p.evaluate(api+'.state().viewed') is False
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==original
  assert not errors,errors
  # Real public API contract, not only a hand-authored lookup stub:
  # the v2200 reader's lookup returns source='content/event/'+filename,
@@ -175,6 +183,64 @@ with sync_playwright() as pw:
  assert real.evaluate(api+'.skip()') is True
  assert real.evaluate(api+'.state().step')==real.evaluate(api+'.state().lines')
  assert real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==real_save
+ # Forget is a manual, durable local-marker edit, not a save or page edit.
+ real.evaluate("BF_homeNav.go('quest')")
+ before_forget=real.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,reader:BFGlobalOriginalEventsV2200.snapshot()})')
+ marker_key='bf_global_offline_qol_viewed_scenes_v101'
+ prior_markers=real.evaluate('(k)=>localStorage.getItem(k)',marker_key)
+ real.evaluate("()=>{window.__markerSet=localStorage.setItem;localStorage.setItem=(k,v)=>{if(k.includes('viewed_scenes'))throw Error('full');__markerSet(k,v)}}")
+ assert real.evaluate(api+'.forget()') is False
+ assert real.evaluate(api+'.state().viewed') is True
+ assert real.evaluate('(k)=>localStorage.getItem(k)',marker_key)==prior_markers
+ real.evaluate('()=>{localStorage.setItem=window.__markerSet}')
+ for width in (320,390,540):
+  real.set_viewport_size({'width':width,'height':844})
+  assert real.locator('#bf10100-forget').bounding_box()['height']>=44
+ real.locator('#bf10100-forget').focus();real.keyboard.press('Enter')
+ assert real.evaluate(api+'.state().viewed') is False
+ assert real.evaluate(api+'.observed()') is False
+ assert real.evaluate(api+'.forget()') is False
+ assert real.locator('#bf10100-forget').is_disabled()
+ assert 'dungeon:20' not in real.evaluate(api+'.viewed')
+ assert 'clear:10' in real.evaluate(api+'.viewed')
+ assert real.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,reader:BFGlobalOriginalEventsV2200.snapshot()})')==before_forget
+ assert real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==real_save
+ # Rereading from the first page can earn the marker again.
+ assert real.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)')
+ real.wait_for_function('BFGlobalQoLViewedDialogueV10100.state().step===1')
+ real.evaluate(api+'.observed()')
+ real.evaluate("()=>{const n=document.querySelector('#bf2200-next');while(!n.disabled)n.click()}")
+ real.wait_for_function('BFGlobalQoLViewedDialogueV10100.state().viewed')
+ # One-page scenes have no earlier page to reset Forget suppression.
+ # A verified different scene must end suppression before returning to reread.
+ edge_state=real.evaluate('JSON.stringify({P,S,quest:QUEST.missionId})')
+ real.evaluate("""()=>{
+   window.__edgeWrites=[];window.__edgeSet=localStorage.setItem;
+   localStorage.setItem=(k,v)=>{__edgeWrites.push(k);__edgeSet(k,v)};
+ }""")
+ for width in (320,390,540):
+  real.set_viewport_size({'width':width,'height':844})
+  assert real.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)')
+  assert real.evaluate(api+'.state().lines')==1
+  real.wait_for_function('BFGlobalQoLViewedDialogueV10100.state().viewed')
+  before_scene=real.evaluate('JSON.stringify(BFGlobalOriginalEventsV2200.snapshot())')
+  real.locator('#bf10100-forget').click()
+  for _ in range(3):
+   assert real.evaluate(api+'.observed()') is False
+  assert real.evaluate(api+'.state().viewed') is False
+  assert real.evaluate('JSON.stringify(BFGlobalOriginalEventsV2200.snapshot())')==before_scene
+  assert real.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20)')
+  assert real.evaluate(api+'.state().step')==1
+  real.evaluate(api+'.observed()')
+  assert real.evaluate(api+'.state().storedCount')==1
+  assert real.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)')
+  real.evaluate(api+'.observed()')
+  assert real.evaluate(api+'.state().viewed') is True,'one-page marker not restored after verified scene switch'
+  assert set(real.evaluate(api+'.viewed'))=={'clear:10','dungeon:20'}
+ assert real.evaluate('JSON.stringify({P,S,quest:QUEST.missionId})')==edge_state
+ assert real.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==real_save
+ assert real.evaluate('__edgeWrites')==[marker_key]*6
+ real.evaluate('()=>{localStorage.setItem=__edgeSet}')
  assert not real_errors,real_errors
  real.close()
  b.close()
