@@ -70,6 +70,23 @@ with sync_playwright() as p:
  assert page.evaluate('BFAmdahlOriginalArtV14900.preview(9999)') is False
  after=page.evaluate('''()=>({p:JSON.stringify(P),s:JSON.stringify(S),save:localStorage.getItem('bf_global_offline_demo_v7')})''')
  assert after==original
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for pin in page.locator('[data-bf14900-dungeon]').all():
+   box=pin.bounding_box();assert box and box['width']>=44 and box['height']>=44
+ # Fault events exercise actual browser image elements; no fabricated donor art.
+ page.locator('#bf14900-selected img').dispatch_event('error')
+ assert page.locator('#bf14900-selected img').is_hidden()
+ assert 'selected dungeon backdrop' in page.locator('#bf14900-image-status').inner_text()
+ page.locator('#bf14900-amdahl-art div > img').first.dispatch_event('error')
+ assert 'Amdahl map' in page.locator('#bf14900-image-status').inner_text()
+ pin=page.locator('[data-bf14900-dungeon="400"]');pin.focus();page.keyboard.press('Enter')
+ assert 'Original dungeon #400' in page.locator('#bf14900-selected').inner_text()
+ page.wait_for_function("document.querySelector('#bf14900-selected img').complete && document.querySelector('#bf14900-selected img').naturalWidth>0")
+ assert page.locator('#bf14900-selected img').is_visible()
+ page.locator('#bf14900-amdahl-art div > img').first.dispatch_event('load')
+ assert page.locator('#bf14900-image-status').is_hidden()
+ assert page.evaluate("()=>({p:JSON.stringify(P),s:JSON.stringify(S),save:localStorage.getItem('bf_global_offline_demo_v7')})")==original
  assert not errors,errors
  browser.close()
 print('PASS v149 original Amdahl 2022 world+seven battle JPEG maps, source coords, 7 responsive pins, no save/quest mutations')
