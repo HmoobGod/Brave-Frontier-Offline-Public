@@ -441,6 +441,17 @@ with sync_playwright() as pw:
    }finally{S.enemies=original;}
  }""")
  assert ranks=={'absolute':0,'relative':1,'highest':2,'highestPercent':2},ranks
+ # Preview all tactics through the real UI without changing native orders,
+ # selected strategy, target, player state, or the private save string.
+ preview_before=page.evaluate('JSON.stringify({P,S,strategy:BFGlobalBattleFocusV3100.snapshot().strategy,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for kind in ['lowest-hp','lowest-hp-percent','highest-hp','highest-hp-percent','highest-atk','lowest-def','wounded-threat','wounded-armor','elemental','element-safe']:
+  page.locator('#bf3100-preview').select_option(kind)
+  target=page.evaluate('kind=>BFGlobalBattleFocusV3100.lookup(kind)',kind)
+  text=page.locator('#bf3100-preview-state').inner_text()
+  assert 'No orders queued.' in text,text
+  assert (target['name'] in text) if target else ('No eligible target' in text)
+ assert page.evaluate('JSON.stringify({P,S,strategy:BFGlobalBattleFocusV3100.snapshot().strategy,save:localStorage.getItem("bf_global_offline_demo_v7")})')==preview_before
+ assert page.locator('#bf3100-preview').evaluate('(el)=>el.getBoundingClientRect().height')>=44
  assert page.evaluate('P.version')==7
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  # The fixture explicitly selects a mission, so compare save for implicit writes, not transient P.lastMission.

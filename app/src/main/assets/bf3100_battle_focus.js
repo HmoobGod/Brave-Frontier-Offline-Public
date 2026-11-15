@@ -157,6 +157,7 @@
  function snapshot(){return Object.freeze({strategy:selected,target:lookup(selected),canQueue:legal()});}
  function refresh(){
    const s=snapshot();
+   refreshPreview();
    // Every focus control has its own eligibility. An enemy's ATK/DEF can
    // disappear while the selected focus and elemental availability remain
    // unchanged. Include ALL strategies in the refresh signature so disabled
@@ -230,6 +231,20 @@
  oneTurn.id='bf3100-run-turn';oneTurn.textContent='FOCUS + EXECUTE ONE TURN';
  oneTurn.setAttribute('aria-label','Execute one manually chosen player squad turn');
  oneTurn.addEventListener('click',()=>runFocusedTurn());options.append(oneTurn);
+ // Inspect a tactic without changing the selected target or any queued order.
+ const preview=document.createElement('select');preview.id='bf3100-preview';
+ preview.setAttribute('aria-label','Preview a focus tactic without queuing');
+ preview.style.minHeight='44px';preview.style.maxWidth='100%';
+ for(const [kind,label] of strategies){const o=document.createElement('option');
+   o.value=kind;o.textContent=label;preview.append(o);}
+ const previewState=document.createElement('p');previewState.id='bf3100-preview-state';
+ previewState.setAttribute('role','status');
+ function refreshPreview(){
+   const target=lookup(preview.value);
+   previewState.textContent=target?'PREVIEW · '+target.name+' · '+target.hp+' HP · No orders queued.':
+     'PREVIEW · No eligible target · No orders queued.';
+ }
+ preview.addEventListener('change',refreshPreview);host.append(preview,previewState);
  new MutationObserver(refresh).observe(document.getElementById('meta')||host,{childList:true,characterData:true,subtree:true});
  window.setInterval(()=>{if(!document.hidden)refresh()},900);
  refresh();
