@@ -30,10 +30,17 @@
  const label=document.createElement('small');label.id='bf3600-label';
  background.append(actor,label);
  let last=null;
+ function unavailable(){return Object.freeze({available:false,source:null,step:0,
+   character:null,image:null,background:null,x:null,y:null,side:null,
+   originalSceneCoordinates:false,visualPlacement:'responsive approximation'});}
  function snapshot(){
+   try{
    const s=events.snapshot();
    const b=backgrounds.snapshot(),f=frames.snapshot(),p=positions.snapshot();
-   const okay=reader.open&&b.available&&!!p.speaker&&
+   if(!s||!b||!f||!p)return unavailable();
+   const okay=reader.open&&b.available===true&&!!p.speaker&&
+     Number.isSafeInteger(s.step)&&s.step>=1&&Number.isSafeInteger(s.lines)&&s.step<=s.lines&&
+     Number.isFinite(p.x)&&Number.isFinite(p.y)&&['left','right'].includes(p.side)&&
      b.scene===s.source&&f.source===s.source&&p.source===s.source&&
      f.step===s.step&&p.step===s.step&&p.speaker===f.character&&
      /^navi_chara[123]_[0-9]\.png$/.test(f.image||'');
@@ -42,6 +49,7 @@
      background:okay?b.background:null,
      x:okay?p.x:null,y:okay?p.y:null,side:okay?p.side:null,
      originalSceneCoordinates:!!okay,visualPlacement:'responsive approximation'});
+   }catch(_){return unavailable();}
  }
  function refresh(){
    const s=snapshot(),key=JSON.stringify(s);
