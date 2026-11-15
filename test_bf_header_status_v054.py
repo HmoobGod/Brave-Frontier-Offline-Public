@@ -170,6 +170,11 @@ with sync_playwright() as pw:
         result.invalid=values();
         BF_homeNav.go('quest');result.quest=values();
         BF_homeNav.go('home');result.home=values();
+        // Claude blocker: a real second tap on Home while already Home
+        // calls go('home') without bf-route-change; source text is stale.
+        document.getElementById('pzel').textContent='500';
+        document.querySelector('.bf-navbar button[data-bf-goto="home"]').click();
+        result.sameRouteHome=values();
         P.level=2;P.exp=5;P.zel=1234;P.karma=9;
         BF054HeaderStatus.refresh();
         result.recovered=values();
@@ -188,7 +193,7 @@ with sync_playwright() as pw:
         localStorage.getItem('bf_global_offline_demo_v7')===save;
       return result;
     }""")
-    for kind in ('invalid','quest','home','invalidVersion'):
+    for kind in ('invalid','quest','home','sameRouteHome','invalidVersion'):
         item=header_probe[kind]
         assert (item['level'],item['zel'],item['karma'])==('—','—','—'),(kind,item)
         assert 'Lv./EXP unavailable' in item['detail'],(kind,item)
