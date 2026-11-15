@@ -20,7 +20,7 @@
   '#bf2600-portrait{height:170px;width:100%;object-fit:contain;object-position:center bottom}',
   '#bf2600-portrait-controls{display:flex;flex-wrap:wrap;gap:6px}',
   '#bf2600-portrait-controls button{border:1px solid #ae9970;border-radius:5px;',
-  'color:#fff;background:#30485d;padding:6px 8px;min-height:35px}',
+  'color:#fff;background:#30485d;padding:6px 8px;min-height:44px}',
   '#bf2600-portrait-controls button[aria-pressed=true]{border-color:#f4da91;',
   'outline:1px solid #f4da91}',
   '#bf2600-art small{color:#d4dee5;font:11px/1.5 system-ui}',
@@ -30,12 +30,16 @@
  const box=document.createElement('div');box.id='bf2600-art';
  box.setAttribute('aria-label','Original 2022 source event character illustrations');
  const img=document.createElement('img');img.id='bf2600-portrait';img.alt='';
+ const missing=document.createElement('p');missing.id='bf2600-missing';missing.hidden=true;
+ missing.setAttribute('role','status');missing.textContent='Original portrait unavailable. Source dialogue remains readable; no replacement art is inferred.';
+ img.addEventListener('error',()=>{img.hidden=true;missing.hidden=false;});
+ img.addEventListener('load',()=>{img.hidden=false;missing.hidden=true;});
  const detail=document.createElement('div');
  const label=document.createElement('strong');label.id='bf2600-character';
  const controls=document.createElement('div');controls.id='bf2600-portrait-controls';
  const notice=document.createElement('small');
  notice.textContent='Original 2022 source character image. Static archival preview only: expression changes and original cutscene motion are not restored.';
- detail.append(label,controls,notice);box.append(img,detail);sceneTitle.after(box);
+ detail.append(label,controls,notice,missing);box.append(img,detail);sceneTitle.after(box);
  let choice=null,lastKey='';
  function candidates(){
    const scene=window.BFGlobalOriginalEventsV2200.snapshot().chosen;
@@ -53,7 +57,8 @@
    const key=present.join('|');
    if(key!==lastKey){choice=present[0];lastKey=key;}
    if(!present.includes(choice))choice=present[0];
-   img.src=images[choice];img.alt='Original 2022 '+choice+' event illustration';
+   if(img.getAttribute('src')!==images[choice]){img.hidden=false;missing.hidden=true;img.src=images[choice];}
+   img.alt='Original 2022 '+choice+' event illustration';
    label.textContent=choice;
    controls.replaceChildren();
    for(const name of present){

@@ -44,6 +44,19 @@ with sync_playwright() as pw:
  page.locator('#bf2600-portrait-controls button').nth(1).click()
  assert page.evaluate('BFGlobalOriginalEventPortraitsV2600.snapshot.character')=='Seria'
  assert page.locator('#bf2600-portrait').get_attribute('src')=='content/event/navi_chara3_0.png'
+ art_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.locator('#bf2600-portrait').dispatch_event('error')
+ assert page.locator('#bf2600-portrait').is_hidden()
+ assert page.locator('#bf2600-missing').is_visible()
+ # Repeated snapshot polling cannot restart a failed source request.
+ assert page.evaluate('BFGlobalOriginalEventPortraitsV2600.snapshot.character')=='Seria'
+ assert page.locator('#bf2600-missing').is_visible()
+ page.locator('#bf2600-portrait').dispatch_event('load')
+ assert page.locator('#bf2600-missing').is_hidden()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  assert page.locator('#bf2600-portrait-controls button').first.bounding_box()['height']>=44
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==art_before
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is True
  assert page.evaluate('BFGlobalOriginalEventPortraitsV2600.snapshot.visible') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
