@@ -52,15 +52,21 @@
    return people[sequence[step-1]]||null;
  }
  function snapshot(){
-   const current=archive.snapshot();
-   const name=lookup(current?.source,current?.step);
-   return Object.freeze({source:current?.source||null,step:current?.step||0,
-     character:name,supportedScenes:Object.keys(rows).length});
+   try{
+     const current=archive.snapshot();
+     const match=/^dungeon:([0-9]+)$/.exec(current?.chosen||'');
+     const record=match?archive.lookup('dungeon',Number(match[1])):null;
+     const valid=record&&record.source==='content/event/'+current.source&&
+       Array.isArray(record.lines)&&record.lines.length===current.lines;
+     const name=valid?lookup(current.source,current.step):null;
+     return Object.freeze({source:name?current.source:null,step:name?current.step:0,
+       character:name,supportedScenes:Object.keys(rows).length});
+   }catch(_){return Object.freeze({source:null,step:0,character:null,supportedScenes:Object.keys(rows).length});}
  }
  function refresh(){
    const current=snapshot(),character=current.character;
    marker.hidden=!character;
-   if(!character)return current;
+   if(!character){marker.textContent='';return current;}
    marker.textContent='2022 SOURCE SPEAKER · '+character;
    if(portraitName.textContent!==character){
      const buttons=document.querySelectorAll('#bf2600-portrait-controls button');
