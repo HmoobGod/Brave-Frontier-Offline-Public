@@ -61,6 +61,9 @@
   const party=document.createElement('div');
   party.id='bf420-home-party';
   party.className='bf420-row';
+  const squadIssues=document.createElement('ul');
+  squadIssues.id='bf420-home-squad-issues';
+  squadIssues.setAttribute('aria-label','Squad slots needing attention');
   // v459: existing local DEMO clear receipts, not original native wins.
   const clearLabel=document.createElement('p');
   clearLabel.id='bf420-home-clears';
@@ -88,7 +91,7 @@
   note.textContent='2022 archived mission and Energy references only. '+
     'Enemy formations, rewards and battle logic remain an offline DEMO. '+
     'No automatic quest selection, combat or stamina spending.';
-  card.append(heading,mission,party,clearLabel,clearBar,actions,hint,note);
+  card.append(heading,mission,party,squadIssues,clearLabel,clearBar,actions,hint,note);
   // Home first: do not push the original playable Quest/Summon artwork
   // below the viewport. Append this optional preview AFTER Adventure.
   explore.insertAdjacentElement('afterend',card);
@@ -112,13 +115,19 @@
       // The count is of unique, currently owned, valid squad members; a
       // malformed/duplicate/unowned slot never implies a playable actor.
       if(!Array.isArray(P.roster) || typeof effectiveUnit!=='function')return null;
-      const seen=new Set();
-      const filled=P.squad.reduce((count,id)=>{
-        if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||
-           !P.roster.includes(id) || !effectiveUnit(id))return count;
-        seen.add(id);
-        return count+1;
-      },0);
+      const seen=new Set(),issues=[];
+      let filled=0;
+      Array.from(P.squad).forEach((id,index)=>{
+        let reason=null;
+        if(!Number.isSafeInteger(id)||id<=0)reason='Invalid unit ID';
+        else if(seen.has(id))reason='Duplicate unit';
+        else if(!P.roster.includes(id))reason='Unit not owned';
+        else if(!effectiveUnit(id))reason='Unit data unavailable';
+        if(Number.isSafeInteger(id)&&id>0)seen.add(id);
+        if(reason)issues.push('Slot '+(index+1)+' · '+reason);
+        else filled++;
+      });
+      Object.freeze(issues);
       // An invalid positive string/fraction/infinite count can fool the
       // legacy campaign summary into reporting 106/106. Require the complete
       // 106-entry DEMO clear ledger to be valid before showing progress.
@@ -135,7 +144,7 @@
          progress.cleared!==cleared || cleared>106)return null;
       const next=campaign.nextPlayable();
       if(next===null && cleared===106)
-        return Object.freeze({complete:true,filled,cleared,
+        return Object.freeze({complete:true,filled,cleared,issues,
           missionId:null,waves:null,energy:null});
       if(!next || !Number.isSafeInteger(next.missionId) ||
          !Number.isSafeInteger(next.dungeonId) ||
@@ -154,7 +163,7 @@
       const name=typeof fromSource?.mission?.name==='string' &&
         fromSource.mission.name.trim()?fromSource.mission.name.trim():'Mission '+q.missionId;
       return Object.freeze({complete:false,missionId:q.missionId,
-        waves:row[3],energy:row[4],name:name.slice(0,90),filled,cleared});
+        waves:row[3],energy:row[4],name:name.slice(0,90),filled,cleared,issues});
     }catch(_){return null;}
   }
   // Explain the SAME fail-closed lock used for manual route controls.
@@ -194,6 +203,11 @@
       ' · 2022 original '+s.waves+' waves · Energy '+s.energy+' (reference only)';
     party.textContent=s?'CURRENT SQUAD · '+s.filled+'/6 filled slots':
       'CURRENT SQUAD · source state unavailable';
+    squadIssues.replaceChildren();
+    squadIssues.hidden=!s||s.issues.length===0;
+    for(const issue of s?.issues||[]){
+      const item=document.createElement('li');item.textContent=issue;squadIssues.append(item);
+    }
     clearLabel.textContent=s?'DEMO STORY CLEARS · '+s.cleared+'/106':
       'DEMO STORY CLEARS · unavailable (invalid source or save)';
     clearBar.hidden=!s;
