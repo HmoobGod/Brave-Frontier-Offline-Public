@@ -180,6 +180,43 @@ with sync_playwright() as pw:
     'repeatBlocked':True,'repeatNoRoute':True,'brokenBlocked':True,
     'progressSame':True,'saveSame':True},owned
  assert page.locator('#bf101-continue').is_enabled()
+ # Unknown Repeat status must block every story-navigation entry point.
+ faults=[('null','{statusSnapshot:()=>null}'),
+         ('undefined','{statusSnapshot:()=>undefined}'),
+         ('missing-active','{statusSnapshot:()=>({})}'),
+         ('null-active','{statusSnapshot:()=>({active:null})}'),
+         ('string-false','{statusSnapshot:()=>({active:"false"})}'),
+         ('zero-active','{statusSnapshot:()=>({active:0})}'),
+         ('array-active','{statusSnapshot:()=>({active:[]})}'),
+         ('missing-method','{}'),('noncallable','{statusSnapshot:0}'),
+         ('throwing','{statusSnapshot:()=>{throw Error("status unavailable")}}')]
+ storage_before=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+ stable=page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,auto:document.querySelector("#auto").checked})')
+ page.evaluate("""()=>{window.__repeatWrites=0;window.__repeatOriginalSet=localStorage.setItem;
+   localStorage.setItem=(k,v)=>{__repeatWrites++;__repeatOriginalSet(k,v)};}""")
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for name,provider in faults:
+   page.evaluate('(provider)=>{window.BFGlobalQoLQuestRepeatV9800=eval("("+provider+")");BFGrandGaiaContinueV101.refresh()}',provider)
+   assert page.locator('#bf101-continue').is_disabled(),(width,name)
+   assert page.locator('#bf101-continue-auto').is_disabled(),(width,name)
+   assert 'REPEAT STATUS UNAVAILABLE' in page.locator('#bf101-next').text_content(),(width,name)
+   assert page.evaluate('BFGrandGaiaContinueV101.canNavigate()') is False,(width,name)
+   assert page.evaluate('BFGrandGaiaContinueV101.canContinueAuto()') is False,(width,name)
+   assert page.evaluate('BFGrandGaiaContinueV101.continueAuto()') is False,(width,name)
+   page.evaluate("document.querySelector('#bf101-continue').dispatchEvent(new MouseEvent('click',{bubbles:true}));document.querySelector('#bf101-continue-auto').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+   assert page.evaluate('JSON.stringify({P,S,quest:QUEST.missionId,auto:document.querySelector("#auto").checked})')==stable,(width,name)
+  page.evaluate('window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};BFGrandGaiaContinueV101.refresh()')
+  assert page.locator('#bf101-continue').is_enabled()
+  assert page.locator('#bf101-continue-auto').is_enabled()
+  assert page.evaluate('BFGrandGaiaContinueV101.canNavigate()') is True
+  assert 'REPEAT STATUS UNAVAILABLE' not in page.locator('#bf101-next').text_content()
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+ assert page.evaluate('__repeatWrites')==0
+ assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==storage_before
+ page.evaluate('()=>{delete window.BFGlobalQoLQuestRepeatV9800;localStorage.setItem=__repeatOriginalSet;BFGrandGaiaContinueV101.refresh()}')
+ assert page.locator('#bf101-continue').is_enabled()
+ page.set_viewport_size({'width':390,'height':844})
  # v341: a completed archived victory must have a precise committed v7
  # clear receipt before the global 106-mission shortcut can route onward.
  # The existing results module is loaded later than v101; simulated providers
