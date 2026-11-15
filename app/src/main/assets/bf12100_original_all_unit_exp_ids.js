@@ -34,7 +34,10 @@
    numericExpThresholdsVerifiedFor2022:false,liveExpChanged:false,
    savedExpChanged:false,saveFieldsAdded:0
  });
+ const cohorts=new Map([10,15,20].map(pattern=>[pattern,Object.freeze(ids.filter(id=>table.get(id)===pattern))]));
  window.BFGlobalOriginalExpPatternIdsV12100=Object.freeze({
-   source,lookup:id=>Number.isSafeInteger(id)?table.get(id)??null:null
+   source,formsForPattern:pattern=>cohorts.get(pattern)||null,
+   lookup:id=>Number.isSafeInteger(id)?table.get(id)??null:null
  });
+ window.dispatchEvent(new Event('bf-exp-pattern-source-ready'));
 })();

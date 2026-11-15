@@ -67,6 +67,22 @@ with sync_playwright() as pw:
     p.locator('.bf-archive-unit').click()
     assert 'Original EXP pattern ID 20' in p.locator('#bf-archive-detail').inner_text()
     assert 'not verified' in p.locator('#bf-archive-detail').inner_text()
+    p.locator('#bf-archive-reset').click()
+    for pattern,size in ((10,248),(15,245),(20,1798)):
+        expected=[uid for uid,code in pairs if code==pattern]
+        assert p.evaluate('(v)=>BFGlobalOriginalExpPatternIdsV12100.formsForPattern(v)',pattern)==expected
+        assert p.evaluate('(v)=>Object.isFrozen(BFGlobalOriginalExpPatternIdsV12100.formsForPattern(v))',pattern)
+        p.locator('#bf-archive-exp-pattern').select_option(str(pattern))
+        assert p.evaluate('BFGlobalUnitArchive.matchingCount')==size
+    p.locator('#bf-archive-reset').click()
+    assert p.locator('#bf-archive-exp-pattern').input_value()=='all'
+    assert p.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    p.evaluate("window.__expProvider=BFGlobalOriginalExpPatternIdsV12100;window.BFGlobalOriginalExpPatternIdsV12100={source:__expProvider.source,formsForPattern:()=>{throw Error('source unavailable')}}")
+    p.evaluate('BFGlobalUnitArchive.refresh()')
+    assert p.locator('#bf-archive-exp-pattern').is_disabled()
+    assert p.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    p.evaluate('window.BFGlobalOriginalExpPatternIdsV12100=window.__expProvider;BFGlobalUnitArchive.refresh()')
+    assert p.locator('#bf-archive-exp-pattern').is_enabled()
     after=p.evaluate("""()=>({data:JSON.stringify(P),
       saved:(()=>{try{return localStorage.getItem('bf_global_offline_demo_v7')}catch(_){return null}})()})""")
     assert before==after,(before,after)
