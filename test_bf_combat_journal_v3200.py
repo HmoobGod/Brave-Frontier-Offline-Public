@@ -17,9 +17,10 @@ with sync_playwright() as pw:
   args=['--no-sandbox','--disable-dev-shm-usage'])
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
- page.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
- getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
- removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+ page.evaluate("""()=>{const db={};let writes=0;window.__journalWrites=()=>writes;
+ Object.defineProperty(window,'localStorage',{configurable:true,value:{
+ getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+ removeItem:k=>{writes++;delete db[k]},key:i=>Object.keys(db)[i]??null,
  get length(){return Object.keys(db).length}}});
  window.alert=()=>{};window.confirm=()=>true;
  HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
@@ -54,9 +55,11 @@ with sync_playwright() as pw:
  page.locator('#bf3200-journal > summary').click()
  for width in (320,390,540):
   page.set_viewport_size({'width':width,'height':844})
-  for selector in ('#bf3200-journal > summary','#bf3200-search','#bf3200-clear'):
+  for selector in ('#bf3200-journal > summary','#bf3200-search','#bf3200-clear','#bf3200-round'):
    box=page.locator(selector).bounding_box()
    assert box and box['height']>=44,(width,selector,box)
+   assert box['x']>=-1 and box['x']+box['width']<=width+1,(width,selector,box)
+  assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),width
  page.set_viewport_size({'width':390,'height':844})
  page.locator('#bf3200-search').fill('combat_journal_entry_29')
  assert page.locator('#bf3200-filter-count').inner_text()==f'1 of {current_total} retained entries match'
@@ -85,6 +88,50 @@ with sync_playwright() as pw:
  page.locator('#bf3200-clear').click()
  current_after_reset=page.evaluate('BFGlobalCombatJournalV3200.snapshot().current')
  assert page.locator('#bf3200-filter-count').inner_text()==f'{current_after_reset} retained entries shown'
+ # Latest view follows the last RECORDED wave/round pair in the chosen run,
+ # not the live battle's current metadata or the numerically largest round.
+ page.evaluate("""()=>{window.__journalRoundState={wave:S.wave,round:S.round};
+   S.wave=0;S.round=4;msg('EARLIER_ROUND_MARKER')}""")
+ page.wait_for_function("BFGlobalCombatJournalV3200.report().includes('EARLIER_ROUND_MARKER')")
+ page.evaluate("S.wave=1;S.round=1;msg('LATEST_ROUND_MARKER')")
+ page.wait_for_function("BFGlobalCombatJournalV3200.report().includes('LATEST_ROUND_MARKER')")
+ page.evaluate('()=>{Object.assign(S,window.__journalRoundState);reset()}')
+ page.wait_for_function("(BFGlobalCombatJournalV3200.report('previous')||'').includes('LATEST_ROUND_MARKER')")
+ filter_state=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
+   writes:__journalWrites()})""")
+ page.locator('#bf3200-previous').click()
+ page.locator('#bf3200-round').select_option('latest')
+ latest=page.locator('#bf3200-report').input_value()
+ assert 'LATEST_ROUND_MARKER' in latest and 'EARLIER_ROUND_MARKER' not in latest
+ assert 'latest recorded Wave 2 / Round 1' in latest
+ assert 'EARLIER_ROUND_MARKER' in page.evaluate("BFGlobalCombatJournalV3200.report('previous')")
+ page.locator('#bf3200-search').fill('EARLIER_ROUND_MARKER')
+ assert '0 of 1 latest-round entries match'==page.locator('#bf3200-filter-count').inner_text()
+ page.locator('#bf3200-clear').click()
+ assert page.locator('#bf3200-round').input_value()=='all'
+ assert 'EARLIER_ROUND_MARKER' in page.locator('#bf3200-report').input_value()
+ page.locator('#bf3200-round').focus()
+ page.locator('#bf3200-round').press('End')
+ page.locator('#bf3200-round').press('Enter')
+ assert page.locator('#bf3200-round').input_value()=='latest'
+ assert 'EARLIER_ROUND_MARKER' not in page.locator('#bf3200-report').input_value()
+ assert page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
+   quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
+   writes:__journalWrites()})""")==filter_state
+ # At the 400-entry cap, an identical message in a NEW round must still
+ # update the actual textarea, even though count and last text are unchanged.
+ page.locator('#bf3200-current').click()
+ page.evaluate("""()=>{window.__journalRoundState={wave:S.wave,round:S.round};
+   S.wave=0;S.round=2;for(let i=0;i<410;i++)msg('SAME_ROUND_EVENT')}""")
+ page.wait_for_function("BFGlobalCombatJournalV3200.snapshot().current===400")
+ assert '[Wave 1 / Round 2] SAME_ROUND_EVENT' in page.locator('#bf3200-report').input_value()
+ page.evaluate("S.round=3;msg('SAME_ROUND_EVENT')")
+ page.wait_for_function("document.getElementById('bf3200-report').value.includes('[Wave 1 / Round 3] SAME_ROUND_EVENT')")
+ assert 'Round 2] SAME_ROUND_EVENT' not in page.locator('#bf3200-report').input_value()
+ assert page.locator('#bf3200-filter-count').inner_text()=='1 latest-round entries shown'
+ page.evaluate('Object.assign(S,window.__journalRoundState)')
+ page.locator('#bf3200-clear').click()
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'journal and defeat/restart must not change saved progression'
  assert page.evaluate('P.version')==7
