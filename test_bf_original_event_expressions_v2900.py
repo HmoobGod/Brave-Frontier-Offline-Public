@@ -32,6 +32,12 @@ with sync_playwright() as pw:
    'bf2400_st_lamia_event_dialogue.js','bf2500_story_event_prompt.js',
    'bf2600_original_event_portraits.js','bf2700_original_event_stage.js',
    'bf2800_dialogue_speaker_cues.js','bf2900_original_event_expressions.js'):
+  if n=='bf2900_original_event_expressions.js':
+   page.evaluate("""()=>{const original=BFGlobalOriginalEventsV2200;window.__expressionFault='';
+    window.BFGlobalOriginalEventsV2200={...original,snapshot:()=>{
+     if(__expressionFault==='throw')throw Error('source unavailable');if(__expressionFault==='null')return null;
+     return {...original.snapshot(),...({chosen:{chosen:'dungeon:20'},lines:{lines:999},step:{step:999},source:{source:'map1-dungeon1.txt'}}[__expressionFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/n))
  assert page.evaluate('BFGlobalEventExpressionsV2900.snapshot().frames')==405
  assert page.evaluate('BFGlobalEventExpressionsV2900.snapshot().scenes')==20
@@ -58,6 +64,15 @@ with sync_playwright() as pw:
  for _ in range(17):page.locator('#bf2200-next').click()
  assert page.evaluate('BFGlobalEventExpressionsV2900.refresh().image')=='navi_chara3_0.png'
  assert page.locator('#bf2600-portrait').get_attribute('src')=='content/event/navi_chara3_0.png'
+ frame_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','chosen','lines','step','source'):
+  page.evaluate('(v)=>window.__expressionFault=v',case)
+  assert page.evaluate('BFGlobalEventExpressionsV2900.refresh().image') is None,case
+  assert page.locator('#bf2600-portrait').get_attribute('src') is None
+  assert page.locator('#bf2600-portrait-controls').evaluate('(el)=>el.style.display')==''
+  page.evaluate("window.__expressionFault=''")
+  assert page.evaluate('BFGlobalEventExpressionsV2900.refresh().image')=='navi_chara3_0.png'
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==frame_before
  assert page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10)') is True
  assert page.evaluate('BFGlobalEventExpressionsV2900.refresh().image') is None
  assert page.locator('#bf2900-expression-note').is_hidden()
