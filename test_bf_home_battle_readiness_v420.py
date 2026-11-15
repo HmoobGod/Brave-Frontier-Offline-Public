@@ -31,10 +31,11 @@ with sync_playwright() as pw:
         errors=[]
         page.on("pageerror",lambda e:errors.append(str(e)))
         page.evaluate("""() => {
-          const db={};
+          const db={};let writes=0;
+          window.__bf420StorageWrites=()=>writes;
           Object.defineProperty(window,'localStorage',{configurable:true,value:{
-             getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
-             removeItem:k=>{delete db[k]},key:i=>Object.keys(db)[i]??null,
+             getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+             removeItem:k=>{writes++;delete db[k]},key:i=>Object.keys(db)[i]??null,
              get length(){return Object.keys(db).length}
           }});
           window.alert=()=>{};window.confirm=()=>true;
@@ -176,6 +177,66 @@ with sync_playwright() as pw:
                 assert button["height"]>=44,(width,button)
                 assert button["left"]>=-1 and button["right"]<=width+1,(width,button)
         page.set_viewport_size({"width":390,"height":844})
+        # CHECK SQUAD must reach the editor, even after another Units tab
+        # was used. Exercise actual touch/keyboard navigation, not just route.
+        destination_before=page.evaluate("""()=>({
+          p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+          writes:__bf420StorageWrites(),
+          storage:Object.fromEntries(Object.keys(localStorage).map(k=>[k,localStorage.getItem(k)]))
+        })""")
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            for previous_tab in ('training','evolve','box','equipment'):
+                page.evaluate("""tab=>{
+                  BF_homeNav.go('units');BFInnerScreens.setTab(tab);
+                  BF_homeNav.go('home');
+                }""",previous_tab)
+                shortcut=page.locator('#bf420-home-units')
+                if previous_tab=='training':
+                    shortcut.click()
+                else:
+                    shortcut.focus()
+                    shortcut.press('Space' if previous_tab=='box' else 'Enter')
+                assert page.evaluate('BF_homeNav.current')=='units'
+                assert page.evaluate('BFInnerScreens.unitTab')=='squad',(width,previous_tab)
+                assert page.locator('#squadpicker').is_visible(),(width,previous_tab)
+                assert page.locator('.bf-unit-actions [data-bf-unit-tab="squad"]').get_attribute('aria-pressed')=='true'
+                assert page.locator('#bf-owned-box').is_hidden()
+                assert page.locator('#bf-equipment-screen').is_hidden()
+                assert page.locator('section.training-panel').is_hidden()
+                assert page.locator('section.evo-panel').is_hidden()
+                assert page.locator('#bf-unit-tab-label').evaluate('(e)=>document.activeElement===e')
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+                page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+        assert page.evaluate("""()=>({
+          p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+          writes:__bf420StorageWrites(),
+          storage:Object.fromEntries(Object.keys(localStorage).map(k=>[k,localStorage.getItem(k)]))
+        })""")==destination_before
+        # If the editor provider is absent, the painted shortcut must not
+        # send the player to the wrong Units screen. Restore it and recover.
+        missing_editor=page.evaluate("""()=>{
+          const original=window.BFInnerScreens;
+          const button=document.getElementById('bf420-home-units');
+          const out={};
+          try{
+            window.BFInnerScreens={};
+            BFHomeBattleReadinessV420.refresh();
+            out.disabled=button.disabled;
+            out.questEnabled=!document.getElementById('bf420-home-quest').disabled;
+            out.hint=document.getElementById('bf420-home-hint').textContent;
+            button.dispatchEvent(new MouseEvent('click',{bubbles:true}));
+            out.route=BF_homeNav.current;
+          }finally{
+            window.BFInnerScreens=original;BFHomeBattleReadinessV420.refresh();
+          }
+          out.recovered=!button.disabled;
+          return out;
+        }""")
+        assert missing_editor['disabled'] and missing_editor['questEnabled'],missing_editor
+        assert missing_editor['route']=='home' and missing_editor['recovered'],missing_editor
+        assert 'SQUAD EDITOR UNAVAILABLE' in missing_editor['hint'],missing_editor
+        page.set_viewport_size({'width':390,'height':844})
         # A live automatic action must disable even read-only route shortcuts.
         page.evaluate("S.auto=true;BFHomeBattleReadinessV420.refresh()")
         assert 'AUTO BATTLE ACTIVE' in page.locator('#bf420-home-hint').inner_text()

@@ -180,6 +180,11 @@
     return null;
   }
   function available(){return blockedReason()===null;}
+  function squadDestination(){
+    return typeof window.BFInnerScreens?.setTab==='function' &&
+      document.getElementById('squadpicker') &&
+      document.getElementById('bf-unit-tab-label');
+  }
   function refresh(){
     const s=snapshot(),reason=blockedReason(),can=reason===null;
     mission.replaceChildren();
@@ -201,9 +206,10 @@
       clearBar.setAttribute('aria-valuetext','DEMO clear progress unavailable');
     }
     questButton.disabled=!s || s.complete || !can;
-    unitsButton.disabled=!s || !can;
+    unitsButton.disabled=!s || !can || !squadDestination();
     const message=!s?'SOURCE PREVIEW UNAVAILABLE · Open Quests for details.':
-      reason || (s.complete?'STORY COMPLETE · All 106 DEMO missions cleared.':
+      reason || (!squadDestination()?'SQUAD EDITOR UNAVAILABLE · Use Units to inspect your squad.':
+        s.complete?'STORY COMPLETE · All 106 DEMO missions cleared.':
         s.filled===0?'NO VALID SQUAD · Check owned units before battle.':'');
     hint.hidden=!message;
     if(hint.textContent!==message)hint.textContent=message;
@@ -212,7 +218,19 @@
   function go(route){
     const s=refresh();
     if(!s || !available() || (route==='quest'&&s.complete))return false;
-    return window.BF_homeNav?.go?.(route)===true;
+    // A top-level Units route can retain the previous Box/Training tab.
+    // CHECK SQUAD promises the native editor, with keyboard focus restored
+    // to its visible label instead of the now-hidden Home button.
+    if(route==='units'&&!squadDestination())return false;
+    if(window.BF_homeNav?.go?.(route)!==true)return false;
+    if(route==='units'){
+      if(window.BFInnerScreens.setTab('squad')!==true)return false;
+      const label=document.getElementById('bf-unit-tab-label');
+      label.tabIndex=-1;
+      label.focus({preventScroll:true});
+      label.scrollIntoView({block:'center',behavior:'instant'});
+    }
+    return true;
   }
   questButton.addEventListener('click',()=>{if(!questButton.disabled)go('quest');});
   unitsButton.addEventListener('click',()=>{if(!unitsButton.disabled)go('units');});
