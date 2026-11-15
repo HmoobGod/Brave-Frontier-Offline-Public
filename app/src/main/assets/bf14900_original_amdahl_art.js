@@ -25,7 +25,7 @@
    'border-radius:8px;background:#15273a;color:#f7e9d2;font:12px/1.45 system-ui';
  const summary=document.createElement('summary');
  summary.textContent='AMDAHL · ORIGINAL 2022 MAP & DUNGEONS (PREVIEW)';
- summary.style.cssText='cursor:pointer;font-weight:750;min-height:28px';
+ summary.style.cssText='cursor:pointer;font-weight:750;min-height:44px';
  const notice=document.createElement('p');notice.className='bf14900-notice';
  notice.textContent='Recovered original 2022 artwork and quest references. '+
     'Amdahl battles are NOT playable: enemy waves and native AI remain undecoded. '+
@@ -45,6 +45,18 @@
  background.style.cssText='max-width:100%;max-height:180px;object-fit:contain;display:block';
  background.alt='Original Amdahl battle background';
  detail.append(title,info,background);
+ const imageStatus=document.createElement('p');imageStatus.id='bf14900-image-status';
+ imageStatus.setAttribute('role','status');imageStatus.hidden=true;
+ const failures=new Set();
+ function reportImages(){
+   imageStatus.hidden=failures.size===0;
+   imageStatus.textContent=failures.size?'Artwork unavailable: '+[...failures].join(' and ')+
+     '. Source dungeon buttons and descriptions remain available; no replacement art is inferred.':'';
+ }
+ for(const [img,label] of [[image,'Amdahl map'],[background,'selected dungeon backdrop']]){
+   img.addEventListener('error',()=>{failures.add(label);img.hidden=true;img.style.display='none';reportImages();});
+   img.addEventListener('load',()=>{failures.delete(label);img.hidden=false;img.style.display='block';reportImages();});
+ }
  const pins=new Map();
  for(const d of rows){
    const pin=document.createElement('button');pin.type='button';
@@ -52,7 +64,7 @@
    pin.title=d.name;pin.setAttribute('aria-label','Preview '+d.name+' original dungeon art');
    pin.style.cssText='position:absolute;transform:translate(-50%,-50%);'+
      'border:1px solid #f4e5bc;border-radius:50%;padding:3px 5px;'+
-     'font:700 10px system-ui;color:#fff;background:#504766;min-width:33px;min-height:33px';
+     'font:700 10px system-ui;color:#fff;background:#504766;min-width:44px;min-height:44px';
    pin.style.left=(d.x/640*100)+'%';pin.style.top=(d.y/960*100)+'%';
    pin.addEventListener('click',()=>preview(d.id));
    pins.set(d.id,pin);world.append(pin);
@@ -64,6 +76,7 @@
    info.textContent='Original first mission '+d.firstMissionId+
      ' · original prerequisite mission '+d.requires+
      ' · preview only; quests 400–465 are not in the playable 106-quest catalog.';
+   failures.delete('selected dungeon backdrop');background.hidden=false;background.style.display='block';reportImages();
    background.src='content/dungeon/'+d.battleBackground;
    background.alt='Original 2022 Global '+d.name+' battle background';
    for(const [key,button] of pins){
@@ -75,7 +88,7 @@
  const footer=document.createElement('small');
  footer.textContent='Owner 2022 BF1 area/dungeon archive; original source images, '+
    'world coordinates, names. No combat, quest, loot, AI or save mutations.';
- section.append(summary,notice,world,detail,footer);
+ section.append(summary,notice,imageStatus,world,detail,footer);
  campaign.after(section);preview(400);
  window.BFAmdahlOriginalArtV14900=Object.freeze({
    source:original,entries:Object.freeze(rows.map(r=>Object.freeze({...r}))),
