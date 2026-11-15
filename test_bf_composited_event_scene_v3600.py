@@ -63,6 +63,31 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalEventCompositeV3600.snapshot().available') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ # Explicit provider-fault fixture supplements the real archived-scene flow.
+ fault=browser.new_page()
+ fault.set_content('<details id="bf2200-reader" open><div id="bf2700-stage"></div><div id="bf2600-art"></div><p id="bf2200-text"></p><select id="bf2200-scenes"></select></details>')
+ fault.evaluate("""()=>{
+   window.P={version:7};window.__fault='';
+   const source='map1-dungeon1.txt';
+   const wrap=(key,value)=>({snapshot:()=>{if(__fault===key)throw Error('provider unavailable');if(__fault===key+'Null')return null;return value()}});
+   window.BFGlobalOriginalEventsV2200=wrap('events',()=>({source,step:1,lines:36}));
+   window.BFOriginalEventStageV2700=wrap('background',()=>({available:true,scene:source,background:'test.png'}));
+   window.BFGlobalEventExpressionsV2900=wrap('frame',()=>({source,step:1,character:'Tilith',image:'navi_chara1_0.png'}));
+   window.BFGlobalScenePlacementV3400=wrap('position',()=>({source,step:1,speaker:'Tilith',x:__fault==='nan'?NaN:60,y:30,side:__fault==='side'?'unknown':'right'}));
+   window.BFGlobalDialogueTimelineV3500={};
+ }""")
+ fault.add_script_tag(path=str(A/'bf3600_event_composite.js'))
+ assert fault.evaluate('BFGlobalEventCompositeV3600.refresh().available') is True
+ for case in ['events','eventsNull','background','backgroundNull','frame','frameNull','position','positionNull','nan','side']:
+  fault.evaluate('(v)=>window.__fault=v',case)
+  status=fault.evaluate('BFGlobalEventCompositeV3600.refresh()')
+  assert status['available'] is False and status['originalSceneCoordinates'] is False,(case,status)
+  assert fault.locator('#bf3600-actor').get_attribute('src') is None
+  assert fault.locator('#bf3600-actor').is_hidden()
+  assert fault.locator('#bf2600-art').evaluate('(el)=>el.style.display')==''
+  fault.evaluate("window.__fault=''")
+  assert fault.evaluate('BFGlobalEventCompositeV3600.refresh().available') is True
+ fault.close()
  assert not errors,errors
  browser.close()
 print('PASS v36.00 composited recovered event art, source transitions, read-only save')
