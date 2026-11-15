@@ -19,10 +19,10 @@ with sync_playwright() as pw:
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
  page.evaluate("""() => {
-   const store={};
+   const store={};let writes=0;window.__questJournalWrites=()=>writes;
    Object.defineProperty(window,'localStorage',{configurable:true,value:{
-     getItem:k=>store[k]??null,setItem:(k,v)=>store[k]=String(v),
-     removeItem:k=>{delete store[k]},key:i=>Object.keys(store)[i]??null,
+     getItem:k=>store[k]??null,setItem:(k,v)=>{writes++;store[k]=String(v)},
+     removeItem:k=>{writes++;delete store[k]},key:i=>Object.keys(store)[i]??null,
      get length(){return Object.keys(store).length}}});
    window.alert=()=>{};window.confirm=()=>true;
    HTMLMediaElement.prototype.load=()=>{};
@@ -57,6 +57,50 @@ with sync_playwright() as pw:
  # New read-only story completion, direct-next action and sortable source fields.
  assert page.evaluate('BFGlobalQuestJournalV110.nextAvailableMission')==1
  assert '/106 cleared' in page.locator('#bf110-progress').text_content()
+ # The journal's visible total/row/detail claims must agree with the strict
+ # Continue Story ledger, rather than coercing Infinity or "1" into clears.
+ ledger_probe=page.evaluate("""()=>{
+   const api=BFGlobalQuestJournalV110,original=P.questClears,version=P.version;
+   const before={p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+     raw:localStorage.getItem('bf_global_offline_demo_v7'),writes:__questJournalWrites()};
+   const read=()=>{
+     api.refresh();api.inspect(1);
+     const opens=[...document.querySelectorAll('[data-bf-journal-open]')];
+     return {progress:document.getElementById('bf110-progress').textContent,
+       detail:document.getElementById('bf110-preview').textContent,
+       nextDisabled:document.getElementById('bf110-next').disabled,
+       rowsDisabled:opens.length>0&&opens.every(b=>b.disabled),
+       opened:api.chooseMission(1),continueDone:BFGrandGaiaContinueV101.snapshot().done};
+   };
+   const result={bad:[]};
+   try{
+     for(const bad of [Infinity,'1',1.5,-1,null,NaN,Number.MAX_SAFE_INTEGER+1,undefined]){
+       P.questClears=Object.fromEntries(QUESTS.map(q=>[q.missionId,1]));
+       P.questClears[365]=bad;result.bad.push(read());
+     }
+     for(const ledger of [null,[],42,'invalid']){
+       P.questClears=ledger;result.bad.push(read());
+     }
+     P.questClears=Object.fromEntries(QUESTS.map(q=>[q.missionId,1]));
+     api.refresh();result.full=document.getElementById('bf110-progress').textContent;
+     P.questClears={};api.refresh();
+     result.zero=document.getElementById('bf110-progress').textContent;
+     result.recovered=!document.getElementById('bf110-next').disabled;
+   }finally{
+     P.questClears=original;P.version=version;api.refresh();
+   }
+   result.unchanged=JSON.stringify(before)===JSON.stringify({
+     p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
+     raw:localStorage.getItem('bf_global_offline_demo_v7'),writes:__questJournalWrites()});
+   return result;
+ }""")
+ for item in ledger_probe['bad']:
+  assert 'STORY COMPLETION UNAVAILABLE' in item['progress'],item
+  assert '106/106 cleared' not in item['progress'] and item['continueDone'] is None,item
+  assert item['nextDisabled'] and item['rowsDisabled'] and not item['opened'],item
+  assert 'Progress: UNAVAILABLE' in item['detail'],item
+ assert '106/106 cleared' in ledger_probe['full'] and '0/106 cleared' in ledger_probe['zero'],ledger_probe
+ assert ledger_probe['recovered'] and ledger_probe['unchanged'],ledger_probe
  assert 'MISSION 1' in page.locator('#bf110-next').text_content()
  p_before_sort=page.evaluate('JSON.stringify(P)')
  page.locator('#bf110-sort').select_option('energy')

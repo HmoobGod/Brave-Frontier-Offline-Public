@@ -103,14 +103,23 @@
  host.after(panel);
  let visibleLimit=20, previewId=null;
 
- function progress(row){
-   if((P.questClears?.[row.id]||0)>0)return 'cleared';
+ function clearLedgerValid(){
+   if(typeof P==='undefined'||P?.version!==7||!P.questClears||
+      typeof P.questClears!=='object'||Array.isArray(P.questClears))return false;
+   return archive.every(row=>!Object.prototype.hasOwnProperty.call(P.questClears,row.id)||
+     Number.isSafeInteger(P.questClears[row.id])&&P.questClears[row.id]>=0);
+ }
+ const clearCount=row=>Object.prototype.hasOwnProperty.call(P.questClears,row.id)?
+   P.questClears[row.id]:0;
+ function progress(row,valid=clearLedgerValid()){
+   if(!valid)return 'unavailable';
+   if(clearCount(row)>0)return 'cleared';
    return questUnlocked(row.q)?'available':'locked';
  }
  // Reuse Continue Story's exact runtime gate, including pending v7 save,
  // uncommitted receipts, live Auto and active/broken Auto Repeat.
  function navigationBlocked(){
-   try{return window.BFGrandGaiaContinueV101?.canNavigate?.()!==true;}
+   try{return !clearLedgerValid()||window.BFGrandGaiaContinueV101?.canNavigate?.()!==true;}
    catch(_){return true;}
  }
  function nextAvailable(){
@@ -122,37 +131,38 @@
      return row&&progress(row)==='available'?row:null;
    }catch(_){return null;}
  }
- function matching(){
+ function matching(valid=clearLedgerValid()){
    const query=search.value.trim().toLocaleLowerCase();
    const rows=archive.filter(row=>(regions.value==='all'||row.region===regions.value) &&
-      (states.value==='all'||progress(row)===states.value) &&
+      (states.value==='all'||progress(row,valid)===states.value) &&
       (!query || [String(row.id),row.name,row.dungeon,row.description].some(t=>t.toLocaleLowerCase().includes(query))));
    // Sort only a temporary list. The canonical 106-quest story order is immutable.
    const order=ordering.value;
    if(order==='energy')rows.sort((a,b)=>a.q.energy-b.q.energy||a.id-b.id);
    else if(order==='exp')rows.sort((a,b)=>b.q.exp-a.q.exp||a.id-b.id);
-   else if(order==='clears')rows.sort((a,b)=>(P.questClears?.[b.id]||0)-
-     (P.questClears?.[a.id]||0)||a.id-b.id);
+   else if(order==='clears'&&valid)rows.sort((a,b)=>clearCount(b)-clearCount(a)||a.id-b.id);
    return rows;
  }
  function inspect(id){
    const row=archive.find(r=>r.id===Number(id));
    if(!row)return false;
    previewId=row.id;
-   const q=row.q,locked=!questUnlocked(q),clears=P.questClears?.[q.missionId]||0;
+   const q=row.q,valid=clearLedgerValid(),state=progress(row,valid),
+     locked=state==='locked',clears=valid?clearCount(row):null;
    preview.textContent=[
      row.name+' · Mission '+row.id+' · '+row.dungeon,
      row.description,
      'Original recorded: '+q.battles+' battles · '+q.energy+' Energy cost · '+
          q.exp+' EXP · '+q.zel+' Zel · '+q.karma+' Karma',
-     'Progress: '+(clears?clears+' clear(s)':locked?'LOCKED · requires Mission '+q.requires:'AVAILABLE'),
+     'Progress: '+(!valid?'UNAVAILABLE · invalid local DEMO clear ledger':
+       clears?clears+' clear(s)':locked?'LOCKED · requires Mission '+q.requires:'AVAILABLE'),
      'Original enemy formations, drop probabilities, native combat and Energy spending are not restored.'
    ].join('\n');
    return true;
  }
  function chooseMission(id){
    const row=archive.find(r=>r.id===Number(id));
-   if(!row || !questUnlocked(row.q) || navigationBlocked())return false;
+   if(!row || navigationBlocked() || !questUnlocked(row.q))return false;
    if(!BFQuestAreas.choose(row.q))return false;
    const index=row.region==='stlamia'?2:row.region==='morgan'?1:0;
    tabs.querySelectorAll('button')[index]?.click();
@@ -171,17 +181,20 @@
         !campaign.waveReadiness(archive[0].id) ||
         campaign.sourceEconomyReadiness?.()===false)return false;
      return archive.every(row=>{
+       if(!Object.prototype.hasOwnProperty.call(P.questClears,row.id))return false;
        const count=P.questClears?.[row.id];
        return Number.isSafeInteger(count)&&count>0;
      });
    }catch(_){return false;}
  }
  function refresh(){
+   const valid=clearLedgerValid();
    const active=nextAvailable();
-   const cleared=archive.filter(row=>progress(row)==='cleared').length;
+   const cleared=archive.filter(row=>progress(row,valid)==='cleared').length;
    const regionRows=regions.value==='all'?archive:archive.filter(row=>row.region===regions.value);
-   const regionCleared=regionRows.filter(row=>progress(row)==='cleared').length;
-   completed.textContent='STORY COMPLETION: '+cleared+'/106 cleared · '+
+   const regionCleared=regionRows.filter(row=>progress(row,valid)==='cleared').length;
+   completed.textContent=!valid?'STORY COMPLETION UNAVAILABLE · invalid local DEMO clear ledger':
+     'STORY COMPLETION: '+cleared+'/106 cleared · '+
      (regions.value==='all'?'All regions':
        regions.value==='stlamia'?'St. Lamia':
        regions.value==='morgan'?'Morgan':'Mistral')+': '+regionCleared+'/'+regionRows.length;
@@ -190,12 +203,13 @@
    nextButton.textContent=active?'NEXT UNCLEARED · MISSION '+active.id:
      allMissionsCleared()?'ALL 106 MISSIONS CLEARED':
      'NEXT MISSION UNAVAILABLE · CHECK SAVE OR UNLOCKS';
-   const rows=matching();
+   const rows=matching(valid);
    count.textContent=rows.length+' matching missions · showing '+Math.min(visibleLimit,rows.length)+
-     ' · '+rows.filter(r=>progress(r)==='available').length+' available and uncleared';
+     (valid?' · '+rows.filter(r=>progress(r,valid)==='available').length+' available and uncleared':
+       ' · progress unavailable');
    const fragment=document.createDocumentFragment();
    for(const row of rows.slice(0,visibleLimit)){
-     const state=progress(row);
+     const state=progress(row,valid);
      const item=document.createElement('div');item.className='bf110-entry';
      item.dataset.bfJournalEntry=String(row.id);
      const info=document.createElement('div');
@@ -210,8 +224,8 @@
      view.addEventListener('click',()=>inspect(row.id));
      const go=document.createElement('button');go.type='button';
      go.dataset.bfJournalOpen=String(row.id);
-     go.textContent=state==='locked'?'LOCKED':'OPEN';
-     go.disabled=state==='locked'||blocked;
+     go.textContent=state==='unavailable'?'UNAVAILABLE':state==='locked'?'LOCKED':'OPEN';
+     go.disabled=state==='unavailable'||state==='locked'||blocked;
      go.addEventListener('click',()=>chooseMission(row.id));
      actions.append(view,go);item.append(info,actions);fragment.append(item);
    }
