@@ -33,6 +33,13 @@ with sync_playwright() as pw:
  'bf3000_battle_results.js','bf3100_battle_focus.js',
  'bf3200_combat_journal.js','bf3300_story_playback.js',
  'bf3400_source_scene_placement.js','bf3500_dialogue_timeline.js'):
+  if name=='bf3500_dialogue_timeline.js':
+   page.evaluate("""()=>{
+     window.__actualTimelineReader=BFGlobalOriginalEventsV2200;
+     window.__timelineOverride=null;
+     window.BFGlobalOriginalEventsV2200={...__actualTimelineReader,
+       snapshot:()=>__timelineOverride?__timelineOverride():__actualTimelineReader.snapshot()};
+   }""")
   page.add_script_tag(path=str(A/name))
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert page.locator('#bf3500-timeline').is_hidden()
@@ -60,6 +67,22 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1000)') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ # Bad/throwing reader snapshots must not pause, click through or invent progress.
+ stable=page.evaluate('JSON.stringify({P,S,reader:__actualTimelineReader.snapshot()})')
+ for mutation in ("a.step='9'","a.step=0","a.step=0.5","a.step=a.lines+1",
+                  "a.lines='12'","a.lines=9999","a.source='wrong.txt'",
+                  "a.chosen='dungeon:9999'","throw Error('provider unavailable')"):
+  page.evaluate("""(code)=>{window.__timelineOverride=()=>{
+    const a={...__actualTimelineReader.snapshot()};eval(code);return a;
+  }}""",mutation)
+  assert page.evaluate('BFGlobalDialogueTimelineV3500.refresh().available') is False,mutation
+  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1)') is False,mutation
+  assert page.locator('#bf3500-timeline').is_hidden()
+  assert page.evaluate('JSON.stringify({P,S,reader:__actualTimelineReader.snapshot()})')==stable,mutation
+ page.evaluate('window.__timelineOverride=null')
+ assert page.evaluate('BFGlobalDialogueTimelineV3500.refresh().available') is True
+ assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1)') is True
+ assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert not errors,errors
  browser.close()
 print('PASS v35.00 source dialogue timeline line jumps, source expressions, no saves')
