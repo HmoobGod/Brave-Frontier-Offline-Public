@@ -48,7 +48,14 @@
    const value=effectiveUnit(baseId);
    return Number.isSafeInteger(value?.id)?value.id:null;
  }
+ function unavailable(){return freeze({valid:false,leaderBase:null,leaderId:null,leaderSupported:false,
+   leader:null,slots:freeze([]),source,nativeLeaderBuffsApplied:false});}
  function snapshot(){
+   try{
+   if(P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||Array.from(P.squad).some((_,i)=>!Object.prototype.hasOwnProperty.call(P.squad,i))||
+     Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0)||new Set(P.roster).size!==P.roster.length)return unavailable();
+   const occupied=P.squad.filter(id=>Number.isSafeInteger(id)&&id>0);
+   if(new Set(occupied).size!==occupied.length)return unavailable();
    const leaderBase=P.squad[0],leaderId=currentForm(leaderBase);
    const leader=lookup(leaderId),slots=[];
    for(const baseId of P.squad.slice(0,6)){
@@ -56,9 +63,10 @@
      slots.push(freeze({baseId,currentId,
        effect:leader&&currentId!==null?bonusFor(leaderId,currentId):null}));
    }
-   return freeze({leaderBase:leaderBase??null,leaderId,
+   return freeze({valid:true,leaderBase:leaderBase??null,leaderId,
      leaderSupported:!!leader,leader,slots:freeze(slots),
      source,nativeLeaderBuffsApplied:false});
+   }catch(_){return unavailable();}
  }
  const panel=document.createElement('details');panel.id='bf11000-leader-audit';
  panel.style.cssText='padding:10px;margin:10px 2px;border:1px solid #9daaaa;'+
@@ -88,7 +96,7 @@
      'Source-qualified preview, NOT applied to combat yet. '+
      'Unknown leaders and other unit forms fail closed. '+
      'No squad, HP, ATK, save or rewards are changed.';
-   status.textContent=state.leader?
+   status.textContent=!state.valid?'Leader preview unavailable: invalid or unreadable owned squad.':state.leader?
      ('Slot 1 leader form #'+state.leaderId+' · Leader Skill #'+
        state.leader.lsId+' · matching element +'+
        state.leader.atkPercent+'% ATK / +'+

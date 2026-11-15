@@ -83,6 +83,19 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==initial
  p.add_script_tag(path=str(A/'bf11000_source_starter_leader_skills.js'))
  assert p.locator('#bf11000-leader-audit').count()==1
+ malformed=p.evaluate("""()=>{const squad=P.squad,roster=P.roster,version=P.version,resolve=window.effectiveUnit;
+  const before=JSON.stringify({P,S}),results=[];
+  try{
+   for(const value of [null,{},Array(2),[squad[0],squad[0]],Array(7).fill(squad[0])]){
+    P.squad=value;results.push(BFGlobalStarterLeaderSourceV11000.refresh().valid===false);
+   }
+   P.squad=squad;P.roster=null;results.push(!BFGlobalStarterLeaderSourceV11000.refresh().valid);
+   P.roster=roster;P.version=6;results.push(!BFGlobalStarterLeaderSourceV11000.refresh().valid);
+   P.version=version;window.effectiveUnit=()=>{throw Error('form unavailable')};results.push(!BFGlobalStarterLeaderSourceV11000.refresh().valid);
+  }finally{P.squad=squad;P.roster=roster;P.version=version;window.effectiveUnit=resolve;BFGlobalStarterLeaderSourceV11000.refresh();}
+  return {results,same:before===JSON.stringify({P,S}),recovered:BFGlobalStarterLeaderSourceV11000.snapshot().valid};
+ }""")
+ assert malformed=={'results':[True]*8,'same':True,'recovered':True},malformed
  assert not errors,errors
  b.close()
 print('PASS v110 original 30 starter leader profiles, elements, HP/ATK, squad preview, fail-closed and v7 save integrity')
