@@ -112,6 +112,10 @@ function bfOfflineUnitPortraitV266(source, name) {
     if (previous !== route) window.dispatchEvent(new CustomEvent('bf-route-change', {
       detail: {route,previous}
     }));
+    // Every successful go() can copy stale DOM into the read-only header,
+    // including clicking Home while already on Home. Allow late overlays to
+    // validate the actual v7 player after every successful route refresh.
+    window.dispatchEvent(new CustomEvent('bf-route-sync', {detail:{route,previous}}));
     return true;
   }
   function navigate(event) {
