@@ -85,6 +85,23 @@ with sync_playwright() as pw:
  assert page.evaluate('BFTacticalRoundsV300.snapshot.mode')=='owned'
  assert page.evaluate('BFTacticalRoundsV300.snapshot.draftUnitIds')==[]
  assert page.evaluate('BFTacticalRoundsV300.exit()') is True
+ filter_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.evaluate('BFArchiveDraftV800.clear();BFArchiveDraftV800.add(10011);BFArchiveDraftV800.add(10012)')
+ selected_before=page.evaluate('BFArchiveDraftV800.selected')
+ page.locator('#bf800-search').fill('')
+ page.locator('#bf800-availability').select_option('selected')
+ assert page.locator('#bf800-results .bf800-entry').count()==2
+ assert '10011' in page.locator('#bf800-results').inner_text()
+ page.locator('#bf800-availability').select_option('available')
+ assert page.locator('#bf800-results .bf800-entry').count()==12
+ assert page.locator('#bf800-results button').evaluate_all('(es)=>es.every(e=>!e.disabled)')
+ page.locator('#bf800-search').fill('10011')
+ assert page.locator('#bf800-results .bf800-entry').count()==0
+ page.locator('#bf800-availability').select_option('all')
+ assert page.locator('#bf800-results .bf800-entry').count()==1
+ assert page.locator('#bf800-results button').is_disabled()
+ assert page.evaluate('BFArchiveDraftV800.selected')==selected_before
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==filter_before
  assert not errors,errors
  browser.close()
 print('PASS v8.00: archive draft uses unowned 2022 forms, respects unlocks, supports undo and leaves v7 saved data unchanged')
