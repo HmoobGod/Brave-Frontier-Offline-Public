@@ -17,12 +17,15 @@
    // v455: filters can hide an otherwise owned selected card. Never let
    // Favorite/Lock controls mutate an invisible selection.
    if(!node || node.hidden || node.style.display==='none')return null;
-   const id=Number(node.dataset.bfUnitId);
+   const raw=node.dataset.bfUnitId;
+   if(typeof raw!=='string'||!/^[1-9][0-9]*$/.test(raw))return null;
+   const id=Number(raw);
    return validId(id)?id:null;
  }
+ function readableRoster(){return P.version===7&&Array.isArray(P.roster)&&
+   Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;}
  function validId(id){
-   return Number.isSafeInteger(id)&&id>0&&
-     Array.isArray(P.roster)&&P.roster.includes(id);
+   return readableRoster()&&Number.isSafeInteger(id)&&id>0&&P.roster.includes(id);
  }
  function load(){
    try{
@@ -47,7 +50,7 @@
    flags=next;refresh();return true;
  }
  function state(id=current()){
-   return freeze({id,owned:validId(id),
+   return freeze({id,ownershipAvailable:readableRoster(),owned:validId(id),
      favorite:validId(id)&&flags.favorites.includes(id),
      locked:validId(id)&&flags.locked.includes(id),
      favorites:flags.favorites.filter(validId).length,
@@ -96,12 +99,13 @@
  function refresh(){
    // v455: apply filter visibility before calculating current selection,
    // so a newly hidden selected card fails closed on the same click.
-   let shown=0,total=0,invalid=0;
+   let shown=0,total=0,invalid=0;const seen=new Set();
    for(const card of results.querySelectorAll('.bf-box-card')){
      const id=Number(card.dataset.bfUnitId);
      // Never label a malformed or unowned card as a favorite/lock, and
      // never include it among the owned box-filter results.
-     const owned=validId(id);
+     const owned=validId(id)&&/^[1-9][0-9]*$/.test(card.dataset.bfUnitId||'')&&!seen.has(id);
+     if(owned)seen.add(id);
      card.dataset.bfQolFavorite=String(owned&&flags.favorites.includes(id));
      card.dataset.bfQolLocked=String(owned&&flags.locked.includes(id));
      const visible=owned&&(filterMode==='all'||
@@ -127,6 +131,7 @@
    filterInfo.textContent=shown+' of '+total+' owned box cards shown'+
      (filterMode==='all'?'.':' · '+(filterMode==='favorites'?'Favorites':'Locked')+' only.')+
      (invalid?' · '+invalid+' unowned or malformed cards hidden.':'');
+   if(!s.ownershipAvailable)filterInfo.textContent='Owned markers unavailable: invalid roster. No marker changes allowed.';
    return s;
  }
  function setFilter(mode){
