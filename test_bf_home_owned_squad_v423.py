@@ -153,6 +153,12 @@ with sync_playwright() as pw:
         page.evaluate("BFGlobalHome.refreshParty()")
         assert warning.is_hidden()
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
+        elements=page.evaluate('BFHomeElementsB100.refresh()')
+        assert elements and elements['sourceYear']==2022 and elements['liveStatsChanged'] is False,elements
+        oracle=page.evaluate("()=>{const forms=JSON.parse(document.querySelector('#bf-global-unit-catalog-data').textContent).units,labels=['Fire','Water','Earth','Thunder','Light','Dark'],counts=Object.fromEntries(labels.map(x=>[x,0]));for(const id of P.squad){const form=forms.find(x=>x.id===effectiveUnit(id).id);counts[labels[form.element-1]]++;}return counts;}")
+        assert elements['elements']==oracle
+        invalid_elements=page.evaluate("""()=>{const squad=P.squad,before=JSON.stringify({P,S});try{P.squad=[squad[0],squad[0]];BFHomeElementsB100.refresh();return {row:BFHomeElementsB100.snapshot(),text:document.querySelector('#bf-home-element-reference').textContent};}finally{P.squad=squad;BFHomeElementsB100.refresh();}}""")
+        assert invalid_elements['row'] is None and 'unavailable' in invalid_elements['text']
         assert not errors, errors
     finally:
         browser.close()

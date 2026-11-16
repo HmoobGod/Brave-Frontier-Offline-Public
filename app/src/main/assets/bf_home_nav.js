@@ -1802,3 +1802,18 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
 })();
+
+/* Home source-element composition; no team buffs or target recommendations. */
+(()=>{'use strict';if(window.BFHomeElementsB100)return;
+ const home=document.getElementById('bf-home'),party=home?.querySelector('#bf-scene-party');if(!party)return;
+ let catalog=null;try{const raw=JSON.parse(document.getElementById('bf-global-unit-catalog-data').textContent);if(raw.schema==='bf-global-unit-archive-2022-v1'&&raw.units.length===2291&&new Set(raw.units.map(x=>x.id)).size===2291)catalog=new Map(raw.units.map(x=>[x.id,x]));}catch(_){}
+ const labels=['Fire','Water','Earth','Thunder','Light','Dark'];
+ const text=document.createElement('p');text.id='bf-home-element-reference';text.setAttribute('role','status');text.style.cssText='box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui';party.after(text);
+ function snapshot(){try{if(!catalog||P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||new Set(P.roster).size!==P.roster.length||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0))return null;
+   const seen=new Set(),counts=Object.fromEntries(labels.map(x=>[x,0]));
+   for(const id of Array.from(P.squad)){if(id===0||id===null||id===undefined)continue;if(!Number.isSafeInteger(id)||!P.roster.includes(id)||seen.has(id))return null;const unit=effectiveUnit(id),row=catalog.get(unit?.id);if(!row||!Number.isInteger(row.element)||row.element<1||row.element>6)return null;seen.add(id);counts[labels[row.element-1]]++;}
+   return Object.freeze({count:seen.size,elements:Object.freeze(counts),sourceYear:2022,liveStatsChanged:false});
+ }catch(_){return null;}}
+ function refresh(){const row=snapshot();text.textContent=row?'2022 SOURCE SQUAD ELEMENTS · '+(row.count?Object.entries(row.elements).filter(([,n])=>n).map(([name,n])=>name+' '+n).join(' · '):'No owned squad forms selected')+' · reference only; no automatic strategy':'Source squad elements unavailable; ownership/form could not be verified.';return row;}
+ window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);document.getElementById('squadpicker')?.addEventListener('change',refresh);window.BFHomeElementsB100=Object.freeze({snapshot,refresh});refresh();
+})();
