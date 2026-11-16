@@ -38,6 +38,13 @@ with sync_playwright() as pw:
  assert s['allies'][0]['hpPercent']==60 and s['allies'][0]['bb']==70
  assert s['foes'][0]['hpPercent']==50
  assert s['invalidAllies']==0 and s['invalidFoes']==0
+ assert p.evaluate(api+".healthSummary('allies')")=={'members':1,'living':1,'hp':600,'maxHp':1000,'bbReady':0,'observerOnly':True}
+ assert p.evaluate(api+".healthSummary('foes')")=={'members':1,'living':1,'hp':220,'maxHp':440,'bbReady':None,'observerOnly':True}
+ assert p.evaluate(api+".healthSummary('enemy')") is None
+ unavailable_health=p.evaluate("""()=>{const u=S.party[0],hp=u.hp,before=JSON.stringify({P,S});try{u.hp=NaN;const row=BFGlobalQoLBattleDetailsV10300.healthSummary('allies');BFGlobalQoLBattleDetailsV10300.refresh();return {row,text:document.querySelector('#bf10300-health-summary').textContent};}finally{u.hp=hp;BFGlobalQoLBattleDetailsV10300.refresh();}}""")
+ assert unavailable_health['row'] is None and 'HP SUMMARY UNAVAILABLE' in unavailable_health['text'],unavailable_health
+ assert p.evaluate('JSON.stringify({P,S})')==before
+
  # v430: refuse to invent 1 HP or valid HP for invalid live DEMO data.
  invalid=p.evaluate("""()=>{
    const api=BFGlobalQoLBattleDetailsV10300;
