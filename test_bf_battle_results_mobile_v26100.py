@@ -35,7 +35,7 @@ for forbidden in (
 ):
     assert forbidden not in PATCH, forbidden
 assert "'#bf3000-actions button{min-height:44px;" in RESULTS
-for required in ("bf3000-replay", "bf3000-next", "bf3000-scene",
+for required in ("bf3000-replay", "bf3000-next", "bf3000-scene", "bf3000-train",
                  "SIMULATED CAMPAIGN REWARDS", "DEFEAT · No rewards"):
     assert required in RESULTS, required
 assert "test_bf_battle_results_mobile_v26100.py --source-only" in PRE
@@ -70,6 +70,7 @@ fixture = """<!doctype html><html><head><meta charset="utf-8"></head><body>
 <div id="bf3000-actions">
 <button type="button" id="bf3000-replay">REPLAY MISSION ↻</button>
 <button type="button" id="bf3000-next" disabled>NEXT STORY MISSION ›</button>
+<button type="button" id="bf3000-train">TRAIN UNITS WITH EARNED SHARDS ›</button>
 <button type="button" id="bf3000-scene" hidden>READ ORIGINAL CLEAR SCENE ›</button>
 </div>
 <small id="bf3000-note">Offline simulated battle rewards, and original enemy AI, enemy waves, and costs remain DEMO.</small>
@@ -102,7 +103,7 @@ with sync_playwright() as pw:
         columns = page.locator("#bf3000-actions").evaluate(
             "e=>getComputedStyle(e).gridTemplateColumns.split(/\\s+/).length")
         assert columns == (1 if width <= 359 else 2), (width, columns)
-        for selector in ("#bf3000-replay", "#bf3000-next"):
+        for selector in ("#bf3000-replay", "#bf3000-next", "#bf3000-train"):
             props = page.locator(selector).evaluate("""e=>{
               const c=getComputedStyle(e),r=e.getBoundingClientRect();
               return {minHeight:parseFloat(c.minHeight),height:r.height,
