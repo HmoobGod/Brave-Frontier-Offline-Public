@@ -38,6 +38,7 @@
  status.setAttribute('aria-live','polite');
  const focus=document.createElement('p');focus.id='bf2100-focus';
  focus.setAttribute('role','status');focus.setAttribute('aria-live','polite');
+ const targetMeter=document.createElement('meter');targetMeter.id='bf2100-target-health';targetMeter.min=0;targetMeter.style.cssText='box-sizing:border-box;width:100%;max-width:320px';
  const targets=document.createElement('div');targets.id='bf2100-targets';
  targets.setAttribute('role','group');targets.setAttribute('aria-label','Choose demo enemy target');
  const actions=document.createElement('div');actions.id='bf2100-buttons';
@@ -64,7 +65,7 @@
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- panel.append(title,status,focus,targets,actions,orders,foot);area.before(panel);
+ panel.append(title,status,focus,targetMeter,targets,actions,orders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
  const enemies=()=>Array.isArray(S.enemies)?S.enemies.filter(e=>e&&e.hp>0):[];
@@ -588,6 +589,10 @@
      ' · HP '+current.hp+'/'+current.maxHp:
      'Selected DEMO target unavailable';
    if(focus.textContent!==focusText)focus.textContent=focusText;
+   targetMeter.hidden=!current;
+   if(current){targetMeter.max=current.maxHp;targetMeter.value=current.hp;targetMeter.setAttribute('aria-label',current.name+' selected DEMO target HP');targetMeter.setAttribute('aria-valuetext',current.hp+' of '+current.maxHp+' HP');}
+   else{targetMeter.max=1;targetMeter.value=0;targetMeter.removeAttribute('aria-label');targetMeter.removeAttribute('aria-valuetext');}
+
    const key=JSON.stringify([st,active().map(p=>[
      p.id,p.hp,p.maxHp,p.unitId,p.action?.kind,p.action?.target])]);
    // Native target-button availability can change without changing the
