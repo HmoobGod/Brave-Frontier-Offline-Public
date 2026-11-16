@@ -413,6 +413,10 @@ with sync_playwright() as pw:
         assert page.locator('#bf420-home-clear-bar').is_visible()
         assert '106/106' in page.locator('#bf420-home-clears').inner_text()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
+        receipt_proof=page.evaluate("""()=>{const clears=P.questClears,before=JSON.stringify({P,S}),api=BFHomeBattleReadinessV420;let calls=0;const out=[];
+          try{P.questClears=Object.create(Object.fromEntries(QUESTS.map(q=>[q.missionId,1])));out.push(api.refresh()===null);P.questClears={};Object.defineProperty(P.questClears,String(QUESTS[0].missionId),{enumerable:true,get:()=>{calls++;return 1;}});out.push(api.refresh()===null);}
+          finally{P.questClears=clears;api.refresh();}return {out,calls,same:before===JSON.stringify({P,S})};}""")
+        assert receipt_proof=={'out':[True,True],'calls':0,'same':True},receipt_proof
         assert not errors,errors
     finally:
         browser.close()

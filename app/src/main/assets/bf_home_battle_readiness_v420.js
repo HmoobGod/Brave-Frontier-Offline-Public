@@ -122,10 +122,14 @@
       // An invalid positive string/fraction/infinite count can fool the
       // legacy campaign summary into reporting 106/106. Require the complete
       // 106-entry DEMO clear ledger to be valid before showing progress.
+      const prototype=Object.getPrototypeOf(P.questClears);if(prototype!==Object.prototype&&prototype!==null)return null;
+      const descriptors=Object.getOwnPropertyDescriptors(P.questClears);
+      for(const receipt of Object.values(descriptors))if(!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<0)return null;
       let cleared=0;
       for(const q of QUESTS){
         if(!Number.isSafeInteger(q?.missionId)||q.missionId<=0)return null;
-        const count=P.questClears[q.missionId];
+        const receipt=descriptors[String(q.missionId)];
+        const count=receipt?.value;
         if(count!==undefined&&
            (!Number.isSafeInteger(count)||count<0))return null;
         if(count>0)cleared++;
