@@ -47,6 +47,21 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==saved
  p.add_script_tag(path=str(A/'bf11200_all_playable_leader_source.js'))
  assert p.locator('#bf11200-playable-leaders').count()==1
+ for code in ('2','5','31','29','32','34','48','49'):
+  p.locator('#bf11200-type').select_option(code)
+  observed=p.locator('#bf11200-form option').evaluate_all('(els)=>els.map(e=>Number(e.value))')
+  expected_ids=[row['unitId'] for row in source['rows'] if code in row['skillTypeRaw'].split('@')]
+  assert sorted(observed)==sorted(expected_ids),(code,observed,expected_ids)
+ p.locator('#bf11200-type').select_option('all')
+ p.locator('#bf11200-search').fill('60025')
+ assert p.locator('#bf11200-form option').count()==1
+ assert '31@29' in p.locator('#bf11200-raw').text_content()
+ p.locator('#bf11200-search').fill('NO_SOURCE_MATCH')
+ assert p.locator('#bf11200-form').is_disabled()
+ assert '0 matching' in p.locator('#bf11200-match-count').text_content()
+ p.locator('#bf11200-search').fill('')
+ assert p.locator('#bf11200-form option').count()==72
+ assert p.evaluate('JSON.stringify(P)')==saved
  assert not errors,errors
  b.close()
 print('PASS v112 72 original 2022 leader records, 36 LS, raw type2/5/31/compound, no gameplay/save mutation')

@@ -49,12 +49,16 @@
    'v111 only applies source-verified starter type2 ATK/HP effects in archive DEMO. '+
    'Type31 spark, type5 elemental and compound @ effects are NOT implemented '+
    'by this reader; native timing, recipients and stacking still need proof.';
- for(const row of byId.values()){
-   const option=document.createElement('option');option.value=String(row.unitId);
-   option.textContent='#'+row.unitId+' · '+row.rarity+'★ LS #'+row.lsId;
-   select.append(option);
+ const query=document.createElement('input');query.type='search';query.id='bf11200-search';query.maxLength=80;query.placeholder='Find unit ID, leader ID or raw passive';query.setAttribute('aria-label','Find source leader profile');query.style.cssText='box-sizing:border-box;min-height:44px;width:100%';
+ const types=document.createElement('select');types.id='bf11200-type';types.setAttribute('aria-label','Filter original raw leader effect type');types.style.minHeight='44px';
+ for(const value of ['all',...new Set([...byId.values()].flatMap(x=>x.skillTypeRaw.split('@')))]){const option=document.createElement('option');option.value=value;option.textContent=value==='all'?'All raw effect types':'Contains raw type '+value;types.append(option);}
+ const count=document.createElement('p');count.id='bf11200-match-count';count.setAttribute('role','status');
+ function filter(){const prior=select.value,term=query.value.trim().toLocaleLowerCase();
+   const rows=[...byId.values()].filter(row=>(types.value==='all'||row.skillTypeRaw.split('@').includes(types.value))&&(!term||[String(row.unitId),String(row.lsId),row.passiveSkillInfoRaw].some(x=>x.toLocaleLowerCase().includes(term))));
+   select.replaceChildren(...rows.map(row=>{const option=document.createElement('option');option.value=String(row.unitId);option.textContent='#'+row.unitId+' · '+row.rarity+'★ LS #'+row.lsId;return option;}));
+   if(rows.some(x=>String(x.unitId)===prior))select.value=prior;select.disabled=!rows.length;count.textContent=rows.length+' matching source profiles / 72';refresh();return rows.length;
  }
- panel.append(title,select,output,caution);host.after(panel);
+ panel.append(title,query,types,count,select,output,caution);host.after(panel);
  function refresh(){
    const row=lookup(Number(select.value));
    output.textContent=row?('Unit #'+row.unitId+' · Leader #'+row.lsId+
@@ -63,7 +67,8 @@
      'Unknown archived leader profile';
    return row;
  }
- select.addEventListener('change',refresh);refresh();
+ query.addEventListener('input',filter);types.addEventListener('change',filter);
+ select.addEventListener('change',refresh);filter();
  window.BFGlobalPlayableLeadersV11200=freeze({source,lookup,refresh,
    snapshot:()=>freeze({current:lookup(Number(select.value)),
      count:byId.size,mode:typeof S==='undefined'?null:S.mode,saveFieldsAdded:0})});
