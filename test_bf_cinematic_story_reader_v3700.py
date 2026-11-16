@@ -47,6 +47,18 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(9)') is True
  assert page.evaluate('BFGlobalEventCompositeV3600.refresh().character')=='Tilith'
  assert page.evaluate('BFGlobalCinematicReaderV3700.snapshot().step')==9
+ # Expanded theater keeps keyboard traversal within its visible controls.
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  ids=page.evaluate("""()=>{const reader=document.querySelector('#bf2200-reader'),a=[...reader.querySelectorAll('button,input,select,textarea,a[href],summary,[tabindex]')].filter(el=>!el.disabled&&el.tabIndex>=0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');window.__stops3700=a;a[a.length-1].focus();return a.length;}""")
+  assert ids>=2,ids
+  page.keyboard.press('Tab')
+  assert page.evaluate('document.activeElement===__stops3700[0]')
+  page.keyboard.press('Shift+Tab')
+  assert page.evaluate('document.activeElement===__stops3700[__stops3700.length-1]')
+  page.locator('#execute').evaluate('(el)=>el.focus()')
+  page.keyboard.press('Tab')
+  assert page.evaluate("document.querySelector('#bf2200-reader').contains(document.activeElement)")
  page.keyboard.press('Escape')
  assert page.evaluate('BFGlobalCinematicReaderV3700.snapshot().focused') is False
  assert page.locator('html').evaluate('(el)=>el.classList.contains("bf3700-lock")') is False

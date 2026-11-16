@@ -69,6 +69,15 @@
  toggle.addEventListener('click',()=>{if(focused)exit();else enter()});
  reader.addEventListener('toggle',()=>{if(!reader.open)exit();else refresh()});
  document.addEventListener('keydown',e=>{
+   if(focused&&e.key==='Tab'){
+     const stops=[...reader.querySelectorAll('button,input,select,textarea,a[href],summary,[tabindex]')]
+       .filter(el=>!el.disabled&&el.tabIndex>=0&&el.getClientRects().length&&getComputedStyle(el).visibility!=='hidden');
+     const first=stops[0],last=stops[stops.length-1];
+     if(!first){e.preventDefault();toggle.focus();return;}
+     if(!reader.contains(document.activeElement)||(!e.shiftKey&&document.activeElement===last)){
+       e.preventDefault();(e.shiftKey?last:first).focus();
+     }else if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+   }
    if(focused&&e.key==='Escape'){e.preventDefault();exit()}
  });
  document.addEventListener('visibilitychange',()=>{if(document.hidden)exit()});
