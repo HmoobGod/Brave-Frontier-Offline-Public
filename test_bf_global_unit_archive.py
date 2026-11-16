@@ -111,6 +111,17 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    page.locator('#bf-archive-reset').click()
+    for kind,count in [('bundled',127),('pending',2291-127)]:
+        page.locator('#bf-archive-original-art').select_option(kind)
+        assert page.evaluate('BFGlobalUnitArchive.matchingCount')==count
+        shown=page.locator('.bf-archive-unit').evaluate_all('(els)=>els.map(x=>Number(x.dataset.unitId))')
+        expected=[x['id'] for x in source['units'] if bool(x.get('thumbnail'))==(kind=='bundled')][:24]
+        assert shown==expected,(kind,shown,expected)
+    page.locator('#bf-archive-reset').click()
+    assert page.locator('#bf-archive-original-art').input_value()=='all'
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    assert before==page.evaluate("() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})")
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()
