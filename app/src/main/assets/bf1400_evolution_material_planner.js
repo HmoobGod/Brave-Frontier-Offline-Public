@@ -46,6 +46,8 @@
    selections.clear();render();return true;
  }
  function summary(){
+   const before=new Map(selections);
+   try{
    prune();
    const selected=chosen(),entries=[],missing=[];
    const totals={zel:0,karma:0,materials:[]},counted=new Map();
@@ -55,11 +57,15 @@
      if(!recipe){missing.push(from);continue;}
      const original=archive.find(from),result=archive.find(to);
      if(!original||!result){missing.push(from);continue;}
+     if(![recipe.zel,recipe.karma].every(n=>Number.isSafeInteger(n)&&n>=0)||
+       !Array.isArray(recipe.materials)||recipe.materials.some(m=>!m||!Number.isSafeInteger(m.id)||m.id<=0||
+         !Number.isSafeInteger(m.type)||m.type<0))throw Error('Invalid source recipe');
      const items=recipe.materials.map(mat=>({...mat}));
      entries.push({from,to,fromName:original.name,toName:result.name,
        zel:recipe.zel,karma:recipe.karma,materials:items});
      totals.zel+=recipe.zel||0;
      totals.karma+=recipe.karma||0;
+     if(!Number.isSafeInteger(totals.zel)||!Number.isSafeInteger(totals.karma))throw Error('Source total overflow');
      for(const material of items){
        const key=String(material.type)+':'+String(material.id);
        const record=counted.get(key);
@@ -71,7 +77,12 @@
    totals.materials=[...counted.values()]
      .sort((a,b)=>String(a.type).localeCompare(String(b.type))||
        Number(a.id)-Number(b.id));
-   return {selected,entries,missing,totals};
+   return {available:true,selected,entries,missing,totals};
+   }catch(_){
+     selections.clear();for(const [from,to] of before)selections.set(from,to);
+     let selected=[];try{selected=chosen();}catch(_){}
+     return {available:false,selected,entries:[],missing:selected.slice(),totals:{zel:0,karma:0,materials:[]}};
+   }
  }
  const style=document.createElement('style');style.id='bf1400-styles';
  style.textContent=[
@@ -114,6 +125,7 @@
  function render(){
    const data=summary();
    cards.replaceChildren();report.replaceChildren();
+   if(!data.available){status.textContent='Source material plan unavailable: invalid recipe/cost evidence. Existing choices retained; no zero-cost plan inferred.';return data;}
    status.textContent=data.entries.length+' / '+data.selected.length+
      ' source-listed evolution recipes planned · '+data.missing.length+
      ' missing/unselected. This is a hypothetical archive checklist.';

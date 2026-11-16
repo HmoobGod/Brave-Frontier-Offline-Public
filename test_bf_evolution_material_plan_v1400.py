@@ -35,6 +35,13 @@ with sync_playwright() as pw:
   'bf300_tactical_rounds.js','bf400_original_battle_dossier.js',
   'bf800_archive_draft.js','bf900_optional_labs_hub.js',
   'bf1000_original_evolution_paths.js','bf1400_evolution_material_planner.js'):
+  if name=='bf1400_evolution_material_planner.js':
+   page.evaluate("""()=>{const original=BFOriginalEvolutionV1000;window.__planFault='';
+    window.BFOriginalEvolutionV1000={...original,sourceRecipe:(...args)=>{
+     if(__planFault==='throw')throw Error('recipe unavailable');
+     const s=original.sourceRecipe(...args);if(!s)return s;
+     return {...s,...({negative:{zel:-1},text:{karma:'0'},invalid:{materials:[{id:'bad',type:1}]},overflow:{zel:Number.MAX_SAFE_INTEGER}}[__planFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/name))
  assert page.evaluate('P.version')==7
  assert page.evaluate('BFOriginalEvolutionV1000.formCount')==2291
@@ -64,6 +71,16 @@ with sync_playwright() as pw:
  plan=page.evaluate('BFEvolutionMaterialPlannerV1400.plan')
  assert plan['selected']==selected and len(plan['entries'])==len(selected)
  assert plan['missing']==[] and all(row['to']>0 for row in plan['entries'])
+ fault_before=page.evaluate('JSON.stringify({P,S,QUEST,draft:BFArchiveDraftV800.selected,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','negative','text','invalid','overflow'):
+  page.evaluate('(v)=>window.__planFault=v',case)
+  assert page.evaluate('BFEvolutionMaterialPlannerV1400.refresh().available') is False,case
+  assert 'unavailable' in page.locator('#bf1400-status').text_content()
+  assert page.locator('#bf1400-materials').count()==0
+  page.evaluate("window.__planFault=''")
+  recovered=page.evaluate('BFEvolutionMaterialPlannerV1400.refresh()')
+  assert recovered['available'] and recovered['entries']==plan['entries']
+ assert page.evaluate('JSON.stringify({P,S,QUEST,draft:BFArchiveDraftV800.selected,save:localStorage.getItem("bf_global_offline_demo_v7")})')==fault_before
  # Independently recompute from the original archived codex, not the planner.
  expected=page.evaluate("""(ids) => {
   const rows=[],materials=new Map();let zel=0,karma=0;
