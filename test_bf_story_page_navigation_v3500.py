@@ -60,6 +60,17 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1000)') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ page.evaluate("BF_homeNav.go('quest');document.querySelector('#bf2200-reader').open=true")
+ stable=page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ for value in ('0','-1','1.5','1e1','','999999999999999999999'):
+  page.locator('#bf3500-line').fill(value)
+  page.locator('#bf3500-go').click()
+  assert page.locator('#bf3500-line').get_attribute('aria-invalid')=='true',value
+  assert 'Scene position unchanged' in page.locator('#bf3500-status').text_content()
+  assert page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable,value
+ current=page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')
+ page.locator('#bf3500-line').fill(str(current));page.keyboard.press('Enter')
+ assert page.locator('#bf3500-line').get_attribute('aria-invalid') is None
  assert not errors,errors
  browser.close()
 print('PASS v35.00 source dialogue timeline line jumps, source expressions, no saves')
