@@ -88,6 +88,16 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'journal and defeat/restart must not change saved progression'
  assert page.evaluate('P.version')==7
+ grouped=page.evaluate('BFGlobalCombatJournalV3200.entryGroups("previous","COMBAT_JOURNAL_ENTRY_")')
+ assert grouped['retainedOnly'] and sum(x['entries'] for x in grouped['waves'])==30,grouped
+ assert all(x['observedRounds']>=1 for x in grouped['waves'])
+ assert page.evaluate('BFGlobalCombatJournalV3200.entryGroups("invalid")') is None
+ assert page.evaluate('BFGlobalCombatJournalV3200.entryGroups("current",42)') is None
+ page.evaluate('BFGlobalCombatJournalV3200.show("previous")')
+ page.locator('#bf3200-search').fill('COMBAT_JOURNAL_ENTRY_29')
+ assert '1 retained entries' in page.locator('#bf3200-wave-summary').text_content()
+ page.locator('#bf3200-clear').click()
+ assert before==page.evaluate("()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})")
  assert not errors,errors
  browser.close()
 print('PASS v32.00: retained complete 30+ event log across reset, accurate previous run, v7 isolation')
