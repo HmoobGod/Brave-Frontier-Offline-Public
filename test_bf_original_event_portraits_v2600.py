@@ -48,6 +48,18 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalOriginalEventPortraitsV2600.snapshot.visible') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ page.evaluate('BFGlobalOriginalEventsV2200.read("dungeon",20);BFGlobalOriginalEventPortraitsV2600.refresh()')
+ passive=page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844});page.locator('#bf2600-inspect').click()
+  assert page.locator('#bf2600-inspector').is_visible()
+  assert page.locator('#bf2600-inspector-image').get_attribute('src')=='content/event/navi_chara1_0.png'
+  assert page.locator('#bf2600-inspector button').bounding_box()['height']>=44
+  page.keyboard.press('Escape');page.wait_for_function("!document.querySelector('#bf2600-inspector').open")
+  assert page.evaluate('document.activeElement.id')=='bf2600-inspect'
+ assert page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
+ page.locator('#bf2600-inspect').click();page.evaluate('BFGlobalOriginalEventsV2200.read("clear",10);BFGlobalOriginalEventPortraitsV2600.refresh()')
+ assert page.locator('#bf2600-inspector').is_hidden()
  assert not errors,errors
  browser.close()
 print('PASS v26.00 original 2022 event art mapping, speaker switch, v7 save untouched')
