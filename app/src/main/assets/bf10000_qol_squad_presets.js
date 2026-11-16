@@ -114,6 +114,12 @@
    slots=next;message='Copied preset '+(index+1)+' to empty preset '+(target+1)+'.';
    refresh();return true;
  }
+ function repeatIdle(){
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;
+   if(!repeat)return true;
+   try{return typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false;}
+   catch(_){return false;}
+ }
  function applyPreset(index){
    if(!Number.isInteger(index)||index<0||index>=max||S.busy||
       typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)return false;
@@ -124,6 +130,7 @@
      message='Stop Auto Battle before applying a squad preset.';
      refresh();return false;
    }
+   if(!repeatIdle()){message='Stop Auto Repeat before applying a squad preset; Repeat status must be idle.';refresh();return false;}
    if(!victoryReceiptCommitted()){
      message='Victory is not saved. Retry Save or export your progress before switching squads.';
      refresh();return false;
@@ -203,7 +210,7 @@
    const index=Number(selected.value)||0,slot=slots[index];
    const unavailable=!!S.busy,validActive=goodIds(P.squad,true);
    saveButton.disabled=unavailable||!validActive;
-   equipButton.disabled=unavailable||!validActive||(S.auto===true&&!S.over)||
+   equipButton.disabled=unavailable||!validActive||!repeatIdle()||(S.auto===true&&!S.over)||
      (typeof saveRecoveryPending==='boolean'&&saveRecoveryPending)||
      !victoryReceiptCommitted()||!slot||!goodIds(slot.squad,true);
    removeButton.disabled=unavailable||!slot;
