@@ -280,7 +280,12 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Explicit player click uses the existing Home router, without marking an
   // Adventure portal available earlier than the original Quest/Summon cards.
   document.getElementById('bf-home-story-open')?.addEventListener('click', () => {
-    window.BF_homeNav?.go('quest');
+    if (window.BF_homeNav?.go('quest') !== true) return;
+    const title = document.getElementById('bf-route-title');
+    if (title) {
+      title.tabIndex = -1;
+      title.focus({preventScroll:true});
+    }
   });
   function refreshStory() {
     let message = 'Story status unavailable · browse Quests for available missions.';
@@ -481,8 +486,12 @@ function bfOfflineUnitPortraitV266(source, name) {
   ].join('');
   quest.prepend(questTop);
   questTop.querySelector('.bf-quest-manage').addEventListener('click', () => {
-    setTab('squad');
-    window.BF_homeNav.go('units');
+    if (setTab('squad') !== true || window.BF_homeNav.go('units') !== true) return;
+    const label = document.getElementById('bf-unit-tab-label');
+    if (label) {
+      label.tabIndex = -1;
+      label.focus({preventScroll:true});
+    }
   });
 
   const summonTop = document.createElement('div');
