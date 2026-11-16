@@ -160,6 +160,8 @@
   // Explain the SAME fail-closed lock used for manual route controls.
   // Read-only and never a request to auto-start combat or change the save.
   function blockedReason(){
+    if(typeof P==='undefined'||P?.version!==7||typeof S==='undefined'||!S||typeof S.busy!=='boolean'||typeof S.auto!=='boolean')return 'BATTLE STATUS UNAVAILABLE · Home shortcuts are safely paused.';
+
     if(window.BF_homeNav?.current!=='home')return 'HOME NOT ACTIVE · Return Home to use these shortcuts.';
     if(S?.busy===true)return 'TURN IN PROGRESS · Finish the current battle action first.';
     if(S?.auto===true)return 'AUTO BATTLE ACTIVE · Stop Auto before changing screens.';
