@@ -1802,3 +1802,24 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
 })();
+
+/* Home links to recovered Village clear-event text, not working Village systems. */
+(()=>{'use strict';if(window.BFHomeVillageNoticesB100)return;
+ const home=document.getElementById('bf-home'),anchor=home?.querySelector('.bf-scene-note');if(!anchor)return;
+ const panel=document.createElement('details');panel.id='bf-home-village-notices';
+ const heading=document.createElement('summary');heading.textContent='RECOVERED VILLAGE NOTICES · STORY REFERENCE';heading.style.minHeight='44px';
+ const note=document.createElement('p');note.textContent='Read recovered 2022 clear-event dialogue only. Farm, Mountain and Sphere House gameplay remain unavailable; nothing is collected or crafted.';
+ panel.append(heading,note);anchor.before(panel);
+ const rows=[[10,'Farm','map1-dungeon0-1end.txt'],[11,'Mountain','map1-dungeon0-2end.txt'],[21,'Sphere House','map1-dungeon0-3end.txt']],buttons=new Map();
+ function allowed(id){try{
+   const row=rows.find(x=>x[0]===id),events=window.BFGlobalOriginalEventsV2200,receipt=Object.getOwnPropertyDescriptor(P.questClears||{},String(id)),repeat=window.BFGlobalQoLQuestRepeatV9800;
+   if(!row||P.version!==7||S.busy!==false||S.auto!==false||typeof events?.read!=='function'||typeof events.lookup!=='function'||typeof window.BF_homeNav?.go!=='function'||!receipt||!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<=0)return false;
+   if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;
+   const source=events.lookup('clear',id);return source?.kind==='clear'&&source.id===id&&source.source==='content/event/'+row[2]&&Array.isArray(source.lines)&&source.lines.length>0;
+ }catch(_){return false;}}
+ function open(id){if(!allowed(id)||window.BF_homeNav.current!=='home')return false;
+   try{if(window.BF_homeNav.go('quest')!==true||window.BFGlobalOriginalEventsV2200.read('clear',id)!==true)return false;const title=document.getElementById('bf2200-title');if(title){title.tabIndex=-1;title.focus();}return true;}catch(_){return false;}}
+ for(const [id,name] of rows){const button=document.createElement('button');button.type='button';button.textContent='READ '+name.toUpperCase()+' NOTICE · MISSION '+id;button.dataset.villageNotice=String(id);button.style.cssText='display:block;box-sizing:border-box;width:100%;min-height:44px;white-space:normal;margin:6px 0';button.addEventListener('click',()=>open(id));buttons.set(id,button);panel.append(button);}
+ function refresh(){for(const [id,button] of buttons){button.disabled=!allowed(id);button.title=button.disabled?'Requires its verified v7 clear receipt and idle manual play':'Read the archived clear-event text';}}
+ panel.addEventListener('toggle',refresh);window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);window.BFHomeVillageNoticesB100=Object.freeze({refresh,open});refresh();
+})();
