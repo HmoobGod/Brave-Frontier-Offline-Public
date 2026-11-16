@@ -153,6 +153,10 @@ with sync_playwright() as pw:
         page.evaluate("BFGlobalHome.refreshParty()")
         assert warning.is_hidden()
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
+        corrupt=page.evaluate("""()=>{const original={squad:P.squad,roster:P.roster,version:P.version},before=JSON.stringify({P,S}),out=[];
+          try{for(const [key,value] of [['squad',null],['squad',{}],['squad',Array(7).fill(P.squad[0])],['roster',null],['roster',[P.roster[0],P.roster[0]]],['roster',Array(2)],['version',6]]){Object.assign(P,original);P[key]=value;BFGlobalHome.refreshParty();out.push(document.querySelectorAll('#bf-scene-party button').length===0&&!document.querySelector('#bf-scene-party-review').hidden&&document.querySelector('#bf-scene-party-review').textContent.includes('unavailable'));}}
+          finally{Object.assign(P,original);BFGlobalHome.refreshParty();}return {out,same:before===JSON.stringify({P,S})};}""")
+        assert corrupt=={'out':[True]*7,'same':True},corrupt
         assert not errors, errors
     finally:
         browser.close()

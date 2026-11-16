@@ -195,7 +195,9 @@ function bfOfflineUnitPortraitV266(source, name) {
   partyReview.setAttribute('aria-live', 'polite');
   party.insertAdjacentElement('afterend', partyReview);
   function refreshParty() {
-    const members = typeof P !== 'undefined' && P && Array.isArray(P.squad) ? P.squad.slice(0, 6) : [];
+    const stateValid=typeof P!=='undefined'&&P?.version===7&&Array.isArray(P.squad)&&P.squad.length<=6&&Array.isArray(P.roster)&&Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
+    const members = stateValid ? P.squad.slice(0,6) : [];
+
     const nodes = [], seen = new Set();
     const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
     let unverified = 0;
@@ -206,7 +208,7 @@ function bfOfflineUnitPortraitV266(source, name) {
         Array.isArray(roster) && roster.includes(baseId) && !seen.has(baseId);
       let unit = null;
       if (owned && typeof effectiveUnit === 'function') {
-        try { unit = effectiveUnit(baseId); } catch (_) { unit = null; }
+        try { unit = effectiveUnit(baseId);if(!unit||!Number.isSafeInteger(unit.id)||unit.id<=0||typeof unit.name!=='string'||!unit.name.trim())unit=null; } catch (_) { unit = null; }
       }
       if (unit) seen.add(baseId);
       const card = document.createElement(unit ? 'button' : 'div');
@@ -262,8 +264,8 @@ function bfOfflineUnitPortraitV266(source, name) {
       nodes.push(card);
     }
     party.replaceChildren(...nodes);
-    partyReview.hidden = unverified === 0;
-    partyReview.textContent = unverified ?
+    partyReview.hidden = stateValid && unverified === 0;
+    partyReview.textContent = !stateValid ? 'Squad data unavailable · ownership could not be verified. Open Units to review.' : unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
       ' review · Open Units to inspect ownership.' : '';
   }
