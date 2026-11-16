@@ -21,11 +21,11 @@ with sync_playwright() as playwright:
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.evaluate("""() => {
-      const saved = {};
+      const saved = {};let writes=0;window.__homeNavWrites=()=>writes;
       Object.defineProperty(window,'localStorage',{configurable:true,value:{
         getItem(k){return saved[k] ?? null;},
-        setItem(k,v){saved[k]=String(v);},
-        removeItem(k){delete saved[k];},
+        setItem(k,v){writes++;saved[k]=String(v);},
+        removeItem(k){writes++;delete saved[k];},
         key(n){return Object.keys(saved)[n] ?? null;},
         get length(){return Object.keys(saved).length;}
       }});
@@ -40,6 +40,33 @@ with sync_playwright() as playwright:
     assert not page.locator("#questlist").is_visible()
     assert page.locator('.bf-navbar button[aria-current="page"]').count() == 1
     print("PASS home starts with quest content hidden")
+    # Dedicated Home/Quest handoffs must focus their visible destination too.
+    handoff_snapshot = """() => JSON.stringify({P,S,quest:QUEST.missionId,
+      storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+        const k=localStorage.key(i);return [k,localStorage.getItem(k)];})),
+      writes:window.__homeNavWrites()})"""
+    handoff_before=page.evaluate(handoff_snapshot)
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        for key in ('Enter','Space'):
+            page.evaluate('BFInnerScreens.setTab("training")')
+            page.locator('#bf-home-story-open').focus()
+            page.keyboard.press(key)
+            assert page.evaluate('BF_homeNav.current')=='quest'
+            title=page.locator('#bf-route-title')
+            assert title.is_visible() and title.evaluate('(el)=>document.activeElement===el'),(width,key,'quest')
+            page.locator('.bf-quest-manage').focus()
+            page.keyboard.press(key)
+            assert page.evaluate('BF_homeNav.current')=='units'
+            assert page.evaluate('BFInnerScreens.unitTab')=='squad'
+            assert page.locator('#squadpicker').is_visible()
+            label=page.locator('#bf-unit-tab-label')
+            assert label.is_visible() and label.evaluate('(el)=>document.activeElement===el'),(width,key,'squad')
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+            page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    assert page.evaluate(handoff_snapshot)==handoff_before
+    print('PASS Home View Quests and Quest Manage Squad keyboard handoffs focus visible destinations without storage writes')
+
     # v437: Home build-info shortcut opens only the already-existing Menu
     # metadata disclosure; browser previews must not invent APK identity.
     for width in (320,390,540):
