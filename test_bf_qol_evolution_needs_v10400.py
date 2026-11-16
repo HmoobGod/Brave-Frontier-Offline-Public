@@ -103,10 +103,12 @@ with sync_playwright() as pw:
  p.locator('#bf10400-filter').select_option('materials')
  p.wait_for_function("document.querySelector('#bf10400-rows').textContent.includes('0 missing')")
  save_before_nav=p.evaluate('JSON.stringify(P)')
- p.evaluate("""()=>{window.__go=[];
+ p.evaluate("""()=>{window.__go=[];window.S={busy:false,auto:false};
+   document.body.insertAdjacentHTML('beforeend','<div id=traininglist></div><h3 id=bf-unit-tab-label>Training</h3>');
    window.BF_homeNav={go:route=>{window.__go.push(route);return true}};
    window.BFInnerScreens={setTab:tab=>{window.__go.push(tab);return true}};
  }""")
+ p.evaluate(api+'.refresh()')
  p.locator('#bf10400-training-shortcut').click()
  assert p.evaluate('window.__go')==['units','training']
  assert p.evaluate('JSON.stringify(P)')==save_before_nav

@@ -180,6 +180,7 @@ jobs:
           python test_bf_qol_unit_flags_v10200.py
           python test_bf_qol_battle_details_v10300.py
           python test_bf_qol_evolution_needs_v10400.py
+          python test_bf_evolution_training_handoff_b100.py
           python test_bf_qol_advanced_smart_auto_v10500.py
           python test_bf_qol_integration_contract_v106.py
           python test_bf_source_landed_crystal_eligibility_v10700.py
