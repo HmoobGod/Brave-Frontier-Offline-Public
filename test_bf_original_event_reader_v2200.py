@@ -61,6 +61,16 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ stable=page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ page.locator('#bf2200-scene-search').fill('NO_MATCH_SCENE')
+ assert '0 matching unlocked scenes' in page.locator('#bf2200-scene-count').text_content()
+ assert page.locator('#bf2200-scenes option').count()==1 # selected source scene stays reachable
+ assert page.locator('#bf2200-scenes').input_value()==page.evaluate('BFGlobalOriginalEventsV2200.snapshot().chosen')
+ page.locator('#bf2200-scene-search').fill('map1-dungeon')
+ assert page.locator('#bf2200-scenes option').count()>=1
+ for bad in (None,42,'x'*81): assert page.evaluate('(v)=>BFGlobalOriginalEventsV2200.setSceneQuery(v)',bad) is False
+ assert page.evaluate("BFGlobalOriginalEventsV2200.setSceneQuery('')") is True
+ assert page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')

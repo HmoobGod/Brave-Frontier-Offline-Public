@@ -33,6 +33,9 @@
  summary.textContent='2022 GLOBAL STORY · ORIGINAL DIALOGUE';
  const choices=document.createElement('select');choices.id='bf2200-scenes';
  choices.setAttribute('aria-label','Choose an available original event script');
+ const sceneSearch=document.createElement('input');sceneSearch.type='search';sceneSearch.id='bf2200-scene-search';sceneSearch.maxLength=80;sceneSearch.placeholder='Find unlocked scene title or source filename';sceneSearch.setAttribute('aria-label','Find an unlocked original scene');sceneSearch.style.cssText='box-sizing:border-box;width:100%;min-height:44px';
+ const sceneCount=document.createElement('p');sceneCount.id='bf2200-scene-count';sceneCount.setAttribute('role','status');
+ function setSceneQuery(value){if(typeof value!=='string'||value.length>80)return false;sceneSearch.value=value;lastList='';refresh();return true;}
  const heading=document.createElement('p');heading.id='bf2200-title';
  const message=document.createElement('div');message.id='bf2200-text';
  message.setAttribute('aria-live','polite');
@@ -43,7 +46,7 @@
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ panel.append(summary,sceneSearch,sceneCount,choices,heading,message,controls,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -74,10 +77,14 @@
  }
  function refresh(){
    const allowed=unlocked();
-   const keys=allowed.map(keyOf).join('|');
+   const query=sceneSearch.value.trim().toLocaleLowerCase();
+   const matching=allowed.filter(s=>!query||[s.title,s.name,String(s.id)].some(x=>x.toLocaleLowerCase().includes(query)));
+   const visible=allowed.filter(s=>matching.includes(s)||keyOf(s)===selected);
+   const keys=visible.map(keyOf).join('|')+'|'+query;
+   sceneCount.textContent=matching.length+' matching unlocked scenes'+(visible.length>matching.length?' · current scene retained':'');
    if(keys!==lastList){
      const fragment=document.createDocumentFragment();
-     for(const s of allowed){
+     for(const s of visible){
        const option=document.createElement('option');
        option.value=keyOf(s);option.textContent=s.title+(s.kind==='clear'?' · Cleared quest':' · Dungeon');
        fragment.append(option);
@@ -98,6 +105,7 @@
    next.disabled=position>=s.lines.length-1;
    return snapshot();
  }
+ sceneSearch.addEventListener('input',()=>{lastList='';refresh();});
  choices.addEventListener('change',()=>{
    const s=unlocked().find(x=>keyOf(x)===choices.value);
    choose(s);
@@ -109,7 +117,7 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGlobalOriginalEventsV2200=Object.freeze({
+ window.BFGlobalOriginalEventsV2200=Object.freeze({setSceneQuery,
    registerSupplemental(s){
      if(!s||s.kind!=='dungeon'||!Number.isInteger(s.id)||
        !((s.id>=200&&s.id<=260)||(s.id>=300&&s.id<=360))||
