@@ -153,6 +153,11 @@ with sync_playwright() as pw:
         page.evaluate("BFGlobalHome.refreshParty()")
         assert warning.is_hidden()
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
+        level_proof=page.evaluate("""()=>{const exp=P.unitExp,id=P.squad[0],before=JSON.stringify({P,S}),out=[];let getterCalls=0;
+          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');}
+          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');
+          }finally{P.unitExp=exp;BFGlobalHome.refreshParty();}return {out,getterCalls,same:before===JSON.stringify({P,S})};}""")
+        assert level_proof=={'out':[True]*7,'getterCalls':0,'same':True},level_proof
         assert not errors, errors
     finally:
         browser.close()

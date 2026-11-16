@@ -194,6 +194,12 @@ function bfOfflineUnitPortraitV266(source, name) {
   partyReview.setAttribute('role', 'status');
   partyReview.setAttribute('aria-live', 'polite');
   party.insertAdjacentElement('afterend', partyReview);
+  function verifiedDemoLevel(id){try{
+    if(!P.unitExp||typeof P.unitExp!=='object'||Array.isArray(P.unitExp))return null;
+    const receipt=Object.getOwnPropertyDescriptor(P.unitExp,String(id));
+    if(!receipt||!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<0||receipt.value>1000000000||typeof demoLevel!=='function')return null;
+    const level=demoLevel(receipt.value);return Number.isSafeInteger(level)&&level>=1&&level<=99?level:null;
+  }catch(_){return null;}}
   function refreshParty() {
     const members = typeof P !== 'undefined' && P && Array.isArray(P.squad) ? P.squad.slice(0, 6) : [];
     const nodes = [], seen = new Set();
@@ -218,8 +224,8 @@ function bfOfflineUnitPortraitV266(source, name) {
         const name = document.createElement('strong');
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
-        const exp = P.unitExp && P.unitExp[baseId] || 0;
-        level.textContent = 'Lv.' + (typeof demoLevel === 'function' ? demoLevel(exp) : '1');
+        const observedLevel=verifiedDemoLevel(baseId);
+        level.textContent=observedLevel===null?'LEVEL UNAVAILABLE':'Lv.'+observedLevel;
         card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent);
         card.title = 'Inspect owned unit';
         card.append(img, name, level);
