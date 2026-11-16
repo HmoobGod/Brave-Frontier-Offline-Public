@@ -111,6 +111,11 @@
  const word=(tag,value)=>{
    const el=document.createElement(tag);el.textContent=String(value);return el;
  };
+ function costBreakdown(){try{const data=summary();
+   if(data.entries.some(x=>!Number.isSafeInteger(x.zel)||x.zel<0||!Number.isSafeInteger(x.karma)||x.karma<0))return null;
+   const rows=data.entries.map(x=>Object.freeze({from:x.from,to:x.to,name:x.toName,zel:x.zel,karma:x.karma})).sort((a,b)=>b.zel-a.zel||b.karma-a.karma||a.from-b.from);
+   return Object.freeze({rows:Object.freeze(rows),zel:rows.reduce((n,x)=>n+x.zel,0),karma:rows.reduce((n,x)=>n+x.karma,0),missing:Object.freeze(data.missing.slice()),complete:data.missing.length===0,ownedBudgetChecked:false,sourceYear:2022});
+ }catch(_){return null;}}
  function render(){
    const data=summary();
    cards.replaceChildren();report.replaceChildren();
@@ -147,6 +152,8 @@
    cost.append(word('p',(data.totals.zel||0)+' recorded Zel · '+
      (data.totals.karma||0)+' recorded Karma'));
    report.append(cost);
+   const breakdown=costBreakdown();if(breakdown){const detail=document.createElement('details');detail.id='bf1400-cost-breakdown';const heading=word('summary','RECORDED RECIPE COST BREAKDOWN · REFERENCE ONLY');heading.style.minHeight='44px';detail.append(heading);for(const entry of breakdown.rows){const line=word('p',entry.name+' · #'+entry.from+' → #'+entry.to+' · '+entry.zel+' original Zel / '+entry.karma+' original Karma'+(breakdown.zel?' · '+Math.round(entry.zel/breakdown.zel*100)+'% of selected recorded Zel':''));detail.append(line);}detail.append(word('small','Covers selected recorded recipes only; '+breakdown.missing.length+' unselected/missing. Owned DEMO balances are not checked or spent.'));report.append(detail);}
+
    if(data.missing.length)
      report.append(word('p','Missing/unselected recipes for #'+data.missing.join(', #')+
        '; totals cover SELECTED source recipes only.'));
@@ -170,7 +177,7 @@
    if(panel.open)render();
  });
  render();
- window.BFEvolutionMaterialPlannerV1400=Object.freeze({
+ window.BFEvolutionMaterialPlannerV1400=Object.freeze({costBreakdown,
    get selected(){return chosen();},
    get plan(){return summary();},
    sourceOptions:id=>sourceOptions(id).map(r=>({
