@@ -138,6 +138,11 @@
        ' · DEF '+(st.def??'?')+' · REC '+(st.rec??'?')));
    }
    card.append(info);squadCard.append(card);
+   let hitSource=null;
+   try{hitSource=window.BFOriginalHitSequenceV700?.describe?.(row.formId);}catch(_){}
+   if(hitSource){squadCard.append(para('NORMAL-HIT SOURCE · '+hitSource.hitCount+' reference hits · frames '+
+     hitSource.firstSourceFrame+'–'+hitSource.lastSourceFrame+' · weight total '+hitSource.sourceWeightTotal+
+     ' · frame timing and damage splitting remain DEMO.'));}
    if(!row.original){
      skills.append(para('Archived 2022 skill and lore records unavailable for this form.'));
      return {formId:row.formId,available:false,skillNames:[]};
