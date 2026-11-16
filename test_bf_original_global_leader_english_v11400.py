@@ -57,6 +57,18 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==before
  p.add_script_tag(path=str(A/'bf11400_original_global_leader_english.js'))
  assert p.locator('#bf11400-original-leader-english').count()==1
+ compared=p.evaluate(api+'.compareUnits(10011,10041)')
+ assert compared['sourceYear']==2022 and compared['sameSourceSkill'] is False and compared['liveEffectsCompared'] is False,compared
+ for row in (compared['first'],compared['second']):
+  oracle=next(r for r in records if r['leaderSkillId']==row['lsId'])
+  assert row['name']==oracle['originalEnglishName'] and row['description']==oracle['originalEnglishDescription']
+ for args in ([10011,'10041'],[999999,10041],[None,10041]): assert p.evaluate('([a,b])=>BFGlobalOriginalLeaderEnglishV11400.compareUnits(a,b)',args) is None
+ p.locator('#bf11400-compare').evaluate('(el)=>el.open=true');p.locator('#bf11400-compare-unit').select_option('10011')
+ assert 'Fire Spirit' in p.locator('#bf11400-comparison').text_content()
+ p.evaluate("document.querySelector('#bf11200-form').replaceChildren(new Option('Raw form','10011'))")
+ p.wait_for_function("document.querySelector('#bf11200-form option').textContent.includes('Fire Spirit')")
+ assert 'Fire Spirit' in p.locator('#bf11400-original-name').text_content()
+ assert p.evaluate('JSON.stringify(P)')==before
  assert not errors,errors
  b.close()
 print('PASS v114 exact original 2022 Global English 36 LS / 72 forms, Spark/BC/mitigation distinction, no save writes')
