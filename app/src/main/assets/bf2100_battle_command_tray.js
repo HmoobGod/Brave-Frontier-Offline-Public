@@ -60,6 +60,7 @@
  const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const clear=btn('CLEAR QUEUED ACTIONS','bf2100-clear',()=>clearQueuedActions());
+ const nextUnqueued=btn('SELECT NEXT UNQUEUED UNIT','bf2100-next-unqueued',()=>focusNextUnqueued());nextUnqueued.title='Select only; no action is queued or executed.';
  const orders=document.createElement('p');orders.id='bf2100-orders';
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
@@ -556,6 +557,13 @@
  }
  // Player-facing, read-only preview. The native Execute button remains the
  // only way to commit commands; this never queues, clears, saves or advances.
+ function nextUnqueuedSlot(){try{
+   if((window.BF_homeNav&&window.BF_homeNav.current!=='quest')||!ready()||S.over!==false||S.busy!==false||S.auto!==false||!Number.isSafeInteger(S.selected)||S.selected<0||S.selected>=6||!Array.isArray(S.party)||S.party.length!==6)return null;
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return null;
+   const buttons=[...slots.children];if(buttons.length!==6||buttons.some(b=>b.tagName!=='BUTTON')||active().some(p=>!Number.isSafeInteger(p.id)||p.id<0||p.id>=6||S.party[p.id]!==p||S.party.filter(x=>x===p).length!==1))return null;
+   for(let offset=1;offset<=6;offset++){const id=(S.selected+offset)%6,unit=S.party[id];if(unit?.active===true&&Number.isFinite(unit.hp)&&unit.hp>0&&!unit.action&&!buttons[id].disabled)return id;}return null;
+ }catch(_){return null;}}
+ function focusNextUnqueued(){const target=nextUnqueuedSlot();if(target===null)return false;const battle=S,button=slots.children[target];button.click();if(S!==battle||S.selected!==target)return false;slots.children[target]?.focus();return true;}
  function queuedTurnPreview(){
    if(!Array.isArray(S.party))return 'Queued turn preview unavailable';
    const squad=active();
@@ -573,7 +581,7 @@
    }).join(' · ');
  }
  function refresh(){
-   orders.textContent=queuedTurnPreview();
+   orders.textContent=queuedTurnPreview();nextUnqueued.disabled=nextUnqueuedSlot()===null;
    const st=snapshot();
    // Read only the CURRENT living native DEMO target. A stale, malformed,
    // KO or ambiguous selection must not masquerade as an actionable focus.
@@ -635,5 +643,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions,focusNextUnqueued,nextUnqueuedSlot});
 })();
