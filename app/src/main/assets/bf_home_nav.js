@@ -120,7 +120,14 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   function navigate(event) {
     const button = event.target.closest('[data-bf-goto]');
-    if (button) go(button.dataset.bfGoto);
+    if (!button) return;
+    const previous=current;
+    if (go(button.dataset.bfGoto)!==true || previous===current) return;
+    // Explicit navigation must not leave keyboard focus inside the page
+    // just hidden. Programmatic go() callers keep their own focus handling.
+    const target=current==='home'?home.querySelector('.bf-scene-title'):heading;
+    if(target){target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}
+
   }
   home.addEventListener('click',navigate);
   nav.addEventListener('click',navigate);
