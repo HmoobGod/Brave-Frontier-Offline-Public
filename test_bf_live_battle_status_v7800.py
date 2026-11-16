@@ -69,6 +69,10 @@ with sync_playwright() as pw:
  assert health=={'nan':False,'maxZero':False,'overheal':False,'unchangedSave':True},health
  ally=state['units'][0]
  assert ally['codes']==[1,2,3,4,5,6]
+ totals=p.evaluate('BFGlobalLiveBattleStatusV7800.statusTotals()')
+ assert totals=={'affected':1,'actionBlocked':1,'bbBlocked':1,'immune':0,'regenerating':0,'readOnly':True},totals
+ assert 'Cannot act 1' in p.locator('#bf7800-totals').text_content()
+
  assert ally['actionBlocked'] and ally['bbBlocked']
  p.locator('#bf7800-status summary').click()
  for width in (320,390,540):
@@ -93,6 +97,10 @@ with sync_playwright() as pw:
  assert state['visible'] and len(state['units'])>=4
  assert all(u['immune'] and u['regeneration'] for u in state['units'])
  assert all(u['immunityTurns']==3 and u['regenerationTurns']==3 for u in state['units'])
+ totals=p.evaluate('BFGlobalLiveBattleStatusV7800.statusTotals()')
+ assert totals['immune']==len(state['units']) and totals['regenerating']==len(state['units']),totals
+ assert totals['actionBlocked']==totals['bbBlocked']==0,totals
+
  assert p.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(0,1)') is False
  p.evaluate('S.round++')
  state=p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')
