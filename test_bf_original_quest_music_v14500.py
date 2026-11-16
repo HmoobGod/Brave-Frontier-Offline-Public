@@ -51,7 +51,7 @@ with sync_playwright() as pw:
   HTMLMediaElement.prototype.play=()=>Promise.resolve();
   window.__playCalls=0;window.__pauseCalls=0;
   window.Audio=class {
-   constructor(){this.src='';this.loop=false;this.preload='';this.volume=1}
+   constructor(){window.__previewAudio=this;this.duration=NaN;this.currentTime=0;this.src='';this.loop=false;this.preload='';this.volume=1}
    pause(){window.__pauseCalls++}
    removeAttribute(k){if(k==='src')this.src=''}
    getAttribute(k){return k==='src'&&this.src?this.src:null}
@@ -69,6 +69,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFOriginalGlobalMusicV14500.source.originalFiles')==18
  assert page.evaluate('BFOriginalGlobalMusicV14500.source.saveMutation') is False
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
+ assert page.evaluate('BFOriginalGlobalMusicV14500.seek(0)') is False
  assert page.evaluate('window.__playCalls')==0
  assert page.locator('#bf145-original-music button').count()==3
  assert page.evaluate('BFOriginalGlobalMusicV14500.lookup(1).map')=='bf010_map_grass.mp3'
@@ -79,6 +80,14 @@ with sync_playwright() as pw:
  assert not page.locator('#bf145-original-music button').nth(1).is_disabled()
  page.locator('#bf145-original-music button').nth(0).click()
  assert page.evaluate('window.__playCalls')==1
+ page.evaluate('__previewAudio.duration=125.4;__previewAudio.currentTime=7;BFOriginalGlobalMusicV14500.refresh()')
+ assert page.evaluate('BFOriginalGlobalMusicV14500.playbackPosition().seconds')==7
+ assert page.locator('#bf145-position').is_enabled()
+ assert page.evaluate('BFOriginalGlobalMusicV14500.seek(120)') is True
+ assert page.evaluate('__previewAudio.currentTime')==120
+ for invalid in (-1,126,1.5,'10',None): assert page.evaluate('(v)=>BFOriginalGlobalMusicV14500.seek(v)',invalid) is False
+ assert page.evaluate('__playCalls')==1 # seeking never calls play
+
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.src')=='content/sound/bf010_map_grass.mp3'
  # Legacy optional controls receive the same real native callback expression.
  native_js=json.loads(re.search(r'UI_BACKGROUND_JS\s*=\s*("[^\n]+");',java)[1])
@@ -86,6 +95,7 @@ with sync_playwright() as pw:
  pauses=page.evaluate('__pauseCalls')
  page.evaluate(native_js)
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
+ assert page.evaluate('BFOriginalGlobalMusicV14500.seek(0)') is False
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.src') is None
  assert page.evaluate('__pauseCalls')>pauses
  page.evaluate("document.dispatchEvent(new Event('visibilitychange'))")
@@ -98,6 +108,7 @@ with sync_playwright() as pw:
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.src')=='content/sound/bf006_btl_boss.mp3'
  page.locator('#bf145-original-music button').nth(2).click()
  assert page.evaluate('BFOriginalGlobalMusicV14500.state.stopped') is True
+ assert page.evaluate('BFOriginalGlobalMusicV14500.seek(0)') is False
  # Change selected mission in browser-only test (no mutation of P save).
  page.evaluate('QUEST=QUEST_BY_ID.get(20);BFOriginalGlobalMusicV14500.refresh()')
  assert page.evaluate('BFOriginalGlobalMusicV14500.lookup(20).map')=='bf011_map_firecave.mp3'
