@@ -54,6 +54,16 @@ with sync_playwright() as pw:
   saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  party=page.evaluate('BFArchiveDraftV800.selected')
  depth=page.evaluate('BFGlobalDraftEvolutionV1600.history.length')
+ source_preview=page.evaluate('BFGlobalEvolutionABV1900.plannedSourceStats()')
+ assert source_preview['sourceYear']==2022 and source_preview['level']==1 and source_preview['liveBattlePower'] is False,source_preview
+ for side,ids in [('before',[10011,10021]),('after',[10013,10023])]:
+  oracle=page.evaluate("ids=>ids.map(id=>{const r=BFGlobalUnitArchive.find(id);return {unitId:id,hp:r.unitBaseHp,atk:r.unitBaseAtk,def:r.unitBaseDef,rec:r.unitBaseRec}})",ids)
+  assert source_preview[side]==oracle
+  assert source_preview[side+'Totals']=={key:sum(x[key] for x in oracle) for key in ('hp','atk','def','rec')}
+ assert before==page.evaluate("()=>({p:JSON.stringify(P),s:JSON.stringify(S),saved:localStorage.getItem('bf_global_offline_demo_v7')})")
+ assert page.evaluate('BFTacticalRoundsV300.snapshot') is None
+ page.evaluate('BFGlobalEvolutionABV1900.refresh()')
+ assert 'Not live battle power' in page.locator('#bf1900-source-stat-comparison').text_content()
  result=page.evaluate('BFGlobalEvolutionABV1900.run(1)')
  assert result is not None
  assert result['originalYear']==2022 and result['historicalEnemyYear']==2014
