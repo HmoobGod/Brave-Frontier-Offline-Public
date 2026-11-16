@@ -66,12 +66,22 @@
      nativeFullDamageFormula:false,progressUnchanged:true
    });
  }
+ function healthSummary(kind){
+   if(!['allies','foes'].includes(kind))return null;
+   const state=snapshot(),units=state[kind],invalid=kind==='allies'?state.invalidAllies:state.invalidFoes;
+   if(invalid||!Array.isArray(kind==='allies'?S.party:S.enemies))return null;
+   const hp=units.reduce((n,u)=>n+u.hp,0),maxHp=units.reduce((n,u)=>n+u.maxHp,0);
+   if(!Number.isFinite(hp)||!Number.isFinite(maxHp))return null;
+   return freeze({members:units.length,living:units.filter(u=>u.hp>0).length,hp,maxHp,
+     bbReady:kind==='allies'?units.filter(u=>u.hp>0&&u.bb>=100).length:null,observerOnly:true});
+ }
  const panel=document.createElement('details');panel.id='bf10300-details';
  panel.style.cssText='margin:10px 2px;padding:10px;border:1px solid #a6b4cc;'+
    'border-radius:7px;background:#18293c;color:#e7effa;font:12px/1.5 system-ui,sans-serif';
  const title=document.createElement('summary');title.textContent='QoL · LIVE BATTLE DETAILS';
  title.style.cssText='cursor:pointer;min-height:44px;font-weight:800';
  const header=document.createElement('p');header.id='bf10300-header';
+ const aggregate=document.createElement('p');aggregate.id='bf10300-health-summary';
  const ally=document.createElement('div');ally.id='bf10300-allies';
  const enemy=document.createElement('div');enemy.id='bf10300-enemies';
  const note=document.createElement('small');
@@ -79,7 +89,7 @@
    'are displayed without changing combat, original units, rewards or saves. '+
    'Source wave count checks use pinned repository 2022 fixtures only; '+
    'original enemy formations, native AI and drops are not verified.';
- panel.append(title,header,ally,enemy,note);battle.after(panel);
+ panel.append(title,header,aggregate,ally,enemy,note);battle.after(panel);
  function group(host,label,units,invalid){
    host.replaceChildren();
    const h=document.createElement('strong');h.textContent=label+
@@ -115,6 +125,7 @@
      ' · Turn '+s.round+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
      ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
+   aggregate.textContent=['allies','foes'].map(kind=>{const row=healthSummary(kind);return kind.toUpperCase()+': '+(row?row.living+'/'+row.members+' living · '+row.hp+'/'+row.maxHp+' DEMO HP'+(row.bbReady===null?'':' · '+row.bbReady+' BB ready'):'HP SUMMARY UNAVAILABLE');}).join(' · ');
    group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
    group(enemy,'ENEMIES · HP',s.foes,s.invalidFoes);
    return s;
@@ -125,5 +136,5 @@
  },800);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  refresh();
- window.BFGlobalQoLBattleDetailsV10300=freeze({snapshot,refresh});
+ window.BFGlobalQoLBattleDetailsV10300=freeze({snapshot,refresh,healthSummary});
 })();
