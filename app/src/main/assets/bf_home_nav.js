@@ -1802,3 +1802,36 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
 })();
+
+/* Read-only DEMO training spend preview. No training commands are invoked. */
+(()=>{'use strict';
+ if(window.BFTrainingQuoteB100)return;
+ const host=document.querySelector('.training-panel .training-toolbar');if(!host)return;
+ const panel=document.createElement('details');panel.id='bf-training-quote';
+ const title=document.createElement('summary');title.textContent='PREVIEW DEMO TRAINING COST & EXP';title.style.minHeight='44px';
+ const unit=document.createElement('select');unit.id='bf-training-quote-unit';unit.setAttribute('aria-label','Owned unit for read-only training quote');unit.style.cssText='width:100%;min-height:44px';
+ const amount=document.createElement('select');amount.id='bf-training-quote-count';amount.setAttribute('aria-label','Preview training shard count');amount.style.cssText='width:100%;min-height:44px';
+ for(const [value,label] of [[1,'1 Shard · +10 DEMO EXP'],[5,'5 Shards · +50 DEMO EXP']]){const o=document.createElement('option');o.value=String(value);o.textContent=label;amount.append(o);}
+ const text=document.createElement('p');text.id='bf-training-quote-text';text.setAttribute('role','status');
+ panel.append(title,unit,amount,text);host.after(panel);
+ function quote(baseId,count){
+   try{
+     const valid=n=>Number.isSafeInteger(n)&&n>=0;
+     if(P.version!==7||!Number.isSafeInteger(baseId)||![1,5].includes(count)||!Array.isArray(P.roster)||new Set(P.roster).size!==P.roster.length||!P.roster.includes(baseId)||!effectiveUnit(baseId))return null;
+     const exp=P.unitExp?.[baseId];if(![exp,P.trainingShards,P.zel,P.trainingSpent].every(valid)||exp>1000000000-count*10||P.trainingSpent>100000-count)return null;
+     const level=demoLevel(exp);if(!Number.isSafeInteger(level)||level<1)return null;
+     const cost=150*count,enough=P.trainingShards>=count&&P.zel>=cost;
+     return Object.freeze({baseId,count,cost,expBefore:exp,expAfter:exp+10*count,levelBefore:level,levelAfter:demoLevel(exp+10*count),enoughResources:enough,levelCapped:level>=99,shardsAfter:enough?P.trainingShards-count:null,zelAfter:enough?P.zel-cost:null,inspectionOnly:true});
+   }catch(_){return null;}
+ }
+ function refresh(){
+   const prior=unit.value;unit.replaceChildren();
+   try{if(P.version===7&&Array.isArray(P.roster))for(const id of new Set(P.roster)){if(!Number.isSafeInteger(id)||id<=0)continue;const form=effectiveUnit(id);if(!form)continue;const o=document.createElement('option');o.value=String(id);o.textContent=String(form.name||'Unit')+' · #'+id;unit.append(o);}}catch(_){}
+   if([...unit.options].some(o=>o.value===prior))unit.value=prior;
+   const q=quote(Number(unit.value),Number(amount.value));
+   text.textContent=q?'PREVIEW ONLY · '+q.count+' Shard(s) + '+q.cost+' Zel · EXP '+q.expBefore+' → '+q.expAfter+' · DEMO level '+q.levelBefore+' → '+q.levelAfter+' · '+(q.levelCapped?'Level99 cap; training unavailable':!q.enoughResources?'Insufficient resources':'Would leave '+q.shardsAfter+' Shards / '+q.zelAfter+' Zel')+'. No resources spent; final training restrictions still apply.':'Training quote UNAVAILABLE: owned EXP/resources could not be verified.';
+   return q;
+ }
+ unit.addEventListener('change',refresh);amount.addEventListener('change',refresh);panel.addEventListener('toggle',refresh);window.addEventListener('bf-route-change',refresh);
+ window.BFTrainingQuoteB100=Object.freeze({quote,refresh});refresh();
+})();
