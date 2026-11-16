@@ -37,7 +37,7 @@ with sync_playwright() as pw:
    window.originalSupport=id=>id===20011?{kind:'heal_all'}:
      id===30011?{kind:'atk_buff_all',pct:30}:null;
    window.BF041SmartAuto={
-     enabled:()=>document.getElementById('bf041-smart-auto').checked,
+     enabled:()=>{if(window.__provider105==='throw')throw Error('fixture');if(window.__provider105==='null')return null;return document.getElementById('bf041-smart-auto').checked},
      kindFor:p=>p.bb>=100?'burst':'attack'
    };
    window.BF042AutoCoordination={
@@ -49,6 +49,14 @@ with sync_playwright() as pw:
  saved=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
  p.add_script_tag(path=str(A/'bf10500_qol_advanced_smart_auto.js'))
  api='BFGlobalQoLAdvancedAutoV10500'
+ # Inspection is pure even when the optional enabled provider is unknown.
+ inspection=p.evaluate("""()=>{const api=BFGlobalQoLAdvancedAutoV10500;
+ const before=JSON.stringify({P,S,prefs:localStorage.getItem('bf_global_offline_qol_advanced_auto_v105'),save:localStorage.getItem('bf_global_offline_demo_v7')});
+ const healthy=api.presentationSummary(),out=[];
+ for(const value of ['throw','null']){window.__provider105=value;const s=api.presentationSummary();api.refresh();out.push(s.smartEnabled===null&&document.querySelector('#bf10500-status').textContent.includes('UNAVAILABLE'));}
+ delete window.__provider105;api.refresh();return {healthy,out,frozen:Object.isFrozen(healthy),unchanged:before===JSON.stringify({P,S,prefs:localStorage.getItem('bf_global_offline_qol_advanced_auto_v105'),save:localStorage.getItem('bf_global_offline_demo_v7')})};}""")
+ assert inspection['healthy']=={'configuredOn':False,'smartEnabled':True,'playerAuto':True,'healPercent':60,'guardPercent':0,'target':'percent','offensiveBB':'normal','healBeforeGuard':False,'inspectionOnly':True},inspection
+ assert inspection['out']==[True,True] and inspection['frozen'] and inspection['unchanged'],inspection
  assert p.evaluate(api+'.get().on') is False
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[0])')=='burst'
  foes=[{'hp':70,'maxHp':1000,'slot':0},{'hp':20,'maxHp':100,'slot':1}]
@@ -56,6 +64,9 @@ with sync_playwright() as pw:
  settings={'on':True,'heal':35,'target':'absolute','burst':'conserve'}
  assert p.evaluate("""opts=>BFGlobalQoLAdvancedAutoV10500.set(opts)""",settings) is True
  assert p.evaluate(api+'.active()') is True
+ assert p.evaluate(api+'.presentationSummary().target')=='absolute'
+ assert 'Heal ≤35%' in p.locator('#bf10500-status').text_content()
+ assert 'Offensive BB conserve' in p.locator('#bf10500-status').text_content()
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[0])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[1])')=='attack'
  assert p.evaluate('BF041SmartAuto.kindFor(__party105[2])')=='burst'

@@ -356,12 +356,27 @@
    'requires a live legal player target; if it vanishes, Auto turns OFF instead of choosing another foe. Optional Guard applies '+
    'only to active player Auto turns. Optional heal-before-Guard is off by default and requires a verified heal-all skill, full BB gauge and known unblocked status. Final-wave BB strategy uses only archived quest wave counts, not restored enemy formations; no enemy AI, damage, rewards or v7 save changes.';
  panel.append(title,intro,settings,status,caution);host.after(panel);
+ // This observer never invokes an action/target planner or changes Auto.
+ function presentationSummary(){
+   let smartEnabled=null;
+   try{const value=smart.enabled();if(typeof value==='boolean')smartEnabled=value;}catch(_){}
+   return freeze({configuredOn:config.on,smartEnabled,
+     playerAuto:typeof S!=='undefined'&&typeof S.auto==='boolean'?S.auto:null,
+     healPercent:config.heal,guardPercent:config.guard,target:config.target,
+     offensiveBB:config.burst,healBeforeGuard:config.healBeforeGuard,
+     inspectionOnly:true});
+ }
  function refresh(){
    toggle.checked=config.on;heal.value=String(config.heal);
    target.value=config.target;burst.value=config.burst;guard.value=String(config.guard);
    healFirst.checked=config.healBeforeGuard;
    status.textContent='Advanced rules '+(config.on?'ON':'OFF')+
-     (smart.enabled()?' · Smart Auto ready':' · Existing Smart Auto is disabled');
+     (presentationSummary().smartEnabled===null?' · Smart Auto UNAVAILABLE':
+      presentationSummary().smartEnabled?' · Smart Auto ready':' · Existing Smart Auto is disabled')+
+     ' · Player Auto '+(presentationSummary().playerAuto===null?'UNAVAILABLE':presentationSummary().playerAuto?'ON':'OFF')+
+     ' · Heal ≤'+config.heal+'% · Guard '+(config.guard?'≤'+config.guard+'%':'OFF')+
+     ' · Target '+config.target+' · Offensive BB '+config.burst+
+     ' · Heal before Guard '+(config.healBeforeGuard?'ON':'OFF');
    return get();
  }
  toggle.addEventListener('change',()=>set({...config,on:toggle.checked}));
@@ -373,7 +388,7 @@
  host.addEventListener('change',refresh);
  refresh();
  window.BFGlobalQoLAdvancedAutoV10500=freeze({
-   get,active,kindFor,chooseTarget,set,refresh,
+   get,active,kindFor,chooseTarget,set,refresh,presentationSummary,
    requiresSelectedTarget:()=>active()&&config.target==='selected',
    // Native Auto must not override a rejected optional advanced target with
    // the legacy lowest-absolute-HP fallback. Default targeting is unchanged.
