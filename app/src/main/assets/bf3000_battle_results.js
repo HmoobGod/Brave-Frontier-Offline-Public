@@ -45,6 +45,9 @@
  const retryAuto=make('bf3000-retry-auto',
    'RETRY DEFEAT + AUTO BATTLE',()=>retryDefeatAuto());
  const next=make('bf3000-next','NEXT STORY MISSION ›',()=>advance());
+ // One explicit post-victory route to the EXISTING DEMO Training screen.
+ // No direct leveling, shard debit, reward duplication, save or Auto action.
+ const train=make('bf3000-train','TRAIN UNITS WITH EARNED SHARDS ›',()=>openTraining());
  const scene=make('bf3000-scene','READ ORIGINAL CLEAR SCENE ›',()=>readScene());
  const retrySave=make('bf3000-retry-save','RETRY SAVE',()=>retrySaveResult());
  const backup=make('bf3000-backup','DOWNLOAD UNSAVED BACKUP',()=>downloadBackup());
@@ -108,10 +111,46 @@
      level:P.level,stored
    });
  }
+ // Route only after a committed original-scalar DEMO victory. The player
+ // chooses training actions separately through the native Units tab.
+ // Do not offer navigation during Auto/repeat, failed saves, or zero shards.
+ function canOpenTraining(s=snapshot()){
+   if(!s?.done||!s.victory||!s.archive||!s.stored||
+      S.busy||S.auto===true||S.mode!=='archive'||document.hidden||
+      P?.version!==7||!Number.isSafeInteger(P.trainingShards)||
+      P.trainingShards<1)return false;
+   try{
+     const nav=window.BF_homeNav;
+     const units=window.BFInnerScreens;
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     return !!nav&&nav.current==='quest'&&typeof nav.go==='function'&&
+       !!units&&typeof units.setTab==='function'&&
+       (!repeat||(typeof repeat.statusSnapshot==='function'&&
+                    repeat.statusSnapshot()?.active===false));
+   }catch(_){return false;}
+ }
+ function openTraining(){
+   if(!canOpenTraining())return false;
+   // The existing route and Units tab remain the sole source of truth.
+   try{
+     if(window.BF_homeNav.go('units')!==true)return false;
+     if(window.BFInnerScreens.setTab('training')!==true)return false;
+     const heading=document.getElementById('bf-unit-tab-label');
+     if(heading){
+       heading.tabIndex=-1;
+       heading.focus({preventScroll:true});
+       heading.scrollIntoView({block:'start',behavior:'instant'});
+     }
+     return true;
+   }catch(_){return false;}
+ }
  let rendered='';
  function refresh(){
    const s=snapshot();
    if(!s)return null;
+   // These eligibility gates include live route / Auto / repeat status, which
+   // can change without the result text/snapshot signature changing.
+   train.disabled=!canOpenTraining(s);
    const sig=JSON.stringify(s);
    if(sig===rendered)return s;
    rendered=sig;
@@ -301,5 +340,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh();},850);
  refresh();
- window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,retryDefeatAuto,canRetryDefeatAuto,replayVictoryAuto,canReplayVictoryAuto,advance,readScene,committedClearCount});
+ window.BFGlobalBattleResultsV3000=Object.freeze({snapshot,refresh,replayBattle,retryDefeatAuto,canRetryDefeatAuto,replayVictoryAuto,canReplayVictoryAuto,advance,readScene,committedClearCount,canOpenTraining,openTraining});
 })();
