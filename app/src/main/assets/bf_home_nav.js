@@ -233,6 +233,12 @@ function bfOfflineUnitPortraitV266(source, name) {
     const level=demoLevel(receipt.value);return Number.isSafeInteger(level)&&level>=1&&level<=99?level:null;
   }catch(_){return null;}}
   function refreshParty() {
+    // Replacing the cards must not discard a keyboard user's place or
+    // silently move them to a different unit. External focus stays untouched.
+    const focused=document.activeElement;
+    const focusWasReview=focused===partyReview;
+    const focusIndex=focused?.parentElement===party?[...party.children].indexOf(focused):-1;
+    const focusId=focusIndex>=0?focused.dataset.bfHomeUnitId:null;
     const stateValid=typeof P!=='undefined'&&P?.version===7&&Array.isArray(P.squad)&&P.squad.length<=6&&Array.isArray(P.roster)&&Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
     const members = stateValid ? P.squad.slice(0,6) : [];
 
@@ -325,6 +331,15 @@ function bfOfflineUnitPortraitV266(source, name) {
     partyReview.textContent = !stateValid ? 'Squad data unavailable · ownership could not be verified. Open Units to review.' : unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
       ' review · Open Units to inspect ownership.' : '';
+    if((focusId||focusWasReview)&&window.BF_homeNav?.current==='home'){
+      const replacement=party.children[focusIndex];
+      if(replacement?.tagName==='BUTTON'&&replacement.dataset.bfHomeUnitId===focusId)replacement.focus({preventScroll:true});
+      else {
+        const fallback=!partyReview.hidden?partyReview:home.querySelector('.bf-scene-title');
+        if(fallback){fallback.setAttribute('tabindex','-1');fallback.focus({preventScroll:true});}
+      }
+    }
+
   }
   // Home shows only source-validated campaign progress. No quest selection,
   // battle start, Auto toggle or canonical v7 save mutation occurs here.
