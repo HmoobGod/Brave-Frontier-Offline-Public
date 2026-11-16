@@ -18,9 +18,17 @@
  title.style.cssText='cursor:pointer;min-height:35px;font-weight:800';
  const text=document.createElement('p');text.id='bf9000-ledger-totals';
  const detail=document.createElement('ol');detail.id='bf9000-ledger-lines';
+ const filter=document.createElement('select');filter.id='bf9000-kind';filter.setAttribute('aria-label','Filter source crystal receipt kind');filter.style.minHeight='44px';
+ for(const [value,label] of [['all','All retained source receipts'],['normal','Normal attack receipts'],['bb','Brave Burst receipts']]){const option=document.createElement('option');option.value=value;option.textContent=label;filter.append(option);}
+ const previous=document.createElement('button');previous.type='button';previous.id='bf9000-prev';previous.textContent='PREVIOUS RECEIPTS';previous.style.minHeight='44px';
+ const next=document.createElement('button');next.type='button';next.id='bf9000-next';next.textContent='MORE RECEIPTS';next.style.minHeight='44px';
+ const position=document.createElement('p');position.id='bf9000-position';position.setAttribute('role','status');let page=0;
+ function viewSnapshot(){const rows=snapshot().recent.filter(x=>filter.value==='all'||x.kind===filter.value).slice().reverse(),pages=Math.max(1,Math.ceil(rows.length/8));page=Math.min(page,pages-1);return freeze({kind:filter.value,page:page+1,pages,total:rows.length,rows:freeze(rows.slice(page*8,page*8+8)),providerGrouped:true});}
+ function setKind(value){if(!['all','normal','bb'].includes(value))return false;filter.value=value;page=0;render();return true;}
+ filter.addEventListener('change',()=>{page=0;render();});previous.addEventListener('click',()=>{if(page>0)page--;render();});next.addEventListener('click',()=>{if(page+1<viewSnapshot().pages)page++;render();});
  const caution=document.createElement('small');caution.id='bf9000-ledger-caution';
  caution.textContent='Only observed DEMO combat events with 2022 original source-valid profiles. These are generated reference rolls, NOT collected BC/HC. No BB gauge charging, HP healing, native enemy resistance, recipient selection or overkill assumed.';
- panel.append(title,text,detail,caution);host.append(panel);
+ panel.append(title,text,filter,position,detail,previous,next,caution);host.append(panel);
  function validEvent(e,kind){
    if(!e||e.referenceOnly!==true||e.overkill!==false||
       !Number.isSafeInteger(e.unitId)||!Number.isSafeInteger(e.wave)||e.wave<1||
@@ -65,7 +73,8 @@
      ' HC · BB '+s.burstTargetEvents+' target events: '+t.burstBC+' BC / '+t.burstHC+
      ' HC · Total uncollected '+t.uncollectedBC+' BC / '+t.uncollectedHC+' HC';
    detail.replaceChildren();
-   for(const event of s.recent.slice(-8)){
+   const view=viewSnapshot();position.textContent='Page '+view.page+' / '+view.pages+' · '+view.total+' retained matching receipts · grouped by provider, not a chronological event stream';previous.disabled=view.page===1;next.disabled=view.page===view.pages;
+   for(const event of view.rows){
      const li=document.createElement('li');
      li.textContent='Wave '+event.wave+' · '+event.kind.toUpperCase()+' unit #'+
        event.unitId+': '+event.battleCrystals+' BC / '+event.heartCrystals+' HC';
@@ -76,6 +85,6 @@
  document.getElementById('reset')?.addEventListener('click',render);
  document.getElementById('mode')?.addEventListener('change',render);
  window.setInterval(()=>{if(!document.hidden)render()},700);
- window.BFGlobalLiveCrystalProvenanceV9000=freeze({snapshot,refresh:render,validEvent});
+ window.BFGlobalLiveCrystalProvenanceV9000=freeze({snapshot,refresh:render,validEvent,viewSnapshot,setKind});
  render();
 })();

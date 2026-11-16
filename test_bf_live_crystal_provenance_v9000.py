@@ -25,6 +25,8 @@ with sync_playwright() as pw:
               'bf8400_original_normal_crystal_checks.js','bf8500_original_all_bb_checks.js',
               'bf8800_live_normal_crystal_events.js','bf8900_live_simple_bb_crystals.js',
               'bf9000_live_crystal_provenance.js'):
+  if name=='bf9000_live_crystal_provenance.js':
+   p.evaluate("""()=>{const old=BFGlobalLiveNormalCrystalEventsV8800;window.BFGlobalLiveNormalCrystalEventsV8800={...old,snapshot:()=>{const row=old.snapshot();if(!window.__manyCrystalReceipts||!row.recent.length)return row;const event=row.recent[0],recent=Array.from({length:17},(_,i)=>({...event,wave:i+1}));return {...row,recent,observed:17,battleCrystals:event.battleCrystals*17,heartCrystals:event.heartCrystals*17};}}}""")
   p.add_script_tag(path=str(A/name))
  assert p.evaluate('P.version')==7
  api='BFGlobalLiveCrystalProvenanceV9000'
@@ -54,6 +56,26 @@ with sync_playwright() as pw:
  assert len(t['recent'])==2,t
  assert '11 BC / 8 HC' in p.locator('#bf9000-ledger-totals').text_content()
  assert p.evaluate("""()=>({P:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")==original
+ stable=p.evaluate('JSON.stringify({P,S,ledger:BFGlobalLiveCrystalProvenanceV9000.snapshot()})')
+ for kind in ('normal','bb','all'):
+  assert p.evaluate('(kind)=>BFGlobalLiveCrystalProvenanceV9000.setKind(kind)',kind) is True
+  view=p.evaluate('BFGlobalLiveCrystalProvenanceV9000.viewSnapshot()')
+  assert view['total']==(2 if kind=='all' else 1) and all(kind=='all' or row['kind']==kind for row in view['rows']),view
+  assert p.locator('#bf9000-prev').is_disabled() and p.locator('#bf9000-next').is_disabled()
+ assert p.evaluate('BFGlobalLiveCrystalProvenanceV9000.setKind("bad")') is False
+ assert p.evaluate('JSON.stringify({P,S,ledger:BFGlobalLiveCrystalProvenanceV9000.snapshot()})')==stable
+ p.evaluate('window.__manyCrystalReceipts=true;BFGlobalLiveCrystalProvenanceV9000.setKind("normal")')
+ assert p.evaluate('BFGlobalLiveCrystalProvenanceV9000.viewSnapshot().pages')==3
+ assert p.locator('#bf9000-ledger-lines li').count()==8
+ p.locator('#bf9000-crystal-provenance').evaluate("(el)=>{for(let node=el;node;node=node.parentElement)if(node.tagName==='DETAILS')node.open=true;}")
+ p.locator('#bf9000-next').click();p.locator('#bf9000-next').click()
+ assert p.evaluate('BFGlobalLiveCrystalProvenanceV9000.viewSnapshot().page')==3
+ assert p.locator('#bf9000-ledger-lines li').count()==1 and p.locator('#bf9000-next').is_disabled()
+ p.locator('#bf9000-prev').click()
+ assert p.evaluate('BFGlobalLiveCrystalProvenanceV9000.viewSnapshot().page')==2
+ assert p.locator('#bf9000-ledger-lines li').count()==8
+ p.evaluate('delete window.__manyCrystalReceipts;BFGlobalLiveCrystalProvenanceV9000.setKind("all")')
+ assert p.evaluate('JSON.stringify({P,S,ledger:BFGlobalLiveCrystalProvenanceV9000.snapshot()})')==stable
  p.evaluate('Math.random=window.__random90')
  p.locator('#reset').click()
  assert p.evaluate(api+'.snapshot().totals.uncollectedBC')==0
