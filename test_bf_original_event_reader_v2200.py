@@ -61,6 +61,18 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ page.evaluate("P.questClears[12]=1;P.questClears[10]=1;BFGlobalOriginalEventsV2200.read('dungeon',20)")
+ page.locator('#bf2200-next').click();page.locator('#bf2200-next').click()
+ last_page=page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')
+ page.evaluate("BFGlobalOriginalEventsV2200.read('clear',10);BFGlobalOriginalEventsV2200.read('dungeon',20)")
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1 # explicit reads still begin normally
+ passive=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ page.locator('#bf2200-resume-page').click()
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==last_page
+ page.evaluate('S.auto=true')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.restoreSessionPage()') is False
+ page.evaluate('S.auto=false')
+ assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')
