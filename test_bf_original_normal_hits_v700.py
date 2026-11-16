@@ -50,6 +50,14 @@ with sync_playwright() as pw:
    assert sum(p[1] for p in pairs)==130 and actual is None
   else:
    assert sum(p[1] for p in pairs)==100 and actual==pairs,rec['unitId']
+ for invalid in ('constructor','toString','__proto__','10011.0','1e4',' 10011 ',None,True,[10011]):
+  assert page.evaluate('(id)=>BFOriginalHitSequenceV700.get(id)',invalid) is None,invalid
+  assert page.evaluate('(id)=>BFOriginalHitSequenceV700.describe(id)',invalid) is None,invalid
+ meta=page.evaluate('BFOriginalHitSequenceV700.describe(10011)')
+ assert meta=={'unitId':10011,'hitCount':3,'firstSourceFrame':26,'lastSourceFrame':62,'sourceWeightTotal':100,'nativeTimingRestored':False,'damageChanged':False},meta
+ assert page.evaluate('Object.isFrozen(BFOriginalHitSequenceV700.describe(10011))')
+ assert page.evaluate('BFGlobalBattleDossierV400.showUnit(10011).formId')==10011
+ assert 'NORMAL-HIT SOURCE' in page.locator('#bf400-unit-card').text_content()
  page.evaluate('BFOriginalHitSequenceV700.get(10011)[0][1]=999')
  assert page.evaluate('BFOriginalHitSequenceV700.get(10011)[0][1]')==50
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
