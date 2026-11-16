@@ -69,6 +69,16 @@ with sync_playwright() as pw:
  assert health=={'nan':False,'maxZero':False,'overheal':False,'unchangedSave':True},health
  ally=state['units'][0]
  assert ally['codes']==[1,2,3,4,5,6]
+ identity=p.evaluate("""()=>{const party=S.party,before=JSON.stringify({P,S}),api=BFGlobalLiveBattleStatusV7800,out=[];
+ try{for(const invalid of [[party[1],party[0],...party.slice(2)],[party[0],party[0],...party.slice(2)],[{...party[0],id:5},...party.slice(1)]]){S.party=invalid;const x=api.refresh();out.push(x.identityUnavailable&&x.visible&&x.units.every(u=>u.slot!==0)&&document.querySelector('#bf7800-heading').textContent.includes('IDENTITY UNAVAILABLE'));}}
+ finally{S.party=party;api.refresh();}return {out,same:before===JSON.stringify({P,S})};}""")
+ assert identity=={'out':[True]*3,'same':True},identity
+ # Native ailment providers invalidate their own stale actor receipts during the fixture; restore the six deliberate test ailments.
+ for code in (1,2,3,4,5,6): p.evaluate(f'{registry}.inflict(0,{code})')
+ p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')
+ assert p.evaluate('BFGlobalOriginalAilmentStateV5700.codesFor(0)')==[1,2,3,4,5,6]
+
+
  assert ally['actionBlocked'] and ally['bbBlocked']
  p.locator('#bf7800-status summary').click()
  for width in (320,390,540):
