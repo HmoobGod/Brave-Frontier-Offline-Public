@@ -80,6 +80,20 @@ with sync_playwright() as pw:
          '(buttons)=>buttons.map(b=>b.getBoundingClientRect().height)')
      assert sizes and all(h>=44 for h in sizes),(width,sizes)
  page.set_viewport_size({'width':390,'height':844})
+ page.evaluate("document.querySelector('#mode').value='archive';reset();BFGlobalBattleCommandsV2100.refresh()")
+ pending=page.evaluate('BFGlobalBattleCommandsV2100.pendingOrders()')
+ assert len(pending)==6,pending
+ passive=page.evaluate("JSON.stringify({P,party:S.party,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ page.locator('[data-pending-slot="3"]').click()
+ assert page.evaluate('S.selected')==3
+ assert page.evaluate('S.party.every(u=>!u.action)')
+ assert page.evaluate("JSON.stringify({P,party:S.party,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(9999)') is False
+ page.evaluate("S.party[3].action={kind:'guard',target:S.target}")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(3)') is False
+ page.evaluate('S.party[3].action=null;S.auto=true')
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(2)') is False
+ page.evaluate('S.auto=false;BFGlobalBattleCommandsV2100.refresh()')
  assert not errors,errors
  print('PASS selected living DEMO target readout, fail-closed corruption, 44px target controls')
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -945,6 +959,20 @@ with sync_playwright() as pw:
  page.evaluate('reset()')
  assert page.evaluate('S.busy') is False
  assert page.evaluate('P.version')==7
+ page.evaluate("document.querySelector('#mode').value='archive';reset();BFGlobalBattleCommandsV2100.refresh()")
+ pending=page.evaluate('BFGlobalBattleCommandsV2100.pendingOrders()')
+ assert len(pending)==6,pending
+ passive=page.evaluate("JSON.stringify({P,party:S.party,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ page.locator('[data-pending-slot="3"]').click()
+ assert page.evaluate('S.selected')==3
+ assert page.evaluate('S.party.every(u=>!u.action)')
+ assert page.evaluate("JSON.stringify({P,party:S.party,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(9999)') is False
+ page.evaluate("S.party[3].action={kind:'guard',target:S.target}")
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(3)') is False
+ page.evaluate('S.party[3].action=null;S.auto=true')
+ assert page.evaluate('BFGlobalBattleCommandsV2100.selectPending(2)') is False
+ page.evaluate('S.auto=false;BFGlobalBattleCommandsV2100.refresh()')
  assert not errors,errors
  browser.close()
 print('PASS v21.00: native manual source healing BB, BB spread, Curse/Guard, corrupt foe rejection and v7 save isolation')
