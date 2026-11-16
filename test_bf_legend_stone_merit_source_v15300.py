@@ -94,6 +94,19 @@ with sync_playwright() as pw:
  assert p.locator('#bf15300-legend-stone-source').count()==1
  assert p.evaluate('Object.isFrozen('+api+'.source)') is True
  assert p.evaluate('Object.isFrozen('+api+'.offers)') is True
+ for width in (320,390,540):
+  p.set_viewport_size({'width':width,'height':844})
+  assert p.locator('#bf15300-quantity').bounding_box()['height']>=44
+  for quantity,total in ((1,4000),(3,12000),(99,396000)):
+   p.locator('#bf15300-quantity').fill(str(quantity))
+   q=p.evaluate('(n)=>BFGlobalOriginalLegendStoneExchangeV15300.quote(n)',quantity)
+   assert q['totalHistoricalMeritCost']==total and q['itemsAwarded']==0 and q['livePurchasable'] is False
+   assert format(total,',') in p.locator('#bf15300-estimate').text_content()
+ for value in ('0','-1','1.5','1e1','01','100',''):
+  p.locator('#bf15300-quantity').fill(value)
+  assert 'unavailable' in p.locator('#bf15300-estimate').text_content(),value
+ for value in (None,True,'1',0,-1,100,1.5):
+  assert p.evaluate('(n)=>BFGlobalOriginalLegendStoneExchangeV15300.quote(n)',value) is None,value
  after=p.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
        save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__writes()})""")
  assert before==after,(before,after)
