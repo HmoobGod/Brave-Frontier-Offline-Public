@@ -70,6 +70,13 @@ with sync_playwright() as pw:
   assert p.evaluate(api+".scaleIncoming(100,'"+other+"',S.party[1])")==100
   # No cumulative effect: only one reduction per incoming hit.
   assert p.evaluate(api+".scaleIncoming(100,'"+element+"',S.party[1])")==90
+ # The observer displays the latest eight real ledger returns, never simulates hits.
+ receipt=p.evaluate("""()=>{const api=BFGlobalOriginalElementResistV16600,before=JSON.stringify({P,S}),saved=localStorage.getItem('bf_global_offline_demo_v7');
+ const a=api.snapshot(),rows=[...document.querySelectorAll('#bf16600-hit-history li')].map(x=>x.textContent);api.refresh();
+ return {rows,hits:a.recent,unchanged:before===JSON.stringify({P,S})&&saved===localStorage.getItem('bf_global_offline_demo_v7')};}""")
+ assert receipt['unchanged'] and len(receipt['rows'])==len(receipt['hits'])==3,receipt
+ for text,hit in zip(receipt['rows'],receipt['hits']):
+  assert hit['element'] in text and f"{hit['original']} → {hit['result']}" in text and f"{hit['prevented']} prevented" in text,text
  # A cloned/shuffled player actor does not own its native target slot.
  # Never reduce incoming damage for ambiguous squad references.
  p.evaluate("""()=>{P.squad[0]=10041;document.getElementById('mode').value='archive';reset()}""")
@@ -90,6 +97,8 @@ with sync_playwright() as pw:
  assert ownership=={'cloned':100,'shuffled':100,'duplicated':100,
                     'playerSame':True,'saveSame':True},ownership
  p.evaluate("document.getElementById('mode').value='training';reset()")
+ p.evaluate(api+'.refresh()')
+ assert 'No qualifying hits' in p.locator('#bf16600-hit-history').text_content()
  assert p.evaluate(api+'.leader()') is None
  assert p.evaluate(api+".scaleIncoming(100,'Dark',S.party[1])")==100
  p.evaluate("document.getElementById('mode').value='archive';P.squad[0]=10011;reset()")
