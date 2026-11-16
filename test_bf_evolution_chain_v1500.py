@@ -117,6 +117,20 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Recipe route lookup must never change saved game'
+ passive=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ if fixtures['two']:
+  pair=fixtures['two'];a=pair['mid'];b=pair['to'];start=pair['from']
+  first=page.evaluate('([start,to])=>BFGlobalEvolutionChainV1500.findRoute(start,to)',[start,a]);second=page.evaluate('([start,to])=>BFGlobalEvolutionChainV1500.findRoute(start,to)',[start,b])
+  comparison=page.evaluate('([start,a,b])=>BFGlobalEvolutionChainV1500.compareRoutes(start,a,b)',[start,a,b])
+  assert comparison['zelDelta']==second['totals']['zel']-first['totals']['zel']
+  assert comparison['karmaDelta']==second['totals']['karma']-first['totals']['karma']
+  assert comparison['firstStages']==1 and comparison['secondStages']==2 and comparison['liveEvolutionChanged'] is False
+ assert page.evaluate('BFGlobalEvolutionChainV1500.compareRoutes(999999,10012,10013)') is None
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==passive
+ options=page.locator('#bf1500-compare-target option').count()
+ if options>1:
+  value=page.locator('#bf1500-compare-target option').nth(1).get_attribute('value');page.locator('#bf1500-compare-target').select_option(value)
+  assert 'Second minus selected source route' in page.locator('#bf1500-comparison').text_content()
  assert not errors,errors
  browser.close()
 print('PASS v15: strict source recipe BFS, 2022 cost/material totals, bounded routes and v7 safety')
