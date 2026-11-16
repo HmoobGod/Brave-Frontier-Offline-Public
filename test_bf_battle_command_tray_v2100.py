@@ -15,9 +15,9 @@ with sync_playwright() as pw:
   args=['--no-sandbox','--disable-dev-shm-usage'])
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)+'\n'+str(e.stack)))
- page.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
-  getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
-  removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+ page.evaluate("""()=>{const db={};let writes=0;window.__bf2100Writes=()=>writes;Object.defineProperty(window,'localStorage',{configurable:true,value:{
+  getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+  removeItem:k=>{writes++;delete db[k]},key:i=>Object.keys(db)[i]??null,
   get length(){return Object.keys(db).length}}});
   window.alert=()=>{};window.confirm=()=>true;
   HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
@@ -136,6 +136,113 @@ with sync_playwright() as pw:
  assert page.locator('#bf2100-clear').is_disabled()
  assert page.locator('#bf2100-orders').text_content().count(': Not queued')==6
  assert page.evaluate('BFGlobalBattleCommandsV2100.clearQueuedActions()') is False
+ # Manual correction clears one selected order, preserving the other five.
+ assert page.evaluate('typeof BFGlobalBattleCommandsV2100.clearSelectedAction')=='function'
+ assert page.locator('#bf2100-clear-selected').is_disabled()
+ page.evaluate("""()=>{
+   window.__oneOriginal={item:window.BFGlobalItemTurnReservationsV4500,
+     repeat:window.BFGlobalQoLQuestRepeatV9800,
+     actions:S.party.map(p=>p.action),selected:S.selected,bb:S.party.map(p=>p.bb)};
+   window.BFGlobalItemTurnReservationsV4500={snapshot:()=>({reservations:[]})};
+   window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};
+   window.__oneSnapshot=()=>({player:JSON.stringify(P),state:JSON.stringify(S),
+     mission:QUEST.missionId,writes:__bf2100Writes(),
+     storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+       const k=localStorage.key(i);return [k,localStorage.getItem(k)]}))});
+ }""")
+ try:
+  for width in (320,390,540):
+   page.set_viewport_size({'width':width,'height':844})
+   for slot in range(6):
+    assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")')
+    page.evaluate('(slot)=>{S.party[slot].bb=100;update()}',slot)
+    page.locator('#slots > button').nth(slot).click()
+    page.locator(('#guard','#attack','#burst')[slot%3]).click()
+    page.locator('#slots > button').nth(slot).click()
+    page.evaluate("""()=>{
+      const a=BFGlobalBattleCommandsV2100; a.refresh();
+      window.__oneRefs=S.party.map(p=>p.action);window.__oneBefore=__oneSnapshot();
+      const expected=JSON.parse(__oneBefore.state);expected.party[S.selected].action=null;
+      window.__oneExpected=JSON.stringify(expected);
+    }""")
+    clear_one=page.locator('#bf2100-clear-selected')
+    assert clear_one.is_visible() and clear_one.is_enabled()
+    assert clear_one.evaluate('(el)=>el.getBoundingClientRect().height')>=44
+    clear_one.focus();clear_one.press('Enter' if slot%2==0 else 'Space')
+    proof=page.evaluate("""()=>{
+      const after=__oneSnapshot(),before=__oneBefore;
+      return {state:after.state===__oneExpected,
+        others:S.party.every((p,i)=>i===S.selected||p.action===__oneRefs[i]),
+        player:after.player===before.player,mission:after.mission===before.mission,
+        storage:JSON.stringify(after.storage)===JSON.stringify(before.storage),
+        writes:after.writes===before.writes,
+        empty:S.party[S.selected].action===null,
+        again:BFGlobalBattleCommandsV2100.clearSelectedAction()===false};
+    }""")
+    assert all(proof.values()),(width,slot,proof)
+    assert clear_one.is_disabled()
+    assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+    page.evaluate('()=>{S.party[S.selected].action=__oneRefs[S.selected];update()}')
+  refused=page.evaluate("""()=>{
+    const api=BFGlobalBattleCommandsV2100,baseParty=S.party;
+    S.selected=0;update();const reports=[];
+    const probe=(name,change,restore)=>{
+      try{change();const before=JSON.stringify(__oneSnapshot());api.refresh();
+        const disabled=document.getElementById('bf2100-clear-selected').disabled;
+        const rejected=api.clearSelectedAction()===false;
+        reports.push({name,ok:disabled&&rejected&&JSON.stringify(__oneSnapshot())===before});
+      }finally{restore();}
+    };
+    for(const key of ['busy','auto','over'])for(const value of [true,null,'false']){
+      const old=S[key];probe(key+String(value),()=>S[key]=value,()=>S[key]=old);
+    }
+    const goodRepeat=window.BFGlobalQoLQuestRepeatV9800;
+    for(const value of [undefined,{active:true},null,{active:'false'}]){
+      probe('Repeat '+String(value),()=>window.BFGlobalQoLQuestRepeatV9800=
+        value===undefined?undefined:{statusSnapshot:()=>value},
+        ()=>window.BFGlobalQoLQuestRepeatV9800=goodRepeat);
+    }
+    probe('Repeat throws',()=>window.BFGlobalQoLQuestRepeatV9800={
+      statusSnapshot:()=>{throw Error('unavailable')}},
+      ()=>window.BFGlobalQoLQuestRepeatV9800=goodRepeat);
+    const goodItems=window.BFGlobalItemTurnReservationsV4500;
+    for(const value of [undefined,{reservations:null},{reservations:[{slot:5}]}]){
+      probe('item '+String(value),()=>window.BFGlobalItemTurnReservationsV4500=
+        value===undefined?undefined:{snapshot:()=>value},
+        ()=>window.BFGlobalItemTurnReservationsV4500=goodItems);
+    }
+    probe('items throw',()=>window.BFGlobalItemTurnReservationsV4500={
+      snapshot:()=>{throw Error('unavailable')}},
+      ()=>window.BFGlobalItemTurnReservationsV4500=goodItems);
+    probe('Home route',()=>BF_homeNav.go('home'),()=>BF_homeNav.go('quest'));
+    const version=P.version;probe('wrong save version',()=>P.version=6,()=>P.version=version);
+    for(const value of [-1,6,'0',null]){
+      probe('selected '+String(value),()=>S.selected=value,()=>S.selected=0);
+    }
+    probe('swapped actors',()=>S.party=[baseParty[1],baseParty[0],...baseParty.slice(2)],
+      ()=>S.party=baseParty);
+    probe('unrecognised action',()=>baseParty[0].action={kind:'item'},
+      ()=>baseParty[0].action=__oneRefs[0]);
+    const nativeUpdate=update,original=baseParty[0].action;
+    try{
+      update=()=>{throw Error('renderer unavailable')};
+      const before=JSON.stringify(__oneSnapshot());
+      reports.push({name:'renderer rollback',ok:api.clearSelectedAction()===false&&
+        baseParty[0].action===original&&JSON.stringify(__oneSnapshot())===before});
+    }finally{update=nativeUpdate;update();api.refresh();}
+    return reports;
+  }""")
+  assert len(refused)>=25 and all(r['ok'] for r in refused),refused
+ finally:
+  page.evaluate("""()=>{
+    const old=__oneOriginal;
+    window.BFGlobalItemTurnReservationsV4500=old.item;
+    window.BFGlobalQoLQuestRepeatV9800=old.repeat;
+    S.selected=old.selected;
+    S.party.forEach((p,i)=>{p.action=old.actions[i];p.bb=old.bb[i]});
+    update();BFGlobalBattleCommandsV2100.refresh();
+  }""")
+ print('PASS selected-order correction: all six slots, three widths, native Attack/Guard/BB, strict blockers and renderer rollback')
  # Restore ordinary Guard queue for subsequent pre-existing native tests.
  assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")') is True
  # Cancel must refuse item reservations and bad actor identities while

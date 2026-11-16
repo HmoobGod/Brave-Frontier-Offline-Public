@@ -60,10 +60,12 @@
  const protectCautious=btn('PROTECT CAUTIOUS · 60% HP','bf2100-protect-cautious',()=>protectWounded(0.60));
  const fire=btn('EXECUTE QUEUED TURN','bf2100-execute',()=>executeTurn());
  const clear=btn('CLEAR QUEUED ACTIONS','bf2100-clear',()=>clearQueuedActions());
+ const clearSelected=btn('CLEAR SELECTED ORDER','bf2100-clear-selected',()=>clearSelectedAction());
  const orders=document.createElement('p');orders.id='bf2100-orders';
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
+ foot.textContent+=' Clear Selected Order removes only the selected unit\'s unexecuted Attack, Guard or BB. Other orders stay queued. Unavailable during Auto, Repeat or any reserved paid item turn.';
  panel.append(title,status,focus,targets,actions,orders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -554,6 +556,36 @@
      return false;
    }
  }
+ // Explicit manual correction of one native order, never an item turn.
+ // Refresh only reads eligibility; cancellation happens on player activation.
+ function selectedCancellableActor(){
+   if(P.version!==7||window.BF_homeNav?.current!=='quest'||
+      S.busy!==false||S.auto!==false||S.over!==false||
+      !Number.isSafeInteger(S.selected)||S.selected<0||S.selected>=6)return null;
+   try{
+     if(window.BFGlobalQoLQuestRepeatV9800?.statusSnapshot?.()?.active!==false)
+       return null;
+     // Reuse manual-cancel checks for identity, native buttons, recognised
+     // queued kinds and a verified empty paid-item reservation ledger.
+     const queued=cancellableQueuedActors();
+     return queued?.find(p=>p.id===S.selected)||null;
+   }catch(_){return null;}
+ }
+ function clearSelectedAction(){
+   const actor=selectedCancellableActor();
+   if(!actor)return false;
+   const original=actor.action;
+   try{
+     actor.action=null;
+     update();signature='';refresh();
+     return actor.action===null;
+   }catch(_){
+     actor.action=original;
+     try{update()}catch(_){}
+     signature='';try{refresh()}catch(_){}
+     return false;
+   }
+ }
  // Player-facing, read-only preview. The native Execute button remains the
  // only way to commit commands; this never queues, clears, saves or advances.
  function queuedTurnPreview(){
@@ -596,6 +628,7 @@
    if(key===signature){
      fire.disabled=!st.canExecute||!queuedAttacksSafe();
      clear.disabled=!cancellableQueuedActors();
+     clearSelected.disabled=!selectedCancellableActor();
      return st;
    }
    signature=key;
@@ -611,6 +644,7 @@
    // Recheck every refresh: queued targets/BB profiles can change mid-turn.
    fire.disabled=!st.canExecute||!queuedAttacksSafe();
    clear.disabled=!cancellableQueuedActors();
+   clearSelected.disabled=!selectedCancellableActor();
    const group=document.createDocumentFragment();
    for(const e of st.foes){
      const b=document.createElement('button');b.type='button';
@@ -635,5 +669,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions,clearSelectedAction});
 })();

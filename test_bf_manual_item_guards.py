@@ -49,6 +49,24 @@ with sync_playwright() as pw:
     assert page.evaluate('BFGlobalSourceFullReviveV4700.useFullRevive(1,2)')
     reservations = page.evaluate('BFGlobalItemTurnReservationsV4500.snapshot().reservations')
     stocks = page.evaluate('[BFGlobalDemoPotionV4200.snapshot().remaining,BFGlobalSourceFullReviveV4700.snapshot().remaining]')
+    # A verified idle Repeat owner must still not authorise clearing a real paid item turn.
+    protected_order = page.evaluate("""() => {
+        const api=BFGlobalBattleCommandsV2100,oldRepeat=window.BFGlobalQoLQuestRepeatV9800;
+        const selected=S.selected;
+        try {
+            window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};
+            S.selected=0;update();api.refresh();
+            const state=JSON.stringify(S),ledger=JSON.stringify(BFGlobalItemTurnReservationsV4500.snapshot());
+            return {disabled:document.getElementById('bf2100-clear-selected').disabled,
+                rejected:api.clearSelectedAction()===false,
+                state:JSON.stringify(S)===state,
+                reservations:JSON.stringify(BFGlobalItemTurnReservationsV4500.snapshot())===ledger};
+        } finally {
+            S.selected=selected;window.BFGlobalQoLQuestRepeatV9800=oldRepeat;
+            update();api.refresh();
+        }
+    }""")
+    assert all(protected_order.values()),protected_order
     for slot in (0,1,2):
         for command in ('attack','burst'):
             page.locator('#slots > button').nth(slot).click()
