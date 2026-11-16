@@ -65,7 +65,7 @@
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- foot.textContent+=' Clear Selected Order removes only the selected unit\'s unexecuted Attack, Guard or BB. Other orders stay queued. Unavailable during Auto, Repeat or any reserved paid item turn.';
+ foot.textContent+=' Clear Selected Order removes only the selected unit\'s unexecuted Attack, Guard or BB. Other orders stay queued. Both clearing controls wait until Auto and Repeat are idle and no paid item turn is reserved.';
  panel.append(title,status,focus,targets,actions,orders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
@@ -513,6 +513,14 @@
  // Execute, save write, item reservation, quest transition or AI change.
  // Inspect the entire party before mutating even one action.
  function cancellableQueuedActors(){
+   // Clear All shares the selected-order control's known-idle boundary.
+   // A stale button or unknown flag must not cancel a Repeat-owned queue.
+   if(P.version!==7||window.BF_homeNav?.current!=='quest'||
+      S.busy!==false||S.auto!==false||S.over!==false)return null;
+   try{
+     if(window.BFGlobalQoLQuestRepeatV9800?.statusSnapshot?.()?.active!==false)
+       return null;
+   }catch(_){return null;}
    if(!ready()||S.mode!=='archive'||document.hidden||
       !Array.isArray(S.party)||!S.party.length||
       typeof update!=='function')return null;

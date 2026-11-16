@@ -111,6 +111,8 @@ with sync_playwright() as pw:
  # uses the native v4500 owner; no emulator item state is invented here.
  manual_clear=page.evaluate("""()=>{
    const old=window.BFGlobalItemTurnReservationsV4500;
+   const oldRepeat=window.BFGlobalQoLQuestRepeatV9800;
+   window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};
    window.BFGlobalItemTurnReservationsV4500={
      snapshot:()=>({reservations:[]})};
    try{
@@ -127,6 +129,7 @@ with sync_playwright() as pw:
        idle:!S.busy,empty:S.party.every(p=>p.action==null)};
    }finally{
      window.BFGlobalItemTurnReservationsV4500=old;
+     window.BFGlobalQoLQuestRepeatV9800=oldRepeat;
      BFGlobalBattleCommandsV2100.refresh();
    }
  }""")
@@ -136,6 +139,76 @@ with sync_playwright() as pw:
  assert page.locator('#bf2100-clear').is_disabled()
  assert page.locator('#bf2100-orders').text_content().count(': Not queued')==6
  assert page.evaluate('BFGlobalBattleCommandsV2100.clearQueuedActions()') is False
+ # Clear All must obey the same known-idle ownership boundary as Clear Selected.
+ page.evaluate("""()=>{
+   window.__allOriginal={item:window.BFGlobalItemTurnReservationsV4500,
+     repeat:window.BFGlobalQoLQuestRepeatV9800,selected:S.selected,
+     actions:S.party.map(p=>p.action)};
+   window.BFGlobalItemTurnReservationsV4500={snapshot:()=>({reservations:[]})};
+   window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};
+   window.__allSnapshot=()=>JSON.stringify({P,S,mission:QUEST.missionId,
+     writes:__bf2100Writes(),storage:Object.fromEntries(
+       Array.from({length:localStorage.length},(_,i)=>{
+         const k=localStorage.key(i);return [k,localStorage.getItem(k)]}))});
+ }""")
+ try:
+  clear_all_blocked=page.evaluate("""()=>{
+    const api=BFGlobalBattleCommandsV2100,reports=[];
+    const idleRepeat=window.BFGlobalQoLQuestRepeatV9800;
+    const probe=(name,change,restore)=>{
+      if(!api.queueAll('guard'))throw Error('native queue fixture unavailable');
+      const actions=S.party.map(p=>p.action);
+      try{
+        change();const before=__allSnapshot();api.refresh();
+        const disabled=document.getElementById('bf2100-clear').disabled;
+        const rejected=api.clearQueuedActions()===false;
+        reports.push({name,ok:disabled&&rejected&&__allSnapshot()===before&&
+          S.party.every((p,i)=>p.action===actions[i])});
+      }finally{restore();S.party.forEach((p,i)=>p.action=actions[i]);update();api.refresh();}
+    };
+    for(const value of [{active:true},null,{active:'false'},{},undefined]){
+      probe('Repeat '+JSON.stringify(value),()=>window.BFGlobalQoLQuestRepeatV9800=
+        value===undefined?undefined:{statusSnapshot:()=>value},
+        ()=>window.BFGlobalQoLQuestRepeatV9800=idleRepeat);
+    }
+    probe('Repeat throws',()=>window.BFGlobalQoLQuestRepeatV9800={
+      statusSnapshot:()=>{throw Error('unavailable')}},
+      ()=>window.BFGlobalQoLQuestRepeatV9800=idleRepeat);
+    for(const key of ['busy','auto','over'])for(const value of [true,null,undefined,0,'','false']){
+      const old=S[key];probe(key+String(value),()=>S[key]=value,()=>S[key]=old);
+    }
+    const version=P.version;
+    probe('wrong save version',()=>P.version=6,()=>P.version=version);
+    probe('Home route',()=>BF_homeNav.go('home'),()=>BF_homeNav.go('quest'));
+    const mode=S.mode;
+    probe('Training mode',()=>S.mode='training',()=>S.mode=mode);
+    const hidden=Object.getOwnPropertyDescriptor(document,'hidden');
+    probe('hidden page',()=>Object.defineProperty(document,'hidden',{configurable:true,value:true}),
+      ()=>{if(hidden)Object.defineProperty(document,'hidden',hidden);else delete document.hidden});
+    return reports;
+  }""")
+  assert len(clear_all_blocked)==28 and all(r['ok'] for r in clear_all_blocked),clear_all_blocked
+  for width in (320,390,540):
+   page.set_viewport_size({'width':width,'height':844})
+   for key in ('Enter','Space'):
+    assert page.evaluate('BFGlobalBattleCommandsV2100.queueAll("guard")')
+    page.evaluate("""()=>{
+      BFGlobalBattleCommandsV2100.refresh();window.__allBefore=__allSnapshot();
+      const expected=JSON.parse(__allBefore);expected.S.party.forEach(p=>p.action=null);
+      window.__allExpected=JSON.stringify(expected);
+    }""")
+    button=page.locator('#bf2100-clear')
+    assert button.is_enabled() and button.is_visible()
+    button.focus();button.press(key)
+    assert page.evaluate('__allSnapshot()===__allExpected'),(width,key)
+    assert button.is_disabled()
+ finally:
+  page.evaluate("""()=>{
+    const old=__allOriginal;window.BFGlobalItemTurnReservationsV4500=old.item;
+    window.BFGlobalQoLQuestRepeatV9800=old.repeat;S.selected=old.selected;
+    S.party.forEach((p,i)=>p.action=old.actions[i]);update();BFGlobalBattleCommandsV2100.refresh();
+  }""")
+ print('PASS Clear All strict known-idle/Repeat/Quest guards, 28 blocked states, three-width manual keyboard clear')
  # Manual correction clears one selected order, preserving the other five.
  assert page.evaluate('typeof BFGlobalBattleCommandsV2100.clearSelectedAction')=='function'
  assert page.locator('#bf2100-clear-selected').is_disabled()
