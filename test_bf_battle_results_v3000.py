@@ -109,6 +109,82 @@ with sync_playwright() as pw:
    }
  }""")
  assert training_denied is True
+ # Claude R2: negative browser probes targeting safety-gate mutants.
+ # Supply a valid frozen snapshot to isolate direct S.mode/S.busy guards
+ # that are partly duplicated by ordinary snapshot() eligibility.
+ training_guards=page.evaluate("""() => {
+   const api=BFGlobalBattleResultsV3000,s=api.snapshot();
+   const before={p:JSON.stringify(P),state:JSON.stringify(S),
+     save:localStorage.getItem('bf_global_offline_demo_v7'),
+     route:BF_homeNav.current};
+   const result={},legacy=window.BFGlobalQoLQuestRepeatV9800;
+   const nativeInner=window.BFInnerScreens;
+   const ownHidden=Object.getOwnPropertyDescriptor(document,'hidden');
+   const blocked=()=>api.canOpenTraining(s)===false &&
+     api.openTraining()===false && BF_homeNav.current==='quest';
+   result.initial=api.canOpenTraining(s)===true && s.stored===true;
+   const auto=S.auto;
+   try {
+     for(const [name,value] of [
+       ['autoTrue',true],['autoNumeric',1],
+       ['autoString','true'],['autoNull',null]
+     ]){S.auto=value;result[name]=blocked();}
+   }finally{S.auto=auto;}
+   const mode=S.mode;
+   try {S.mode='training';result.otherMode=blocked();}
+   finally{S.mode=mode;}
+   const busy=S.busy;
+   try {S.busy=true;result.busyDirect=blocked();}
+   finally{S.busy=busy;}
+   const version=P.version;
+   try {P.version=6;result.version6=blocked();}
+   finally{P.version=version;}
+   try {
+     Object.defineProperty(document,'hidden',{configurable:true,value:true});
+     result.hiddenDocument=blocked();
+   }finally{
+     if(ownHidden)Object.defineProperty(document,'hidden',ownHidden);
+     else delete document.hidden;
+   }
+   try{
+     window.BFInnerScreens={...nativeInner,setTab:undefined};
+     result.missingSetTab=blocked();
+   }finally{window.BFInnerScreens=nativeInner;}
+   const shards=P.trainingShards;
+   try{
+     for(const [name,value] of [
+       ['shardsZero',0],['shardsNaN',NaN],
+       ['shardsFractional',1.5],['shardsInfinity',Infinity],
+       ['shardsNegative',-1],['shardsString','1']
+     ]){P.trainingShards=value;result[name]=blocked();}
+   }finally{P.trainingShards=shards;}
+   try {
+     for(const [name,payload] of [
+       ['repeatUnknown',{statusSnapshot:()=>({active:undefined})}],
+       ['repeatNullStatus',{statusSnapshot:()=>null}],
+       ['repeatUnknownStatus',{statusSnapshot:()=>({})}],
+       ['repeatThrowing',{statusSnapshot:()=>{throw Error('no status')}}],
+       ['repeatNoFunction',{statusSnapshot:null}],
+       ['repeatNullModule',null],
+       ['repeatTrue',{statusSnapshot:()=>({active:true})}]
+     ]){window.BFGlobalQoLQuestRepeatV9800=payload;
+       result[name]=blocked();}
+     // Absence on older isolated embeds is explicitly supported;
+     // malformed PRESENT providers are not.
+     delete window.BFGlobalQoLQuestRepeatV9800;
+     result.legacyAbsentAllowed=api.canOpenTraining(s)===true;
+   }finally{
+     if(legacy===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
+     else window.BFGlobalQoLQuestRepeatV9800=legacy;
+   }
+   result.restored=api.canOpenTraining(s)===true;
+   result.unchanged=JSON.stringify(P)===before.p &&
+     JSON.stringify(S)===before.state &&
+     localStorage.getItem('bf_global_offline_demo_v7')===before.save &&
+     BF_homeNav.current===before.route;
+   return result;
+ }""")
+ assert all(training_guards.values()),training_guards
  # A stale/corrupt canonical receipt cannot be bypassed by a still-true
  # saveEnabled flag. All post-victory navigation shares the stored-clear gate.
  stale=page.evaluate("""()=> {
