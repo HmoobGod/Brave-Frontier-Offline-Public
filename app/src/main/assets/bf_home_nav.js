@@ -577,12 +577,14 @@ function bfOfflineUnitPortraitV266(source, name) {
     originalProfile.className='bf-box-original-profile';
     originalProfile.textContent='VIEW ORIGINAL GLOBAL PROFILE ›';
     originalProfile.addEventListener('click',()=>{
-      if(!window.BFGlobalUnitArchive)return;
-      const encyclopedia=document.getElementById('bf-unit-encyclopedia');
-      if(encyclopedia)encyclopedia.open=true;
-      if(window.BFGlobalUnitArchive.showDetail(unit.id)){
-        document.getElementById('bf-archive-detail')?.scrollIntoView({block:'start',behavior:'smooth'});
-      }
+      try{
+        if(P.version!==7||S.busy!==false||S.auto!==false||window.BF_homeNav?.current!=='units'||window.BFInnerScreens?.unitTab!=='box'||activeId!==id||!Array.isArray(P.roster)||!P.roster.includes(id)||effectiveUnit(id)?.id!==unit.id)return;
+        const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return;
+        const archive=window.BFGlobalUnitArchive,encyclopedia=document.getElementById('bf-unit-encyclopedia');
+        if(typeof archive?.showDetail!=='function'||!archive.find(unit.id)||!encyclopedia)return;
+        encyclopedia.open=true;
+        if(archive.showDetail(unit.id)===true){const heading=document.querySelector('#bf-archive-detail h4');if(heading){heading.tabIndex=-1;heading.focus();}document.getElementById('bf-archive-detail')?.scrollIntoView({block:'start',behavior:'instant'});}
+      }catch(_){/* Unknown live identity must not open a stale source profile. */}
     });
     content.append(originalProfile);
     detail.append(img,content);
