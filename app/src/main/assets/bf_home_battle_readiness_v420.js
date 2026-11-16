@@ -89,6 +89,10 @@
     'Enemy formations, rewards and battle logic remain an offline DEMO. '+
     'No automatic quest selection, combat or stamina spending.';
   card.append(heading,mission,party,clearLabel,clearBar,actions,hint,note);
+  const reference=document.createElement('details');reference.id='bf420-source-totals';
+  const referenceTitle=document.createElement('summary');referenceTitle.textContent='RECORDED NEXT-MISSION TOTALS · SOURCE REFERENCE';referenceTitle.style.minHeight='44px';
+  const referenceText=document.createElement('p');referenceText.id='bf420-source-totals-text';reference.append(referenceTitle,referenceText);card.append(reference);
+  function referenceDetails(){try{const current=snapshot();if(!current||current.complete)return null;const row=archive.lookup(current.missionId);if(!Array.isArray(row)||row.length!==8||row.some(n=>!Number.isSafeInteger(n)||n<0))return null;return Object.freeze({missionId:row[0],energy:row[4],exp:row[5],zel:row[6],karma:row[7],sourceYear:2022,displayOnly:true});}catch(_){return null;}}
   // Home first: do not push the original playable Quest/Summon artwork
   // below the viewport. Append this optional preview AFTER Adventure.
   explore.insertAdjacentElement('afterend',card);
@@ -187,6 +191,7 @@
   }
   function refresh(){
     const s=snapshot(),reason=blockedReason(),can=reason===null;
+    const totals=referenceDetails();referenceText.textContent=totals?'Mission '+totals.missionId+' · recorded Energy '+totals.energy+' · EXP '+totals.exp+' · Zel '+totals.zel+' · Karma '+totals.karma+'. Source totals only; no stamina spent or rewards granted by this preview.':'Next-mission source totals unavailable; no values inferred.';
     mission.replaceChildren();
     if(!s)mission.textContent='Archived mission preview unavailable · inspect Quests.';
     else if(s.complete)mission.textContent='All 106 archived missions cleared (DEMO battles).';
@@ -237,6 +242,6 @@
   window.addEventListener('bf-route-change',event=>{
     if(event?.detail?.route==='home')refresh();
   });
-  window.BFHomeBattleReadinessV420=Object.freeze({snapshot,refresh});
+  window.BFHomeBattleReadinessV420=Object.freeze({snapshot,refresh,referenceDetails});
   refresh();
 })();

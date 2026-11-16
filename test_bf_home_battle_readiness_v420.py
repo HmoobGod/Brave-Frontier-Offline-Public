@@ -413,6 +413,10 @@ with sync_playwright() as pw:
         assert page.locator('#bf420-home-clear-bar').is_visible()
         assert '106/106' in page.locator('#bf420-home-clears').inner_text()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
+        reference=page.evaluate("""()=>{const clears=P.questClears,before=JSON.stringify({P,S});try{P.questClears={};const api=BFHomeBattleReadinessV420,row=api.referenceDetails();api.refresh();const source=BFOriginalGlobalQuestEnergyV14300.lookup(row.missionId);return {row,source,text:document.querySelector('#bf420-source-totals-text').textContent};}finally{P.questClears=clears;BFHomeBattleReadinessV420.refresh();}}""")
+        assert reference['row']['sourceYear']==2022 and reference['row']['displayOnly']
+        assert [reference['row'][key] for key in ('energy','exp','zel','karma')]==reference['source'][4:8]
+        assert 'no stamina spent or rewards granted' in reference['text']
         assert not errors,errors
     finally:
         browser.close()
