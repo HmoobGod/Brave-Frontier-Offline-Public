@@ -173,6 +173,26 @@ function bfOfflineUnitPortraitV266(source, name) {
     '</section>',
     '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
   ].join('');
+  // Keep navigation and source location names usable if original Home art
+  // cannot load. No replacement image or playable-mode claim is invented.
+  const homeArtFallbacks=new WeakMap();
+  home.addEventListener('error',event=>{
+    const img=event.target;
+    if(img?.tagName!=='IMG'||!img.closest('.bf-scene-place,.bf-scene-toolrow'))return;
+    let fallback=homeArtFallbacks.get(img);
+    if(!fallback){
+      fallback=document.createElement('span');fallback.className='bf-home-art-fallback';
+      fallback.setAttribute('role','img');fallback.setAttribute('aria-label','Original Home artwork unavailable');
+      fallback.textContent='ORIGINAL ART UNAVAILABLE';
+      fallback.style.cssText='box-sizing:border-box;display:block;width:100%;max-width:100%;padding:8px;overflow-wrap:anywhere;font:700 10px/1.4 Arial,sans-serif';
+      img.after(fallback);homeArtFallbacks.set(img,fallback);
+    }
+    img.style.display='none';fallback.hidden=false;fallback.style.display='block';
+  },true);
+  home.addEventListener('load',event=>{
+    const img=event.target,fallback=homeArtFallbacks.get(img);
+    if(fallback){img.style.display='';fallback.hidden=true;fallback.style.display='none';}
+  },true);
   // v437: Home-to-existing-about-panel is a read-only, user-initiated route.
   // No build identity or signing status is guessed when Android metadata is absent.
   home.addEventListener('click',event=>{
