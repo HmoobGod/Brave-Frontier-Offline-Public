@@ -72,7 +72,8 @@
         '<label>Element<select id="bf-archive-element"><option value="all">All elements</option><option value="1">Fire</option><option value="2">Water</option><option value="3">Earth</option><option value="4">Thunder</option><option value="5">Light</option><option value="6">Dark</option></select></label>',
         '<label>Rarity<select id="bf-archive-rarity"><option value="all">All rarities</option></select></label>',
         '<label>Record type<select id="bf-archive-type"><option value="all">All original records</option><option value="0">Standard unit entries</option><option value="other">Other original kind codes</option></select></label>',
-        '<label>Sort<select id="bf-archive-sort"><option value="id">Original ID</option><option value="name">English name</option><option value="rarity">Highest rarity</option></select></label>',
+        '<label>Maximum recorded unit cost (standard forms, reference only)<input id="bf-archive-max-cost" type="text" inputmode="numeric" autocomplete="off" placeholder="No cost limit" /></label>',
+        '<label>Sort<select id="bf-archive-sort"><option value="id">Original ID</option><option value="name">English name</option><option value="rarity">Highest rarity</option><option value="cost">Lowest recorded cost</option></select></label>',
         '<button id="bf-archive-reset" type="button">CLEAR FILTERS</button>',
       '</div>',
       '<div id="bf-archive-count" role="status" aria-live="polite"></div>',
@@ -88,6 +89,9 @@
   const historicalBattleToggle=get('bf-v189-historical-battle-art');
   const search=get('bf-archive-search'),element=get('bf-archive-element'),rarity=get('bf-archive-rarity'),kind=get('bf-archive-type'),sort=get('bf-archive-sort');
   const results=get('bf-archive-results'),counter=get('bf-archive-count'),prev=get('bf-archive-prev'),next=get('bf-archive-next'),pageLabel=get('bf-archive-page'),detail=get('bf-archive-detail'),reset=get('bf-archive-reset');
+  const maxCost=get('bf-archive-max-cost');
+  function budgetValue(){const raw=maxCost.value.trim();return /^[1-9][0-9]*$/.test(raw)&&Number.isSafeInteger(Number(raw))&&Number(raw)<=1000000?Number(raw):null;}
+  const costRank=u=>Number.isSafeInteger(u.unitCost)&&u.unitCost>0?u.unitCost:Infinity;
   const pageSize=24;
   let page=0;
   const rarities=[...new Set(units.map(u=>u.rarity))].filter(Number.isInteger).sort((a,b)=>a-b);
@@ -96,12 +100,15 @@
   const item=(name,cls,value)=>{const e=document.createElement(name);if(cls)e.className=cls;e.textContent=String(value);return e;};
   function matches(){
     const q=search.value.trim().toLocaleLowerCase();
-    const data=units.filter(u=>(element.value==='all'||u.element===Number(element.value)) &&
+    const budget=budgetValue();
+    const data=units.filter(u=>(budget===null||(u.unitKind===0&&costRank(u)<=budget)) &&
+      (element.value==='all'||u.element===Number(element.value)) &&
       (rarity.value==='all'||u.rarity===Number(rarity.value)) &&
       (kind.value==='all'||(kind.value==='0'?u.unitKind===0:u.unitKind!==0)) &&
       (!q||String(u.id).includes(q)||u.name.toLocaleLowerCase().includes(q)));
     if(sort.value==='name')data.sort((a,b)=>a.name.localeCompare(b.name)||a.id-b.id);
     if(sort.value==='rarity')data.sort((a,b)=>b.rarity-a.rarity||a.id-b.id);
+    if(sort.value==='cost')data.sort((a,b)=>costRank(a)-costRank(b)||a.id-b.id);
     return data;
   }
   function showDetail(id){
@@ -324,16 +331,17 @@
       button.append(text);button.addEventListener('click',()=>showDetail(u.id));results.append(button);
     }
     if(!shown.length)results.append(item('p','bf-archive-nohits','No matching original Global unit records.'));
-    counter.textContent=matched.length.toLocaleString()+' matching archived forms · '+archive.stats.thumbnailCount+' original thumbnails bundled';
+    counter.textContent=(maxCost.value.trim()&&budgetValue()===null?'Cost filter unavailable; enter a positive decimal limit · ':'')+matched.length.toLocaleString()+' matching archived forms · '+archive.stats.thumbnailCount+' original thumbnails bundled';
     pageLabel.textContent='Page '+(page+1)+' / '+total;
     prev.disabled=page===0;next.disabled=page>=total-1;
-    reset.disabled=!search.value && element.value==='all' && rarity.value==='all' && kind.value==='all' && sort.value==='id';
+    reset.disabled=!search.value && element.value==='all' && rarity.value==='all' && kind.value==='all' && sort.value==='id' && !maxCost.value;
   }
   for(const select of [search,element,rarity,kind,sort])select.addEventListener(select===search?'input':'change',()=>{page=0;detail.hidden=true;render();});
   reset.addEventListener('click',()=>{
-    search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';
+    search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';maxCost.value='';
     page=0;detail.hidden=true;detail.replaceChildren();render();search.focus();
   });
+  maxCost.addEventListener('input',()=>{page=0;detail.hidden=true;render();});
   historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
   historicalBattleToggle.addEventListener('change',()=>{detail.hidden=true;detail.replaceChildren();render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});

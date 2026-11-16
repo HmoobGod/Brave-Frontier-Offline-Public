@@ -111,6 +111,18 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    page.locator('#bf-archive-reset').click()
+    page.locator('#bf-archive-max-cost').fill('10');page.locator('#bf-archive-sort').select_option('cost')
+    expected=sorted([x for x in source['units'] if x.get('unitKind')==0 and isinstance(x.get('unitCost'),int) and 0<x['unitCost']<=10],key=lambda x:(x['unitCost'],x['id']))
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==len(expected)
+    observed=page.locator('.bf-archive-unit').evaluate_all('(els)=>els.map(e=>Number(e.dataset.unitId))')
+    assert observed==[x['id'] for x in expected[:24]],(observed,expected[:24])
+    page.locator('#bf-archive-max-cost').fill('1e1')
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    assert 'Cost filter unavailable' in page.locator('#bf-archive-count').text_content()
+    page.locator('#bf-archive-reset').click()
+    assert page.locator('#bf-archive-max-cost').input_value()==''
+    assert before==page.evaluate("() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})")
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()
