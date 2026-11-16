@@ -80,6 +80,17 @@ with sync_playwright() as pw:
          '(buttons)=>buttons.map(b=>b.getBoundingClientRect().height)')
      assert sizes and all(h>=44 for h in sizes),(width,sizes)
  page.set_viewport_size({'width':390,'height':844})
+ page.evaluate("document.querySelector('#mode').value='archive';reset()")
+ before_select=page.evaluate("JSON.stringify({P,party:S.party,selected:S.selected,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ target=page.evaluate('BFGlobalBattleCommandsV2100.nextUnqueuedSlot()')
+ assert target is not None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.focusNextUnqueued()') is True
+ assert page.evaluate('S.selected')==target
+ assert page.evaluate('S.party.every(u=>!u.action)')
+ after_select=page.evaluate("JSON.stringify({P,party:S.party,selected:0,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ assert before_select==after_select
+ blocked_select=page.evaluate("""()=>{const api=BFGlobalBattleCommandsV2100,repeat=window.BFGlobalQoLQuestRepeatV9800,out=[],selected=S.selected;try{for(const mode of ['busy','auto','repeat']){S.busy=mode==='busy';S.auto=mode==='auto';if(mode==='repeat')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};out.push(api.focusNextUnqueued()===false&&S.selected===selected);}}finally{S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;api.refresh();}return out;}""")
+ assert blocked_select==[True]*3,blocked_select
  assert not errors,errors
  print('PASS selected living DEMO target readout, fail-closed corruption, 44px target controls')
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -945,6 +956,17 @@ with sync_playwright() as pw:
  page.evaluate('reset()')
  assert page.evaluate('S.busy') is False
  assert page.evaluate('P.version')==7
+ page.evaluate("document.querySelector('#mode').value='archive';reset()")
+ before_select=page.evaluate("JSON.stringify({P,party:S.party,selected:S.selected,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ target=page.evaluate('BFGlobalBattleCommandsV2100.nextUnqueuedSlot()')
+ assert target is not None
+ assert page.evaluate('BFGlobalBattleCommandsV2100.focusNextUnqueued()') is True
+ assert page.evaluate('S.selected')==target
+ assert page.evaluate('S.party.every(u=>!u.action)')
+ after_select=page.evaluate("JSON.stringify({P,party:S.party,selected:0,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ assert before_select==after_select
+ blocked_select=page.evaluate("""()=>{const api=BFGlobalBattleCommandsV2100,repeat=window.BFGlobalQoLQuestRepeatV9800,out=[],selected=S.selected;try{for(const mode of ['busy','auto','repeat']){S.busy=mode==='busy';S.auto=mode==='auto';if(mode==='repeat')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};out.push(api.focusNextUnqueued()===false&&S.selected===selected);}}finally{S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;api.refresh();}return out;}""")
+ assert blocked_select==[True]*3,blocked_select
  assert not errors,errors
  browser.close()
 print('PASS v21.00: native manual source healing BB, BB spread, Curse/Guard, corrupt foe rejection and v7 save isolation')
