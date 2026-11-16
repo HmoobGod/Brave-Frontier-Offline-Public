@@ -1528,3 +1528,75 @@ body.bf-menu-mode #bf054-home-details {
     overflow-wrap:anywhere;line-height:1.2;
   }
 }
+
+/* v617 original-art centered Quest gateway: a real source-backed Home
+   composition improvement, NOT authenticated 2022 pixel parity. Preserve
+   active routes, original image bytes, disabled location visibility and
+   v615's actual owned five-portrait row. At 320–412px, avoid the owner's
+   rejected pair of equally oversized Quest/Summon dashboard cards. The
+   existing Quest art becomes the center gateway; DEMO Summon is secondary.
+   DOM/keyboard order stays available-label -> Quest -> Summon -> previews. */
+@media(max-width:412px){
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="quest"] {
+    grid-column:1/-1;
+    justify-self:center;
+    box-sizing:border-box;
+    width:min(100%,288px);
+    min-height:176px;
+    padding:4px 3px 7px;
+    border:0;
+    border-radius:2px;
+    background:transparent;
+    box-shadow:none;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="quest"] img {
+    width:100%;
+    height:148px;
+    object-fit:contain;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="quest"] .bf-scene-status {
+    box-sizing:border-box;
+    min-height:30px;
+    min-width:112px;
+    padding:6px 10px;
+    font-size:11px;
+    line-height:1.35;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="summon"] {
+    grid-column:1/-1;
+    justify-self:center;
+    box-sizing:border-box;
+    width:min(100%,228px);
+    min-height:92px;
+    padding:5px 7px;
+    flex-direction:row;
+    gap:6px;
+    border:1px solid #9c7f50;
+    border-radius:4px;
+    background:linear-gradient(145deg,#26364a,#172537);
+    box-shadow:inset 0 1px 2px #ffffff24;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="summon"] img {
+    flex:0 1 78px;
+    width:78px;
+    max-width:42%;
+    height:79px;
+    object-fit:contain;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places
+    button.bf-scene-featured[data-bf-goto="summon"] .bf-scene-status {
+    box-sizing:border-box;
+    flex:1 1 94px;
+    min-width:0;
+    min-height:44px;
+    padding:8px 4px;
+    font-size:10px;
+    line-height:1.35;
+    overflow-wrap:anywhere;
+  }
+}
