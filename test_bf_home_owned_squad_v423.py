@@ -365,6 +365,73 @@ with sync_playwright() as pw:
                 page.evaluate("BF_homeNav.go('home');BFGlobalHome.refreshParty()")
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
         print('PASS Home refresh focus: 33 matrix probes, 6 keyboard inspections, no identity substitution or state writes')
+        elements=page.evaluate('BFHomeElementsB100.refresh()')
+        assert elements and elements['sourceYear']==2022 and elements['liveStatsChanged'] is False,elements
+        oracle=page.evaluate("()=>{const forms=JSON.parse(document.querySelector('#bf-global-unit-catalog-data').textContent).units,labels=['Fire','Water','Earth','Thunder','Light','Dark'],counts=Object.fromEntries(labels.map(x=>[x,0]));for(const id of P.squad){const form=forms.find(x=>x.id===effectiveUnit(id).id);counts[labels[form.element-1]]++;}return counts;}")
+        assert elements['elements']==oracle
+        invalid_elements=page.evaluate("""()=>{const squad=P.squad,before=JSON.stringify({P,S});try{P.squad=[squad[0],squad[0]];BFHomeElementsB100.refresh();return {row:BFHomeElementsB100.snapshot(),text:document.querySelector('#bf-home-element-reference').textContent};}finally{P.squad=squad;BFHomeElementsB100.refresh();}}""")
+        assert invalid_elements['row'] is None and 'unavailable' in invalid_elements['text']
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            references=page.evaluate("""async()=>{
+              BF_homeNav.go('home');BFGlobalHome.refreshParty();
+              const old={version:P.version,squad:P.squad,roster:P.roster,evolutions:P.evolutions,unit:effectiveUnit};
+              const rows=JSON.parse(document.getElementById('bf-global-unit-catalog-data').textContent).units;
+              const labels=['Fire','Water','Earth','Thunder','Light','Dark'];
+              const text=document.getElementById('bf-home-element-reference'),api=BFHomeElementsB100;
+              const snap=()=>JSON.stringify({P,S,mission:QUEST.missionId,
+                storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+                  const k=localStorage.key(i);return [k,localStorage.getItem(k)];})),writes:__v423Writes()});
+              const initial=snap(),reports=[];
+              const reset=()=>{P.version=old.version;P.squad=old.squad;P.roster=old.roster;P.evolutions=old.evolutions;effectiveUnit=old.unit;};
+              const oracle=()=>{const counts=Object.fromEntries(labels.map(x=>[x,0]));
+                for(const id of P.squad){if(id===null||id===undefined||id===0)continue;
+                  const row=rows.find(row=>row.id===effectiveUnit(id).id);counts[labels[row.element-1]]++;}
+                return counts;};
+              const valid=()=>{const row=api.snapshot();return row&&Object.isFrozen(row)&&Object.isFrozen(row.elements)&&
+                row.sourceYear===2022&&row.liveStatsChanged===false&&
+                JSON.stringify(row.elements)===JSON.stringify(oracle())&&
+                row.count===Object.values(row.elements).reduce((a,b)=>a+b,0)&&
+                text.textContent.includes('2022 SOURCE SQUAD ELEMENTS')&&text.textContent.includes('reference only; no automatic strategy');};
+              const unavailable=()=>api.snapshot()===null&&text.textContent.includes('unavailable')&&!text.textContent.includes('Fire ');
+              const run=(name,mutate,check)=>{reset();mutate();const before=snap();api.refresh();
+                reports.push({name,ok:!!check(),unchanged:snap()===before});};
+              const first=old.squad[0],base=rows.find(row=>row.id===old.unit(first).id);
+              const other=rows.find(row=>Number.isSafeInteger(row.id)&&row.element>=1&&row.element<=6&&row.element!==base.element);
+              const changedForm=()=>effectiveUnit=id=>id===first?{...old.unit(id),id:other.id}:old.unit(id);
+              try{
+                run('healthy source counts',()=>{},valid);
+                run('changed effective form',changedForm,valid);
+                const recipe=EVO_BY_BASE.get(first);
+                if(!recipe)throw Error('Native evolution fixture missing');
+                run('native evolved form',()=>P.evolutions={...old.evolutions,[first]:recipe.evolvedId},
+                  ()=>valid()&&effectiveUnit(first).id===recipe.evolvedId);
+                run('empty squad',()=>P.squad=[null,0,undefined],()=>valid()&&api.snapshot().count===0&&text.textContent.includes('No owned squad forms selected'));
+                run('wrong version',()=>P.version=6,unavailable);
+                run('unreadable roster',()=>P.roster=null,unavailable);
+                run('duplicate roster',()=>P.roster=[...old.roster,first],unavailable);
+                run('sparse roster',()=>P.roster=Array(2),unavailable);
+                run('duplicate squad',()=>P.squad=[first,first],unavailable);
+                run('unowned squad',()=>P.squad=[9999999],unavailable);
+                run('oversized squad',()=>P.squad=[...old.squad,first],unavailable);
+                run('blank profile name',()=>effectiveUnit=id=>({...old.unit(id),name:' '}),unavailable);
+                run('unknown source form',()=>effectiveUnit=id=>({...old.unit(id),id:9999999}),unavailable);
+                run('profile throws',()=>effectiveUnit=()=>{throw Error('unavailable')},unavailable);
+                reset();api.refresh();changedForm();const before=snap();BFGlobalHome.refreshParty();
+                await Promise.resolve();await Promise.resolve();
+                reports.push({name:'party repaint updates effective-form reference',ok:!!valid(),unchanged:snap()===before});
+                P.roster=null;const corrupt=snap();BFGlobalHome.refreshParty();
+                await Promise.resolve();await Promise.resolve();
+                reports.push({name:'party repaint clears stale counts',ok:unavailable(),unchanged:snap()===corrupt});
+                reset();BFGlobalHome.refreshParty();await Promise.resolve();await Promise.resolve();
+                reports.push({name:'repaint recovery',ok:!!valid(),unchanged:snap()===initial});
+                return {reports,restored:snap()===initial,formChanged:base.element!==other.element};
+              }finally{reset();BFGlobalHome.refreshParty();api.refresh();}
+            }""")
+            assert len(references['reports'])==17 and references['restored'] and references['formChanged'],(width,references)
+            assert all(row['ok'] and row['unchanged'] for row in references['reports']),(width,references)
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+        print('PASS Home source elements: 51 form/ownership/repaint probes, immutable 2022 reference and full state invariance')
         assert not errors, errors
     finally:
         browser.close()
