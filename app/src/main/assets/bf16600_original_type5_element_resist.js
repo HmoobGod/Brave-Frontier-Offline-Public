@@ -78,9 +78,9 @@
        'Original leader #'+l.leaderId+' protects the squad: 10% less '+
        l.resistedElement+'-element enemy damage (when the enemy element is known).':
        'No source-confirmed 10% elemental-protection leader equipped.';
-     if(history){history.replaceChildren();for(const hit of recent.slice(-8)){
+     if(history){history.textContent='';for(const hit of recent.slice(-8)){
        const row=document.createElement('li');row.textContent=hit.element+' · '+hit.original+' → '+hit.result+' DEMO damage · '+hit.prevented+' prevented · wave '+(hit.wave??'unknown')+', turn '+(hit.round??'unknown');history.append(row);
-     }if(!history.childElementCount){const row=document.createElement('li');row.textContent='No qualifying hits recorded in this battle.';history.append(row);}}
+     }if(!recent.length){const row=document.createElement('li');row.textContent='No qualifying hits recorded in this battle.';history.append(row);}}
      if(summary)summary.textContent='This battle: '+applied+
        ' matching-element hit'+(applied===1?'':'s')+' · '+prevented+
        ' actual DEMO damage prevented.';
