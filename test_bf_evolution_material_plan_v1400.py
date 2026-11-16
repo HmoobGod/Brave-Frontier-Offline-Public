@@ -110,6 +110,15 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
+ breakdown=page.evaluate('BFEvolutionMaterialPlannerV1400.costBreakdown()')
+ actual_plan=page.evaluate('BFEvolutionMaterialPlannerV1400.plan')
+ assert breakdown['zel']==sum(x['zel'] for x in actual_plan['entries'])
+ assert breakdown['karma']==sum(x['karma'] for x in actual_plan['entries'])
+ assert breakdown['ownedBudgetChecked'] is False and breakdown['sourceYear']==2022
+ assert [(x['from'],x['zel'],x['karma']) for x in breakdown['rows']]==[(x['from'],x['zel'],x['karma']) for x in sorted(actual_plan['entries'],key=lambda x:(-x['zel'],-x['karma'],x['from']))]
+ assert page.evaluate('Object.isFrozen(BFEvolutionMaterialPlannerV1400.costBreakdown().rows)')
+ page.locator('#bf1400-cost-breakdown').evaluate('(el)=>el.open=true')
+ assert 'Owned DEMO balances are not checked or spent' in page.locator('#bf1400-cost-breakdown').text_content()
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
  assert not errors,errors
