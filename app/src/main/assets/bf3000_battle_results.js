@@ -116,7 +116,7 @@
  // Do not offer navigation during Auto/repeat, failed saves, or zero shards.
  function canOpenTraining(s=snapshot()){
    if(!s?.done||!s.victory||!s.archive||!s.stored||
-      S.busy||S.auto===true||S.mode!=='archive'||document.hidden||
+      S.busy||S.auto!==false||S.mode!=='archive'||document.hidden||
       P?.version!==7||!Number.isSafeInteger(P.trainingShards)||
       P.trainingShards<1)return false;
    try{
@@ -125,8 +125,11 @@
      const repeat=window.BFGlobalQoLQuestRepeatV9800;
      return !!nav&&nav.current==='quest'&&typeof nav.go==='function'&&
        !!units&&typeof units.setTab==='function'&&
-       (!repeat||(typeof repeat.statusSnapshot==='function'&&
-                    repeat.statusSnapshot()?.active===false));
+       // Legacy isolated embeds may omit Repeat entirely; a present but
+       // null, malformed, throwing or unknown-status Repeat must refuse.
+       (repeat===undefined||(!!repeat&&
+         typeof repeat.statusSnapshot==='function'&&
+         repeat.statusSnapshot()?.active===false));
    }catch(_){return false;}
  }
  function openTraining(){
