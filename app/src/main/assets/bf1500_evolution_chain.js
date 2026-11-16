@@ -113,12 +113,17 @@
  fromSel.setAttribute('aria-label','Temporary draft original form');
  const toSel=document.createElement('select');toSel.id='bf1500-to';
  toSel.setAttribute('aria-label','Recorded reachable evolution target');
+ const depthLabel=document.createElement('label');depthLabel.textContent='Maximum recorded recipe stages';
+ const depthChoice=document.createElement('select');depthChoice.id='bf1500-depth';depthChoice.setAttribute('aria-label','Maximum source evolution route depth');depthChoice.style.minHeight='44px';
+ for(const value of [1,2,3,6,12]){const option=document.createElement('option');option.value=String(value);option.textContent=value+' recorded stage'+(value===1?'':'s');depthChoice.append(option);}depthChoice.value='12';depthLabel.append(depthChoice);
+ let selectedDepth=12;
+ function setDepth(value){if(![1,2,3,6,12].includes(value))return false;selectedDepth=value;depthChoice.value=String(value);refresh();return true;}
  const refreshBtn=document.createElement('button');refreshBtn.type='button';
  refreshBtn.id='bf1500-refresh';refreshBtn.textContent='REFRESH DRAFT ROUTES';
  const report=document.createElement('div');report.id='bf1500-report';
  const steps=document.createElement('div');steps.id='bf1500-steps';
  const materials=document.createElement('div');materials.id='bf1500-materials';
- panel.append(summary,note,fromSel,toSel,refreshBtn,report,steps,materials);
+ panel.append(summary,note,fromSel,toSel,depthLabel,refreshBtn,report,steps,materials);
  anchor.after(panel);
  let from=null,to=null;
  const el=(tag,txt)=>{const node=document.createElement(tag);
@@ -138,9 +143,9 @@
      report.append(el('p','Choose a drafted source and a target with recorded recipe links.'));
      return null;
    }
-   const route=findRoute(from,to);
+   const route=findRoute(from,to,selectedDepth);
    if(!route){
-     report.append(el('p','No source-verified recipe path exists within 12 recorded hops.'));
+     report.append(el('p','No source-verified recipe path exists within the selected recorded-stage limit.'));
      return null;
    }
    report.append(el('strong','2022 Global source path · '+route.steps.length+' recipe stages'));
@@ -180,7 +185,7 @@
    setOptions(fromSel,ids.map(id=>({id,label:catalog.find(id).name+' · #'+id})),
      'Add an original source unit in the temporary archive draft');
    fromSel.value=from===null?'':String(from);
-   const destinations=from===null?[]:reachable(from);
+   const destinations=from===null?[]:reachable(from,selectedDepth);
    if(!destinations.some(x=>x.id===to))to=destinations[0]?.id??null;
    setOptions(toSel,destinations.map(x=>({id:x.id,
      label:x.name+' · #'+x.id+' · '+x.steps+' source stage(s)'})),
@@ -191,7 +196,7 @@
  }
  function choose(fromId,toId){
    if(!draft.selected.includes(fromId)||
-     !reachable(fromId).some(x=>x.id===toId))return false;
+     !reachable(fromId,selectedDepth).some(x=>x.id===toId))return false;
    from=fromId;to=toId;refresh();return true;
  }
  fromSel.addEventListener('change',()=>{
@@ -202,9 +207,10 @@
  toSel.addEventListener('change',()=>{
    const id=Number(toSel.value);
    to=toSel.value&&from!==null&&
-     reachable(from).some(x=>x.id===id)?id:null;
+     reachable(from,selectedDepth).some(x=>x.id===id)?id:null;
    showRoute();
  });
+ depthChoice.addEventListener('change',()=>setDepth(Number(depthChoice.value)));
  refreshBtn.addEventListener('click',refresh);
  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
@@ -214,7 +220,8 @@
  window.BFGlobalEvolutionChainV1500=Object.freeze({
    get sourceHopCount(){return sourceHopCount;},
    get selected(){return {from,to};},
-   findRoute,reachable,choose,refresh,
-   get currentRoute(){return from===null||to===null?null:findRoute(from,to);}
+   findRoute,reachable,choose,refresh,setDepth,
+   get selectedDepth(){return selectedDepth;},
+   get currentRoute(){return from===null||to===null?null:findRoute(from,to,selectedDepth);}
  });
 })();
