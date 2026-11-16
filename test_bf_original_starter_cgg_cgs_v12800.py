@@ -77,6 +77,17 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalOriginalStarterCggV12800.lookup(10015)') is None
  assert page.evaluate('BFGlobalOriginalStarterCggV12800.lookup(10016).sequences.atk.length')>8
  assert page.evaluate('BFGlobalOriginalStarterCggV12800.source.nativeRenderVerified') is False
+ # Independent Python oracle from the pinned compressed raw source, all36 clips.
+ for uid,cgg,idle,atk,move in rows:
+  for kind,clip in zip(('idle','atk','move'),(idle,atk,move)):
+   result=page.evaluate('([id,kind])=>BFGlobalOriginalStarterCggV12800.sequenceReport(id,kind)',[uid,kind])
+   assert result['rawDelayTotal']==sum(x[3] for x in clip)
+   assert result['uniqueFrames']==len(set(x[0] for x in clip))
+   assert result['steps']==[{'step':i+1,'frame':x[0],'rawDelay':x[3],'layers':cgg[x[0]][1]} for i,x in enumerate(clip)]
+   assert result['nativeTimingVerified'] is False and result['playable'] is False
+ for args in ([10016,'constructor'],[10016,None],['10016','idle'],[999,'atk']):
+  assert page.evaluate('([id,kind])=>BFGlobalOriginalStarterCggV12800.sequenceReport(id,kind)',args) is None
+
  # Read-only encyclopedia. There are 2,291 archived forms, only 72 playable.
  page.add_script_tag(path=str(A/'bf_home_nav.js'))
  page.add_script_tag(path=str(A/'bf_global_unit_archive.js'))
@@ -90,6 +101,12 @@ with sync_playwright() as pw:
  detail.locator('summary').filter(has_text='ORIGINAL 2022 SPRITE CGG / CGS').click()
  assert 'Native 2022 rendering is not verified' in detail.inner_text()
  assert '24 source frames' in detail.inner_text()
+ for kind in ('move','atk','idle'):
+  page.locator('#bf-cgg-sequence').select_option(kind)
+  assert 'units/native timing unknown' in page.locator('#bf-cgg-sequence-report').text_content()
+  expected=page.evaluate('(kind)=>BFGlobalOriginalStarterCggV12800.sequenceReport(10016,kind).rawDelayTotal',kind)
+  assert f'raw delay sum {expected}' in page.locator('#bf-cgg-sequence-report').text_content()
+
  page.add_script_tag(path=str(A/'bf12800_original_starter_cgg_cgs.js'))
  assert page.evaluate('BFGlobalOriginalStarterCggV12800.count')==12
  after=page.evaluate("""()=>({player:JSON.stringify(P),saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
