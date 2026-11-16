@@ -110,6 +110,13 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
+ stable=page.evaluate('JSON.stringify({P,S,plan:BFEvolutionMaterialPlannerV1400.plan,draft:BFArchiveDraftV800.selected})')
+ for order in ('quantity','name','source'):
+  page.locator('#bf1400-material-order').select_option(order)
+  expected_order=page.evaluate("(order)=>{const rows=BFEvolutionMaterialPlannerV1400.plan.totals.materials.slice();if(order==='quantity')rows.sort((a,b)=>b.count-a.count||String(a.type).localeCompare(String(b.type))||a.id-b.id);if(order==='name')rows.sort((a,b)=>String(a.name).localeCompare(String(b.name))||a.id-b.id);return rows.map(x=>String(x.type)+':'+x.id)}",order)
+  assert page.locator('#bf1400-materials [data-material-key]').evaluate_all('(els)=>els.map(e=>e.dataset.materialKey)')==expected_order
+  assert page.evaluate('JSON.stringify({P,S,plan:BFEvolutionMaterialPlannerV1400.plan,draft:BFArchiveDraftV800.selected})')==stable
+ for value in ('invalid',None,1): assert page.evaluate('(v)=>BFEvolutionMaterialPlannerV1400.setMaterialOrder(v)',value) is False
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
  assert not errors,errors
