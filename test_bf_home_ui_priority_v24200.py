@@ -32,6 +32,20 @@ assert 'data-bf-goto="menu"' in home
 assert "window.BF_homeNav = {go,get current()" in J
 assert "/* v242: visual-first Home hierarchy" in C
 assert C.count("/* v246: readable nameplates for original Global art-only") == 1
+# v617: two original art assets, contrasting hierarchy on phones only.
+gate="/* v617 original-art centered Quest gateway"
+assert C.count(gate)==1
+focus=C.split(gate,1)[1]
+for token in ('@media(max-width:412px)', 'data-bf-goto="quest"',
+              'data-bf-goto="summon"', 'grid-column:1/-1',
+              'justify-self:center', 'width:min(100%,288px)',
+              'width:min(100%,228px)', 'min-height:44px',
+              'object-fit:contain', 'overflow-wrap:anywhere'):
+    assert token in focus,token
+for forbidden in ("localStorage", "saveProgress(", "awardDemoRewards(",
+                  "P.", "S.", "fetch(", "XMLHttpRequest(",
+                  "display:none", "visibility:hidden", "pointer-events:none"):
+    assert forbidden not in focus,forbidden
 sty=C.split("/* v242: visual-first Home hierarchy",1)[1].split(
     "/* v246: readable nameplates for original Global art-only",1
 )[0]
@@ -98,6 +112,34 @@ with sync_playwright() as pw:
         assert bounds["scroll"] <= bounds["client"]+2,(width,bounds)
         assert page.locator(".bf-scene-featured").first.evaluate(
             "(el)=>getComputedStyle(el).minHeight") != "0px"
+        # Existing active destinations and source order remain exactly the
+        # same, but an owner phone now shows the original Quest gateway
+        # centered and larger than the subordinate Summoning Hall tile.
+        geometry=page.locator(".bf-scene-places").evaluate("""root=>{
+          const q=root.querySelector('[data-bf-goto="quest"]'),
+            s=root.querySelector('[data-bf-goto="summon"]'),
+            a=root.getBoundingClientRect(),x=q.getBoundingClientRect(),
+            y=s.getBoundingClientRect();
+          return {qc:x.left+x.width/2,ac:a.left+a.width/2,
+            qwidth:x.width,swidth:y.width,qheight:x.height,sheight:y.height,
+            questBeforeSummon:x.bottom<=y.top+1,
+            questGrid:getComputedStyle(q).gridColumnStart,
+            summonGrid:getComputedStyle(s).gridColumnStart,
+            questImage:q.querySelector('img').getAttribute('src'),
+            summonImage:s.querySelector('img').getAttribute('src'),
+            questAccessible:q.getAttribute('aria-label'),
+            summonAccessible:s.getAttribute('aria-label')};
+        }""")
+        assert geometry['questAccessible']=='Quest: play demo battles',geometry
+        assert geometry['summonAccessible']=='Summoning Hall: demo recruitment',geometry
+        assert geometry['questImage']=='content/home/home_win_quest.png',geometry
+        assert geometry['summonImage']=='content/home/home_win_akras_smn_hall.png',geometry
+        if width<=412:
+            assert geometry['qwidth']>geometry['swidth'],(width,geometry)
+            assert abs(geometry['qc']-geometry['ac'])<=2,(width,geometry)
+            assert geometry['qheight']>=160 and geometry['sheight']>=90,(width,geometry)
+            assert geometry['questBeforeSummon'],(width,geometry)
+            assert geometry['questGrid']=='1' and geometry['summonGrid']=='1',(width,geometry)
         page.locator('.bf-scene-featured[data-bf-goto="summon"]').click()
         assert page.evaluate("BF_homeNav.current")=="summon"
         page.locator('.bf-navbar [data-bf-goto="home"]').click()
