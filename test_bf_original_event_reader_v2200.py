@@ -61,6 +61,18 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ page.evaluate("BF_homeNav.go('quest');document.querySelector('#bf2200-reader').open=true;BFSourceTranscriptB100.refresh()")
+ stable=page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ transcript=page.evaluate('BFSourceTranscriptB100.transcript()')
+ assert transcript and 'ORIGINAL 2022 GLOBAL SOURCE TRANSCRIPT' in transcript
+ oracle=page.evaluate("()=>{const s=BFGlobalOriginalEventsV2200.snapshot(),[kind,id]=s.chosen.split(':');return BFGlobalOriginalEventsV2200.lookup(kind,Number(id)).lines}")
+ for i,line in enumerate(oracle): assert f'{i+1}. {line}' in transcript
+ page.locator('#bf2200-transcript').evaluate('(el)=>el.open=true')
+ page.locator('#bf2200-transcript button').click()
+ assert page.evaluate("document.activeElement.id==='bf2200-transcript-text'&&document.activeElement.selectionStart===0&&document.activeElement.selectionEnd===document.activeElement.value.length")
+ fault=page.evaluate("""()=>{const old=BFGlobalOriginalEventsV2200;try{window.BFGlobalOriginalEventsV2200={...old,lookup:(...args)=>({...old.lookup(...args),source:'content/event/wrong.txt'})};BFSourceTranscriptB100.refresh();return document.querySelector('#bf2200-transcript').hidden&&document.querySelector('#bf2200-transcript-text').value==='';}finally{window.BFGlobalOriginalEventsV2200=old;BFSourceTranscriptB100.refresh();}}""")
+ assert fault
+ assert page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')
