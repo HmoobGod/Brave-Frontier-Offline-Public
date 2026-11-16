@@ -117,6 +117,14 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Recipe route lookup must never change saved game'
+ stable=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ for bad in (0,4,13,'2',None): assert page.evaluate('(v)=>BFGlobalEvolutionChainV1500.setDepth(v)',bad) is False
+ for depth in (1,2,3,6,12):
+  page.locator('#bf1500-depth').select_option(str(depth))
+  assert page.evaluate('BFGlobalEvolutionChainV1500.selectedDepth')==depth
+  options=page.locator('#bf1500-to option').all_text_contents()
+  assert all(f'· {i} source stage(s)' not in x for x in options for i in range(depth+1,13))
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==stable
  assert not errors,errors
  browser.close()
 print('PASS v15: strict source recipe BFS, 2022 cost/material totals, bounded routes and v7 safety')
