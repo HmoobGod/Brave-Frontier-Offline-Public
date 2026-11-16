@@ -103,6 +103,10 @@
  const reset=document.createElement('button');reset.type='button';reset.id='bf1400-reset';
  reset.textContent='CLEAR RECIPE CHOICES';
  controls.append(auto,reset);
+ const materialOrder=document.createElement('select');materialOrder.id='bf1400-material-order';materialOrder.setAttribute('aria-label','Order original recipe material references');materialOrder.style.minHeight='44px';
+ for(const [value,label] of [['source','Material type / ID'],['quantity','Most required first'],['name','Material name']]){const option=document.createElement('option');option.value=value;option.textContent=label;materialOrder.append(option);}controls.append(materialOrder);
+ function setMaterialOrder(value){if(!['source','quantity','name'].includes(value))return false;materialOrder.value=value;render();return true;}
+ materialOrder.addEventListener('change',render);
  const status=document.createElement('p');status.id='bf1400-status';status.setAttribute('aria-live','polite');
  const cards=document.createElement('div');cards.id='bf1400-choices';
  const report=document.createElement('div');report.id='bf1400-report';
@@ -154,8 +158,11 @@
    materials.append(word('strong','COMBINED ORIGINAL MATERIAL LIST'));
    if(!data.totals.materials.length)
      materials.append(word('p','No source-listed materials in current recipe choices.'));
-   for(const item of data.totals.materials){
-     const row=document.createElement('div');row.className='bf1400-list';
+   const orderedMaterials=data.totals.materials.slice();
+   if(materialOrder.value==='quantity')orderedMaterials.sort((a,b)=>b.count-a.count||String(a.type).localeCompare(String(b.type))||a.id-b.id);
+   if(materialOrder.value==='name')orderedMaterials.sort((a,b)=>String(a.name).localeCompare(String(b.name))||a.id-b.id);
+   for(const item of orderedMaterials){
+     const row=document.createElement('div');row.className='bf1400-list';row.dataset.materialKey=String(item.type)+':'+item.id;
      row.append(word('span',(item.name||'Unnamed archived material')+
        ' · #'+item.id+' · type '+item.type+' ×'+item.count));
      materials.append(row);
@@ -170,7 +177,7 @@
    if(panel.open)render();
  });
  render();
- window.BFEvolutionMaterialPlannerV1400=Object.freeze({
+ window.BFEvolutionMaterialPlannerV1400=Object.freeze({setMaterialOrder,
    get selected(){return chosen();},
    get plan(){return summary();},
    sourceOptions:id=>sourceOptions(id).map(r=>({
