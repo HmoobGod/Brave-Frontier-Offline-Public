@@ -110,6 +110,17 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
+ material=page.evaluate("BFEvolutionMaterialPlannerV1400.plan.totals.materials.find(x=>x.type===1&&BFGlobalUnitArchive.find(x.id)&&!P.roster.includes(x.id))")
+ assert material,material
+ passive=page.evaluate("JSON.stringify({P,S,draft:BFArchiveDraftV800.selected,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ for blocked in ('busy','auto','repeat'):
+  assert page.evaluate("([id,mode])=>{const repeat=window.BFGlobalQoLQuestRepeatV9800;try{S.busy=mode==='busy';S.auto=mode==='auto';if(mode==='repeat')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};return BFEvolutionMaterialPlannerV1400.inspectMaterial(id);}finally{S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;}}",[material['id'],blocked]) is False
+ page.locator(f'[data-material-unit="{material["id"]}"]').click()
+ assert page.evaluate('BF_homeNav.current')=='units'
+ assert page.locator('#bf-archive-detail').is_visible()
+ assert page.evaluate("document.activeElement.closest('#bf-archive-detail')!==null")
+ assert page.evaluate("JSON.stringify({P,S,draft:BFArchiveDraftV800.selected,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
+ assert page.evaluate('BFEvolutionMaterialPlannerV1400.inspectMaterial(999999999)') is False
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
  assert not errors,errors

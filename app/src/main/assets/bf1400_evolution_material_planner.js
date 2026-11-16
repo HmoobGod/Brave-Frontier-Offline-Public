@@ -111,6 +111,14 @@
  const word=(tag,value)=>{
    const el=document.createElement(tag);el.textContent=String(value);return el;
  };
+ function inspectMaterial(id){try{
+   if(!Number.isSafeInteger(id)||!summary().totals.materials.some(x=>x.type===1&&x.id===id)||!archive.find(id)||P.version!==7||S.busy!==false||S.auto!==false)return false;
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;
+   if(typeof window.BF_homeNav?.go!=='function'||typeof window.BFInnerScreens?.setTab!=='function'||typeof archive.showDetail!=='function')return false;
+   const encyclopedia=document.getElementById('bf-unit-encyclopedia');if(!encyclopedia)return false;
+   if(window.BF_homeNav.go('units')!==true||window.BFInnerScreens.setTab('box')!==true)return false;
+   encyclopedia.open=true;if(archive.showDetail(id)!==true)return false;const heading=document.querySelector('#bf-archive-detail h4');if(heading){heading.tabIndex=-1;heading.focus();}return true;
+ }catch(_){return false;}}
  function render(){
    const data=summary();
    cards.replaceChildren();report.replaceChildren();
@@ -158,6 +166,7 @@
      const row=document.createElement('div');row.className='bf1400-list';
      row.append(word('span',(item.name||'Unnamed archived material')+
        ' · #'+item.id+' · type '+item.type+' ×'+item.count));
+     if(item.type===1&&archive.find(item.id)){const inspect=document.createElement('button');inspect.type='button';inspect.dataset.materialUnit=String(item.id);inspect.textContent='VIEW ARCHIVED MATERIAL UNIT #'+item.id;inspect.style.cssText='min-height:44px;max-width:100%;white-space:normal';inspect.addEventListener('click',()=>inspectMaterial(item.id));row.append(inspect);}
      materials.append(row);
    }
    report.append(materials);
@@ -170,7 +179,7 @@
    if(panel.open)render();
  });
  render();
- window.BFEvolutionMaterialPlannerV1400=Object.freeze({
+ window.BFEvolutionMaterialPlannerV1400=Object.freeze({inspectMaterial,
    get selected(){return chosen();},
    get plan(){return summary();},
    sourceOptions:id=>sourceOptions(id).map(r=>({
