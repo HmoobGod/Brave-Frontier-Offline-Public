@@ -100,6 +100,18 @@ with sync_playwright() as pw:
  assert fractional=='MISMATCH',fractional
  p.evaluate(api+'.refresh()')
  assert '3 (MATCH)' in p.locator('#bf10300-header').inner_text()
+ # Malformed position is unavailable, even while source wave count remains verified.
+ proof=p.evaluate("""()=>{const api=BFGlobalQoLBattleDetailsV10300,old={wave:S.wave,totalWaves:S.totalWaves,round:S.round};const out=[];
+ try{for(const [key,value] of [['wave',NaN],['wave',-1],['wave',0.5],['wave',3],['wave','0'],['totalWaves',0],['totalWaves',3.5],['round',-1],['round',1.5],['round','1']]){
+ Object.assign(S,old);S[key]=value;const before=JSON.stringify({P,S}),x=api.refresh();
+ out.push({key,wave:x.wave,round:x.round,total:x.totalWaves,status:x.sourceWaveStatus,text:document.querySelector('#bf10300-header').textContent,unchanged:JSON.stringify({P,S})===before});}}
+ finally{Object.assign(S,old);api.refresh();}return out;}""")
+ for row in proof:
+  assert row['unchanged'],row
+  if row['key']=='round': assert row['round'] is None and 'Turn UNAVAILABLE' in row['text'],row
+  else: assert row['wave'] is None and 'Wave UNAVAILABLE' in row['text'],row
+  if row['key']=='wave': assert row['status']=='MATCH',row
+ assert p.evaluate(api+'.snapshot().wave')==1
  # Reject a tampered/unavailable API even when the DEMO count looks valid.
  unavailable=p.evaluate("""()=>{
    const api=window.BFGrandGaiaCampaignV100;

@@ -47,19 +47,23 @@
    const invalidFoes=enemySource.length-foes.length;
    const one=window.BFGlobalSingleHitCriticalV9300?.snapshot();
    const multi=window.BFGlobalMultiHitCriticalV9500?.snapshot();
-   const recorded=recordedWaves(),liveTotal=safe(S.totalWaves);
+   const recorded=recordedWaves();
    const quest=typeof QUEST==='undefined'?null:QUEST;
    // A fractional, negative, or out-of-range DEMO total must not be
    // normalized into an apparent match with immutable source metadata.
    const liveValid=Number.isSafeInteger(S.totalWaves)&&
      S.totalWaves>=1&&S.totalWaves<=100;
+   const liveTotal=liveValid?S.totalWaves:null;
+   const positionValid=liveValid&&Number.isSafeInteger(S.wave)&&S.wave>=0&&S.wave<S.totalWaves;
+   const turnValid=Number.isSafeInteger(S.round)&&S.round>=0;
    const provenance=recorded===null?'UNAVAILABLE':
      liveValid&&recorded===S.totalWaves&&
      quest?.battles===recorded?'MATCH':'MISMATCH';
    return freeze({
-     mode:String(S.mode||''),wave:safe(S.wave)+1,totalWaves:liveTotal,
+     mode:String(S.mode||''),wave:positionValid?S.wave+1:null,totalWaves:liveTotal,
+     livePositionAvailable:positionValid,liveTurnAvailable:turnValid,
      sourceRecordedWaveCount:recorded,sourceWaveStatus:provenance,
-     round:safe(S.round),busy:!!S.busy,over:!!S.over,
+     round:turnValid?S.round:null,busy:!!S.busy,over:!!S.over,
      phase:String(S.phase||''),allies:freeze(allies),foes:freeze(foes),
      invalidAllies,invalidFoes,
      sourceScopedCriticalHits:safe(one?.criticals)+safe(multi?.criticalHits),
@@ -107,12 +111,12 @@
    if(signature===last)return s;
    last=signature;
    header.textContent=(s.mode==='archive'?'STORY':'TRAINING')+
-     ' · DEMO Wave '+s.wave+'/'+s.totalWaves+
+     ' · DEMO Wave '+(s.livePositionAvailable?s.wave+'/'+s.totalWaves:'UNAVAILABLE')+
      (s.mode==='archive'?' · 2022 recorded wave count: '+
        (s.sourceWaveStatus==='MATCH'?String(s.sourceRecordedWaveCount)+' (MATCH)':
         s.sourceWaveStatus==='MISMATCH'?'MISMATCH — DEMO data differs':
         'UNAVAILABLE'):'')+
-     ' · Turn '+s.round+
+     ' · Turn '+(s.liveTurnAvailable?s.round:'UNAVAILABLE')+
      ' · '+(s.over?'RESULT':s.busy?'ACTION':'READY')+
      ' · '+s.sourceScopedCriticalHits+' source-eligible critical hits';
    group(ally,'ALLIES · HP / BB',s.allies,s.invalidAllies);
