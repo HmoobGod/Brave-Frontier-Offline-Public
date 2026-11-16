@@ -80,6 +80,13 @@ with sync_playwright() as pw:
          '(buttons)=>buttons.map(b=>b.getBoundingClientRect().height)')
      assert sizes and all(h>=44 for h in sizes),(width,sizes)
  page.set_viewport_size({'width':390,'height':844})
+ page.evaluate("document.querySelector('#mode').value='archive';reset();BFGlobalBattleCommandsV2100.refresh()")
+ health=page.evaluate('S.enemies.find(e=>e.slot===S.target)')
+ assert page.locator('#bf2100-target-health').get_attribute('aria-valuetext')==f"{health['hp']} of {health['maxHp']} HP"
+ passive=page.evaluate('JSON.stringify({P,S})')
+ stale_meter=page.evaluate("""()=>{const target=S.target;try{S.target=999999;BFGlobalBattleCommandsV2100.refresh();return document.querySelector('#bf2100-target-health').hidden&&!document.querySelector('#bf2100-target-health').hasAttribute('aria-valuetext');}finally{S.target=target;BFGlobalBattleCommandsV2100.refresh();}}""")
+ assert stale_meter
+ assert page.evaluate('JSON.stringify({P,S})')==passive
  assert not errors,errors
  print('PASS selected living DEMO target readout, fail-closed corruption, 44px target controls')
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -945,6 +952,13 @@ with sync_playwright() as pw:
  page.evaluate('reset()')
  assert page.evaluate('S.busy') is False
  assert page.evaluate('P.version')==7
+ page.evaluate("document.querySelector('#mode').value='archive';reset();BFGlobalBattleCommandsV2100.refresh()")
+ health=page.evaluate('S.enemies.find(e=>e.slot===S.target)')
+ assert page.locator('#bf2100-target-health').get_attribute('aria-valuetext')==f"{health['hp']} of {health['maxHp']} HP"
+ passive=page.evaluate('JSON.stringify({P,S})')
+ stale_meter=page.evaluate("""()=>{const target=S.target;try{S.target=999999;BFGlobalBattleCommandsV2100.refresh();return document.querySelector('#bf2100-target-health').hidden&&!document.querySelector('#bf2100-target-health').hasAttribute('aria-valuetext');}finally{S.target=target;BFGlobalBattleCommandsV2100.refresh();}}""")
+ assert stale_meter
+ assert page.evaluate('JSON.stringify({P,S})')==passive
  assert not errors,errors
  browser.close()
 print('PASS v21.00: native manual source healing BB, BB spread, Curse/Guard, corrupt foe rejection and v7 save isolation')
