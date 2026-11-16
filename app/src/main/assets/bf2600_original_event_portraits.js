@@ -36,6 +36,21 @@
  const notice=document.createElement('small');
  notice.textContent='Original 2022 source character image. Static archival preview only: expression changes and original cutscene motion are not restored.';
  detail.append(label,controls,notice);box.append(img,detail);sceneTitle.after(box);
+ const inspect=document.createElement('button');inspect.type='button';inspect.id='bf2600-inspect';inspect.textContent='INSPECT ORIGINAL PORTRAIT';inspect.style.cssText='min-height:44px;max-width:100%;white-space:normal';detail.append(inspect);
+ const dialog=document.createElement('dialog');dialog.id='bf2600-inspector';dialog.setAttribute('aria-label','Original source portrait inspection');dialog.style.cssText='box-sizing:border-box;max-width:calc(100vw - 24px);max-height:90vh;background:#172b3b;color:white';
+ const enlarged=document.createElement('img');enlarged.id='bf2600-inspector-image';enlarged.style.cssText='max-width:100%;max-height:60vh;object-fit:contain';
+ const caption=document.createElement('p');caption.id='bf2600-inspector-caption';
+ const close=document.createElement('button');close.type='button';close.textContent='CLOSE PORTRAIT';close.style.minHeight='44px';dialog.append(enlarged,caption,close);document.body.append(dialog);let inspectedScene=null,inspectedCharacter=null;
+ function closeInspector(){if(dialog.open)dialog.close();}
+ close.addEventListener('click',closeInspector);dialog.addEventListener('close',()=>{enlarged.removeAttribute('src');if(panel.open&&inspect.getClientRects().length)inspect.focus();});
+ enlarged.addEventListener('error',()=>{if(dialog.open){enlarged.hidden=true;caption.textContent='Source portrait file unavailable; no replacement artwork inferred.';}});
+ function openPortrait(){try{const api=window.BFGlobalOriginalEventsV2200,state=api.snapshot(),parts=/^(dungeon):([1-9][0-9]*)$/.exec(state.chosen||'');
+   if(!panel.open||P.version!==7||S.busy!==false||S.auto!==false||!parts||!candidates().includes(choice)||typeof dialog.showModal!=='function'||dialog.open)return false;
+   const source=api.lookup(parts[1],Number(parts[2]));if(source?.source!=='content/event/'+state.source||source.lines.length!==state.lines)return false;
+   const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;
+   inspectedScene=state.chosen;inspectedCharacter=choice;enlarged.hidden=false;enlarged.src=images[choice];enlarged.alt='Original 2022 '+choice+' source portrait';caption.textContent=choice+' · '+images[choice]+' · Original source pixels; native cutscene placement/timing not inferred.';dialog.showModal();close.focus();return true;
+ }catch(_){return false;}}
+ inspect.addEventListener('click',openPortrait);
  let choice=null,lastKey='';
  function candidates(){
    const scene=window.BFGlobalOriginalEventsV2200.snapshot().chosen;
@@ -48,6 +63,7 @@
  }
  function refresh(){
    const present=candidates();
+   if(dialog.open&&(window.BFGlobalOriginalEventsV2200.snapshot().chosen!==inspectedScene||choice!==inspectedCharacter||!present.includes(inspectedCharacter)))closeInspector();
    box.hidden=!present.length;
    if(!present.length){choice=null;lastKey='';return Object.freeze({visible:false,character:null,options:[]})}
    const key=present.join('|');
@@ -67,6 +83,6 @@
  new MutationObserver(refresh).observe(sceneTitle,{childList:true,characterData:true});
  selector.addEventListener('change',refresh);
  refresh();
- window.BFGlobalOriginalEventPortraitsV2600=Object.freeze({refresh,
+ window.BFGlobalOriginalEventPortraitsV2600=Object.freeze({refresh,openPortrait,
    get snapshot(){return refresh()}});
 })();
