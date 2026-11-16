@@ -56,6 +56,17 @@ with sync_playwright() as pw:
  assert page.evaluate('BFOriginalBBV500.get(20041).low')==600
  assert page.evaluate('BFOriginalBBV500.get(40021).pct')==30
  assert page.evaluate('BFOriginalBBV500.get(999999)') is None
+ for invalid in ('constructor','toString','__proto__','10011.0','1e4',' 10011 ',None,True,[10011]):
+  assert page.evaluate('(id)=>BFOriginalBBV500.get(id)',invalid) is None,invalid
+  assert page.evaluate('(id)=>BFOriginalBBV500.getAtLevel(id,1)',invalid) is None,invalid
+ bb_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ page.evaluate('BFGlobalBattleDossierV400.showUnit(10011)')
+ page.locator('#bf400-bb-level').evaluate("el=>{el.value='1';el.dispatchEvent(new Event('change'))}")
+ assert 'source modifier 30%' in page.locator('#bf400-bb-preview').text_content()
+ page.locator('#bf400-bb-level').evaluate("el=>{el.value='10';el.dispatchEvent(new Event('change'))}")
+ assert 'source modifier 75%' in page.locator('#bf400-bb-preview').text_content()
+ assert 'No BB queued' in page.locator('#bf400-bb-preview').text_content()
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==bb_before
  page.evaluate('BFOriginalBBV500.get(10011).pct=999')
  assert page.evaluate('BFOriginalBBV500.get(10011).pct')==30
  page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
