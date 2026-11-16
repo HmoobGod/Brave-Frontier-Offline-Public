@@ -294,6 +294,7 @@ jobs:
           python test_bf_morgan_event_dialogue_v2300.py
           python test_bf_st_lamia_event_dialogue_v2400.py
           python test_bf_story_event_cue_v2500.py
+          python test_bf_home_source_scene_resume_b100.py
           python test_bf_original_event_portraits_v2600.py
           python test_bf_original_event_stage_v2700.py
           python test_bf_dialogue_speaker_cues_v2800.py

@@ -173,6 +173,36 @@ function bfOfflineUnitPortraitV266(source, name) {
     '</section>',
     '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
   ].join('');
+  // Resume an already-open verified source scene; never select a quest,
+  // replay a script, advance a page or write a saved story marker.
+  const resumeScene=document.createElement('button');resumeScene.type='button';resumeScene.id='bf-home-resume-scene';
+  resumeScene.textContent='RETURN TO OPEN ORIGINAL SCENE';resumeScene.hidden=true;
+  resumeScene.style.cssText='box-sizing:border-box;width:100%;min-height:44px;margin:8px 0;padding:9px;color:#ffe2af;background:#21364d;border:1px solid #bca16a;border-radius:6px;font:800 12px Arial,sans-serif';
+  home.querySelector('.bf-scene-tools')?.append(resumeScene);
+  function readableHomeScene(){
+    try{
+      if(typeof P==='undefined'||P.version!==7||typeof S==='undefined'||S.busy!==false||S.auto!==false)return null;
+      const repeat=window.BFGlobalQoLQuestRepeatV9800;
+      if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return null;
+      const api=window.BFGlobalOriginalEventsV2200,reader=document.getElementById('bf2200-reader');
+      const a=api?.snapshot(),m=/^(dungeon|clear):([1-9][0-9]*)$/.exec(a?.chosen||'');
+      const row=m?api.lookup(m[1],Number(m[2])):null;
+      if(!reader?.open||reader.tagName!=='DETAILS'||!row||row.source!=='content/event/'+a.source||
+        !Array.isArray(row.lines)||row.lines.length!==a.lines||!Number.isSafeInteger(a.step)||a.step<1||a.step>a.lines)return null;
+      return {reader,source:a.source,step:a.step};
+    }catch(_){return null;}
+  }
+  function refreshHomeScene(){const scene=readableHomeScene();resumeScene.hidden=!scene;
+    resumeScene.disabled=!scene;return !!scene;}
+  function resumeHomeScene(){
+    if(window.BF_homeNav?.current!=='home'||!readableHomeScene()||window.BF_homeNav.go('quest')!==true)return false;
+    const title=document.getElementById('bf2200-title'),reader=document.getElementById('bf2200-reader');
+    reader.scrollIntoView({block:'start'});if(title){title.tabIndex=-1;title.focus();}return true;
+  }
+  resumeScene.addEventListener('click',resumeHomeScene);
+  window.addEventListener('bf-route-sync',refreshHomeScene);
+  window.BFHomeSourceResumeB100=Object.freeze({refresh:refreshHomeScene,open:resumeHomeScene});
+  refreshHomeScene();
   // v437: Home-to-existing-about-panel is a read-only, user-initiated route.
   // No build identity or signing status is guessed when Android metadata is absent.
   home.addEventListener('click',event=>{
