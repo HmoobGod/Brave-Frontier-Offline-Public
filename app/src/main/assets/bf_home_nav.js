@@ -545,6 +545,13 @@ function bfOfflineUnitPortraitV266(source, name) {
     });
     return {owned, filtered, unresolved};
   }
+  function revealOwned(id){try{
+    if(P.version!==7||!Number.isSafeInteger(id)||!Array.isArray(P.roster)||!P.roster.includes(id)||!effectiveUnit(id)||S.busy!==false||S.auto!==false||window.BF_homeNav?.current!=='units'||window.BFInnerScreens?.unitTab!=='box')return false;
+    const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;
+    const markers=window.BFGlobalQoLUnitFlagsV10200;if(markers&&(typeof markers.setFilter!=='function'||markers.setFilter('all')!==true))return false;
+    search.value='';filter.value='all';elementFilter.value='all';rarityFilter.value='all';activeId=id;refresh();markers?.refresh?.();
+    const card=results.querySelector('[data-bf-unit-id="'+id+'"]');if(!card||card.hidden)return false;card.focus();return true;
+  }catch(_){return false;}}
   function showDetail(id, noAvailableProfiles = false) {
     detail.replaceChildren();
     const unit = effectiveUnit(id);
@@ -585,6 +592,8 @@ function bfOfflineUnitPortraitV266(source, name) {
       }
     });
     content.append(originalProfile);
+    const reveal=document.createElement('button');reveal.type='button';reveal.className='bf-box-reveal-owned';reveal.textContent='REVEAL THIS UNIT IN BOX · CLEAR VIEW FILTERS';reveal.style.cssText='min-height:44px;max-width:100%;white-space:normal';reveal.addEventListener('click',()=>revealOwned(id));content.append(reveal);
+
     detail.append(img,content);
     // The recovered evolution relationship is shown as a preview only.
     // Its source stats are not computed by the demo battle formula and this
@@ -736,7 +745,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     if(window.BF_homeNav.current==='quest') updateQuestDetails();
   });
   updateQuestDetails();
-  window.BFUnitBox={refresh,showDetail,updateQuestDetails};
+  window.BFUnitBox={refresh,showDetail,updateQuestDetails,revealOwned};
 })();
 
 
