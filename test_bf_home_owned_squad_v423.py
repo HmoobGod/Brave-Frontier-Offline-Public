@@ -140,6 +140,48 @@ with sync_playwright() as pw:
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
         })""") == before_inspect
+        # Hold the painted card while live providers/data change. Keyboard
+        # activation must fail closed without refreshing away the stale card.
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            for key in ('Enter','Space'):
+                count=page.evaluate("""()=>{
+                  BF_homeNav.go('home');BFGlobalHome.refreshParty();
+                  const card=document.querySelector('#bf-scene-party button');
+                  const old={busy:S.busy,auto:S.auto,roster:P.roster,squad:P.squad,
+                    effective:effectiveUnit,repeat:window.BFGlobalQoLQuestRepeatV9800};
+                  const fixtures=[];
+                  for(const flag of ['busy','auto'])for(const value of [true,null,undefined,0,'','false'])
+                    fixtures.push(()=>S[flag]=value);
+                  fixtures.push(()=>P.roster=[...old.roster,old.roster[0]],
+                    ()=>P.roster=[...old.roster,-1],()=>P.roster=Array(2),
+                    ()=>P.squad=[...old.squad,old.squad[0]],
+                    ()=>effectiveUnit=()=>({id:0,name:'Invalid'}),
+                    ()=>effectiveUnit=()=>({id:1,name:' '}),
+                    ()=>effectiveUnit=()=>{throw Error('profile unavailable')});
+                  for(const value of [null,{}, {active:'false'}])
+                    fixtures.push(()=>window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>value});
+                  const reset=()=>{S.busy=old.busy;S.auto=old.auto;P.roster=old.roster;
+                    P.squad=old.squad;effectiveUnit=old.effective;
+                    window.BFGlobalQoLQuestRepeatV9800=old.repeat;};
+                  const snap=()=>JSON.stringify({P,S,mission:QUEST.missionId,
+                    storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+                      const k=localStorage.key(i);return [k,localStorage.getItem(k)];})),writes:__v423Writes()});
+                  window.__stalePortrait={card,fixtures,reset,snap,original:snap()};
+                  return fixtures.length;
+                }""")
+                assert count==22,count
+                for case in range(count):
+                    page.evaluate('(i)=>{const f=__stalePortrait;f.reset();f.fixtures[i]();f.before=f.snap();f.card.focus();}',case)
+                    page.keyboard.press(key)
+                    assert page.evaluate("BF_homeNav.current==='home'&&__stalePortrait.snap()===__stalePortrait.before"),(width,key,case)
+                assert page.evaluate('()=>{const f=__stalePortrait;f.reset();return f.snap()===f.original;}')
+                # The same retained card still works after all fixtures restore.
+                page.evaluate('__stalePortrait.card.focus()')
+                page.keyboard.press(key)
+                assert page.evaluate("BF_homeNav.current==='units'")
+                page.evaluate("BF_homeNav.go('home');delete window.__stalePortrait")
+        print('PASS stale portrait strict idle/ownership/profile guards: 132 keyboard probes, full storage invariance')
         ids = page.evaluate("""() => {
            const owned = P.roster.find(id=>Number.isSafeInteger(id)&&id>0&&effectiveUnit(id));
            const unowned = [10012,20012,30012,40012,50012,60012,

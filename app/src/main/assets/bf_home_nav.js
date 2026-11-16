@@ -275,11 +275,17 @@ function bfOfflineUnitPortraitV266(source, name) {
           // Recheck the live slot and ownership: this card may predate a
           // roster import or squad edit. Navigation is a manual read only
           // action, and must not interrupt a running player turn or Repeat.
-          if (window.BF_homeNav?.current !== 'home' || S?.busy || S?.auto ||
-              P?.version !== 7 || !Array.isArray(P.squad) || P.squad[index] !== baseId ||
+          if (window.BF_homeNav?.current !== 'home' || S?.busy !== false || S?.auto !== false ||
+              P?.version !== 7 || !Array.isArray(P.squad) || P.squad.length > 6 || P.squad[index] !== baseId ||
               P.squad.indexOf(baseId) !== index ||
-              !Array.isArray(P.roster) || !P.roster.includes(baseId)) return;
-          try { if (!effectiveUnit(baseId)) return; }
+              !Array.isArray(P.roster) || !P.roster.includes(baseId) ||
+              !Array.from(P.roster).every(id => Number.isSafeInteger(id) && id > 0) ||
+              new Set(P.roster).size !== P.roster.length) return;
+          try {
+            const liveUnit = effectiveUnit(baseId);
+            if (!liveUnit || !Number.isSafeInteger(liveUnit.id) || liveUnit.id <= 0 ||
+                typeof liveUnit.name !== 'string' || !liveUnit.name.trim()) return;
+          }
           catch (_) { return; }
           const repeat = window.BFGlobalQoLQuestRepeatV9800;
           if (repeat) {
