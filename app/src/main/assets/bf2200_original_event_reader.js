@@ -36,6 +36,10 @@
  const heading=document.createElement('p');heading.id='bf2200-title';
  const message=document.createElement('div');message.id='bf2200-text';
  message.setAttribute('aria-live','polite');
+ const font=document.createElement('select');font.id='bf2200-font';font.setAttribute('aria-label','Current-session original dialogue text size');font.style.minHeight='44px';
+ for(const [value,label] of [['default','Default story text size'],['18','Large dialogue · 18px'],['21','Extra-large dialogue · 21px']]){const option=document.createElement('option');option.value=value;option.textContent=label;font.append(option);}
+ function setFont(value){if(value!=='default'&&![18,21].includes(value))return false;font.value=String(value);if(value==='default')message.style.removeProperty('font-size');else message.style.fontSize=value+'px';return true;}
+ font.addEventListener('change',()=>setFont(font.value==='default'?'default':Number(font.value)));
  const controls=document.createElement('div');controls.id='bf2200-nav';
  const prev=document.createElement('button');prev.id='bf2200-prev';prev.type='button';prev.textContent='‹ PREV';
  const counter=document.createElement('span');counter.id='bf2200-counter';
@@ -43,7 +47,7 @@
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ panel.append(summary,choices,font,heading,message,controls,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -109,7 +113,7 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGlobalOriginalEventsV2200=Object.freeze({
+ window.BFGlobalOriginalEventsV2200=Object.freeze({setFont,
    registerSupplemental(s){
      if(!s||s.kind!=='dungeon'||!Number.isInteger(s.id)||
        !((s.id>=200&&s.id<=260)||(s.id>=300&&s.id<=360))||

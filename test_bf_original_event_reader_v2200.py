@@ -61,6 +61,18 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ stable=page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  for size in (18,21):
+   page.locator('#bf2200-font').select_option(str(size))
+   assert page.locator('#bf2200-text').evaluate('(el)=>getComputedStyle(el).fontSize')==str(size)+'px'
+   assert page.locator('#bf2200-font').bounding_box()['height']>=44
+   assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
+ for value in ('18',16,None,999): assert page.evaluate('(v)=>BFGlobalOriginalEventsV2200.setFont(v)',value) is False
+ assert page.evaluate("BFGlobalOriginalEventsV2200.setFont('default')") is True
+ assert page.locator('#bf2200-text').evaluate("el=>el.style.fontSize")==''
+ assert page.evaluate("JSON.stringify({P,S,scene:BFGlobalOriginalEventsV2200.snapshot(),save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')
