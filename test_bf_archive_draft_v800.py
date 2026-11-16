@@ -85,6 +85,21 @@ with sync_playwright() as pw:
  assert page.evaluate('BFTacticalRoundsV300.snapshot.mode')=='owned'
  assert page.evaluate('BFTacticalRoundsV300.snapshot.draftUnitIds')==[]
  assert page.evaluate('BFTacticalRoundsV300.exit()') is True
+ page.locator('#bf800-search').fill('')
+ page.locator('#bf800-draft').evaluate("el=>{for(let n=el;n;n=n.parentElement)if(n.tagName==='DETAILS')n.open=true}")
+ passive=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ first=page.locator('#bf800-results strong').all_text_contents()
+ page.locator('#bf800-next').click()
+ assert page.evaluate('BFArchiveDraftV800.candidatePage')==2
+ assert page.locator('#bf800-results strong').all_text_contents()!=first
+ assert page.locator('#bf800-results .bf800-entry').count()==12
+ page.locator('#bf800-prev').click()
+ assert page.locator('#bf800-results strong').all_text_contents()==first
+ assert page.locator('#bf800-prev').is_disabled()
+ page.locator('#bf800-next').click();page.locator('#bf800-search').fill('10011')
+ assert page.evaluate('BFArchiveDraftV800.candidatePage')==1
+ assert page.locator('#bf800-next').is_disabled()
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==passive
  assert not errors,errors
  browser.close()
 print('PASS v8.00: archive draft uses unowned 2022 forms, respects unlocks, supports undo and leaves v7 saved data unchanged')
