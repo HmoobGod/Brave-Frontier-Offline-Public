@@ -68,7 +68,7 @@
    'and undocumented 2022 encounters remain unimplemented.';
  const panelHost=document.getElementById('bf11100-leader-combat')||
    document.getElementById('squadpicker');
- let panel=null,status=null,summary=null;
+ let panel=null,status=null,summary=null,history=null;
  function refresh(){
    syncEncounter();
    const l=leader();
@@ -78,6 +78,9 @@
        'Original leader #'+l.leaderId+' protects the squad: 10% less '+
        l.resistedElement+'-element enemy damage (when the enemy element is known).':
        'No source-confirmed 10% elemental-protection leader equipped.';
+     if(history){history.textContent='';for(const hit of recent.slice(-8)){
+       const row=document.createElement('li');row.textContent=hit.element+' · '+hit.original+' → '+hit.result+' DEMO damage · '+hit.prevented+' prevented · wave '+(hit.wave??'unknown')+', turn '+(hit.round??'unknown');history.append(row);
+     }if(!recent.length){const row=document.createElement('li');row.textContent='No qualifying hits recorded in this battle.';history.append(row);}}
      if(summary)summary.textContent='This battle: '+applied+
        ' matching-element hit'+(applied===1?'':'s')+' · '+prevented+
        ' actual DEMO damage prevented.';
@@ -97,12 +100,14 @@
    title.style.cssText='cursor:pointer;font-weight:800;min-height:34px';
    status=document.createElement('p');status.id='bf16600-status';
    summary=document.createElement('p');summary.id='bf16700-protection-totals';
+   const recentTitle=document.createElement('strong');recentTitle.textContent='RECENT QUALIFYING HITS · LAST 8';
+   history=document.createElement('ol');history.id='bf16600-hit-history';
    const note=document.createElement('small');
    note.textContent='Original 2022 skill descriptions and exact 10% source passive. '+
      'Only known-element incoming attacks in archive DEMO battles qualify. '+
      'No inferred 2022 enemy formations, native rounding, training changes, '+
      'new Gem rewards or save writes.';
-   panel.append(title,status,summary,note);
+   panel.append(title,status,summary,recentTitle,history,note);
    panelHost.after(panel);
    document.getElementById('mode')?.addEventListener('change',refresh);
    document.getElementById('reset')?.addEventListener('click',()=>setTimeout(refresh,0));
