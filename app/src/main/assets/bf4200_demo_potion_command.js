@@ -50,6 +50,7 @@
  sourceUse.textContent='ORIGINAL POTION #20000 · 100–120 BASE HP (DEMO GUARD)';
  const sourceNote=document.createElement('small');
  sourceNote.textContent='Source 2022 item #20000: one selected living ally, heal payload 100–120. Acting ally may differ from recipient; 100–120 uniform DEMO roll, one temporary charge, Guard turn, no saved inventory.';
+ const previewText=document.createElement('p');previewText.id='bf4200-source-preview';
  const legacy=document.createElement('details');legacy.id='bf7200-legacy';
  const legacyTitle=document.createElement('summary');
  legacyTitle.textContent='EXPAND: LEGACY +500 HP DEMO POTION';
@@ -62,7 +63,7 @@
  actorLabel.append(sourceActor);
  const targetLabel=document.createElement('label');targetLabel.textContent='Wounded ally to heal';
  targetLabel.append(sourceTarget);
- panel.append(title,sourceStatus,actorLabel,targetLabel,sourceUse,sourceNote,legacy);hud.append(panel);
+ panel.append(title,sourceStatus,actorLabel,targetLabel,sourceUse,previewText,sourceNote,legacy);hud.append(panel);
  let previousBattle=S,remaining=3,sourceRemaining=1,round=S.round,last='';
  const used=new Map();
  function synchronize(){
@@ -94,6 +95,23 @@
    const p=S.party?.[i];
    return Number.isInteger(i)&&i>=0&&i<6&&!!p&&p.active&&p.hp>0&&
      Number.isFinite(p.hp)&&Number.isFinite(p.maxHp)&&p.hp<p.maxHp;
+ }
+ // Read-only range preview: never rolls RNG, reserves a turn or spends a charge.
+ function sourcePreview(slot){
+   const unit=S.party?.[slot];
+   if(!Number.isSafeInteger(slot)||slot<0||slot>=6||!unit||unit.active!==true||
+      !Number.isFinite(unit.hp)||!Number.isFinite(unit.maxHp)||unit.hp<=0||
+      unit.maxHp<=0||unit.hp>=unit.maxHp)return null;
+   const missing=unit.maxHp-unit.hp;
+   return Object.freeze({slot,name:String(unit.name||'Ally'),missing,
+     minimum:Math.min(original.baseLow,missing),maximum:Math.min(original.baseHigh,missing),
+     resultingHpMin:unit.hp+Math.min(original.baseLow,missing),
+     resultingHpMax:unit.hp+Math.min(original.baseHigh,missing),inspectionOnly:true});
+ }
+ function refreshPreview(){
+   const value=sourceTarget.value;
+   const row=/^[0-5]$/.test(value)?sourcePreview(Number(value)):null;
+   previewText.textContent=row?'Selected recipient: '+row.name+' · '+row.missing+' HP missing · '+row.minimum+'–'+row.maximum+' DEMO HP preview · resulting HP '+row.resultingHpMin+'–'+row.resultingHpMax+' (no charge used).':'Select a living wounded recipient to inspect the source Potion range.';
  }
  function snapshot(){
    synchronize();
@@ -142,7 +160,7 @@
    sourceUse.disabled=!sourceAvailable()||!info.sourceActors.length||!info.sourceTargets.length;
    target.disabled=use.disabled;
    sourceActor.disabled=sourceUse.disabled;
-   sourceTarget.disabled=sourceUse.disabled;
+   sourceTarget.disabled=sourceUse.disabled;refreshPreview();
    return info;
  }
  function usePotion(i){
@@ -193,12 +211,13 @@
    update();last='';refresh();
  }
  use.addEventListener('click',()=>usePotion(Number(target.value)));
+ sourceTarget.addEventListener('change',refreshPreview);
  sourceUse.addEventListener('click',()=>useSourcePotion(Number(sourceActor.value),Number(sourceTarget.value)));
  executeButton.addEventListener('click',enforceGuards,true);
  mode.addEventListener('change',refresh);
  new MutationObserver(refresh).observe(questinfo,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},650);
- window.BFGlobalDemoPotionV4200=Object.freeze({snapshot,refresh,usePotion,useSourcePotion,enforceGuards,source:original});
+ window.BFGlobalDemoPotionV4200=Object.freeze({snapshot,refresh,usePotion,useSourcePotion,enforceGuards,sourcePreview,source:original});
  refresh();
 })();
