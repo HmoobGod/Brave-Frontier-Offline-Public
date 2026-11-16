@@ -122,12 +122,31 @@
    'Invalid or incomplete source recipes are excluded rather than shown '+ 
    'as material-complete. Training only navigates; nothing is consumed or saved.';
  panel.append(heading,status,controls,results,note);host.after(panel);
+ function trainingReady(){
+   try{
+     if(P.version!==7||typeof S==='undefined'||S.busy!==false||S.auto!==false||
+        typeof window.BF_homeNav?.go!=='function'||typeof window.BFInnerScreens?.setTab!=='function'||
+        !document.getElementById('traininglist')||!document.getElementById('bf-unit-tab-label'))return false;
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);
+   }catch(_){return false;}
+ }
+ function openTraining(){
+   if(!trainingReady())return false;
+   try{
+     if(window.BF_homeNav.go('units')!==true||window.BFInnerScreens?.setTab?.('training')!==true)return false;
+     const label=document.getElementById('bf-unit-tab-label');label.setAttribute('tabindex','-1');label.focus();
+     return true;
+   }catch(_){return false;}
+ }
  let previous='';
  function refresh(){
    const s=snapshot();
-   const signature=JSON.stringify({open:panel.open,filter:filter.value,paths:s.paths});
+   const signature=JSON.stringify({open:panel.open,filter:filter.value,paths:s.paths,trainingReady:trainingReady()});
    if(signature===previous)return s;
    previous=signature;
+   training.disabled=!trainingReady();
+   training.title=training.disabled?'Training unavailable during an action, Auto, unknown Repeat or missing editor.':'Open Training without spending resources';
    const visible=s.paths.filter(row=>filter.value==='all'||
      (filter.value==='demo'&&row.demoCostsReady)||
      (filter.value==='materials'&&row.missingCount===0)||
@@ -165,17 +184,12 @@
  }
  panel.addEventListener('toggle',()=>{previous='';refresh()});
  filter.addEventListener('change',()=>{previous='';refresh()});
- training.addEventListener('click',()=>{
-   try{
-     if(window.BF_homeNav?.go?.('units')===false)return;
-     window.BFInnerScreens?.setTab?.('training');
-   }catch{/* Optional navigation may not be mounted; never spend resources. */}
- });
+ training.addEventListener('click',openTraining);
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
    if(panel.open)refresh();
  });
  const timer=setInterval(()=>{if(panel.open&&!document.hidden)refresh()},2000);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  refresh();
- window.BFGlobalQoLEvolutionNeedsV10400=freeze({snapshot,refresh});
+ window.BFGlobalQoLEvolutionNeedsV10400=freeze({snapshot,refresh,openTraining});
 })();
