@@ -96,7 +96,8 @@
      const a=catalog.find(unit.id),record=catalog.originalRecord(unit.id);
      out.push({sourceId:id,formId:unit.id,name:a?.name||unit.name,
        element:a?.element??null,rarity:a?.rarity??null,thumbnail:!!a?.thumbnail,
-       baseStats:a?.stats||null,original:record||null});
+       baseStats:a&&[a.unitBaseHp,a.unitBaseAtk,a.unitBaseDef,a.unitBaseRec].every(n=>Number.isSafeInteger(n)&&n>0)?
+         {hp:a.unitBaseHp,atk:a.unitBaseAtk,def:a.unitBaseDef,rec:a.unitBaseRec}:null,original:record||null});
    }
    return out;
  }
