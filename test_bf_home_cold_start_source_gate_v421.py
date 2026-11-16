@@ -13,9 +13,11 @@ HEADER=(ASSETS/"bf054_header_status.js").read_text("utf-8")
 READY=(ASSETS/"bf_home_battle_readiness_v420.js").read_text("utf-8")
 JAVA=(ROOT/"app/src/main/java/org/bravefrontier/offline/MainActivity.java").read_text("utf-8")
 
-assert "syncNarrowHome();" in HEADER, "phone must reorder on initial module load"
-assert "home.insertBefore(sceneExplore,sceneSquad)" in HEADER
-assert "if (preview) home.insertBefore(preview,sceneSquad)" in HEADER
+# v615: use the real authored source order, never the rejected v401 narrow reorder.
+assert "homeTitle.after(sceneSquad)" in HEADER, "cold-start must prioritize squad"
+assert "home.append(homeDetails)" in HEADER, "redundant details must follow the scene"
+assert "syncNarrowHome();" not in HEADER
+assert "home.insertBefore(sceneExplore,sceneSquad)" not in HEADER
 assert ".every((v,i)=>v===row[i])" in READY, "v420 must independently compare all source tuple fields"
 assert JAVA.index('readPackagedText("bf054_header_status.js")') < JAVA.index(
     'readPackagedText("bf100_grand_gaia_campaign.js")') < JAVA.index(
@@ -62,8 +64,8 @@ with sync_playwright() as pw:
           shutil.which("google-chrome") or shutil.which("google-chrome-stable"),
         args=["--no-sandbox","--disable-dev-shm-usage"])
     try:
-        # Cold boot MUST start at the narrow size; simply resizing a wide page
-        # cannot prove the mandatory initial syncNarrowHome() call works.
+        # Cold boot MUST start at the narrow size: resizing from a wide page
+        # cannot establish portrait-first ordering on actual phone startup.
         for width in (320,370):
             page,errors=fresh_page(browser,width)
             try:
@@ -78,10 +80,18 @@ with sync_playwright() as pw:
                     nav=document.querySelector('.bf-navbar').getBoundingClientRect(),
                     tiles=[...explore.querySelectorAll('button.bf-scene-active')];
                   return {
-                    adjacent:explore.nextElementSibling===squad,
-                    order:title.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING,
-                    orderOK:!!(title.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)&&
-                      !!(explore.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING),
+                    adjacent:title.nextElementSibling===squad &&
+                      squad.nextElementSibling===story &&
+                      story.nextElementSibling===explore,
+                    order:title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING,
+                    orderOK:!!(title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING)&&
+                      !!(squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)&&
+                      !!(story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING),
+                    squadTop:squad.getBoundingClientRect().top,
+                    squadBottom:squad.getBoundingClientRect().bottom,
+                    squadCards:squad.querySelectorAll('.bf-scene-member').length,
+                    cols:getComputedStyle(squad.querySelector('.bf-scene-party'))
+                      .gridTemplateColumns.split(' ').length,
                     details:details?.parentElement===home,
                     routes:tiles.map(t=>t.dataset.bfGoto),
                     buttons:tiles.map(t=>{
@@ -93,10 +103,14 @@ with sync_playwright() as pw:
                   };
                 }""")
                 assert geometry["adjacent"] and geometry["orderOK"] and geometry["details"],(width,geometry)
+                assert geometry["squadCards"]==6 and geometry["cols"]==5,(width,geometry)
+                assert geometry["squadTop"]>=0 and geometry["squadTop"]<geometry["navTop"],(width,geometry)
                 assert geometry["routes"]==["quest","summon"],(width,geometry)
                 assert len(geometry["buttons"])==2,(width,geometry)
-                assert all(t["top"]>=0 and t["bottom"]<geometry["navTop"]
-                           and t["left"]>=0 and t["right"]<=width for t in geometry["buttons"]),(width,geometry)
+                # Quest remains reachable by scrolling. Reject horizontal overflow,
+                # not vertical scrolling: the original game shows the squad first.
+                assert all(t["top"]>=geometry["squadBottom"] and
+                           t["left"]>=0 and t["right"]<=width for t in geometry["buttons"]),(width,geometry)
                 assert geometry["scroll"]<=width,(width,geometry)
                 # Late v420 injection must keep the original artwork before
                 # the optional preview with no additional location nodes.
@@ -106,7 +120,9 @@ with sync_playwright() as pw:
                   const e=home.querySelector('.bf-scene-explore');
                   const p=home.querySelector('#bf420-home-readiness');
                   const squad=home.querySelector('.bf-scene-squad');
-                  return e.nextElementSibling===p && p.nextElementSibling===squad &&
+                  return e.nextElementSibling===p &&
+                    p.nextElementSibling===home.querySelector('.bf-scene-tools') &&
+                    home.querySelector('.bf-scene-title').nextElementSibling===squad &&
                     home.querySelectorAll('.bf-scene-explore').length===1 &&
                     home.querySelectorAll('#bf420-home-readiness').length===1;
                 }"""),width
@@ -163,4 +179,4 @@ with sync_playwright() as pw:
             page.close()
     finally:
         browser.close()
-print("PASS v421: authentic narrow cold boot + independent 8-field v420 source gate; v7 unchanged")
+print("PASS v421/v615: portrait-first narrow cold boot + independent 8-field v420 source gate; v7 unchanged")
