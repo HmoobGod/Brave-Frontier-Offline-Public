@@ -36,6 +36,15 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'committedClearCount(s.missionId)!==s.clears' in src
  assert 'repeat.statusSnapshot()?.active!==false' in src
  assert 'disarmRetryAuto();return false;' in src
+ # User-triggered existing Units Training route, not new reward or currency.
+ assert "'bf3000-train'" in src
+ assert 'function canOpenTraining(s=snapshot())' in src
+ assert 'function openTraining()' in src
+ assert "window.BF_homeNav.go('units')" in src
+ assert "window.BFInnerScreens.setTab('training')" in src
+ assert "P.trainingShards<1" in src
+ assert 'repeat.statusSnapshot()?.active===false' in src
+ assert 'train.disabled=!canOpenTraining(s)' in src
  # Packaged recovery must immediately refresh the existing read-only story
  # shortcut without adding a second save path or alternative storage key.
  assert 'window.BFGrandGaiaContinueV101' in src
