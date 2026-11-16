@@ -71,6 +71,10 @@
    'border-radius:7px;background:#18293c;color:#e7effa;font:12px/1.5 system-ui,sans-serif';
  const title=document.createElement('summary');title.textContent='QoL · LIVE BATTLE DETAILS';
  title.style.cssText='cursor:pointer;min-height:44px;font-weight:800';
+ const healthFilter=document.createElement('select');healthFilter.id='bf10300-health-filter';healthFilter.setAttribute('aria-label','Filter displayed live battle health records');healthFilter.style.minHeight='44px';
+ for(const [value,label] of [['all','All verified health records'],['living','Living units only'],['ko','KO units only']]){const option=document.createElement('option');option.value=value;option.textContent=label;healthFilter.append(option);}
+ function setHealthFilter(value){if(!['all','living','ko'].includes(value))return false;healthFilter.value=value;last='';refresh();return true;}
+ healthFilter.addEventListener('change',()=>{last='';refresh();});
  const header=document.createElement('p');header.id='bf10300-header';
  const ally=document.createElement('div');ally.id='bf10300-allies';
  const enemy=document.createElement('div');enemy.id='bf10300-enemies';
@@ -79,13 +83,14 @@
    'are displayed without changing combat, original units, rewards or saves. '+
    'Source wave count checks use pinned repository 2022 fixtures only; '+
    'original enemy formations, native AI and drops are not verified.';
- panel.append(title,header,ally,enemy,note);battle.after(panel);
+ panel.append(title,healthFilter,header,ally,enemy,note);battle.after(panel);
  function group(host,label,units,invalid){
    host.replaceChildren();
-   const h=document.createElement('strong');h.textContent=label+
+   const displayed=units.filter(unit=>healthFilter.value==='all'||(healthFilter.value==='living'?unit.hp>0:unit.hp===0));
+   const h=document.createElement('strong');h.textContent=label+' · '+displayed.length+' of '+units.length+' shown'+
      (invalid?' · '+invalid+' UNVERIFIED DEMO HP RECORD'+(invalid===1?'':'S')+' HIDDEN':'');
    host.append(h);
-   for(const unit of units){
+   for(const unit of displayed){
      const item=document.createElement('div');
      item.style.cssText='display:flex;justify-content:space-between;'+
        'align-items:center;flex-wrap:wrap;gap:6px;border-bottom:1px solid #4d627b;'+
@@ -103,7 +108,7 @@
  let last='';
  function refresh(){
    const s=snapshot();
-   const signature=JSON.stringify(s);
+   const signature=JSON.stringify({state:s,filter:healthFilter.value});
    if(signature===last)return s;
    last=signature;
    header.textContent=(s.mode==='archive'?'STORY':'TRAINING')+
@@ -125,5 +130,5 @@
  },800);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  refresh();
- window.BFGlobalQoLBattleDetailsV10300=freeze({snapshot,refresh});
+ window.BFGlobalQoLBattleDetailsV10300=freeze({snapshot,refresh,setHealthFilter});
 })();

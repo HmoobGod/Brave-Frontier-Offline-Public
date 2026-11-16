@@ -116,6 +116,17 @@ with sync_playwright() as pw:
  assert p.evaluate("P.version")==7
  p.add_script_tag(path=str(A/'bf10300_qol_battle_details.js'))
  assert p.locator('#bf10300-details').count()==1
+ p.evaluate("BFGlobalQoLBattleDetailsV10300.refresh()")
+ stable=p.evaluate('JSON.stringify({P,S})')
+ p.locator('#bf10300-health-filter').select_option('living')
+ assert 'Vargas' not in p.locator('#bf10300-allies').text_content() # deliberately KO earlier
+ assert 'Enemy' in p.locator('#bf10300-enemies').text_content()
+ p.locator('#bf10300-health-filter').select_option('ko')
+ assert 'Vargas' in p.locator('#bf10300-allies').text_content()
+ assert 'Enemy' not in p.locator('#bf10300-enemies').text_content()
+ assert p.evaluate("BFGlobalQoLBattleDetailsV10300.setHealthFilter('invalid')") is False
+ assert p.evaluate("BFGlobalQoLBattleDetailsV10300.setHealthFilter('all')") is True
+ assert p.evaluate('JSON.stringify({P,S})')==stable
  assert not errors,errors
  b.close()
 print('PASS v103 read-only battle HP/BB/source critical HUD, no save or combat writes')
