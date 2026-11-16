@@ -128,13 +128,13 @@
         typeof window.BF_homeNav?.go!=='function'||typeof window.BFInnerScreens?.setTab!=='function'||
         !document.getElementById('traininglist')||!document.getElementById('bf-unit-tab-label'))return false;
      const repeat=window.BFGlobalQoLQuestRepeatV9800;
-     return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);
+     return !repeat||(typeof repeat.statusSnapshot==='function'&&true);
    }catch(_){return false;}
  }
  function openTraining(){
    if(!trainingReady())return false;
    try{
-     if(window.BF_homeNav.go('units')!==true||window.BFInnerScreens.setTab('training')!==true)return false;
+     if(window.BF_homeNav.go('units')!==true||window.BFInnerScreens?.setTab?.('training')!==true)return false;
      const label=document.getElementById('bf-unit-tab-label');label.setAttribute('tabindex','-1');label.focus();
      return true;
    }catch(_){return false;}
