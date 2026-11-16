@@ -307,6 +307,40 @@ with sync_playwright() as pw:
       assert len(receipt)==64
       capture_digests.append((width,receipt))
     assert len(capture_digests)==8
+    # v615 Claude R2 mixed-slot mutation: the renderer always emits SIX
+    # stable slot children, even when slot 2 has no owned unit. Slot 6 must
+    # retain its dedicated compact row and original source ownership.
+    page.set_viewport_size({'width':320,'height':844})
+    mixed=page.evaluate("""() => {
+      const old=P.squad.slice(), party=document.getElementById('bf-scene-party');
+      const storageBefore=localStorage.getItem('bf_global_offline_demo_v7');
+      try {
+        if(old.length!==6||!old.every(id=>Number.isSafeInteger(id)&&P.roster.includes(id)))
+          return {fixture:false,reason:'expected valid six-slot synthetic starter squad'};
+        P.squad[1]=null; // disposable browser state only
+        BFGlobalHome.refreshParty();
+        const cards=[...party.children],last=cards[5],second=cards[1],
+          css=getComputedStyle(last);
+        const r0=cards[0].getBoundingClientRect(),
+          r6=last.getBoundingClientRect();
+        return {
+          fixture:true,count:cards.length,
+          secondEmpty:second.classList.contains('bf-scene-empty'),
+          sixthButton:last.tagName==='BUTTON',
+          sixthId:Number(last.dataset.bfHomeUnitId),
+          expectedSixthId:old[5],
+          compact:css.gridColumnStart==='1'&&css.gridColumnEnd==='-1',
+          below:r6.top>=r0.bottom-2,
+          saveSame:localStorage.getItem('bf_global_offline_demo_v7')===storageBefore
+        };
+      } finally {
+        P.squad.splice(0,P.squad.length,...old);
+        BFGlobalHome.refreshParty();
+      }
+    }""")
+    assert mixed['fixture'] and mixed['count']==6 and mixed['secondEmpty'],mixed
+    assert mixed['sixthButton'] and mixed['sixthId']==mixed['expectedSixthId'],mixed
+    assert mixed['compact'] and mixed['below'] and mixed['saveSame'],mixed
     after_priority=page.evaluate("""() => ({
       p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
       save:localStorage.getItem('bf_global_offline_demo_v7'),
