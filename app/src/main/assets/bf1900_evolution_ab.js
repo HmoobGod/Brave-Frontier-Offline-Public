@@ -133,6 +133,20 @@
  panel.append(summary,note,roundLabel,button,status,results);
  anchor.after(panel);
  const el=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;return e;};
+ // Source-level-1 reference comparison; never starts the synthetic battle.
+ function plannedSourceStats(){
+   try{
+     const plan=multi.preview,ids=draft.selected;
+     if(!plan.ready||!plan.entries.length||!ids.length||new Set(ids).size!==ids.length)return null;
+     const changes=new Map(plan.entries.map(x=>[x.from,x.to]));
+     const read=id=>{const row=archive.find(id);if(!row||row.id!==id)return null;const stats={hp:row.unitBaseHp,atk:row.unitBaseAtk,def:row.unitBaseDef,rec:row.unitBaseRec};return Object.values(stats).every(x=>Number.isSafeInteger(x)&&x>0)?Object.freeze({unitId:id,...stats}):null;};
+     const before=ids.map(read),after=ids.map(id=>read(changes.get(id)||id));
+     if([...before,...after].some(x=>!x))return null;
+     const sum=rows=>Object.freeze(Object.fromEntries(['hp','atk','def','rec'].map(key=>[key,rows.reduce((n,x)=>n+x[key],0)])));
+     const a=sum(before),b=sum(after),difference=Object.freeze(Object.fromEntries(Object.keys(a).map(key=>[key,b[key]-a[key]])));
+     return Object.freeze({before:Object.freeze(before),after:Object.freeze(after),beforeTotals:a,afterTotals:b,difference,sourceYear:2022,level:1,liveBattlePower:false});
+   }catch(_){return null;}
+ }
  function render(){
    const can=ready();
    button.disabled=!can;
@@ -140,6 +154,8 @@
      'Ready: preview compares original draft with fully documented planned 2022 evolution destinations for mission '+draft.mission+'.':
      'Select at least one fully documented multi-stage evolution route and exit any active training battle before comparing.';
    results.replaceChildren();
+   const reference=plannedSourceStats();
+   if(reference){const card=el('p','ORIGINAL 2022 LEVEL-1 STAT REFERENCE · '+Object.keys(reference.difference).map(k=>k.toUpperCase()+': '+reference.beforeTotals[k]+' → '+reference.afterTotals[k]+' (Δ '+reference.difference[k]+')').join(' · ')+' · Not live battle power or a native evolution ranking.');card.id='bf1900-source-stat-comparison';results.append(card);}
    if(!latest)return can;
    const title=el('div','Last comparison: 2014 historical mission '+latest.missionId+
      ' · up to '+latest.roundLimit+' simulated team rounds per squad');
@@ -177,6 +193,6 @@
  window.BFGlobalEvolutionABV1900=Object.freeze({
    get result(){return latest?copy(latest):null;},
    get ready(){return ready();},
-   run,refresh:render
+   run,refresh:render,plannedSourceStats
  });
 })();
