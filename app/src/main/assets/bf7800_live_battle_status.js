@@ -38,9 +38,10 @@
  panel.setAttribute('aria-label','Live ally battle statuses and supported protection');
  const heading=document.createElement('summary');heading.id='bf7800-heading';
  const rows=document.createElement('div');rows.id='bf7800-rows';
+ const totalsText=document.createElement('p');totalsText.id='bf7800-totals';totalsText.setAttribute('role','status');
  const foot=document.createElement('small');
  foot.textContent='Archived 2022 ailments, plus source-described status immunity and recovery. Combat effects, stacking and remaining-round timing are DEMO until native rules are recovered.';
- panel.append(heading,rows,foot);
+ panel.append(heading,totalsText,rows,foot);
  host.prepend(panel);
  const freeze=a=>Object.freeze(a);
  function snapshot(){
@@ -77,10 +78,14 @@
      units:freeze(entries),source:'2022 Global item master and already-loaded battle states',
      timing:'Current simulated battle rounds; not original native status lifetime'});
  }
+ function totalsFrom(state){if(state.providersAvailable===false||state.identityUnavailable===true)return null;
+   const units=state.units;return freeze({affected:units.length,actionBlocked:units.filter(x=>x.actionBlocked).length,bbBlocked:units.filter(x=>x.bbBlocked).length,immune:units.filter(x=>x.immune).length,regenerating:units.filter(x=>x.regeneration).length,readOnly:true});}
+ function statusTotals(){return totalsFrom(snapshot());}
  let last='';
  function refresh(){
    const st=snapshot();
    panel.hidden=!st.visible;
+   const totals=totalsFrom(st);totalsText.textContent=totals?'All verified affected allies: '+totals.affected+' · Cannot act '+totals.actionBlocked+' · BB blocked '+totals.bbBlocked+' · Nullifier '+totals.immune+' · Regeneration '+totals.regenerating:'Status totals unavailable; observer data is incomplete.';
    const signature=JSON.stringify(st.units);
    if(signature===last)return st;
    last=signature;
@@ -112,6 +117,6 @@
  mode.addEventListener('change',refresh);
  document.getElementById('reset')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},550);
- window.BFGlobalLiveBattleStatusV7800=freeze({snapshot,refresh});
+ window.BFGlobalLiveBattleStatusV7800=freeze({snapshot,refresh,statusTotals});
  refresh();
 })();
