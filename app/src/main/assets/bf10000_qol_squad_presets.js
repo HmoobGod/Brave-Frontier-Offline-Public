@@ -159,6 +159,12 @@
    message='Applied preset '+(index+1)+'. Original battle restarted as usual.';
    refresh();return true;
  }
+ function previewPreset(index){
+   if(!Number.isSafeInteger(index)||index<0||index>=max||!goodIds(P.squad,true))return null;
+   const slot=slots[index];if(!slot||!goodIds(slot.squad,false))return null;
+   return freeze(slot.squad.map((id,position)=>{const owned=P.roster.includes(id);let unit=null;try{if(owned&&typeof effectiveUnit==='function')unit=effectiveUnit(id);}catch(_){}
+     return freeze({slot:position+1,baseId:id,currentBaseId:P.squad[position]??null,owned,formId:Number.isSafeInteger(unit?.id)?unit.id:null,name:typeof unit?.name==='string'?unit.name:'Unit #'+id,alreadyInPosition:P.squad[position]===id});}));
+ }
  const panel=document.createElement('details');panel.id='bf10000-squad-presets';
  panel.style.cssText='margin:10px 3px;padding:10px;border:1px solid #bd9f73;'+
    'border-radius:7px;background:#2e302d;color:#fff0d9;font:12px/1.5 system-ui,sans-serif';
@@ -195,10 +201,11 @@
  const status=document.createElement('p');status.id='bf10000-status';status.setAttribute('role','status');
  const preview=document.createElement('p');preview.id='bf10000-preview';
  preview.setAttribute('role','status');preview.setAttribute('aria-live','polite');
+ const slotPreview=document.createElement('ol');slotPreview.id='bf10000-slot-preview';slotPreview.setAttribute('aria-label','Read-only ordered preset slots');
  const help=document.createElement('small');
  help.textContent='Preset labels do not travel inside exported v7 saves. '+
    'No automatic selection or extra original unit slots.';
- panel.append(heading,explanation,selected,name,buttons,status,preview,help);anchor.after(panel);
+ panel.append(heading,explanation,selected,name,buttons,status,preview,slotPreview,help);anchor.after(panel);
  function refresh(){
    const index=Number(selected.value)||0,slot=slots[index];
    const unavailable=!!S.busy,validActive=goodIds(P.squad,true);
@@ -232,6 +239,8 @@
        (missing.length?' · UNOWNED #'+missing.join(', #')+'; cannot apply':'')+
        (!added.length&&!removed.length&&!reordered?' · Already active':'');
    }
+   slotPreview.replaceChildren();
+   const rows=previewPreset(index);if(rows)for(const row of rows){const item=document.createElement('li');item.textContent='Slot '+row.slot+' · current #'+(row.currentBaseId??'empty')+' → '+row.name+' (base #'+row.baseId+', '+(row.formId?'current form #'+row.formId:'source form unavailable')+') · '+(!row.owned?'UNOWNED; cannot apply':row.alreadyInPosition?'Already in this slot':'Would change this slot');slotPreview.append(item);}
    return info();
  }
  selected.addEventListener('change',()=>{
@@ -242,6 +251,6 @@
  setInterval(()=>{if(!document.hidden&&panel.open)refresh()},1400);
  refresh();
  window.BFGlobalQoLSquadPresetsV10000=freeze({
-   key,info,savePreset,applyPreset,deletePreset,renamePreset,duplicatePreset,refresh
+   key,info,previewPreset,savePreset,applyPreset,deletePreset,renamePreset,duplicatePreset,refresh
  });
 })();

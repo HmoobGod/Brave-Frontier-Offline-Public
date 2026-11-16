@@ -231,6 +231,20 @@ with sync_playwright() as pw:
  p.add_script_tag(path=str(A/'bf10000_qol_squad_presets.js'))
  assert p.locator('#bf10000-squad-presets').count()==1
  assert p.evaluate('P.version')==7
+ p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",old)
+ assert p.evaluate(api+'.savePreset(4,"Read-only preview fixture")') is True
+ passive=p.evaluate("JSON.stringify({P,S,presets:localStorage.getItem(BFGlobalQoLSquadPresetsV10000.key),save:localStorage.getItem('bf_global_offline_demo_v7'),resets:__resetCalls})")
+ rows=p.evaluate(api+'.previewPreset(4)')
+ squad=p.evaluate('P.squad')
+ assert [row['baseId'] for row in rows]==squad and all(row['owned'] and row['alreadyInPosition'] for row in rows),rows
+ for value in (-1,5,1.5,'4',None): assert p.evaluate('(v)=>BFGlobalQoLSquadPresetsV10000.previewPreset(v)',value) is None
+ p.locator('#bf10000-slot').select_option('4');p.evaluate(api+'.refresh()')
+ assert p.locator('#bf10000-slot-preview li').count()==len(squad)
+ assert 'source form unavailable' in p.locator('#bf10000-slot-preview').text_content() # fixture has no resolver
+ assert p.evaluate("JSON.stringify({P,S,presets:localStorage.getItem(BFGlobalQoLSquadPresetsV10000.key),save:localStorage.getItem('bf_global_offline_demo_v7'),resets:__resetCalls})")==passive
+ p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",original_live)
+ p.evaluate(api+'.refresh()')
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
  assert not errors,errors
  b.close()
 print('PASS v100 five squad presets: owned-only, save rollback on failure, busy gate, deletion and v7 schema')
