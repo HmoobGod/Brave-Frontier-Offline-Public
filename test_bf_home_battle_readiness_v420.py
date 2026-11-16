@@ -413,6 +413,11 @@ with sync_playwright() as pw:
         assert page.locator('#bf420-home-clear-bar').is_visible()
         assert '106/106' in page.locator('#bf420-home-clears').inner_text()
         assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')") is None
+        unknown=page.evaluate("""()=>{BF_homeNav.go('home');const original={busy:S.busy,auto:S.auto,version:P.version},before=JSON.stringify({P,S}),out=[];
+          try{for(const [key,value] of [['busy',null],['busy','false'],['auto',null],['auto','false'],['version',6]]){S.busy=original.busy;S.auto=original.auto;P.version=original.version;if(key==='version')P.version=value;else S[key]=value;BFHomeBattleReadinessV420.refresh();
+          const quest=document.querySelector('#bf420-home-quest'),units=document.querySelector('#bf420-home-units');quest.dispatchEvent(new MouseEvent('click',{bubbles:true}));out.push(quest.disabled&&units.disabled&&BF_homeNav.current==='home'&&document.querySelector('#bf420-home-hint').textContent.includes('STATUS UNAVAILABLE'));}}
+          finally{S.busy=original.busy;S.auto=original.auto;P.version=original.version;BFHomeBattleReadinessV420.refresh();}return {out,same:before===JSON.stringify({P,S})};}""")
+        assert unknown=={'out':[True]*5,'same':True},unknown
         assert not errors,errors
     finally:
         browser.close()
