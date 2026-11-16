@@ -51,6 +51,17 @@ with sync_playwright() as pw:
  assert page.locator('#bf400-dossier').is_visible()
  assert page.locator('#bf400-unit option').count()==6
  assert 'Flare Ride' in page.locator('#bf400-unit-skills').inner_text()
+ assert 'ARCHIVED BASE HP 1030 · ATK 500 · DEF 410 · REC 320' in page.locator('#bf400-unit-card').inner_text()
+ source=page.evaluate('JSON.parse(document.getElementById("bf-global-unit-catalog-data").textContent).units')
+ source_by_id={u['id']:u for u in source}
+ profile_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for item in owned:
+  page.evaluate('(id)=>BFGlobalBattleDossierV400.showUnit(id)',item['sourceId'])
+  text=page.locator('#bf400-unit-card').text_content();ref=source_by_id[item['formId']]
+  assert all(str(ref[key]) in text for key in ('unitBaseHp','unitBaseAtk','unitBaseDef','unitBaseRec'))
+ page.evaluate('BFGlobalBattleDossierV400.showUnit(10011)')
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==profile_before
+
  assert 'NOT simulated' in page.locator('#bf400-unit-skills').inner_text()
  assert page.locator('#bf400-mission option').count()==21
  assert page.evaluate('BFGlobalBattleDossierV400.showMission(1)') is True
