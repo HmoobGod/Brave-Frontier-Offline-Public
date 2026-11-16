@@ -79,6 +79,8 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   const names = {home:'HOME',units:'UNITS · SQUAD',quest:'QUEST · BATTLE',
                  summon:'SUMMON GATE · DEMO',menu:'MENU · SAVES'};
+  const routeStatus=document.createElement('p');routeStatus.id='bf-route-unavailable';routeStatus.setAttribute('role','status');routeStatus.hidden=true;routeStatus.style.cssText='max-width:100%;overflow-wrap:anywhere;padding:8px';heading.after(routeStatus);
+  function destinationReady(route){return route==='home'?home.isConnected:[...routes].some(([element,page])=>page===route&&element.isConnected);}
   let current = 'home';
   function syncProgress() {
     for (const [source, dest] of [['plevel','bf-nav-level'],['pzel','bf-nav-zel'],['pkarma','bf-nav-karma']]) {
@@ -88,6 +90,9 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   function go(route) {
     if (!Object.prototype.hasOwnProperty.call(names,route)) return false;
+    if(!destinationReady(route)){routeStatus.hidden=false;routeStatus.textContent=names[route]+' is unavailable in this page. Current screen preserved; no action started.';return false;}
+    routeStatus.hidden=true;routeStatus.textContent='';
+
     if (window.BFLocationPreview?.isOpen) {
       if (route === 'home') return window.BFLocationPreview.back();
       window.BFLocationPreview.close();

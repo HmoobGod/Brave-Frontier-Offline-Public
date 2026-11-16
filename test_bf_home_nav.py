@@ -193,6 +193,74 @@ with sync_playwright() as playwright:
     page.locator('.bf-navbar button[data-bf-goto="home"]').focus()
     assert page.evaluate('BF_homeNav.go("quest")') is True
     assert page.evaluate('document.activeElement.dataset.bfGoto')=='home'
+    page.evaluate("BF_homeNav.go('home')")
+    passive=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+    blocked=page.evaluate("""()=>{const panel=document.querySelector('.summonpanel'),parent=panel.parentNode,next=panel.nextSibling;try{panel.remove();const result=BF_homeNav.go('summon');return {result,route:BF_homeNav.current,visible:!document.querySelector('#bf-route-unavailable').hidden,text:document.querySelector('#bf-route-unavailable').textContent};}finally{parent.insertBefore(panel,next);}}""")
+    assert blocked['result'] is False and blocked['route']=='home' and blocked['visible'],blocked
+    assert 'Current screen preserved' in blocked['text']
+    assert page.evaluate("BF_homeNav.go('summon')") is True
+    assert page.locator('#summonbutton').is_visible()
+    assert page.locator('#bf-route-unavailable').is_hidden()
+    page.evaluate("BF_homeNav.go('home')")
+    assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
+    preview=page.evaluate("""()=>{
+      BF_homeNav.go('home');const old=window.BFLocationPreview;
+      const panel=document.querySelector('.summonpanel'),marker=document.createComment('preview fixture');
+      panel.before(marker);let closes=0;
+      const fake={isOpen:true,close(){closes++;this.isOpen=false;}};
+      const before=("""+handoff_snapshot+""")();
+      try{window.BFLocationPreview=fake;panel.remove();
+        const blocked=BF_homeNav.go('summon')===false&&BF_homeNav.current==='location-preview'&&closes===0;
+        marker.replaceWith(panel);
+        const recovered=BF_homeNav.go('summon')===true&&closes===1&&BF_homeNav.current==='summon';
+        return {blocked,recovered,unchanged:("""+handoff_snapshot+""")()===before};
+      }finally{if(marker.isConnected)marker.replaceWith(panel);window.BFLocationPreview=old;BF_homeNav.go('home');}
+    }""")
+    assert all(preview.values()),preview
+    # Remove every destination panel while retaining the real navbar button.
+    # A failed handoff must preserve screen, focus, route events and storage.
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        for route in ('quest','units','summon','menu','home'):
+            for key in ('Enter','Space'):
+                fixture=page.evaluate("""route=>{
+                  BF_homeNav.go(route==='home'?'quest':'home');
+                  const selectors={home:'#bf-home',units:'.squadsetup,.evo-panel,.training-panel',
+                    summon:'.summonpanel',menu:'.progresspanel,.hit-panel,.notice,.foot',
+                    quest:'.questpanel,.squad-panel,.resultpanel,.log-panel,section:has(> .battle)'};
+                  const panels=[...document.querySelectorAll(selectors[route])];
+                  const battle=document.querySelector('#battle')?.closest('section');
+                  if(route==='quest'&&battle&&!panels.includes(battle))panels.push(battle);
+                  const saved=panels.map(el=>{const marker=document.createComment('route fixture');el.before(marker);return {el,marker};});
+                  const events=[];const listen=e=>events.push(e.type);
+                  window.addEventListener('bf-route-change',listen);window.addEventListener('bf-route-sync',listen);
+                  const button=document.querySelector('.bf-navbar button[data-bf-goto="'+route+'"]');
+                  const previous=BF_homeNav.current;
+                  const source=route==='home'?document.querySelector('#questlist'):document.querySelector('#bf-home');
+                  panels.forEach(el=>el.remove());button.focus();
+                  const snap=()=>JSON.stringify({P,S,mission:QUEST.missionId,
+                    storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+                      const k=localStorage.key(i);return [k,localStorage.getItem(k)];})),writes:__homeNavWrites()});
+                  window.__missingRoute={saved,button,source,previous,events,listen,snap,before:snap()};
+                  return panels.length;
+                }""",route)
+                assert fixture>0,(width,route)
+                page.keyboard.press(key)
+                result=page.evaluate("""()=>{const f=__missingRoute,s=document.querySelector('#bf-route-unavailable');
+                  return {route:BF_homeNav.current,previous:f.previous,focus:document.activeElement===f.button,
+                    source:!!f.source.getClientRects().length,status:!s.hidden,text:s.textContent,
+                    events:f.events.length,unchanged:f.snap()===f.before};}""")
+                assert result['route']==result['previous'] and result['focus'] and result['source'],(width,route,key,result)
+                assert result['status'] and 'Current screen preserved' in result['text'],result
+                assert result['events']==0 and result['unchanged'],result
+                assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),(width,route)
+                assert page.evaluate("""route=>{const f=__missingRoute;
+                  for(const {el,marker} of f.saved)marker.replaceWith(el);
+                  window.removeEventListener('bf-route-change',f.listen);window.removeEventListener('bf-route-sync',f.listen);
+                  const ok=BF_homeNav.go(route)===true&&BF_homeNav.current===route&&
+                    document.querySelector('#bf-route-unavailable').hidden&&f.snap()===f.before;
+                  delete window.__missingRoute;return ok;}""",route),(width,route,key)
+    print('PASS missing destination: 30 mobile keyboard handoffs preserve screen/focus/events/full storage and recover')
     assert not errors, errors
     print("PASS navigation changes no save, squad, or Zel and throws no JS errors")
     browser.close()
