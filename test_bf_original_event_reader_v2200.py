@@ -61,6 +61,20 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ page.evaluate("for(const q of QUESTS)P.questClears[q.missionId]=1;BFGlobalOriginalEventsV2200.read('clear',10)")
+ stable=page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ options=page.locator('#bf2200-scenes option').evaluate_all('(els)=>els.map(x=>x.value)')
+ assert page.locator('#bf2200-prev-scene').is_disabled()
+ page.locator('#bf2200-next-scene').click()
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().chosen')==options[1]
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ page.locator('#bf2200-prev-scene').click()
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().chosen')==options[0]
+ page.evaluate('S.auto=true')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.navigateScene(1)') is False
+ page.evaluate('S.auto=false')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.navigateScene(2)') is False
+ assert page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')

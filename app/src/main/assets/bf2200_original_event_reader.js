@@ -40,10 +40,15 @@
  const prev=document.createElement('button');prev.id='bf2200-prev';prev.type='button';prev.textContent='‹ PREV';
  const counter=document.createElement('span');counter.id='bf2200-counter';
  const next=document.createElement('button');next.id='bf2200-next';next.type='button';next.textContent='NEXT ›';
+ const previousScene=document.createElement('button');previousScene.type='button';previousScene.id='bf2200-prev-scene';previousScene.textContent='PREVIOUS UNLOCKED SCRIPT';previousScene.style.minHeight='44px';
+ const nextScene=document.createElement('button');nextScene.type='button';nextScene.id='bf2200-next-scene';nextScene.textContent='NEXT UNLOCKED SCRIPT';nextScene.style.minHeight='44px';
+ function sceneSwitchIdle(){try{if(P.version!==7||!panel.open||S.busy!==false||S.auto!==false)return false;const repeat=window.BFGlobalQoLQuestRepeatV9800;return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);}catch(_){return false;}}
+ function navigateScene(direction){if(![-1,1].includes(direction)||!sceneSwitchIdle())return false;const allowed=unlocked(),index=allowed.findIndex(s=>keyOf(s)===snapshot().chosen),next=index+direction;if(index<0||next<0||next>=allowed.length)return false;try{window.BFGlobalStoryPlaybackV3300?.pause?.();if(!choose(allowed[next]))return false;choices.dispatchEvent(new Event('change'));return true;}catch(_){return false;}}
+ previousScene.addEventListener('click',()=>navigateScene(-1));nextScene.addEventListener('click',()=>navigateScene(1));
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ panel.append(summary,choices,previousScene,nextScene,heading,message,controls,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -91,6 +96,7 @@
    panel.hidden=!s;
    if(!s)return null;
    choices.value=selected;
+   const sceneIndex=allowed.findIndex(x=>keyOf(x)===selected);previousScene.disabled=!sceneSwitchIdle()||sceneIndex<=0;nextScene.disabled=!sceneSwitchIdle()||sceneIndex<0||sceneIndex>=allowed.length-1;
    heading.textContent=s.title+' · Original '+(s.kind==='clear'?'clear-event':'dungeon')+' script';
    message.textContent=s.lines[position];
    counter.textContent=(position+1)+' / '+s.lines.length;
@@ -109,7 +115,7 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGlobalOriginalEventsV2200=Object.freeze({
+ window.BFGlobalOriginalEventsV2200=Object.freeze({navigateScene,
    registerSupplemental(s){
      if(!s||s.kind!=='dungeon'||!Number.isInteger(s.id)||
        !((s.id>=200&&s.id<=260)||(s.id>=300&&s.id<=360))||
