@@ -1802,3 +1802,13 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
 })();
+
+/* Return to the current native DEMO battle; never choose/reset/start a mission. */
+(()=>{'use strict';if(window.BFHomeCurrentBattleB100)return;const home=document.getElementById('bf-home'),anchor=home?.querySelector('.bf-scene-story');if(!anchor)return;
+ const button=document.createElement('button');button.type='button';button.id='bf-home-current-battle';button.style.cssText='box-sizing:border-box;width:100%;min-height:44px;white-space:normal';anchor.append(button);let shownBattle=null,shownMission=null;
+ function snapshot(){try{if(P.version!==7||S.mode!=='archive'||S.over!==false||!Number.isSafeInteger(QUEST?.missionId)||!Number.isSafeInteger(S.wave)||S.wave<0||!Number.isSafeInteger(S.round)||S.round<1)return null;const row=QUESTS.filter(q=>q.missionId===QUEST.missionId);if(row.length!==1||row[0].dungeonId!==QUEST.dungeonId||row[0].battles!==QUEST.battles||S.totalWaves!==QUEST.battles||S.wave>=S.totalWaves)return null;return Object.freeze({missionId:QUEST.missionId,wave:S.wave+1,totalWaves:S.totalWaves,round:S.round,existingBattleOnly:true});}catch(_){return null;}}
+ function idle(){try{if(S.busy!==false||S.auto!==false)return false;const repeat=window.BFGlobalQoLQuestRepeatV9800;return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);}catch(_){return false;}}
+ function refresh(){const state=snapshot();shownBattle=S;shownMission=state?.missionId??null;button.disabled=!state||!idle();button.textContent=state?'RETURN TO CURRENT DEMO BATTLE · MISSION '+state.missionId+' · WAVE '+state.wave+'/'+state.totalWaves+' · TURN '+state.round:'CURRENT DEMO BATTLE UNAVAILABLE';return state;}
+ function open(){const state=snapshot();if(!state||S!==shownBattle||state.missionId!==shownMission||!idle()||window.BF_homeNav?.current!=='home')return false;if(window.BF_homeNav.go('quest')!==true)return false;const heading=document.querySelector('#bf2100-tray h3')||document.querySelector('.questpanel h2');if(heading){heading.tabIndex=-1;heading.focus();}return true;}
+ button.addEventListener('click',open);window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);window.BFHomeCurrentBattleB100=Object.freeze({snapshot,refresh,open});refresh();
+})();
