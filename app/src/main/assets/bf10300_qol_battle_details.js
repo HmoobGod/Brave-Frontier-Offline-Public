@@ -17,7 +17,7 @@
    return freeze({name:String(u.name||('Unit #'+(u.unitId||'?'))).slice(0,90),
      kind,unitId:Number.isSafeInteger(u.unitId)?u.unitId:null,
      hp,maxHp:max,hpPercent:Math.round(100*hp/max),
-     bb:kind==='ally'?Math.min(100,safe(u.bb)):null,
+     bb:kind==='ally'&&Number.isFinite(u.bb)&&u.bb>=0&&u.bb<=100?u.bb:null,
      active:kind==='ally'?!!u.active&&hp>0:hp>0,
      defending:kind==='ally'?!!u.guard:null});
  }
@@ -95,9 +95,11 @@
      const numbers=document.createElement('span');
      numbers.textContent=unit.hp.toLocaleString()+'/'+unit.maxHp.toLocaleString()+
        ' HP · '+unit.hpPercent+'%'+
-       (unit.kind==='ally'?' · BB '+unit.bb+'%'+
+       (unit.kind==='ally'?' · BB '+(unit.bb===null?'UNAVAILABLE':unit.bb+'%')+
          (unit.defending?' · Guard':''):'');
-     item.append(name,numbers);host.append(item);
+     item.append(name,numbers);
+     if(unit.kind==='ally'&&unit.bb!==null){const gauge=document.createElement('meter');gauge.min=0;gauge.max=100;gauge.value=unit.bb;gauge.setAttribute('aria-label',unit.name+' DEMO BB gauge');gauge.setAttribute('aria-valuetext',unit.bb+' percent');gauge.style.cssText='width:100%;max-width:180px';item.append(gauge);}
+     host.append(item);
    }
  }
  let last='';
