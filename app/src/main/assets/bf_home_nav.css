@@ -1521,7 +1521,10 @@ body.bf-menu-mode #bf054-home-details {
   body.bf-menu-mode #bf-home .bf-scene-place img {
     height:82px;
   }
+  /* Preserve v243's >=10px locked-mode labels on 320px devices.
+     Reduce padding rather than shrinking readable status text. */
   body.bf-menu-mode #bf-home .bf-scene-status {
-    min-height:18px;padding:3px 4px;font-size:9px;
+    min-height:18px;padding:2px 3px;font-size:10px;
+    overflow-wrap:anywhere;line-height:1.2;
   }
 }
