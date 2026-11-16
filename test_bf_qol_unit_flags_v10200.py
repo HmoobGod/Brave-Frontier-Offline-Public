@@ -192,6 +192,20 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.state().advisoryOnly') is True
  p.add_script_tag(path=str(A/'bf10200_qol_unit_flags.js'))
  assert p.locator('#bf10200-flags').count()==1
+ marker_guard=p.evaluate("""()=>{const roster=P.roster,version=P.version,box=document.getElementById('bf-box-results'),card=box.querySelector('[data-bf-unit-id="20011"]');
+  const before=JSON.stringify(P),raw=localStorage.getItem('bf_global_offline_demo_v7'),flags=localStorage.getItem(BFGlobalQoLUnitFlagsV10200.key);
+  const clones=[];let out=[];
+  try{
+   for(const id of ['20011','20011.0','2.0011e4']){const clone=card.cloneNode(true);clone.dataset.bfUnitId=id;box.append(clone);clones.push(clone);}
+   BFGlobalQoLUnitFlagsV10200.refresh();out.push(clones.every(c=>c.hidden&&c.style.display==='none'));
+   for(const value of [null,[20011,20011],[20011,'10011'],Array(2)]){
+    P.roster=value;out.push(!BFGlobalQoLUnitFlagsV10200.refresh().ownershipAvailable&&BFGlobalQoLUnitFlagsV10200.change(20011,'favorites',true)===false);
+   }
+   P.roster=roster;P.version=6;out.push(!BFGlobalQoLUnitFlagsV10200.refresh().ownershipAvailable);
+  }finally{P.roster=roster;P.version=version;clones.forEach(c=>c.remove());BFGlobalQoLUnitFlagsV10200.refresh();}
+  return {out,same:before===JSON.stringify(P)&&raw===localStorage.getItem('bf_global_offline_demo_v7')&&flags===localStorage.getItem(BFGlobalQoLUnitFlagsV10200.key)};
+ }""")
+ assert marker_guard=={'out':[True]*6,'same':True},marker_guard
  assert not errors,errors
  b.close()
 print('PASS v102 unit marker persistence, owned-only toggles, advisory scope and save isolation')
