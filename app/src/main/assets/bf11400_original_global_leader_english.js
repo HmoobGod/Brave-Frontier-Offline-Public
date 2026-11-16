@@ -85,4 +85,5 @@
      sourceForms:72,localizedLeaderIds:36,
      addsCombatEffects:false,saveFieldsAdded:0})
  });
+ window.dispatchEvent?.(new Event('bf-original-leader-english-ready'));
 })();

@@ -1802,3 +1802,14 @@ function bfOfflineUnitPortraitV266(source, name) {
   }
   panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
 })();
+
+/* Home first: original leader text only, with no application of effects. */
+(()=>{'use strict';if(window.BFHomeLeaderReferenceB100)return;const party=document.querySelector('#bf-home #bf-scene-party');if(!party)return;
+ const panel=document.createElement('details');panel.id='bf-home-leader-reference';const title=document.createElement('summary');title.textContent='SQUAD LEADER · ORIGINAL ENGLISH REFERENCE';title.style.minHeight='44px';const text=document.createElement('p');text.id='bf-home-leader-text';panel.append(title,text);party.after(panel);
+ function snapshot(){try{const api=window.BFGlobalOriginalLeaderEnglishV11400;
+ if(P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||!P.squad.length||P.squad.length>6||new Set(P.squad).size!==P.squad.length||new Set(P.roster).size!==P.roster.length||!Number.isSafeInteger(P.squad[0])||!P.roster.includes(P.squad[0])||api?.source?.originalEnglish!==true||typeof api.forUnit!=='function')return null;
+ const unit=effectiveUnit(P.squad[0]),row=api.forUnit(unit?.id);if(!row||row.unitId!==unit?.id||!Number.isSafeInteger(row.lsId)||typeof row.name!=='string'||typeof row.description!=='string')return null;
+ return Object.freeze({baseId:P.squad[0],unitId:row.unitId,leaderId:row.lsId,name:row.name,description:row.description,sourceYear:2022,appliesEffects:false});}catch(_){return null;}}
+ function refresh(){const row=snapshot();text.textContent=row?row.name+' · Unit #'+row.unitId+' / LS #'+row.leaderId+' · '+row.description+' · Original reference text only; native stacking/recipients not inferred.':'Owned squad leader reference unavailable; no description inferred.';return row;}
+ window.addEventListener('bf-original-leader-english-ready',refresh);window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);document.getElementById('squadpicker')?.addEventListener('change',refresh);window.BFHomeLeaderReferenceB100=Object.freeze({snapshot,refresh});refresh();
+})();
