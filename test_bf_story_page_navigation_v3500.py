@@ -60,6 +60,19 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalDialogueTimelineV3500.jump(1000)') is False
  assert page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')==before
  assert page.evaluate('P.version')==7
+ page.evaluate("BF_homeNav.go('quest');document.querySelector('#bf2200-reader').open=true;document.querySelector('#bf2200-text').tabIndex=0;BFGlobalDialogueTimelineV3500.jump(1)")
+ stable=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ page.locator('#bf2200-text').focus();page.keyboard.press('ArrowRight')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==2
+ page.keyboard.press('End')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step===BFGlobalOriginalEventsV2200.snapshot().lines')
+ page.keyboard.press('Home')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ page.locator('#bf3500-line').focus();page.keyboard.press('ArrowRight')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ page.evaluate('S.auto=true');page.locator('#bf2200-text').focus();page.keyboard.press('ArrowRight');page.evaluate('S.auto=false')
+ assert page.evaluate('BFGlobalOriginalEventsV2200.snapshot().step')==1
+ assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v35.00 source dialogue timeline line jumps, source expressions, no saves')
