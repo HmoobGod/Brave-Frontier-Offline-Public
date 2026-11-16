@@ -75,6 +75,12 @@
  }
  go.addEventListener('click',()=>{if(!jump(Number(line.value)))refresh()});
  line.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go.click()}});
+ reader.addEventListener('keydown',event=>{
+   const tag=event.target?.tagName;if(event.altKey||event.ctrlKey||event.metaKey||event.shiftKey||['INPUT','SELECT','TEXTAREA'].includes(tag)||event.target?.isContentEditable||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+   try{if(P.version!==7||typeof S==='undefined'||S.busy!==false||S.auto!==false)return;const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return;
+     const state=snapshot();if(!state.available)return;const target=event.key==='Home'?1:event.key==='End'?state.lines:event.key==='ArrowLeft'?Math.max(1,state.step-1):Math.min(state.lines,state.step+1);event.preventDefault();jump(target);
+   }catch(_){}
+ });
  scene.addEventListener('change',()=>queueMicrotask(refresh));
  reader.addEventListener('toggle',refresh);
  new MutationObserver(refresh).observe(text,{childList:true,subtree:true,characterData:true});
