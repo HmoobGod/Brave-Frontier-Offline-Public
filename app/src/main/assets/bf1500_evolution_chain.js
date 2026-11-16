@@ -113,12 +113,20 @@
  fromSel.setAttribute('aria-label','Temporary draft original form');
  const toSel=document.createElement('select');toSel.id='bf1500-to';
  toSel.setAttribute('aria-label','Recorded reachable evolution target');
+ const compare=document.createElement('select');compare.id='bf1500-compare-target';compare.setAttribute('aria-label','Compare another recorded route destination');compare.style.minHeight='44px';
+ const compareText=document.createElement('p');compareText.id='bf1500-comparison';
+ function compareRoutes(start,a,b){const first=findRoute(start,a),second=findRoute(start,b);if(!first||!second)return null;
+   const delta=new Map();for(const [route,sign] of [[first,-1],[second,1]])for(const m of route.totals.materials){const key=String(m.type)+':'+m.id;const row=delta.get(key)||{id:m.id,type:m.type,change:0};row.change+=sign*m.count;delta.set(key,row);}
+   return Object.freeze({from:start,first:a,second:b,firstStages:first.steps.length,secondStages:second.steps.length,zelDelta:second.totals.zel-first.totals.zel,karmaDelta:second.totals.karma-first.totals.karma,materialDeltas:Object.freeze([...delta.values()].filter(x=>x.change!==0).map(x=>Object.freeze(x))),sourceYear:2022,liveEvolutionChanged:false});
+ }
+ function renderComparison(){const reference=compare.value&&from!==null&&to!==null?compareRoutes(from,to,Number(compare.value)):null;compareText.textContent=reference?'Second minus selected source route: '+reference.firstStages+' → '+reference.secondStages+' recorded stages · Δ Zel '+reference.zelDelta+' · Δ Karma '+reference.karmaDelta+' · '+reference.materialDeltas.map(x=>'type '+x.type+' #'+x.id+' Δ '+x.change).join(' · ')+'. Original recipe references only; no owned resources checked.':'Choose a second destination to compare recorded route requirements.';}
+ compare.addEventListener('change',renderComparison);
  const refreshBtn=document.createElement('button');refreshBtn.type='button';
  refreshBtn.id='bf1500-refresh';refreshBtn.textContent='REFRESH DRAFT ROUTES';
  const report=document.createElement('div');report.id='bf1500-report';
  const steps=document.createElement('div');steps.id='bf1500-steps';
  const materials=document.createElement('div');materials.id='bf1500-materials';
- panel.append(summary,note,fromSel,toSel,refreshBtn,report,steps,materials);
+ panel.append(summary,note,fromSel,toSel,compare,compareText,refreshBtn,report,steps,materials);
  anchor.after(panel);
  let from=null,to=null;
  const el=(tag,txt)=>{const node=document.createElement(tag);
@@ -186,7 +194,8 @@
      label:x.name+' · #'+x.id+' · '+x.steps+' source stage(s)'})),
      'No catalog-matched source recipe path for this draft unit');
    toSel.value=to===null?'':String(to);
-   showRoute();
+   const priorComparison=compare.value;setOptions(compare,destinations.map(x=>({id:x.id,label:x.name+' · #'+x.id})),'Optional: compare a second destination');compare.value=destinations.some(x=>String(x.id)===priorComparison)?priorComparison:'';
+   showRoute();renderComparison();
    return destinations.length;
  }
  function choose(fromId,toId){
@@ -203,7 +212,7 @@
    const id=Number(toSel.value);
    to=toSel.value&&from!==null&&
      reachable(from).some(x=>x.id===id)?id:null;
-   showRoute();
+   showRoute();renderComparison();
  });
  refreshBtn.addEventListener('click',refresh);
  panel.addEventListener('toggle',()=>{if(panel.open)refresh();});
@@ -214,7 +223,7 @@
  window.BFGlobalEvolutionChainV1500=Object.freeze({
    get sourceHopCount(){return sourceHopCount;},
    get selected(){return {from,to};},
-   findRoute,reachable,choose,refresh,
+   findRoute,reachable,choose,refresh,compareRoutes,
    get currentRoute(){return from===null||to===null?null:findRoute(from,to);}
  });
 })();
