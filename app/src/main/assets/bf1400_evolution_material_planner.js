@@ -111,6 +111,10 @@
  const word=(tag,value)=>{
    const el=document.createElement(tag);el.textContent=String(value);return el;
  };
+ function sharedMaterials(){try{const data=summary(),byMaterial=new Map();if(data.available===false)return null;
+   for(const entry of data.entries){if(!Array.isArray(entry.materials)||entry.materials.some(x=>!Number.isSafeInteger(x.id)||x.id<=0||!Number.isSafeInteger(x.type)))return null;const counts=new Map();for(const mat of entry.materials){const key=String(mat.type)+':'+mat.id;const value=counts.get(key)||{id:mat.id,type:mat.type,required:0};value.required++;counts.set(key,value);}for(const [key,mat] of counts){const row=byMaterial.get(key)||{id:mat.id,type:mat.type,total:0,recipes:[]};row.total+=mat.required;row.recipes.push(Object.freeze({from:entry.from,to:entry.to,required:mat.required}));byMaterial.set(key,row);}}
+   return Object.freeze([...byMaterial.values()].filter(x=>x.recipes.length>1).map(x=>Object.freeze({...x,recipes:Object.freeze(x.recipes)})));
+ }catch(_){return null;}}
  function render(){
    const data=summary();
    cards.replaceChildren();report.replaceChildren();
@@ -161,6 +165,8 @@
      materials.append(row);
    }
    report.append(materials);
+   const shared=sharedMaterials();const sharedPanel=document.createElement('details');sharedPanel.id='bf1400-shared-materials';const sharedTitle=word('summary','SHARED MATERIALS ACROSS SELECTED SOURCE RECIPES');sharedTitle.style.minHeight='44px';sharedPanel.append(sharedTitle);if(shared===null)sharedPanel.append(word('p','Shared material reference unavailable.'));else if(!shared.length)sharedPanel.append(word('p','No material is shared across the current selected source recipes.'));else for(const row of shared)sharedPanel.append(word('p','Type '+row.type+' material #'+row.id+' · '+row.total+' recorded slots across '+row.recipes.length+' source recipes: '+row.recipes.map(r=>'#'+r.from+' → #'+r.to+' ×'+r.required).join(' | ')));sharedPanel.append(word('small','Source recipe dependencies only; owned inventory and acquisition are not inferred.'));report.append(sharedPanel);
+
    return data;
  }
  auto.addEventListener('click',autoSelect);
@@ -170,7 +176,7 @@
    if(panel.open)render();
  });
  render();
- window.BFEvolutionMaterialPlannerV1400=Object.freeze({
+ window.BFEvolutionMaterialPlannerV1400=Object.freeze({sharedMaterials,
    get selected(){return chosen();},
    get plan(){return summary();},
    sourceOptions:id=>sourceOptions(id).map(r=>({
