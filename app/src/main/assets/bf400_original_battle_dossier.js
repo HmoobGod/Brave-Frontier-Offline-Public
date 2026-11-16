@@ -168,17 +168,25 @@
    return {formId:row.formId,available:true,skillNames:names};
  }
  function waveRows(){
+   try{
    const row=selectedMission();
    const waveIndex=Number(wave.value);
    if(!row||!Number.isInteger(waveIndex)||waveIndex<1||
       waveIndex>row.waves.length)return [];
-   return row.waves[waveIndex-1].enemies.map((e,i)=>{
+   const enemies=row.waves[waveIndex-1]?.enemies;
+   if(!Array.isArray(enemies)||!enemies.length||enemies.length>32||enemies.some(e=>!e||
+     !Number.isSafeInteger(e.unitId)||e.unitId<=0||typeof e.name!=='string'||!e.name.trim()||
+     !Number.isSafeInteger(e.hp)||e.hp<=0||!Number.isSafeInteger(e.atk)||e.atk<0||
+     !Number.isSafeInteger(e.def)||e.def<0)||
+     !Number.isSafeInteger(enemies.reduce((sum,e)=>sum+e.hp,0)))return [];
+   return enemies.map((e,i)=>{
      const now=catalog.find(e.unitId);
      return {slot:i+1,name:e.name,unitId:e.unitId,hp:e.hp,atk:e.atk,
        def:e.def,aiId:e.aiId,sourceYear:2014,
        unit2022:now?{name:now.name,element:elements[now.element]||null,
          thumbnail:!!now.thumbnail,exactName:now.name===e.name}:null};
    });
+   }catch(_){return [];}
  }
  function showMission(id=Number(mission.value)){
    const row=history.sourceFor(Number(id));if(!row)return false;
@@ -190,10 +198,12 @@
    wave.value='1';return showWave();
  }
  function showWave(n=Number(wave.value)){
-   const row=selectedMission();if(!row)return false;
+   let row;try{row=selectedMission();}catch(_){row=null;}
+   if(!row){origin.textContent='Historical wave evidence unavailable.';metrics.replaceChildren();foes.replaceChildren();return false;}
    const w=Number(n);if(!Number.isInteger(w)||w<1||w>row.waves.length)return false;
    wave.value=String(w);
    const entries=waveRows();
+   if(!entries.length){origin.textContent='Historical 2014 wave evidence unavailable; no 2022 formation inferred.';metrics.replaceChildren();foes.replaceChildren();integrity.textContent='Verified native 2022 formations: 0';return false;}
    origin.replaceChildren(b('Historical 2014 data · '+row.name),
      tag(row.sourcePath+' · Git blob '+row.gitBlobSha),
      para('2014 enemy lineup; NOT authenticated 2022 native spawn, AI, rewards or damage rules.'));
