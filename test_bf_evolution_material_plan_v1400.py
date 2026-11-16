@@ -112,6 +112,25 @@ with sync_playwright() as pw:
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
+ passive=page.evaluate('JSON.stringify({P,S,plan:BFEvolutionMaterialPlannerV1400.plan,draft:BFArchiveDraftV800.selected})')
+ shared=page.evaluate('BFEvolutionMaterialPlannerV1400.sharedMaterials()')
+ assert isinstance(shared,list)
+ # At this point the original test deliberately cleared all recipe choices.
+ assert shared==[]
+ page.evaluate('BFEvolutionMaterialPlannerV1400.autoSelect()')
+ planned=page.evaluate('BFEvolutionMaterialPlannerV1400.plan')
+ expected_shared={}
+ for entry in planned['entries']:
+  counts={}
+  for mat in entry['materials']: counts[(mat['type'],mat['id'])]=counts.get((mat['type'],mat['id']),0)+1
+  for key,count in counts.items(): expected_shared.setdefault(key,[]).append({'from':entry['from'],'to':entry['to'],'required':count})
+ expected_shared={key:rows for key,rows in expected_shared.items() if len(rows)>1}
+ observed=page.evaluate('BFEvolutionMaterialPlannerV1400.sharedMaterials()')
+ assert {(x['type'],x['id']):x['recipes'] for x in observed}==expected_shared,observed
+ for row in observed: assert row['total']==sum(x['required'] for x in row['recipes'])
+ passive=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected,plan:BFEvolutionMaterialPlannerV1400.plan})')
+ page.evaluate('BFEvolutionMaterialPlannerV1400.sharedMaterials();BFEvolutionMaterialPlannerV1400.refresh()')
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected,plan:BFEvolutionMaterialPlannerV1400.plan})')==passive
  assert not errors,errors
  browser.close()
 print('PASS v14: exact 2022 recipe material aggregation, missing targets, draft edits, UI and v7 save protection')
