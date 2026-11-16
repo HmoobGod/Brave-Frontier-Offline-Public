@@ -73,11 +73,20 @@
    refresh();
    return result.source===s.source&&result.step===target;
  }
- go.addEventListener('click',()=>{if(!jump(Number(line.value)))refresh()});
+ function submitLine(){
+   const state=snapshot(),raw=line.value;
+   if(!/^[1-9][0-9]*$/.test(raw)||!Number.isSafeInteger(Number(raw))||Number(raw)>state.lines||!state.available){
+     line.setAttribute('aria-invalid','true');status.textContent='Enter a whole source line from 1 to '+state.lines+'. Scene position unchanged.';return false;
+   }
+   line.removeAttribute('aria-invalid');return jump(Number(raw));
+ }
+ go.addEventListener('click',submitLine);
+ line.addEventListener('input',()=>line.removeAttribute('aria-invalid'));
+
  line.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();go.click()}});
  scene.addEventListener('change',()=>queueMicrotask(refresh));
  reader.addEventListener('toggle',refresh);
  new MutationObserver(refresh).observe(text,{childList:true,subtree:true,characterData:true});
  refresh();
- window.BFGlobalDialogueTimelineV3500=Object.freeze({snapshot,refresh,jump});
+ window.BFGlobalDialogueTimelineV3500=Object.freeze({snapshot,refresh,jump,submitLine});
 })();
