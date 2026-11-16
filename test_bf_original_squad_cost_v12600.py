@@ -56,6 +56,12 @@ with sync_playwright() as playwright:
  observed=page.evaluate('(ids)=>ids.map(id=>BFGlobalOriginalSquadCostV12600.lookup(id))',[10011,10025,60042,123456789])
  assert observed[:3]==[{'unitId':10011,'cost':2,'rarity':2,'original2022':True,'displayOnly':True},{'unitId':10025,'cost':25,'rarity':6,'original2022':True,'displayOnly':True},{'unitId':60042,'cost':6,'rarity':3,'original2022':True,'displayOnly':True}]
  assert observed[3] is None
+ proof=page.evaluate("""()=>{const api=BFGlobalOriginalSquadCostV12600,roster=P.roster,squad=P.squad,resolver=window.effectiveUnit,before=JSON.stringify({P,S}),out=[];
+ try{for(const bad of [null,{},[squad[0],squad[0]],['10011'],[999999],Array(7).fill(10011)]){P.squad=bad;const x=api.refresh();out.push(!x.available&&!x.complete&&x.originalSquadCost===null&&document.querySelector('#bf12600-home-squad-cost').textContent.includes('OWNERSHIP UNAVAILABLE'));}
+ P.squad=squad;P.roster=null;out.push(!api.refresh().available);P.roster=roster;window.effectiveUnit=()=>{throw Error('fixture')};out.push(!api.refresh().available);
+ }finally{P.roster=roster;P.squad=squad;window.effectiveUnit=resolver;api.refresh();}return {out,unchanged:before===JSON.stringify({P,S}),recovered:api.snapshot().available};}""")
+ assert proof=={'out':[True]*8,'unchanged':True,'recovered':True},proof
+
  assert page.locator('#bf12600-original-squad-cost').count()==1
  assert page.locator('#bf12600-original-squad-cost summary').count()==1
  assert page.locator('#bf12600-home-squad-cost').count()==1

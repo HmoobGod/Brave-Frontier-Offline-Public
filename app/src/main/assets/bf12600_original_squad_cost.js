@@ -35,6 +35,11 @@
   function snapshot(){
     const rows=[],unsupported=[];
     let total=0;
+    let available=true;
+    try{
+    if(P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0)||new Set(P.roster).size!==P.roster.length)throw Error('Invalid ownership');
+    const occupied=P.squad.filter(id=>id!==null&&id!==undefined&&id!==0);
+    if(occupied.some(id=>!Number.isSafeInteger(id)||id<=0||!P.roster.includes(id))||new Set(occupied).size!==occupied.length)throw Error('Invalid squad');
     for(let i=0;i<Math.min(6,P.squad.length);i++){
       const baseId=P.squad[i];
       if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))continue;
@@ -46,8 +51,9 @@
       rows.push(freeze({slot:i+1,baseId,unitId,
         rarity:original.rarity,cost:original.cost}));
     }
-    return freeze({originalSquadCost:total,count:rows.length,
-      complete:unsupported.length===0,rows:freeze(rows),
+    }catch(_){available=false;rows.length=0;unsupported.length=0;total=null;}
+    return freeze({available,originalSquadCost:total,count:rows.length,
+      complete:available&&unsupported.length===0,rows:freeze(rows),
       unsupported:freeze(unsupported),capacityKnown:false,
       originalCapacityLimit:null,savedFieldsAdded:0});
   }
@@ -81,7 +87,7 @@
   function refresh(){
     const state=snapshot();
     heading.textContent='ORIGINAL 2022 SQUAD COST · '+
-      (state.complete?state.originalSquadCost+' ('+state.count+' units)':'INCOMPLETE SOURCE COVERAGE');
+      (!state.available?'OWNERSHIP UNAVAILABLE':state.complete?state.originalSquadCost+' ('+state.count+' units)':'INCOMPLETE SOURCE COVERAGE');
     list.replaceChildren();
     for(const row of state.rows){
       const entry=document.createElement('li');
@@ -95,7 +101,7 @@
       list.append(entry);
     }
     if(homeCost){
-      homeCost.textContent=!state.complete?
+      homeCost.textContent=!state.available?'ORIGINAL 2022 SQUAD COST · OWNERSHIP UNAVAILABLE · capacity unknown':!state.complete?
         'ORIGINAL 2022 SQUAD COST · SOURCE INCOMPLETE · '+
           state.unsupported.length+' unverified unit(s) · capacity unknown':
         state.count===0?
