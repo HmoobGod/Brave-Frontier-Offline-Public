@@ -126,6 +126,13 @@ with sync_playwright() as pw:
  assert p.locator('#bf11300-level-rows li').count()==6
  p.add_script_tag(path=str(A/'bf11500_original_unit_level_caps.js'))
  assert p.locator('#bf11300-original-level-caps').count()==1
+ reference=p.evaluate("""()=>{const api=BFGlobalOriginalUnitLevelCapsV11500,before=JSON.stringify({P,S}),squad=P.squad,roster=P.roster,resolve=window.effectiveUnit,healthy=api.squadReference(),out=[];
+ try{for(const bad of [null,{},[squad[0],squad[0]],['10011'],[999999]]){P.squad=bad;api.refresh();out.push(!api.squadReference().available&&document.querySelector('#bf11300-squad-cap-preview').textContent.includes('UNAVAILABLE'));}
+ P.squad=squad;P.roster=null;out.push(!api.squadReference().available);P.roster=roster;window.effectiveUnit=()=>{throw Error('fixture')};out.push(!api.squadReference().available);
+ }finally{P.squad=squad;P.roster=roster;window.effectiveUnit=resolve;api.refresh();}return {healthy,out,unchanged:before===JSON.stringify({P,S})};}""")
+ assert reference['healthy']['available'] and len(reference['healthy']['rows'])==6,reference
+ for row in reference['healthy']['rows']: assert row['originalCap']==expected[row['unitId']]
+ assert reference['out']==[True]*7 and reference['unchanged'],reference
  assert not errors,errors
  browser.close()
 print('PASS v115 source 72 original 2022 unit level caps; live archive-only caps before LS, resets, training, save v7')

@@ -99,6 +99,22 @@
      cappedBuilders,unchangedBuilders,rejectedBuilders,
      rows:freeze(rows),savedProgressChanged:false});
  }
+ // Reference inspection only; apply() remains the existing combat builder.
+ function squadReference(){
+   const rows=[];
+   try{
+     if(P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0)||new Set(P.roster).size!==P.roster.length)throw Error('ownership unknown');
+     const seen=new Set();
+     for(const [index,baseId] of Array.from(P.squad).entries()){
+       if(baseId===null||baseId===undefined||baseId===0)continue;
+       if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId)||seen.has(baseId))throw Error('ambiguous squad');seen.add(baseId);
+       const unit=effectiveUnit(baseId),cap=lookup(unit?.id),level=demoLevel(P.unitExp?.[baseId]);
+       if(!cap||!Number.isSafeInteger(level)||level<1)throw Error('reference unavailable');
+       rows.push(freeze({slot:index+1,unitId:unit.id,demoLevel:level,originalCap:cap,atOrAboveCap:level>=cap}));
+     }
+     return freeze({available:true,rows:freeze(rows),readOnly:true});
+   }catch(_){return freeze({available:false,rows:freeze([]),readOnly:true});}
+ }
  const panel=document.createElement('details');
  panel.id='bf11300-original-level-caps';
  panel.style.cssText='padding:10px;margin:9px 2px;border:1px solid #b5bc8f;'+
@@ -131,27 +147,11 @@
    list.replaceChildren();
    squadPreview.replaceChildren();
    if(panel.open){
-     let occupied=0;
-     for(let slot=0;slot<Math.min(6,P.squad.length);slot++){
-       const baseId=P.squad[slot];
-       if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId))continue;
-       const unit=effectiveUnit(baseId);
-       if(!unit||!Number.isSafeInteger(unit.id))continue;
-       const cap=lookup(unit.id);
-       if(!cap)continue;
-       const level=demoLevel(P.unitExp?.[baseId]);
-       if(!Number.isSafeInteger(level)||level<1)continue;
-       const li=document.createElement('li');
-       li.textContent='Slot '+(slot+1)+' · Unit #'+unit.id+
-         ' · DEMO level '+level+' / original cap '+cap+
-         (level>=cap?' · at/above source cap':' · below source cap');
-       squadPreview.append(li);occupied++;
+     const reference=squadReference();
+     for(const row of reference.rows){
+       const li=document.createElement('li');li.textContent='Slot '+row.slot+' · Unit #'+row.unitId+' · DEMO level '+row.demoLevel+' / original cap '+row.originalCap+(row.atOrAboveCap?' · at/above source cap':' · below source cap');squadPreview.append(li);
      }
-     if(!occupied){
-       const li=document.createElement('li');
-       li.textContent='No eligible owned squad forms to preview.';
-       squadPreview.append(li);
-     }
+     if(!reference.available||!reference.rows.length){const li=document.createElement('li');li.textContent=reference.available?'No eligible owned squad forms to preview.':'Squad level reference UNAVAILABLE: ownership or source could not be verified.';squadPreview.append(li);}
    }
    if(panel.open)for(const row of state.rows){
      const li=document.createElement('li');
@@ -165,7 +165,7 @@
  const timer=setInterval(()=>{if(!document.hidden&&panel.open)refresh();},1800);
  window.addEventListener('pagehide',()=>clearInterval(timer),{once:true});
  window.BFGlobalOriginalUnitLevelCapsV11500=freeze({
-   source,lookup,apply,snapshot,refresh
+   source,lookup,apply,snapshot,refresh,squadReference
  });
  refresh();
 })();
