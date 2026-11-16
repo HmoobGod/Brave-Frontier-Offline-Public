@@ -397,6 +397,15 @@ with sync_playwright() as pw:
               const run=(name,mutate,check)=>{reset();mutate();const before=snap();api.refresh();
                 reports.push({name,ok:!!check(),unchanged:snap()===before});};
               const first=old.squad[0],base=rows.find(row=>row.id===old.unit(first).id);
+              // Isolate ownership from profile/catalog rejection: this unit
+              // is real and inspectable, but is absent from the owned roster.
+              const unowned=[10012,20012,30012,40012,50012,60012,
+                10013,20013,30013,40013,50013,60013].find(id=>{
+                  const unit=old.unit(id),row=rows.find(row=>row.id===unit?.id);
+                  return !old.roster.includes(id)&&unit&&Number.isSafeInteger(unit.id)&&unit.id>0&&
+                    typeof unit.name==='string'&&unit.name.trim()&&row&&Number.isInteger(row.element)&&row.element>=1&&row.element<=6;
+                });
+              if(!Number.isSafeInteger(unowned))throw Error('Valid unowned source-profile fixture missing');
               const other=rows.find(row=>Number.isSafeInteger(row.id)&&row.element>=1&&row.element<=6&&row.element!==base.element);
               const changedForm=()=>effectiveUnit=id=>id===first?{...old.unit(id),id:other.id}:old.unit(id);
               try{
@@ -412,7 +421,7 @@ with sync_playwright() as pw:
                 run('duplicate roster',()=>P.roster=[...old.roster,first],unavailable);
                 run('sparse roster',()=>P.roster=Array(2),unavailable);
                 run('duplicate squad',()=>P.squad=[first,first],unavailable);
-                run('unowned squad',()=>P.squad=[9999999],unavailable);
+                run('valid unowned squad',()=>P.squad=[unowned],unavailable);
                 run('oversized squad',()=>P.squad=[...old.squad,first],unavailable);
                 run('blank profile name',()=>effectiveUnit=id=>({...old.unit(id),name:' '}),unavailable);
                 run('unknown source form',()=>effectiveUnit=id=>({...old.unit(id),id:9999999}),unavailable);
