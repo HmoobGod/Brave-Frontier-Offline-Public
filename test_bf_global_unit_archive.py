@@ -111,6 +111,18 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    page.locator('#bf-archive-reset').click()
+    stable=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+    page.locator('.bf-archive-unit').first.click()
+    page.locator('#bf-archive-detail .bf-archive-close').focus();page.keyboard.press('Escape')
+    assert page.locator('#bf-archive-detail').is_hidden()
+    assert page.evaluate('document.activeElement.matches(".bf-archive-unit")')
+    page.locator('.bf-archive-unit').first.click()
+    page.locator('#bf-archive-search').fill('NO_ORIGINAL_MATCH')
+    # Filtering already closes the stale profile; Escape on search does not alter the filter.
+    page.locator('#bf-archive-search').focus();page.keyboard.press('Escape')
+    assert page.locator('#bf-archive-detail').is_hidden()
+    assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()

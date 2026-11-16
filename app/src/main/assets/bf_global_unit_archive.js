@@ -334,6 +334,7 @@
     search.value='';element.value='all';rarity.value='all';kind.value='all';sort.value='id';
     page=0;detail.hidden=true;detail.replaceChildren();render();search.focus();
   });
+  detail.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.altKey||event.ctrlKey||event.metaKey||detail.hidden)return;const close=detail.querySelector('.bf-archive-close');if(!close)return;event.preventDefault();event.stopPropagation();close.click();});
   historicalArtToggle.addEventListener('change',()=>{detail.hidden=true;render();});
   historicalBattleToggle.addEventListener('change',()=>{detail.hidden=true;detail.replaceChildren();render();});
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});
