@@ -61,6 +61,15 @@ with sync_playwright() as pw:
  assert page.evaluate('P.version')==7
  saved=page.evaluate('localStorage.getItem("bf_global_offline_demo_v7")')
  assert saved==before['save'],'Reader must never auto-save or grant rewards'
+ page.evaluate('P.questClears[12]=1;BFGlobalOriginalEventsV2200.read("dungeon",20)')
+ stable=page.evaluate("JSON.stringify({P,S,mission:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ context=page.evaluate('BFGlobalOriginalEventsV2200.sceneContext()')
+ expected=page.evaluate('QUESTS.filter(q=>q.dungeonId===20).map(q=>q.missionId)')
+ assert context['associatedMissions']==expected and context['nativeTriggerRestored'] is False,context
+ matches=page.evaluate("""()=>{const prior=QUEST;try{QUEST=QUEST_BY_ID.get(20);BFGlobalOriginalEventsV2200.refresh();return BFGlobalOriginalEventsV2200.sceneContext().selectedMissionMatches;}finally{QUEST=prior;BFGlobalOriginalEventsV2200.refresh();}}""")
+ assert matches is True
+ assert 'native triggers are not restored' in page.locator('#bf2200-selection-context').text_content()
+ assert page.evaluate("JSON.stringify({P,S,mission:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()
 print('PASS v22.00 10 original 2022 event scripts, 128 text frames, Mistral unlocks and no save writes')

@@ -36,6 +36,13 @@
  const heading=document.createElement('p');heading.id='bf2200-title';
  const message=document.createElement('div');message.id='bf2200-text';
  message.setAttribute('aria-live','polite');
+ const context=document.createElement('p');context.id='bf2200-selection-context';
+ function sceneContext(){try{if(P.version!==7)return null;const scene=snapshot(),match=/^(clear|dungeon):([1-9][0-9]*)$/.exec(scene.chosen||'');if(!match)return null;
+   const kind=match[1],id=Number(match[2]),source=lookup(kind,id);if(!source||source.name!==scene.source)return null;
+   const missions=QUESTS.filter(q=>kind==='clear'?q.missionId===id:q.dungeonId===id).map(q=>q.missionId);if(!missions.length||new Set(missions).size!==missions.length)return null;
+   const selected=typeof QUEST!=='undefined'&&Number.isSafeInteger(QUEST?.missionId)?QUEST.missionId:null;
+   return Object.freeze({kind,id,associatedMissions:Object.freeze(missions),selectedMissionId:selected,selectedMissionMatches:selected===null?null:missions.includes(selected),nativeTriggerRestored:false});
+ }catch(_){return null;}}
  const controls=document.createElement('div');controls.id='bf2200-nav';
  const prev=document.createElement('button');prev.id='bf2200-prev';prev.type='button';prev.textContent='‹ PREV';
  const counter=document.createElement('span');counter.id='bf2200-counter';
@@ -43,7 +50,7 @@
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ panel.append(summary,choices,heading,message,context,controls,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -90,6 +97,7 @@
    }
    panel.hidden=!s;
    if(!s)return null;
+   const link=sceneContext();context.textContent=link?'Archive scene '+link.kind+' #'+link.id+' · associated mission IDs '+link.associatedMissions.join(', ')+' · selected mission '+(link.selectedMissionId??'unknown')+(link.selectedMissionMatches?' is in this source group.':' is separate from this source group.')+' Selection context only; native triggers are not restored. Reading does not select a mission.':'Source selection context unavailable.';
    choices.value=selected;
    heading.textContent=s.title+' · Original '+(s.kind==='clear'?'clear-event':'dungeon')+' script';
    message.textContent=s.lines[position];
@@ -109,7 +117,7 @@
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGlobalOriginalEventsV2200=Object.freeze({
+ window.BFGlobalOriginalEventsV2200=Object.freeze({sceneContext,
    registerSupplemental(s){
      if(!s||s.kind!=='dungeon'||!Number.isInteger(s.id)||
        !((s.id>=200&&s.id<=260)||(s.id>=300&&s.id<=360))||
