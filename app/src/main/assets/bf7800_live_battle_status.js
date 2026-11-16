@@ -53,12 +53,13 @@
      Math.max(0,immuneState.expiresAfterRound-S.round+1);
    const regenTurns=regenState.untilRound===null?null:
      Math.max(0,regenState.untilRound-S.round+1);
-   const entries=[];
+   const entries=[];let identityUnavailable=false;
    if(active)for(let slot=0;slot<6;slot++){
      const unit=S.party?.[slot];
      if(!unit?.active||!Number.isFinite(unit.hp)||
        !Number.isFinite(unit.maxHp)||unit.hp<=0||
        unit.maxHp<=0||unit.hp>unit.maxHp)continue;
+     if(!Number.isSafeInteger(unit.id)||unit.id!==slot||S.party.filter(x=>x===unit).length!==1){identityUnavailable=true;continue;}
      const codes=ailments.codesFor(slot);
      const immune=immuneState.protectedSlots.includes(slot);
      const regen=regenState.active&&regenState.targetSlots.includes(slot);
@@ -73,7 +74,7 @@
        bbBlocked:codes.includes(5)||codes.includes(6)
      }));
    }
-   return freeze({mode:S.mode,round:S.round,visible:active&&entries.length>0,
+   return freeze({mode:S.mode,round:S.round,visible:active&&(entries.length>0||identityUnavailable),identityUnavailable,
      units:freeze(entries),source:'2022 Global item master and already-loaded battle states',
      timing:'Current simulated battle rounds; not original native status lifetime'});
  }
@@ -81,10 +82,10 @@
  function refresh(){
    const st=snapshot();
    panel.hidden=!st.visible;
-   const signature=JSON.stringify(st.units);
+   const signature=JSON.stringify({units:st.units,identityUnavailable:st.identityUnavailable});
    if(signature===last)return st;
    last=signature;
-   heading.textContent='BATTLE STATUS · '+st.units.length+
+   heading.textContent=(st.identityUnavailable?'BATTLE STATUS IDENTITY UNAVAILABLE · ':'BATTLE STATUS · ')+st.units.length+
      (st.units.length===1?' AFFECTED ALLY':' AFFECTED ALLIES');
    const nodes=st.units.map(unit=>{
      const row=document.createElement('div');row.className='bf7800-row';
