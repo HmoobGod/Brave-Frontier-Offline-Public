@@ -81,7 +81,7 @@ with sync_playwright() as pw:
         assert squad.locator(".bf-scene-member").count() == 6
         assert squad.evaluate(
             "(el) => getComputedStyle(el).gridTemplateColumns.split(' ').length"
-        ) == (3 if width <= 412 else 6), width
+        ) == (5 if width <= 412 else 6), width
 
         shortcut = page.locator(".bf-scene-toolrow")
         assert shortcut.locator("button").count() == 4

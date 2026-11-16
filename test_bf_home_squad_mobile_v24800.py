@@ -1,4 +1,4 @@
-"""v248 original Global Home six-slot squad preview: responsive CSS only."""
+"""v248 six-slot Home squad: retain old source contract, verify v615 portrait-first override."""
 from pathlib import Path
 import re
 import sys
@@ -62,18 +62,18 @@ with sync_playwright() as pw:
             cols:getComputedStyle(el).gridTemplateColumns.split(' ').length,
             scroll:el.scrollWidth,client:el.clientWidth
         })""")
-        assert sizes["cols"]==(3 if width<=412 else 6),(width,sizes)
+        assert sizes["cols"]==(5 if width<=412 else 6),(width,sizes)
         assert sizes["scroll"] <= sizes["client"]+2,(width,sizes)
-        for item in cards.all():
+        for index,item in enumerate(cards.all()):
             assert item.get_attribute("aria-label")=="Empty squad slot"
             m=item.evaluate("""el=>({
                 size:el.getBoundingClientRect().width,
                 minHeight:parseFloat(getComputedStyle(el).minHeight)
             })""")
-            assert m["size"] >= 36 and m["minHeight"] >= 90,(width,m)
+            assert m["size"] >= 36 and m["minHeight"] >= (44 if width<=412 and index==5 else 90),(width,index,m)
         page.locator(".bf-scene-squad button[data-bf-goto='units']").click()
         assert page.evaluate("BF_homeNav.current")=="units"
         assert not errors,(width,errors)
         page.close()
     browser.close()
-print("PASS v248 browser: six visible squad slots, 3/6 responsive columns and Units route")
+print("PASS v248/v615 browser: five main portraits + compact sixth phone slot, all six visible; Units route")
