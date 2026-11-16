@@ -180,6 +180,26 @@ function bfOfflineUnitPortraitV266(source, name) {
     '</section>',
     '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
   ].join('');
+  // Keep navigation and source location names usable if original Home art
+  // cannot load. No replacement image or playable-mode claim is invented.
+  const homeArtFallbacks=new WeakMap();
+  home.addEventListener('error',event=>{
+    const img=event.target;
+    if(img?.tagName!=='IMG'||!img.closest('.bf-scene-place,.bf-scene-toolrow'))return;
+    let fallback=homeArtFallbacks.get(img);
+    if(!fallback){
+      fallback=document.createElement('span');fallback.className='bf-home-art-fallback';
+      fallback.setAttribute('role','img');fallback.setAttribute('aria-label','Original Home artwork unavailable');
+      fallback.textContent='ORIGINAL ART UNAVAILABLE';
+      fallback.style.cssText='box-sizing:border-box;display:block;width:100%;max-width:100%;padding:8px;overflow-wrap:anywhere;font:700 10px/1.4 Arial,sans-serif';
+      img.after(fallback);homeArtFallbacks.set(img,fallback);
+    }
+    img.style.display='none';fallback.hidden=false;fallback.style.display='block';
+  },true);
+  home.addEventListener('load',event=>{
+    const img=event.target,fallback=homeArtFallbacks.get(img);
+    if(fallback){img.style.display='';fallback.hidden=true;fallback.style.display='none';}
+  },true);
   // v437: Home-to-existing-about-panel is a read-only, user-initiated route.
   // No build identity or signing status is guessed when Android metadata is absent.
   home.addEventListener('click',event=>{
@@ -201,8 +221,16 @@ function bfOfflineUnitPortraitV266(source, name) {
   partyReview.setAttribute('role', 'status');
   partyReview.setAttribute('aria-live', 'polite');
   party.insertAdjacentElement('afterend', partyReview);
+  function verifiedDemoLevel(id){try{
+    if(!P.unitExp||typeof P.unitExp!=='object'||Array.isArray(P.unitExp))return null;
+    const receipt=Object.getOwnPropertyDescriptor(P.unitExp,String(id));
+    if(!receipt||!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<0||receipt.value>1000000000||typeof demoLevel!=='function')return null;
+    const level=demoLevel(receipt.value);return Number.isSafeInteger(level)&&level>=1&&level<=99?level:null;
+  }catch(_){return null;}}
   function refreshParty() {
-    const members = typeof P !== 'undefined' && P && Array.isArray(P.squad) ? P.squad.slice(0, 6) : [];
+    const stateValid=typeof P!=='undefined'&&P?.version===7&&Array.isArray(P.squad)&&P.squad.length<=6&&Array.isArray(P.roster)&&Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
+    const members = stateValid ? P.squad.slice(0,6) : [];
+
     const nodes = [], seen = new Set();
     const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
     let unverified = 0;
@@ -213,7 +241,7 @@ function bfOfflineUnitPortraitV266(source, name) {
         Array.isArray(roster) && roster.includes(baseId) && !seen.has(baseId);
       let unit = null;
       if (owned && typeof effectiveUnit === 'function') {
-        try { unit = effectiveUnit(baseId); } catch (_) { unit = null; }
+        try { unit = effectiveUnit(baseId);if(!unit||!Number.isSafeInteger(unit.id)||unit.id<=0||typeof unit.name!=='string'||!unit.name.trim())unit=null; } catch (_) { unit = null; }
       }
       if (unit) seen.add(baseId);
       const card = document.createElement(unit ? 'button' : 'div');
@@ -225,11 +253,24 @@ function bfOfflineUnitPortraitV266(source, name) {
         const name = document.createElement('strong');
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
-        const exp = P.unitExp && P.unitExp[baseId] || 0;
-        level.textContent = 'Lv.' + (typeof demoLevel === 'function' ? demoLevel(exp) : '1');
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent);
+        const observedLevel=verifiedDemoLevel(baseId);
+        level.textContent=observedLevel===null?'LEVEL UNAVAILABLE':'Lv.'+observedLevel;
+        // The first ordered owned slot is the leader slot; never promote
+        // another visible card when slot one is empty or unverified.
+        const slot = document.createElement('span');
+        slot.className = 'bf-scene-slot';
+        slot.setAttribute('aria-hidden', 'true');
+        if (index === 0) {
+          const leader = document.createElement('b');
+          leader.className = 'bf-scene-leader';
+          leader.textContent = 'LEADER';
+          slot.append(leader);
+        }
+        slot.append(document.createTextNode('SLOT ' + (index + 1)));
+        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent +
+          ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
         card.title = 'Inspect owned unit';
-        card.append(img, name, level);
+        card.append(slot, img, name, level);
         card.addEventListener('click', () => {
           // Recheck the live slot and ownership: this card may predate a
           // roster import or squad edit. Navigation is a manual read only
@@ -269,8 +310,8 @@ function bfOfflineUnitPortraitV266(source, name) {
       nodes.push(card);
     }
     party.replaceChildren(...nodes);
-    partyReview.hidden = unverified === 0;
-    partyReview.textContent = unverified ?
+    partyReview.hidden = stateValid && unverified === 0;
+    partyReview.textContent = !stateValid ? 'Squad data unavailable · ownership could not be verified. Open Units to review.' : unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
       ' review · Open Units to inspect ownership.' : '';
   }

@@ -66,6 +66,23 @@ with sync_playwright() as playwright:
             page.locator('.bf-navbar button[data-bf-goto="home"]').click()
     assert page.evaluate(handoff_snapshot)==handoff_before
     print('PASS Home View Quests and Quest Manage Squad keyboard handoffs focus visible destinations without storage writes')
+    art_before=page.evaluate(handoff_snapshot)
+    art=page.locator('.bf-scene-active[data-bf-goto="quest"] img')
+    art.dispatch_event('error')
+    assert art.evaluate('(el)=>el.style.display')=='none'
+    fallback=page.locator('.bf-scene-active[data-bf-goto="quest"] .bf-home-art-fallback')
+    assert fallback.is_visible() and 'UNAVAILABLE' in fallback.text_content()
+    art.dispatch_event('error')
+    assert fallback.count()==1
+    for width in (320,390,540):
+        page.set_viewport_size({'width':width,'height':844})
+        assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+    page.locator('.bf-scene-active[data-bf-goto="quest"]').focus();page.keyboard.press('Enter')
+    assert page.evaluate('BF_homeNav.current')=='quest'
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+    art.dispatch_event('load')
+    assert fallback.is_hidden()
+    assert page.evaluate(handoff_snapshot)==art_before
 
     # v437: Home build-info shortcut opens only the already-existing Menu
     # metadata disclosure; browser previews must not invent APK identity.

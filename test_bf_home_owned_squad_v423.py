@@ -47,6 +47,38 @@ with sync_playwright() as pw:
         assert warning.count() == 1 and warning.is_hidden()
         # Real Home portrait controls open the CURRENT owned profile through
         # the existing Unit Box, including keyboard activation and narrow phones.
+        # Home identifies actual ordered squad slots, not a promoted fallback leader.
+        slot_snapshot = """()=>JSON.stringify({P,S,quest:QUEST.missionId,
+          storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+            const k=localStorage.key(i);return [k,localStorage.getItem(k)]})),
+          writes:__v423Writes()})"""
+        slot_before=page.evaluate(slot_snapshot)
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            page.evaluate('BFGlobalHome.refreshParty()')
+            cards=page.locator('#bf-scene-party .bf-scene-member')
+            assert page.locator('#bf-scene-party .bf-scene-leader').count()==1
+            for index in range(6):
+                role=cards.nth(index).locator('.bf-scene-slot')
+                assert role.is_visible() and f'SLOT {index+1}' in role.inner_text()
+                assert f'squad slot {index+1} of 6' in cards.nth(index).get_attribute('aria-label')
+                assert ('Leader' in cards.nth(index).get_attribute('aria-label'))==(index==0)
+                assert cards.nth(index).locator('.bf-scene-leader').count()==int(index==0)
+                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'),(width,index)
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        assert page.evaluate(slot_snapshot)==slot_before
+        for first in (None, -1):
+            page.evaluate("""first=>{window.__slotSquad=P.squad;P.squad=[first,...P.squad.slice(1)];}""",first)
+            try:
+                fixture_before=page.evaluate(slot_snapshot)
+                page.evaluate('BFGlobalHome.refreshParty()')
+                assert page.locator('#bf-scene-party .bf-scene-leader').count()==0
+                assert 'Leader' not in page.locator('#bf-scene-party').inner_text()
+                assert 'squad slot 2 of 6' in page.locator('#bf-scene-party button').first.get_attribute('aria-label')
+                assert page.evaluate(slot_snapshot)==fixture_before
+            finally:
+                page.evaluate('P.squad=window.__slotSquad;delete window.__slotSquad;BFGlobalHome.refreshParty()')
+        print('PASS ordered Home slot/leader labels at three widths, no fallback leader or player/storage writes')
         before_inspect = page.evaluate("""()=>({
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
@@ -153,6 +185,80 @@ with sync_playwright() as pw:
         page.evaluate("BFGlobalHome.refreshParty()")
         assert warning.is_hidden()
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
+        corrupt=page.evaluate("""()=>{const original={squad:P.squad,roster:P.roster,version:P.version},before=JSON.stringify({P,S}),out=[];
+          try{for(const [key,value] of [['squad',null],['squad',{}],['squad',Array(7).fill(P.squad[0])],['roster',null],['roster',[P.roster[0],P.roster[0]]],['roster',Array(2)],['version',6]]){Object.assign(P,original);P[key]=value;BFGlobalHome.refreshParty();out.push(document.querySelectorAll('#bf-scene-party button').length===0&&!document.querySelector('#bf-scene-party-review').hidden&&document.querySelector('#bf-scene-party-review').textContent.includes('unavailable'));}}
+          finally{Object.assign(P,original);BFGlobalHome.refreshParty();}return {out,same:before===JSON.stringify({P,S})};}""")
+        assert corrupt=={'out':[True]*7,'same':True},corrupt
+        level_proof=page.evaluate("""()=>{const exp=P.unitExp,id=P.squad[0],before=JSON.stringify({P,S}),out=[];let getterCalls=0;
+          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');}
+          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');
+          }finally{P.unitExp=exp;BFGlobalHome.refreshParty();}return {out,getterCalls,same:before===JSON.stringify({P,S})};}""")
+        assert level_proof=={'out':[True]*7,'getterCalls':0,'same':True},level_proof
+        # Combined role/ownership/level behaviors must agree on the same painted cards.
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            combined=page.evaluate("""()=>{
+              const old={squad:P.squad,roster:P.roster,version:P.version,exp:P.unitExp,
+                unit:window.effectiveUnit},reports=[];let reads=0;
+              const firstId=old.squad[0];
+              const reset=()=>{P.squad=old.squad;P.roster=old.roster;P.version=old.version;
+                P.unitExp=old.exp;window.effectiveUnit=old.unit};
+              const snap=()=>JSON.stringify({P,S,mission:QUEST.missionId,writes:__v423Writes(),
+                storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+                  const k=localStorage.key(i);return [k,localStorage.getItem(k)]}))});
+              const original=snap(),party=document.getElementById('bf-scene-party');
+              const buttons=()=>[...party.querySelectorAll('button')];
+              const leaders=()=>party.querySelectorAll('.bf-scene-leader').length;
+              const run=(name,change,verify)=>{
+                try{reset();change();const before=snap();BFGlobalHome.refreshParty();
+                  reports.push({name,ok:verify(),unchanged:snap()===before});
+                }finally{reset();BFGlobalHome.refreshParty();}
+              };
+              const unavailable=()=>buttons().length===0&&leaders()===0&&
+                !document.getElementById('bf-scene-party-review').hidden&&
+                document.getElementById('bf-scene-party-review').textContent.includes('unavailable');
+              run('unreadable roster',()=>P.roster=null,unavailable);
+              run('wrong version',()=>P.version=6,unavailable);
+              const unknownLevel=()=>{
+                const first=buttons()[0],level=first?.querySelector('small');
+                if(!level)return false;const a=first.getBoundingClientRect(),b=level.getBoundingClientRect();
+                return buttons().length===6&&leaders()===1&&
+                  first.querySelectorAll('.bf-scene-leader').length===1&&
+                  first.getAttribute('aria-label').includes('squad slot 1 of 6')&&
+                  level.textContent==='LEVEL UNAVAILABLE'&&
+                  level.scrollWidth<=level.clientWidth&&
+                  b.left>=a.left+first.clientLeft-.5&&b.right<=a.right-first.clientLeft+.5;
+              };
+              run('invalid EXP remains owned, readable leader',()=>P.unitExp={[firstId]:'0'},unknownLevel);
+              run('EXP accessor never invoked',()=>{P.unitExp={};
+                Object.defineProperty(P.unitExp,String(firstId),{get(){reads++;return 0}})},
+                ()=>unknownLevel()&&reads===0);
+              const noFallback=()=>buttons().length===5&&leaders()===0&&
+                Number(buttons()[0]?.dataset.bfHomeUnitId)===old.squad[1]&&
+                buttons()[0]?.getAttribute('aria-label').includes('squad slot 2 of 6');
+              run('bad first profile ID',()=>window.effectiveUnit=id=>
+                id===firstId?{...old.unit(id),id:0}:old.unit(id),noFallback);
+              run('bad first profile name',()=>window.effectiveUnit=id=>
+                id===firstId?{...old.unit(id),name:''}:old.unit(id),noFallback);
+              run('first profile throws',()=>window.effectiveUnit=id=>{
+                if(id===firstId)throw Error('profile unavailable');return old.unit(id)},noFallback);
+              run('portrait failure preserves owned role',()=>{},()=>{
+                const first=buttons()[0],home=document.getElementById('bf-home');
+                const before=home.querySelectorAll('.bf-home-art-fallback').length;
+                const photo=bfOfflineUnitPortraitV266('content/home/missing-fixture.png','Fixture');
+                first.prepend(photo);photo.dispatchEvent(new Event('error'));
+                return buttons().length===6&&leaders()===1&&!photo.isConnected&&
+                  !!first.querySelector('.bf-portrait-fallback')&&
+                  first.querySelectorAll('.bf-scene-leader').length===1&&
+                  home.querySelectorAll('.bf-home-art-fallback').length===before;
+              });
+              return {reports,reads,restored:snap()===original};
+            }""")
+            assert len(combined['reports'])==8 and all(
+                row['ok'] and row['unchanged'] for row in combined['reports']), (width,combined)
+            assert combined['reads']==0 and combined['restored'],(width,combined)
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+        print('PASS combined Home roles/ownership/EXP matrix, no false leader, unreadable level or state writes')
         assert not errors, errors
     finally:
         browser.close()
