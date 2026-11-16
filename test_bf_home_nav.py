@@ -134,6 +134,15 @@ with sync_playwright() as playwright:
     assert page.locator("#bf-home").is_visible()
     assert page.evaluate("({squad:JSON.stringify(P.squad),zel:P.zel,save:localStorage.getItem('bf_global_offline_demo_v7')})") == state
     assert page.evaluate("BF_homeNav.routedPanels") >= 10
+    passive=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+    blocked=page.evaluate("""()=>{const panel=document.querySelector('.summonpanel'),parent=panel.parentNode,next=panel.nextSibling;try{panel.remove();const result=BF_homeNav.go('summon');return {result,route:BF_homeNav.current,visible:!document.querySelector('#bf-route-unavailable').hidden,text:document.querySelector('#bf-route-unavailable').textContent};}finally{parent.insertBefore(panel,next);}}""")
+    assert blocked['result'] is False and blocked['route']=='home' and blocked['visible'],blocked
+    assert 'Current screen preserved' in blocked['text']
+    assert page.evaluate("BF_homeNav.go('summon')") is True
+    assert page.locator('#summonbutton').is_visible()
+    assert page.locator('#bf-route-unavailable').is_hidden()
+    page.evaluate("BF_homeNav.go('home')")
+    assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
     assert not errors, errors
     print("PASS navigation changes no save, squad, or Zel and throws no JS errors")
     browser.close()
