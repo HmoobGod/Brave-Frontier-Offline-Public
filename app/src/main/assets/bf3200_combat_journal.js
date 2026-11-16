@@ -32,13 +32,14 @@
  clear.id='bf3200-clear';clear.textContent='CLEAR FILTER';
  const filterCount=document.createElement('small');filterCount.id='bf3200-filter-count';
  filterCount.setAttribute('role','status');
+ const groups=document.createElement('p');groups.id='bf3200-wave-summary';
  const select=document.createElement('button');select.type='button';
  select.id='bf3200-select';select.textContent='SELECT REPORT TEXT';
  const output=document.createElement('textarea');output.id='bf3200-report';
  output.readOnly=true;output.setAttribute('aria-label','Read-only offline battle run report');
  const foot=document.createElement('small');
  foot.textContent='Captures the DEMO combat log while this app stays open, including removed on-screen log lines (up to 400 entries). No files, permissions, network calls or saved progress. Select text to copy it manually.';
- panel.append(title,count,currentButton,previousButton,search,clear,filterCount,select,output,foot);
+ panel.append(title,count,currentButton,previousButton,search,clear,filterCount,groups,select,output,foot);
  host.after(panel);
  const make=()=>({missionId:typeof QUEST==='undefined'?null:QUEST.missionId,
    mode:S.mode,items:[],wave:S.wave+1,round:S.round,phase:S.phase||'',complete:false});
@@ -85,6 +86,17 @@
    for(const entry of items)header.push('[Wave '+entry.wave+' / Round '+entry.round+'] '+entry.text);
    return header.join('\n');
  }
+ // Counts retained text receipts only; never infer hits, damage or enemy AI.
+ function entryGroups(which=view,query=''){
+   rotate();if(!['current','previous'].includes(which)||typeof query!=='string'||query.length>80)return null;
+   const source=which==='previous'?previous:active;if(!source)return null;
+   const term=query.trim().toLocaleLowerCase(),byWave=new Map();let unknown=0;
+   for(const item of source.items){if(term&&!item.text.toLocaleLowerCase().includes(term))continue;
+     if(!Number.isSafeInteger(item.wave)||item.wave<1||!Number.isSafeInteger(item.round)||item.round<0){unknown++;continue;}
+     const row=byWave.get(item.wave)||{wave:item.wave,entries:0,rounds:new Set()};row.entries++;row.rounds.add(item.round);byWave.set(item.wave,row);
+   }
+   return Object.freeze({waves:Object.freeze([...byWave.values()].sort((a,b)=>a.wave-b.wave).map(x=>Object.freeze({wave:x.wave,entries:x.entries,observedRounds:x.rounds.size}))),unknownPositionEntries:unknown,retainedOnly:true});
+ }
  let renderKey='';
  function snapshot(){
    rotate();return Object.freeze({
@@ -105,6 +117,7 @@
      filterCount.textContent=term?matches+' of '+(items?.length||0)+' retained entries match':
        (items?.length||0)+' retained entries shown';
      output.value=report(view,term)||'';
+     const grouped=entryGroups(view,term);groups.textContent=grouped?grouped.waves.map(x=>'Wave '+x.wave+': '+x.entries+' retained entries / '+x.observedRounds+' observed turns').join(' · ')+(grouped.unknownPositionEntries?' · '+grouped.unknownPositionEntries+' entries with unknown position':''):'No retained run';
    }
    return s;
  }
@@ -120,5 +133,5 @@
  select.addEventListener('click',()=>{output.focus();output.select()});
  panel.addEventListener('toggle',refresh);
  refresh();
- window.BFGlobalCombatJournalV3200=Object.freeze({snapshot,refresh,show,report});
+ window.BFGlobalCombatJournalV3200=Object.freeze({snapshot,refresh,show,report,entryGroups});
 })();
