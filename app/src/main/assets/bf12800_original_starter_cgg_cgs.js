@@ -59,6 +59,16 @@
    }catch(_){return false;}
  })();
  function lookup(id){return Number.isSafeInteger(id)?byId.get(id)||null:null;}
- window.BFGlobalOriginalStarterCggV12800=Object.freeze({source,ready,lookup,
+ function sequenceReport(id,kind){
+   if(!['idle','atk','move'].includes(kind))return null;
+   const row=lookup(id);if(!row)return null;
+   const sequence=row.sequences[kind];
+   const steps=sequence.map((entry,index)=>Object.freeze({step:index+1,frame:entry[0],rawDelay:entry[3],layers:row.originalSourceFrames[entry[0]][1]}));
+   return Object.freeze({unitId:id,kind,steps:Object.freeze(steps),
+     rawDelayTotal:steps.reduce((sum,x)=>sum+x.rawDelay,0),
+     uniqueFrames:new Set(steps.map(x=>x.frame)).size,
+     nativeTimingVerified:false,playable:false});
+ }
+ window.BFGlobalOriginalStarterCggV12800=Object.freeze({source,ready,lookup,sequenceReport,
    get count(){return byId.size;}});
 })();

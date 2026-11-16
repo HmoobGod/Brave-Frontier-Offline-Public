@@ -168,6 +168,13 @@
       frames.append(item('p','',
         'Original attack CGS entries: '+cgg.sequences.atk.map(step=>
           'frame '+step[0]+' / raw delay '+step[3]).join(' | ')));
+      if(typeof window.BFGlobalOriginalStarterCggV12800?.sequenceReport==='function'){
+        const choice=document.createElement('select');choice.id='bf-cgg-sequence';choice.setAttribute('aria-label','Inspect archived sprite sequence');choice.style.cssText='min-height:44px;max-width:100%';
+        for(const [key,label] of [['idle','Idle'],['atk','Attack'],['move','Move']]){const o=document.createElement('option');o.value=key;o.textContent=label;choice.append(o);}
+        const report=item('p','bf-codex-note','');report.id='bf-cgg-sequence-report';
+        function showSequence(){const row=window.BFGlobalOriginalStarterCggV12800.sequenceReport(id,choice.value);report.textContent=row?row.steps.length+' source steps · '+row.uniqueFrames+' unique source frames · raw delay sum '+row.rawDelayTotal+' (units/native timing unknown) · '+row.steps.map(x=>'#'+x.step+': frame '+x.frame+', '+x.layers+' layers, raw delay '+x.rawDelay).join(' | '):'Source sequence unavailable';}
+        choice.addEventListener('change',showSequence);frames.append(choice,report);showSequence();
+      }
       detail.append(frames);
     }
 
