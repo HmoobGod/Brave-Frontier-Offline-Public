@@ -1,6 +1,6 @@
 """v14.00: 2022 source evolution material aggregation, six-unit draft and save safety."""
 from pathlib import Path
-import shutil
+import shutil,base64,gzip,json
 from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parent;A=R/'app/src/main/assets'
 script=(A/'bf1400_evolution_material_planner.js').read_text('utf8')
@@ -112,6 +112,23 @@ with sync_playwright() as pw:
  assert before==after,'Source planning must never spend Zel, Karma, items or save'
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.clear()') is True
  assert page.evaluate('BFEvolutionMaterialPlannerV1400.plan.entries')==[]
+ raw_codex=json.loads(gzip.decompress(base64.b64decode((R/'source_data/bf_global_original_lore_codex.json.gz.b64').read_text())))
+ expected_uses=[]
+ for unit in raw_codex['units']:
+  for recipe in unit.get('recipes',[]):
+   required=sum(m['type']==1 and m['id']==10130 for m in recipe.get('materials',[]))
+   if required: expected_uses.append({'from':unit['id'],'to':recipe['target'],'required':required,'zel':recipe.get('zel',0),'karma':recipe.get('karma',0)})
+ passive=page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')
+ uses=page.evaluate('BFEvolutionMaterialPlannerV1400.materialUses(1,10130)')
+ assert uses['rows']==expected_uses and uses['recipeCount']==len(expected_uses),uses
+ assert uses['dropLocationsKnown'] is False
+ for args in ([3,10130],[1,'10130'],[1,0],[None,10130]): assert page.evaluate('([kind,id])=>BFEvolutionMaterialPlannerV1400.materialUses(kind,id)',args) is None
+ page.locator('#bf1400-material-uses').evaluate('(e)=>e.open=true')
+ page.locator('#bf1400-material-id').fill('10130');page.locator('#bf1400-material-find').click()
+ assert f'{len(expected_uses)} recorded recipes' in page.locator('#bf1400-material-use-results').text_content()
+ page.locator('#bf1400-material-id').fill('1e3');page.locator('#bf1400-material-find').click()
+ assert 'unavailable' in page.locator('#bf1400-material-use-results').text_content()
+ assert page.evaluate('JSON.stringify({P,S,draft:BFArchiveDraftV800.selected})')==passive
  assert not errors,errors
  browser.close()
 print('PASS v14: exact 2022 recipe material aggregation, missing targets, draft edits, UI and v7 save protection')

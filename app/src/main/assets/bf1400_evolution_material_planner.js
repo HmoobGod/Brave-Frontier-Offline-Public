@@ -108,9 +108,26 @@
  const report=document.createElement('div');report.id='bf1400-report';
  panel.append(heading,note,controls,status,cards,report);
  host.after(panel);
+ const lookupPanel=document.createElement('details');lookupPanel.id='bf1400-material-uses';
+ const lookupTitle=document.createElement('summary');lookupTitle.textContent='FIND RECORDED RECIPES USING A MATERIAL';lookupTitle.style.minHeight='44px';
+ const lookupType=document.createElement('select');lookupType.id='bf1400-material-type';lookupType.setAttribute('aria-label','Original material category');lookupType.style.minHeight='44px';for(const [value,label] of [[1,'Source unit material · type 1'],[2,'Source item material · type 2']]){const option=document.createElement('option');option.value=String(value);option.textContent=label;lookupType.append(option);}
+ const lookupId=document.createElement('input');lookupId.id='bf1400-material-id';lookupId.inputMode='numeric';lookupId.setAttribute('aria-label','Exact original material ID');lookupId.style.minHeight='44px';
+ const lookupButton=document.createElement('button');lookupButton.type='button';lookupButton.id='bf1400-material-find';lookupButton.textContent='FIND SOURCE USES';lookupButton.style.minHeight='44px';
+ const lookupResults=document.createElement('p');lookupResults.id='bf1400-material-use-results';lookupResults.setAttribute('role','status');
+ lookupButton.addEventListener('click',()=>{const raw=lookupId.value;const found=/^[1-9][0-9]*$/.test(raw)?materialUses(Number(lookupType.value),Number(raw)):null;lookupResults.textContent=found?found.recipeCount+' recorded recipes / '+found.requiredSlots+' recorded slots · showing '+Math.min(20,found.recipeCount)+'. '+found.rows.slice(0,20).map(x=>'#'+x.from+' → #'+x.to+' ×'+x.required+' ('+x.zel+' Zel / '+x.karma+' Karma)').join(' | ')+' Reference recipes only; drop locations and owned quantities not inferred.':'Source uses unavailable; enter an exact positive decimal material ID.';});
+ lookupPanel.append(lookupTitle,lookupType,lookupId,lookupButton,lookupResults);panel.append(lookupPanel);
+
  const word=(tag,value)=>{
    const el=document.createElement(tag);el.textContent=String(value);return el;
  };
+ function materialUses(type,id){
+   if(![1,2].includes(type)||!Number.isSafeInteger(id)||id<=0)return null;
+   try{const catalog=JSON.parse(document.getElementById('bf-global-unit-catalog-data').textContent);if(catalog.schema!=='bf-global-unit-archive-2022-v1'||catalog.units.length!==2291)return null;const rows=[];
+     for(const unit of catalog.units){const recipes=evolution.sourceRecipes(unit.id);if(!Array.isArray(recipes))return null;for(const recipe of recipes){if(!Number.isSafeInteger(recipe.target)||recipe.target<=0||!Array.isArray(recipe.materials)||recipe.materials.some(x=>!Number.isSafeInteger(x.id)||x.id<=0||!Number.isSafeInteger(x.type))||!Number.isSafeInteger(recipe.zel)||recipe.zel<0||!Number.isSafeInteger(recipe.karma)||recipe.karma<0)return null;
+       const required=recipe.materials.filter(x=>x.type===type&&x.id===id).length;if(required)rows.push(Object.freeze({from:unit.id,to:recipe.target,required,zel:recipe.zel,karma:recipe.karma}));}}
+     return Object.freeze({type,id,rows:Object.freeze(rows),recipeCount:rows.length,requiredSlots:rows.reduce((n,x)=>n+x.required,0),sourceYear:2022,dropLocationsKnown:false});
+   }catch(_){return null;}
+ }
  function render(){
    const data=summary();
    cards.replaceChildren();report.replaceChildren();
@@ -170,7 +187,7 @@
    if(panel.open)render();
  });
  render();
- window.BFEvolutionMaterialPlannerV1400=Object.freeze({
+ window.BFEvolutionMaterialPlannerV1400=Object.freeze({materialUses,
    get selected(){return chosen();},
    get plan(){return summary();},
    sourceOptions:id=>sourceOptions(id).map(r=>({
