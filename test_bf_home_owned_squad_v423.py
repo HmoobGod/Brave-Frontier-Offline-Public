@@ -301,6 +301,70 @@ with sync_playwright() as pw:
             assert combined['reads']==0 and combined['restored'],(width,combined)
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
         print('PASS combined Home roles/ownership/EXP matrix, no false leader, unreadable level or state writes')
+        focused=page.evaluate("""()=>{BF_homeNav.go('home');BFGlobalHome.refreshParty();const first=document.querySelector('#bf-scene-party button'),id=first.dataset.bfHomeUnitId;first.focus();const before=JSON.stringify({P,S});BFGlobalHome.refreshParty();return {same:before===JSON.stringify({P,S}),focused:document.activeElement.dataset.bfHomeUnitId===id};}""")
+        assert focused=={'same':True,'focused':True},focused
+        removed=page.evaluate("""()=>{const old=P.squad,before=JSON.stringify({P,S});const button=document.querySelector('#bf-scene-party button');button.focus();try{P.squad=[999999,...old.slice(1)];BFGlobalHome.refreshParty();return document.activeElement.id==='bf-scene-party-review';}finally{P.squad=old;BFGlobalHome.refreshParty();}}""")
+        assert removed
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            focus_matrix=page.evaluate("""async()=>{
+              BF_homeNav.go('home');BFGlobalHome.refreshParty();
+              const old={squad:P.squad,roster:P.roster};
+              const snap=()=>JSON.stringify({P,S,mission:QUEST.missionId,
+                storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+                  const k=localStorage.key(i);return [k,localStorage.getItem(k)];})),writes:__v423Writes()});
+              const initial=snap(),rows=[];
+              const buttons=()=>[...document.querySelectorAll('#bf-scene-party button')];
+              const title=document.querySelector('#bf-home .bf-scene-title');
+              const review=document.getElementById('bf-scene-party-review');
+              const run=(name,mutate,expect)=>{
+                P.squad=old.squad;P.roster=old.roster;BFGlobalHome.refreshParty();
+                buttons()[0].focus();mutate();const before=snap();
+                BFGlobalHome.refreshParty();rows.push({name,ok:expect(),unchanged:snap()===before});
+              };
+              try{
+                for(const slot of [0,2,5]){
+                  const button=buttons()[slot],id=button.dataset.bfHomeUnitId;
+                  button.focus();const before=snap(),scroll=scrollY;BFGlobalHome.refreshParty();
+                  rows.push({name:'same slot '+slot,ok:document.activeElement===buttons()[slot]&&
+                    document.activeElement.dataset.bfHomeUnitId===id&&scrollY===scroll,unchanged:snap()===before});
+                }
+                run('lost ownership',()=>P.roster=old.roster.filter(id=>id!==old.squad[0]),
+                  ()=>document.activeElement===review&&!review.hidden);
+                run('empty first slot',()=>P.squad=[null,...old.squad.slice(1)],
+                  ()=>document.activeElement===title);
+                run('different unit at same slot',()=>P.squad=[old.squad[1],old.squad[0],...old.squad.slice(2)],
+                  ()=>document.activeElement===title);
+                run('unreadable roster',()=>P.roster=null,()=>document.activeElement===review&&!review.hidden);
+                P.roster=old.roster;BFGlobalHome.refreshParty();
+                rows.push({name:'review recovers',ok:review.hidden&&document.activeElement===title,
+                  unchanged:snap()===initial});
+                const nav=document.querySelector('.bf-navbar button[data-bf-goto="home"]');
+                nav.focus();const before=snap();BFGlobalHome.refreshParty();
+                rows.push({name:'external focus',ok:document.activeElement===nav,unchanged:snap()===before});
+                BF_homeNav.go('units');const label=document.getElementById('bf-route-title');
+                label.tabIndex=-1;label.focus();BFGlobalHome.refreshParty();
+                rows.push({name:'other route',ok:document.activeElement===label,unchanged:snap()===before});
+                BF_homeNav.go('home');BFGlobalHome.refreshParty();buttons()[2].focus();
+                const id=buttons()[2].dataset.bfHomeUnitId;
+                const marker=document.createComment('focus refresh');
+                document.getElementById('squadpicker').append(marker);
+                await Promise.resolve();marker.remove();await Promise.resolve();
+                rows.push({name:'picker observer',ok:document.activeElement===buttons()[2]&&
+                  document.activeElement.dataset.bfHomeUnitId===id,unchanged:snap()===before});
+                return {rows,restored:snap()===initial};
+              }finally{P.squad=old.squad;P.roster=old.roster;BF_homeNav.go('home');BFGlobalHome.refreshParty();}
+            }""")
+            assert len(focus_matrix['rows'])==11 and focus_matrix['restored'],(width,focus_matrix)
+            assert all(r['ok'] and r['unchanged'] for r in focus_matrix['rows']),(width,focus_matrix)
+            for key in ('Enter','Space'):
+                unit_id=page.evaluate("()=>{const button=document.querySelectorAll('#bf-scene-party button')[2];button.focus();BFGlobalHome.refreshParty();return Number(document.activeElement.dataset.bfHomeUnitId);}")
+                page.keyboard.press(key)
+                assert page.evaluate("BF_homeNav.current==='units'")
+                assert f'Base roster ID {unit_id} ·' in page.locator('#bf-box-detail').inner_text()
+                page.evaluate("BF_homeNav.go('home');BFGlobalHome.refreshParty()")
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
+        print('PASS Home refresh focus: 33 matrix probes, 6 keyboard inspections, no identity substitution or state writes')
         assert not errors, errors
     finally:
         browser.close()
