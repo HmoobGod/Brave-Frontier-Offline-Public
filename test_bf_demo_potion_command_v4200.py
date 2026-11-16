@@ -49,6 +49,15 @@ with sync_playwright() as pw:
  before=page.evaluate("""()=>({progress:JSON.stringify(P),
    save:localStorage.getItem('bf_global_offline_demo_v7'),
    clears:JSON.stringify(P.questClears),wave:S.wave,round:S.round})""")
+ preview=page.evaluate("""()=>{const api=BFGlobalDemoPotionV4200,before=JSON.stringify({P,S,stock:api.snapshot()}),random=Math.random;let calls=0;Math.random=()=>{calls++;return .5};
+ try{const row=api.sourcePreview(0),bad=[-1,6,0.5,'0',null].map(x=>api.sourcePreview(x));return {row,bad,calls,frozen:Object.isFrozen(row),unchanged:before===JSON.stringify({P,S,stock:api.snapshot()})};}finally{Math.random=random;}}""")
+ assert preview['row']['minimum']==100 and preview['row']['maximum']==120 and preview['calls']==0,preview
+ assert preview['bad']==[None]*5 and preview['frozen'] and preview['unchanged'],preview
+ page.evaluate('BFGlobalDemoPotionV4200.refresh()')
+ page.locator('#bf7300-target').select_option('1')
+ assert page.evaluate('S.party[1].name') in page.locator('#bf4200-source-preview').text_content()
+ clipped=page.evaluate("""()=>{const u=S.party[0],hp=u.hp;try{u.hp=u.maxHp-5;return BFGlobalDemoPotionV4200.sourcePreview(0);}finally{u.hp=hp;}}""")
+ assert clipped['minimum']==clipped['maximum']==5,clipped
  before_hp=page.evaluate("S.party[0].hp")
  page.evaluate('BFGlobalDemoPotionV4200.refresh()')
  assert page.evaluate('BFGlobalDemoPotionV4200.usePotion(0)') is True
