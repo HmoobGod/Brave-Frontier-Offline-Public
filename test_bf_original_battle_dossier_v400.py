@@ -32,6 +32,16 @@ with sync_playwright() as pw:
   'bf_global_unit_archive.js','bf150_source_crosscheck.js',
   'bf200_historical_wave_lab.js','bf250_squad_training.js',
   'bf300_tactical_rounds.js','bf400_original_battle_dossier.js'):
+  if name=='bf400_original_battle_dossier.js':
+   page.evaluate("""()=>{const original=BFArchiveTrialsV200;window.__dossierFault='';
+    window.BFArchiveTrialsV200={...original,sourceFor:id=>{
+     if(__dossierFault==='throw')throw Error('historical evidence unavailable');
+     const s=original.sourceFor(id);if(!s||!__dossierFault)return s;
+     const copy=JSON.parse(JSON.stringify(s));const e=copy.waves[0].enemies[0];
+     if(__dossierFault==='hp')e.hp=NaN;if(__dossierFault==='atk')e.atk=-1;
+     if(__dossierFault==='id')e.unitId='30030';if(__dossierFault==='empty')copy.waves[0].enemies=[];
+     return copy;
+    }};}""")
   page.add_script_tag(path=str(A/name))
  assert page.evaluate('QUESTS.length')==106
  assert page.evaluate('P.version')==7
@@ -73,6 +83,17 @@ with sync_playwright() as pw:
  after=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
    save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert before==after,'Research UI must never mutate original player, battle or v7 save'
+ page.evaluate('BFGlobalBattleDossierV400.showMission(1)')
+ dossier_before=page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','hp','atk','id','empty'):
+  page.evaluate('(v)=>window.__dossierFault=v',case)
+  assert page.evaluate('BFGlobalBattleDossierV400.showWave(1)') is False,case
+  assert page.locator('#bf400-wave-foes .bf400-row').count()==0
+  assert page.locator('#bf400-wave-metrics').text_content()==''
+  assert 'unavailable' in page.locator('#bf400-source').text_content()
+  page.evaluate("window.__dossierFault=''")
+  assert page.evaluate('BFGlobalBattleDossierV400.showWave(1)') is True
+ assert page.evaluate('JSON.stringify({P,S,QUEST,save:localStorage.getItem("bf_global_offline_demo_v7")})')==dossier_before
  assert not errors,errors
  browser.close()
 print('PASS v4.00: 2022 owned unit skill intel, 21 historic 2014 mission dossiers, provenance and no save edits')
