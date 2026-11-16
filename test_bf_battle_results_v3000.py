@@ -58,6 +58,8 @@ with sync_playwright() as pw:
  assert page.locator('#bf3000-result').is_visible()
  assert 'DEFEAT' in page.locator('#bf3000-reward').inner_text()
  assert page.locator('#bf3000-next').is_disabled()
+ assert page.locator('#bf3000-train').is_disabled()
+ assert page.evaluate('BFGlobalBattleResultsV3000.canOpenTraining()') is False
  assert page.evaluate('BFGlobalBattleResultsV3000.replayBattle()') is True
  assert page.evaluate('S.over') is False
  assert page.evaluate('QUEST.missionId')==1
@@ -66,6 +68,47 @@ with sync_playwright() as pw:
  assert s['victory'] and s['archive'] and s['clears']==1,s
  assert s['exp']==5 and s['nextId']==2,s
  assert page.evaluate('BFGlobalBattleResultsV3000.committedClearCount(1)')==1
+ # Real gameplay bridge: a committed victory can take the player directly
+ # into existing DEMO Training, with the reward already saved. Clicking the
+ # shortcut itself cannot grant shards, train units, or save a new record.
+ assert page.evaluate('P.trainingShards>=1') is True
+ assert page.evaluate('BFGlobalBattleResultsV3000.canOpenTraining()') is True
+ assert page.locator('#bf3000-train').is_enabled()
+ training_before=page.evaluate("""()=>({
+   player:JSON.stringify(P),battle:JSON.stringify(S),
+   save:localStorage.getItem('bf_global_offline_demo_v7'),
+   mission:QUEST.missionId
+ })""")
+ page.locator('#bf3000-train').click()
+ assert page.evaluate('BF_homeNav.current')=='units'
+ assert page.evaluate('BFInnerScreens.unitTab')=='training'
+ assert page.locator('#traininglist').is_visible()
+ assert page.evaluate('BFGlobalBattleResultsV3000.canOpenTraining()') is False
+ page.locator('.bf-navbar button[data-bf-goto="quest"]').click()
+ assert page.evaluate('BF_homeNav.current')=='quest'
+ training_after=page.evaluate("""()=>({
+   player:JSON.stringify(P),battle:JSON.stringify(S),
+   save:localStorage.getItem('bf_global_offline_demo_v7'),
+   mission:QUEST.missionId
+ })""")
+ assert training_before==training_after,(training_before,training_after)
+ # Bad resource records or unexpected repeat ownership can never enable
+ # this shortcut; do not repair/migrate owner data from results UI.
+ training_denied=page.evaluate("""()=>{
+   const initial=P.trainingShards,original=window.BFGlobalQoLQuestRepeatV9800;
+   try{
+     P.trainingShards=-1;
+     const badResource=!BFGlobalBattleResultsV3000.canOpenTraining();
+     P.trainingShards=initial;
+     window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+     const repeat=!BFGlobalBattleResultsV3000.canOpenTraining();
+     return badResource&&repeat;
+   }finally{P.trainingShards=initial;
+     if(original===undefined)delete window.BFGlobalQoLQuestRepeatV9800;
+     else window.BFGlobalQoLQuestRepeatV9800=original;
+   }
+ }""")
+ assert training_denied is True
  # A stale/corrupt canonical receipt cannot be bypassed by a still-true
  # saveEnabled flag. All post-victory navigation shares the stored-clear gate.
  stale=page.evaluate("""()=> {
@@ -78,6 +121,7 @@ with sync_playwright() as pw:
      const now=api.refresh();
      return {saveFlag:saveEnabled,stored:now.stored,next:now.nextId,
        replay:now.canReplay,advance:api.advance(),
+       training:api.canOpenTraining(),trainAction:api.openTraining(),
        replayAction:api.replayBattle(),
        rescue:!document.getElementById('bf3000-retry-save').hidden,
        progressSame:JSON.stringify(P)===progress,
@@ -85,8 +129,8 @@ with sync_playwright() as pw:
    }finally{localStorage.setItem(key,original);api.refresh();}
  }""")
  assert stale=={'saveFlag':True,'stored':False,'next':None,
-   'replay':False,'advance':False,'replayAction':False,
-   'rescue':True,'progressSame':True,'mission':1},stale
+   'replay':False,'advance':False,'training':False,'trainAction':False,
+   'replayAction':False,'rescue':True,'progressSame':True,'mission':1},stale
  assert page.evaluate('BFGlobalBattleResultsV3000.snapshot().stored') is True
  assert 'SIMULATED' in page.locator('#bf3000-reward').inner_text()
  assert not page.locator('#bf3000-next').is_disabled()
@@ -393,4 +437,4 @@ with sync_playwright() as pw:
  assert not trial_errors,trial_errors
  trial.close()
  browser.close()
-print('PASS v30.00: real demo victory/defeat results, retry and next via engine, original source scene, training isolation')
+print('PASS v30.00: native results/retry/next plus committed victory-to-Training route with save isolation')
