@@ -62,9 +62,10 @@
  const clear=btn('CLEAR QUEUED ACTIONS','bf2100-clear',()=>clearQueuedActions());
  const orders=document.createElement('p');orders.id='bf2100-orders';
  orders.setAttribute('role','status');orders.setAttribute('aria-live','polite');
+ const targetOrders=document.createElement('p');targetOrders.id='bf2100-queued-targets';targetOrders.setAttribute('role','status');
  const foot=document.createElement('small');foot.id='bf2100-info';
  foot.textContent='Optional demo shortcuts use native player controls. Spread Attacks distributes targets; Spread Ready BB distributes ready Brave Bursts and Attacks; Manual Healing BB choices use one source-verified party healer at or below 35%, 50% (default), or 75% ally HP; Element Advantage uses source-known weaknesses, with an optional ready-BB variant. Protect Critical (20%), Wounded (40%), and Cautious (60%) Guard allies at or below the selected HP threshold, and queue attacks for healthier allies. Paid item turns still Guard. Nothing executes until you choose Execute. Clear Queued Actions discards unexecuted player Attack, Guard and BB orders, but never a reserved item turn. No original 2022 enemy AI or damage formula is claimed.';
- panel.append(title,status,focus,targets,actions,orders,foot);area.before(panel);
+ panel.append(title,status,focus,targets,actions,orders,targetOrders,foot);area.before(panel);
  let signature='';
  const active=()=>Array.isArray(S.party)?S.party.filter(p=>p&&p.active&&p.hp>0):[];
  const enemies=()=>Array.isArray(S.enemies)?S.enemies.filter(e=>e&&e.hp>0):[];
@@ -556,6 +557,18 @@
  }
  // Player-facing, read-only preview. The native Execute button remains the
  // only way to commit commands; this never queues, clears, saves or advances.
+ function queuedTargets(){
+   if(!Array.isArray(S.party)||!Array.isArray(S.enemies))return null;
+   const out=[];
+   for(const unit of active()){
+     if(!Number.isSafeInteger(unit.id)||unit.id<0||unit.id>=6||S.party[unit.id]!==unit||S.party.filter(x=>x===unit).length!==1)return null;
+     const action=unit.action;if(!action||!['attack','burst'].includes(action.kind))continue;
+     const matches=S.enemies.filter(e=>e&&Number.isSafeInteger(e.slot)&&e.slot===action.target&&Number.isFinite(e.hp)&&e.hp>0);
+     const valid=Number.isSafeInteger(action.target)&&action.target>=0&&matches.length===1;
+     out.push(Object.freeze({actorSlot:unit.id,kind:action.kind,storedTargetSlot:valid?action.target:null,targetName:valid?String(matches[0].name||'Enemy'):null,verifiedTarget:valid}));
+   }
+   return Object.freeze(out);
+ }
  function queuedTurnPreview(){
    if(!Array.isArray(S.party))return 'Queued turn preview unavailable';
    const squad=active();
@@ -574,6 +587,7 @@
  }
  function refresh(){
    orders.textContent=queuedTurnPreview();
+   const targetRows=queuedTargets();targetOrders.textContent=targetRows===null?'Queued target details unavailable':targetRows.length?'Stored player orders · '+targetRows.map(x=>'Slot '+(x.actorSlot+1)+' '+(x.kind==='burst'?'BB (skill scope may differ)':'Attack')+' → '+(x.verifiedTarget?x.targetName+' [enemy slot '+x.storedTargetSlot+']':'target unavailable')).join(' · '):'No attack/BB target orders queued.';
    const st=snapshot();
    // Read only the CURRENT living native DEMO target. A stale, malformed,
    // KO or ambiguous selection must not masquerade as an actionable focus.
@@ -635,5 +649,5 @@
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  window.setInterval(()=>{if(!document.hidden)refresh()},800);
  refresh();
- window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions});
+ window.BFGlobalBattleCommandsV2100=Object.freeze({snapshot,refresh,setTarget,queueAll,healingChoice,healingAvailable,spreadAttacks,spreadBurstPlan,spreadBursts,elementPlan,elementAttacks,elementBursts,woundedPlan,protectWounded,queuedAttacksSafe,executeTurn,clearQueuedActions,queuedTargets});
 })();

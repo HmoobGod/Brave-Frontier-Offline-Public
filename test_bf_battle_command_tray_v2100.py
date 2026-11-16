@@ -80,6 +80,14 @@ with sync_playwright() as pw:
          '(buttons)=>buttons.map(b=>b.getBoundingClientRect().height)')
      assert sizes and all(h>=44 for h in sizes),(width,sizes)
  page.set_viewport_size({'width':390,'height':844})
+ inspection=page.evaluate("""()=>{const api=BFGlobalBattleCommandsV2100,party=S.party,enemies=S.enemies,before=JSON.stringify({P,S});
+ try{S.party=[{id:0,active:true,hp:100,action:{kind:'attack',target:2}},{id:1,active:true,hp:100,action:{kind:'burst',target:999}}];S.enemies=[{slot:2,name:'Stored enemy target',hp:100,maxHp:100}];
+ const fixture=JSON.stringify({P,S}),rows=api.queuedTargets();api.refresh();const text=document.querySelector('#bf2100-queued-targets').textContent;
+ const same=fixture===JSON.stringify({P,S});S.enemies.push({...S.enemies[0]});const ambiguous=api.queuedTargets();return {rows,text,same,ambiguous};
+ }finally{S.party=party;S.enemies=enemies;api.refresh();}}""")
+ assert inspection['same'] and inspection['rows'][0]['targetName']=='Stored enemy target' and inspection['rows'][0]['storedTargetSlot']==2,inspection
+ assert inspection['rows'][1]['verifiedTarget'] is False and 'target unavailable' in inspection['text'],inspection
+ assert inspection['ambiguous'][0]['verifiedTarget'] is False,inspection
  assert not errors,errors
  print('PASS selected living DEMO target readout, fail-closed corruption, 44px target controls')
  before=page.evaluate("""()=>({p:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7')})""")
@@ -945,6 +953,14 @@ with sync_playwright() as pw:
  page.evaluate('reset()')
  assert page.evaluate('S.busy') is False
  assert page.evaluate('P.version')==7
+ inspection=page.evaluate("""()=>{const api=BFGlobalBattleCommandsV2100,party=S.party,enemies=S.enemies,before=JSON.stringify({P,S});
+ try{S.party=[{id:0,active:true,hp:100,action:{kind:'attack',target:2}},{id:1,active:true,hp:100,action:{kind:'burst',target:999}}];S.enemies=[{slot:2,name:'Stored enemy target',hp:100,maxHp:100}];
+ const fixture=JSON.stringify({P,S}),rows=api.queuedTargets();api.refresh();const text=document.querySelector('#bf2100-queued-targets').textContent;
+ const same=fixture===JSON.stringify({P,S});S.enemies.push({...S.enemies[0]});const ambiguous=api.queuedTargets();return {rows,text,same,ambiguous};
+ }finally{S.party=party;S.enemies=enemies;api.refresh();}}""")
+ assert inspection['same'] and inspection['rows'][0]['targetName']=='Stored enemy target' and inspection['rows'][0]['storedTargetSlot']==2,inspection
+ assert inspection['rows'][1]['verifiedTarget'] is False and 'target unavailable' in inspection['text'],inspection
+ assert inspection['ambiguous'][0]['verifiedTarget'] is False,inspection
  assert not errors,errors
  browser.close()
 print('PASS v21.00: native manual source healing BB, BB spread, Curse/Guard, corrupt foe rejection and v7 save isolation')
