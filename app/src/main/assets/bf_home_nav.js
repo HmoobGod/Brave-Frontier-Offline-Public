@@ -195,6 +195,9 @@ function bfOfflineUnitPortraitV266(source, name) {
   partyReview.setAttribute('aria-live', 'polite');
   party.insertAdjacentElement('afterend', partyReview);
   function refreshParty() {
+    const focused=document.activeElement;
+    const focusIndex=focused?.parentElement===party?[...party.children].indexOf(focused):-1;
+    const focusId=focusIndex>=0?focused.dataset.bfHomeUnitId:null;
     const members = typeof P !== 'undefined' && P && Array.isArray(P.squad) ? P.squad.slice(0, 6) : [];
     const nodes = [], seen = new Set();
     const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
@@ -266,6 +269,12 @@ function bfOfflineUnitPortraitV266(source, name) {
     partyReview.textContent = unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
       ' review · Open Units to inspect ownership.' : '';
+    if(focusId&&window.BF_homeNav?.current==='home'){
+      const replacement=party.children[focusIndex];
+      if(replacement?.tagName==='BUTTON'&&replacement.dataset.bfHomeUnitId===focusId)replacement.focus({preventScroll:true});
+      else if(!partyReview.hidden){partyReview.setAttribute('tabindex','-1');partyReview.focus({preventScroll:true});}
+    }
+
   }
   // Home shows only source-validated campaign progress. No quest selection,
   // battle start, Auto toggle or canonical v7 save mutation occurs here.

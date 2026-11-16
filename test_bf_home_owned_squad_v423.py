@@ -153,6 +153,10 @@ with sync_playwright() as pw:
         page.evaluate("BFGlobalHome.refreshParty()")
         assert warning.is_hidden()
         assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
+        focused=page.evaluate("""()=>{BF_homeNav.go('home');BFGlobalHome.refreshParty();const first=document.querySelector('#bf-scene-party button'),id=first.dataset.bfHomeUnitId;first.focus();const before=JSON.stringify({P,S});BFGlobalHome.refreshParty();return {same:before===JSON.stringify({P,S}),focused:document.activeElement.dataset.bfHomeUnitId===id};}""")
+        assert focused=={'same':True,'focused':True},focused
+        removed=page.evaluate("""()=>{const old=P.squad,before=JSON.stringify({P,S});const button=document.querySelector('#bf-scene-party button');button.focus();try{P.squad=[999999,...old.slice(1)];BFGlobalHome.refreshParty();return document.activeElement.id==='bf-scene-party-review';}finally{P.squad=old;BFGlobalHome.refreshParty();}}""")
+        assert removed
         assert not errors, errors
     finally:
         browser.close()
