@@ -54,6 +54,10 @@
  filter.setAttribute('aria-label','Find source-backed archived units for trial');
  const found=document.createElement('p');found.id='bf800-found';
  const results=document.createElement('div');results.id='bf800-results';results.className='bf800-results';
+ let candidatePage=0;
+ const previous=document.createElement('button');previous.type='button';previous.id='bf800-prev';previous.textContent='PREVIOUS SOURCE FORMS';previous.style.minHeight='44px';
+ const next=document.createElement('button');next.type='button';next.id='bf800-next';next.textContent='MORE SOURCE FORMS';next.style.minHeight='44px';
+ previous.addEventListener('click',()=>{if(candidatePage>0)candidatePage--;render();});next.addEventListener('click',()=>{candidatePage++;render();});
  const title=document.createElement('strong');title.textContent='TEMPORARY DRAFT · maximum six';
  const selectedView=document.createElement('div');selectedView.id='bf800-selected';
  const sortControls=document.createElement('div');sortControls.id='bf1200-presets';
@@ -76,7 +80,7 @@
  const info=document.createElement('p');info.id='bf800-status';info.setAttribute('aria-live','polite');
  const foot=document.createElement('p');foot.className='bf800-note';
  foot.textContent='2022 unit base stats, names and optional thumbnails are original source references. ALL action, Burst, HP scaling, opponent and reward rules remain synthetic. Draft resets on exit/reload and never changes actual v7 save.';
- root.append(h,note,filter,found,results,title,selectedView,mission,start,info,foot);
+ root.append(h,note,filter,found,results,previous,next,title,selectedView,mission,start,info,foot);
  anchor.after(root);
  let chosen=[];
  let addedOrder=[];
@@ -117,10 +121,11 @@
    const q=filter.value.trim().toLocaleLowerCase();
    const matches=forms.filter(u=>!q||String(u.id).includes(q)||
      u.name.toLocaleLowerCase().includes(q));
+   const pages=Math.max(1,Math.ceil(matches.length/12));candidatePage=Math.min(candidatePage,pages-1);previous.disabled=candidatePage===0;next.disabled=candidatePage>=pages-1;
    found.textContent=forms.length+' source-backed standard forms with positive base stats · '+
-     matches.length+' matches · showing '+Math.min(12,matches.length);
+     matches.length+' matches · page '+(candidatePage+1)+' / '+pages+' · showing '+Math.min(12,matches.length-candidatePage*12);
    results.replaceChildren();
-   for(const u of matches.slice(0,12))results.append(row(u,false));
+   for(const u of matches.slice(candidatePage*12,candidatePage*12+12))results.append(row(u,false));
    selectedView.replaceChildren();
    if(chosen.length>1)selectedView.append(sortControls);
    for(const id of chosen){const u=value(id);if(u)selectedView.append(row(u,true));}
@@ -195,7 +200,7 @@
    }
    render();return ok;
  }
- filter.addEventListener('input',render);
+ filter.addEventListener('input',()=>{candidatePage=0;render();});
  mission.addEventListener('change',render);
  start.addEventListener('click',startDraft);
  document.querySelector('.bf-navbar')?.addEventListener('click',()=>{
@@ -206,6 +211,7 @@
    get eligibleCount(){return forms.length;},
    get archiveCount(){return parsed.units.length;},
    get selected(){return selected();},
+   get candidatePage(){return candidatePage+1;},
    get mission(){return missionId();},
    add,remove,replace:replaceDraft,eligible:id=>!!value(id),
    move,moveTo,sortBy,clear,canStart,start:startDraft,refresh:render
