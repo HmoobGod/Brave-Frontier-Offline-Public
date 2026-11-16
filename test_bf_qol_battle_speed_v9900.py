@@ -91,6 +91,19 @@ with sync_playwright() as pw:
  p.add_script_tag(path=str(A/'bf9900_qol_battle_speed.js'))
  assert p.locator('#bf9900-speed').count()==1
  assert p.locator('#speed option').count()==6
+ p.evaluate('S.busy=true;S.roundSpeed=12;BFGlobalQoLBattleSpeedV9900.refresh()')
+ assert p.evaluate(api+'.snapshot().activeTurnSpeed')==12
+ assert 'Active turn speed 12×' in p.locator('#bf9900-speed-info').text_content()
+ assert p.locator('#bf9900-reset-presentation').is_disabled()
+ assert p.evaluate(api+'.resetPresentation()') is False
+ p.evaluate('S.busy=false;BFGlobalQoLBattleSpeedV9900.refresh()')
+ assert p.evaluate(api+'.setSkip(true)') is True
+ assert p.evaluate(api+'.setSpeed(12)') is True
+ p.locator('#bf9900-speed').evaluate('(el)=>el.open=true')
+ p.locator('#bf9900-reset-presentation').click()
+ assert p.evaluate(api+'.snapshot().speed')==2
+ assert p.evaluate(api+'.snapshot().skip') is False
+ assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==saved
  assert not errors,errors
  b.close()
 print('PASS v99 extended round speed and animation skip are optional, save-safe, archive-only and idempotent')

@@ -100,17 +100,23 @@
  note.textContent='Animation skip is OFF until enabled; applies to original-style '+
    'story battles only, and cannot be toggled during a running turn. '+
    'Turn-speed changes take effect on the next turn.';
+ const restore=document.createElement('button');restore.type='button';restore.id='bf9900-reset-presentation';
+ restore.textContent='RESTORE 2× SPEED & FULL ANIMATIONS';restore.style.cssText='min-height:44px;max-width:100%;white-space:normal';
+ function resetPresentation(){if(S.busy)return false;if(!setSkip(false))return false;return setSpeed(2);}
+ restore.addEventListener('click',resetPresentation);
  const info=document.createElement('p');info.id='bf9900-speed-info';
- panel.append(heading,caption,group,label,note,info);host.after(panel);
+ panel.append(heading,caption,group,label,restore,note,info);host.after(panel);
  function snapshot(){return freeze({speed:nativeSpeed(),skip,
+   activeTurnSpeed:S.busy&&[1,2,3,5,8,12].includes(S.roundSpeed)?S.roundSpeed:null,
    originalOptions:freeze(nativeOptions.slice()),extra:freeze([8,12]),
    unchangedSaveSchema:P.version===7});}
  function refresh(){
    control.value=speed.value;
    control.disabled=!!S.busy;
    checkbox.checked=skip;
-   checkbox.disabled=!!S.busy;
-   info.textContent='Speed '+nativeSpeed()+'× · Long animation skip '+
+   checkbox.disabled=!!S.busy;restore.disabled=!!S.busy;
+   info.textContent='Selected next-turn speed '+nativeSpeed()+'× · '+
+     (S.busy?'Active turn speed '+(snapshot().activeTurnSpeed===null?'UNAVAILABLE':snapshot().activeTurnSpeed+'×')+' · ':'')+'Long animation skip '+
      (skip?'ON':'OFF')+(S.busy?' · finish this turn to change speed or skip':'');
    return snapshot();
  }
@@ -126,5 +132,5 @@
  });
  setInterval(()=>{if(!document.hidden&&panel.open)refresh();},1100);
  refresh();
- window.BFGlobalQoLBattleSpeedV9900=freeze({snapshot,setSpeed,setSkip,refresh});
+ window.BFGlobalQoLBattleSpeedV9900=freeze({snapshot,setSpeed,setSkip,refresh,resetPresentation});
 })();
