@@ -111,6 +111,20 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    page.locator('#bf-archive-reset').click()
+    passive=page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+    assert page.evaluate('BFGlobalUnitArchive.showDetail(10011)') is True
+    page.locator('#bf-archive-detail .bf-codex-recipes').evaluate('(el)=>el.open=true')
+    page.locator('#bf-archive-detail .bf-codex-evo-jump').first.click()
+    assert page.evaluate('BFGlobalUnitArchive.inspectedUnitId')==10012
+    assert page.evaluate("document.activeElement.matches('#bf-archive-detail h4')")
+    page.locator('#bf-archive-back-profile').click()
+    assert page.evaluate('BFGlobalUnitArchive.inspectedUnitId')==10011
+    assert page.evaluate('BFGlobalUnitArchive.backProfile()') is False
+    assert page.evaluate('BFGlobalUnitArchive.jumpProfile(99999999)') is False
+    page.evaluate('BFGlobalUnitArchive.showDetail(20011)')
+    assert page.locator('#bf-archive-back-profile').count()==0
+    assert page.evaluate("JSON.stringify({P,S,save:localStorage.getItem('bf_global_offline_demo_v7')})")==passive
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()

@@ -104,12 +104,17 @@
     if(sort.value==='rarity')data.sort((a,b)=>b.rarity-a.rarity||a.id-b.id);
     return data;
   }
+  let currentDetailId=null,profileHistory=[],profileNavigation=false;
+  function focusProfile(){const heading=detail.querySelector('h4');if(heading){heading.tabIndex=-1;heading.focus();}}
+  function jumpProfile(target){if(detail.hidden||!Number.isSafeInteger(target)||!byId.has(target)||!codex?.get(currentDetailId)?.recipes?.some(x=>x.target===target))return false;profileHistory.push(currentDetailId);if(profileHistory.length>12)profileHistory.shift();profileNavigation=true;try{const result=showDetail(target);if(result)focusProfile();return result;}finally{profileNavigation=false;}}
+  function backProfile(){if(!profileHistory.length||detail.hidden)return false;const id=profileHistory.pop();profileNavigation=true;try{const result=showDetail(id);if(result)focusProfile();return result;}finally{profileNavigation=false;}}
   function showDetail(id){
     const u=byId.get(id);
     if(!u)return false;
+    if(!profileNavigation)profileHistory=[];currentDetailId=id;
     detail.replaceChildren();
     const close=document.createElement('button');close.type='button';close.className='bf-archive-close';close.textContent='CLOSE DETAILS';
-    close.addEventListener('click',()=>{detail.hidden=true;detail.replaceChildren();const source=results.querySelector('.bf-archive-unit[data-unit-id="'+id+'"]');if(source)source.focus();else search.focus();});
+    close.addEventListener('click',()=>{profileHistory=[];currentDetailId=null;detail.hidden=true;detail.replaceChildren();const source=results.querySelector('.bf-archive-unit[data-unit-id="'+id+'"]');if(source)source.focus();else search.focus();});
     detail.append(close,item('h4','',u.name),item('p','','Original unit ID '+u.id+' · '+(elements[u.element]||'Element '+u.element)+' · '+u.rarity+'★'));
     detail.append(item('p','', 'Max level '+fmt(u.unitMaxLevel)+' · Cost '+fmt(u.unitCost)+' · '+(u.nameSource==='2022_Global_English'?'2022 Global English localization':u.nameSource==='master_literal'?'Literal master-table name':'Original English name not recovered')));
     // v189: exact historical source bytes, independently opted-in, read-only.
@@ -212,6 +217,7 @@
       table.append(tr);
     }
     detail.append(table,item('p','', 'Leader skill ID '+fmt(u.lsId)+' · BB '+fmt(u.bbId)+' · SBB '+fmt(u.sbbId)+' · UBB '+fmt(u.ubbId)+' · Extra skill '+fmt(u.esId)));
+    if(profileHistory.length){const back=document.createElement('button');back.type='button';back.id='bf-archive-back-profile';back.textContent='BACK TO PREVIOUS SOURCE FORM';back.style.minHeight='44px';back.addEventListener('click',backProfile);detail.append(back);}
     const evolutions=u.evo.map(next=>byId.get(next)?.name+' ('+next+')'||String(next));
     detail.append(item('p','', 'Source-listed next evolution: '+(evolutions.join(' / ')||'None recorded')));
     // Source-verified original Global character lore and skill descriptions.
@@ -287,7 +293,7 @@
           if(target){
             const jump=document.createElement('button');jump.type='button';
             jump.className='bf-codex-evo-jump';jump.textContent='VIEW NEXT FORM ›';
-            jump.addEventListener('click',()=>{showDetail(target.id);detail.scrollIntoView({block:'start',behavior:'smooth'});});
+            jump.addEventListener('click',()=>{if(jumpProfile(target.id))detail.scrollIntoView({block:'start',behavior:'instant'});});
             entry.append(jump);
           }
           recipes.append(entry);
@@ -339,7 +345,8 @@
   prev.addEventListener('click',()=>{if(page>0){page--;render();}});
   next.addEventListener('click',()=>{if(page+1<Math.ceil(matches().length/pageSize)){page++;render();}});
   render();
-  window.BFGlobalUnitArchive=Object.freeze({
+  window.BFGlobalUnitArchive=Object.freeze({jumpProfile,backProfile,
+    get inspectedUnitId(){return currentDetailId;},
     get count(){return units.length;},
     originalImpCaps:id=>originalImpCaps?.get(Number(id))||null,
     get thumbnailCount(){return archive.stats.thumbnailCount;},
