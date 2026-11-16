@@ -38,7 +38,9 @@
  }
  const status=document.createElement('p');status.id='bf145-original-music-status';
  status.setAttribute('aria-live','polite');
- box.append(title,note,mapBtn,bossBtn,stopBtn,status);
+ const position=document.createElement('input');position.type='range';position.id='bf145-position';position.min='0';position.step='1';position.value='0';position.setAttribute('aria-label','Seek manually chosen preview track in seconds');position.style.cssText='box-sizing:border-box;width:100%;min-height:44px';
+ const positionText=document.createElement('output');positionText.id='bf145-position-text';
+ box.append(title,note,mapBtn,bossBtn,stopBtn,status,position,positionText);
  host.after(box);
  const sound=new Audio();sound.loop=true;sound.preload='none';sound.volume=0.42;
  let active=null;let intent=null;let stopped=true;let playRequest=0;
@@ -48,6 +50,15 @@
       !map.has(QUEST.missionId))return null;
    return map.get(QUEST.missionId);
  }
+ function playbackPosition(){
+   const q=current(),file=active==='map'?q?.map:active==='boss'?q?.boss:null;
+   if(stopped||!onQuest()||!file||intent!==file||!Number.isFinite(sound.duration)||sound.duration<=0||!Number.isFinite(sound.currentTime)||sound.currentTime<0)return null;
+   return Object.freeze({seconds:Math.min(sound.duration,sound.currentTime),duration:sound.duration,manualPreview:true});
+ }
+ function refreshPosition(){const state=playbackPosition();position.disabled=!state;position.max=state?String(Math.floor(state.duration)):'0';position.value=state?String(Math.floor(state.seconds)):'0';positionText.textContent=state?Math.floor(state.seconds)+' / '+Math.floor(state.duration)+' preview seconds':'Playback position unavailable until a chosen track has metadata.';}
+ function seek(seconds){const state=playbackPosition();if(!state||!Number.isSafeInteger(seconds)||seconds<0||seconds>Math.floor(state.duration))return false;try{sound.currentTime=seconds;refreshPosition();return true;}catch(_){return false;}}
+ position.addEventListener('input',()=>seek(Number(position.value)));
+ sound.addEventListener?.('loadedmetadata',refreshPosition);sound.addEventListener?.('timeupdate',refreshPosition);
  function stop(){
    playRequest++;
    sound.pause();sound.removeAttribute('src');sound.load();
@@ -55,6 +66,7 @@
    refresh();return true;
  }
  function refresh(){
+   refreshPosition();
    const q=current(),mode=typeof E==='undefined'?null:E.mode?.value;
    const enabled=mode==='archive'&&!!q&&onQuest();
    const hasMap=enabled&&bundled.has(q.map),hasBoss=enabled&&bundled.has(q.boss);
@@ -115,7 +127,7 @@
    source:Object.freeze({year:2022,missions:106,sourceSha256:canonical,originalFiles:18,
      bundledTracks:3,nativePlaybackTimingKnown:false,
      autoplay:false,saveMutation:false}),
-   lookup:id=>map.get(id)||null,refresh,
+   lookup:id=>map.get(id)||null,refresh,seek,playbackPosition,
    get state(){return Object.freeze({active,stopped,src:sound.getAttribute('src')});}
  });
 })();
