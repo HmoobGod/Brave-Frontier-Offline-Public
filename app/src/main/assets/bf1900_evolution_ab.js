@@ -15,22 +15,25 @@
  const idle=()=>battle.snapshot===null&&!(typeof S!=='undefined'&&S?.busy);
  let latest=null;
  const sourceStats=id=>{
-   const rec=archive.find(id);
-   const raw=rec?.stats||{};
-   return {formId:id,name:rec?.name||'#'+id,
-     hp:raw.hp??null,atk:raw.atk??null,
-     def:raw.def??null,rec:raw.rec??null};
+   try{
+     const rec=archive.find(id);
+     if(!rec||rec.id!==id||typeof rec.name!=='string'||
+       ![rec.unitBaseHp,rec.unitBaseAtk,rec.unitBaseDef,rec.unitBaseRec].every(n=>Number.isSafeInteger(n)&&n>0))return null;
+     return {formId:id,name:rec.name,hp:rec.unitBaseHp,atk:rec.unitBaseAtk,def:rec.unitBaseDef,rec:rec.unitBaseRec};
+   }catch(_){return null;}
  };
  function ready(){
+   try{
    const plan=multi.preview;
-   if(!idle()||!plan.ready||!plan.entries.length)return false;
+   if(!idle()||plan?.ready!==true||!Array.isArray(plan.entries)||!plan.entries.length)return false;
    const start=draft.selected;
    const changes=new Map(plan.entries.map(r=>[r.from,r.to]));
    const evolved=start.map(x=>changes.get(x)||x);
-   return evolved.length>0&&evolved.length<=6&&
+   return evolved.length>0&&evolved.length<=6&&[...start,...evolved].every(id=>sourceStats(id)!==null)&&
      new Set(evolved).size===evolved.length&&
      battle.canStartDraft(start,draft.mission)&&
      battle.canStartDraft(evolved,draft.mission);
+   }catch(_){return false;}
  }
  function simulate(ids,mission,rounds){
    if(!battle.startDraft(ids,mission))return null;
@@ -148,7 +151,7 @@
      ['EVOLVED 2022 DRAFT',latest.after]]){
      const card=document.createElement('div');card.className='bf1900-result';
      card.append(el('strong',caption),
-       el('small',record.sourceStats.map(x=>x.name+' (#'+x.formId+')').join(' · ')),
+       el('small',record.sourceStats.map(x=>x.name+' (#'+x.formId+') · source base HP '+x.hp+' / ATK '+x.atk+' / DEF '+x.def+' / REC '+x.rec).join(' · ')),
        el('small','Rounds '+record.results.rounds+' · Wave '+
          record.results.wave+'/'+record.results.totalWaves+' · '+
          record.results.phase),

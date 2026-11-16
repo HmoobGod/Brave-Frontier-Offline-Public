@@ -38,6 +38,13 @@ with sync_playwright() as pw:
   'bf1500_evolution_chain.js','bf1600_draft_evolution.js',
   'bf1700_batch_draft_evolution.js','bf1800_multistage_draft.js',
   'bf1900_evolution_ab.js'):
+  if n=='bf1900_evolution_ab.js':
+   page.evaluate("""()=>{const original=BFGlobalUnitArchive;window.__comparisonFault='';
+    window.BFGlobalUnitArchive={...original,find:id=>{
+     if(__comparisonFault==='throw')throw Error('unit source unavailable');if(__comparisonFault==='null')return null;
+     const s=original.find(id);if(!s)return s;
+     return {...s,...({hp:{unitBaseHp:NaN},id:{id:999999}}[__comparisonFault]||{})};
+    }};}""")
   page.add_script_tag(path=str(A/n))
  assert page.evaluate('P.version')==7 and page.evaluate('BFGlobalUnitArchive.count')==2291
  assert page.evaluate('BFGlobalEvolutionABV1900.result') is None
@@ -54,6 +61,13 @@ with sync_playwright() as pw:
   saved:localStorage.getItem('bf_global_offline_demo_v7')})""")
  party=page.evaluate('BFArchiveDraftV800.selected')
  depth=page.evaluate('BFGlobalDraftEvolutionV1600.history.length')
+ fault_before=page.evaluate('JSON.stringify({P,S,QUEST,selected:BFArchiveDraftV800.selected,save:localStorage.getItem("bf_global_offline_demo_v7")})')
+ for case in ('throw','null','hp','id'):
+  page.evaluate('(v)=>window.__comparisonFault=v',case)
+  assert page.evaluate('BFGlobalEvolutionABV1900.run(1)') is None,case
+  assert page.evaluate('BFTacticalRoundsV300.snapshot') is None
+  page.evaluate("window.__comparisonFault=''")
+ assert page.evaluate('JSON.stringify({P,S,QUEST,selected:BFArchiveDraftV800.selected,save:localStorage.getItem("bf_global_offline_demo_v7")})')==fault_before
  result=page.evaluate('BFGlobalEvolutionABV1900.run(1)')
  assert result is not None
  assert result['originalYear']==2022 and result['historicalEnemyYear']==2014
@@ -63,6 +77,14 @@ with sync_playwright() as pw:
  assert result['after']['sourceFormIds']==[10013,10023]
  assert [x['formId'] for x in result['before']['sourceStats']]==[10011,10021]
  assert [x['formId'] for x in result['after']['sourceStats']]==[10013,10023]
+ source=page.evaluate('JSON.parse(document.getElementById("bf-global-unit-catalog-data").textContent).units')
+ by_id={u['id']:u for u in source}
+ for group in ('before','after'):
+  for row in result[group]['sourceStats']:
+   expected=by_id[row['formId']]
+   assert [row[k] for k in ('hp','atk','def','rec')]==[expected[k] for k in ('unitBaseHp','unitBaseAtk','unitBaseDef','unitBaseRec')]
+ assert 'source base HP' in page.locator('#bf1900-results').text_content()
+
  assert [x['sourceStages'] for x in result['changedForms']]==[2,2]
  assert result['before']['results']['rounds']<=1
  assert result['after']['results']['rounds']<=1
