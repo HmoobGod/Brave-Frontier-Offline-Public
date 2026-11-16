@@ -116,6 +116,10 @@ with sync_playwright() as pw:
  assert p.evaluate("P.version")==7
  p.add_script_tag(path=str(A/'bf10300_qol_battle_details.js'))
  assert p.locator('#bf10300-details').count()==1
+ gauge=p.evaluate("""()=>{const unit=S.party[0],bb=unit.bb,before=JSON.stringify({P,S}),out=[];try{for(const value of [NaN,null,'70',-1,101]){unit.bb=value;const x=BFGlobalQoLBattleDetailsV10300.refresh();out.push(x.allies[0].bb===null&&document.querySelector('#bf10300-allies').textContent.includes('BB UNAVAILABLE')&&document.querySelectorAll('#bf10300-allies meter').length===0);}}finally{unit.bb=bb;BFGlobalQoLBattleDetailsV10300.refresh();}return {out,same:before===JSON.stringify({P,S})};}""")
+ assert gauge=={'out':[True]*5,'same':True},gauge
+ assert p.locator('#bf10300-allies meter').get_attribute('aria-valuetext')=='70 percent'
+ assert p.locator('#bf10300-allies meter').get_attribute('aria-label')=='Vargas DEMO BB gauge'
  assert not errors,errors
  b.close()
 print('PASS v103 read-only battle HP/BB/source critical HUD, no save or combat writes')
