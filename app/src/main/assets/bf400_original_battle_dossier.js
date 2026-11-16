@@ -57,7 +57,13 @@
  const skills=document.createElement('div');skills.id='bf400-unit-skills';
  const update=document.createElement('button');update.type='button';
  update.id='bf400-refresh';update.textContent='REFRESH EQUIPPED SQUAD';
- squadPanel.append(squadHeading,squadSelect,squadCard,skills,update);
+ const bbLabel=document.createElement('label');bbLabel.textContent='Source BB level (reference only)';
+ const bbLevel=document.createElement('select');bbLevel.id='bf400-bb-level';bbLevel.style.minHeight='44px';
+ for(let level=1;level<=10;level++){const o=document.createElement('option');o.value=String(level);o.textContent='Source level '+level;bbLevel.append(o);}
+ bbLabel.append(bbLevel);
+ const bbPreview=document.createElement('p');bbPreview.id='bf400-bb-preview';bbPreview.setAttribute('role','status');
+ bbLevel.addEventListener('change',()=>showUnit(selectedUnit));
+ squadPanel.append(squadHeading,squadSelect,squadCard,bbLabel,bbPreview,skills,update);
  const missionPanel=document.createElement('section');missionPanel.className='bf400-panel';
  const missionHeading=document.createElement('strong');
  missionHeading.textContent='2014 HISTORICAL ENCOUNTER SOURCES';
@@ -118,6 +124,8 @@
  function showUnit(baseId=Number(squadSelect.value)){
    const row=equipped().find(u=>u.sourceId===Number(baseId));
    squadCard.replaceChildren();skills.replaceChildren();
+   bbPreview.textContent='No verified source BB profile for this owned form.';
+
    if(!row){squadCard.append(para('No equipped, owned units to inspect.'));
      return null;}
    selectedUnit=row.sourceId;
@@ -142,6 +150,14 @@
      skills.append(para('Archived 2022 skill and lore records unavailable for this form.'));
      return {formId:row.formId,available:false,skillNames:[]};
    }
+   let profile=null;
+   try{
+     const source=window.BFOriginalBBV500;
+     if(source?.sourceSha256==='69c3d919903039d8e8bdfb3327909b7177ae358d177b59db254980c6233776a9')profile=source.getAtLevel(row.formId,Number(bbLevel.value));
+   }catch(_){}
+   if(profile)bbPreview.textContent=profile.name+' · source level '+bbLevel.value+' · '+
+     (profile.kind==='attack'?'source modifier '+profile.pct+'%':'source recovery interval '+profile.low+'–'+profile.high)+
+     ' · reference only; native formulas remain unverified. No BB queued or level changed.';
    let names=[];
    const abilityLabels=[['leader','LEADER SKILL'],['bb','BRAVE BURST'],
      ['sbb','SUPER BRAVE BURST'],['ubb','ULTIMATE BRAVE BURST'],
