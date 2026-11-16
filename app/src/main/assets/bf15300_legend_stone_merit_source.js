@@ -88,7 +88,8 @@
    'documentation, not an explicit currency field in this archived table. '+
    'No Merit Points balance, earning rules, spending, item inventory or 7★/8★ '+
    'evolution purchase is enabled. Existing DEMO progression and saved data are untouched.';
- panel.append(title,visual,paragraph,quantityLabel,estimate,history,notice);
+ panel.append(title,visual,paragraph,history,notice);
+ paragraph.after(quantityLabel,estimate);
  host.after(panel);
  window.BFGlobalOriginalLegendStoneExchangeV15300=freeze({
    source,offers:rows,quote,
