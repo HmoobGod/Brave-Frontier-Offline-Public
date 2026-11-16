@@ -73,6 +73,19 @@
    if(skill)option.textContent=option.textContent+
      ' · '+skill.name;
  }
+ const comparePanel=document.createElement('details');comparePanel.id='bf11400-compare';
+ const compareTitle=document.createElement('summary');compareTitle.textContent='COMPARE ORIGINAL ENGLISH LEADER REFERENCES';compareTitle.style.minHeight='44px';
+ const other=document.createElement('select');other.id='bf11400-compare-unit';other.setAttribute('aria-label','Compare another original leader profile');other.style.cssText='width:100%;min-height:44px';
+ const none=document.createElement('option');none.value='';none.textContent='Choose a second source form';other.append(none);
+ for(const option of select.options){const copy=document.createElement('option');copy.value=option.value;copy.textContent=option.textContent;other.append(copy);}
+ const comparison=document.createElement('p');comparison.id='bf11400-comparison';
+ function compareUnits(a,b){try{if(!Number.isSafeInteger(a)||!Number.isSafeInteger(b))return null;const first=forUnit(a),second=forUnit(b);if(!first||!second)return null;
+   const ref=row=>freeze({unitId:row.unitId,lsId:row.lsId,name:row.name,description:row.description,skillTypeRaw:row.skillTypeRaw});
+   return freeze({first:ref(first),second:ref(second),sameSourceSkill:first.lsId===second.lsId,sourceYear:2022,liveEffectsCompared:false});}catch(_){return null;}}
+ function refreshComparison(){const row=compareUnits(Number(select.value),Number(other.value));comparison.textContent=row?[row.first,row.second].map(x=>'Unit #'+x.unitId+' · '+x.name+' [LS #'+x.lsId+', raw type '+x.skillTypeRaw+'] · '+x.description).join(' | ')+' · '+(row.sameSourceSkill?'Same archived leader skill.':'Different archived leader skills.')+' Reference text only; stacking/live effect strength not compared.':'Choose two source-known profiles to compare original descriptions.';}
+ comparePanel.append(compareTitle,other,comparison);block.append(comparePanel);other.addEventListener('change',refreshComparison);select.addEventListener('change',refreshComparison);refreshComparison();
+ // Profile filters can rebuild options after this optional English reader loads.
+ if(typeof MutationObserver==='function')new MutationObserver(()=>{for(const option of select.options){const skill=forUnit(Number(option.value));if(skill&&!option.textContent.includes(skill.name))option.textContent+=' · '+skill.name;}refresh();refreshComparison();}).observe(select,{childList:true});
  select.addEventListener('change',refresh);
  refresh();
  window.BFGlobalOriginalLeaderEnglishV11400=freeze({
@@ -80,7 +93,7 @@
      sha256:'4dccce4eeb6a89cc0cf5718badff7af95046c891882e42c05c6eaca81f9d6285',
      names:36,forms:72,originalEnglish:true,
      combatChanges:false,savedFieldsAdded:0}),
-   lookup,forUnit,refresh,snapshot:()=>freeze({
+   lookup,forUnit,refresh,compareUnits,snapshot:()=>freeze({
      selected:forUnit(Number(select.value)),sourceOnly:true,
      sourceForms:72,localizedLeaderIds:36,
      addsCombatEffects:false,saveFieldsAdded:0})
