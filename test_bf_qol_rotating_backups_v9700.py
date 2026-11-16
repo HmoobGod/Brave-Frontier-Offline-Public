@@ -160,6 +160,18 @@ with sync_playwright() as pw:
  }""")==[12,10,11]
  p.add_script_tag(path=str(asset))
  assert p.locator('#bf9700-backups').count()==1
+ timestamp=p.evaluate("""()=>{const api=BFGlobalQoLBackupsV9700,live=localStorage.getItem(api.liveKey),backups=localStorage.getItem(api.key),state=JSON.stringify(P),enabled=api.enabled;
+  const results=[];try{
+   for(const time of [Number.MAX_SAFE_INTEGER,8640000000000001,-1,0,1.5,'1001']){
+    const raw=JSON.stringify({version:1,slots:[{time,raw:live}]});localStorage.setItem(api.key,raw);
+    results.push(api.refresh().length===0&&api.download(0)===false&&localStorage.getItem(api.key)===raw);
+   }
+   for(const index of ['map','constructor',null,true,-1,3,0.5])results.push(api.download(index)===false);
+   for(const value of ['on','false',null,1])results.push(api.enable(value)===false&&api.enabled===enabled);
+  }finally{localStorage.setItem(api.key,backups);api.refresh();}
+  return {results,same:localStorage.getItem(api.liveKey)===live&&JSON.stringify(P)===state};
+ }""")
+ assert timestamp=={'results':[True]*17,'same':True},timestamp
  assert not errors,errors
  b.close()
 print('PASS v97 rotating backups: dedupe/3 slots/corrupt rejection/opt-out/export/v7 isolation')

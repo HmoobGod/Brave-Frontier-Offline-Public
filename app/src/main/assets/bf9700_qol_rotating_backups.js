@@ -23,13 +23,14 @@
        typeof v.questClears==='object'&&!Array.isArray(v.questClears);
    }catch(_){return false;}
  }
+ const validTime=t=>Number.isSafeInteger(t)&&t>0&&t<=8640000000000000;
  function existing(){
    try{
      const value=JSON.parse(safeGet(backupKey)||'null');
      if(!value||value.version!==1||!Array.isArray(value.slots))return [];
      const seen=new Set();
      return value.slots.slice(0,limit).filter(x=>{
-       if(!x||!Number.isSafeInteger(x.time)||x.time<=0||
+       if(!x||!validTime(x.time)||
           !valid(x.raw)||seen.has(x.raw))return false;
        seen.add(x.raw);return true;
      });
@@ -49,7 +50,8 @@
    if(slots[0]?.raw===raw)return false;
    // Restoring an older valid save should move it to newest without wasting
    // one of the three recovery slots on byte-identical progress.
-   const next=[{time:Date.now(),raw},...slots.filter(x=>x.raw!==raw)]
+   const time=Date.now();if(!validTime(time))return false;
+   const next=[{time,raw},...slots.filter(x=>x.raw!==raw)]
      .slice(0,limit);
    try{localStorage.setItem(backupKey,JSON.stringify({version:1,slots:next}));}
    catch(_){return false;}
@@ -74,6 +76,7 @@
    }catch(_){return false;}
  }
  function download(index=0){
+   if(!Number.isSafeInteger(index)||index<0||index>=limit)return false;
    const x=existing()[index];
    if(!x)return false;
    const filename='BraveFrontier-v7-backup-'+
@@ -87,6 +90,7 @@
    return exportRaw(raw,filename);
  }
  function enable(value){
+   if(typeof value!=='boolean')return false;
    const newValue=value===true;
    try{localStorage.setItem(enabledKey,newValue?'on':'off');}
    catch(_){return false;}
