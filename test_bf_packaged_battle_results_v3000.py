@@ -45,6 +45,12 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert "P.trainingShards<1" in src
  assert 'repeat.statusSnapshot()?.active===false' in src
  assert 'train.disabled=!canOpenTraining(s)' in src
+ # Strict fail-closed Auto and PRESENT Repeat provider guards, distinct from
+ # older compatibility code elsewhere in this source module.
+ assert 'S.auto!==false||S.mode' in src
+ assert 'repeat===undefined' in src
+ assert 'repeat.statusSnapshot()?.active===false' in src
+ assert "typeof units.setTab==='function'" in src
  # Packaged recovery must immediately refresh the existing read-only story
  # shortcut without adding a second save path or alternative storage key.
  assert 'window.BFGrandGaiaContinueV101' in src
