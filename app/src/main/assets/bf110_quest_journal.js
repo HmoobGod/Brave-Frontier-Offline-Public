@@ -94,12 +94,18 @@
  const preview=document.createElement('div');preview.id='bf110-preview';
  preview.setAttribute('aria-live','polite');
  preview.textContent='Select DETAILS to read an original archived mission description.';
+ const dismiss=document.createElement('button');dismiss.type='button';dismiss.id='bf110-close-preview';dismiss.textContent='CLOSE MISSION DETAILS';dismiss.hidden=true;
+ dismiss.style.cssText='min-height:44px;max-width:100%;white-space:normal';
+ preview.setAttribute('tabindex','-1');preview.setAttribute('role','region');preview.setAttribute('aria-label','Archived mission details');
+ function closePreview(){const id=previewId;previewId=null;preview.textContent='Select DETAILS to read an original archived mission description.';dismiss.hidden=true;
+   const origin=results.querySelector('[data-bf-journal-preview="'+id+'"]');(origin||search).focus();return true;}
+ dismiss.addEventListener('click',closePreview);
  const results=document.createElement('div');results.id='bf110-results';
  const more=document.createElement('button');more.id='bf110-more';more.type='button';
  more.textContent='SHOW MORE MISSIONS';
  const foot=document.createElement('small');foot.id='bf110-foot';
  foot.textContent='Original Global quest text and recorded battle/energy/reward totals. Native enemies, AI, drops, combat math and Energy deduction remain DEMO.';
- panel.append(title,filters,completed,nextButton,count,preview,results,more,foot);
+ panel.append(title,filters,completed,nextButton,count,preview,dismiss,results,more,foot);
  host.after(panel);
  let visibleLimit=20, previewId=null;
 
@@ -135,10 +141,10 @@
      (P.questClears?.[a.id]||0)||a.id-b.id);
    return rows;
  }
- function inspect(id){
+ function inspect(id,focus=false){
    const row=archive.find(r=>r.id===Number(id));
    if(!row)return false;
-   previewId=row.id;
+   previewId=row.id;dismiss.hidden=false;
    const q=row.q,locked=!questUnlocked(q),clears=P.questClears?.[q.missionId]||0;
    preview.textContent=[
      row.name+' · Mission '+row.id+' · '+row.dungeon,
@@ -148,6 +154,7 @@
      'Progress: '+(clears?clears+' clear(s)':locked?'LOCKED · requires Mission '+q.requires:'AVAILABLE'),
      'Original enemy formations, drop probabilities, native combat and Energy spending are not restored.'
    ].join('\n');
+   if(focus)preview.focus();
    return true;
  }
  function chooseMission(id){
@@ -207,7 +214,7 @@
      const actions=document.createElement('div');actions.className='bf110-actions';
      const view=document.createElement('button');view.type='button';
      view.dataset.bfJournalPreview=String(row.id);view.textContent='DETAILS';
-     view.addEventListener('click',()=>inspect(row.id));
+     view.addEventListener('click',()=>inspect(row.id,true));
      const go=document.createElement('button');go.type='button';
      go.dataset.bfJournalOpen=String(row.id);
      go.textContent=state==='locked'?'LOCKED':'OPEN';
@@ -242,6 +249,6 @@
    get matchingCount(){return matching().length},
    get previewMission(){return previewId},
    get nextAvailableMission(){return nextAvailable()?.id??null},
-   refresh,inspect,chooseMission
+   refresh,inspect,chooseMission,closePreview
  });
 })();

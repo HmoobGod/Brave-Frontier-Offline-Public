@@ -257,6 +257,23 @@ with sync_playwright() as pw:
  assert saved_snapshot==page.evaluate("""()=>({p:JSON.stringify(P),
      save:localStorage.getItem('bf_global_offline_demo_v7')})""")
  assert page.evaluate('P.version')==7
+ page.evaluate("BF_homeNav.go('quest');document.querySelector('#bf110-journal').open=true")
+ page.locator('#bf110-clear-filters').click()
+ stable=page.evaluate("JSON.stringify({P,S,mission:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  page.locator('[data-bf-journal-preview="1"]').focus()
+  page.keyboard.press('Enter')
+  assert page.evaluate('document.activeElement.id')=='bf110-preview'
+  assert 'Mission 1' in page.locator('#bf110-preview').text_content()
+  assert page.locator('#bf110-close-preview').bounding_box()['height']>=44
+  page.locator('#bf110-close-preview').click()
+  assert page.locator('#bf110-close-preview').is_hidden()
+  assert page.evaluate('document.activeElement.dataset.bfJournalPreview')=='1'
+ assert page.evaluate("JSON.stringify({P,S,mission:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
+ page.locator('#bf110-search').focus()
+ page.evaluate('BFGlobalQuestJournalV110.inspect(1)')
+ assert page.evaluate('document.activeElement.id')=='bf110-search' # API focus-neutral
  assert not errors,errors
  browser.close()
 print('PASS v1.10 journal: 106 original English missions, gates/search/regions, v7 passive safety')
