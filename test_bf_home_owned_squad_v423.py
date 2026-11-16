@@ -47,6 +47,38 @@ with sync_playwright() as pw:
         assert warning.count() == 1 and warning.is_hidden()
         # Real Home portrait controls open the CURRENT owned profile through
         # the existing Unit Box, including keyboard activation and narrow phones.
+        # Home identifies actual ordered squad slots, not a promoted fallback leader.
+        slot_snapshot = """()=>JSON.stringify({P,S,quest:QUEST.missionId,
+          storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+            const k=localStorage.key(i);return [k,localStorage.getItem(k)]})),
+          writes:__v423Writes()})"""
+        slot_before=page.evaluate(slot_snapshot)
+        for width in (320,390,540):
+            page.set_viewport_size({'width':width,'height':844})
+            page.evaluate('BFGlobalHome.refreshParty()')
+            cards=page.locator('#bf-scene-party .bf-scene-member')
+            assert page.locator('#bf-scene-party .bf-scene-leader').count()==1
+            for index in range(6):
+                role=cards.nth(index).locator('.bf-scene-slot')
+                assert role.is_visible() and f'SLOT {index+1}' in role.inner_text()
+                assert f'squad slot {index+1} of 6' in cards.nth(index).get_attribute('aria-label')
+                assert ('Leader' in cards.nth(index).get_attribute('aria-label'))==(index==0)
+                assert cards.nth(index).locator('.bf-scene-leader').count()==int(index==0)
+                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'),(width,index)
+            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
+        assert page.evaluate(slot_snapshot)==slot_before
+        for first in (None, -1):
+            page.evaluate("""first=>{window.__slotSquad=P.squad;P.squad=[first,...P.squad.slice(1)];}""",first)
+            try:
+                fixture_before=page.evaluate(slot_snapshot)
+                page.evaluate('BFGlobalHome.refreshParty()')
+                assert page.locator('#bf-scene-party .bf-scene-leader').count()==0
+                assert 'Leader' not in page.locator('#bf-scene-party').inner_text()
+                assert 'squad slot 2 of 6' in page.locator('#bf-scene-party button').first.get_attribute('aria-label')
+                assert page.evaluate(slot_snapshot)==fixture_before
+            finally:
+                page.evaluate('P.squad=window.__slotSquad;delete window.__slotSquad;BFGlobalHome.refreshParty()')
+        print('PASS ordered Home slot/leader labels at three widths, no fallback leader or player/storage writes')
         before_inspect = page.evaluate("""()=>({
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
