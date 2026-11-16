@@ -127,8 +127,8 @@
      if(P.version!==7||typeof S==='undefined'||S.busy!==false||S.auto!==false||
         typeof window.BF_homeNav?.go!=='function'||typeof window.BFInnerScreens?.setTab!=='function'||
         !document.getElementById('traininglist')||!document.getElementById('bf-unit-tab-label'))return false;
-     const repeat=window.BFGlobalQoLAutoRepeatV10600;
-     return !repeat||(typeof repeat.snapshot==='function'&&repeat.snapshot()?.active===false);
+     const repeat=window.BFGlobalQoLQuestRepeatV9800;
+     return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);
    }catch(_){return false;}
  }
  function openTraining(){

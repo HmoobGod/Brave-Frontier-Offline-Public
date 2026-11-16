@@ -41,16 +41,16 @@ with sync_playwright() as pw:
   assert page.locator('#traininglist').is_visible()
   assert page.evaluate("document.activeElement.id")=='bf-unit-tab-label'
   assert page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==before
- blocked=page.evaluate("""()=>{const api=BFGlobalQoLEvolutionNeedsV10400,repeat=window.BFGlobalQoLAutoRepeatV10600;const out=[];
+ blocked=page.evaluate("""()=>{const api=BFGlobalQoLEvolutionNeedsV10400,repeat=window.BFGlobalQoLQuestRepeatV9800;const out=[];
  try{for(const mode of ['busy','auto','repeatTrue','repeatNull','repeatThrows','repeatString','missing']){
- BFInnerScreens.setTab('evolve');S.busy=false;S.auto=false;window.BFGlobalQoLAutoRepeatV10600=repeat;
+ BFInnerScreens.setTab('evolve');S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;
  let removed=null;if(mode==='busy')S.busy=true;if(mode==='auto')S.auto=true;
- if(mode.startsWith('repeat'))window.BFGlobalQoLAutoRepeatV10600={snapshot:()=>{if(mode==='repeatThrows')throw Error('fixture');return mode==='repeatNull'?null:{active:mode==='repeatString'?'false':true}}};
+ if(mode.startsWith('repeat'))window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{if(mode==='repeatThrows')throw Error('fixture');return mode==='repeatNull'?null:{active:mode==='repeatString'?'false':true}}};
  if(mode==='missing'){removed=document.querySelector('#traininglist');removed.remove();}
  api.refresh();const disabled=document.querySelector('#bf10400-training-shortcut').disabled;
  out.push(disabled&&api.openTraining()===false&&BFInnerScreens.unitTab==='evolve');
  if(removed)document.body.append(removed);
- }}finally{S.busy=false;S.auto=false;window.BFGlobalQoLAutoRepeatV10600=repeat;api.refresh();}return out;}""")
+ }}finally{S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;api.refresh();}return out;}""")
  assert blocked==[True]*7,blocked
  assert page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==before
  assert not errors,errors
