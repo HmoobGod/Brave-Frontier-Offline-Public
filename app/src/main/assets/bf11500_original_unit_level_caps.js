@@ -105,10 +105,12 @@
    try{
      if(P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0)||new Set(P.roster).size!==P.roster.length)throw Error('ownership unknown');
      const seen=new Set();
-     for(const [index,baseId] of Array.from(P.squad).entries()){
+     for(let index=0;index<Math.min(6,P.squad.length);index++){
+       const baseId=P.squad[index];
        if(baseId===null||baseId===undefined||baseId===0)continue;
        if(!Number.isSafeInteger(baseId)||!P.roster.includes(baseId)||seen.has(baseId))throw Error('ambiguous squad');seen.add(baseId);
-       const unit=effectiveUnit(baseId),cap=lookup(unit?.id),level=demoLevel(P.unitExp?.[baseId]);
+       const unit=effectiveUnit(baseId);if(!unit)throw Error('source form unavailable');
+       const cap=lookup(unit.id),level=demoLevel(P.unitExp?.[baseId]);
        if(!cap||!Number.isSafeInteger(level)||level<1)throw Error('reference unavailable');
        rows.push(freeze({slot:index+1,unitId:unit.id,demoLevel:level,originalCap:cap,atOrAboveCap:level>=cap}));
      }
