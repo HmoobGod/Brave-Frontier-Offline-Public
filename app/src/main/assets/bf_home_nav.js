@@ -227,9 +227,22 @@ function bfOfflineUnitPortraitV266(source, name) {
         const level = document.createElement('small');
         const exp = P.unitExp && P.unitExp[baseId] || 0;
         level.textContent = 'Lv.' + (typeof demoLevel === 'function' ? demoLevel(exp) : '1');
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent);
+        // The first ordered owned slot is the leader slot; never promote
+        // another visible card when slot one is empty or unverified.
+        const slot = document.createElement('span');
+        slot.className = 'bf-scene-slot';
+        slot.setAttribute('aria-hidden', 'true');
+        if (index === 0) {
+          const leader = document.createElement('b');
+          leader.className = 'bf-scene-leader';
+          leader.textContent = 'LEADER';
+          slot.append(leader);
+        }
+        slot.append(document.createTextNode('SLOT ' + (index + 1)));
+        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent +
+          ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
         card.title = 'Inspect owned unit';
-        card.append(img, name, level);
+        card.append(slot, img, name, level);
         card.addEventListener('click', () => {
           // Recheck the live slot and ownership: this card may predate a
           // roster import or squad edit. Navigation is a manual read only
