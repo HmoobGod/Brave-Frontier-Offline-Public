@@ -17,9 +17,9 @@ with sync_playwright() as pw:
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
  page.evaluate("""() => {
-  const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
-   getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),
-   removeItem:k=>delete db[k],key:i=>Object.keys(db)[i]??null,
+  const db={};let writes=0;window.__hudWrites=()=>writes;Object.defineProperty(window,'localStorage',{configurable:true,value:{
+   getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+   removeItem:k=>{writes++;delete db[k]},key:i=>Object.keys(db)[i]??null,
    get length(){return Object.keys(db).length}}});
   window.alert=()=>{};window.confirm=()=>true;
   HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
@@ -166,8 +166,9 @@ with sync_playwright() as pw:
  # No separate save format or mocked reward engine: only setItem is denied.
  persisted=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
  page.evaluate("""()=>{window.__hudOldSet=localStorage.setItem.bind(localStorage);
-   window.__hudDenySave=true;
+   window.__hudDenySave=true;window.__hudSaveAttempts=0;
    localStorage.setItem=(key,value)=>{
+     if(key==='bf_global_offline_demo_v7')__hudSaveAttempts++;
      if(__hudDenySave&&key==='bf_global_offline_demo_v7')
        throw new DOMException('Synthetic storage quota','QuotaExceededError');
      return __hudOldSet(key,value);
@@ -183,14 +184,70 @@ with sync_playwright() as pw:
  assert page.evaluate('BFGlobalStoryBattleV2000.advance()') is False
  assert page.evaluate('QUEST.missionId')==1
  assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
- # The player must explicitly retry; failed retries never unlock Next.
- assert page.locator('#bf2000-retry-save').is_visible()
- page.locator('#bf2000-retry-save').click()
- assert page.locator('#bf2000-next').is_disabled()
- assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==persisted
- page.evaluate('()=>{__hudDenySave=false}')
- page.locator('#bf2000-retry-save').click()
+ # HUD Retry Save must refresh Continue Story immediately, including failure.
+ page.evaluate("""()=>{
+   BFGrandGaiaContinueV101.refresh();
+   window.__hudRetryState=()=>({player:JSON.stringify(P),battle:JSON.stringify(S),
+     mission:QUEST.missionId,writes:__hudWrites(),attempts:__hudSaveAttempts,
+     storage:Object.fromEntries(Array.from({length:localStorage.length},(_,i)=>{
+       const k=localStorage.key(i);return [k,localStorage.getItem(k)]}))});
+ }""")
+ assert page.locator('#bf101-continue').is_disabled()
+ for width in (320,390,540):
+  page.set_viewport_size({'width':width,'height':844})
+  page.evaluate("""()=>{
+    document.getElementById('bf101-continue').disabled=false;
+    document.getElementById('bf101-next').textContent='STALE RECEIPT';
+  }""")
+  before_retry=page.evaluate('__hudRetryState()')
+  retry=page.locator('#bf2000-retry-save')
+  assert retry.is_visible();retry.focus();retry.press('Enter' if width!=390 else 'Space')
+  assert page.locator('#bf2000-next').is_disabled()
+  assert page.locator('#bf101-continue').is_disabled(),width
+  assert 'VICTORY NOT SAVED' in page.locator('#bf101-next').inner_text(),width
+  after_retry=page.evaluate('__hudRetryState()')
+  for key in ('player','battle','mission','storage','writes'):
+   assert after_retry[key]==before_retry[key],(width,key)
+  assert after_retry['attempts']==before_retry['attempts']+1
+ # Missing, throwing or unreadable optional UI must not escape or retry the save twice.
+ for fault in ('missing','throws','getter'):
+  page.evaluate("""fault=>{
+    window.__hudContinueOriginal=window.BFGrandGaiaContinueV101;
+    if(fault==='missing')window.BFGrandGaiaContinueV101=undefined;
+    else if(fault==='throws')window.BFGrandGaiaContinueV101={refresh:()=>{throw Error('UI unavailable')}};
+    else window.BFGrandGaiaContinueV101=Object.defineProperty({},'refresh',{
+      get(){throw Error('UI provider unavailable')}});
+  }""",fault)
+  try:
+   before_fault=page.evaluate('__hudRetryState()')
+   page.locator('#bf2000-retry-save').click()
+   after_fault=page.evaluate('__hudRetryState()')
+   for key in ('player','battle','mission','storage','writes'):
+    assert after_fault[key]==before_fault[key],(fault,key)
+   assert after_fault['attempts']==before_fault['attempts']+1
+   assert page.locator('#bf2000-next').is_disabled()
+   assert page.locator('#bf2000-retry-save').is_visible()
+   assert not errors,errors
+  finally:
+   page.evaluate('window.BFGrandGaiaContinueV101=window.__hudContinueOriginal')
+ page.evaluate("""()=>{
+   __hudDenySave=false;
+   document.getElementById('bf101-continue').disabled=true;
+   document.getElementById('bf101-next').textContent='STALE RECEIPT';
+ }""")
+ before_success=page.evaluate('__hudRetryState()')
+ page.locator('#bf2000-retry-save').focus();page.locator('#bf2000-retry-save').press('Space')
  assert page.locator('#bf2000-retry-save').is_hidden()
+ assert page.locator('#bf101-continue').is_enabled()
+ assert page.locator('#bf101-next').inner_text().startswith('NEXT:')
+ after_success=page.evaluate('__hudRetryState()')
+ for key in ('player','battle','mission'):
+  assert after_success[key]==before_success[key],key
+ assert after_success['attempts']==before_success['attempts']+1
+ assert after_success['writes']==before_success['writes']+1
+ expected_storage={**before_success['storage'],'bf_global_offline_demo_v7':after_success['player']}
+ assert after_success['storage']==expected_storage
+ print('PASS HUD Retry Save immediately refreshes Continue Story at three widths, isolates optional UI faults and writes exactly once')
  s=page.evaluate('BFGlobalStoryBattleV2000.refresh()')
  assert s['won'] and s['stored'] and s['clears']>=1 and s['nextId']==2,s
  # v331: v3000 loads AFTER this HUD on the real Android page. Its read-only

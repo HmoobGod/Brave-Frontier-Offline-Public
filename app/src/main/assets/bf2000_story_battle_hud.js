@@ -179,6 +179,13 @@
       typeof saveProgress!=='function')return;
    try{saveProgress();}catch(_){/* Keep Next locked until persisted receipt verifies. */}
    previous='';refresh();
+   // The existing story shortcut observes quest-list changes, not storage.
+   // Refresh its read-only receipt UI after either save outcome; optional
+   // display failures must not block native recovery or trigger another write.
+   try{
+     const shortcut=window.BFGrandGaiaContinueV101;
+     if(typeof shortcut?.refresh==='function')shortcut.refresh();
+   }catch(_){/* Preserve the native save result if optional UI is unavailable. */}
  });
  jump.addEventListener('click',()=>battle.scrollIntoView({block:'start',behavior:'smooth'}));
  next.addEventListener('click',advance);
