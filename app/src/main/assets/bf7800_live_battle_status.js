@@ -46,22 +46,21 @@
  function snapshot(){
    // Only current in-battle ally identities; KO or replacements cannot inherit
    // stale protections or statuses from a previous unit object.
-   const immuneState=nullifier.snapshot();
-   const regenState=regeneration.snapshot();
+   let immuneState=null,regenState=null,providersAvailable=true;
+   try{const row=nullifier.snapshot();if(!row||!Array.isArray(row.protectedSlots))throw Error('unknown immunity');immuneState=row;}catch(_){providersAvailable=false;}
+   try{const row=regeneration.snapshot();if(!row||!Array.isArray(row.targetSlots)||typeof row.active!=='boolean')throw Error('unknown regeneration');regenState=row;}catch(_){providersAvailable=false;}
    const active=S.mode==='archive'&&!S.over;
-   const immunityTurns=immuneState.expiresAfterRound===null?null:
-     Math.max(0,immuneState.expiresAfterRound-S.round+1);
-   const regenTurns=regenState.untilRound===null?null:
-     Math.max(0,regenState.untilRound-S.round+1);
+   function remaining(until){return Number.isSafeInteger(S.round)&&S.round>=0&&Number.isSafeInteger(until)&&until>=S.round?until-S.round+1:null;}
+   const immunityTurns=remaining(immuneState?.expiresAfterRound),regenTurns=remaining(regenState?.untilRound);
    const entries=[];
    if(active)for(let slot=0;slot<6;slot++){
      const unit=S.party?.[slot];
      if(!unit?.active||!Number.isFinite(unit.hp)||
        !Number.isFinite(unit.maxHp)||unit.hp<=0||
        unit.maxHp<=0||unit.hp>unit.maxHp)continue;
-     const codes=ailments.codesFor(slot);
-     const immune=immuneState.protectedSlots.includes(slot);
-     const regen=regenState.active&&regenState.targetSlots.includes(slot);
+     let codes=[];try{const result=ailments.codesFor(slot);if(!Array.isArray(result)||result.some(n=>!Number.isSafeInteger(n)||n<1||n>6))throw Error('unknown ailments');codes=result;}catch(_){providersAvailable=false;}
+     const immune=immuneState?.protectedSlots.includes(slot)===true;
+     const regen=regenState?.active===true&&regenState.targetSlots.includes(slot);
      if(!codes.length&&!immune&&!regen)continue;
      entries.push(freeze({
        slot,name:String(unit.name||'Ally '+(slot+1)),
@@ -73,7 +72,7 @@
        bbBlocked:codes.includes(5)||codes.includes(6)
      }));
    }
-   return freeze({mode:S.mode,round:S.round,visible:active&&entries.length>0,
+   return freeze({mode:S.mode,round:S.round,visible:active&&(entries.length>0||!providersAvailable),providersAvailable,
      units:freeze(entries),source:'2022 Global item master and already-loaded battle states',
      timing:'Current simulated battle rounds; not original native status lifetime'});
  }
@@ -81,10 +80,10 @@
  function refresh(){
    const st=snapshot();
    panel.hidden=!st.visible;
-   const signature=JSON.stringify(st.units);
+   const signature=JSON.stringify({units:st.units,providersAvailable:st.providersAvailable});
    if(signature===last)return st;
    last=signature;
-   heading.textContent='BATTLE STATUS · '+st.units.length+
+   heading.textContent=(st.providersAvailable?'BATTLE STATUS · ':'BATTLE STATUS UNAVAILABLE · ')+st.units.length+
      (st.units.length===1?' AFFECTED ALLY':' AFFECTED ALLIES');
    const nodes=st.units.map(unit=>{
      const row=document.createElement('div');row.className='bf7800-row';
@@ -100,9 +99,9 @@
      }
      for(const code of unit.codes)
        chip(descriptions[code]||ailments.labels[code]||'Status '+code);
-     if(unit.immune)chip('Nullifier · '+unit.immunityTurns+
+     if(unit.immune)chip('Nullifier · '+(unit.immunityTurns===null?'UNKNOWN':unit.immunityTurns)+
        ' DEMO round'+(unit.immunityTurns===1?'':'s')+' left',true);
-     if(unit.regeneration)chip('Regeneration · '+unit.regenerationTurns+
+     if(unit.regeneration)chip('Regeneration · '+(unit.regenerationTurns===null?'UNKNOWN':unit.regenerationTurns)+
        ' DEMO round'+(unit.regenerationTurns===1?'':'s')+' left',true);
      return row;
    });

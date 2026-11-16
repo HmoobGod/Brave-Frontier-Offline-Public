@@ -35,6 +35,8 @@ with sync_playwright() as pw:
  for name in ('bf6400_status_remedy_command.js','bf6500_sickness_recovery.js',
               'bf7500_original_saint_light.js','bf7600_original_status_nullifier.js',
               'bf7700_original_party_regen.js','bf7800_live_battle_status.js'):
+  if name=='bf7800_live_battle_status.js':
+   p.evaluate("""()=>{for(const [name,method] of [['BFGlobalOriginalAilmentStateV5700','codesFor'],['BFGlobalStatusNegationV7600','snapshot'],['BFGlobalOriginalPartyRegenV7700','snapshot']]){const old=window[name];window[name]={...old,[method]:(...args)=>{if(window.__brokenStatus===name)throw Error('fixture');const row=old[method](...args);return window.__unknownTiming&&method==='snapshot'?{...row,expiresAfterRound:NaN,untilRound:NaN}:row}}}}""")
   p.add_script_tag(path=str(A/name))
  p.locator('.bf-navbar button[data-bf-goto="quest"]').click()
  assert p.evaluate('P.version')==7
@@ -93,6 +95,16 @@ with sync_playwright() as pw:
  assert state['visible'] and len(state['units'])>=4
  assert all(u['immune'] and u['regeneration'] for u in state['units'])
  assert all(u['immunityTurns']==3 and u['regenerationTurns']==3 for u in state['units'])
+ fault=p.evaluate("""()=>{const api=BFGlobalLiveBattleStatusV7800,before=JSON.stringify({P,S}),out=[];
+ try{for(const name of ['BFGlobalOriginalAilmentStateV5700','BFGlobalStatusNegationV7600','BFGlobalOriginalPartyRegenV7700']){window.__brokenStatus=name;const x=api.refresh();out.push(!x.providersAvailable&&x.visible&&document.querySelector('#bf7800-heading').textContent.includes('UNAVAILABLE'));}}
+ finally{delete window.__brokenStatus;api.refresh();}return {out,unchanged:before===JSON.stringify({P,S}),recovered:api.snapshot().providersAvailable};}""")
+ assert fault=={'out':[True,True,True],'unchanged':True,'recovered':True},fault
+
+ # Unknown timing never becomes an invented zero or NaN countdown.
+ unknown=p.evaluate("""()=>{const before=JSON.stringify({P,S});try{window.__unknownTiming=true;const x=BFGlobalLiveBattleStatusV7800.refresh();return {units:x.units,text:document.querySelector('#bf7800-rows').textContent};}finally{delete window.__unknownTiming;BFGlobalLiveBattleStatusV7800.refresh();}}""")
+ assert all(u['immunityTurns'] is None and u['regenerationTurns'] is None for u in unknown['units']),unknown
+ assert 'UNKNOWN DEMO round' in unknown['text'] and 'NaN' not in unknown['text'],unknown
+
  assert p.evaluate('BFGlobalOriginalAilmentStateV5700.inflict(0,1)') is False
  p.evaluate('S.round++')
  state=p.evaluate('BFGlobalLiveBattleStatusV7800.refresh()')
