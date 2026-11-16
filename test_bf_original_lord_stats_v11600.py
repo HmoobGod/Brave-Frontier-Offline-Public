@@ -88,6 +88,15 @@ with sync_playwright() as pw:
  assert p.evaluate('JSON.stringify(P)')==initial
  p.add_script_tag(path=str(A/'bf11600_original_lord_stats_reference.js'))
  assert p.locator('#bf11600-original-lord-stats').count()==1
+ guarded=p.evaluate("""()=>{const squad=P.squad,roster=P.roster,resolve=window.effectiveUnit,before=JSON.stringify(P);const out=[];
+  try{
+   for(const s of [null,{},[squad[0],squad[0]],Array(7).fill(squad[0])]){P.squad=s;out.push(!BFGlobalOriginalLordStatsV11600.refresh().available);}
+   P.squad=squad;P.roster=null;out.push(!BFGlobalOriginalLordStatsV11600.refresh().available);
+   P.roster=roster;window.effectiveUnit=()=>{throw Error('form unavailable')};out.push(!BFGlobalOriginalLordStatsV11600.refresh().available);
+  }finally{P.squad=squad;P.roster=roster;window.effectiveUnit=resolve;BFGlobalOriginalLordStatsV11600.refresh();}
+  return {out,same:before===JSON.stringify(P),recovered:BFGlobalOriginalLordStatsV11600.snapshot().available};
+ }""")
+ assert guarded=={'out':[True]*6,'same':True,'recovered':True},guarded
  p.add_style_tag(path=str(A/'bf_home_nav.css'))
  p.add_script_tag(path=str(A/'bf_home_nav.js'))
  p.evaluate(api+'.refresh()')
