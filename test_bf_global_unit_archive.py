@@ -55,6 +55,7 @@ with sync_playwright() as pw:
     page.add_style_tag(path=str(ASSETS/'bf_home_nav.css'))
     page.add_script_tag(path=str(ASSETS/'bf_home_nav.js'))
     page.add_style_tag(path=str(ASSETS/'bf_global_unit_archive.css'))
+    page.add_script_tag(path=str(ASSETS/'bf500_source_bb_evidence.js'))
     page.add_script_tag(path=str(ASSETS/'bf_global_unit_archive.js'))
     before=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert page.evaluate('BFGlobalUnitArchive.count')==2291
@@ -111,6 +112,23 @@ with sync_playwright() as pw:
     assert 'No matching' in page.locator('#bf-archive-results').inner_text()
     after=page.evaluate('''() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})''')
     assert before==after,(before,after)
+    page.locator('#bf-archive-reset').click()
+    for kind,count in [('attack',24),('support',6)]:
+        page.locator('#bf-archive-bb-kind').select_option(kind)
+        assert page.evaluate('BFGlobalUnitArchive.matchingCount')==count
+        observed=page.locator('.bf-archive-unit').evaluate_all('(els)=>els.map(e=>Number(e.dataset.unitId))')
+        expected=page.evaluate("(kind)=>JSON.parse(document.querySelector('#bf-global-unit-catalog-data').textContent).units.filter(u=>{const row=BFOriginalBBV500.get(u.id);return row&&(kind==='attack'?row.kind==='attack':['heal_all','atk_buff_all'].includes(row.kind))}).map(u=>u.id)",kind)
+        assert observed==expected,(kind,observed,expected)
+    page.evaluate("window.__bb500=BFOriginalBBV500;window.BFOriginalBBV500={count:30,get:()=>{throw Error('fixture')}};document.querySelector('#bf-archive-search').dispatchEvent(new Event('input'))")
+    assert page.locator('#bf-archive-bb-kind').is_disabled()
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==2291
+    assert 'filter unavailable' in page.locator('#bf-archive-count').text_content()
+    page.evaluate("window.BFOriginalBBV500=__bb500;document.querySelector('#bf-archive-search').dispatchEvent(new Event('input'))")
+    assert page.locator('#bf-archive-bb-kind').is_enabled()
+    assert page.evaluate('BFGlobalUnitArchive.matchingCount')==6
+    page.locator('#bf-archive-reset').click()
+    assert page.locator('#bf-archive-bb-kind').input_value()=='all'
+    assert before==page.evaluate("() => ({state:JSON.stringify(P),save:localStorage.getItem('bf_global_offline_demo_v7'),mission:QUEST.missionId,auto:S.auto})")
     assert not errs,errs
     print('PASS portrait UI, paginated search, element/rarity, detail view, sprite loading, unchanged save/roster/Auto')
     browser.close()
