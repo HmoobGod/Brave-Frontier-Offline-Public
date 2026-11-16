@@ -225,6 +225,19 @@ with sync_playwright() as pw:
  p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",old)
  p.evaluate(api+'.refresh()')
  assert 'Preview unavailable' not in p.locator('#bf10000-preview').text_content()
+ guard_before=p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7"),presets:BFGlobalQoLSquadPresetsV10000.info(),resets:__resetCalls})')
+ for status in (True,None,'false'):
+  p.evaluate('(v)=>window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:v})}',status)
+  p.evaluate(api+'.refresh()')
+  assert p.locator('#bf10000-apply').is_disabled()
+  assert p.evaluate(api+'.applyPreset(1)') is False
+ for provider in ("{statusSnapshot:()=>{throw Error('unavailable')}}",'{}'):
+  p.evaluate('window.BFGlobalQoLQuestRepeatV9800='+provider)
+  assert p.evaluate(api+'.applyPreset(1)') is False
+ p.evaluate('window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:false})};BFGlobalQoLSquadPresetsV10000.refresh()')
+ assert p.locator('#bf10000-apply').is_enabled()
+ assert p.evaluate('JSON.stringify({P,S,save:localStorage.getItem("bf_global_offline_demo_v7"),presets:BFGlobalQoLSquadPresetsV10000.info(),resets:__resetCalls})')==guard_before
+ p.evaluate('delete window.BFGlobalQoLQuestRepeatV9800')
  p.evaluate("(v)=>{const state=JSON.parse(v);P.roster=state.roster;P.squad=state.squad}",original_live)
  p.evaluate(api+'.refresh()')
  assert p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==stored
