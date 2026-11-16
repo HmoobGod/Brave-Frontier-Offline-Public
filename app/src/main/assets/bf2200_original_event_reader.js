@@ -130,3 +130,19 @@
      lines:Object.freeze(s.lines.slice())}):null}
  });
 })();
+/* Manual source transcript inspection; no clipboard, saved bookmark or playback. */
+(()=>{'use strict';if(window.BFSourceTranscriptB100)return;
+ const reader=document.getElementById('bf2200-reader'),message=document.getElementById('bf2200-text');if(!reader||!message)return;
+ const panel=document.createElement('details');panel.id='bf2200-transcript';
+ const heading=document.createElement('summary');heading.textContent='INSPECT CURRENT SOURCE TRANSCRIPT';heading.style.minHeight='44px';
+ const text=document.createElement('textarea');text.id='bf2200-transcript-text';text.readOnly=true;text.setAttribute('aria-label','Read-only current unlocked source transcript');text.style.cssText='box-sizing:border-box;width:100%;min-height:180px';
+ const select=document.createElement('button');select.type='button';select.textContent='SELECT TRANSCRIPT TEXT';select.style.minHeight='44px';select.addEventListener('click',()=>{text.focus();text.select();});
+ panel.append(heading,text,select);reader.append(panel);
+ function transcript(){try{const api=window.BFGlobalOriginalEventsV2200,scene=api?.snapshot?.(),match=/^(clear|dungeon):([1-9][0-9]*)$/.exec(scene?.chosen||'');if(!reader.open||!match)return null;
+   const source=api.lookup(match[1],Number(match[2]));if(!source||source.kind!==match[1]||source.id!==Number(match[2])||source.source!=='content/event/'+scene.source||source.lines.length!==scene.lines||source.lines[scene.step-1]!==scene.text||!source.lines.every(x=>typeof x==='string'))return null;
+   return 'ORIGINAL 2022 GLOBAL SOURCE TRANSCRIPT\n'+source.source+'\n'+source.lines.map((line,index)=>(index+1)+'. '+line).join('\n')+'\nReference dialogue only; no gameplay or saved progress changed.';
+ }catch(_){return null;}}
+ function refresh(){const value=transcript();panel.hidden=!value;text.value=value||'';select.disabled=!value;return value;}
+ panel.addEventListener('toggle',refresh);reader.addEventListener('toggle',refresh);new MutationObserver(refresh).observe(message,{childList:true,subtree:true,characterData:true});
+ window.BFSourceTranscriptB100=Object.freeze({transcript,refresh});refresh();
+})();
