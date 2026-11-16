@@ -40,10 +40,11 @@
  const prev=document.createElement('button');prev.id='bf2200-prev';prev.type='button';prev.textContent='‹ PREV';
  const counter=document.createElement('span');counter.id='bf2200-counter';
  const next=document.createElement('button');next.id='bf2200-next';next.type='button';next.textContent='NEXT ›';
+ const resumePage=document.createElement('button');resumePage.type='button';resumePage.id='bf2200-resume-page';resumePage.textContent='RESUME LAST VIEWED PAGE · THIS SESSION';resumePage.style.cssText='min-height:44px;max-width:100%;white-space:normal';resumePage.addEventListener('click',restoreSessionPage);
  const note=document.createElement('small');note.id='bf2200-note';
  note.textContent='Extracted original 2022 event-script dialogue. Archive reader only: cutscene characters, scene actions, triggers and the Village unlock systems are not reconstructed. No saves or quest results change.';
  controls.append(prev,counter,next);
- panel.append(summary,choices,heading,message,controls,note);
+ panel.append(summary,choices,heading,message,controls,resumePage,note);
  host.after(panel);
  const keyOf=s=>s.kind+':'+s.id;
  const available=s=>s.kind==='clear'?
@@ -51,16 +52,21 @@
    QUESTS.some(q=>q.dungeonId===s.id&&questUnlocked(q));
  const unlocked=()=>data.filter(available);
  let selected=null,position=0,lastList='';
+ const pageMemory=new Map();
+ function rememberPage(){const script=data.find(x=>keyOf(x)===selected);if(script&&available(script)&&Number.isInteger(position)&&position>=0&&position<script.lines.length)pageMemory.set(selected,Object.freeze({name:script.name,lines:script.lines.length,position}));}
+ function memoryReady(){try{if(P.version!==7||!panel.open||S.busy!==false||S.auto!==false)return false;const repeat=window.BFGlobalQoLQuestRepeatV9800;if(repeat&&(typeof repeat.statusSnapshot!=='function'||repeat.statusSnapshot()?.active!==false))return false;const script=data.find(x=>keyOf(x)===selected),memory=pageMemory.get(selected);return !!script&&available(script)&&memory?.name===script.name&&memory.lines===script.lines.length&&Number.isSafeInteger(memory.position)&&memory.position>=0&&memory.position<script.lines.length&&memory.position!==position;}catch(_){return false;}}
+ function restoreSessionPage(){if(!memoryReady())return false;try{window.BFGlobalStoryPlaybackV3300?.pause?.();position=pageMemory.get(selected).position;refresh();return true;}catch(_){return false;}}
+
  const lookup=(kind,id)=>data.find(s=>s.kind===kind&&s.id===Number(id))||null;
  function read(kind,id){
    const s=lookup(kind,id);
    if(!s||!available(s))return false;
-   selected=keyOf(s);position=0;lastList='';refresh();
+   rememberPage();selected=keyOf(s);position=0;lastList='';refresh();
    panel.open=true;return true;
  }
  function choose(s){
    if(!s||!available(s))return false;
-   selected=keyOf(s);position=0;refresh();
+   rememberPage();selected=keyOf(s);position=0;refresh();
    return true;
  }
  function snapshot(){
@@ -90,7 +96,7 @@
    }
    panel.hidden=!s;
    if(!s)return null;
-   choices.value=selected;
+   choices.value=selected;resumePage.disabled=!memoryReady();
    heading.textContent=s.title+' · Original '+(s.kind==='clear'?'clear-event':'dungeon')+' script';
    message.textContent=s.lines[position];
    counter.textContent=(position+1)+' / '+s.lines.length;
@@ -102,14 +108,14 @@
    const s=unlocked().find(x=>keyOf(x)===choices.value);
    choose(s);
  });
- prev.addEventListener('click',()=>{position=Math.max(0,position-1);refresh()});
+ prev.addEventListener('click',()=>{position=Math.max(0,position-1);refresh();rememberPage()});
  next.addEventListener('click',()=>{const s=unlocked().find(x=>keyOf(x)===selected);
    if(s)position=Math.min(s.lines.length-1,position+1);
-   refresh()});
+   refresh();rememberPage()});
  new MutationObserver(refresh).observe(list,{childList:true});
  document.querySelector('.bf-navbar')?.addEventListener('click',refresh);
  refresh();
- window.BFGlobalOriginalEventsV2200=Object.freeze({
+ window.BFGlobalOriginalEventsV2200=Object.freeze({restoreSessionPage,
    registerSupplemental(s){
      if(!s||s.kind!=='dungeon'||!Number.isInteger(s.id)||
        !((s.id>=200&&s.id<=260)||(s.id>=300&&s.id<=360))||
