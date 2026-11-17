@@ -264,6 +264,7 @@ jobs:
           python3 test_bf_home_story_quick_select_v62000.py
           python3 test_bf_home_owned_unit_route_race_v62400.py
           python3 test_bf_home_owned_form_identity_v62500.py
+          python3 test_bf_home_stale_card_feedback_v62900.py
           python test_bf_home_battle_readiness_v420.py
           python test_bf_home_cold_start_source_gate_v421.py
           python test_bf_quest_journal_v110.py

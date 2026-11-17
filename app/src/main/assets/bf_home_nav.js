@@ -300,9 +300,18 @@ function bfOfflineUnitPortraitV266(source, name) {
           try {
             const liveUnit = effectiveUnit(baseId);
             if (!liveUnit || !Number.isSafeInteger(liveUnit.id) || liveUnit.id <= 0 ||
-                typeof liveUnit.name !== 'string' || !liveUnit.name.trim() ||
-                liveUnit.id !== displayedFormId ||
-                liveUnit.name !== displayedFormName) return;
+                typeof liveUnit.name !== 'string' || !liveUnit.name.trim()) return;
+            // v629: stale displayed form is still a manual read-only refusal.
+            // Refresh visible Home data in place instead of leaving a dead
+            // button; never follow the stale click into Units or Unit Box.
+            if (liveUnit.id !== displayedFormId ||
+                liveUnit.name !== displayedFormName) {
+              refreshParty();
+              partyReview.hidden = false;
+              partyReview.textContent =
+                'Squad unit changed. Home refreshed; tap again to inspect.';
+              return;
+            }
           }
           catch (_) { return; }
           const repeat = window.BFGlobalQoLQuestRepeatV9800;
