@@ -81,6 +81,7 @@ with sync_playwright() as p:
                       const originalRepeat=window.BFGlobalQoLQuestRepeatV9800;
                       const originalSquad=P.squad.slice(),originalRoster=P.roster.slice();
                       const originalAuto=S.auto,originalBusy=S.busy;
+                      const originalVersion=P.version;
                       const calls=[];
                       const injected=[];
                       let handler=null, result=null, before=null;
@@ -154,6 +155,7 @@ with sync_playwright() as p:
                         window.BFGlobalQoLQuestRepeatV9800=originalRepeat;
                         P.squad=originalSquad;P.roster=originalRoster;
                         S.auto=originalAuto;S.busy=originalBusy;
+                        P.version=originalVersion;
                         nav.go('home');BFGlobalHome.refreshParty();
                         result={...result,restored:snap()===before};
                       }
