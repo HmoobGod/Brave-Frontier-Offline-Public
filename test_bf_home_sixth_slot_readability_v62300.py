@@ -28,7 +28,7 @@ assert "roster.includes(baseId)" in JS and "!seen.has(baseId)" in JS
 assert "homeTitle.after(sceneSquad)" in HEADER, "squad precedes Adventure"
 assert BUILD.count("python3 " + TEST) == 1
 assert PREFLIGHT.count(TEST) == 2, "path trigger plus source-only run"
-assert "grid-template-columns:minmax(58px,max-content) 42px minmax(0,1fr)" in CSS
+assert "grid-template-columns:minmax(58px,max-content) 56px minmax(0,1fr)" in CSS
 assert "button.bf-scene-member:nth-child(6) strong" in CSS
 assert "button.bf-scene-member:nth-child(6) small" in CSS
 assert BUILD.count("python3 test_bf_home_lineup_readability_v62100.py") == 1
@@ -198,6 +198,43 @@ with sync_playwright() as pw:
                     assert focus["active"] and focus["visible"], (width, focus)
                     assert focus["width"] >= 3 and focus["style"] != "none", (width, focus)
                 assert snap(page) == before, (width, "sixth focus mutated v7")
+
+                # Regression against v268: the real original-art fallback on
+                # sixth owned slot must keep NO ART on ONE line at 320-412px.
+                # The earlier 40px grid column split it into NO / ART.
+                if width <= 412:
+                    sixth.evaluate("""el => {
+                      const image=el.querySelector("img");
+                      if(image) image.dispatchEvent(new Event("error"));
+                    }""")
+                    fallback = sixth.locator(".bf-portrait-fallback")
+                    assert fallback.count() == 1 and fallback.is_visible(), width
+                    assert fallback.inner_text() == "NO ART", width
+                    fallback_geometry = fallback.evaluate("""e => {
+                      const t=e.firstChild, ys=[];
+                      for(let i=0;i<t.length;i++){
+                        const range=document.createRange();
+                        range.setStart(t,i);range.setEnd(t,i+1);
+                        ys.push(Math.round(range.getBoundingClientRect().y));
+                      }
+                      const f=e.getBoundingClientRect();
+                      const parent=e.parentElement.getBoundingClientRect();
+                      return {
+                        lines:new Set(ys).size,
+                        font:parseFloat(getComputedStyle(e).fontSize),
+                        scroll:e.scrollWidth,client:e.clientWidth,
+                        scrollHeight:e.scrollHeight,clientHeight:e.clientHeight,
+                        left:f.left,right:f.right,
+                        parentLeft:parent.left,parentRight:parent.right
+                      };
+                    }""")
+                    assert fallback_geometry["lines"] == 1, (width, fallback_geometry)
+                    assert fallback_geometry["font"] >= 11, (width, fallback_geometry)
+                    assert fallback_geometry["scroll"] <= fallback_geometry["client"] + 1, (width, fallback_geometry)
+                    assert fallback_geometry["scrollHeight"] <= fallback_geometry["clientHeight"] + 1, (width, fallback_geometry)
+                    assert fallback_geometry["left"] >= fallback_geometry["parentLeft"] - 1, (width, fallback_geometry)
+                    assert fallback_geometry["right"] <= fallback_geometry["parentRight"] + 1, (width, fallback_geometry)
+                    assert snap(page) == before, (width, "portrait fallback mutated owner v7")
 
                 # Keyboard focus and returned route remain owned-unit actions.
                 first = lineup.first
