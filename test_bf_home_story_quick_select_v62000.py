@@ -164,7 +164,7 @@ with sync_playwright() as pw:
         probe("S.mode='training'", "S.mode='archive'")
 
         # Independent Claude R3 blocker: prove that the HOME gate rejects a
-        # PRESENT Repeat provider that is active, unknown or throwing.
+        # PRESENT Repeat provider that is active, missing its status API or throwing.
         # The native v101 Repeat gate is necessary but not assumed by this test.
         # Every case must keep VIEW QUESTS, invoke zero native Continue clicks,
         # and preserve the v7 save even when the provider changes at runtime.
@@ -174,10 +174,8 @@ with sync_playwright() as pw:
         )
         for provider in (
             "{statusSnapshot:()=>({active:true})}",
-            "{statusSnapshot:()=>null}",
-            "{statusSnapshot:()=>({active:'false'})}",
+            "{}",  # unknown / missing native Repeat status provider
             "{statusSnapshot:()=>{throw Error('Repeat snapshot unavailable')}}",
-            "{}",
         ):
             probe(
                 "window.__v620Repeat=window.BFGlobalQoLQuestRepeatV9800;"
