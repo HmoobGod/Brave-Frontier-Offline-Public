@@ -96,7 +96,7 @@ with sync_playwright() as p:
                           if(when!==point)return;
                           if(action==='auto')S.auto=true;
                           if(action==='busy')S.busy=true;
-                          if(action==='repeat')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+                          if(action==='repeat-active')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
                           if(action==='repeat-null')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};
                           if(action==='repeat-throw')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('repeat unavailable')}};
                           if(action==='squad')P.squad[0]=second;
@@ -138,6 +138,7 @@ with sync_playwright() as p:
                         assert result["calls"] == [result["base"]], (width, result)
                     else:
                         assert result["calls"] == [], (width, result)
+                    assert result["restored"], (width, mode, "fixture leaked v7 or storage")
                     assert not errors, (width, mode, errors)
                 assert page.evaluate("document.documentElement.scrollWidth<=innerWidth"), width
                 print("PASS v624 real Home", width, "px, normal Unit Box and 12 route/tab race refusals")
