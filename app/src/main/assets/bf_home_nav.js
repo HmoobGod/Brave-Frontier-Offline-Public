@@ -260,6 +260,11 @@ function bfOfflineUnitPortraitV266(source, name) {
       if (unit) {
         card.type = 'button';
         card.dataset.bfHomeUnitId = String(baseId);
+        // v625: bind the visible card to its original owned source form.
+        // Event listeners may replace the current effective form before a
+        // manual handoff; stale cards must never inspect a different form.
+        const displayedFormId = unit.id;
+        const displayedFormName = unit.name;
         const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
         name.textContent = unit.name || 'Unit';
@@ -295,7 +300,9 @@ function bfOfflineUnitPortraitV266(source, name) {
           try {
             const liveUnit = effectiveUnit(baseId);
             if (!liveUnit || !Number.isSafeInteger(liveUnit.id) || liveUnit.id <= 0 ||
-                typeof liveUnit.name !== 'string' || !liveUnit.name.trim()) return;
+                typeof liveUnit.name !== 'string' || !liveUnit.name.trim() ||
+                liveUnit.id !== displayedFormId ||
+                liveUnit.name !== displayedFormName) return;
           }
           catch (_) { return; }
           const repeat = window.BFGlobalQoLQuestRepeatV9800;
@@ -321,7 +328,9 @@ function bfOfflineUnitPortraitV266(source, name) {
             try {
               const now = effectiveUnit(baseId);
               if (!now || !Number.isSafeInteger(now.id) || now.id <= 0 ||
-                  typeof now.name !== 'string' || !now.name.trim()) return false;
+                  typeof now.name !== 'string' || !now.name.trim() ||
+                  now.id !== displayedFormId ||
+                  now.name !== displayedFormName) return false;
               const replay = window.BFGlobalQoLQuestRepeatV9800;
               return !replay || (typeof replay.statusSnapshot === 'function' &&
                   replay.statusSnapshot()?.active === false);
