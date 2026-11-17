@@ -103,19 +103,34 @@ with sync_playwright() as pw:
 
         before=page.evaluate("""()=>({
           player:JSON.stringify(P),save:localStorage.getItem(
-            'bf_global_offline_demo_v7'),auto:S.auto
+            'bf_global_offline_demo_v7'),auto:S.auto,
+          clears:JSON.stringify(P.questClears),
+          storageKeys:Object.keys(localStorage).sort()
         })""")
         label.click()
-        result=page.evaluate("""()=>({
-          route:BF_homeNav.current,mission:QUEST.missionId,
-          nativeClicks:__nativeContinueClicks,auto:S.auto,
-          player:JSON.stringify(P),
-          save:localStorage.getItem('bf_global_offline_demo_v7')
-        })""")
+        result=page.evaluate("""()=>{
+          const raw=localStorage.getItem('bf_global_offline_demo_v7');
+          const stored=raw?JSON.parse(raw):null;
+          return {
+            route:BF_homeNav.current,mission:QUEST.missionId,
+            nativeClicks:__nativeContinueClicks,auto:S.auto,
+            player:JSON.stringify(P),save:raw,
+            storedVersion:stored?.version??null,
+            storedClears:JSON.stringify(stored?.questClears??null),
+            storageKeys:Object.keys(localStorage).sort()
+          };
+        }""")
         assert result["route"]=="quest" and result["mission"]==1, result
         assert result["nativeClicks"]==1 and result["auto"] is False, result
-        assert result["player"]==before["player"], "mission selection awarded player state"
-        assert result["save"]==before["save"], "Home mission selection wrote v7"
+        assert result["player"]==before["player"], "mission selection altered player progress"
+        # Native BFQuestAreas.choose(q) may persist the selected lastMission.
+        # Unlike a passive Home preview, an explicit Quest selection can write
+        # a VALID v7 save; source v101 tests already document this behavior.
+        # Reject an invalid schema, changed clear ledger or extra storage keys.
+        assert result["save"] and result["storedVersion"]==7, result
+        assert result["storedClears"]==before["clears"], "selection changed saved clears"
+        assert set(result["storageKeys"])==(
+          set(before["storageKeys"])|{"bf_global_offline_demo_v7"}), result
 
         home=page.locator('.bf-navbar [data-bf-goto="home"]')
         home.click()
@@ -138,6 +153,9 @@ with sync_playwright() as pw:
 
         probe("S.auto=1", "S.auto=false")
         probe("S.busy=true", "S.busy=false")
+        # Deliberate v620 scope limit: a completed victory stays on VIEW QUESTS
+        # until a future independently reviewed canonical-receipt shortcut.
+        probe("S.over=true", "S.over=false")
         probe("S.mode='training'", "S.mode='archive'")
         probe("P.questClears[365]=-1", "delete P.questClears[365]")
         probe("window.__savedContinue=window.BFGrandGaiaContinueV101;"
@@ -149,7 +167,7 @@ with sync_playwright() as pw:
         assert page.evaluate("S.auto") is False
         assert not errors,errors
         print("PASS v620 browser: one-tap native source-next manual selection; "
-              "320–540 layouts, five blocked fallbacks, unchanged v7")
+              "320–540 layouts, six blocked fallbacks, valid v7, no rewards")
     finally:
         page.close()
         browser.close()
