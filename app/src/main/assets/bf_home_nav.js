@@ -352,15 +352,6 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Fail closed to the original VIEW QUESTS route when any provider is absent.
   function safeNextStoryMission() {
     try {
-      // v101 denies active/throwing Repeat, but a present ambiguous snapshot
-      // must never authorize the Home shortcut. Absent legacy is allowed.
-      // A present adapter must prove strictly inactive on BOTH sides of go().
-      const repeat=window.BFGlobalQoLQuestRepeatV9800;
-      if(repeat!==undefined){
-        if(!repeat||typeof repeat.statusSnapshot!=='function')return null;
-        const status=repeat.statusSnapshot();
-        if(!status||status.active!==false)return null;
-      }
       const api=window.BFGrandGaiaContinueV101;
       const native=document.getElementById('bf101-continue');
       if(typeof S==='undefined'||S?.busy!==false||S?.auto!==false||
