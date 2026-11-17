@@ -105,7 +105,7 @@ with sync_playwright() as pw:
           player:JSON.stringify(P),save:localStorage.getItem(
             'bf_global_offline_demo_v7'),auto:S.auto,
           clears:JSON.stringify(P.questClears),
-          storageKeys:Object.keys(localStorage).sort()
+          storageKeys:Array.from({length:localStorage.length},(_,i)=>localStorage.key(i)).sort()
         })""")
         label.click()
         result=page.evaluate("""()=>{
@@ -117,7 +117,7 @@ with sync_playwright() as pw:
             player:JSON.stringify(P),save:raw,
             storedVersion:stored?.version??null,
             storedClears:JSON.stringify(stored?.questClears??null),
-            storageKeys:Object.keys(localStorage).sort()
+            storageKeys:Array.from({length:localStorage.length},(_,i)=>localStorage.key(i)).sort()
           };
         }""")
         assert result["route"]=="quest" and result["mission"]==1, result
@@ -127,6 +127,8 @@ with sync_playwright() as pw:
         # Unlike a passive Home preview, an explicit Quest selection can write
         # a VALID v7 save; source v101 tests already document this behavior.
         # Reject an invalid schema, changed clear ledger or extra storage keys.
+        # The disposable localStorage stub's keys live in its backing db; use
+        # the Web Storage length/key(i) contract, not Object.keys(methods).
         assert result["save"] and result["storedVersion"]==7, result
         assert result["storedClears"]==before["clears"], "selection changed saved clears"
         assert set(result["storageKeys"])==(
