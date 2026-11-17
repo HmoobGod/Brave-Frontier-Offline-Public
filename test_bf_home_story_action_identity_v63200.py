@@ -29,7 +29,7 @@ with sync_playwright() as pw:
    args=["--no-sandbox","--disable-dev-shm-usage"])
  try:
   for width in (320,359,393,412,540):
-   for mode in ("view-then-select","select-then-view","baseline"):
+   for mode in ("view-then-select","select-then-view","source-drift","route-auto","baseline"):
     page=browser.new_page(viewport={"width":width,"height":844})
     errors=[]
     page.on("pageerror",lambda e:errors.append(str(e)))
@@ -59,25 +59,52 @@ with sync_playwright() as pw:
        api.refresh();BFGlobalHome.refreshStory();
        const button=document.getElementById('bf-home-story-open');
        if(button.textContent!=='SELECT NEXT STORY ›')throw Error('No initial select action');
-       let original,mutated;
+       // Test real source drift after render and a synchronous route-change
+       // mutation. The rendered Home button must NOT silently change action.
+       let routeFired=0;
+       const sourceBefore=api.nextMission;
+       if(sourceBefore!==1)throw Error('Expected real source next mission #1');
        if(mode==='view-then-select'){
          S.auto=true;api.refresh();BFGlobalHome.refreshStory();
          if(button.textContent!=='VIEW QUESTS ›')throw Error('View action not displayed');
          S.auto=false;api.refresh();
        }else if(mode==='select-then-view'){
          S.auto=true;api.refresh();
+       }else if(mode==='source-drift'){
+         // The live native v101 provider must actually advance to #2.
+         P.questClears[1]=1;
+         api.refresh();
+         if(api.nextMission!==2)throw Error('Source mission drift not exercised');
+       }else if(mode==='route-auto'){
+         window.__v632RouteInjection=event=>{
+           if(event?.detail?.route!=='quest')return;
+           routeFired++;
+           S.auto=true;
+           window.removeEventListener('bf-route-change',window.__v632RouteInjection);
+         };
+         window.addEventListener('bf-route-change',window.__v632RouteInjection);
        }
-       const displayed=button.textContent;
+       const displayed=button.textContent,sourceAfter=api.nextMission;
        const native=document.getElementById('bf101-continue');
+       // Spy on the imperative native click CALL, even if the real button
+       // becomes disabled after a route callback. An event-only spy misses
+       // a dangerous attempt to invoke a newly disabled native control.
        let calls=0;
-       native.addEventListener('click',()=>calls++);
-       const snapshot=()=>JSON.stringify({P,S,QUEST,
+       const originalClick=native.click.bind(native);
+       native.click=()=>{calls++;return originalClick();};
+       const snapshot=(normalizeAuto=false)=>JSON.stringify({
+          P,S:normalizeAuto?{...S,auto:false}:S,QUEST,
           writes:__v632writes(),keys:Array.from({length:localStorage.length},(_,i)=>{
             const k=localStorage.key(i);return [k,localStorage.getItem(k)]
-          }).sort((a,b)=>a[0].localeCompare(b[0]))});
+          }).sort((a,b)=>a[0].localeCompare(b[0]))
+       });
        const prior=snapshot(),player=JSON.stringify(P);
        button.click();
-       return {route:nav.current,displayed,calls,unchanged:snapshot()===prior,
+       if(window.__v632RouteInjection)
+         window.removeEventListener('bf-route-change',window.__v632RouteInjection);
+       delete window.__v632RouteInjection;
+       return {route:nav.current,displayed,calls,routeFired,
+         sourceBefore,sourceAfter,unchanged:snapshot(mode==='route-auto')===prior,
          playerSame:JSON.stringify(P)===player,auto:S.auto,
          stored:localStorage.getItem('bf_global_offline_demo_v7'),
          overflow:document.documentElement.scrollWidth>innerWidth+1};
@@ -88,10 +115,19 @@ with sync_playwright() as pw:
       assert result["calls"]==1 and result["auto"] is False and result["playerSame"],result
      else:
       assert result["calls"]==0 and result["unchanged"],(width,mode,result)
-      if mode=="view-then-select":assert result["displayed"]=="VIEW QUESTS ›",result
-      else:assert result["displayed"]=="SELECT NEXT STORY ›",result
+      assert result["playerSame"],(width,mode,result)
+      if mode=="view-then-select":
+       assert result["displayed"]=="VIEW QUESTS ›",result
+      else:
+       assert result["displayed"]=="SELECT NEXT STORY ›",result
+      if mode=="source-drift":
+       assert result["sourceBefore"]==1 and result["sourceAfter"]==2,result
+       assert result["routeFired"]==0,result
+      if mode=="route-auto":
+       assert result["sourceBefore"]==result["sourceAfter"]==1,result
+       assert result["routeFired"]==1 and result["auto"] is True,result
      assert not errors,(width,mode,errors[:3])
      print("PASS v632 actual Home",width,mode)
     finally:page.close()
  finally:browser.close()
-print("PASS v632: 15 real manual Home action identity cases; blocked cases have no owner writes")
+print("PASS v632 R2: 25 real Home cases incl source #1→#2 drift and route-change Auto; blocked cases preserve P/S/QUEST/storage")
