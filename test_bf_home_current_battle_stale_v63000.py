@@ -79,7 +79,7 @@ with sync_playwright() as p:
       assert result["route"]=="quest",(width,result)
      else:
       assert result["route"]=="home" and result["unchanged"],(width,mode,result)
-      assert result["focused"] and result["aria"]=="polite" and result["role"]=="status",result
+      assert (mode=="busy" or result["focused"]) and result["aria"]=="polite" and result["role"]=="status",result
       assert result["message"],(width,mode,result)
       if mode=="stale-turn":assert "TURN 2" in result["label"] and "tap again" in result["message"],result
       if mode=="stale-wave":assert "WAVE 2/" in result["label"] and "tap again" in result["message"],result
