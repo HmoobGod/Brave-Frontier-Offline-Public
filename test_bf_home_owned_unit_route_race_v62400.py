@@ -66,7 +66,7 @@ with sync_playwright() as p:
                 for mode in (
                     "baseline", "route-auto", "route-busy", "route-repeat-active",
                     "route-repeat-null", "route-repeat-throw", "route-squad",
-                    "route-roster", "tab-auto", "tab-busy", "tab-repeat",
+                    "route-roster", "tab-auto", "tab-busy", "tab-repeat-active",
                     "tab-squad", "tab-route"
                 ):
                     result = page.evaluate("""mode => {
@@ -76,7 +76,8 @@ with sync_playwright() as p:
                       const originalSquad=P.squad.slice(),originalRoster=P.roster.slice();
                       const originalAuto=S.auto,originalBusy=S.busy;
                       const calls=[];
-                      let handler=null, result=null;
+                      const injected=[];
+                      let handler=null, result=null, before=null;
                       const snap=()=>JSON.stringify({
                         p:P,s:S,quest:QUEST.missionId,writes:__v624Writes(),
                         storage:Array.from({length:localStorage.length},(_,i)=>{
@@ -89,19 +90,21 @@ with sync_playwright() as p:
                         const first=P.squad[0],second=P.squad[1];
                         const button=document.querySelector('#bf-scene-party button.bf-scene-member');
                         if(button?.dataset.bfHomeUnitId!==String(first))throw Error('Missing genuine owned first slot');
-                        const before=snap();
+                        before=snap();
                         box.showDetail=id=>{calls.push(id);return true;};
                         const apply=(point)=>{
                           const [when, ...words]=mode.split('-'); const action=words.join('-');
                           if(when!==point)return;
                           if(action==='auto')S.auto=true;
-                          if(action==='busy')S.busy=true;
-                          if(action==='repeat-active')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
-                          if(action==='repeat-null')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};
-                          if(action==='repeat-throw')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('repeat unavailable')}};
-                          if(action==='squad')P.squad[0]=second;
-                          if(action==='roster')P.roster=P.roster.filter(id=>id!==first);
-                          if(action==='route')nav.go('home');
+                          else if(action==='busy')S.busy=true;
+                          else if(action==='repeat-active')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>({active:true})};
+                          else if(action==='repeat-null')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};
+                          else if(action==='repeat-throw')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>{throw Error('repeat unavailable')}};
+                          else if(action==='squad')P.squad[0]=second;
+                          else if(action==='roster')P.roster=P.roster.filter(id=>id!==first);
+                          else if(action==='route')nav.go('home');
+                          else throw Error('Unknown race injection: '+mode);
+                          injected.push(action);
                         };
                         if(mode.startsWith('route-')){
                           handler=e=>{
@@ -121,7 +124,7 @@ with sync_playwright() as p:
                         result={
                           mode,base:first,calls:[...calls],route:nav.current,
                           tab:tabs.unitTab,changed:snap()!==before,
-                          written:__v624Writes(),before
+                          written:__v624Writes(),injected:[...injected]
                         };
                       } finally {
                         if(handler)window.removeEventListener('bf-route-change',handler);
@@ -130,13 +133,15 @@ with sync_playwright() as p:
                         P.squad=originalSquad;P.roster=originalRoster;
                         S.auto=originalAuto;S.busy=originalBusy;
                         nav.go('home');BFGlobalHome.refreshParty();
-                        result={...result,restored:snap()===result?.before};
+                        result={...result,restored:snap()===before};
                       }
                       return result;
                     }""", mode)
                     if mode == "baseline":
                         assert result["calls"] == [result["base"]], (width, result)
+                        assert result["injected"] == [], (width, mode, "unexpected injection")
                     else:
+                        assert result["injected"] == [mode.split("-", 1)[1]], (width, mode, "race injection not exercised")
                         assert result["calls"] == [], (width, result)
                     assert result["restored"], (width, mode, "fixture leaked v7 or storage")
                     assert not errors, (width, mode, errors)
