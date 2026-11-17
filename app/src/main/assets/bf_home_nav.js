@@ -344,15 +344,39 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Home shows only source-validated campaign progress. No quest selection,
   // battle start, Auto toggle or canonical v7 save mutation occurs here.
   const storyStatus = document.getElementById('bf-home-story-progress');
-  // Explicit player click uses the existing Home router, without marking an
-  // Adventure portal available earlier than the original Quest/Summon cards.
-  document.getElementById('bf-home-story-open')?.addEventListener('click', () => {
-    if (window.BF_homeNav?.go('quest') !== true) return;
-    const title = document.getElementById('bf-route-title');
-    if (title) {
-      title.tabIndex = -1;
-      title.focus({preventScroll:true});
-    }
+  const storyOpen = document.getElementById('bf-home-story-open');
+  // v620: a voluntary one-tap source-backed next-mission SELECT, never an
+  // automatic battle, reward or save. Reuse the existing v101 Continue Story
+  // button (which rechecks the full 106-row catalog, ledger, unlock and
+  // saved-victory gates) rather than duplicating its quest selector.
+  // Fail closed to the original VIEW QUESTS route when any provider is absent.
+  function safeNextStoryMission() {
+    try {
+      const api=window.BFGrandGaiaContinueV101;
+      const native=document.getElementById('bf101-continue');
+      if(typeof S==='undefined'||S?.busy!==false||S?.auto!==false||
+         S?.over!==false||S?.mode!=='archive'||document.hidden||
+         !Array.isArray(S.party)||S.party.some(p=>!!p?.action)||
+         !api||typeof api.canNavigate!=='function'||
+         typeof api.refresh!=='function'||!native||!native.isConnected||
+         native.disabled||api.canNavigate()!==true)return null;
+      const mission=api.nextMission;
+      const source=window.BFGrandGaiaCampaignV100?.nextPlayable?.();
+      if(!Number.isSafeInteger(mission)||mission<1||
+         source?.missionId!==mission)return null;
+      return mission;
+    }catch(_){return null;}
+  }
+  // An explicit click must revalidate both BEFORE and AFTER switching to
+  // Quest, because the visible Home label is not an authority to act.
+  // Native v101 owns mission choice; it never starts Auto from this shortcut.
+  storyOpen?.addEventListener('click', () => {
+    const desired=safeNextStoryMission();
+    if(window.BF_homeNav?.go('quest')!==true)return;
+    if(desired!==null&&safeNextStoryMission()===desired)
+      document.getElementById('bf101-continue')?.click();
+    const title=document.getElementById('bf-route-title');
+    if(title){title.tabIndex=-1;title.focus({preventScroll:true});}
   });
   function refreshStory() {
     let message = 'Story status unavailable · browse Quests for available missions.';
@@ -385,13 +409,27 @@ function bfOfflineUnitPortraitV266(source, name) {
         }
       }
     } catch (_) { message = 'Story status unavailable · browse Quests for available missions.'; }
-    if (storyStatus && storyStatus.textContent !== message) storyStatus.textContent = message;
+    if(storyStatus&&storyStatus.textContent!==message)storyStatus.textContent=message;
+    if(storyOpen){
+      const enabled=safeNextStoryMission()!==null;
+      const label=enabled?'SELECT NEXT STORY ›':'VIEW QUESTS ›';
+      if(storyOpen.textContent!==label)storyOpen.textContent=label;
+      storyOpen.setAttribute('aria-label',enabled?
+        'Select verified next story mission, manual battle':
+        'View available quests');
+    }
     return message;
   }
   refreshParty();
   refreshStory();
+  // v101 is loaded after Home in the packaged WebView; update the label once
+  // the current synchronous injection stack finishes, without a timer loop.
+  setTimeout(refreshStory,0);
   window.addEventListener('bf-route-change', event => {
-    if (event?.detail?.route === 'home') refreshStory();
+    if(event?.detail?.route==='home')refreshStory();
+  });
+  window.addEventListener('bf-route-sync', event => {
+    if(event?.detail?.route==='home')refreshStory();
   });
   const picker = document.getElementById('squadpicker');
   if (picker) new MutationObserver(refreshParty).observe(picker, {childList:true});
