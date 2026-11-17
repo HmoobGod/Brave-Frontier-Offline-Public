@@ -384,6 +384,7 @@ jobs:
           python3 test_bf_offline_page_recovery_v22900.py
           python3 test_bf_engine_ui_touch_v22700.py
           python3 test_bf_home_ui_priority_v24200.py
+          python3 test_bf_home_gateway_live_v61800.py
           python3 test_bf_home_ui_accessibility_v24300.py
           python3 test_bf_home_semantic_hierarchy_v24500.py
           python3 test_bf_home_preview_nameplates_v24600.py
