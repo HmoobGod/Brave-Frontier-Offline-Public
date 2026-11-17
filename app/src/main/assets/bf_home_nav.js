@@ -394,10 +394,14 @@ function bfOfflineUnitPortraitV266(source, name) {
   // An explicit click must revalidate both BEFORE and AFTER switching to
   // Quest, because the visible Home label is not an authority to act.
   // Native v101 owns mission choice; it never starts Auto from this shortcut.
+  // v632: a rendered VIEW QUESTS button never silently becomes SELECT NEXT STORY.
+  let displayedNextStoryMission=null;
   storyOpen?.addEventListener('click', () => {
     const desired=safeNextStoryMission();
+    const shown=displayedNextStoryMission;
+    const selectShown=shown!==null&&desired===shown&&storyOpen.textContent==='SELECT NEXT STORY ›';
     if(window.BF_homeNav?.go('quest')!==true)return;
-    if(desired!==null&&safeNextStoryMission()===desired)
+    if(selectShown&&safeNextStoryMission()===shown)
       document.getElementById('bf101-continue')?.click();
     const title=document.getElementById('bf-route-title');
     if(title){title.tabIndex=-1;title.focus({preventScroll:true});}
@@ -435,7 +439,8 @@ function bfOfflineUnitPortraitV266(source, name) {
     } catch (_) { message = 'Story status unavailable · browse Quests for available missions.'; }
     if(storyStatus&&storyStatus.textContent!==message)storyStatus.textContent=message;
     if(storyOpen){
-      const enabled=safeNextStoryMission()!==null;
+      displayedNextStoryMission=safeNextStoryMission();
+      const enabled=displayedNextStoryMission!==null;
       const label=enabled?'SELECT NEXT STORY ›':'VIEW QUESTS ›';
       if(storyOpen.textContent!==label)storyOpen.textContent=label;
       storyOpen.setAttribute('aria-label',enabled?
