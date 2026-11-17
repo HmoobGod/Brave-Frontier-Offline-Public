@@ -21,6 +21,7 @@ on:
       - 'test_bf_home_sixth_slot_readability_v62300.py'
       - 'test_bf_home_story_quick_select_v62000.py'
       - 'test_bf_home_owned_unit_route_race_v62400.py'
+      - 'test_bf_home_current_battle_stale_v63000.py'
       - 'V242_ORIGINAL_HOME_UI_PRIORITY.md'
       - 'test_bf_home_ui_accessibility_v24300.py'
       - 'test_bf_home_semantic_hierarchy_v24500.py'
@@ -164,6 +165,8 @@ jobs:
         run: python3 test_bf_home_story_quick_select_v62000.py --source-only
       - name: Verify Home owned-unit route and tab race safety source gate
         run: python3 test_bf_home_owned_unit_route_race_v62400.py --source-only
+      - name: Verify Home current-battle stale wave/turn refusal v630
+        run: python3 test_bf_home_current_battle_stale_v63000.py --source-only
       - name: Verify narrow-screen Menu icon and Home accessible locations
         run: python3 test_bf_home_ui_accessibility_v24300.py --source-only
       - name: Verify Home heading hierarchy and genuinely disabled Global previews
