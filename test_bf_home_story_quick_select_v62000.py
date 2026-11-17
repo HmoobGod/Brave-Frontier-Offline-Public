@@ -145,11 +145,14 @@ with sync_playwright() as pw:
             assert label.inner_text()=="VIEW QUESTS ›"
             count=page.evaluate("__nativeContinueClicks")
             storage=page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
+            player=page.evaluate("JSON.stringify(P)")
             label.click()
             assert page.evaluate("BF_homeNav.current")=="quest"
             assert page.evaluate("__nativeContinueClicks")==count
             assert page.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")==storage
+            assert page.evaluate("JSON.stringify(P)")==player
             page.evaluate(restore)
+            page.evaluate("BFGrandGaiaContinueV101.refresh()")
             home.click()
             assert page.evaluate("BF_homeNav.current")=="home"
 
@@ -159,6 +162,69 @@ with sync_playwright() as pw:
         # until a future independently reviewed canonical-receipt shortcut.
         probe("S.over=true", "S.over=false")
         probe("S.mode='training'", "S.mode='archive'")
+
+        # Independent Claude R3 blocker: prove that the HOME gate rejects a
+        # PRESENT Repeat provider that is active, unknown or throwing.
+        # The native v101 Repeat gate is necessary but not assumed by this test.
+        # Every case must keep VIEW QUESTS, invoke zero native Continue clicks,
+        # and preserve the v7 save even when the provider changes at runtime.
+        repeat_restore = (
+            "window.BFGlobalQoLQuestRepeatV9800=window.__v620Repeat;"
+            "delete window.__v620Repeat"
+        )
+        for provider in (
+            "{statusSnapshot:()=>({active:true})}",
+            "{statusSnapshot:()=>null}",
+            "{statusSnapshot:()=>({active:'false'})}",
+            "{statusSnapshot:()=>{throw Error('Repeat snapshot unavailable')}}",
+            "{}",
+        ):
+            probe(
+                "window.__v620Repeat=window.BFGlobalQoLQuestRepeatV9800;"
+                "window.BFGlobalQoLQuestRepeatV9800="+provider,
+                repeat_restore
+            )
+
+        # Another R3 blocker: gate must re-evaluate AFTER routing to Quest.
+        # bf-route-change is synchronously fired by the real Home router,
+        # so Auto can become active after the first check but before the
+        # native v101 button is clicked. Removing the second check must fail.
+        assert label.inner_text()=="SELECT NEXT STORY ›"
+        prior=page.evaluate("""()=>{
+          const before={
+            storage:localStorage.getItem('bf_global_offline_demo_v7'),
+            player:JSON.stringify(P),native:__nativeContinueClicks
+          };
+          window.__v620RouteMutation=(event)=>{
+            if(event?.detail?.route==='quest'){
+              S.auto=true;
+              window.removeEventListener('bf-route-change',
+                window.__v620RouteMutation);
+            }
+          };
+          window.addEventListener('bf-route-change',window.__v620RouteMutation);
+          return before;
+        }""")
+        label.click()
+        during=page.evaluate("""()=>({
+          route:BF_homeNav.current,auto:S.auto,
+          native:__nativeContinueClicks,player:JSON.stringify(P),
+          storage:localStorage.getItem('bf_global_offline_demo_v7')
+        })""")
+        assert during["route"]=="quest" and during["auto"] is True,during
+        assert during["native"]==prior["native"], "post-route guard bypassed"
+        assert during["player"]==prior["player"], "post-route guard changed P"
+        assert during["storage"]==prior["storage"], "post-route guard wrote save"
+        page.evaluate("""()=>{
+          window.removeEventListener('bf-route-change',window.__v620RouteMutation);
+          delete window.__v620RouteMutation;
+          S.auto=false;
+          BFGrandGaiaContinueV101.refresh();
+        }""")
+        home.click()
+        assert page.evaluate("BF_homeNav.current")=="home"
+        assert label.inner_text()=="SELECT NEXT STORY ›"
+
         probe("P.questClears[365]=-1", "delete P.questClears[365]")
         probe("window.__savedContinue=window.BFGrandGaiaContinueV101;"
               "delete window.BFGrandGaiaContinueV101",
@@ -169,7 +235,7 @@ with sync_playwright() as pw:
         assert page.evaluate("S.auto") is False
         assert not errors,errors
         print("PASS v620 browser: one-tap native source-next manual selection; "
-              "320–540 layouts, six blocked fallbacks, valid v7, no rewards")
+              "320–540 layouts, Repeat unknown/active/throw blockers, route race, valid v7, no rewards")
     finally:
         page.close()
         browser.close()
