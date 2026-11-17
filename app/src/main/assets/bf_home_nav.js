@@ -305,8 +305,32 @@ function bfOfflineUnitPortraitV266(source, name) {
           }
           if (typeof window.BFInnerScreens?.setTab !== 'function' ||
               typeof window.BFUnitBox?.showDetail !== 'function') return;
+          // v624: route-change and tab-change handlers can synchronously
+          // change the active turn, squad, owned profile, Repeat or route.
+          // Re-check AFTER EACH handoff before revealing owned Unit Box
+          // details. The first gate above still refuses an unsafe tap.
+          function stillSafeToInspect() {
+            if (window.BF_homeNav?.current !== 'units' ||
+                S?.busy !== false || S?.auto !== false ||
+                P?.version !== 7 || !Array.isArray(P.squad) ||
+                P.squad.length > 6 || P.squad[index] !== baseId ||
+                P.squad.indexOf(baseId) !== index ||
+                !Array.isArray(P.roster) || !P.roster.includes(baseId) ||
+                !Array.from(P.roster).every(id => Number.isSafeInteger(id) && id > 0) ||
+                new Set(P.roster).size !== P.roster.length) return false;
+            try {
+              const now = effectiveUnit(baseId);
+              if (!now || !Number.isSafeInteger(now.id) || now.id <= 0 ||
+                  typeof now.name !== 'string' || !now.name.trim()) return false;
+              const replay = window.BFGlobalQoLQuestRepeatV9800;
+              return !replay || (typeof replay.statusSnapshot === 'function' &&
+                  replay.statusSnapshot()?.active === false);
+            } catch (_) { return false; }
+          }
           if (window.BF_homeNav.go('units') !== true ||
-              window.BFInnerScreens.setTab('box') !== true) return;
+              !stillSafeToInspect()) return;
+          if (window.BFInnerScreens.setTab('box') !== true ||
+              !stillSafeToInspect()) return;
           window.BFUnitBox.showDetail(baseId);
           const detail = document.getElementById('bf-box-detail');
           const heading = detail?.querySelector('h3');
