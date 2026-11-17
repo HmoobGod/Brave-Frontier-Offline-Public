@@ -1600,3 +1600,55 @@ body.bf-menu-mode #bf054-home-details {
     overflow-wrap:anywhere;
   }
 }
+
+
+/* v621 owner Home P0: actual owned five-up unit portrait labels, phone readable.
+   The v615 source-verified five-plus-one layout is preserved; original 2022
+   unit sprites, roster identity and native routes are not fabricated or edited.
+   A maximum two-line name keeps each narrow tile legible without letting a
+   long translated unit name push the entire Quest gateway below the fold.
+   Full unit names remain in each card's existing aria-label and Unit Box. */
+@media(max-width:412px){
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)){
+    min-height:136px;
+    padding:3px 2px 5px;
+    gap:2px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) img{
+    max-width:100%;
+    height:62px;
+    object-fit:contain;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) strong{
+    box-sizing:border-box;
+    width:100%;
+    max-width:100%;
+    min-height:24px;
+    max-height:24px;
+    font-size:10px;
+    line-height:1.2;
+    text-align:center;
+    overflow:hidden;
+    overflow-wrap:anywhere;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) small{
+    box-sizing:border-box;
+    max-width:100%;
+    font-size:10px;
+    line-height:1.2;
+    text-align:center;
+    overflow-wrap:anywhere;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-scene-slot{
+    font-size:9px;
+    line-height:1.2;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-scene-leader{
+    font-size:9px;
+    line-height:1.2;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party button.bf-scene-member:focus-visible{
+    outline:3px solid #b8ebff;
+    outline-offset:1px;
+  }
+}
