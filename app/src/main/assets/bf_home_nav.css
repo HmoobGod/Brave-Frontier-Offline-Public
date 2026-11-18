@@ -1783,3 +1783,26 @@ body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked .bf-scene-loc
     height:62px;
   }
 }
+
+
+/* v626 P0 320px vertical clearance: preserve all 5 original-art portraits,
+   full two-line name, 10px labels, sixth owned row and large tappable Quest.
+   Exact-head v618 asserts the Quest button clears the fixed footer. */
+@media(max-width:359px){
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)){
+    min-height:118px;padding:2px 2px 3px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) img,
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-portrait-fallback{
+    height:50px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-scene-slot{
+    min-height:16px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"]{
+    min-height:170px;padding:3px 3px 5px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img{
+    height:132px;
+  }
+}
