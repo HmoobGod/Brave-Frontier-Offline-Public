@@ -105,8 +105,10 @@ with sync_playwright() as pw:
         assert page.locator(".bf-scene-places > :first-child").get_attribute("class")==available
         positions=page.locator(".bf-scene-places").evaluate(
             "(root)=>Array.from(root.children).map(el=>el.className)")
-        assert positions[:4]==[available,"bf-scene-place bf-scene-active bf-scene-featured",
-                               "bf-scene-place bf-scene-active bf-scene-featured",archived],positions
+        assert positions==[available,"bf-scene-place bf-scene-active bf-scene-featured",
+                               "bf-scene-place bf-scene-active bf-scene-featured"],positions
+        assert page.locator("#bf-scene-archive").evaluate("(e)=>!e.open")
+        assert page.locator("#bf-scene-archive .bf-scene-archive-label").count()==1
         bounds=page.locator(".bf-scene-places").evaluate(
             "(el)=>({scroll:el.scrollWidth,client:el.clientWidth})")
         assert bounds["scroll"] <= bounds["client"]+2,(width,bounds)

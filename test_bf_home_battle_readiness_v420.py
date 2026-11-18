@@ -69,20 +69,23 @@ with sync_playwright() as pw:
               const explore=document.querySelector('.bf-scene-explore');
               const preview=document.getElementById('bf420-home-readiness');
               return {
-                followsAdventure:explore.nextElementSibling===preview,
+                followsStory:document.querySelector('#bf-scene-archive').nextElementSibling?.id==='bf420-readiness-disclosure' &&
+                   document.querySelector('#bf420-readiness-disclosure').contains(preview),
                 explore:explore.getBoundingClientRect().top,
                 quest:explore.querySelector('button[data-bf-goto="quest"]').getBoundingClientRect().top,
                 summon:explore.querySelector('button[data-bf-goto="summon"]').getBoundingClientRect().top
               };
             }""")
-            assert geometry["followsAdventure"],(width,geometry)
+            assert geometry["followsStory"],(width,geometry)
             for key in ("explore","quest","summon"):
                 assert abs(geometry[key]-baseline[width][key])<=1,(width,key,baseline[width],geometry)
         page.set_viewport_size({"width":390,"height":844})
         assert page.evaluate("P.version")==7
         assert page.evaluate("BF_homeNav.current")=="home"
         panel=page.locator("#bf420-home-readiness")
-        assert panel.count()==1 and panel.is_visible()
+        assert panel.count()==1 and panel.is_hidden()
+        page.locator('#bf420-readiness-disclosure summary').click()
+        assert panel.is_visible()
         assert page.locator('#bf420-home-hint').get_attribute('role')=='status'
         assert page.locator('#bf420-home-hint').is_hidden()
         assert page.locator("#bf420-home-mission").count()==1

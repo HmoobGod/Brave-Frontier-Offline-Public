@@ -24,6 +24,12 @@ with sync_playwright() as pw:
   page.add_script_tag(path=str(A/name))
  page.evaluate("BF_homeNav.go('home');BFHomeCurrentBattleB100.refresh()")
  assert page.evaluate('BFHomeCurrentBattleB100.snapshot().missionId')==page.evaluate('QUEST.missionId')
+ assert page.locator('#bf-home-current-battle').is_visible()
+ assert page.evaluate("""()=>{
+   const button=document.getElementById('bf-home-current-battle').getBoundingClientRect();
+   const story=document.querySelector('.bf-scene-story').getBoundingClientRect();
+   return button.width >= story.width-40;
+ }""")
  stable=page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")
  page.locator('#bf-home-current-battle').click()
  assert page.evaluate('BF_homeNav.current')=='quest'
@@ -33,6 +39,10 @@ with sync_playwright() as pw:
  for(const mode of ['busy','auto','repeat']){S.busy=mode==='busy';S.auto=mode==='auto';if(mode==='repeat')window.BFGlobalQoLQuestRepeatV9800={statusSnapshot:()=>null};api.refresh();out.push(document.querySelector('#bf-home-current-battle').disabled&&api.open()===false);}}
  finally{S=old;S.busy=false;S.auto=false;window.BFGlobalQoLQuestRepeatV9800=repeat;api.refresh();}return out;}""")
  assert proof==[True]*4,proof
+ page.evaluate('S.over=true;BFHomeCurrentBattleB100.refresh()')
+ assert page.locator('#bf-home-current-battle').is_hidden()
+ page.evaluate('S.over=false;BFHomeCurrentBattleB100.refresh()')
+ assert page.locator('#bf-home-current-battle').is_visible()
  assert page.evaluate("JSON.stringify({P,S,quest:QUEST.missionId,save:localStorage.getItem('bf_global_offline_demo_v7')})")==stable
  assert not errors,errors
  browser.close()

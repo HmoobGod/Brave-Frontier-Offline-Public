@@ -68,7 +68,8 @@ with sync_playwright() as pw:
         page.set_content(html)
         page.add_style_tag(content=C)
         page.add_script_tag(content=bootstrap)
-        locked = page.locator(".bf-scene-places .bf-scene-locked")
+        page.locator("#bf-scene-archive summary").click()
+        locked = page.locator(".bf-scene-archive-grid .bf-scene-locked")
         assert locked.count() == 4, (width, locked.count())
         for index, (name, visible, sprite) in enumerate(PLACES):
             card = locked.nth(index)

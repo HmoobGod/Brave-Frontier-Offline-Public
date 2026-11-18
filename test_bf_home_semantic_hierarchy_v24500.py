@@ -18,7 +18,7 @@ HOME = J.split("/* Build #9: original Global home location hub", 1)[1].split(
 assert HOME.count('role="heading" aria-level="1"') == 1
 assert HOME.count('role="heading" aria-level="2"') == 3
 assert HOME.count('role="heading" aria-level="3"') == 2
-for title in ("GRAND GAIA", "CURRENT SQUAD", "ADVENTURE", "HOME SHORTCUTS"):
+for title in ("HOME", "CURRENT SQUAD", "ADVENTURE", "HOME SHORTCUTS"):
     assert title in HOME
 for name in ("Vortex Gate", "Arena", "Raid Battle", "Capital Randall"):
     assert 'aria-label="' + name + ' not implemented" aria-disabled="true"' in HOME
@@ -60,7 +60,7 @@ with sync_playwright() as pw:
         headings = page.locator("#bf-home [role=heading]").evaluate_all(
             "(nodes) => nodes.map(n => [Number(n.getAttribute('aria-level')), n.textContent.trim()])")
         assert [level for level, _ in headings] == [1, 2, 2, 3, 3, 2], (width, headings)
-        assert headings[0][1] == "GRAND GAIA", (width, headings)
+        assert headings[0][1] == "HOME", (width, headings)
         for name in ("Vortex Gate", "Arena", "Raid Battle", "Capital Randall"):
             item = page.locator(f'.bf-scene-locked[aria-label="{name} not implemented"]')
             assert item.count() == 1, (width, name)

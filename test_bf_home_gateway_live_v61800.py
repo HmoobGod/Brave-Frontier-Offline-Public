@@ -74,8 +74,8 @@ with sync_playwright() as pw:
         headless=True, executable_path=chrome,
         args=["--no-sandbox", "--disable-dev-shm-usage"])
     try:
-        for width in (320, 360, 393, 412, 540):
-            page = browser.new_page(viewport={"width": width, "height": 844})
+        for width,height in ((320,740),(360,844),(393,852),(412,844),(540,844)):
+            page = browser.new_page(viewport={"width": width, "height": height})
             errors = []
             page.on("pageerror", lambda error: errors.append(str(error)))
             page.route("http://bf-assets.test/**", serve_local_png)
@@ -106,7 +106,8 @@ with sync_playwright() as pw:
                 assert active.count() == 2, (width, active.count())
                 assert active.evaluate_all("(nodes)=>nodes.map(x=>x.dataset.bfGoto)") == [
                     "quest", "summon"], width
-                locked = page.locator("#bf-home .bf-scene-places .bf-scene-locked")
+                assert page.locator("#bf-scene-archive").evaluate("(e)=>!e.open")
+                locked = page.locator("#bf-home .bf-scene-archive-grid .bf-scene-locked")
                 assert locked.count() == 4
                 assert locked.evaluate_all(
                     "(nodes)=>nodes.every(n=>n.getAttribute('aria-disabled')==='true')")
@@ -160,6 +161,20 @@ with sync_playwright() as pw:
                     assert g["questWidth"] >= g["summonWidth"] + 50, (width, g)
                     assert abs(g["questCenter"] - g["containerCenter"]) <= 2, (width, g)
                     assert g["questBeforeSummon"], (width, g)
+                    if (width,height) in ((320,740),(393,852)):
+                        def safe_gateway():
+                            return page.evaluate("""() => {
+                              const q=document.querySelector('#bf-home .bf-scene-featured[data-bf-goto="quest"]').getBoundingClientRect();
+                              const nav=document.querySelector('.bf-navbar').getBoundingClientRect();
+                              const head=document.querySelector('.bf-shell-head').getBoundingClientRect();
+                              return {questTop:q.top,questBottom:q.bottom,footerTop:nav.top,headerBottom:head.bottom};
+                            }""")
+                        safe=safe_gateway()
+                        assert safe["questTop"] >= safe["headerBottom"]-1, (width,height,safe)
+                        assert safe["questBottom"] <= safe["footerTop"]-4, (width,height,safe)
+                        page.evaluate("BF_homeNav.go('units');BF_homeNav.go('home')")
+                        after_return=safe_gateway()
+                        assert after_return["questBottom"] <= after_return["footerTop"]-4, (width,height,after_return)
                 else:
                     # The v617 mobile-only composition cannot break wider Home.
                     assert abs(g["questWidth"] - g["summonWidth"]) <= 2, (width, g)

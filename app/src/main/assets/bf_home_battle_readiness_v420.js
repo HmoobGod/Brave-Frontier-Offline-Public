@@ -20,6 +20,12 @@
   const style=document.createElement('style');
   style.id='bf420-home-readiness-style';
   style.textContent=[
+    '#bf420-readiness-disclosure{margin:6px 0;border:1px solid #9e8356;',
+    'border-radius:5px;background:#18263b;color:#f5e2ba}',
+    '#bf420-readiness-disclosure>summary{box-sizing:border-box;display:flex;',
+    'align-items:center;min-height:44px;padding:8px 10px;cursor:pointer;',
+    'font:800 11px/1.4 Georgia,serif}',
+    '#bf420-readiness-disclosure>summary:focus-visible{outline:3px solid #a9e2ff}',
     '#bf420-home-readiness{box-sizing:border-box;max-width:100%;margin:10px 0;',
     'padding:11px 10px;border:1px solid #ba9656;border-radius:7px;',
     'background:linear-gradient(145deg,#25364b,#151e2f);color:#f6e5c2;',
@@ -91,7 +97,13 @@
   card.append(heading,mission,party,clearLabel,clearBar,actions,hint,note);
   // Home first: do not push the original playable Quest/Summon artwork
   // below the viewport. Append this optional preview AFTER Adventure.
-  explore.insertAdjacentElement('afterend',card);
+  const disclosure=document.createElement('details');
+  disclosure.id='bf420-readiness-disclosure';
+  const summary=document.createElement('summary');
+  summary.textContent='NEXT ADVENTURE · STATUS DETAILS';
+  disclosure.append(summary,card);
+  const archiveDetails=home.querySelector('#bf-scene-archive');
+  (archiveDetails||story).insertAdjacentElement('afterend',disclosure);
   document.head.append(style);
 
   function snapshot(){
@@ -237,6 +249,7 @@
   window.addEventListener('bf-route-change',event=>{
     if(event?.detail?.route==='home')refresh();
   });
+  disclosure.addEventListener('toggle',()=>{if(disclosure.open)refresh();});
   window.BFHomeBattleReadinessV420=Object.freeze({snapshot,refresh});
   refresh();
 })();
