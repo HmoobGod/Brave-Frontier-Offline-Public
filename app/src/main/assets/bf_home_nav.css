@@ -1829,11 +1829,12 @@ body.bf-menu-mode #bf-home #bf-home-element-reference{
 body.bf-menu-mode #bf-home .bf-scene-squad{
   background:linear-gradient(180deg,#1b2639eb,#101827f5);
 }
-body.bf-menu-mode #bf-home .bf-scene-party > .bf-scene-member:not(:nth-child(6)){
-  background:linear-gradient(180deg,#1d2a4266,#081322b0),
-    url("content/home/home_character_frame_bg.png") center/100% 100% no-repeat;
-}
 @media(max-width:412px){
+  /* Keep the established six-column wider-screen layout unchanged. */
+  body.bf-menu-mode #bf-home .bf-scene-party > .bf-scene-member:not(:nth-child(6)){
+    background:linear-gradient(180deg,#1d2a4266,#081322b0),
+      url("content/home/home_character_frame_bg.png") center/100% 100% no-repeat;
+  }
   body.bf-menu-mode #bf-home .bf-scene-party{
     position:relative;isolation:isolate;
     grid-template-columns:repeat(5,minmax(0,1fr));
