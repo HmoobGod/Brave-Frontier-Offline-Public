@@ -20,7 +20,11 @@ ROUTES = (("home", "Home"), ("units", "Units"), ("quest", "Quest"),
 for route, label in ROUTES:
     assert "['" + route + "','" + label + "']" in JS, (route, label)
 assert "bf-route-title" in JS and "bf-home" in JS
-assert "ORIGINAL GLOBAL ART" in JS and "RECONSTRUCTION" in JS
+assert "ORIGINAL GLOBAL ART" in JS
+assert 'class="bf-scene-title"' in JS and 'aria-level="1">HOME' in JS
+assert 'id="bf-scene-archive"' in JS
+assert 'MORE LOCATIONS · ARTWORK PREVIEWS ONLY' in JS
+assert 'RECONSTRUCTION</span>' not in JS
 assert "demo" in JS.lower() and "not playable" in JS.lower()
 
 # Archived areas must not gain a clickable main-route ID by accident.
