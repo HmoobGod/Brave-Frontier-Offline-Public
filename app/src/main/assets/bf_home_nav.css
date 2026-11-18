@@ -1722,3 +1722,103 @@ body.bf-menu-mode #bf054-home-details {
     overflow-wrap:anywhere;
   }
 }
+
+
+/* v626 P0: original-art Quest-first Home, no original sprites altered. */
+body.bf-menu-mode #bf-home .bf-scene-title{
+  box-sizing:border-box;min-height:22px;margin:0 0 2px;padding:1px 4px;
+  border:0;border-bottom:1px solid #8a744e;border-radius:0;
+  background:transparent;box-shadow:none;
+}
+body.bf-menu-mode #bf-home .bf-scene-title strong{
+  font:800 12px/1.4 Georgia,serif;letter-spacing:.06em;color:#f7dfb1;
+}
+body.bf-menu-mode #bf-home .bf-scene-squad{
+  margin:0 0 3px;padding:2px 4px 4px;border-width:1px;border-radius:3px;
+}
+body.bf-menu-mode #bf-home .bf-scene-explore{margin-top:0}
+body.bf-menu-mode #bf-home .bf-scene-explore .bf-scene-heading{padding:2px 3px}
+body.bf-menu-mode #bf-home .bf-scene-available-label{padding:2px 3px}
+body.bf-menu-mode #bf-home .bf-scene-story{margin:6px 0;padding:7px;gap:6px}
+body.bf-menu-mode #bf-home #bf-home-current-battle{
+  grid-column:1/-1;justify-self:stretch;width:100%;min-width:0;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive{
+  box-sizing:border-box;margin:6px 0;border:1px solid #8d754e;
+  border-radius:5px;background:linear-gradient(#27364a,#17253a);color:#f5dfb6;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive>summary{
+  box-sizing:border-box;min-height:44px;display:flex;align-items:center;
+  padding:8px 10px;cursor:pointer;font:800 11px/1.4 Georgia,serif;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive>summary:focus-visible{
+  outline:3px solid #a9e2ff;outline-offset:2px;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;padding:6px 5px 8px;min-width:0;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked{
+  min-height:89px;padding:4px 4px 7px;opacity:.76;
+  background:linear-gradient(#2d3849,#172334);
+}
+body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked img{height:69px}
+body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked .bf-scene-status{
+  font-size:10px;line-height:1.25;min-height:16px;padding:4px 2px;max-width:100%;
+}
+body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked .bf-scene-location-name{
+  display:block;max-width:100%;padding:3px 2px 2px;text-align:center;
+  overflow-wrap:anywhere;color:#f0d8ac;font:900 11px/1.2 Georgia,serif;
+}
+@media(max-width:359px){
+  body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked img{height:57px}
+  body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked .bf-scene-location-name{font-size:10px}
+}
+@media(max-width:412px){
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:nth-child(6):not(button){
+    grid-column:1/-1;display:flex;flex-direction:row;align-items:center;
+    justify-content:center;min-height:62px;height:auto;padding:7px 9px;font-size:12px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-portrait-fallback{
+    height:62px;
+  }
+}
+
+
+/* v626 P0 320px vertical clearance: preserve all 5 original-art portraits,
+   full two-line name, 10px labels, sixth owned row and large tappable Quest.
+   Exact-head v618 asserts the Quest button clears the fixed footer. */
+@media(max-width:359px){
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)){
+    min-height:118px;padding:2px 2px 3px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) img,
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-portrait-fallback{
+    height:50px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-party .bf-scene-member:not(:nth-child(6)) .bf-scene-slot{
+    min-height:16px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"]{
+    min-height:170px;padding:3px 3px 5px;
+  }
+  body.bf-menu-mode #bf-home .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img{
+    height:132px;
+  }
+}
+
+/* A1 advisory: retain read-only squad source data behind an accessible Home disclosure. */
+body.bf-menu-mode #bf-home #bf-home-element-disclosure{
+  box-sizing:border-box;margin:8px 0 0;border:1px solid #8d754e;
+  border-radius:5px;background:linear-gradient(#27364a,#17253a);color:#f5dfb6;
+}
+body.bf-menu-mode #bf-home #bf-home-element-disclosure>summary{
+  box-sizing:border-box;display:flex;align-items:center;min-height:44px;
+  padding:8px 10px;cursor:pointer;font:800 11px/1.4 Georgia,serif;
+}
+body.bf-menu-mode #bf-home #bf-home-element-disclosure>summary:focus-visible{
+  outline:3px solid #a9e2ff;outline-offset:2px;
+}
+body.bf-menu-mode #bf-home #bf-home-element-reference{
+  margin:0;padding:8px 10px;color:#e8d9b8;
+}

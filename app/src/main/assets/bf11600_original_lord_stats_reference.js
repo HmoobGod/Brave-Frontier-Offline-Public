@@ -104,23 +104,7 @@
      return freeze({count:seen.size,totals:freeze(totals),level:1,sourceYear:2022,liveStats:false});
    }catch(_){return null;}
  }
- let homeRef=null;
- function refreshHome(){
-   const party=document.querySelector('#bf-home #bf-scene-party');if(!party)return;
-   if(!homeRef||!homeRef.isConnected){
-     homeRef=document.createElement('p');homeRef.id='bf11600-home-base-reference';
-     homeRef.setAttribute('role','status');homeRef.setAttribute('aria-live','polite');
-     homeRef.style.cssText='max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui,sans-serif';
-     party.after(homeRef);
-   }
-   const s=homeReference();
-   const text=!s?'2022 BASE STATS · unavailable for this squad':!s.count?'2022 BASE STATS · no squad selected':
-     '2022 LEVEL 1 REFERENCE · '+fmt(s.totals)+' · '+s.count+' forms · NOT live battle stats';
-   if(homeRef.textContent!==text)homeRef.textContent=text;
- }
- window.addEventListener('bf-route-sync',refreshHome);
  function refresh(){
-   refreshHome();
    const current=snapshot();
    list.replaceChildren();
    if(panel.open)for(const slot of current.slots){

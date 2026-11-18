@@ -89,7 +89,8 @@ with sync_playwright() as pw:
             "(el) => getComputedStyle(el).gridTemplateColumns.split(' ').length"
         ) == (3 if width <= 412 else 5), width
 
-        previews = page.locator(".bf-scene-places .bf-scene-locked")
+        page.locator("#bf-scene-archive summary").click()
+        previews = page.locator(".bf-scene-archive-grid .bf-scene-locked")
         assert previews.count() == 4
         for index, (name, visible, image) in enumerate(PREVIEWS):
             card = previews.nth(index)

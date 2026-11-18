@@ -150,14 +150,10 @@ function bfOfflineUnitPortraitV266(source, name) {
   if (!home || home.dataset.globalScene || !window.BF_homeNav) return;
   home.dataset.globalScene = '1';
   home.innerHTML = [
-    '<div class="bf-scene-title"><div><strong role="heading" aria-level="1">GRAND GAIA</strong><small>BRAVE FRONTIER GLOBAL · OFFLINE</small></div><span>RECONSTRUCTION</span></div>',
+    '<div class="bf-scene-title"><strong role="heading" aria-level="1">HOME</strong></div>',
     '<section class="bf-scene-squad" aria-label="Your squad">',
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">CURRENT SQUAD</strong><button type="button" data-bf-goto="units">EDIT SQUAD ›</button></div>',
       '<div id="bf-scene-party" class="bf-scene-party" aria-live="polite"></div>',
-    '</section>',
-    '<section class="bf-scene-story" aria-label="Story progress and quest navigation">',
-      '<p id="bf-home-story-progress" role="status" aria-live="polite">Story status unavailable · browse Quests for available missions.</p>',
-      '<button id="bf-home-story-open" type="button">VIEW QUESTS ›</button>',
     '</section>',
     '<section class="bf-scene-explore" aria-label="Global locations">',
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">ADVENTURE</strong><small>Recovered Global artwork</small></div>',
@@ -165,13 +161,22 @@ function bfOfflineUnitPortraitV266(source, name) {
         '<div class="bf-scene-available-label" role="heading" aria-level="3"><strong>AVAILABLE OFFLINE</strong><small>Choose an adventure</small></div>',
         '<button type="button" class="bf-scene-place bf-scene-active bf-scene-featured" data-bf-goto="quest" aria-label="Quest: play demo battles"><img src="content/home/home_win_quest.png" alt="" /><span class="bf-scene-status">PLAY QUEST</span></button>',
         '<button type="button" class="bf-scene-place bf-scene-active bf-scene-featured" data-bf-goto="summon" aria-label="Summoning Hall: demo recruitment"><img src="content/home/home_win_akras_smn_hall.png" alt="" /><span class="bf-scene-status">DEMO SUMMON</span></button>',
+      '</div>',
+    '</section>',
+    '<section class="bf-scene-story" aria-label="Story progress and quest navigation">',
+      '<p id="bf-home-story-progress" role="status" aria-live="polite">Story status unavailable · browse Quests for available missions.</p>',
+      '<button id="bf-home-story-open" type="button">VIEW QUESTS ›</button>',
+    '</section>',
+    '<details class="bf-scene-archive" id="bf-scene-archive">',
+      '<summary>MORE LOCATIONS · ARTWORK PREVIEWS ONLY</summary>',
+      '<div class="bf-scene-archive-grid">',
         '<div class="bf-scene-archive-label" role="heading" aria-level="3"><strong>RECOVERED GLOBAL LOCATIONS</strong><small>Artwork preview · not playable</small></div>',
         '<div class="bf-scene-place bf-scene-locked" role="group" aria-label="Vortex Gate not implemented" aria-disabled="true"><img src="content/home/home_win_gate.png" alt="" /><strong class="bf-scene-location-name" aria-hidden="true">VORTEX GATE</strong><span class="bf-scene-status">NOT YET AVAILABLE</span></div>',
         '<div class="bf-scene-place bf-scene-locked" role="group" aria-label="Arena not implemented" aria-disabled="true"><img src="content/home/home_win_arena.png" alt="" /><strong class="bf-scene-location-name" aria-hidden="true">ARENA</strong><span class="bf-scene-status">NOT YET AVAILABLE</span></div>',
         '<div class="bf-scene-place bf-scene-locked" role="group" aria-label="Raid Battle not implemented" aria-disabled="true"><img src="content/home/home_win_raid_open.png" alt="" /><strong class="bf-scene-location-name" aria-hidden="true">RAID BATTLE</strong><span class="bf-scene-status">NOT YET AVAILABLE</span></div>',
         '<div class="bf-scene-place bf-scene-locked" role="group" aria-label="Capital Randall not implemented" aria-disabled="true"><img src="content/home/home_win_randall.png" alt="" /><strong class="bf-scene-location-name" aria-hidden="true">CAPITAL RANDALL</strong><span class="bf-scene-status">NOT YET AVAILABLE</span></div>',
       '</div>',
-    '</section>',
+    '</details>',
     '<section class="bf-scene-tools" aria-label="Home shortcuts">',
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">HOME SHORTCUTS</strong><small>Available offline</small></div>',
       '<div class="bf-scene-toolrow">',
@@ -467,12 +472,13 @@ function bfOfflineUnitPortraitV266(source, name) {
     if(event?.detail?.route==='home')refreshStory();
   });
   window.addEventListener('bf-route-sync', event => {
-    if(event?.detail?.route==='home')refreshStory();
+    if(event?.detail?.route==='home'){
+      refreshParty();
+      refreshStory();
+    }
   });
   const picker = document.getElementById('squadpicker');
   if (picker) new MutationObserver(refreshParty).observe(picker, {childList:true});
-  const nav = document.querySelector('.bf-navbar');
-  if (nav) nav.addEventListener('click', refreshParty);
   window.BFGlobalHome = {refreshParty};
   window.BFGlobalHome.refreshStory = refreshStory;
 })();
@@ -1967,7 +1973,7 @@ function bfOfflineUnitPortraitV266(source, name) {
  const button=document.createElement('button');button.type='button';button.id='bf-home-current-battle';button.style.cssText='box-sizing:border-box;width:100%;min-height:44px;white-space:normal';anchor.append(button);let shownBattle=null,shownMission=null;
  function snapshot(){try{if(P.version!==7||S.mode!=='archive'||S.over!==false||!Number.isSafeInteger(QUEST?.missionId)||!Number.isSafeInteger(S.wave)||S.wave<0||!Number.isSafeInteger(S.round)||S.round<1)return null;const row=QUESTS.filter(q=>q.missionId===QUEST.missionId);if(row.length!==1||row[0].dungeonId!==QUEST.dungeonId||row[0].battles!==QUEST.battles||S.totalWaves!==QUEST.battles||S.wave>=S.totalWaves)return null;return Object.freeze({missionId:QUEST.missionId,wave:S.wave+1,totalWaves:S.totalWaves,round:S.round,existingBattleOnly:true});}catch(_){return null;}}
  function idle(){try{if(S.busy!==false||S.auto!==false)return false;const repeat=window.BFGlobalQoLQuestRepeatV9800;return !repeat||(typeof repeat.statusSnapshot==='function'&&repeat.statusSnapshot()?.active===false);}catch(_){return false;}}
- function refresh(){const state=snapshot();shownBattle=S;shownMission=state?.missionId??null;button.disabled=!state||!idle();button.textContent=state?'RETURN TO CURRENT DEMO BATTLE · MISSION '+state.missionId+' · WAVE '+state.wave+'/'+state.totalWaves+' · TURN '+state.round:'CURRENT DEMO BATTLE UNAVAILABLE';return state;}
+ function refresh(){const state=snapshot();shownBattle=S;shownMission=state?.missionId??null;button.hidden=!state;button.disabled=!state||!idle();button.textContent=state?'RETURN TO CURRENT DEMO BATTLE · MISSION '+state.missionId+' · WAVE '+state.wave+'/'+state.totalWaves+' · TURN '+state.round:'CURRENT DEMO BATTLE UNAVAILABLE';return state;}
  function open(){const state=snapshot();if(!state||S!==shownBattle||state.missionId!==shownMission||!idle()||window.BF_homeNav?.current!=='home')return false;if(window.BF_homeNav.go('quest')!==true)return false;const heading=document.querySelector('#bf2100-tray h3')||document.querySelector('.questpanel h2');if(heading){heading.tabIndex=-1;heading.focus();}return true;}
  button.addEventListener('click',open);window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);window.BFHomeCurrentBattleB100=Object.freeze({snapshot,refresh,open});refresh();
 })();
@@ -1977,7 +1983,12 @@ function bfOfflineUnitPortraitV266(source, name) {
  const home=document.getElementById('bf-home'),party=home?.querySelector('#bf-scene-party');if(!party)return;
  let catalog=null;try{const raw=JSON.parse(document.getElementById('bf-global-unit-catalog-data').textContent);if(raw.schema==='bf-global-unit-archive-2022-v1'&&raw.units.length===2291&&new Set(raw.units.map(x=>x.id)).size===2291)catalog=new Map(raw.units.map(x=>[x.id,x]));}catch(_){}
  const labels=['Fire','Water','Earth','Thunder','Light','Dark'];
- const text=document.createElement('p');text.id='bf-home-element-reference';text.setAttribute('role','status');text.style.cssText='box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui';party.after(text);
+ const tools=home.querySelector('.bf-scene-tools');if(!tools)return;
+ const disclosure=document.createElement('details');disclosure.id='bf-home-element-disclosure';
+ const summary=document.createElement('summary');summary.textContent='SQUAD ELEMENTS · SOURCE DETAILS';
+ const text=document.createElement('p');text.id='bf-home-element-reference';text.setAttribute('role','status');
+ text.style.cssText='box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui';
+ disclosure.append(summary,text);tools.append(disclosure);
  function snapshot(){try{if(!catalog||P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||new Set(P.roster).size!==P.roster.length||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0))return null;
    const seen=new Set(),counts=Object.fromEntries(labels.map(x=>[x,0]));
    for(const id of Array.from(P.squad)){if(id===0||id===null||id===undefined)continue;if(!Number.isSafeInteger(id)||!P.roster.includes(id)||seen.has(id))return null;const unit=effectiveUnit(id);if(!unit||!Number.isSafeInteger(unit.id)||unit.id<=0||typeof unit.name!=='string'||!unit.name.trim())return null;const row=catalog.get(unit.id);if(!row||!Number.isInteger(row.element)||row.element<1||row.element>6)return null;seen.add(id);counts[labels[row.element-1]]++;}

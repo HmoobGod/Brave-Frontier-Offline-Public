@@ -148,15 +148,56 @@ with sync_playwright() as playwright:
     actual = page.locator("#bf-scene-party strong").all_text_contents()
     expected = page.evaluate("P.squad.map(id => effectiveUnit(id).name)")
     assert actual == expected, (actual, expected)
-    assert page.locator(".bf-scene-places .bf-scene-place").count() == 6
+    # A1: keep source-element reference and API, but remove the visual
+    # diagnostic line from the first-screen squad and close it by default.
+    source_details = page.locator("#bf-home-element-disclosure")
+    source_text = source_details.locator("#bf-home-element-reference")
+    assert source_details.count() == 1
+    assert page.locator(".bf-scene-tools > #bf-home-element-disclosure").count() == 1
+    assert page.locator(".bf-scene-squad #bf-home-element-reference").count() == 0
+    assert source_text.count() == 1
+    assert not source_details.evaluate("(e) => e.open")
+    assert not source_text.is_visible()
+    assert page.evaluate("BFHomeElementsB100.snapshot().count") == 6
+    source_details.locator("summary").focus()
+    page.keyboard.press("Enter")
+    assert source_details.evaluate("(e) => e.open")
+    assert source_text.is_visible()
+    assert "2022 SOURCE SQUAD ELEMENTS" in source_text.inner_text()
+    source_details.locator("summary").focus()
+    page.keyboard.press("Enter")
+    assert not source_details.evaluate("(e) => e.open")
+    assert not source_text.is_visible()
+    assert page.evaluate("""() => ({
+        save: localStorage.getItem('bf_global_offline_demo_v7'),
+        squad: JSON.stringify(P.squad), zel: P.zel
+    })""") == before
+    # P0: two playable gateways, with four authentic-art previews disabled
+    # inside a closed, keyboard-accessible disclosure.
+    assert page.locator(".bf-scene-places .bf-scene-place").count() == 2
     assert page.locator(".bf-scene-places button[data-bf-goto]").count() == 2
-    assert page.locator(".bf-scene-places .bf-scene-locked").count() == 4
+    assert page.locator(".bf-scene-places .bf-scene-locked").count() == 0
+    archive = page.locator("#bf-scene-archive")
+    assert archive.count() == 1 and not archive.evaluate("(el) => el.open")
+    locked = archive.locator(".bf-scene-locked")
+    assert locked.count() == 4
+    assert locked.evaluate_all("""nodes => nodes.every(el =>
+        el.getAttribute('role') === 'group' &&
+        el.getAttribute('aria-disabled') === 'true' &&
+        !el.hasAttribute('data-bf-goto') &&
+        el.querySelector('img[src^="content/home/"]'))""")
+    archive.locator("summary").focus()
+    page.keyboard.press("Enter")
+    assert archive.evaluate("(el) => el.open")
     assert page.locator(".bf-scene-toolrow button").count() == 4
     assert page.locator(".bf-scene-toolrow .bf-scene-tool-locked").count() == 1
     assert page.locator(".bf-scene-tool-box[data-bf-open-box]").count() == 1
     # Check actual locally packaged files resolve, rather than accepting broken img tags.
     page.wait_for_function("""() => [...document.querySelectorAll('.bf-scene-place img, .bf-scene-toolrow img')]
         .every(img => img.complete && img.naturalWidth > 0)""", timeout=15000)
+    archive.locator("summary").focus()
+    page.keyboard.press("Enter")
+    assert not archive.evaluate("(el) => el.open")
     assert page.evaluate("""() => ({
         save: localStorage.getItem('bf_global_offline_demo_v7'),
         squad: JSON.stringify(P.squad), zel: P.zel

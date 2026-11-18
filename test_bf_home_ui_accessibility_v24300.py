@@ -60,7 +60,8 @@ with sync_playwright() as pw:
             "(el)=>({size:getComputedStyle(el).backgroundSize,image:getComputedStyle(el).backgroundImage})")
         assert art["size"]=="contain",(width,art)
         assert "home_new_btn_menu1.png" in art["image"],(width,art)
-        locked=page.locator(".bf-scene-places .bf-scene-locked")
+        page.locator("#bf-scene-archive summary").click()
+        locked=page.locator(".bf-scene-archive-grid .bf-scene-locked")
         assert locked.count()==4
         for ix,name in enumerate(("Vortex Gate","Arena","Raid Battle","Capital Randall")):
             el=locked.nth(ix)
@@ -72,7 +73,8 @@ with sync_playwright() as pw:
             })""")
             assert computed["size"]>=10,(width,name,computed)
             assert computed["fit"]=="contain",(width,name,computed)
-        assert page.locator(".bf-scene-places [role=heading]").count()==2
+        assert page.locator(".bf-scene-places [role=heading]").count()==1
+        assert page.locator(".bf-scene-archive-grid [role=heading]").count()==1
         assert page.locator(".bf-scene-places button").count()==2
         page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
         assert page.evaluate("BF_homeNav.current")=="menu"

@@ -112,8 +112,8 @@ with sync_playwright() as pw:
                     story=home.querySelector('.bf-scene-story'),
                     explore=home.querySelector('.bf-scene-explore');
                   return squad&&story&&explore&&
-                    (squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)!==0&&
-                    (story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)!==0;
+                    (squad.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)!==0&&
+                    (explore.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)!==0;
                 }"""), width
                 proof = page.locator("#bf-scene-party").evaluate("""root=>{
                   const cards=[...root.children], boxes=cards.map(c=>c.getBoundingClientRect());

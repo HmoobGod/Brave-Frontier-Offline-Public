@@ -234,10 +234,9 @@ with sync_playwright() as pw:
     }""")
     assert status_bounds['left'] >= -0.1 and status_bounds['right'] <= status_bounds['viewport'] + 0.1, status_bounds
     assert status_bounds['documentWidth'] <= max(status_bounds['viewport'], base_scroll_width), (status_bounds,base_scroll_width)
-    # v615: owner screenshot rejected the v401 Quest-first narrow order.
-    # The same real Home DOM must be title > OWNED portrait squad > story >
-    # Adventure > optional preview > tools at every viewport width.
-    # Keep redundant header detail after content, not before the portraits.
+    # P0 Home: the owned squad remains directly beneath Home; active Quest
+    # and Summon precede Story. Archived art and closed v420 readiness follow
+    # Story, with redundant header detail after all Home content.
     before_priority=page.evaluate("""() => ({
       p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
       save:localStorage.getItem('bf_global_offline_demo_v7'),
@@ -254,14 +253,20 @@ with sync_playwright() as pw:
       return h.lastElementChild?.id==='bf054-home-details' &&
         h.querySelector('#bf-scene-party')?.children.length===6;
     }""")
-    # Emulate #420 late-loading a read-only reference panel next to Adventure.
+    # Emulate v420's optional, closed reference disclosure AFTER archived art;
+    # this synthetic fixture only tests DOM order and does not touch game saves.
     page.evaluate("""() => {
-      const adventure=document.querySelector('#bf-home .bf-scene-explore');
+      const archive=document.querySelector('#bf-home #bf-scene-archive');
+      const disclosure=document.createElement('details');
+      disclosure.id='bf420-readiness-disclosure';
+      const summary=document.createElement('summary');
+      summary.textContent='NEXT ADVENTURE · STATUS DETAILS';
       const panel=document.createElement('section');
       panel.id='bf420-home-readiness';
       panel.setAttribute('aria-label','Late-loaded source preview fixture');
       panel.textContent='Reference preview, no save changes';
-      adventure.after(panel);
+      disclosure.append(summary,panel);
+      archive.after(disclosure);
     }""")
     capture_digests=[]
     for width in (320,360,370,371,390,412,540,320):
@@ -274,16 +279,20 @@ with sync_playwright() as pw:
           story=h.querySelector('.bf-scene-story'),
           adventure=h.querySelector('.bf-scene-explore'),
           preview=h.querySelector('#bf420-home-readiness'),
+          archive=h.querySelector('#bf-scene-archive'),
+          disclosure=h.querySelector('#bf420-readiness-disclosure'),
           tools=h.querySelector('.bf-scene-tools'),
           details=h.querySelector('#bf054-home-details'),
           cards=[...p.querySelectorAll('.bf-scene-member')],
           rects=cards.map(x=>x.getBoundingClientRect()),
           buttons=[...adventure.querySelectorAll('button.bf-scene-active')];
         return {
-          order:t.nextElementSibling===s&&s.nextElementSibling===story&&
-            story.nextElementSibling===adventure&&
-            adventure.nextElementSibling===preview&&
-            preview.nextElementSibling===tools,
+          order:t.nextElementSibling===s&&s.nextElementSibling===adventure&&
+            adventure.nextElementSibling===story&&
+            story.nextElementSibling===archive&&
+            archive.nextElementSibling===disclosure&&
+            disclosure.contains(preview)&&disclosure.nextElementSibling===tools,
+          previewsClosed:!archive.open&&!disclosure.open,
           detailsLast:h.lastElementChild===details,
           width:document.documentElement.scrollWidth,
           cols:getComputedStyle(p).gridTemplateColumns.split(' ').length,
@@ -293,7 +302,7 @@ with sync_playwright() as pw:
           hit:rects.every(x=>x.width>=36&&x.height>=44)
         };
       }""")
-      assert layout['order'] and layout['detailsLast'],(width,layout)
+      assert layout['order'] and layout['previewsClosed'] and layout['detailsLast'],(width,layout)
       assert layout['cards']==6 and layout['interactive']==['quest','summon'],(width,layout)
       assert layout['cols']==(5 if width<=412 else 6),(width,layout)
       if width<=412:
@@ -348,7 +357,7 @@ with sync_playwright() as pw:
       writes:__headerWrites()
     })""")
     assert before_priority==after_priority,(before_priority,after_priority)
-    page.evaluate("document.getElementById('bf420-home-readiness').remove()")
+    page.evaluate("document.getElementById('bf420-readiness-disclosure').remove()")
     page.set_viewport_size({'width':390,'height':844})
     page.evaluate('()=>{P.exp=13;P.level=2;P.zel=1345;P.karma=250;renderProgress()}')
     page.wait_for_function("""()=>document.querySelector('#bf054-exp-text')?.textContent==='8 / 10'""")

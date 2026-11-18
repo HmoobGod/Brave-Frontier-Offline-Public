@@ -81,12 +81,13 @@ with sync_playwright() as pw:
                     tiles=[...explore.querySelectorAll('button.bf-scene-active')];
                   return {
                     adjacent:title.nextElementSibling===squad &&
-                      squad.nextElementSibling===story &&
-                      story.nextElementSibling===explore,
+                      squad.nextElementSibling===explore &&
+                      explore.nextElementSibling===story &&
+                      story.nextElementSibling?.id==='bf-scene-archive',
                     order:title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING,
                     orderOK:!!(title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING)&&
-                      !!(squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)&&
-                      !!(story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING),
+                      !!(squad.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)&&
+                      !!(explore.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING),
                     squadTop:squad.getBoundingClientRect().top,
                     squadBottom:squad.getBoundingClientRect().bottom,
                     squadCards:squad.querySelectorAll('.bf-scene-member').length,
@@ -120,8 +121,14 @@ with sync_playwright() as pw:
                   const e=home.querySelector('.bf-scene-explore');
                   const p=home.querySelector('#bf420-home-readiness');
                   const squad=home.querySelector('.bf-scene-squad');
-                  return e.nextElementSibling===p &&
-                    p.nextElementSibling===home.querySelector('.bf-scene-tools') &&
+                  const story=home.querySelector('.bf-scene-story'),
+                        archive=home.querySelector('#bf-scene-archive'),
+                        disclosure=home.querySelector('#bf420-readiness-disclosure');
+                  return e.nextElementSibling===story &&
+                    story.nextElementSibling===archive &&
+                    archive.nextElementSibling===disclosure &&
+                    disclosure.contains(p) &&
+                    disclosure.nextElementSibling===home.querySelector('.bf-scene-tools') &&
                     home.querySelector('.bf-scene-title').nextElementSibling===squad &&
                     home.querySelectorAll('.bf-scene-explore').length===1 &&
                     home.querySelectorAll('#bf420-home-readiness').length===1;
