@@ -24,6 +24,8 @@ assert CSS.count("/* v617 original-art centered Quest gateway") == 1
 assert "window.BF_homeNav = {go,get current()" in JS
 assert "data-bf-goto=\"quest\"" in JS and "data-bf-goto=\"summon\"" in JS
 assert len(CSS.encode("utf-8")) < 128 * 1024
+assert "v634 Home-first mobile art" in CSS
+assert "content/home/character_frame.png" in CSS
 print("PASS v618 source: full APK and preflight registered, original-art Home CSS, offline identity")
 
 if "--source-only" in sys.argv:
@@ -43,7 +45,8 @@ MODULES = (
     "bf100_grand_gaia_campaign.js", "bf101_story_continue.js",
     "bf14300_original_quest_energy.js",
 )
-IMAGES = ("home_win_quest.png", "home_win_akras_smn_hall.png")
+IMAGES = ("home_win_quest.png", "home_win_akras_smn_hall.png",
+          "character_frame.png", "home_character_frame_bg.png")
 for name in IMAGES:
     assert (ASSETS / "content/home" / name).is_file(), name
 
@@ -83,10 +86,12 @@ with sync_playwright() as pw:
                 # Private in-memory browser fixture; never read or write owner data.
                 page.evaluate("""() => {
                   const db={};
+                  window.__bfTestStorageWrites={set:0,remove:0,clear:0};
                   Object.defineProperty(window,'localStorage',{configurable:true,value:{
                     getItem:k=>db[k]??null,
-                    setItem:(k,v)=>{db[k]=String(v)},
-                    removeItem:k=>{delete db[k]},
+                    setItem:(k,v)=>{window.__bfTestStorageWrites.set++;db[k]=String(v)},
+                    removeItem:k=>{window.__bfTestStorageWrites.remove++;delete db[k]},
+                    clear:()=>{window.__bfTestStorageWrites.clear++;for(const k of Object.keys(db))delete db[k]},
                     key:i=>Object.keys(db)[i]??null,
                     get length(){return Object.keys(db).length}
                   }});
@@ -127,6 +132,21 @@ with sync_playwright() as pw:
                   return img && img.complete && img.naturalWidth===450 &&
                     img.naturalHeight===316;
                 })""", timeout=15000)
+                frame_dimensions = page.evaluate("""async () => {
+                  const frame=new Image();frame.src='content/home/character_frame.png';
+                  await frame.decode();return [frame.naturalWidth,frame.naturalHeight];
+                }""")
+                assert frame_dimensions == [644,354], (width, frame_dimensions)
+                if width <= 412:
+                    art = page.locator("#bf-scene-party").evaluate("""party => ({
+                      overlay:getComputedStyle(party,'::before').backgroundImage,
+                      slots:[...party.children].slice(0,5).map(
+                        node=>getComputedStyle(node).backgroundImage),
+                      sixth:party.children.length === 6
+                    })""")
+                    assert "character_frame.png" in art["overlay"], (width, art)
+                    assert art["sixth"] and all("home_character_frame_bg.png" in bg
+                                                for bg in art["slots"]), (width, art)
                 g = page.locator("#bf-home .bf-scene-places").evaluate("""root=>{
                   const q=root.querySelector('button[data-bf-goto="quest"]'),
                     s=root.querySelector('button[data-bf-goto="summon"]'),
@@ -180,6 +200,53 @@ with sync_playwright() as pw:
                         safe=safe_gateway()
                         assert safe["questTop"] >= safe["headerBottom"]-1, (width,height,safe)
                         assert safe["questBottom"] <= safe["footerTop"]-4, (width,height,safe)
+                        # v634: inspect untouched layout before route resets or focus.
+                        before_tap = snapshot(page)
+                        writes_before = page.evaluate("({...window.__bfTestStorageWrites})")
+                        initial = page.evaluate("""() => {
+                          const sc=document.scrollingElement;
+                          const s=document.querySelector('#bf-home button[data-bf-goto="summon"]');
+                          const h=document.querySelector('.bf-shell-head').getBoundingClientRect();
+                          const f=document.querySelector('.bf-navbar').getBoundingClientRect();
+                          const r=s.getBoundingClientRect();
+                          return {scrollY:scrollY,scrollTop:sc.scrollTop,
+                            maxScroll:sc.scrollHeight-sc.clientHeight,
+                            headerBottom:h.bottom,footerTop:f.top,
+                            summonTop:r.top,summonBottom:r.bottom};
+                        }""")
+                        assert initial["maxScroll"] > 0, (width,height,initial)
+                        page.evaluate("""() => document.querySelector(
+                          '#bf-home button[data-bf-goto="summon"]').scrollIntoView({
+                            block:'center',behavior:'instant'
+                          })""")
+                        visible = page.evaluate("""() => {
+                          const sc=document.scrollingElement;
+                          const s=document.querySelector('#bf-home button[data-bf-goto="summon"]');
+                          const r=s.getBoundingClientRect();
+                          const h=document.querySelector('.bf-shell-head').getBoundingClientRect();
+                          const f=document.querySelector('.bf-navbar').getBoundingClientRect();
+                          const x=r.left+r.width/2,y=r.top+r.height/2;
+                          const target=document.elementFromPoint(x,y);
+                          return {scrollY:scrollY,scrollTop:sc.scrollTop,
+                            maxScroll:sc.scrollHeight-sc.clientHeight,
+                            summonTop:r.top,summonBottom:r.bottom,
+                            headerBottom:h.bottom,footerTop:f.top,
+                            x:x,y:y,hit:!!target&&(target===s||s.contains(target))};
+                        }""")
+                        assert visible["scrollTop"] >= 0 and visible["scrollTop"] <= visible["maxScroll"] + 1, (width,height,visible)
+                        assert visible["summonTop"] >= visible["headerBottom"] + 4, (width,height,visible)
+                        assert visible["summonBottom"] <= visible["footerTop"] - 4, (width,height,visible)
+                        assert visible["hit"], (width,height,visible)
+                        page.mouse.click(visible["x"], visible["y"])
+                        assert page.evaluate("BF_homeNav.current") == "summon", (width,height)
+                        assert page.locator(".summonpanel").evaluate_all("""panels => panels.some(
+                          node=>node.isConnected && node.getAttribute('aria-hidden')==='false' &&
+                            !node.classList.contains('bf-hidden') &&
+                            getComputedStyle(node).display!=='none')"""), (width,height)
+                        assert snapshot(page) == before_tap, (width,height,"Summon tap mutated game state")
+                        assert page.evaluate("({...window.__bfTestStorageWrites})") == writes_before, (width,height,"Summon tap attempted a storage write")
+                        assert not errors, (width,height,errors)
+                        assert page.evaluate("BF_homeNav.go('home')") is True, (width,height)
                         page.evaluate("BF_homeNav.go('units');BF_homeNav.go('home')")
                         after_return=safe_gateway()
                         assert after_return["questBottom"] <= after_return["footerTop"]-4, (width,height,after_return)

@@ -6,6 +6,7 @@ from pathlib import Path
 from zipfile import ZipFile
 import hashlib
 import struct
+import base64
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / "source_assets" / "bf1"
@@ -76,6 +77,21 @@ def main():
                 if not target.exists() or target.read_bytes() != data:
                     target.write_bytes(data)
                 count += 1
+    # Signed Global 2.19.6.0 MANIFEST.MF authenticates this original frame.
+    # Keep the independently pinned source separate from the immutable BF1 home ZIP.
+    framed = SOURCE / "authenticated_home" / "character_frame.png"
+    data = framed.read_bytes()
+    expected_sha1 = base64.b64decode("7Psxon2RmyLqxQUvs2fxadKeUVQ=")
+    if hashlib.sha1(data).digest() != expected_sha1:
+        raise ValueError("Authenticated Global character frame digest mismatch")
+    check_png(data, "authenticated_home/character_frame.png")
+    if struct.unpack(">II", data[16:24]) != (644, 354):
+        raise ValueError("Authenticated Global character frame dimensions mismatch")
+    target = DESTINATION / "content/home/character_frame.png"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if not target.exists() or target.read_bytes() != data:
+        target.write_bytes(data)
+    count += 1
     print(f"PASS {count} verified, original Global home UI PNGs staged locally")
 
 if __name__ == "__main__":
