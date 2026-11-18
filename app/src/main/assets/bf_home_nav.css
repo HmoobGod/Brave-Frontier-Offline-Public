@@ -1826,11 +1826,11 @@ body.bf-menu-mode #bf-home #bf-home-element-reference{
 /* v634 Home-first mobile art: archive-authenticated Global five-opening frame.
    This is a responsive reconstruction, NOT certified April 2022 native geometry.
    The overlay is decorative and never intercepts the six manual owned slots. */
-body.bf-menu-mode #bf-home .bf-scene-squad{
-  background:linear-gradient(180deg,#1b2639eb,#101827f5);
-}
 @media(max-width:412px){
-  /* Keep the established six-column wider-screen layout unchanged. */
+  /* Keep the established six-column wider-screen art and layout unchanged. */
+  body.bf-menu-mode #bf-home .bf-scene-squad{
+    background:linear-gradient(180deg,#1b2639eb,#101827f5);
+  }
   body.bf-menu-mode #bf-home .bf-scene-party > .bf-scene-member:not(:nth-child(6)){
     background:linear-gradient(180deg,#1d2a4266,#081322b0),
       url("content/home/home_character_frame_bg.png") center/100% 100% no-repeat;
