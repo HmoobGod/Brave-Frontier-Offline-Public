@@ -107,6 +107,14 @@ with sync_playwright() as pw:
                 assert active.evaluate_all("(nodes)=>nodes.map(x=>x.dataset.bfGoto)") == [
                     "quest", "summon"], width
                 assert page.locator("#bf-scene-archive").evaluate("(e)=>!e.open")
+                # Advisory A1: data remains in an opt-in disclosure after
+                # navigation, never occupying the first-screen squad area.
+                details = page.locator("#bf-home-element-disclosure")
+                assert details.count() == 1 and not details.evaluate("(e)=>e.open"), width
+                assert page.locator(".bf-scene-tools > #bf-home-element-disclosure").count() == 1
+                assert page.locator(".bf-scene-squad #bf-home-element-reference").count() == 0
+                assert details.locator("#bf-home-element-reference").count() == 1
+                assert not details.locator("#bf-home-element-reference").is_visible(), width
                 locked = page.locator("#bf-home .bf-scene-archive-grid .bf-scene-locked")
                 assert locked.count() == 4
                 assert locked.evaluate_all(

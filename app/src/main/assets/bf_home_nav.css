@@ -1806,3 +1806,19 @@ body.bf-menu-mode #bf-home .bf-scene-archive-grid .bf-scene-locked .bf-scene-loc
     height:132px;
   }
 }
+
+/* A1 advisory: retain read-only squad source data behind an accessible Home disclosure. */
+body.bf-menu-mode #bf-home #bf-home-element-disclosure{
+  box-sizing:border-box;margin:8px 0 0;border:1px solid #8d754e;
+  border-radius:5px;background:linear-gradient(#27364a,#17253a);color:#f5dfb6;
+}
+body.bf-menu-mode #bf-home #bf-home-element-disclosure>summary{
+  box-sizing:border-box;display:flex;align-items:center;min-height:44px;
+  padding:8px 10px;cursor:pointer;font:800 11px/1.4 Georgia,serif;
+}
+body.bf-menu-mode #bf-home #bf-home-element-disclosure>summary:focus-visible{
+  outline:3px solid #a9e2ff;outline-offset:2px;
+}
+body.bf-menu-mode #bf-home #bf-home-element-reference{
+  margin:0;padding:8px 10px;color:#e8d9b8;
+}

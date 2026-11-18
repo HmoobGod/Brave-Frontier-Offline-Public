@@ -1983,7 +1983,12 @@ function bfOfflineUnitPortraitV266(source, name) {
  const home=document.getElementById('bf-home'),party=home?.querySelector('#bf-scene-party');if(!party)return;
  let catalog=null;try{const raw=JSON.parse(document.getElementById('bf-global-unit-catalog-data').textContent);if(raw.schema==='bf-global-unit-archive-2022-v1'&&raw.units.length===2291&&new Set(raw.units.map(x=>x.id)).size===2291)catalog=new Map(raw.units.map(x=>[x.id,x]));}catch(_){}
  const labels=['Fire','Water','Earth','Thunder','Light','Dark'];
- const text=document.createElement('p');text.id='bf-home-element-reference';text.setAttribute('role','status');text.style.cssText='box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui';party.after(text);
+ const tools=home.querySelector('.bf-scene-tools');if(!tools)return;
+ const disclosure=document.createElement('details');disclosure.id='bf-home-element-disclosure';
+ const summary=document.createElement('summary');summary.textContent='SQUAD ELEMENTS · SOURCE DETAILS';
+ const text=document.createElement('p');text.id='bf-home-element-reference';text.setAttribute('role','status');
+ text.style.cssText='box-sizing:border-box;max-width:100%;overflow-wrap:anywhere;font:12px/1.5 system-ui';
+ disclosure.append(summary,text);tools.append(disclosure);
  function snapshot(){try{if(!catalog||P.version!==7||!Array.isArray(P.roster)||!Array.isArray(P.squad)||P.squad.length>6||new Set(P.roster).size!==P.roster.length||Array.from(P.roster).some(id=>!Number.isSafeInteger(id)||id<=0))return null;
    const seen=new Set(),counts=Object.fromEntries(labels.map(x=>[x,0]));
    for(const id of Array.from(P.squad)){if(id===0||id===null||id===undefined)continue;if(!Number.isSafeInteger(id)||!P.roster.includes(id)||seen.has(id))return null;const unit=effectiveUnit(id);if(!unit||!Number.isSafeInteger(unit.id)||unit.id<=0||typeof unit.name!=='string'||!unit.name.trim())return null;const row=catalog.get(unit.id);if(!row||!Number.isInteger(row.element)||row.element<1||row.element>6)return null;seen.add(id);counts[labels[row.element-1]]++;}
