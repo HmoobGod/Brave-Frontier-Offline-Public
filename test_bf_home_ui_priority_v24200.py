@@ -44,8 +44,26 @@ for token in ('@media(max-width:412px)', 'data-bf-goto="quest"',
     assert token in focus,token
 for forbidden in ("localStorage", "saveProgress(", "awardDemoRewards(",
                   "P.", "S.", "fetch(", "XMLHttpRequest(",
-                  "display:none", "visibility:hidden", "pointer-events:none"):
+                  "display:none", "visibility:hidden"):
     assert forbidden not in focus,forbidden
+# v634: only the original passive five-portrait frame may pass pointer taps through.
+active_focus=re.sub(r"/\*.*?\*/", "", focus, flags=re.S)
+frame_selector="body.bf-menu-mode #bf-home .bf-scene-party::before"
+frames=list(re.finditer(r"(?m)^[ \t]*"+re.escape(frame_selector)+r"\s*\{([^{}]*)\}",active_focus))
+assert len(frames)==1,"original Global frame must be unique and active"
+frame=frames[0]
+declarations=frame.group(1)
+assert 'content:""' in declarations and "aspect-ratio:644/354" in declarations
+assert 'background:url("content/home/character_frame.png")' in declarations
+pointer_values=re.findall(r"(?i)(?<![\w-])pointer-events\s*:\s*([^;{}]+)",declarations)
+assert len(pointer_values)==1 and pointer_values[0].strip().lower()=="none",pointer_values
+mobile="@media(max-width:412px){"
+media_start=active_focus.rfind(mobile,0,frame.start())
+assert media_start>=0,"original frame must be mobile-only"
+between=active_focus[media_start+len(mobile):frame.start()]
+assert between.count("{")==between.count("}"),"frame must be a direct mobile rule"
+other_rules=active_focus[:frame.start()]+active_focus[frame.end():]
+assert not re.search(r"(?i)(?<![\w-])pointer-events\s*:\s*none\b",other_rules),"non-frame pointer suppression"
 sty=C.split("/* v242: visual-first Home hierarchy",1)[1].split(
     "/* v246: readable nameplates for original Global art-only",1
 )[0]
