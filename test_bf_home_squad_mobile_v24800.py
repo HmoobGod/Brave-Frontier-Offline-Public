@@ -68,9 +68,9 @@ with sync_playwright() as pw:
             assert item.get_attribute("aria-label")=="Empty squad slot"
             m=item.evaluate("""el=>({
                 size:el.getBoundingClientRect().width,
-                minHeight:parseFloat(getComputedStyle(el).minHeight)
+                height:el.getBoundingClientRect().height
             })""")
-            assert m["size"] >= 36 and m["minHeight"] >= (44 if width<=412 and index==5 else 90),(width,index,m)
+            assert m["size"] >= 36 and m["height"] >= (44 if width<=412 and index==5 else 90),(width,index,m)
         page.locator(".bf-scene-squad button[data-bf-goto='units']").click()
         assert page.evaluate("BF_homeNav.current")=="units"
         assert not errors,(width,errors)
