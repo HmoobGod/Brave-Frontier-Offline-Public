@@ -1848,7 +1848,7 @@ body.bf-menu-mode #bf-home #bf-home-element-reference{
   }
   body.bf-menu-mode #bf-home .bf-scene-party > .bf-scene-member:not(:nth-child(6)){
     box-sizing:border-box;aspect-ratio:128/350;min-width:0;min-height:0;
-    height:auto;padding:2px 1px 3px;gap:2px;
+    height:auto;padding:2px 1px 19px;gap:2px;
     border:0;border-radius:0;box-shadow:none;
     position:relative;z-index:1;
   }
@@ -1857,5 +1857,10 @@ body.bf-menu-mode #bf-home #bf-home-element-reference{
   }
   body.bf-menu-mode #bf-home .bf-scene-party > button.bf-scene-member:not(:nth-child(6)):focus-visible{
     outline-offset:-3px;z-index:4;
+  }
+  /* Keep exact Global names on two lines, clear of the gold frame rails. */
+  body.bf-menu-mode #bf-home .bf-scene-party > .bf-scene-member:not(:nth-child(6)) strong{
+    max-width:calc(100% - 12px);
+    white-space:normal;text-overflow:clip;
   }
 }
