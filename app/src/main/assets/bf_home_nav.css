@@ -1553,7 +1553,7 @@ body.bf-menu-mode #bf054-home-details {
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{position:absolute;left:9%;top:24%;width:82%;height:auto;aspect-ratio:1/1;margin:0;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 3px 3px #000c)}
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{display:flex;align-items:center;justify-content:center;font:800 11px/1.1 Arial,sans-serif;text-align:center;overflow-wrap:anywhere;background:#0008}
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{position:absolute;left:8%;right:8%;bottom:15%;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:none;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;color:#fff4d8;font:800 10px/1.15 Arial,sans-serif;text-shadow:0 1px 2px #000,0 0 3px #000}
-#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{position:absolute;left:8%;right:34%;bottom:5%;text-align:left;color:#d8e6f7;font:700 10px/1.1 Arial,sans-serif;text-shadow:0 1px 2px #000}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{position:absolute;left:8%;right:8%;bottom:5%;text-align:left;color:#d8e6f7;font:700 10px/1.1 Arial,sans-serif;text-shadow:0 1px 2px #000}
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-scene-slot{position:absolute;left:8%;right:8%;top:9%;margin:0;padding:0;background:none;border:0;font-size:0;line-height:0}
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5) .bf-scene-leader{display:inline-block;padding:2px 3px;color:#ffe9a8;background:none;border:0;font:italic 900 11px/1 Georgia,serif;letter-spacing:.02em;text-shadow:0 0 2px #000,1px 1px 0 #6a3b00,-1px -1px 0 #6a3b00}
 #bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member.bf-scene-empty:nth-child(-n+5){display:flex;align-items:center;justify-content:center;color:#d9c79e;background:#0006}
@@ -1566,6 +1566,7 @@ body.bf-menu-mode #bf054-home-details {
 #bf-home.bf-home-v635 .bf-home-squad-reference-body{padding:0 10px 8px}
 #bf-home.bf-home-v635 .bf-home-squad-reference-body>p{margin:6px 0!important}
 @media(min-width:510px){#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{font-size:12px}#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{font-size:11px}}
+@media(min-width:413px) and (max-width:509px){#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{font-size:9px}}
 
 /* v617 original-art centered Quest gateway: a real source-backed Home
    composition improvement, NOT authenticated 2022 pixel parity. Preserve
