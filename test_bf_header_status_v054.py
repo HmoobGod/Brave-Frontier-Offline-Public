@@ -295,9 +295,10 @@ with sync_playwright() as pw:
       }""")
       assert layout['order'] and layout['detailsLast'],(width,layout)
       assert layout['cards']==6 and layout['interactive']==['quest','summon'],(width,layout)
-      assert layout['cols']==(5 if width<=412 else 6),(width,layout)
-      if width<=412:
-        assert layout['firstRow'] and layout['sixthBelow'],(width,layout)
+      # v635: the original five-opening party frame (layout_home2.csv) is
+      # used at every width; the sixth owned unit always sits below it.
+      assert layout['cols']==5,(width,layout)
+      assert layout['firstRow'] and layout['sixthBelow'],(width,layout)
       assert layout['hit'],(width,layout)
       assert layout['width']<=max(width,base_scroll_width),(width,layout)
       # In-memory Chromium image receipt; never publishes owner screenshots.

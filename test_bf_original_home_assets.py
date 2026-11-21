@@ -24,6 +24,7 @@ expected = {
     "area_name_frame.png": (286, 58),
     "party_frame_quest_btn1.png": (210, 55),
     "mission_frame_off.png": (622, 176),
+    "character_frame.png": (644, 354),  # v635 original five-opening frame
 }
 expected.update({name: (100, 80) for name in (
     "home_new_btn_menu1.png", "home_new_btn_box1.png",

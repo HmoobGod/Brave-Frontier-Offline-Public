@@ -232,8 +232,14 @@ with sync_playwright() as pw:
           finally{Object.assign(P,original);BFGlobalHome.refreshParty();}return {out,same:before===JSON.stringify({P,S})};}""")
         assert corrupt=={'out':[True]*7,'same':True},corrupt
         level_proof=page.evaluate("""()=>{const exp=P.unitExp,id=P.squad[0],before=JSON.stringify({P,S}),out=[];let getterCalls=0;
-          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');}
-          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');
+          const shortButAnnounced=()=>{
+            const card=document.querySelector('#bf-scene-party button');
+            return card?.querySelector('small')?.textContent==='Lv —' &&
+              card.getAttribute('aria-label').includes('LEVEL UNAVAILABLE') &&
+              card.getAttribute('aria-label').includes('Leader, squad slot 1 of 6');
+          };
+          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(shortButAnnounced());}
+          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(shortButAnnounced());
           }finally{P.unitExp=exp;BFGlobalHome.refreshParty();}return {out,getterCalls,same:before===JSON.stringify({P,S})};}""")
         assert level_proof=={'out':[True]*7,'getterCalls':0,'same':True},level_proof
         # Combined role/ownership/level behaviors must agree on the same painted cards.
@@ -267,7 +273,8 @@ with sync_playwright() as pw:
                 return buttons().length===6&&leaders()===1&&
                   first.querySelectorAll('.bf-scene-leader').length===1&&
                   first.getAttribute('aria-label').includes('squad slot 1 of 6')&&
-                  level.textContent==='LEVEL UNAVAILABLE'&&
+                  level.textContent==='Lv —'&&
+                  first.getAttribute('aria-label').includes('LEVEL UNAVAILABLE')&&
                   level.scrollWidth<=level.clientWidth&&
                   b.left>=a.left+first.clientLeft-.5&&b.right<=a.right-first.clientLeft+.5;
               };

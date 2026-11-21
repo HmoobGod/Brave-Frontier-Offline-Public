@@ -24,6 +24,7 @@ PACKS = {
             "home_new_btn_mission1.png",
             "home_new_btn_shortcut1.png",
             "home_character_frame_bg.png",
+            "character_frame.png",
             "home_win_akras_smn_hall.png",
             "home_win_randall.png",
         ),

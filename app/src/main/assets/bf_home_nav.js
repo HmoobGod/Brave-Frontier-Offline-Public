@@ -183,8 +183,39 @@ function bfOfflineUnitPortraitV266(source, name) {
       '</div>',
       '<button type="button" id="bf-home-build-info" aria-label="Open installed app build information" style="box-sizing:border-box;display:block;width:100%;min-height:44px;margin:8px 0 0;padding:9px 12px;color:#ffe2af;background:#21364d;border:1px solid #bca16a;border-radius:6px;font:800 12px Arial,sans-serif;text-align:center;cursor:pointer">VIEW BUILD VERSION / APP INFO</button>',
     '</section>',
-    '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
+    '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features. Squad frame: archived layout_home2 slot coordinates; artwork scaling, unit placement and leader badge are reconstruction choices.</p>'
   ].join('');
+  // v635: original-style Home squad frame. Presentation only: the visible
+  // title stays in the DOM as the accessible level-1 heading and focus
+  // fallback; squad diagnostics move into a collapsed disclosure below.
+  home.classList.add('bf-home-v635');
+  const squadSectionV635 = home.querySelector('.bf-scene-squad');
+  const squadReferenceV635 = document.createElement('details');
+  squadReferenceV635.id = 'bf-home-squad-reference';
+  squadReferenceV635.hidden = true;
+  squadReferenceV635.innerHTML = '<summary>SQUAD SOURCE NOTES · 2022 reference data</summary>' +
+    '<div class="bf-home-squad-reference-body"></div>';
+  squadSectionV635.append(squadReferenceV635);
+  // Keep keyboard order equal to the visual order: portraits, then Edit Squad.
+  squadSectionV635.insertBefore(squadSectionV635.querySelector(':scope > .bf-scene-heading'), squadReferenceV635);
+  const squadReferenceBodyV635 = squadReferenceV635.lastElementChild;
+  // Existing read-only modules insert these beside #bf-scene-party. Moving
+  // the same live nodes keeps their refresh hooks, roles and text intact.
+  const squadReferenceIdsV635 = ['bf12600-home-squad-cost', 'bf-home-element-reference',
+    'bf11600-home-base-reference'];
+  function relocateSquadReferencesV635() {
+    for (const id of squadReferenceIdsV635) {
+      const node = document.getElementById(id);
+      if (!node || node.parentElement !== squadSectionV635) continue;
+      const later = squadReferenceIdsV635.slice(squadReferenceIdsV635.indexOf(id) + 1)
+        .map(x => document.getElementById(x)).find(x => x?.parentElement === squadReferenceBodyV635);
+      squadReferenceBodyV635.insertBefore(node, later || null);
+    }
+    squadReferenceV635.hidden = squadReferenceBodyV635.childElementCount === 0;
+  }
+  new MutationObserver(relocateSquadReferencesV635).observe(squadSectionV635, {childList: true});
+  window.BFHomeSquadFrameV635 = Object.freeze({relocate: relocateSquadReferencesV635,
+    referenceIds: Object.freeze(squadReferenceIdsV635.slice())});
   // Keep navigation and source location names usable if original Home art
   // cannot load. No replacement image or playable-mode claim is invented.
   const homeArtFallbacks=new WeakMap();
@@ -270,7 +301,11 @@ function bfOfflineUnitPortraitV266(source, name) {
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
         const observedLevel=verifiedDemoLevel(baseId);
-        level.textContent=observedLevel===null?'LEVEL UNAVAILABLE':'Lv.'+observedLevel;
+        // R6: keep a truthful compact label visible between the original
+        // five-slot frame ornaments; announce the full invalid-level state.
+        const levelUnknown=observedLevel===null;
+        level.textContent=levelUnknown?'Lv —':'Lv.'+observedLevel;
+        const announcedLevel=levelUnknown?'LEVEL UNAVAILABLE':level.textContent;
         // The first ordered owned slot is the leader slot; never promote
         // another visible card when slot one is empty or unverified.
         const slot = document.createElement('span');
@@ -283,7 +318,7 @@ function bfOfflineUnitPortraitV266(source, name) {
           slot.append(leader);
         }
         slot.append(document.createTextNode('SLOT ' + (index + 1)));
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent +
+        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + announcedLevel +
           ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
         card.title = 'Inspect owned unit';
         card.append(slot, img, name, level);
