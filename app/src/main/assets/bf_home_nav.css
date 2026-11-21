@@ -1567,6 +1567,30 @@ body.bf-menu-mode #bf054-home-details {
 #bf-home.bf-home-v635 .bf-home-squad-reference-body>p{margin:6px 0!important}
 @media(min-width:510px){#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{font-size:12px}#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{font-size:11px;letter-spacing:0}}
 
+/* v636 artwork-first Home composition (presentation only).
+   Evidence: archived layout_home2.csv puts the Home menu/action buttons at
+   y~510-612 directly beneath the 640x356 party frame (y161-517); original
+   home_new_btn_* PNGs are used unchanged. Reconstruction choices, not
+   verified client behavior: five-across cell sizing, labels under each
+   icon, compact status bar, visually hidden section headings (kept in the
+   accessibility tree). Locked/preview states stay visibly labeled. */
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{order:4;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;box-sizing:border-box;width:100%;margin:2px 0 0;padding:4px 2px;background:#0b111dcc;border-top:1px solid #8a6a32;border-bottom:1px solid #8a6a32}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>button,
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;min-width:44px;min-height:64px;margin:0;padding:2px 0;color:#fff1cf;background:none;border:0;border-radius:4px;box-shadow:none;text-align:center}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow img{display:block;width:100%;max-width:64px;height:44px;margin:0;object-fit:contain;filter:drop-shadow(0 2px 2px #000b)}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow span{display:block;max-width:100%;color:#fff1cf;font:800 10px/1.1 Arial,sans-serif;letter-spacing:0;overflow-wrap:normal;word-break:normal;text-shadow:0 1px 2px #000,0 0 3px #000}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked img{opacity:.5;filter:grayscale(.7)}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked span{color:#c9bda4}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>button:focus-visible{outline:3px solid #ffe2a0;outline-offset:-3px}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-home-squad-reference,#bf-home.bf-home-v636 #bf-home-squad-reference{order:5}
+#bf-home.bf-home-v636 .bf-scene-explore>.bf-scene-heading,
+#bf-home.bf-home-v636 .bf-scene-tools>.bf-scene-heading,
+#bf-home.bf-home-v636 .bf-scene-places>.bf-scene-available-label{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0!important}
+@media(max-width:360px){#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{gap:1px;padding:4px 1px}#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow span{letter-spacing:-.3px}}
+#bf-home.bf-home-v636 .bf-scene-tools{margin-top:8px;padding:0;background:none;border:0;box-shadow:none}
+#bf-home.bf-home-v636 .bf-scene-story{margin:0 0 8px;padding:6px 8px;background:#0f1828e6;border:0;border-top:1px solid #8a6a32;border-bottom:1px solid #8a6a32;border-radius:0;box-shadow:none}
+#bf-home.bf-home-v636 .bf-scene-story>p{margin:0 0 6px;font-size:12px;line-height:1.35}
+
 /* v617 original-art centered Quest gateway: a real source-backed Home
    composition improvement, NOT authenticated 2022 pixel parity. Preserve
    active routes, original image bytes, disabled location visibility and

@@ -87,7 +87,7 @@ with sync_playwright() as pw:
         assert shortcut.locator("button").count() == 4
         assert shortcut.evaluate(
             "(el) => getComputedStyle(el).gridTemplateColumns.split(' ').length"
-        ) == (3 if width <= 412 else 5), width
+        ) == 5, width  # v636: five-across original icon row beneath the frame
 
         previews = page.locator(".bf-scene-places .bf-scene-locked")
         assert previews.count() == 4

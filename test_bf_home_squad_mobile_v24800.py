@@ -72,7 +72,7 @@ with sync_playwright() as pw:
                 minHeight:parseFloat(getComputedStyle(el).minHeight)
             })""")
             assert m["size"] >= 36 and m["minHeight"] >= (44 if width<=412 and index==5 else 90),(width,index,m)
-        page.locator(".bf-scene-squad button[data-bf-goto='units']").click()
+        page.locator(".bf-scene-squad .bf-scene-heading button[data-bf-goto='units']").click()  # v636: icon row also lives in the squad section
         assert page.evaluate("BF_homeNav.current")=="units"
         assert not errors,(width,errors)
         page.close()

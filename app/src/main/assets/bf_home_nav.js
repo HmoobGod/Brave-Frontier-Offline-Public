@@ -198,6 +198,18 @@ function bfOfflineUnitPortraitV266(source, name) {
   squadSectionV635.append(squadReferenceV635);
   // Keep keyboard order equal to the visual order: portraits, then Edit Squad.
   squadSectionV635.insertBefore(squadSectionV635.querySelector(':scope > .bf-scene-heading'), squadReferenceV635);
+  // v636: archived layout_home2 places the Home menu/action buttons
+  // (y~510-612) directly beneath the party frame (y161-517). Move the same
+  // original-art shortcut row there; routing stays delegated on #bf-home.
+  home.classList.add('bf-home-v636');
+  const toolrowV636 = home.querySelector('.bf-scene-tools > .bf-scene-toolrow');
+  if (toolrowV636) {
+    toolrowV636.setAttribute('aria-label', 'Home menu');
+    squadSectionV635.insertBefore(toolrowV636, squadReferenceV635);
+  }
+  // Reference notes stay one tap away at the bottom of Home (same live
+  // nodes, same disclosure) instead of occupying the first screen.
+  home.querySelector('.bf-scene-tools')?.append(squadReferenceV635);
   const squadReferenceBodyV635 = squadReferenceV635.lastElementChild;
   // Existing read-only modules insert these beside #bf-scene-party. Moving
   // the same live nodes keeps their refresh hooks, roles and text intact.

@@ -390,6 +390,7 @@ jobs:
           python3 test_bf_home_ui_priority_v24200.py
           python3 test_bf_home_gateway_live_v61800.py
           python3 test_bf_home_squad_frame_v63500.py
+          python3 test_bf_home_artwork_first_v63600.py
           python3 test_bf_home_lineup_readability_v62100.py
           python3 test_bf_home_sixth_slot_readability_v62300.py
           python3 test_bf_home_ui_accessibility_v24300.py

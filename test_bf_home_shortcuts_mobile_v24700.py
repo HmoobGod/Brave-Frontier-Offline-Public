@@ -72,7 +72,8 @@ with sync_playwright() as pw:
             cols: getComputedStyle(el).gridTemplateColumns.split(' ').length,
             scroll: el.scrollWidth, client: el.clientWidth
         })""")
-        assert grid["cols"] == (3 if width <= 412 else 5), (width, grid)
+        # v636: original layout_home2 icon row beneath the party frame, five across.
+        assert grid["cols"] == 5, (width, grid)
         assert grid["scroll"] <= grid["client"] + 2, (width, grid)
         for button in shortcuts.locator("button").all():
             metrics = button.evaluate("""el => ({
@@ -81,7 +82,7 @@ with sync_playwright() as pw:
                 label: parseFloat(getComputedStyle(el.querySelector('span')).fontSize),
                 visible: getComputedStyle(el).visibility
             })""")
-            assert metrics["width"] >= 44 and metrics["height"] >= 88, (width, metrics)
+            assert metrics["width"] >= 44 and metrics["height"] >= 64, (width, metrics)  # v636 icon row; >=44px touch
             assert metrics["label"] >= 10, (width, metrics)
             assert metrics["visible"] == "visible", (width, metrics)
         locked = shortcuts.locator(".bf-scene-tool-locked")
