@@ -123,7 +123,11 @@ with sync_playwright() as pw:
         locked="bf-scene-place bf-scene-locked"
         v636_order=[available,active,active,archived]+[locked]*4
         v639_order=[available,active,active,"bf-scene-story",archived]+[locked]*4
-        assert positions in (v636_order,v639_order),(width,positions)
+        # Source-selected strict ordering: v639 MUST not pass by silently
+        # falling back to the historic v636 Story-before-Explore DOM order.
+        quest_first_story='// v638 local: keep the exact live Story node' in J
+        expected_order=v639_order if quest_first_story else v636_order
+        assert positions==expected_order,(width,'source-pinned exact Story order',positions)
         fidelity=page.locator("#bf-home").evaluate("""home=>{
           const places=home.querySelector('.bf-scene-places'),
             story=home.querySelector('.bf-scene-story'),
@@ -164,7 +168,7 @@ with sync_playwright() as pw:
             'content/home/home_win_arena.png','content/home/home_win_raid_open.png',
             'content/home/home_win_randall.png'],(width,fidelity)
         assert fidelity['liveRoutes'] and fidelity['originalArt'] and fidelity['archiveBeforeLocked'],(width,fidelity)
-        assert (fidelity['relocatedOrder'] and not fidelity['originalOrder']) if positions==v639_order else (
+        assert (fidelity['relocatedOrder'] and not fidelity['originalOrder']) if quest_first_story else (
             fidelity['originalOrder'] and not fidelity['relocatedOrder']), (width,fidelity)
         bounds=page.locator(".bf-scene-places").evaluate(
             "(el)=>({scroll:el.scrollWidth,client:el.clientWidth})")
