@@ -73,7 +73,7 @@ with sync_playwright() as pw:
             assert computed["size"]>=10,(width,name,computed)
             assert computed["fit"]=="contain",(width,name,computed)
         assert page.locator(".bf-scene-places [role=heading]").count()==2
-        assert page.locator(".bf-scene-places button").count()==2
+        assert page.locator(".bf-scene-places > button").count()==2
         page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
         assert page.evaluate("BF_homeNav.current")=="menu"
         page.locator('.bf-navbar button[data-bf-goto="home"]').click()

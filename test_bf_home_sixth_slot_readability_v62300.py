@@ -18,8 +18,19 @@ BUILD = (ROOT / ".github/workflows/build-debug-apk.yml").read_text("utf-8")
 PREFLIGHT = (ROOT / ".github/workflows/android-back-ui-source-preflight.yml").read_text("utf-8")
 MANIFEST = (ROOT / "app/src/main/AndroidManifest.xml").read_text("utf-8")
 
+# v636 ships the original 320-412px compact-sixth marker. v639 carries
+# that same behavior forward into its 320-540px owner viewport layout.
+# The exact verified JS layout marker chooses the acceptable CSS marker;
+# accepting either variant blindly would weaken this source fidelity gate.
 MARK = "/* v623 owner Home P0: readable sixth owned-squad card on 320-412px screens."
-assert CSS.count(MARK) == 1
+NEW_MARK = "/* v623/v638 owner Home P0: readable compact sixth owned-squad card on"
+QUEST_FIRST_STORY = "// v638 local: keep the exact live Story node" in JS
+if QUEST_FIRST_STORY:
+    assert CSS.count(MARK)==0 and CSS.count(NEW_MARK)==1, "v639 320-540 compact sixth marker"
+    assert "@media(max-width:540px)" in CSS, "v639 must support 540px compact sixth"
+    assert "#bf-home.bf-home-v636 #bf-scene-party>.bf-scene-member:nth-child(6)" in CSS
+else:
+    assert CSS.count(MARK)==1 and CSS.count(NEW_MARK)==0, "v636 original v623 marker"
 assert "repeat(5,minmax(0,1fr))" in CSS, "keep five-plus-one owner-phone layout"
 assert "max-height:24px" in CSS and "overflow-wrap:anywhere" in CSS
 assert "bf-scene-leader" in CSS and "bf-scene-member" in CSS
@@ -106,15 +117,32 @@ with sync_playwright() as pw:
                 assert lineup.count() == 6, (width, lineup.count())
                 assert page.locator("#bf-scene-party .bf-scene-leader").count() == 1
                 assert page.locator("#bf-scene-party button.bf-scene-member").count() == 6
-                assert page.evaluate("""()=>{
+                layout=page.evaluate("""()=>{
                   const home=document.getElementById('bf-home');
                   const squad=home.querySelector('.bf-scene-squad'),
                     story=home.querySelector('.bf-scene-story'),
-                    explore=home.querySelector('.bf-scene-explore');
-                  return squad&&story&&explore&&
-                    (squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)!==0&&
-                    (story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)!==0;
-                }"""), width
+                    explore=home.querySelector('.bf-scene-explore'),
+                    places=explore?.querySelector(':scope > .bf-scene-places'),
+                    summon=places?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]'),
+                    archive=places?.querySelector(':scope > .bf-scene-archive-label');
+                  return {
+                    squadBeforeStory:!!(squad&&story&&(squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)),
+                    originalStoryBeforeExplore:!!(story&&explore&&(story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)),
+                    newExploreBeforeStory:!!(explore&&story&&(explore.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)),
+                    storyCount:home.querySelectorAll('.bf-scene-story').length,
+                    oldSibling:story?.parentElement===home&&story?.nextElementSibling===explore,
+                    newNested:story?.parentElement===places&&story?.previousElementSibling===summon&&story?.nextElementSibling===archive,
+                    archiveCount:home.querySelectorAll('.bf-scene-archive-label').length,
+                    activeRoutes:places?.querySelectorAll(':scope > button.bf-scene-featured[data-bf-goto]').length,
+                    locked:places?.querySelectorAll(':scope > .bf-scene-locked').length
+                  };
+                }""")
+                assert layout['squadBeforeStory'] and layout['storyCount']==1, (width,layout)
+                assert layout['archiveCount']==1 and layout['activeRoutes']==2 and layout['locked']==4,(width,layout)
+                if QUEST_FIRST_STORY:
+                    assert layout['newExploreBeforeStory'] and layout['newNested'] and not layout['oldSibling'],(width,layout)
+                else:
+                    assert layout['originalStoryBeforeExplore'] and layout['oldSibling'] and not layout['newNested'],(width,layout)
                 proof = page.locator("#bf-scene-party").evaluate("""root=>{
                   const cards=[...root.children], boxes=cards.map(c=>c.getBoundingClientRect());
                   return {
@@ -172,7 +200,7 @@ with sync_playwright() as pw:
                 assert sixth_proof["nameText"] and sixth_proof["levelText"], (width, sixth_proof)
                 assert "SLOT 6" in sixth_proof["slotText"], (width, sixth_proof)
                 assert sixth_proof["horizontalScroll"] <= width + 1, (width, sixth_proof)
-                if width <= 412:
+                if width <= 412 or (QUEST_FIRST_STORY and width == 540):
                     assert sixth_proof["display"] == "grid", (width, sixth_proof)
                     assert sixth_proof["height"] >= 62, (width, sixth_proof)
                     assert sixth_proof["artHeight"] >= 40, (width, sixth_proof)
@@ -188,7 +216,7 @@ with sync_playwright() as pw:
                 # the real focus-visible ring must be visible to keyboard users.
                 page.keyboard.press("Shift+Tab")
                 page.keyboard.press("Tab")
-                if width <= 412:
+                if width <= 412 or (QUEST_FIRST_STORY and width == 540):
                     focus = sixth.evaluate("""el => ({
                       active:document.activeElement===el,
                       visible:el.matches(":focus-visible"),
@@ -202,7 +230,7 @@ with sync_playwright() as pw:
                 # Regression against v268: the real original-art fallback on
                 # sixth owned slot must keep NO ART on ONE line at 320-412px.
                 # The earlier 40px grid column split it into NO / ART.
-                if width <= 412:
+                if width <= 412 or (QUEST_FIRST_STORY and width == 540):
                     sixth.evaluate("""el => {
                       const image=el.querySelector("img");
                       if(image) image.dispatchEvent(new Event("error"));

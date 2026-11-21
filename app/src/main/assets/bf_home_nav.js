@@ -210,6 +210,20 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Reference notes stay one tap away at the bottom of Home (same live
   // nodes, same disclosure) instead of occupying the first screen.
   home.querySelector('.bf-scene-tools')?.append(squadReferenceV635);
+  // v638 local: keep the exact live Story node between playable Quest/Summon
+  // and archived inactive location previews; preserve handler and v7 state.
+  // Fail closed if the authenticated Home DOM sequence has changed.
+  const storyV638 = home.querySelector(':scope > .bf-scene-story');
+  const adventureV638 = home.querySelector(':scope > .bf-scene-explore');
+  const placesV638 = adventureV638?.querySelector(':scope > .bf-scene-places');
+  const summonV638 = placesV638?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]');
+  const archiveV638 = summonV638?.nextElementSibling;
+  if (storyV638 && adventureV638 && placesV638 && summonV638 &&
+      archiveV638?.classList.contains('bf-scene-archive-' + 'label') &&
+      storyV638.nextElementSibling === adventureV638 &&
+      summonV638.nextElementSibling === archiveV638) {
+    summonV638.insertAdjacentElement('afterend', storyV638);
+  }
   const squadReferenceBodyV635 = squadReferenceV635.lastElementChild;
   // Existing read-only modules insert these beside #bf-scene-party. Moving
   // the same live nodes keeps their refresh hooks, roles and text intact.

@@ -108,6 +108,7 @@ GEOMETRY = """() => {
   const edit=squad.querySelector(':scope > .bf-scene-heading button[data-bf-goto="units"]');
   const story=home.querySelector('.bf-scene-story'),quest=home.querySelector('.bf-scene-featured[data-bf-goto="quest"]');
   const head=document.querySelector('.bf-shell-head').getBoundingClientRect();
+  const footer=document.querySelector('.bf-navbar').getBoundingClientRect();
   const cells=[...row.children].map(c=>{const r=c.getBoundingClientRect(),i=c.querySelector('img'),s=c.querySelector('span');
     const ir=i.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,hit=document.elementFromPoint(cx,cy);
     return {tag:c.tagName,w:r.width,h:r.height,src:i.getAttribute('src'),nat:i.naturalWidth,
@@ -121,6 +122,20 @@ GEOMETRY = """() => {
   const pr=party.getBoundingClientRect(),rr=row.getBoundingClientRect(),er=edit.getBoundingClientRect();
   return {headBottom:head.bottom,partyTop:pr.top,frameBottom:pr.top+parseFloat(getComputedStyle(party,'::after').height),
     sixthBottom:party.children[5].getBoundingClientRect().bottom,editBottom:er.bottom,rowTop:rr.top,rowBottom:rr.bottom,
+    sixthHeight:party.children[5].getBoundingClientRect().height,
+    sixthAndEditSeparate:(()=>{
+      const s=party.children[5].getBoundingClientRect(),b=edit.getBoundingClientRect(),
+        e=document.elementFromPoint(b.left+b.width/2,b.top+b.height/2);
+      return s.right+1<=b.left&&b.width>=44&&b.height>=44&&
+        !!e&&(e===edit||edit.contains(e));
+    })(),
+    questVisiblePx:Math.max(0,Math.min(quest.getBoundingClientRect().bottom,footer.top)-Math.max(quest.getBoundingClientRect().top,head.bottom)),
+    questFullyVisible:quest.getBoundingClientRect().bottom<=footer.top,
+    summonBottom:home.querySelector('.bf-scene-featured[data-bf-goto="summon"]').getBoundingClientRect().bottom,
+    archiveTop:home.querySelector('.bf-scene-archive-label').getBoundingClientRect().top,
+    storyNested:story.parentElement===home.querySelector('.bf-scene-places')&&
+      story.previousElementSibling===home.querySelector('.bf-scene-featured[data-bf-goto="summon"]')&&
+      story.nextElementSibling===home.querySelector('.bf-scene-archive-label'),
     storyTop:story.getBoundingClientRect().top,questTop:quest.getBoundingClientRect().top,
     rowInSquad:row.parentElement===squad,rowLabel:row.getAttribute('aria-label'),
     order:[...squad.children].map(c=>c.id||c.className).join('|'),cells,hidden,
@@ -140,19 +155,27 @@ with sync_playwright() as pw:
               '#bf-home .bf-scene-squad > .bf-scene-toolrow img')].every(i=>i.complete&&i.naturalWidth>0)""",
               timeout=15000)
             before = page.evaluate(SNAPSHOT)
+            page.evaluate('window.scrollTo(0,0)')
             g = page.evaluate(GEOMETRY)
-            # Composition: header -> frame -> sixth strip -> Edit -> icon row -> status -> Quest.
+            # v638: header -> frame -> sixth -> Edit -> icon row -> Quest/Summon -> story -> archived previews.
             assert g["rowInSquad"] and g["rowLabel"] == "Home menu", (width, g)
             assert 0 <= g["partyTop"] - g["headBottom"] <= 24, (width, g)
             assert g["sixthBottom"] <= g["editBottom"] <= g["rowTop"] + 1, (width, g)
             assert g["rowTop"] - g["editBottom"] <= 16, (width, "icon row not beneath squad", g)
-            assert g["rowBottom"] <= g["storyTop"] + 1 <= g["questTop"], (width, g)
+            assert g["rowBottom"] <= g["questTop"] + 1 and g["summonBottom"] <= g["storyTop"] + 1, (width, g)
+            assert g["storyTop"] <= g["archiveTop"] + 1 and g["storyNested"], (width, g)
+            assert g["sixthHeight"] <= 70, (width, "compact sixth unit", g)
             ref = page.evaluate("""() => {const d=document.getElementById('bf-home-squad-reference');
               return {inTools:!!d.closest('.bf-scene-tools'),open:d.open,hidden:d.hidden,
                 notes:BFHomeSquadFrameV635.referenceIds.filter(id=>document.getElementById(id)).every(
                   id=>d.contains(document.getElementById(id)))}}""")
             assert ref["inTools"] and not ref["open"] and not ref["hidden"] and ref["notes"], (width, ref)
             assert g["scroll"] <= g["viewport"] + 1, (width, g)
+            visibility={320:185,393:185,413:155,450:155,540:155}
+            assert g["questVisiblePx"]>=visibility[width],(width,"unscrolled Quest visibility",g)
+            assert g["questFullyVisible"],(width,"Quest fully above fixed footer",g)
+            if width==540:
+                assert g["sixthAndEditSeparate"],(width,"compact sixth and separate Edit Squad hit areas",g)
             # Five original-art cells, readable labels, touch-sized, unobstructed.
             cells = g["cells"]
             assert [c["src"].rsplit("/", 1)[-1] for c in cells] == ICONS, (width, cells)

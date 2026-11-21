@@ -105,7 +105,7 @@ with sync_playwright() as pw:
         exchange = page.locator(".bf-scene-tool-locked")
         assert exchange.get_attribute("aria-disabled") == "true"
         assert exchange.locator("button, a[href], [tabindex]").count() == 0
-        assert page.locator(".bf-scene-places button").count() == 2
+        assert page.locator(".bf-scene-places > button").count() == 2
         for selector in ("#bf-scene-party", ".bf-scene-places", ".bf-scene-toolrow"):
             sizes = page.locator(selector).evaluate(
                 "(el) => ({scroll:el.scrollWidth,client:el.clientWidth})")
