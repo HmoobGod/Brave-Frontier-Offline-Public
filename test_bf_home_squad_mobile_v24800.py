@@ -62,7 +62,8 @@ with sync_playwright() as pw:
             cols:getComputedStyle(el).gridTemplateColumns.split(' ').length,
             scroll:el.scrollWidth,client:el.clientWidth
         })""")
-        assert sizes["cols"]==(5 if width<=412 else 6),(width,sizes)
+        # v635: original five-opening frame at every width; sixth unit is a strip below.
+        assert sizes["cols"]==5,(width,sizes)
         assert sizes["scroll"] <= sizes["client"]+2,(width,sizes)
         for index,item in enumerate(cards.all()):
             assert item.get_attribute("aria-label")=="Empty squad slot"

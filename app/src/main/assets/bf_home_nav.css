@@ -1529,6 +1529,44 @@ body.bf-menu-mode #bf054-home-details {
   }
 }
 
+/* v635 original Global Home squad frame (presentation only).
+   Evidence: archived layout_home2.csv (640x960 reference) places five
+   128x350 portraits at x=0/128/256/384/512 inside a 640x356 party frame
+   directly below the header; original character_frame.png (644x354, five
+   109px openings on a 128px pitch) and home_character_frame_bg.png (128x350).
+   Reconstruction choices, not verified client behavior: frame stretched to
+   the 640x356 region, thumbnail placement inside each slot, CSS LEADER badge
+   on slot one, sixth owned unit in a strip below the five historical openings,
+   diagnostics moved to a collapsed disclosure. No artwork bytes are altered. */
+#bf-home.bf-home-v635 .bf-scene-title{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0!important}
+#bf-home.bf-home-v635 .bf-scene-squad{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;margin:0 0 10px;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+#bf-home.bf-home-v635 .bf-scene-squad>*{order:5}
+#bf-home.bf-home-v635 #bf-scene-party{order:1}
+#bf-home.bf-home-v635 #bf-scene-party-review{order:2}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading{order:3;display:flex;justify-content:flex-end;align-items:center;margin:0;padding:0;border:0;background:none;min-height:0}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading>strong{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#bf-home.bf-home-v635 #bf-home-squad-reference{order:4}
+#bf-home.bf-home-v635 #bf-scene-party{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;box-sizing:border-box;width:100%;margin:0;padding:0;border:0;background:url("content/home/home_character_frame_bg.png") 0 0/20% auto repeat-x}
+#bf-home.bf-home-v635 #bf-scene-party::after{content:"";position:absolute;z-index:3;left:0;top:0;width:100%;aspect-ratio:640/356;background:url("content/home/character_frame.png") 0 0/100% 100% no-repeat;pointer-events:none}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5){grid-row:1;position:relative;box-sizing:border-box;display:block;width:100%;min-width:0;height:auto;min-height:90px;aspect-ratio:128/350;min-height:90px;margin:0;padding:0;overflow:hidden;color:#fff4d8;text-align:center;background:linear-gradient(transparent 58%,#000a 88%);border:0;border-radius:0;box-shadow:none;font:800 10px/1.15 Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>img,
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{position:absolute;left:9%;top:24%;width:82%;height:auto;aspect-ratio:1/1;margin:0;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 3px 3px #000c)}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{display:flex;align-items:center;justify-content:center;font:800 11px/1.1 Arial,sans-serif;text-align:center;overflow-wrap:anywhere;background:#0008}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{position:absolute;left:8%;right:8%;bottom:15%;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:none;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;color:#fff4d8;font:800 10px/1.15 Arial,sans-serif;text-shadow:0 1px 2px #000,0 0 3px #000}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{position:absolute;left:8%;right:34%;bottom:5%;text-align:left;color:#d8e6f7;font:700 10px/1.1 Arial,sans-serif;text-shadow:0 1px 2px #000}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-scene-slot{position:absolute;left:8%;right:8%;top:9%;margin:0;padding:0;background:none;border:0;font-size:0;line-height:0}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5) .bf-scene-leader{display:inline-block;padding:2px 3px;color:#ffe9a8;background:none;border:0;font:italic 900 11px/1 Georgia,serif;letter-spacing:.02em;text-shadow:0 0 2px #000,1px 1px 0 #6a3b00,-1px -1px 0 #6a3b00}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member.bf-scene-empty:nth-child(-n+5){display:flex;align-items:center;justify-content:center;color:#d9c79e;background:#0006}
+#bf-home.bf-home-v635 #bf-scene-party>button.bf-scene-member:focus-visible{z-index:4;outline:3px solid #ffe2a0;outline-offset:-3px}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(6){grid-row:2;grid-column:1/-1;margin-top:6px}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading>button[data-bf-goto="units"]{min-height:44px;padding:6px 14px;font:800 12px Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference{box-sizing:border-box;max-width:100%;color:#e9dcc0;background:#0f1726cc;border:1px solid #6d5a3a;border-radius:5px;font:11px/1.45 Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference>summary{min-height:44px;box-sizing:border-box;display:flex;align-items:center;padding:6px 10px;cursor:pointer;color:#f3dfb2;font:800 11px Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference>summary:focus-visible{outline:3px solid #a7e2ff;outline-offset:-3px}
+#bf-home.bf-home-v635 .bf-home-squad-reference-body{padding:0 10px 8px}
+#bf-home.bf-home-v635 .bf-home-squad-reference-body>p{margin:6px 0!important}
+@media(min-width:510px){#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{font-size:12px}#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{font-size:11px}}
+
 /* v617 original-art centered Quest gateway: a real source-backed Home
    composition improvement, NOT authenticated 2022 pixel parity. Preserve
    active routes, original image bytes, disabled location visibility and
