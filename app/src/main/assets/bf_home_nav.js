@@ -301,7 +301,11 @@ function bfOfflineUnitPortraitV266(source, name) {
         name.textContent = unit.name || 'Unit';
         const level = document.createElement('small');
         const observedLevel=verifiedDemoLevel(baseId);
-        level.textContent=observedLevel===null?'LEVEL UNAVAILABLE':'Lv.'+observedLevel;
+        // R6: keep a truthful compact label visible between the original
+        // five-slot frame ornaments; announce the full invalid-level state.
+        const levelUnknown=observedLevel===null;
+        level.textContent=levelUnknown?'Lv —':'Lv.'+observedLevel;
+        const announcedLevel=levelUnknown?'LEVEL UNAVAILABLE':level.textContent;
         // The first ordered owned slot is the leader slot; never promote
         // another visible card when slot one is empty or unverified.
         const slot = document.createElement('span');
@@ -314,7 +318,7 @@ function bfOfflineUnitPortraitV266(source, name) {
           slot.append(leader);
         }
         slot.append(document.createTextNode('SLOT ' + (index + 1)));
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent +
+        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + announcedLevel +
           ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
         card.title = 'Inspect owned unit';
         card.append(slot, img, name, level);

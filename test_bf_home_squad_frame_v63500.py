@@ -120,71 +120,111 @@ with sync_playwright() as pw:
               i.src='content/home/character_frame.png';})""")
             assert frame_loaded == [644, 354], (width, frame_loaded)  # decode check only, not parity
 
-            # R5: full original-PNG-on-top Chromium composition, including alpha
-            # at the historical frame's opaque bottom-right ornaments. No mocks.
+            # R6: compare ALL five owned portrait slots to the pinned original
+            # PNG's bottom-right alpha ornaments (source y=290, not 300).
+            # Test both the readable compact text and the full aria-label
+            # without weakening the existing v423 invalid-EXP/getter guards.
             if width == 320:
-                page.evaluate("""() => {window.__r5Exp=P.unitExp;
-                    P.unitExp={[P.squad[0]]:'0'};BFGlobalHome.refreshParty()}""")
+                page.evaluate("""() => {
+                  window.__r6Exp=P.unitExp;
+                  P.unitExp=Object.fromEntries(P.squad.slice(0,5).map(id=>[id,'0']));
+                  BFGlobalHome.refreshParty();
+                }""")
                 try:
                     for w in (320,393,413,450,540):
                         page.set_viewport_size({"width":w,"height":852})
-                        m=page.evaluate("""async()=> {
-                          const party=document.querySelector('#bf-scene-party'),
-                            card=party.querySelector('button'),e=card.querySelector('small'),
-                            name=card.querySelector('strong'),r=card.getBoundingClientRect(),
-                            a=getComputedStyle(party,'::after'),p=party.getBoundingClientRect();
-                          const img=new Image();img.crossOrigin='anonymous';
-                          img.src='content/home/character_frame.png';await img.decode();
+                        measured=page.evaluate("""async()=> {
+                          const party=document.querySelector('#bf-scene-party');
+                          const p=party.getBoundingClientRect();
+                          const overlay=getComputedStyle(party,'::after');
+                          const png=new Image();png.crossOrigin='anonymous';
+                          png.src='content/home/character_frame.png';
+                          await png.decode();
                           const canvas=document.createElement('canvas');
-                          canvas.width=img.width;canvas.height=img.height;
+                          canvas.width=png.width;canvas.height=png.height;
                           const ctx=canvas.getContext('2d',{willReadFrequently:true});
-                          ctx.drawImage(img,0,0);
-                          const pixels=ctx.getImageData(0,0,img.width,img.height).data;
-                          let opaque=0;
-                          for(let y=300;y<354;y++)for(let x=80;x<128;x++)
-                            if(pixels[4*(y*img.width+x)+3]>=200)opaque++;
-                          const word=(a,b)=>{
-                            let q=[];for(let i=a;i<b;i++){
-                              const x=document.createRange();x.setStart(e.firstChild,i);
-                              x.setEnd(e.firstChild,i+1);
-                              const z=x.getBoundingClientRect();
-                              q.push({left:z.left,right:z.right,top:z.top,bottom:z.bottom});
-                            }return q;
-                          };
-                          const words=[word(0,5),word(6,17)],chars=words.flat();
-                          return {text:e.textContent,aria:card.getAttribute('aria-label'),
-                            font:parseFloat(getComputedStyle(e).fontSize),
-                            scroll:e.scrollWidth,client:e.clientWidth,
-                            bounds:[r.left,r.right],frame:[img.width,img.height],
-                            image:a.backgroundImage,opaque,
-                            wordTops:words.map(q=>[Math.min(...q.map(z=>z.top)),
-                              Math.max(...q.map(z=>z.top))]),
-                            textLeft:Math.min(...chars.map(z=>z.left)),
-                            textRight:Math.max(...chars.map(z=>z.right)),
-                            textBottom:Math.max(...chars.map(z=>z.bottom)),
-                            nameBottom:name.getBoundingClientRect().bottom,
-                            opaqueStart:p.top+parseFloat(a.height)*300/354};
+                          ctx.drawImage(png,0,0);
+                          const pixels=ctx.getImageData(0,0,png.width,png.height).data;
+                          const cards=[...party.querySelectorAll(':scope > button.bf-scene-member')].slice(0,5);
+                          const ornamentalBand=p.top+parseFloat(overlay.height)*290/354;
+                          const samples=cards.map((card,index)=>{
+                            const small=card.querySelector('small'),strong=card.querySelector('strong');
+                            const portrait=card.querySelector('img, .bf-portrait-fallback');
+                            const style=getComputedStyle(small);
+                            const span=style.letterSpacing==='normal'?0:parseFloat(style.letterSpacing);
+                            const glyphs=[];
+                            for(let j=0;j<small.firstChild.length;j++){
+                              const range=document.createRange();
+                              range.setStart(small.firstChild,j);
+                              range.setEnd(small.firstChild,j+1);
+                              const rect=range.getBoundingClientRect();
+                              glyphs.push({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom});
+                            }
+                            let opaque=0;
+                            for(let y=290;y<354;y++)for(let x=index*128+80;x<index*128+128;x++)
+                              if(pixels[4*(y*png.width+x)+3]>=200)opaque++;
+                            const cardRect=card.getBoundingClientRect();
+                            const name=strong.getBoundingClientRect();
+                            const art=portrait?.getBoundingClientRect();
+                            return {text:small.textContent,aria:card.getAttribute('aria-label'),
+                              labelFont:parseFloat(style.fontSize),letterSpacing:span,
+                              client:small.clientWidth,scroll:small.scrollWidth,
+                              glyphTops:glyphs.map(g=>g.top),
+                              left:Math.min(...glyphs.map(g=>g.left)),
+                              right:Math.max(...glyphs.map(g=>g.right)),
+                              top:Math.min(...glyphs.map(g=>g.top)),
+                              bottom:Math.max(...glyphs.map(g=>g.bottom)),
+                              cardLeft:cardRect.left,cardRight:cardRect.right,
+                              nameTop:name.top,nameBottom:name.bottom,
+                              artBottom:art?.bottom??null,ornamentOpaque:opaque,
+                              leader:card.querySelectorAll('.bf-scene-leader').length,
+                              id:Number(card.dataset.bfHomeUnitId)};
+                          });
+                          const sixth=party.querySelector(':scope > button:nth-child(6)');
+                          return {frame:[png.width,png.height],image:overlay.backgroundImage,
+                            opaqueStart:ornamentalBand,
+                            ids:P.squad.slice(0,5),sixthId:Number(sixth?.dataset.bfHomeUnitId),
+                            sixthTop:sixth?.getBoundingClientRect().top,
+                            frameBottom:p.top+parseFloat(overlay.height),
+                            homeRoute:BF_homeNav.current,
+                            routes:['home','quest','units','summon','menu'].every(r=>
+                              !!document.querySelector('.bf-navbar button[data-bf-goto="'+r+'"]')),
+                            samples};
                         }""")
-                        assert m["text"]=="LEVEL UNAVAILABLE" and "LEVEL UNAVAILABLE" in m["aria"],(w,m)
-                        assert m["frame"]==[644,354] and "character_frame.png" in m["image"] and m["opaque"]>0,(w,m)
-                        assert m["font"]>=10 and m["scroll"]<=m["client"],(w,m)
-                        assert all(hi-lo<0.5 for lo,hi in m["wordTops"]), (w,"word split",m)
-                        assert m["wordTops"][1][0]>m["wordTops"][0][1]+5,(w,"word separation",m)
-                        assert m["textLeft"]>=m["bounds"][0]-0.5 and m["textRight"]<=m["bounds"][1]+0.5,(w,"text bounds",m)
-                        assert m["nameBottom"]+2<=m["wordTops"][0][0],(w,"name overlap",m)
-                        assert m["textBottom"]+2<=m["opaqueStart"],(w,"opaque ornament overlap",m)
-                        painted=page.screenshot()
-                        off=page.add_style_tag(content="#bf-home.bf-home-v635 #bf-scene-party::after{background-image:none!important}")
-                        try: blank=page.screenshot()
-                        finally: off.evaluate("el=>el.remove()")
-                        assert painted!=blank,(w,"original frame not composited")
-                        print(f"PASS R5 genuine PNG composite {w}px: label at {m['textBottom']:.1f}, "
-                              f"ornament begins {m['opaqueStart']:.1f}; {m['font']:.0f}px, no split/overlap")
+                        assert measured["frame"]==[644,354] and "character_frame.png" in measured["image"],(w,measured)
+                        assert measured["homeRoute"]=="home" and measured["routes"],(w,measured)
+                        assert len(measured["samples"])==5,(w,measured)
+                        assert [s["id"] for s in measured["samples"]]==measured["ids"],(w,measured)
+                        assert [s["leader"] for s in measured["samples"]]==[1,0,0,0,0],(w,measured)
+                        assert measured["sixthId"]==page.evaluate("P.squad[5]"),(w,measured)
+                        assert measured["sixthTop"]>=measured["frameBottom"]-1,(w,measured)
+                        for i,s in enumerate(measured["samples"]):
+                            assert s["text"]=="Lv —" and "LEVEL UNAVAILABLE" in s["aria"],(w,i,s)
+                            assert s["ornamentOpaque"]>0,(w,i,"PNG's original orb missing",s)
+                            assert s["labelFont"]>=10 and s["letterSpacing"]>=-0.5,(w,i,s)
+                            assert s["scroll"]<=s["client"],(w,i,s)
+                            assert max(s["glyphTops"])-min(s["glyphTops"])<=0.5,(w,i,"wrapped compact label",s)
+                            assert s["left"]>=s["cardLeft"]-0.5 and s["right"]<=s["cardRight"]+0.5,(w,i,s)
+                            assert s["nameBottom"]+2<=s["top"],(w,i,"name/level overlap",s)
+                            assert s["artBottom"] is not None and s["artBottom"]<=s["nameTop"]+0.5,(w,i,"portrait/name overlap",s)
+                            assert s["bottom"]+2<=measured["opaqueStart"],(w,i,"ornament occludes glyphs",s)
+                        with_frame=page.screenshot()
+                        disable_frame=page.add_style_tag(content="#bf-home.bf-home-v635 #bf-scene-party::after{background-image:none!important}")
+                        try:
+                            without_frame=page.screenshot()
+                        finally:
+                            disable_frame.evaluate("el=>el.remove()")
+                        assert with_frame!=without_frame,(w,"original PNG not composited")
+                        print(f"PASS R6 five-slot genuine original PNG {w}px: "
+                              f"5/5 readable Lv —, full aria, >=10px, tracking >=-0.5px, "
+                              "orb starts source y=290, no label/name/portrait overlap")
                 finally:
-                    page.evaluate("""() => {P.unitExp=window.__r5Exp;delete window.__r5Exp;
-                         BFGlobalHome.refreshParty()}""")
+                    page.evaluate("""() => {
+                      P.unitExp=window.__r6Exp;delete window.__r6Exp;
+                      BFGlobalHome.refreshParty();
+                    }""")
                     page.set_viewport_size({"width":width,"height":height})
-                assert page.evaluate(SNAPSHOT)==before, "R5 P/S/localStorage snapshot"
+                assert page.evaluate(SNAPSHOT)==before,"R6 P/S/v7 storage unchanged"
 
 
             g = page.evaluate("""() => {
