@@ -70,7 +70,7 @@ with sync_playwright() as pw:
         box = page.locator(".bf-scene-tool-locked")
         assert box.get_attribute("role") == "group"
         assert box.get_attribute("aria-disabled") == "true"
-        assert page.locator(".bf-scene-places button").count() == 2
+        assert page.locator(".bf-scene-places > button").count() == 2
         page.locator('.bf-scene-featured[data-bf-goto="quest"]').click()
         assert page.evaluate("BF_homeNav.current") == "quest"
         page.locator('.bf-navbar button[data-bf-goto="home"]').click()

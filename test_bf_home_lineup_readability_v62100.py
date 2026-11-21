@@ -28,6 +28,10 @@ assert "roster.includes(baseId)" in JS and "!seen.has(baseId)" in JS
 assert "homeTitle.after(sceneSquad)" in HEADER, "squad precedes Adventure"
 assert BUILD.count("python3 " + TEST) == 1
 assert PREFLIGHT.count(TEST) == 2, "path trigger plus source-only run"
+# Story placement is selected by the pinned source, never inferred from the DOM.
+V638_STORY_MOVE = "summonV638.insertAdjacentElement('afterend', storyV638);"
+assert JS.count(V638_STORY_MOVE) in (0, 1)
+STORY_MODE = "v638" if JS.count(V638_STORY_MOVE) == 1 else "legacy"
 assert "android.permission.INTERNET" not in MANIFEST
 assert len(CSS.encode("utf-8")) < 128 * 1024
 assert len(JS.encode("utf-8")) < 128 * 1024
@@ -101,15 +105,36 @@ with sync_playwright() as pw:
                 assert lineup.count() == 6, (width, lineup.count())
                 assert page.locator("#bf-scene-party .bf-scene-leader").count() == 1
                 assert page.locator("#bf-scene-party button.bf-scene-member").count() == 6
-                assert page.evaluate("""()=>{
-                  const home=document.getElementById('bf-home');
-                  const squad=home.querySelector('.bf-scene-squad'),
-                    story=home.querySelector('.bf-scene-story'),
-                    explore=home.querySelector('.bf-scene-explore');
-                  return squad&&story&&explore&&
-                    (squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)!==0&&
-                    (story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)!==0;
-                }"""), width
+                order = page.evaluate("""(mode)=>{
+                  const home=document.getElementById('bf-home'),fail=[];
+                  const stories=document.querySelectorAll('.bf-scene-story');
+                  const actions=document.querySelectorAll('#bf-home-story-open');
+                  const story=stories[0],squad=home.querySelector(':scope > .bf-scene-squad');
+                  const explore=home.querySelector(':scope > .bf-scene-explore');
+                  const places=explore?.querySelector(':scope > .bf-scene-places');
+                  if(stories.length!==1)fail.push('story nodes '+stories.length);
+                  if(actions.length!==1||!story?.contains(actions[0]))fail.push('story actions '+actions.length);
+                  if(!squad||!explore||!places)return {ok:false,mode,fail:fail.concat('missing squad/explore/places')};
+                  const gates=[...places.querySelectorAll(':scope > button')];
+                  const goto=gates.map(b=>b.dataset.bfGoto).join(',');
+                  if(goto!=='quest,summon'||!gates.every(b=>b.classList.contains('bf-scene-featured')))fail.push('gateways '+goto);
+                  const labels=places.querySelectorAll(':scope > .bf-scene-archive-label');
+                  const label=labels[0],locked=[...places.querySelectorAll(':scope > .bf-scene-locked')];
+                  if(labels.length!==1)fail.push('archive labels '+labels.length);
+                  if(locked.length!==4)fail.push('locked '+locked.length);
+                  if(label&&!locked.every(l=>(label.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING)!==0))fail.push('locked before label');
+                  if(places.querySelectorAll('.bf-scene-locked').length!==locked.length)fail.push('nested locked');
+                  if(story){
+                    const prev=story.previousElementSibling,next=story.nextElementSibling;
+                    if(mode==='legacy'){
+                      if(story.parentElement!==home||prev!==squad||next!==explore)fail.push('legacy order');
+                    }else if(mode==='v638'){
+                      if(story.parentElement!==places||prev!==gates[1]||next!==label||home.querySelector(':scope > .bf-scene-story'))fail.push('v638 order');
+                    }else fail.push('unknown mode');
+                  }
+                  return {ok:fail.length===0,mode,fail};
+                }""", STORY_MODE)
+                assert order["ok"] and order["mode"] == STORY_MODE, (width, order)
                 proof = page.locator("#bf-scene-party").evaluate("""root=>{
                   const cards=[...root.children], boxes=cards.map(c=>c.getBoundingClientRect());
                   return {
@@ -151,4 +176,5 @@ with sync_playwright() as pw:
                 page.close()
     finally:
         browser.close()
-print("PASS v621: actual Home squad 5+1 art/readability/keyboard, five phone widths, unchanged v7")
+print("PASS v621: actual Home squad 5+1 art/readability/keyboard, five phone widths, unchanged v7; "
+      f"Story order {STORY_MODE} (source-selected), 1 Story/action, Quest->Summon, 4 locked")
