@@ -33,8 +33,10 @@ with sync_playwright() as playwright:
  page=browser.new_page(viewport={'width':390,'height':844})
  errors=[]
  page.on('pageerror',lambda err:errors.append(str(err)))
- page.evaluate("""()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{
- getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),removeItem:k=>delete db[k],
+ page.evaluate("""()=>{const db={};let writes=0;window.__v126Writes=()=>writes;
+ Object.defineProperty(window,'localStorage',{configurable:true,value:{
+ getItem:k=>db[k]??null,setItem:(k,v)=>{writes++;db[k]=String(v)},
+ removeItem:k=>{writes++;delete db[k]},
  key:i=>Object.keys(db)[i]??null,get length(){return Object.keys(db).length}}});
  window.alert=()=>{};window.confirm=()=>true;
  HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
@@ -61,7 +63,18 @@ with sync_playwright() as playwright:
  assert page.locator('#bf12600-home-squad-cost').count()==1
  assert page.locator('#bf12600-home-squad-cost').get_attribute('role')=='status'
  assert page.locator('#bf12600-home-squad-cost').get_attribute('aria-live')=='polite'
- before=page.evaluate("""()=>({p:JSON.stringify(P),s:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ disclosure=page.locator('#bf-home-squad-reference')
+ cost_note=page.locator('#bf12600-home-squad-cost')
+ page.wait_for_function("""() => {const d=document.getElementById('bf-home-squad-reference');
+   const e=document.getElementById('bf12600-home-squad-cost');
+   return !!d && !!e && !d.hidden && d.querySelector('.bf-home-squad-reference-body')?.contains(e);}""")
+ assert disclosure.count()==1 and not disclosure.evaluate('(e)=>e.open')
+ assert disclosure.locator('summary').is_visible()
+ assert not cost_note.is_visible()
+ before=page.evaluate("""()=>({p:JSON.stringify(P),session:JSON.stringify(S),
+   save:localStorage.getItem('bf_global_offline_demo_v7'),writes:window.__v126Writes()})""")
+ disclosure.locator('summary').click()
+ assert disclosure.evaluate('(e)=>e.open') and cost_note.is_visible()
  scenarios=page.evaluate("""()=>{
  const saved={roster:P.roster,squad:P.squad,evolutions:P.evolutions};
  try{
@@ -112,8 +125,15 @@ with sync_playwright() as playwright:
  bounds=page.locator('#bf12600-home-squad-cost').bounding_box()
  assert bounds and bounds['x']>=-0.5 and bounds['x']+bounds['width']<=320.5,bounds
  page.add_script_tag(content=code)
- assert page.locator('#bf12600-home-squad-cost').count()==1
- after=page.evaluate("""()=>({p:JSON.stringify(P),s:localStorage.getItem('bf_global_offline_demo_v7')})""")
+ assert cost_note.count()==1 and cost_note.is_visible()
+ # Collapsing must hide the live content; reopening must preserve its identity.
+ disclosure.locator('summary').click()
+ assert not disclosure.evaluate('(e)=>e.open') and not cost_note.is_visible()
+ disclosure.locator('summary').click()
+ assert disclosure.evaluate('(e)=>e.open') and cost_note.is_visible()
+ assert cost_note.get_attribute('role')=='status'
+ after=page.evaluate("""()=>({p:JSON.stringify(P),session:JSON.stringify(S),
+   save:localStorage.getItem('bf_global_offline_demo_v7'),writes:window.__v126Writes()})""")
  assert after==before,(before,after)
  assert not errors,errors
  browser.close()
