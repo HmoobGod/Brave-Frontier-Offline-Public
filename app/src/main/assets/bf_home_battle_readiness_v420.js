@@ -8,7 +8,17 @@
   const explore=home?.querySelector('.bf-scene-explore');
   const campaign=window.BFGrandGaiaCampaignV100;
   const archive=window.BFOriginalGlobalQuestEnergyV14300;
-  if(!story || !explore || story.parentElement!==explore.parentElement ||
+  // v638 Home layout: Story may be the same live section reparented directly
+  // after playable Summon, before the archived, locked location previews.
+  // Require the exact Home-owned order; do not relax the source/mission gates.
+  const places=explore?.querySelector(':scope > .bf-scene-places');
+  const summon=places?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]');
+  const archiveLabel=places?.querySelector(':scope > .bf-scene-archive-label');
+  const originalStoryPosition=story?.parentElement===explore?.parentElement;
+  const questFirstStoryPosition=places?.parentElement===explore &&
+    story?.parentElement===places && summon?.nextElementSibling===story &&
+    story?.nextElementSibling===archiveLabel;
+  if(!story || !explore || !(originalStoryPosition || questFirstStoryPosition) ||
      !window.BF_homeNav || !campaign ||
      !archive || typeof campaign.nextPlayable!=='function' ||
      typeof campaign.summary!=='function' ||

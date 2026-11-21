@@ -1590,6 +1590,9 @@ body.bf-menu-mode #bf054-home-details {
 #bf-home.bf-home-v636 .bf-scene-tools{margin-top:8px;padding:0;background:none;border:0;box-shadow:none}
 #bf-home.bf-home-v636 .bf-scene-story{margin:0 0 8px;padding:6px 8px;background:#0f1828e6;border:0;border-top:1px solid #8a6a32;border-bottom:1px solid #8a6a32;border-radius:0;box-shadow:none}
 #bf-home.bf-home-v636 .bf-scene-story>p{margin:0 0 6px;font-size:12px;line-height:1.35}
+/* v638: move the SAME live Story section into the full-width grid row
+   after playable Quest/Summon and before archived locked location previews. */
+#bf-home.bf-home-v636 .bf-scene-places>.bf-scene-story{grid-column:1/-1;min-width:0}
 
 /* v617 original-art centered Quest gateway: a real source-backed Home
    composition improvement, NOT authenticated 2022 pixel parity. Preserve
@@ -1715,11 +1718,10 @@ body.bf-menu-mode #bf054-home-details {
   }
 }
 
-/* v623 owner Home P0: readable sixth owned-squad card on 320-412px screens.
-   The original 2022 portrait source, sixth-slot order and manual Unit Box
-   navigation remain unchanged. A compact two-row grid gives the owned name
-   and level actual space instead of the legacy 44px/65px fixed layout. */
-@media(max-width:412px){
+/* v623/v638 owner Home P0: readable compact sixth owned-squad card on
+   320-540px screens. The original 2022 portrait source, sixth-slot order and
+   manual Unit Box navigation remain unchanged. Preserve two-row name/level. */
+@media(max-width:540px){
   body.bf-menu-mode #bf-home .bf-scene-party button.bf-scene-member:nth-child(6){
     box-sizing:border-box;
     display:grid;
@@ -1782,5 +1784,26 @@ body.bf-menu-mode #bf054-home-details {
     line-height:1.3;
     text-align:left;
     overflow-wrap:anywhere;
+  }
+}
+
+/* v639 disposable viewport clearance (Home presentation only).
+   At 320px, compress ONLY decorative Home-menu spacing. Original five
+   portrait openings, footer, icon bytes, label size and button targets stay.
+   At 510-540px, share the compact sixth-owned-unit row with the existing
+   independent Edit Squad button. Keep DOM order and both hit areas separate.
+   No changes to the unit card identities, click listeners, saves or routing. */
+@media(max-width:360px){
+  #bf-home.bf-home-v636 .bf-scene-squad{margin-bottom:0!important}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{padding-block:2px;margin-top:0}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow img{height:40px}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>*{min-height:64px;gap:1px;padding:1px 0}
+}
+@media(min-width:510px) and (max-width:540px){
+  #bf-home.bf-home-v636 #bf-scene-party>.bf-scene-member:nth-child(6){
+    width:calc(100% - 124px);justify-self:start
+  }
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-heading{
+    position:relative;z-index:2;align-self:flex-end;margin-top:-50px
   }
 }

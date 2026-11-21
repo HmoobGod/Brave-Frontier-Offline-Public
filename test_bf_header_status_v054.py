@@ -11,6 +11,8 @@ R=Path(__file__).resolve().parent
 ASSETS=R/'app/src/main/assets'
 addon=(ASSETS/'bf054_header_status.js').read_text('utf-8')
 assert addon.count('/* BF_HEADER_STATUS_FIDELITY_V054 */')==1
+# Preserve the authored two-axis source crop. Chromium may serialize 'auto' as omitted.
+assert addon.count("'.bf-shell-head{aspect-ratio:644/174!important;background-size:100% auto!important;'")==1, 'authored original header crop was modified'
 assert 'bf_global_offline_demo_v7' not in addon, 'header overlay must never write saves'
 assert 'localStorage.setItem' not in addon
 assert 'min-height:44px' in addon
@@ -74,7 +76,7 @@ with sync_playwright() as pw:
     }""")
     assert css['oldImage'] and css['overflow']=='hidden',css
     assert 0.264 < css['height']/css['width'] < 0.279, css
-    assert css['backgroundSize']=='100% auto',css
+    assert css['backgroundSize'] in ('100% auto','100%'), ('computed header crop',css)
     assert page.evaluate('BF054HeaderStatus.state.percent')==0
     # The new native Home disclosure is closed by default, read-only and
     # reports genuinely unavailable Energy rather than fake regeneration.
@@ -280,10 +282,13 @@ with sync_playwright() as pw:
           rects=cards.map(x=>x.getBoundingClientRect()),
           buttons=[...adventure.querySelectorAll('button.bf-scene-active')];
         return {
-          order:t.nextElementSibling===s&&s.nextElementSibling===story&&
-            story.nextElementSibling===adventure&&
-            adventure.nextElementSibling===preview&&
-            preview.nextElementSibling===tools,
+          order:t.nextElementSibling===s&&s.nextElementSibling===adventure&&
+            adventure.nextElementSibling===preview&&preview.nextElementSibling===tools&&
+            story.parentElement===adventure.querySelector('.bf-scene-places')&&
+            story.previousElementSibling===adventure.querySelector('button.bf-scene-featured[data-bf-goto="summon"]')&&
+            story.nextElementSibling===adventure.querySelector('.bf-scene-archive-label')&&
+            h.querySelectorAll('.bf-scene-story').length===1&&
+            h.querySelectorAll('.bf-scene-explore').length===1,
           detailsLast:h.lastElementChild===details,
           width:document.documentElement.scrollWidth,
           cols:getComputedStyle(p).gridTemplateColumns.split(' ').length,
