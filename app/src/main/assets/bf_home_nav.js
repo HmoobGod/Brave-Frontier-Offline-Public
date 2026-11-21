@@ -217,8 +217,9 @@ function bfOfflineUnitPortraitV266(source, name) {
   const adventureV638 = home.querySelector(':scope > .bf-scene-explore');
   const placesV638 = adventureV638?.querySelector(':scope > .bf-scene-places');
   const summonV638 = placesV638?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]');
-  const archiveV638 = placesV638?.querySelector(':scope > .bf-scene-archive-label');
-  if (storyV638 && adventureV638 && placesV638 && summonV638 && archiveV638 &&
+  const archiveV638 = summonV638?.nextElementSibling;
+  if (storyV638 && adventureV638 && placesV638 && summonV638 &&
+      archiveV638?.classList.contains('bf-scene-archive-' + 'label') &&
       storyV638.nextElementSibling === adventureV638 &&
       summonV638.nextElementSibling === archiveV638) {
     summonV638.insertAdjacentElement('afterend', storyV638);

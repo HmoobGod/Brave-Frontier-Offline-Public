@@ -98,20 +98,95 @@ with sync_playwright() as pw:
         errors=[]
         page.on("pageerror",lambda error:errors.append(str(error)))
         page.set_content(html)
+        # Record direct storage mutations without changing storage semantics.
+        page.evaluate("""() => {window.__v242Writes=[];
+          for(const name of ['setItem','removeItem','clear']){
+            const orig=Storage.prototype[name];
+            Storage.prototype[name]=function(...args){
+              window.__v242Writes.push({name,key:args.length?String(args[0]):null});
+              return orig.apply(this,args);
+            };
+          }
+        }""")
         page.add_style_tag(content=C)
         page.add_script_tag(content=pilot)
+        page.wait_for_timeout(35)
+        assert page.evaluate('window.__v242Writes.length')==0,(width,'passive write')
         assert page.locator(".bf-scene-featured").count()==2
         assert page.locator(".bf-scene-locked").count()==4
         assert page.locator(".bf-scene-places > :first-child").get_attribute("class")==available
         positions=page.locator(".bf-scene-places").evaluate(
             "(root)=>Array.from(root.children).map(el=>el.className)")
-        assert positions[:4]==[available,"bf-scene-place bf-scene-active bf-scene-featured",
-                               "bf-scene-place bf-scene-active bf-scene-featured",archived],positions
+        # Strictly accept the two authenticated presentations of the SAME
+        # live Story node. All child classes and four locked cards are pinned.
+        active="bf-scene-place bf-scene-active bf-scene-featured"
+        locked="bf-scene-place bf-scene-locked"
+        v636_order=[available,active,active,archived]+[locked]*4
+        v639_order=[available,active,active,"bf-scene-story",archived]+[locked]*4
+        assert positions in (v636_order,v639_order),(width,positions)
+        fidelity=page.locator("#bf-home").evaluate("""home=>{
+          const places=home.querySelector('.bf-scene-places'),
+            story=home.querySelector('.bf-scene-story'),
+            adventure=home.querySelector('.bf-scene-explore'),
+            quest=places.querySelector(':scope > [data-bf-goto="quest"]'),
+            summon=places.querySelector(':scope > [data-bf-goto="summon"]'),
+            archive=places.querySelector(':scope > .bf-scene-archive-label'),
+            locked=[...places.querySelectorAll(':scope > .bf-scene-locked')];
+          return {
+            storyCount:home.querySelectorAll('.bf-scene-story').length,
+            storyButtonCount:home.querySelectorAll('#bf-home-story-open').length,
+            archiveCount:home.querySelectorAll('.bf-scene-archive-label').length,
+            archiveIdentity:archive?.getAttribute('role')==='heading'&&
+              archive?.getAttribute('aria-level')==='3'&&
+              archive?.querySelector('strong')?.textContent==='RECOVERED GLOBAL LOCATIONS',
+            originalOrder:story?.parentElement===home&&
+              story.nextElementSibling===adventure&&
+              home.querySelector('.bf-scene-squad')?.nextElementSibling===story,
+            relocatedOrder:story?.parentElement===places&&
+              summon?.nextElementSibling===story&&story.nextElementSibling===archive,
+            liveRoutes:quest?.getAttribute('data-bf-goto')==='quest'&&
+              summon?.getAttribute('data-bf-goto')==='summon'&&
+              places.querySelectorAll(':scope > .bf-scene-featured').length===2,
+            originalArt:quest?.querySelector('img')?.getAttribute('src')==='content/home/home_win_quest.png'&&
+              summon?.querySelector('img')?.getAttribute('src')==='content/home/home_win_akras_smn_hall.png',
+            lockedCount:locked.length,
+            lockedIdentity:locked.every(e=>e.getAttribute('aria-disabled')==='true'&&
+              e.getAttribute('role')==='group'&&!e.hasAttribute('data-bf-goto')),
+            lockedArt:locked.map(e=>e.querySelector('img')?.getAttribute('src')),
+            archiveBeforeLocked:archive?.nextElementSibling===locked[0]&&
+              locked.every((e,i)=>i===0||locked[i-1].nextElementSibling===e)
+          };
+        }""")
+        assert fidelity['storyCount']==1 and fidelity['storyButtonCount']==1,(width,fidelity)
+        assert fidelity['archiveCount']==1 and fidelity['archiveIdentity'],(width,fidelity)
+        assert fidelity['lockedCount']==4 and fidelity['lockedIdentity'],(width,fidelity)
+        assert fidelity['lockedArt']==['content/home/home_win_gate.png',
+            'content/home/home_win_arena.png','content/home/home_win_raid_open.png',
+            'content/home/home_win_randall.png'],(width,fidelity)
+        assert fidelity['liveRoutes'] and fidelity['originalArt'] and fidelity['archiveBeforeLocked'],(width,fidelity)
+        assert (fidelity['relocatedOrder'] and not fidelity['originalOrder']) if positions==v639_order else (
+            fidelity['originalOrder'] and not fidelity['relocatedOrder']), (width,fidelity)
         bounds=page.locator(".bf-scene-places").evaluate(
             "(el)=>({scroll:el.scrollWidth,client:el.clientWidth})")
         assert bounds["scroll"] <= bounds["client"]+2,(width,bounds)
         assert page.locator(".bf-scene-featured").first.evaluate(
             "(el)=>getComputedStyle(el).minHeight") != "0px"
+        for target in ('quest','summon'):
+            b=page.locator(f'.bf-scene-featured[data-bf-goto="{target}"]')
+            b.scroll_into_view_if_needed()
+            hit=b.evaluate("""el=>{
+              const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+              const t=document.elementFromPoint(x,y);
+              const visible=[];
+              for(const px of [.1,.3,.5,.7,.9])for(const py of [.1,.3,.5,.7,.9]){
+                const a=r.left+px*r.width,b=r.top+py*r.height;
+                if(a<0||b<0||a>=innerWidth||b>=innerHeight)continue;
+                const h=document.elementFromPoint(a,b);
+                if(h&&(h===el||el.contains(h)))visible.push([px,py]);
+              }
+              return {width:r.width,height:r.height,atCenter:!!t&&(el===t||el.contains(t)),visibleHits:visible.length};
+            }""")
+            assert hit['width']>=44 and hit['height']>=44 and hit['visibleHits']>=1,(width,target,hit)
         # Existing active destinations and source order remain exactly the
         # same, but an owner phone now shows the original Quest gateway
         # centered and larger than the subordinate Summoning Hall tile.
@@ -149,6 +224,7 @@ with sync_playwright() as pw:
         page.locator('.bf-scene-toolrow [data-bf-goto="menu"]').click()
         assert page.evaluate("BF_homeNav.current")=="menu"
         assert not errors,(width,errors)
+        assert page.evaluate('window.__v242Writes.length')==0,(width,'unexpected storage write',page.evaluate('window.__v242Writes'))
         page.close()
     browser.close()
 print("PASS v242 browser: 320/360/393/412/540px usable Quest, Summon and Saves UI")
