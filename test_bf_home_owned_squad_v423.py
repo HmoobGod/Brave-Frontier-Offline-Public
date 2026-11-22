@@ -53,7 +53,7 @@ with sync_playwright() as pw:
             const k=localStorage.key(i);return [k,localStorage.getItem(k)]})),
           writes:__v423Writes()})"""
         slot_before=page.evaluate(slot_snapshot)
-        for width in (320,390,540):
+        for width in (320,390,393,412,413,540):
             page.set_viewport_size({'width':width,'height':844})
             page.evaluate('BFGlobalHome.refreshParty()')
             cards=page.locator('#bf-scene-party .bf-scene-member')
@@ -64,7 +64,28 @@ with sync_playwright() as pw:
                 assert f'squad slot {index+1} of 6' in cards.nth(index).get_attribute('aria-label')
                 assert ('Leader' in cards.nth(index).get_attribute('aria-label'))==(index==0)
                 assert cards.nth(index).locator('.bf-scene-leader').count()==int(index==0)
-                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'),(width,index)
+                if index == 5 and width <= 412:
+                    # Only the sixth decorative slot caption is visually clipped
+                    # in the approved compact Home row. Keep identity and touch
+                    # coverage; never demand that hidden text fits a 1px box.
+                    assert role.get_attribute('aria-hidden') == 'true'
+                    assert role.evaluate("""el => {
+                        const css = getComputedStyle(el), box = el.getBoundingClientRect();
+                        return css.position === 'absolute'
+                            && css.overflow === 'hidden'
+                            && css.whiteSpace === 'nowrap'
+                            && css.clipPath !== 'none'
+                            && box.width <= 1.01 && box.height <= 1.01;
+                    }"""), (width, index)
+                    sixth = cards.nth(index)
+                    visible_name, visible_level = sixth.locator('strong'), sixth.locator('small')
+                    assert visible_name.is_visible() and visible_level.is_visible(), (width, index)
+                    full_name = visible_name.inner_text().strip()
+                    assert full_name and full_name in sixth.get_attribute('aria-label'), (width, index)
+                    assert sixth.get_attribute('title') == 'Inspect ' + full_name
+                else:
+                    # All visible slot captions must still fit their own boxes.
+                    assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'), (width, index)
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert page.evaluate(slot_snapshot)==slot_before
         for first in (None, -1):
@@ -83,7 +104,7 @@ with sync_playwright() as pw:
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
         })""")
-        for width in (320,390,540):
+        for width in (320,390,393,412,413,540):
             page.set_viewport_size({"width":width,"height":844})
             for slot in (0,5):
                 portrait = page.locator('#bf-scene-party button.bf-scene-member').nth(slot)
