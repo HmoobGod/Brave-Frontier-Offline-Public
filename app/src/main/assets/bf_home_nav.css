@@ -1896,7 +1896,7 @@ body.bf-menu-mode #bf054-home-details {
     font:800 10px/11px Arial,sans-serif;letter-spacing:-.2px;
   }
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
-    bottom:6%;
+    bottom:7%;
   }
   body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"] {
     display:flex;align-items:flex-end;justify-content:center;position:relative;
@@ -1968,4 +1968,10 @@ body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-c
 }
 @media(min-width:510px){
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-short-label {font-size:12px;height:16px;max-height:16px;}
+}
+/* R6 original PNG alpha-mask clearance; v636 Home presentation only. */
+@media (min-width:413px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    left:12%;
+  }
 }

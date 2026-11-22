@@ -147,6 +147,24 @@ with sync_playwright() as pw:
                           const pixels=ctx.getImageData(0,0,png.width,png.height).data;
                           const cards=[...party.querySelectorAll(':scope > button.bf-scene-member')].slice(0,5);
                           const ornamentalBand=p.top+parseFloat(overlay.height)*290/354;
+                          // Original PNG is stretched over the whole party via ::after;
+                          // compare real 2D opaque source pixels, not a horizontal cutoff.
+                          const sx=parseFloat(overlay.width)/png.width;
+                          const sy=parseFloat(overlay.height)/png.height;
+                          if(!(sx>0&&sy>0))throw Error('invalid frame image geometry');
+                          const alphaHit=(r)=>{
+                            const x0=Math.max(0,Math.floor((r.left-2-p.left)/sx));
+                            const x1=Math.min(png.width-1,Math.ceil((r.right+2-p.left)/sx)-1);
+                            const y0=Math.max(0,Math.floor((r.top-2-p.top)/sy));
+                            const y1=Math.min(png.height-1,Math.ceil((r.bottom+2-p.top)/sy)-1);
+                            for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){
+                              if(pixels[4*(y*png.width+x)+3]<200)continue;
+                              const l=p.left+x*sx,t=p.top+y*sy;
+                              if(l<r.right+2&&l+sx>r.left-2&&t<r.bottom+2&&t+sy>r.top-2)
+                                return {sourceX:x,sourceY:y};
+                            }
+                            return null;
+                          };
                           const samples=cards.map((card,index)=>{
                             const small=card.querySelector('small'),strong=card.querySelector('strong');
                             const portrait=card.querySelector('img, .bf-portrait-fallback');
@@ -160,6 +178,10 @@ with sync_playwright() as pw:
                               const rect=range.getBoundingClientRect();
                               glyphs.push({left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom});
                             }
+                            // Whitespace has no painted glyph. Retain all glyphs for
+                            // existing wrapping/position tests, excluding it only here.
+                            const alphaCollision=glyphs.map((g,j)=>
+                              small.firstChild.data[j].trim()?alphaHit(g):null).find(Boolean)||null;
                             let opaque=0;
                             for(let y=290;y<354;y++)for(let x=index*128+80;x<index*128+128;x++)
                               if(pixels[4*(y*png.width+x)+3]>=200)opaque++;
@@ -177,6 +199,7 @@ with sync_playwright() as pw:
                               cardLeft:cardRect.left,cardRight:cardRect.right,
                               nameTop:name.top,nameBottom:name.bottom,
                               artBottom:art?.bottom??null,ornamentOpaque:opaque,
+                              alphaCollision,
                               leader:card.querySelectorAll('.bf-scene-leader').length,
                               id:Number(card.dataset.bfHomeUnitId)};
                           });
@@ -207,7 +230,7 @@ with sync_playwright() as pw:
                             assert s["left"]>=s["cardLeft"]-0.5 and s["right"]<=s["cardRight"]+0.5,(w,i,s)
                             assert s["nameBottom"]+2<=s["top"],(w,i,"name/level overlap",s)
                             assert s["artBottom"] is not None and s["artBottom"]<=s["nameTop"]+0.5,(w,i,"portrait/name overlap",s)
-                            assert s["bottom"]+2<=measured["opaqueStart"],(w,i,"ornament occludes glyphs",s)
+                            assert s["alphaCollision"] is None,(w,i,"alpha>=200 frame overlaps glyph+2px",s)
                         with_frame=page.screenshot()
                         disable_frame=page.add_style_tag(content="#bf-home.bf-home-v635 #bf-scene-party::after{background-image:none!important}")
                         try:
@@ -261,9 +284,23 @@ with sync_playwright() as pw:
                 assert abs(r["l"] - (g["partyLeft"] + i * slot_w)) <= 1, (width, i, r)
                 assert abs(r["w"] - slot_w) <= 1 and abs(r["h"] - slot_w * 350 / 128) <= 1.5, (width, i, r)
                 assert abs(r["t"] - g["partyTop"]) <= 1, (width, i, r)
-            # Six real owned units; leader strictly first actual slot; sixth below frame.
+            # Six real owned IDs, source-derived short Home labels, truthful full
+            # names in accessibility metadata. The sixth strip retains full text.
             assert g["ids"] == g["squad"] and len(g["squad"]) == 6, (width, g)
-            assert g["names"] == g["forms"], (width, g)
+            assert g["names"][5] == g["forms"][5], (width, "sixth full name", g)
+            assert g["forms"][5] in g["labels"][5], (width, "sixth aria", g)
+            for i, (shown, full, aria) in enumerate(zip(
+                    g["names"][:5], g["forms"][:5], g["labels"][:5])):
+                assert isinstance(full, str) and full.strip() and full in aria, (width, i, "full name", g)
+                assert isinstance(shown, str) and shown.strip(), (width, i, "visible name missing", g)
+                source_suffix = full.strip().split()[-1]
+                collision = f" ·{i+1}"
+                visible = shown[:-len(collision)] if shown.endswith(collision) else shown
+                # No invented letters or one-letter-ellipsis placeholder; only
+                # the authenticated source suffix or its >=3-character prefix.
+                assert (visible == source_suffix or (
+                    visible.endswith("…") and len(visible[:-1]) >= 3 and
+                    source_suffix.startswith(visible[:-1]))), (width, i, "non-source/illegible Home name", g)
             assert g["leaders"] == [True, False, False, False, False, False] and g["leaderVisible"], (width, g)
             assert "Leader, squad slot 1 of 6" in g["labels"][0], (width, g)
             assert "squad slot 6 of 6" in g["labels"][5], (width, g)

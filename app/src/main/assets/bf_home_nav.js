@@ -320,46 +320,86 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Owner-approved display-only short labels: source-name suffix or prefix,
   // with a truthful squad-slot marker only if two visible labels would match.
   // Never substitute, invent, or save a unit name or ID.  No catalog required.
+  let shortLabelRevision = 0, shortLabelFrame = 0, shortLabelSchedule = null;
+  let shortLabelObserver = null, shortLabelObservedWidth = null;
   function assignShortHomeLabels(cards, sourceNames) {
+    const revision = ++shortLabelRevision;
+    const live = () => revision === shortLabelRevision && party.isConnected &&
+      cards.every((card, i) => party.children[i] === card);
     const labels = sourceNames.map((full, index) => {
       if (!full || !cards[index]?.querySelector('strong')) return null;
       const words = full.trim().split(/\s+/u);
       return words[words.length - 1] || full;
     });
-    const texts = Array(5).fill(null);
     function measureFit(node, base, suffix) {
-      const cs = getComputedStyle(node);
+      const rectWidth = node.getBoundingClientRect().width;
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      if (!ctx) return (Array.from(base).slice(0, 5).join('') + '…' + suffix);
-      ctx.font = cs.font;
-      const allowed = Math.max(10, node.getBoundingClientRect().width - 2);
+      // Never emit a fabricated one-letter ellipsis when the layout or
+      // font is not measurable. The source suffix remains available.
+      if (!ctx || rectWidth < 12) return base + suffix;
+      ctx.font = getComputedStyle(node).font;
+      const allowed = rectWidth - 2;
       const fits = text => ctx.measureText(text).width <= allowed;
       if (fits(base + suffix)) return base + suffix;
       const chars = Array.from(base);
-      while (chars.length > 1 && !fits(chars.join('') + '…' + suffix)) chars.pop();
-      return chars.join('') + '…' + suffix;
+      while (chars.length > 3 && !fits(chars.join('') + '…' + suffix)) chars.pop();
+      return chars.length >= 3 && fits(chars.join('') + '…' + suffix)
+        ? chars.join('') + '…' + suffix : base + suffix;
     }
+    // First paint: show only truthful source-derived suffixes. Do not
+    // measure a newly inserted, not-yet-laid-out node (the V… bug).
     for (let i = 0; i < 5; i++) {
       if (!labels[i]) continue;
       const strong = cards[i].querySelector('strong');
       strong.replaceChildren();strong.removeAttribute('lang');
       strong.classList.remove('bf-home-portrait-longword');
       strong.classList.add('bf-home-short-label');
-      texts[i] = measureFit(strong, labels[i], '');
+      strong.textContent = labels[i];
     }
-    // A collision may occur either in source suffixes or after ellipsis.
-    // Slot numbers are existing truthful context, not invented unit IDs.
-    const counts = new Map();
-    for (const label of texts) if (label !== null) counts.set(label,(counts.get(label)||0)+1);
-    for (let i = 0; i < 5; i++) {
-      if (texts[i] === null) continue;
-      const strong = cards[i].querySelector('strong');
-      const suffix = counts.get(texts[i]) > 1 ? ' ·' + (i + 1) : '';
-      strong.textContent = suffix ? measureFit(strong, labels[i], suffix) : texts[i];
-      // The original name and its source form ID remain authoritative; this
-      // is ONLY a readable Home slot label, never a saved unit identity.
+    const fitLabels = () => {
+      if (!live()) return;
+      const texts = labels.map((base, i) => base === null ? null :
+        measureFit(cards[i].querySelector('strong'), base, ''));
+      // A collision may occur either in source suffixes or after ellipsis.
+      // Slot numbers are existing truthful context, not invented unit IDs.
+      const counts = new Map();
+      for (const label of texts) if (label !== null)
+        counts.set(label, (counts.get(label) || 0) + 1);
+      for (let i = 0; i < 5; i++) {
+        if (texts[i] === null) continue;
+        const strong = cards[i].querySelector('strong');
+        const suffix = counts.get(texts[i]) > 1 ? ' ·' + (i + 1) : '';
+        const next = suffix ? measureFit(strong, labels[i], suffix) : texts[i];
+        if (strong.textContent !== next) strong.textContent = next;
+      }
+    };
+    const scheduleFit = () => {
+      if (!live()) return;
+      if (shortLabelFrame) cancelAnimationFrame(shortLabelFrame);
+      shortLabelFrame = requestAnimationFrame(() => {
+        shortLabelFrame = 0;
+        if (live()) fitLabels();
+      });
+    };
+    shortLabelSchedule = scheduleFit;
+    // One observer per Home instance; widths only, not text/height changes.
+    if (!shortLabelObserver && typeof ResizeObserver === 'function') {
+      shortLabelObserver = new ResizeObserver(entries => {
+        const width = entries[0]?.contentRect.width;
+        if (!Number.isFinite(width) ||
+            (shortLabelObservedWidth !== null &&
+             Math.abs(width - shortLabelObservedWidth) < .25)) return;
+        shortLabelObservedWidth = width;
+        if (shortLabelSchedule) shortLabelSchedule();
+      });
+      shortLabelObserver.observe(party);
     }
+    scheduleFit();
+    // Re-fit labels only, never refresh the party or mutate player storage.
+    if (document.fonts?.ready) document.fonts.ready.then(() => {
+      if (live()) scheduleFit();
+    });
   }
   function refreshParty() {
     // Replacing the cards must not discard a keyboard user's place or
