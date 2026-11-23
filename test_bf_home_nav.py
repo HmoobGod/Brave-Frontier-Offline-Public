@@ -86,6 +86,9 @@ with sync_playwright() as playwright:
 
     # v437: Home build-info shortcut opens only the already-existing Menu
     # metadata disclosure; browser previews must not invent APK identity.
+    # v640: the build-info shortcut moved from Home to the Menu extras section.
+    assert page.evaluate("!!document.getElementById('bf-home-build-info').closest('#bf-menu-home-extras')")
+    page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
     for width in (320,390,540):
         page.set_viewport_size({"width":width,"height":844})
         button = page.locator("#bf-home-build-info")

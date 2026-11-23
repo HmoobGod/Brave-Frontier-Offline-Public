@@ -32,6 +32,10 @@ assert PREFLIGHT.count(TEST) == 2, "path trigger plus source-only run"
 V638_STORY_MOVE = "summonV638.insertAdjacentElement('afterend', storyV638);"
 assert JS.count(V638_STORY_MOVE) in (0, 1)
 STORY_MODE = "v638" if JS.count(V638_STORY_MOVE) == 1 else "legacy"
+# v640 custom six-slot Home (source-selected): Story follows Play on Home and
+# the archive label plus locked previews live in the Menu extras section.
+if JS.count("/* v640 CUSTOM six-owned-unit Home") == 1:
+    STORY_MODE = "v640"
 assert "android.permission.INTERNET" not in MANIFEST
 assert len(CSS.encode("utf-8")) < 128 * 1024
 assert len(JS.encode("utf-8")) < 128 * 1024
@@ -118,16 +122,20 @@ with sync_playwright() as pw:
                   const gates=[...places.querySelectorAll(':scope > button')];
                   const goto=gates.map(b=>b.dataset.bfGoto).join(',');
                   if(goto!=='quest,summon'||!gates.every(b=>b.classList.contains('bf-scene-featured')))fail.push('gateways '+goto);
-                  const labels=places.querySelectorAll(':scope > .bf-scene-archive-label');
-                  const label=labels[0],locked=[...places.querySelectorAll(':scope > .bf-scene-locked')];
+                  const lockedHost=mode==='v640'?document.querySelector('#bf-menu-home-extras > .bf-menu-locations'):places;
+                  if(mode==='v640'&&(!lockedHost||home.querySelectorAll('.bf-scene-locked,.bf-scene-archive-label').length))fail.push('v640 locations not in Menu');
+                  const labels=lockedHost?lockedHost.querySelectorAll(':scope > .bf-scene-archive-label'):[];
+                  const label=labels[0],locked=lockedHost?[...lockedHost.querySelectorAll(':scope > .bf-scene-locked')]:[];
                   if(labels.length!==1)fail.push('archive labels '+labels.length);
                   if(locked.length!==4)fail.push('locked '+locked.length);
                   if(label&&!locked.every(l=>(label.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING)!==0))fail.push('locked before label');
-                  if(places.querySelectorAll('.bf-scene-locked').length!==locked.length)fail.push('nested locked');
+                  if(lockedHost&&lockedHost.querySelectorAll('.bf-scene-locked').length!==locked.length)fail.push('nested locked');
                   if(story){
                     const prev=story.previousElementSibling,next=story.nextElementSibling;
                     if(mode==='legacy'){
                       if(story.parentElement!==home||prev!==squad||next!==explore)fail.push('legacy order');
+                    }else if(mode==='v640'){
+                      if(story.parentElement!==home||prev!==explore||!next?.classList.contains('bf-scene-tools'))fail.push('v640 order');
                     }else if(mode==='v638'){
                       if(story.parentElement!==places||prev!==gates[1]||next!==label||home.querySelector(':scope > .bf-scene-story'))fail.push('v638 order');
                     }else fail.push('unknown mode');
@@ -143,6 +151,9 @@ with sync_playwright() as pw:
                     cardHeight:boxes[0].height,
                     firstRowSameTop:boxes.slice(0,5).every(b=>Math.abs(b.top-boxes[0].top)<=2),
                     sixthBelow:boxes[5].top>=boxes[0].bottom,
+                    // v640: two rows of three equal owned cards.
+                    rowsOfThree:boxes.slice(0,3).every(b=>Math.abs(b.top-boxes[0].top)<=1)&&
+                      boxes.slice(3,6).every(b=>Math.abs(b.top-boxes[3].top)<=1)&&boxes[3].top>=boxes[0].bottom,
                     sixFull:cards[5].getAttribute("aria-label"),
                     nameFont:parseFloat(getComputedStyle(cards[0].querySelector("strong")).fontSize),
                     levelFont:parseFloat(getComputedStyle(cards[0].querySelector("small")).fontSize),
@@ -158,7 +169,12 @@ with sync_playwright() as pw:
                 assert proof["nativePortraits"] and proof["readableName"], (width, proof)
                 assert proof["scroll"] <= proof["viewport"] + 1, (width, proof)
                 assert lineup.first.get_attribute("aria-label").find("Leader") >= 0
-                if width <= 412:
+                if STORY_MODE == "v640":
+                    assert proof["rowsOfThree"], (width, proof)
+                    assert proof["cardWidth"] >= 88 and proof["cardHeight"] >= 110, (width, proof)
+                    assert proof["nameFont"] >= 11 and proof["levelFont"] >= 11, (width, proof)
+                    assert proof["leaderFont"] >= 10, (width, proof)
+                elif width <= 412:
                     assert proof["firstRowSameTop"] and proof["sixthBelow"], (width, proof)
                     assert proof["cardWidth"] >= 44 and proof["cardHeight"] >= 44, (width, proof)
                     assert proof["nameFont"] >= 10 and proof["levelFont"] >= 10, (width, proof)
@@ -166,8 +182,25 @@ with sync_playwright() as pw:
                 # Option A uses a compact, source-derived single-line name, not
                 # the obsolete v621 two-line 24px box. Prove actual visibility
                 # and complete identity without weakening squad/focus/save checks.
-                assert proof["nameMaxHeight"] == (16 if width >= 510 else 14), (width, proof)
-                label_proof = lineup.evaluate_all("""cards=>cards.slice(0,5).map((card,index)=>{
+                if STORY_MODE == "v640":
+                    # v640 custom six-slot Home: all six cards show the COMPLETE
+                    # original owned name, wholly inside the card, >=11px.
+                    full_proof = lineup.evaluate_all("""cards=>cards.map((card,index)=>{
+                      const node=card.querySelector('strong'),id=Number(card.dataset.bfHomeUnitId);
+                      const original=effectiveUnit(id)?.name,box=node.getBoundingClientRect(),c=card.getBoundingClientRect();
+                      return {index,shown:node.textContent.trim(),original,
+                        complete:node.textContent.trim()===original,
+                        completeAria:card.getAttribute('aria-label')?.startsWith('Inspect '+original+','),
+                        inside:box.left>=c.left-0.5&&box.right<=c.right+0.5&&box.bottom<=c.bottom+0.5&&
+                          node.scrollWidth<=node.clientWidth+1,
+                        font:parseFloat(getComputedStyle(node).fontSize)};})""")
+                    assert len(full_proof) == 6 and all(
+                        p["complete"] and p["completeAria"] and p["inside"] and p["font"] >= 11
+                        for p in full_proof), (width, full_proof)
+                    label_proof = None
+                else:
+                  assert proof["nameMaxHeight"] == (16 if width >= 510 else 14), (width, proof)
+                  label_proof = lineup.evaluate_all("""cards=>cards.slice(0,5).map((card,index)=>{
                   const node=card.querySelector('strong');
                   const id=Number(card.dataset.bfHomeUnitId);
                   const original=effectiveUnit(id)?.name;
@@ -198,7 +231,7 @@ with sync_playwright() as pw:
                     font:style?parseFloat(style.fontSize):0,
                     shown:visible, original};
                 })""")
-                assert len(label_proof) == 5 and all(
+                  assert len(label_proof) == 5 and all(
                     p["truthful"] and p["completeAria"] and p["markerCorrect"] and
                     p["oneLine"] and p["visible"] and p["font"] >= 10
                     for p in label_proof), (width, label_proof)

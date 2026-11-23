@@ -97,6 +97,9 @@ with sync_playwright() as pw:
  p.wait_for_function("""() => {const d=document.getElementById('bf-home-squad-reference');
    const e=document.getElementById('bf11600-home-base-reference');
    return !!d && !!e && !d.hidden && d.querySelector('.bf-home-squad-reference-body')?.contains(e);}""")
+ # v640: the squad source-notes disclosure (same live node) is on Menu.
+ assert p.evaluate("!!document.getElementById('bf-home-squad-reference').closest('#bf-menu-home-extras')")
+ p.locator('.bf-navbar button[data-bf-goto="menu"]').click()
  assert disclosure.count()==1 and not disclosure.evaluate('(e)=>e.open')
  assert disclosure.locator('summary').is_visible()
  assert home.count()==1 and home.get_attribute('role')=='status'
@@ -131,7 +134,7 @@ with sync_playwright() as pw:
   p.evaluate('(ids)=>{P.squad=ids}',bad)
   assert p.evaluate(api+'.homeReference()') is None
  p.evaluate('(ids)=>{P.squad=ids}',old)
- p.evaluate("BF_homeNav.go('home')")
+ p.evaluate("BF_homeNav.go('menu')")  # v640: reference disclosure is on Menu
  assert p.evaluate(api+'.homeReference().totals')==expected_totals
  assert home.is_visible() and 'NOT live battle stats' in home.text_content()
  assert p.evaluate('JSON.stringify({P,S,QUEST})')==stable

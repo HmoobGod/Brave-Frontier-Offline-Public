@@ -210,6 +210,8 @@ function bfOfflineUnitPortraitV266(source, name) {
   // Reference notes stay one tap away at the bottom of Home (same live
   // nodes, same disclosure) instead of occupying the first screen.
   home.querySelector('.bf-scene-tools')?.append(squadReferenceV635);
+  // v640 custom six-slot Home: set before first paint (full names); may fail closed.
+  home.classList.replace('bf-home-v635','bf-home-v640');home.classList.remove('bf-home-v636');
   // v638 local: keep the exact live Story node between playable Quest/Summon
   // and archived inactive location previews; preserve handler and v7 state.
   // Fail closed if the authenticated Home DOM sequence has changed.
@@ -437,7 +439,7 @@ function bfOfflineUnitPortraitV266(source, name) {
         const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
         renderHomePortraitName(name, unit.name || 'Unit');
-        if (index < 5) shortLabelSourceNames[index] = unit.name;
+        if (index < 5 && !home.classList.contains('bf-home-v640')) shortLabelSourceNames[index] = unit.name;
         const level = document.createElement('small');
         const observedLevel=verifiedDemoLevel(baseId);
         // R6: keep a truthful compact label visible between the original
@@ -2162,4 +2164,27 @@ function bfOfflineUnitPortraitV266(source, name) {
  window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);document.getElementById('squadpicker')?.addEventListener('change',refresh);
  // Party repaint also follows imports and form-provider changes, not just input changes.
  new MutationObserver(refresh).observe(party,{childList:true});window.BFHomeElementsB100=Object.freeze({snapshot,refresh});refresh();
+})();
+
+/* v640 CUSTOM six-owned-unit Home (owner-approved; NOT 2022 geometry). Same live
+   nodes/handlers/art; Quest+Summon first screen; extras moved to Menu. No writes. */
+(()=>{'use strict';const h=document.getElementById('bf-home');if(!h||window.BFHomeSixSlotV640||!h.classList.contains('bf-home-v640'))return;
+ const q=s=>h.querySelector(s),sq=q(':scope>.bf-scene-squad'),party=sq?.querySelector('#bf-scene-party'),hd=sq?.querySelector(':scope>.bf-scene-heading'),
+  ex=q(':scope>.bf-scene-explore'),pl=ex?.querySelector(':scope>.bf-scene-places'),al=pl?.querySelector(':scope>.bf-scene-archive-label'),
+  lk=pl?[...pl.querySelectorAll(':scope>.bf-scene-locked')]:[],st=q('.bf-scene-story'),tr=q('.bf-scene-toolrow'),tools=q(':scope>.bf-scene-tools'),menu=document.querySelector('.progresspanel');
+ if(!party||!hd||!pl||!pl.querySelector(':scope>button[data-bf-goto="quest"]')||!pl.querySelector(':scope>button[data-bf-goto="summon"]')||!al||lk.length!==4||!st||!tr||!tools||!menu){
+  h.classList.replace('bf-home-v640','bf-home-v635');h.classList.add('bf-home-v636');try{window.BFGlobalHome?.refreshParty?.();}catch(_){}return;}
+ sq.insertBefore(hd,party);const t=hd.querySelector('strong');if(t)t.textContent='YOUR SQUAD';
+ ex.classList.add('bf-home-play');ex.setAttribute('aria-label','Play');ex.after(st);tools.append(tr);st.after(tools);
+ const x=document.createElement('section');x.id='bf-menu-home-extras';x.className='bf-menu-home-extras';x.setAttribute('aria-labelledby','bf-menu-home-extras-title');
+ x.innerHTML='<h2 id="bf-menu-home-extras-title">GRAND GAIA · MORE</h2><p class="bf-menu-home-extras-intro">Location previews, quest preview, build info and notes moved from Home.</p>';
+ const loc=document.createElement('div');loc.className='bf-scene-places bf-menu-locations';loc.append(al,...lk);x.append(loc);
+ for(const n of [tools.querySelector('#bf-home-build-info'),tools.querySelector('#bf-home-squad-reference'),q(':scope>.bf-location-launch'),q(':scope>.bf-scene-note')])if(n)x.append(n);
+ menu.append(x);
+ const late=()=>{for(const id of ['bf420-home-readiness','bf054-home-details']){const n=document.getElementById(id);if(n?.parentElement===h)x.append(n);}};
+ new MutationObserver(late).observe(h,{childList:true});late();
+ x.addEventListener('click',e=>{if(!e.target.closest?.('#bf-home-build-info'))return;const i=document.getElementById('bf-about-build');if(i){i.open=true;i.querySelector('summary')?.focus();}});
+ // Missing preview art: hide the broken image; the name/status text remains.
+ x.addEventListener('error',e=>{if(e.target?.tagName==='IMG')e.target.hidden=true;},true);
+ window.BFHomeSixSlotV640=Object.freeze({custom:true,historicalGeometry:false,slots:6,menuSection:x.id,relocate:late});
 })();

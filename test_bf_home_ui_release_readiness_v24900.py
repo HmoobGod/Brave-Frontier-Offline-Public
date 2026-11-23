@@ -81,13 +81,13 @@ with sync_playwright() as pw:
         assert squad.locator(".bf-scene-member").count() == 6
         assert squad.evaluate(
             "(el) => getComputedStyle(el).gridTemplateColumns.split(' ').length"
-        ) == 5, width  # v635: five-opening original frame at every width
+        ) == 3, width  # v640: custom six-slot 3x2 squad at every width
 
         shortcut = page.locator(".bf-scene-toolrow")
         assert shortcut.locator("button").count() == 4
         assert shortcut.evaluate(
             "(el) => getComputedStyle(el).gridTemplateColumns.split(' ').length"
-        ) == 5, width  # v636: five-across original icon row beneath the frame
+        ) == 5, width  # five-across original icon row (v640: beneath Story)
 
         previews = page.locator(".bf-scene-places .bf-scene-locked")
         assert previews.count() == 4

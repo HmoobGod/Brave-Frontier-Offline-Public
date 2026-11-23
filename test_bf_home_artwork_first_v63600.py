@@ -45,6 +45,9 @@ for title in ("GRAND GAIA", "CURRENT SQUAD", "ADVENTURE", "HOME SHORTCUTS"):
     assert title in HOME  # headings stay in source and accessibility tree
 assert len(CSS.encode("utf-8")) < 128 * 1024 and len(JS.encode("utf-8")) < 128 * 1024
 print("PASS v636 source: icon row CSS between v635 and v617 gates, no hiding/tracking hacks, no state writes")
+# v640 CUSTOM six-slot Home (owner-approved, source-selected): the same original
+# icon row sits in the Home shortcuts section beneath Story; squad is 3x2.
+V640 = JS.count("/* v640 CUSTOM six-owned-unit Home") == 1
 
 if "--source-only" in sys.argv:
     raise SystemExit(0)
@@ -104,7 +107,7 @@ def open_app(browser, width, height):
 
 GEOMETRY = """() => {
   const home=document.getElementById('bf-home'),squad=home.querySelector('.bf-scene-squad');
-  const party=squad.querySelector('#bf-scene-party'),row=squad.querySelector(':scope > .bf-scene-toolrow');
+  const party=squad.querySelector('#bf-scene-party'),row=home.querySelector('.bf-scene-toolrow');
   const edit=squad.querySelector(':scope > .bf-scene-heading button[data-bf-goto="units"]');
   const story=home.querySelector('.bf-scene-story'),quest=home.querySelector('.bf-scene-featured[data-bf-goto="quest"]');
   const head=document.querySelector('.bf-shell-head').getBoundingClientRect();
@@ -132,12 +135,15 @@ GEOMETRY = """() => {
     questVisiblePx:Math.max(0,Math.min(quest.getBoundingClientRect().bottom,footer.top)-Math.max(quest.getBoundingClientRect().top,head.bottom)),
     questFullyVisible:quest.getBoundingClientRect().bottom<=footer.top,
     summonBottom:home.querySelector('.bf-scene-featured[data-bf-goto="summon"]').getBoundingClientRect().bottom,
-    archiveTop:home.querySelector('.bf-scene-archive-label').getBoundingClientRect().top,
+    archiveTop:home.querySelector('.bf-scene-archive-label')?.getBoundingClientRect().top??null,
     storyNested:story.parentElement===home.querySelector('.bf-scene-places')&&
       story.previousElementSibling===home.querySelector('.bf-scene-featured[data-bf-goto="summon"]')&&
       story.nextElementSibling===home.querySelector('.bf-scene-archive-label'),
     storyTop:story.getBoundingClientRect().top,questTop:quest.getBoundingClientRect().top,
     rowInSquad:row.parentElement===squad,rowLabel:row.getAttribute('aria-label'),
+    rowInTools:row.parentElement===home.querySelector(':scope > .bf-scene-tools')&&
+      story.nextElementSibling===row.parentElement,storyBottom:story.getBoundingClientRect().bottom,
+    partyBottom:pr.bottom,
     order:[...squad.children].map(c=>c.id||c.className).join('|'),cells,hidden,
     ids:[...party.children].map(c=>Number(c.dataset.bfHomeUnitId)||null),squad:Array.from(P.squad),
     leaders:[...party.children].map(c=>!!c.querySelector('.bf-scene-leader')),
@@ -152,32 +158,46 @@ with sync_playwright() as pw:
             page, errors = open_app(browser, width, height)
             assert page.evaluate("BF_homeNav.current") == "home" and page.evaluate("P.version") == 7
             page.wait_for_function("""() => [...document.querySelectorAll(
-              '#bf-home .bf-scene-squad > .bf-scene-toolrow img')].every(i=>i.complete&&i.naturalWidth>0)""",
+              '#bf-home .bf-scene-toolrow img')].every(i=>i.complete&&i.naturalWidth>0)""",
               timeout=15000)
             before = page.evaluate(SNAPSHOT)
             page.evaluate('window.scrollTo(0,0)')
             g = page.evaluate(GEOMETRY)
-            # v638: header -> frame -> sixth -> Edit -> icon row -> Quest/Summon -> story -> archived previews.
-            assert g["rowInSquad"] and g["rowLabel"] == "Home menu", (width, g)
-            assert 0 <= g["partyTop"] - g["headBottom"] <= 24, (width, g)
-            assert g["sixthBottom"] <= g["editBottom"] <= g["rowTop"] + 1, (width, g)
-            assert g["rowTop"] - g["editBottom"] <= 16, (width, "icon row not beneath squad", g)
-            assert g["rowBottom"] <= g["questTop"] + 1 and g["summonBottom"] <= g["storyTop"] + 1, (width, g)
-            assert g["storyTop"] <= g["archiveTop"] + 1 and g["storyNested"], (width, g)
-            assert g["sixthHeight"] <= 70, (width, "compact sixth unit", g)
-            ref = page.evaluate("""() => {const d=document.getElementById('bf-home-squad-reference');
-              return {inTools:!!d.closest('.bf-scene-tools'),open:d.open,hidden:d.hidden,
+            if V640:
+                # v640: header -> Edit Squad -> 3x2 squad -> Quest/Summon -> Story -> icon row.
+                assert g["rowInTools"] and g["rowLabel"] == "Home menu", (width, g)
+                assert 0 <= g["partyTop"] - g["headBottom"] <= 80, (width, g)
+                assert g["editBottom"] <= g["partyTop"] + 1, (width, "Edit Squad above squad", g)
+                assert g["partyBottom"] <= g["questTop"] + 1, (width, g)
+                assert g["summonBottom"] <= g["storyTop"] + 1 and g["storyBottom"] <= g["rowTop"] + 1, (width, g)
+                assert g["sixthHeight"] >= 110, (width, "equal sixth unit card", g)
+            else:
+              assert g["rowInSquad"] and g["rowLabel"] == "Home menu", (width, g)
+              assert 0 <= g["partyTop"] - g["headBottom"] <= 24, (width, g)
+              assert g["sixthBottom"] <= g["editBottom"] <= g["rowTop"] + 1, (width, g)
+              assert g["rowTop"] - g["editBottom"] <= 16, (width, "icon row not beneath squad", g)
+              assert g["rowBottom"] <= g["questTop"] + 1 and g["summonBottom"] <= g["storyTop"] + 1, (width, g)
+              assert g["storyTop"] <= g["archiveTop"] + 1 and g["storyNested"], (width, g)
+              assert g["sixthHeight"] <= 70, (width, "compact sixth unit", g)
+            ref = page.evaluate("""(V640) => {const d=document.getElementById('bf-home-squad-reference');
+              return {inTools:!!d.closest(V640?'#bf-menu-home-extras':'.bf-scene-tools'),open:d.open,hidden:d.hidden,
                 notes:BFHomeSquadFrameV635.referenceIds.filter(id=>document.getElementById(id)).every(
-                  id=>d.contains(document.getElementById(id)))}}""")
+                  id=>d.contains(document.getElementById(id)))}}""", V640)
             assert ref["inTools"] and not ref["open"] and not ref["hidden"] and ref["notes"], (width, ref)
             assert g["scroll"] <= g["viewport"] + 1, (width, g)
             visibility={320:185,393:185,413:155,450:155,540:155}
             assert g["questVisiblePx"]>=visibility[width],(width,"unscrolled Quest visibility",g)
             assert g["questFullyVisible"],(width,"Quest fully above fixed footer",g)
-            if width==540:
+            if width==540 and not V640:
                 assert g["sixthAndEditSeparate"],(width,"compact sixth and separate Edit Squad hit areas",g)
+            if V640:
+                # The icon row is beneath Story: measure its cells once in view.
+                page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
+                cells = page.evaluate(GEOMETRY)["cells"]
+                page.evaluate('window.scrollTo(0,0)')
+            else:
+                cells = g["cells"]
             # Five original-art cells, readable labels, touch-sized, unobstructed.
-            cells = g["cells"]
             assert [c["src"].rsplit("/", 1)[-1] for c in cells] == ICONS, (width, cells)
             assert all(c["nat"] > 0 and c["imgH"] >= 40 for c in cells), (width, cells)
             widths = [c["w"] for c in cells]
@@ -198,16 +218,27 @@ with sync_playwright() as pw:
                 # Keyboard order follows the visual order: portraits, Edit Squad, icon row.
                 page.locator("#bf-scene-party > button").first.focus()
                 seen = []
-                for _ in range(11):
+                for _ in range(16 if V640 else 11):
                     seen.append(page.evaluate("""() => {const a=document.activeElement;
                       return a.dataset.bfHomeUnitId?'unit':(a.closest('.bf-scene-toolrow')?
                         'icon:'+a.querySelector('span').textContent:(a.matches('.bf-scene-heading button')?'edit':a.tagName))}"""))
                     page.keyboard.press("Tab")
-                assert seen == ["unit"] * 6 + ["edit", "icon:QUESTS", "icon:UNITS", "icon:SAVES", "icon:UNIT BOX"], (width, seen)
+                if V640:
+                    # Portraits, Quest, Summon, Story controls, then the icon row.
+                    assert seen[:6] == ["unit"] * 6, (width, seen)
+                    icons = [x for x in seen if x.startswith("icon:")]
+                    assert icons[:4] == ["icon:QUESTS", "icon:UNITS", "icon:SAVES", "icon:UNIT BOX"], (width, seen)
+                    first_icon = seen.index("icon:QUESTS")
+                    assert "edit" not in seen and all(x == "BUTTON" for x in seen[6:first_icon]), (width, seen)
+                    assert seen[first_icon:first_icon + 4] == icons[:4], (width, seen)
+                else:
+                    assert seen == ["unit"] * 6 + ["edit", "icon:QUESTS", "icon:UNITS", "icon:SAVES", "icon:UNIT BOX"], (width, seen)
                 # Real pointer taps on each icon reach their existing routes.
                 for index, route, tab in ((0, "quest", None), (1, "units", None), (2, "menu", None), (3, "units", "box")):
                     page.evaluate("window.scrollTo(0,0)")
-                    box = page.locator("#bf-home .bf-scene-squad > .bf-scene-toolrow > *").nth(index).bounding_box()
+                    if V640:
+                        page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
+                    box = page.locator("#bf-home .bf-scene-toolrow > *").nth(index).bounding_box()
                     page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
                     assert page.evaluate("BF_homeNav.current") == route, (width, index, route)
                     if tab:
@@ -216,6 +247,8 @@ with sync_playwright() as pw:
                     assert page.evaluate("BF_homeNav.current") == "home"
                 # Locked Exchange stays inert.
                 page.evaluate("window.scrollTo(0,0)")
+                if V640:
+                    page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
                 box = page.locator("#bf-home .bf-scene-tool-locked").bounding_box()
                 page.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
                 assert page.evaluate("BF_homeNav.current") == "home"
@@ -236,8 +269,10 @@ with sync_playwright() as pw:
             assert after["player"] == before["player"] and after["writes"] == before["writes"], (width, "no additional writes since snapshot")
             assert after["keys"] == before["keys"], (width, after)
             assert not errors, (width, errors)
-            print(f"PASS v636 {width}x{height}: icon row {g['rowTop']:.0f}-{g['rowBottom']:.0f}px beneath frame "
-                  f"(frame ends {g['frameBottom']:.0f}), 5 original icons {min(widths):.0f}px wide, "
+            where = ("beneath Story (v640 custom 3x2 squad)" if V640 else
+                     f"beneath frame (frame ends {g['frameBottom']:.0f})")
+            print(f"PASS v636 {width}x{height}: icon row {g['rowTop']:.0f}-{g['rowBottom']:.0f}px {where}, "
+                  f"5 original icons {min(widths):.0f}px wide, "
                   "labels fit >=10px, six owned units, leader slot 1, no additional writes")
             page.close()
     finally:

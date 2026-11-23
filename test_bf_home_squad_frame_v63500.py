@@ -55,6 +55,11 @@ assert staged.is_file() or "--source-only" in sys.argv, "run prepare_original_ho
 if staged.is_file():
     assert staged.read_bytes() == original, "staged character_frame.png bytes differ from pinned entry"
 print("PASS v635 source: frame CSS precedes v617 gate; pack and frame SHA-256 pinned; staged bytes identical; no save/engine writes")
+# v640 CUSTOM six-slot Home (owner-approved, source-selected) replaces the
+# five-opening frame. Frame-opening/ornament/short-label geometry no longer
+# applies; identity, leader, disclosure, keyboard, footer, Unit Box guards,
+# navigation and no-write checks below still run in full.
+V640 = (ASSETS / "bf_home_nav.js").read_text("utf-8").count("/* v640 CUSTOM six-owned-unit Home") == 1
 
 if "--source-only" in sys.argv:
     raise SystemExit(0)
@@ -124,7 +129,7 @@ with sync_playwright() as pw:
             # PNG's bottom-right alpha ornaments (source y=290, not 300).
             # Test both the readable compact text and the full aria-label
             # without weakening the existing v423 invalid-EXP/getter guards.
-            if width == 320:
+            if width == 320 and not V640:
                 page.evaluate("""() => {
                   window.__r6Exp=P.unitExp;
                   P.unitExp=Object.fromEntries(P.squad.slice(0,5).map(id=>[id,'0']));
@@ -274,13 +279,27 @@ with sync_playwright() as pw:
                 hits:cards.map(hit),titleArea:title.width*title.height,
                 scroll:document.documentElement.scrollWidth,viewport:innerWidth};
             }""")
-            # Frame and five tall openings follow layout_home2.csv proportions.
-            assert "character_frame.png" in g["frameImage"] and g["frameEvents"] == "none", (width, g)
-            assert abs(g["frameHeight"] - g["partyWidth"] * 356 / 640) <= 1.5, (width, g)
-            assert 0 <= g["partyTop"] - g["headerBottom"] <= 24, (width, g)
-            assert g["titleArea"] <= 1, (width, "visible title banner returned")
-            slot_w = g["partyWidth"] / 5
-            for i, r in enumerate(g["rects"][:5]):
+            if V640:
+                # Custom 3x2 squad: no frame overlay; three equal columns, two rows.
+                assert "character_frame.png" not in g["frameImage"], (width, g)
+                assert 0 <= g["partyTop"] - g["headerBottom"] <= 80, (width, g)
+                assert g["titleArea"] <= 1, (width, "visible title banner returned")
+                rs = g["rects"]
+                assert all(abs(r["t"] - rs[0]["t"]) <= 1 for r in rs[:3]), (width, rs)
+                assert all(abs(r["t"] - rs[3]["t"]) <= 1 for r in rs[3:]), (width, rs)
+                assert rs[3]["t"] >= rs[0]["b"] - 1, (width, rs)
+                assert max(r["w"] for r in rs) - min(r["w"] for r in rs) <= 1, (width, rs)
+                assert g["names"] == g["forms"], (width, "complete owned names", g)
+                for full, aria in zip(g["forms"], g["labels"]):
+                    assert full in aria, (width, full, aria)
+                slot_w = rs[0]["w"]
+            else:
+              assert "character_frame.png" in g["frameImage"] and g["frameEvents"] == "none", (width, g)
+              assert abs(g["frameHeight"] - g["partyWidth"] * 356 / 640) <= 1.5, (width, g)
+              assert 0 <= g["partyTop"] - g["headerBottom"] <= 24, (width, g)
+              assert g["titleArea"] <= 1, (width, "visible title banner returned")
+              slot_w = g["partyWidth"] / 5
+            for i, r in enumerate([] if V640 else g["rects"][:5]):
                 assert abs(r["l"] - (g["partyLeft"] + i * slot_w)) <= 1, (width, i, r)
                 assert abs(r["w"] - slot_w) <= 1 and abs(r["h"] - slot_w * 350 / 128) <= 1.5, (width, i, r)
                 assert abs(r["t"] - g["partyTop"]) <= 1, (width, i, r)
@@ -289,7 +308,7 @@ with sync_playwright() as pw:
             assert g["ids"] == g["squad"] and len(g["squad"]) == 6, (width, g)
             assert g["names"][5] == g["forms"][5], (width, "sixth full name", g)
             assert g["forms"][5] in g["labels"][5], (width, "sixth aria", g)
-            for i, (shown, full, aria) in enumerate(zip(
+            for i, (shown, full, aria) in enumerate([] if V640 else zip(
                     g["names"][:5], g["forms"][:5], g["labels"][:5])):
                 assert isinstance(full, str) and full.strip() and full in aria, (width, i, "full name", g)
                 assert isinstance(shown, str) and shown.strip(), (width, i, "visible name missing", g)
@@ -305,7 +324,10 @@ with sync_playwright() as pw:
             assert "Leader, squad slot 1 of 6" in g["labels"][0], (width, g)
             assert "squad slot 6 of 6" in g["labels"][5], (width, g)
             sixth = g["rects"][5]
-            assert sixth["t"] >= g["partyTop"] + g["frameHeight"] - 1 and sixth["h"] >= 44, (width, sixth)
+            if V640:
+                assert abs(sixth["t"] - g["rects"][3]["t"]) <= 1 and sixth["h"] >= 110, (width, sixth)
+            else:
+                assert sixth["t"] >= g["partyTop"] + g["frameHeight"] - 1 and sixth["h"] >= 44, (width, sixth)
             assert all(g["hits"]), (width, g["hits"])
             assert g["scroll"] <= g["viewport"] + 1, (width, g)
 
@@ -318,11 +340,17 @@ with sync_playwright() as pw:
                 text:ids.map(id=>document.getElementById(id).textContent)}}""")
             assert ref["count"] >= 2 and ref["inside"] and not ref["open"] and not ref["hidden"], (width, ref)
             assert all(r == "status" for r in ref["roles"]) and all(ref["text"]), (width, ref)
+            if V640:  # the same disclosure node is hosted on Menu
+                assert page.evaluate("!!document.getElementById('bf-home-squad-reference').closest('#bf-menu-home-extras')")
+                page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
             page.locator("#bf-home-squad-reference > summary").focus()
             page.keyboard.press("Enter")
             assert page.evaluate("document.getElementById('bf-home-squad-reference').open")
             assert page.locator("#bf12600-home-squad-cost").is_visible()
             page.keyboard.press("Enter")
+            if V640:
+                page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+                assert page.evaluate("BF_homeNav.current") == "home"
 
             # Keyboard: slot buttons in visual order, then sixth, then Edit Squad.
             page.locator("#bf-scene-party > button").first.focus()
@@ -331,7 +359,14 @@ with sync_playwright() as pw:
                 seen.append(page.evaluate("document.activeElement.dataset.bfHomeUnitId||null"))
                 page.keyboard.press("Tab")
             assert [int(x) for x in seen] == g["squad"], (width, seen)
-            assert page.evaluate("document.activeElement.matches('.bf-scene-squad .bf-scene-heading button')")
+            if V640:
+                # Edit Squad precedes the six cards; Quest follows the sixth.
+                assert page.evaluate("document.activeElement.matches('#bf-home button.bf-scene-featured[data-bf-goto=\"quest\"]')")
+                page.locator("#bf-scene-party > button").first.focus()
+                page.keyboard.press("Shift+Tab")
+                assert page.evaluate("document.activeElement.matches('.bf-scene-squad .bf-scene-heading button')")
+            else:
+                assert page.evaluate("document.activeElement.matches('.bf-scene-squad .bf-scene-heading button')")
 
             # Footer clearance: the WHOLE Quest and Summon gateway rectangles fit
             # between the header and the fixed footer after scrolling, and a
@@ -406,8 +441,9 @@ with sync_playwright() as pw:
             after = page.evaluate(SNAPSHOT)
             assert after["player"] == before["player"] and after["writes"] == before["writes"], (width, after)
             assert not errors, (width, errors)
-            print(f"PASS v635 {width}x{height}: geometry five 128x350 openings in 640x356 frame "
-                  f"(slot {slot_w:.1f}x{slot_w*350/128:.1f}px), leader slot 1, sixth below, "
+            print(f"PASS v635 {width}x{height}: " + ("v640 custom 3x2 squad, " if V640 else
+                  f"geometry five 128x350 openings in 640x356 frame (slot {slot_w:.1f}x{slot_w*350/128:.1f}px), ") +
+                  "leader slot 1, sixth below, "
                   "disclosure intact, navigation OK, no additional writes since snapshot "
                   "(geometry/behavior only; not screenshot parity)")
             page.close()
