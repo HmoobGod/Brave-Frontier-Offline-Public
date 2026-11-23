@@ -1840,8 +1840,8 @@ body.bf-menu-mode #bf054-home-details {
   /* The sixth owned unit stays clickable and present beneath the five archival slots. */
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) {
     grid-column:1/-1;box-sizing:border-box;width:calc(100% - 120px);
-    height:52px;min-height:52px;margin-top:5px;padding:4px 6px;
-    grid-template-columns:40px minmax(0,1fr);grid-template-rows:20px 19px;
+    height:62px;min-height:62px;margin-top:5px;padding:5px 6px;
+    grid-template-columns:44px minmax(0,1fr);grid-template-rows:27px 25px;
     column-gap:6px;row-gap:0;
     border:0;border-top:1px solid #9e7b41;border-bottom:1px solid #7d6544;
     border-radius:0;background:linear-gradient(90deg,#121926,#1e2735 80%,#141a26);
@@ -1853,12 +1853,17 @@ body.bf-menu-mode #bf054-home-details {
   }
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) img,
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
-    grid-column:1;grid-row:1/span 2;width:39px;height:39px;max-width:39px;
+    grid-column:1;grid-row:1/span 2;width:44px;height:44px;max-width:44px;
     margin:0;object-fit:contain;align-self:center;
+  }
+  /* Missing-art fallback: keep the 11px one-line "NO ART" inside its own box
+   * at 320px (border-box 44px leaves 42px for ~39px of text). */
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
+    width:44px;max-width:44px;padding:0 1px;white-space:nowrap;
   }
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) strong {
     grid-column:2;grid-row:1;box-sizing:border-box;width:100%;min-width:0;
-    font:800 10px/1.2 Arial,sans-serif;align-self:end;text-align:left;
+    font:800 11px/1.2 Arial,sans-serif;align-self:end;text-align:left;
     white-space:normal;overflow-wrap:anywhere;
   }
   body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) small {
