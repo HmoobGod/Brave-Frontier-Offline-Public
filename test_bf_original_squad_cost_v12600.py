@@ -68,6 +68,9 @@ with sync_playwright() as playwright:
  page.wait_for_function("""() => {const d=document.getElementById('bf-home-squad-reference');
    const e=document.getElementById('bf12600-home-squad-cost');
    return !!d && !!e && !d.hidden && d.querySelector('.bf-home-squad-reference-body')?.contains(e);}""")
+ # v640: the squad source-notes disclosure (same live node) is on Menu.
+ assert page.evaluate("!!document.getElementById('bf-home-squad-reference').closest('#bf-menu-home-extras')")
+ page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
  assert disclosure.count()==1 and not disclosure.evaluate('(e)=>e.open')
  assert disclosure.locator('summary').is_visible()
  assert not cost_note.is_visible()
@@ -120,7 +123,8 @@ with sync_playwright() as playwright:
  assert 'SQUAD COST · 4 (2 verified units) · capacity unknown' in home['known'],home
  assert 'SOURCE INCOMPLETE' in home['unknown'] and '1 unverified' in home['unknown'],home
  assert 'NO OWNED UNITS SELECTED' in home['empty'],home
- assert home['home']=='home' and 0<=home['bounds']['left']<home['bounds']['right']<=390,home
+ # v640: the same live cost note is read on the Menu route.
+ assert home['home']=='menu' and 0<=home['bounds']['left']<home['bounds']['right']<=390,home
  page.set_viewport_size({'width':320,'height':844})
  bounds=page.locator('#bf12600-home-squad-cost').bounding_box()
  assert bounds and bounds['x']>=-0.5 and bounds['x']+bounds['width']<=320.5,bounds

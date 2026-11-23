@@ -64,28 +64,16 @@ with sync_playwright() as pw:
                 assert f'squad slot {index+1} of 6' in cards.nth(index).get_attribute('aria-label')
                 assert ('Leader' in cards.nth(index).get_attribute('aria-label'))==(index==0)
                 assert cards.nth(index).locator('.bf-scene-leader').count()==int(index==0)
-                if index == 5 and width <= 412:
-                    # Only the sixth decorative slot caption is visually clipped
-                    # in the approved compact Home row. Keep identity and touch
-                    # coverage; never demand that hidden text fits a 1px box.
-                    assert role.get_attribute('aria-hidden') == 'true'
-                    assert role.evaluate("""el => {
-                        const css = getComputedStyle(el), box = el.getBoundingClientRect();
-                        return css.position === 'absolute'
-                            && css.overflow === 'hidden'
-                            && css.whiteSpace === 'nowrap'
-                            && css.clipPath !== 'none'
-                            && box.width <= 1.01 && box.height <= 1.01;
-                    }"""), (width, index)
-                    sixth = cards.nth(index)
-                    visible_name, visible_level = sixth.locator('strong'), sixth.locator('small')
-                    assert visible_name.is_visible() and visible_level.is_visible(), (width, index)
-                    full_name = visible_name.inner_text().strip()
-                    assert full_name and full_name in sixth.get_attribute('aria-label'), (width, index)
-                    assert sixth.get_attribute('title') == 'Inspect ' + full_name
-                else:
-                    # All visible slot captions must still fit their own boxes.
-                    assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'), (width, index)
+                # v640 custom six-slot Home: every slot caption, including slot
+                # 6, is visible and fits its box; every card shows its name/level.
+                assert role.get_attribute('aria-hidden') == 'true'
+                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'), (width, index)
+                card = cards.nth(index)
+                visible_name, visible_level = card.locator('strong'), card.locator('small')
+                assert visible_name.is_visible() and visible_level.is_visible(), (width, index)
+                full_name = visible_name.inner_text().strip()
+                assert full_name and ('Inspect ' + full_name + ', ') in card.get_attribute('aria-label'), (width, index)
+                assert card.get_attribute('title') == 'Inspect ' + full_name
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert page.evaluate(slot_snapshot)==slot_before
         for first in (None, -1):

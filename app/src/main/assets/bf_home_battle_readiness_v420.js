@@ -170,7 +170,12 @@
   // Explain the SAME fail-closed lock used for manual route controls.
   // Read-only and never a request to auto-start combat or change the save.
   function blockedReason(){
-    if(window.BF_homeNav?.current!=='home')return 'HOME NOT ACTIVE · Return Home to use these shortcuts.';
+    // v640: the card may be hosted in the Menu extras section; only the
+    // screen that actually shows the card may use its shortcuts.
+    const host=card.closest('#bf-menu-home-extras')?'menu':'home';
+    if(window.BF_homeNav?.current!==host)return host==='home'?
+      'HOME NOT ACTIVE · Return Home to use these shortcuts.':
+      'MENU NOT ACTIVE · Open Menu to use these shortcuts.';
     if(S?.busy===true)return 'TURN IN PROGRESS · Finish the current battle action first.';
     if(S?.auto===true)return 'AUTO BATTLE ACTIVE · Stop Auto before changing screens.';
     const repeat=window.BFGlobalQoLQuestRepeatV9800;

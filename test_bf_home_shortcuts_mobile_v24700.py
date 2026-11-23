@@ -35,7 +35,8 @@ assert len(CSS.encode("utf8")) <= 128 * 1024
 assert len(JS.encode("utf8")) <= 128 * 1024
 home = JS.split("/* Build #9: original Global home location hub", 1)[1].split(
     "/* Build #11 - recovered BF1 Global artwork", 1)[0]
-for label in ("QUESTS", "UNITS", "SAVES", "UNIT BOX", "EXCHANGE · LATER"):
+# v643: icons match actions (Units = footer "Unit" cell, Unit Box = "View Units", MENU not SAVES).
+for label in ("QUESTS", "UNITS", "MENU", "UNIT BOX", "EXCHANGE · LATER"):
     assert f"<span>{label}</span>" in home
 assert home.count('class="bf-scene-tool-locked"') == 1
 assert 'aria-label="Exchange Hall not implemented" aria-disabled="true"' in home

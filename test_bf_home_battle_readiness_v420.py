@@ -69,7 +69,8 @@ with sync_playwright() as pw:
               const explore=document.querySelector('.bf-scene-explore');
               const preview=document.getElementById('bf420-home-readiness');
               return {
-                followsAdventure:explore.nextElementSibling===preview,
+                // v640: the read-only preview card lives in the Menu extras section.
+                followsAdventure:preview.parentElement?.id==='bf-menu-home-extras'&&!document.getElementById('bf-home').contains(preview),
                 explore:explore.getBoundingClientRect().top,
                 quest:explore.querySelector('button[data-bf-goto="quest"]').getBoundingClientRect().top,
                 summon:explore.querySelector('button[data-bf-goto="summon"]').getBoundingClientRect().top
@@ -81,6 +82,11 @@ with sync_playwright() as pw:
         page.set_viewport_size({"width":390,"height":844})
         assert page.evaluate("P.version")==7
         assert page.evaluate("BF_homeNav.current")=="home"
+        # v640: from here on the card's host screen is Menu, so every 'return to the
+        # active host' step below targets Menu instead of Home (same gates/assertions).
+        # v640: the read-only next-adventure preview is shown on Menu.
+        page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
+        assert page.evaluate("BF_homeNav.current")=="menu"
         panel=page.locator("#bf420-home-readiness")
         assert panel.count()==1 and panel.is_visible()
         assert page.locator('#bf420-home-hint').get_attribute('role')=='status'
@@ -189,7 +195,7 @@ with sync_playwright() as pw:
             for previous_tab in ('training','evolve','box','equipment'):
                 page.evaluate("""tab=>{
                   BF_homeNav.go('units');BFInnerScreens.setTab(tab);
-                  BF_homeNav.go('home');
+                  BF_homeNav.go('menu');
                 }""",previous_tab)
                 shortcut=page.locator('#bf420-home-units')
                 if previous_tab=='training':
@@ -207,7 +213,7 @@ with sync_playwright() as pw:
                 assert page.locator('section.evo-panel').is_hidden()
                 assert page.locator('#bf-unit-tab-label').evaluate('(e)=>document.activeElement===e')
                 assert page.evaluate('document.documentElement.scrollWidth<=innerWidth'),width
-                page.locator('.bf-navbar button[data-bf-goto="home"]').click()
+                page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
         assert page.evaluate("""()=>({
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           writes:__bf420StorageWrites(),
@@ -234,7 +240,7 @@ with sync_playwright() as pw:
           return out;
         }""")
         assert missing_editor['disabled'] and missing_editor['questEnabled'],missing_editor
-        assert missing_editor['route']=='home' and missing_editor['recovered'],missing_editor
+        assert missing_editor['route']=='menu' and missing_editor['recovered'],missing_editor
         assert 'SQUAD EDITOR UNAVAILABLE' in missing_editor['hint'],missing_editor
         page.set_viewport_size({'width':390,'height':844})
         # A live automatic action must disable even read-only route shortcuts.
@@ -244,7 +250,7 @@ with sync_playwright() as pw:
         assert page.locator("#bf420-home-units").is_disabled()
         page.evaluate("""() => document.getElementById('bf420-home-quest').dispatchEvent(
            new MouseEvent('click',{bubbles:true}))""")
-        assert page.evaluate("BF_homeNav.current")=="home"
+        assert page.evaluate("BF_homeNav.current")=="menu"
         page.evaluate("S.auto=false;S.busy=true;BFHomeBattleReadinessV420.refresh()")
         assert 'TURN IN PROGRESS' in page.locator('#bf420-home-hint').inner_text()
         assert page.locator("#bf420-home-quest").is_disabled()
@@ -307,12 +313,12 @@ with sync_playwright() as pw:
         assert 'REPEAT STATUS UNAVAILABLE' in repeat_guards['missingHint'],repeat_guards
         for kind,state in repeat_guards['invalid'].items():
             assert state['quest'] and state['units'],(kind,state)
-            assert state['route']=='home',(kind,state)
+            assert state['route']=='menu',(kind,state)
             assert 'REPEAT STATUS UNAVAILABLE' in state['hint'],(kind,state)
         assert not repeat_guards['idle']['quest'],repeat_guards
         assert not repeat_guards['idle']['units'],repeat_guards
         assert repeat_guards['idle']['hint']=='',repeat_guards
-        assert page.evaluate('BF_homeNav.current')=='home'
+        assert page.evaluate('BF_homeNav.current')=='menu'
         assert page.locator("#bf420-home-quest").is_enabled()
         # Every archived quest field must remain source-qualified.
         field_gates=page.evaluate("""() => {
@@ -343,7 +349,7 @@ with sync_playwright() as pw:
         # Both actions only navigate; original profile, mission and storage stay unchanged.
         page.locator("#bf420-home-units").click()
         assert page.evaluate("BF_homeNav.current")=="units"
-        page.evaluate("BF_homeNav.go('home')")
+        page.evaluate("BF_homeNav.go('menu')")
         assert page.locator("#bf420-home-quest").is_enabled()
         page.locator("#bf420-home-quest").click()
         assert page.evaluate("BF_homeNav.current")=="quest"
@@ -353,7 +359,7 @@ with sync_playwright() as pw:
            keys:Object.keys(localStorage).sort().join(',')
         })""")
         assert before==after,(before,after)
-        page.evaluate("BF_homeNav.go('home')")
+        page.evaluate("BF_homeNav.go('menu')")
         assert page.locator("#bf420-home-readiness").is_visible()
         # Test-only memory-only DEMO clear receipts, never an owner save write.
         page.evaluate("""() => {
