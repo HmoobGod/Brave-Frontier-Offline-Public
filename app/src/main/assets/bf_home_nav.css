@@ -2210,6 +2210,9 @@ body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading bu
   /* Keep v641's 5px total squad inset on narrow short screens. */
   body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {padding:0;border-width:5px;border-image-width:5px}
 }
+/* v643: the Units shortcut shows the bottom nav's original footer_btn2 "Unit"
+ * cell at a fixed 43px (+1px) so it sits on the 44px icon line at all widths. */
+.bf-scene-toolrow i.bf-nav-art{width:43px;height:43px;margin-bottom:1px;background-size:205px 410px;background-position:-135px 0}
 /* Menu: auxiliary Home panels (same live nodes, moved off Home). */
 .bf-menu-home-extras{box-sizing:border-box;max-width:100%;margin:12px 0;padding:10px;
   border:1px solid #bca16a;border-radius:6px;background:#121d30;color:#e8eef8}

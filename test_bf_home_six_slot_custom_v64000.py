@@ -51,6 +51,12 @@ assert v642_art == ["home/home_character_frame_bg.png", "mission_select/area_nam
 for art in v642_art:
     assert '"%s"' % art.split("/")[1] in PREP, art
 assert "data:image" not in v642_css and "min-height:" not in v642_css.replace("min-height:44", "")
+# v643: Home shortcut icons match their actions; no gift-box/shortcut-overlay misuse.
+ROW = JS.split('<div class="bf-scene-toolrow">', 1)[1].split("'</div>',", 1)[0]
+assert "home_new_btn_box1.png" not in ROW and "home_new_btn_shortcut1.png" not in ROW and "SAVES" not in ROW
+assert '<i class="bf-nav-art bf-nav-art-units" aria-hidden="true"></i><span>UNITS</span>' in ROW
+assert 'src="content/unit_top/unit_top_box_btn1.png" alt="" /><span>UNIT BOX</span>' in ROW
+assert 'src="content/home/home_new_btn_menu1.png" alt="" /><span>MENU</span>' in ROW
 assert "@media(max-height:769px) and (min-width:380px){" in v640_css and "@media(max-height:729px) and (max-width:379px){" in v640_css
 assert len(CSS.encode("utf-8")) <= 128 * 1024 and len(JS.encode("utf-8")) <= 128 * 1024
 print("PASS v640 source: custom six-slot Home layer, no state/route writes, CI registered, offline")
@@ -212,6 +218,52 @@ DECODE = """async () => Promise.all(['content/mission_select/mission_check_unit_
   i.onerror=()=>ok([src,0,0]);i.src=src;})))"""
 
 
+
+ROW_PROBE = """() => [...document.querySelectorAll('#bf-home .bf-scene-toolrow > *')].map(c => {
+  const a=c.querySelector('img,i.bf-nav-art'),l=c.querySelector('span'),r=c.getBoundingClientRect(),
+    ar=a.getBoundingClientRect(),lr=l.getBoundingClientRect(),cs=getComputedStyle(a);
+  return {label:l.textContent,goto:c.dataset.bfGoto||null,box:c.hasAttribute('data-bf-open-box'),
+    name:c.getAttribute('aria-label')||l.textContent,locked:c.getAttribute('aria-disabled')==='true',
+    art:a.tagName==='IMG'?a.getAttribute('src'):cs.backgroundImage.split('content/')[1].replace('")','')+'@'+cs.backgroundPosition,
+    decoded:a.tagName==='IMG'?a.complete&&a.naturalWidth>0:cs.backgroundSize==='205px 410px',
+    w:r.width,h:r.height,artH:ar.height,labelTop:lr.top,fit:l.scrollWidth<=l.clientWidth+1}})"""
+EXPECTED_ROW = [
+    ("QUESTS", "quest", False, "content/home/home_new_btn_mission1.png"),
+    ("UNITS", "units", False, "footer/footer_btn2.png@-135px 0px"),
+    ("MENU", "menu", False, "content/home/home_new_btn_menu1.png"),
+    ("UNIT BOX", "units", True, "content/unit_top/unit_top_box_btn1.png"),
+    ("EXCHANGE · LATER", None, False, "content/home/home_new_btn_exchange1.png")]
+
+
+def check_row(page, tag, stress_font=False):
+    page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
+    row = page.evaluate(ROW_PROBE)
+    assert [(c["label"], c["goto"], c["box"], c["art"]) for c in row] == EXPECTED_ROW, (tag, row)
+    assert row[3]["name"] == "Open owned Unit Box" and row[4]["locked"], (tag, row)
+    assert all(c["decoded"] and c["w"] >= 44 and c["h"] >= 64 and c["artH"] >= 40 for c in row), (tag, row)
+    # Every label fits with the app font. Under the wider stress font only the
+    # unchanged locked "EXCHANGE · LATER" label (pre-v643) may overflow at 320px.
+    assert all(c["fit"] for c in (row[:4] if stress_font else row)), (tag, row)
+    tops = [c["labelTop"] for c in row]
+    assert max(tops) - min(tops) <= 1, (tag, "shortcut labels aligned", tops)
+    before = page.evaluate(SNAPSHOT)
+    for index, route, tab in ((0, "quest", None), (1, "units", "squad"), (2, "menu", None), (3, "units", "box")):
+        page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
+        b = page.locator("#bf-home .bf-scene-toolrow > *").nth(index).bounding_box()
+        page.mouse.click(b["x"] + b["width"] / 2, b["y"] + b["height"] / 2)
+        assert page.evaluate("BF_homeNav.current") == route, (tag, index, route)
+        if tab:
+            assert page.evaluate("window.BFInnerScreens.unitTab") == tab, (tag, index, tab)
+        page.click('.bf-navbar button[data-bf-goto="home"]')
+        assert page.evaluate("BF_homeNav.current") == "home", (tag, index)
+    page.locator("#bf-home .bf-scene-toolrow").evaluate("e=>e.scrollIntoView({block:'center',behavior:'instant'})")
+    b = page.locator("#bf-home .bf-scene-tool-locked").bounding_box()
+    page.mouse.click(b["x"] + b["width"] / 2, b["y"] + b["height"] / 2)
+    assert page.evaluate("BF_homeNav.current") == "home", (tag, "Exchange inert")
+    after = page.evaluate(SNAPSHOT)
+    assert after["player"] == before["player"] and after["writes"] == before["writes"], (tag, "shortcut taps wrote state")
+    page.evaluate("window.scrollTo(0,0)")
+
 def check_polish(page, tag):
     p = page.evaluate(POLISH)
     assert "mission_check_unit_frame.png" in p["rim"] and p["rimW"] in ("5px", "6px"), (tag, p)
@@ -239,6 +291,7 @@ with sync_playwright() as pw:
         tag = f"{width}x{height}"
         check_cells(page, tag)
         check_polish(page, tag)
+        check_row(page, tag)
         assert "bf-home-v640" in g["cls"] and "bf-home-v635" not in g["cls"] and "bf-home-v636" not in g["cls"], g["cls"]
         assert g["api"] == {"custom": True, "historical": False, "slots": 6}, g["api"]
         cards = g["cards"]
@@ -329,6 +382,7 @@ with sync_playwright() as pw:
             tag = f"{width}x{height}" + (f" font={font}" if font else "")
             c = check_cells(page, tag)
             check_polish(page, tag)
+            check_row(page, tag, stress_font=bool(font))
             names = page.evaluate("""() => [...document.querySelectorAll('#bf-scene-party>.bf-scene-member')]
               .map((c,i)=>[c.querySelector('strong').textContent,effectiveUnit(P.squad[i]).name])""")
             assert all(a == b for a, b in names), (tag, names)  # full names kept

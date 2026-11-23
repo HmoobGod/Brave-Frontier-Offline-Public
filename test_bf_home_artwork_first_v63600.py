@@ -62,10 +62,16 @@ MODULES = [m for m in dict.fromkeys(re.findall(r"bf[0-9a-z_]*\.(?:js|css)", ACTI
            if (ASSETS / m).is_file()]
 assert MODULES[:2] == ["bf_home_nav.js", "bf_home_nav.css"], MODULES[:2]
 TYPES = {".png": "image/png", ".jpg": "image/jpeg"}
-ICONS = ["home_new_btn_mission1.png", "home_new_btn_shortcut1.png", "home_new_btn_menu1.png",
-         "home_new_btn_box1.png", "home_new_btn_exchange1.png"]
-for icon in ICONS:
-    assert (ASSETS / "content/home" / icon).is_file(), "run prepare_original_home_assets.py first"
+# v643: each icon matches its action. Units shows the bottom nav's original
+# footer_btn2 "Unit" atlas cell; Unit Box shows the Units screen's original
+# "View Units" art. The gift-box (Present) and shortcut-overlay icons are no
+# longer used for unrelated actions.
+ICON_FILES = ["home/home_new_btn_mission1.png", "footer/footer_btn2.png", "home/home_new_btn_menu1.png",
+              "unit_top/unit_top_box_btn1.png", "home/home_new_btn_exchange1.png"]
+ICONS = ["home_new_btn_mission1.png", "footer_btn2.png@-135px 0px", "home_new_btn_menu1.png",
+         "unit_top_box_btn1.png", "home_new_btn_exchange1.png"]
+for icon in ICON_FILES:
+    assert (ASSETS / "content" / icon).is_file(), "run prepare_original_home_assets.py first"
 
 
 def serve(route):
@@ -112,9 +118,11 @@ GEOMETRY = """() => {
   const story=home.querySelector('.bf-scene-story'),quest=home.querySelector('.bf-scene-featured[data-bf-goto="quest"]');
   const head=document.querySelector('.bf-shell-head').getBoundingClientRect();
   const footer=document.querySelector('.bf-navbar').getBoundingClientRect();
-  const cells=[...row.children].map(c=>{const r=c.getBoundingClientRect(),i=c.querySelector('img'),s=c.querySelector('span');
+  const cells=[...row.children].map(c=>{const r=c.getBoundingClientRect(),i=c.querySelector('img,i.bf-nav-art'),s=c.querySelector('span');
+    const cs=getComputedStyle(i),atlas=i.tagName==='I'&&cs.backgroundImage.includes('content/footer/footer_btn2.png');
     const ir=i.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,hit=document.elementFromPoint(cx,cy);
-    return {tag:c.tagName,w:r.width,h:r.height,src:i.getAttribute('src'),nat:i.naturalWidth,
+    return {tag:c.tagName,w:r.width,h:r.height,src:atlas?'footer_btn2.png@'+cs.backgroundPosition:i.getAttribute('src'),
+      nat:atlas?1:i.naturalWidth,
       imgH:ir.height,label:s.textContent,fs:parseFloat(getComputedStyle(s).fontSize),
       ls:getComputedStyle(s).letterSpacing,fit:s.scrollWidth<=s.clientWidth+1&&s.scrollHeight<=s.clientHeight+1,
       inside:r.left>=-0.5&&r.right<=innerWidth+0.5,hit:!!hit&&(hit===c||c.contains(hit)),
@@ -227,12 +235,12 @@ with sync_playwright() as pw:
                     # Portraits, Quest, Summon, Story controls, then the icon row.
                     assert seen[:6] == ["unit"] * 6, (width, seen)
                     icons = [x for x in seen if x.startswith("icon:")]
-                    assert icons[:4] == ["icon:QUESTS", "icon:UNITS", "icon:SAVES", "icon:UNIT BOX"], (width, seen)
+                    assert icons[:4] == ["icon:QUESTS", "icon:UNITS", "icon:MENU", "icon:UNIT BOX"], (width, seen)
                     first_icon = seen.index("icon:QUESTS")
                     assert "edit" not in seen and all(x == "BUTTON" for x in seen[6:first_icon]), (width, seen)
                     assert seen[first_icon:first_icon + 4] == icons[:4], (width, seen)
                 else:
-                    assert seen == ["unit"] * 6 + ["edit", "icon:QUESTS", "icon:UNITS", "icon:SAVES", "icon:UNIT BOX"], (width, seen)
+                    assert seen == ["unit"] * 6 + ["edit", "icon:QUESTS", "icon:UNITS", "icon:MENU", "icon:UNIT BOX"], (width, seen)
                 # Real pointer taps on each icon reach their existing routes.
                 for index, route, tab in ((0, "quest", None), (1, "units", None), (2, "menu", None), (3, "units", "box")):
                     page.evaluate("window.scrollTo(0,0)")
