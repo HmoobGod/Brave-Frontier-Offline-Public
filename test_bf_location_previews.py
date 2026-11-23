@@ -47,6 +47,10 @@ with sync_playwright() as pw:
         page.set_content(html,wait_until='load',timeout=90000)
         page.add_style_tag(content=CSS);page.add_script_tag(content=NAV)
         baseline=page.evaluate(SNAPSHOT);battle=page.evaluate('JSON.stringify(S)')
+        # v640 custom Home: the location UI launcher lives in the Menu extras section.
+        assert page.evaluate("!!document.getElementById('bf-location-launch').closest('#bf-menu-home-extras')")
+        page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
+        host=page.evaluate('BF_homeNav.current');assert host=='menu',host
         trigger=page.locator('#bf-location-launch');trigger.click()
         dialog=page.locator('#bf-location-dialog')
         assert dialog.is_visible() and page.evaluate("BF_homeNav.current")== 'location-preview'
@@ -86,9 +90,14 @@ with sync_playwright() as pw:
             assert dialog.evaluate('(e)=>e.contains(document.activeElement)||e===document.activeElement')
         assert page.evaluate(back_js) is True
         page.wait_for_function('!document.body.classList.contains("bf-location-preview-open")')
-        assert not dialog.is_visible() and page.evaluate('BF_homeNav.current')=='home'
+        assert not dialog.is_visible() and page.evaluate('BF_homeNav.current')==host
         assert trigger.evaluate('(e)=>document.activeElement===e')
-        assert page.evaluate(back_js) is False
+        if host=='home':
+            assert page.evaluate(back_js) is False
+        else:
+            # Android Back from Menu returns Home (existing native route), then reopen Menu.
+            assert page.evaluate(back_js) is True and page.evaluate('BF_homeNav.current')=='home'
+            page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
         trigger.click();page.keyboard.press('Escape')
         page.wait_for_function('!document.body.classList.contains("bf-location-preview-open")')
         assert trigger.evaluate('(e)=>document.activeElement===e')
