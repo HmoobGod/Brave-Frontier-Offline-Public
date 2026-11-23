@@ -1807,3 +1807,176 @@ body.bf-menu-mode #bf054-home-details {
     position:relative;z-index:2;align-self:flex-end;margin-top:-50px
   }
 }
+
+/* P0 Home first-screen refinement — disposable presentation-only candidate.
+ * ORIGINAL SOURCE EVIDENCE (unaltered bytes):
+ *   content/home/character_frame.png (644x354)
+ *   content/home/home_character_frame_bg.png (128x350)
+ *   content/unit_top/unit_top_edit_btn1.png (260x156; "Manage Squad" art)
+ * RECONSTRUCTION CHOICES (not authenticated April 2022 Global geometry):
+ *   enlarged existing unit thumbnail, name gutters avoiding gold frame posts,
+ *   compact owned sixth-unit strip, and artist-supplied Manage Squad art for
+ *   the existing edit button. Same nodes, routes, tap targets and save logic.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > img,
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > .bf-portrait-fallback {
+    left:4%;top:15%;width:92%;height:auto;max-width:none;object-fit:contain;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > .bf-scene-slot {
+    z-index:2;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    width:auto;min-width:0;max-width:none;left:13%;right:13%;bottom:35%;
+    height:24px;min-height:24px;max-height:24px;padding:0;margin:0;
+    white-space:normal;overflow-wrap:anywhere;word-break:normal;
+    font:800 10px/12px Arial,sans-serif;text-align:center;overflow:hidden;
+    text-shadow:0 1px 3px #000,0 0 3px #000;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    left:13%;right:13%;bottom:19%;font-size:10px;text-align:left;
+  }
+  /* The sixth owned unit stays clickable and present beneath the five archival slots. */
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) {
+    grid-column:1/-1;box-sizing:border-box;width:calc(100% - 120px);
+    height:62px;min-height:62px;margin-top:5px;padding:5px 6px;
+    grid-template-columns:44px minmax(0,1fr);grid-template-rows:27px 25px;
+    column-gap:6px;row-gap:0;
+    border:0;border-top:1px solid #9e7b41;border-bottom:1px solid #7d6544;
+    border-radius:0;background:linear-gradient(90deg,#121926,#1e2735 80%,#141a26);
+    box-shadow:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-scene-slot {
+    position:absolute;width:1px;height:1px;min-width:0;min-height:0;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) img,
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
+    grid-column:1;grid-row:1/span 2;width:44px;height:44px;max-width:44px;
+    margin:0;object-fit:contain;align-self:center;
+  }
+  /* Missing-art fallback: keep the 11px one-line "NO ART" inside its own box
+   * at 320px (border-box 44px leaves 42px for ~39px of text). */
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
+    width:44px;max-width:44px;padding:0 1px;white-space:nowrap;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) strong {
+    grid-column:2;grid-row:1;box-sizing:border-box;width:100%;min-width:0;
+    font:800 11px/1.2 Arial,sans-serif;align-self:end;text-align:left;
+    white-space:normal;overflow-wrap:anywhere;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) small {
+    grid-column:2;grid-row:2;font:700 10px/1.2 Arial,sans-serif;
+    align-self:start;text-align:left;
+  }
+  /* Reuse archived Global unit-top Manage Squad artwork; button route unchanged. */
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading {
+    position:relative;z-index:4;align-self:flex-end;width:114px;
+    height:52px;min-height:52px;margin-top:-58px;margin-right:0;padding:0;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"] {
+    display:block;box-sizing:border-box;width:114px;height:52px;min-height:52px;min-width:114px;
+    padding:0;border:0;border-radius:0;background:transparent
+      url('content/unit_top/unit_top_edit_btn1.png') center/114px 52px no-repeat;
+    color:transparent;font-size:0;line-height:0;box-shadow:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"]:focus-visible {
+    outline:3px solid #ffe2a0;outline-offset:-3px;
+  }
+}
+
+/* R2 — disposable HOME-FIRST refinement corrections to R1.
+ * The original PNGs stay byte-identical; character geometry, name rendering
+ * and the art/label juxtaposition are reconstructed, NOT verified 2022 UI.
+ * Limit to phone widths through 412px; 413px+ retains pinned PR #635 rules.
+ * The original UNIT TOP Manage Squad text artwork is scaled proportionally
+ * (260x156 -> 87x52.2); live button text remains visible if the PNG fails.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    top:50%;bottom:auto;left:13%;right:13%;height:auto;min-height:0;max-height:none;
+    display:block;-webkit-line-clamp:unset;white-space:normal;
+    overflow:visible;overflow-wrap:break-word;word-break:normal;
+    font:800 10px/11px Arial,sans-serif;letter-spacing:-.2px;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    bottom:7%;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"] {
+    display:flex;align-items:flex-end;justify-content:center;position:relative;
+    box-sizing:border-box;min-width:114px;min-height:52px;width:114px;height:52px;
+    padding:0 3px 3px;border:1px solid #a68851;border-radius:4px;
+    background:url('content/unit_top/unit_top_edit_btn1.png') center -10px/87px 52.2px no-repeat,
+      linear-gradient(180deg,#283443,#111b2a);
+    color:#ffe8ba;font:800 10px/1.1 Arial,sans-serif;
+    letter-spacing:0;text-shadow:0 1px 2px #000,0 0 3px #000;
+    box-shadow:inset 0 1px 1px #e4c18155,0 2px 3px #0008;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"]:focus-visible {
+    outline:3px solid #ffe2a0 !important;outline-offset:-2px;
+  }
+}
+
+/* R3 isolated, presentation-only original-frame name wrap.
+ * 10px source UI type. Do NOT alter archived unit names or original PNGs.
+ * Verified Chromium lacks automatic English hyphenation despite html lang=en;
+ * a condensed system face keeps full English words together at phone widths.
+ * Japanese word segmentation is supplied by a view-only renderer and
+ * displayed as indivisible inline-blocks, retaining exact full name text.
+ * This is reconstructed typography, not authenticated 2022 Global geometry.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    left:8%;right:8%;font:800 10px/11px "Roboto Condensed","Liberation Sans Narrow",Arial,sans-serif;
+    letter-spacing:-1.3px;overflow-wrap:normal;word-break:normal;hyphens:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong > .bf-home-portrait-word {
+    display:inline-block;white-space:nowrap;max-width:100%;vertical-align:baseline;
+    letter-spacing:-1.65px;
+  }
+}
+
+/* R4 disposable Android-font portability, presentation only.
+ * Prefer Android's registered sans-serif-condensed before generic regular faces.
+ * The 320px opening is narrower than some 11+ character catalog words in
+ * regular-font fallback. Only those names need the smaller letter advance;
+ * all names remain the exact source text, at 10px and inside original art.
+ * Not an authenticated April 2022 native layout measurement. */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    font-family:"sans-serif-condensed","Roboto Condensed","Liberation Sans Narrow",Arial,sans-serif;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-portrait-longword {
+    left:7.85%;right:7.85%;font-weight:500;letter-spacing:-1.7px;
+  }
+}
+
+/* R5 trial: restore visible word separation without changing source names. */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    word-spacing:2.5px;
+  }
+}
+
+/* OWNER-APPROVED HOME Option A, disposable presentation prototype.
+ * Keep original five-portrait art; show unambiguous source-derived labels
+ * rather than compressing complete names into 11/128-wide frame openings.
+ * Full names remain in the owned unit button aria-label and Unit Box.
+ * Source art, player state, battle code and sixth slot are untouched. */
+body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-short-label {
+  left:9%;right:9%;top:50%;bottom:auto;height:14px;max-height:14px;min-height:0;
+  display:block;overflow:hidden;white-space:nowrap;text-overflow:clip;
+  overflow-wrap:normal;word-break:normal;hyphens:none;-webkit-line-clamp:unset;
+  padding:0;margin:0;font:800 10px/12px Arial,sans-serif;
+  letter-spacing:0;word-spacing:normal;text-align:center;
+}
+@media(min-width:510px){
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-short-label {font-size:12px;height:16px;max-height:16px;}
+}
+/* R6 original PNG alpha-mask clearance; v636 Home presentation only. */
+@media (min-width:413px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    left:12%;
+  }
+}

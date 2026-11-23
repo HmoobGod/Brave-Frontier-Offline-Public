@@ -171,7 +171,45 @@ with sync_playwright() as pw:
                     assert proof["cardWidth"] >= 44 and proof["cardHeight"] >= 44, (width, proof)
                     assert proof["nameFont"] >= 10 and proof["levelFont"] >= 10, (width, proof)
                     assert proof["leaderFont"] >= 9, (width, proof)
-                    assert proof["nameMaxHeight"] == 24, (width, proof)
+                # Option A uses a compact, source-derived single-line name, not
+                # the obsolete v623 two-line 24px box. Prove actual visibility
+                # and complete identity without weakening squad/focus/save checks.
+                assert proof["nameMaxHeight"] == (16 if width >= 510 else 14), (width, proof)
+                label_proof = lineup.evaluate_all("""cards=>cards.slice(0,5).map((card,index)=>{
+                  const node=card.querySelector('strong');
+                  const id=Number(card.dataset.bfHomeUnitId);
+                  const original=effectiveUnit(id)?.name;
+                  const visible=node?.textContent.trim()||'';
+                  const sourceWord=typeof original==='string' ? original.trim().split(/\\s+/u).pop() : '';
+                  const marker=visible.match(/ ·([1-5])$/u);
+                  const core=marker ? visible.slice(0,-marker[0].length) : visible;
+                  const stem=core.endsWith('…') ? core.slice(0,-1) : core;
+                  const truthful=core===sourceWord || (
+                    core.endsWith('…') && Array.from(stem).length>=3 &&
+                    sourceWord.startsWith(stem));
+                  const style=node && getComputedStyle(node);
+                  const box=node?.getBoundingClientRect();
+                  const range=document.createRange();
+                  if(node)range.selectNodeContents(node);
+                  const ink=range.getBoundingClientRect();
+                  return {truthful:!!truthful,
+                    completeAria:typeof original==='string' &&
+                      card.getAttribute('aria-label')?.startsWith('Inspect '+original+','),
+                    markerCorrect:!marker || Number(marker[1])===index+1,
+                    oneLine:!!style && style.whiteSpace==='nowrap' &&
+                      parseFloat(style.lineHeight)<=node.clientHeight+1,
+                    visible:!!box && box.width>0 && box.height>0 &&
+                      node.scrollWidth<=node.clientWidth+1 &&
+                      node.scrollHeight<=node.clientHeight+1 &&
+                      ink.left>=box.left-1 && ink.right<=box.right+1 &&
+                      ink.top>=box.top-1 && ink.bottom<=box.bottom+1,
+                    font:style?parseFloat(style.fontSize):0,
+                    shown:visible, original};
+                })""")
+                assert len(label_proof) == 5 and all(
+                    p["truthful"] and p["completeAria"] and p["markerCorrect"] and
+                    p["oneLine"] and p["visible"] and p["font"] >= 10
+                    for p in label_proof), (width, label_proof)
                 sixth = lineup.nth(5)
                 assert sixth.get_attribute("aria-label").startswith("Inspect "), width
                 sixth_proof = sixth.evaluate("""el => {

@@ -145,9 +145,29 @@ with sync_playwright() as playwright:
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
-    actual = page.locator("#bf-scene-party strong").all_text_contents()
-    expected = page.evaluate("P.squad.map(id => effectiveUnit(id).name)")
-    assert actual == expected, (actual, expected)
+    # PR #636 Option A: the five framed slots show a truthful compact label
+    # (the source name's last word, or a >=3-character prefix of it plus "…",
+    # with " ·N" only for collisions); the full original name stays in the
+    # card's accessible name. The compact sixth unit shows the full name.
+    labels = page.evaluate("""() => [...document.querySelectorAll('#bf-scene-party .bf-scene-member')].map((card, index) => {
+      const id = P.squad[index], original = effectiveUnit(id).name;
+      const shown = card.querySelector('strong').textContent.trim();
+      const sourceWord = original.trim().split(/\\s+/u).pop();
+      const marker = shown.match(/ ·([1-5])$/u);
+      const core = marker ? shown.slice(0, -marker[0].length) : shown;
+      const stem = core.endsWith('…') ? core.slice(0, -1) : core;
+      return {index, id, original, shown,
+        cardId: Number(card.dataset.bfHomeUnitId),
+        aria: card.getAttribute('aria-label') || '',
+        truthful: index < 5 ? (core === sourceWord || (core.endsWith('…') &&
+          Array.from(stem).length >= 3 && sourceWord.startsWith(stem))) : shown === original,
+        markerCorrect: !marker || (index < 5 && Number(marker[1]) === index + 1)};
+    })""")
+    assert len(labels) == 6, labels
+    for label in labels:
+        assert label["cardId"] == label["id"], label
+        assert label["truthful"] and label["markerCorrect"], label
+        assert label["aria"].startswith("Inspect " + label["original"] + ","), label
     assert page.locator(".bf-scene-places .bf-scene-place").count() == 6
     assert page.locator(".bf-scene-places button[data-bf-goto]").count() == 2
     assert page.locator(".bf-scene-places .bf-scene-locked").count() == 4

@@ -289,6 +289,118 @@ function bfOfflineUnitPortraitV266(source, name) {
     if(!receipt||!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<0||receipt.value>1000000000||typeof demoLevel!=='function')return null;
     const level=demoLevel(receipt.value);return Number.isSafeInteger(level)&&level>=1&&level<=99?level:null;
   }catch(_){return null;}}
+  // R3: retain the exact archive name while grouping Japanese word segments.
+  // The grouping only affects HOME text nodes; unit IDs, labels, saves and
+  // manual interactions remain untouched. Not evidence of 2022 UI behavior.
+  function renderHomePortraitName(node, fullName) {
+    node.textContent = fullName;
+    // R4: presentation-only fallback for long unbroken Latin words when a
+    // condensed system font is missing; never alters visible/semantic text.
+    node.classList.toggle('bf-home-portrait-longword', /[A-Za-z]{11,}/u.test(fullName));
+    if (!/[\u3040-\u30ff\u3400-\u9fff]/u.test(fullName)) return;
+    node.lang = 'ja';
+    try {
+      // R4 fallback when older WebViews lack Intl.Segmenter: keep kana and
+      // full-width Latin runs indivisible, and use the verified source-name
+      // boundary between デラックス / ファイター. Never insert or remove glyphs.
+      const segments = typeof Intl.Segmenter === 'function'
+        ? [...new Intl.Segmenter('ja', {granularity:'word'}).segment(fullName)].map(s=>s.segment)
+        : (fullName.match(/[\u3400-\u9fff]|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[\uff21-\uff3a\uff41-\uff5a]+|[A-Za-z0-9]+|\s+|./gu) || [fullName])
+            .flatMap(s=>s==='デラックスファイター'?['デラックス','ファイター']:[s]);
+      if (!segments.length || segments.join('') !== fullName) return;
+      const content = segments.map(s=>{
+        const part = document.createElement('span');
+        part.className = 'bf-home-portrait-word';
+        part.textContent = s;
+        return part;
+      });
+      node.replaceChildren(...content);
+    } catch (_) { node.textContent = fullName; }
+  }
+  // Owner-approved display-only short labels: source-name suffix or prefix,
+  // with a truthful squad-slot marker only if two visible labels would match.
+  // Never substitute, invent, or save a unit name or ID.  No catalog required.
+  let shortLabelRevision = 0, shortLabelFrame = 0, shortLabelSchedule = null;
+  let shortLabelObserver = null, shortLabelObservedWidth = null;
+  function assignShortHomeLabels(cards, sourceNames) {
+    const revision = ++shortLabelRevision;
+    const live = () => revision === shortLabelRevision && party.isConnected &&
+      cards.every((card, i) => party.children[i] === card);
+    const labels = sourceNames.map((full, index) => {
+      if (!full || !cards[index]?.querySelector('strong')) return null;
+      const words = full.trim().split(/\s+/u);
+      return words[words.length - 1] || full;
+    });
+    function measureFit(node, base, suffix) {
+      const rectWidth = node.getBoundingClientRect().width;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      // Never emit a fabricated one-letter ellipsis when the layout or
+      // font is not measurable. The source suffix remains available.
+      if (!ctx || rectWidth < 12) return base + suffix;
+      ctx.font = getComputedStyle(node).font;
+      const allowed = rectWidth - 2;
+      const fits = text => ctx.measureText(text).width <= allowed;
+      if (fits(base + suffix)) return base + suffix;
+      const chars = Array.from(base);
+      while (chars.length > 3 && !fits(chars.join('') + '…' + suffix)) chars.pop();
+      return chars.length >= 3 && fits(chars.join('') + '…' + suffix)
+        ? chars.join('') + '…' + suffix : base + suffix;
+    }
+    // First paint: show only truthful source-derived suffixes. Do not
+    // measure a newly inserted, not-yet-laid-out node (the V… bug).
+    for (let i = 0; i < 5; i++) {
+      if (!labels[i]) continue;
+      const strong = cards[i].querySelector('strong');
+      strong.replaceChildren();strong.removeAttribute('lang');
+      strong.classList.remove('bf-home-portrait-longword');
+      strong.classList.add('bf-home-short-label');
+      strong.textContent = labels[i];
+    }
+    const fitLabels = () => {
+      if (!live()) return;
+      const texts = labels.map((base, i) => base === null ? null :
+        measureFit(cards[i].querySelector('strong'), base, ''));
+      // A collision may occur either in source suffixes or after ellipsis.
+      // Slot numbers are existing truthful context, not invented unit IDs.
+      const counts = new Map();
+      for (const label of texts) if (label !== null)
+        counts.set(label, (counts.get(label) || 0) + 1);
+      for (let i = 0; i < 5; i++) {
+        if (texts[i] === null) continue;
+        const strong = cards[i].querySelector('strong');
+        const suffix = counts.get(texts[i]) > 1 ? ' ·' + (i + 1) : '';
+        const next = suffix ? measureFit(strong, labels[i], suffix) : texts[i];
+        if (strong.textContent !== next) strong.textContent = next;
+      }
+    };
+    const scheduleFit = () => {
+      if (!live()) return;
+      if (shortLabelFrame) cancelAnimationFrame(shortLabelFrame);
+      shortLabelFrame = requestAnimationFrame(() => {
+        shortLabelFrame = 0;
+        if (live()) fitLabels();
+      });
+    };
+    shortLabelSchedule = scheduleFit;
+    // One observer per Home instance; widths only, not text/height changes.
+    if (!shortLabelObserver && typeof ResizeObserver === 'function') {
+      shortLabelObserver = new ResizeObserver(entries => {
+        const width = entries[0]?.contentRect.width;
+        if (!Number.isFinite(width) ||
+            (shortLabelObservedWidth !== null &&
+             Math.abs(width - shortLabelObservedWidth) < .25)) return;
+        shortLabelObservedWidth = width;
+        if (shortLabelSchedule) shortLabelSchedule();
+      });
+      shortLabelObserver.observe(party);
+    }
+    scheduleFit();
+    // Re-fit labels only, never refresh the party or mutate player storage.
+    if (document.fonts?.ready) document.fonts.ready.then(() => {
+      if (live()) scheduleFit();
+    });
+  }
   function refreshParty() {
     // Replacing the cards must not discard a keyboard user's place or
     // silently move them to a different unit. External focus stays untouched.
@@ -299,7 +411,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     const stateValid=typeof P!=='undefined'&&P?.version===7&&Array.isArray(P.squad)&&P.squad.length<=6&&Array.isArray(P.roster)&&Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
     const members = stateValid ? P.squad.slice(0,6) : [];
 
-    const nodes = [], seen = new Set();
+    const nodes = [], seen = new Set(), shortLabelSourceNames = Array(5).fill(null);
     const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
     let unverified = 0;
     for (let index = 0; index < 6; index++) {
@@ -324,7 +436,8 @@ function bfOfflineUnitPortraitV266(source, name) {
         const displayedFormName = unit.name;
         const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
-        name.textContent = unit.name || 'Unit';
+        renderHomePortraitName(name, unit.name || 'Unit');
+        if (index < 5) shortLabelSourceNames[index] = unit.name;
         const level = document.createElement('small');
         const observedLevel=verifiedDemoLevel(baseId);
         // R6: keep a truthful compact label visible between the original
@@ -344,9 +457,9 @@ function bfOfflineUnitPortraitV266(source, name) {
           slot.append(leader);
         }
         slot.append(document.createTextNode('SLOT ' + (index + 1)));
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + announcedLevel +
+        card.setAttribute('aria-label', 'Inspect ' + unit.name + ', ' + announcedLevel +
           ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
-        card.title = 'Inspect owned unit';
+        card.title = 'Inspect ' + unit.name;
         card.append(slot, img, name, level);
         card.addEventListener('click', () => {
           // Recheck the live slot and ownership: this card may predate a
@@ -421,6 +534,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       nodes.push(card);
     }
     party.replaceChildren(...nodes);
+    assignShortHomeLabels(nodes, shortLabelSourceNames);
     partyReview.hidden = stateValid && unverified === 0;
     partyReview.textContent = !stateValid ? 'Squad data unavailable · ownership could not be verified. Open Units to review.' : unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
