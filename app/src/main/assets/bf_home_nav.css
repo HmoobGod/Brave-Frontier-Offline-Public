@@ -2128,6 +2128,88 @@ body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:nth-c
   body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:160px}
   body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:120px}
 }
+/* v642 CUSTOM Home visual polish (materials only; NOT 2022 layout parity).
+ * Uses original Global PNGs already staged from hash-verified archives, bytes
+ * unchanged, never cropped into new files:
+ *   mission_select/mission_check_unit_frame.png (644x293): blue stone rim of the
+ *     original pre-battle squad check frame, drawn as a 9-slice border only.
+ *   mission_select/area_name_frame.png (286x58): parchment title plate, at its
+ *     natural aspect ratio (as .bf-quest-scroll already uses it).
+ *   home/home_character_frame_bg.png (128x350): original Home unit-slot backdrop.
+ * Button, gold rim and outlined-text styling are CSS imitations of the original
+ * Global blue/gold buttons, not original art. Every box keeps its v640/v641
+ * border+padding total, so card and Quest geometry is unchanged. */
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {
+  padding:1px;border:6px solid #33506f;border-radius:0;
+  border-image:url("content/mission_select/mission_check_unit_frame.png") 14 / 6px round;
+  background:linear-gradient(180deg,#14223ac4,#0b1424d9),
+    url("content/home/home_character_frame_bg.png") center/auto 100% repeat-x;
+  background-clip:padding-box;box-shadow:0 3px 8px #000a;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading {padding:0 3px}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading > strong {
+  display:flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;
+  width:168px;height:34px;margin:0;padding:0 18px 1px;
+  background:url("content/mission_select/area_name_frame.png") center/100% 100% no-repeat;
+  font:900 13px/1 Arial,sans-serif;color:#2a1603;letter-spacing:.08em;white-space:nowrap;
+  text-shadow:0 1px 0 #f4e4bd;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {
+  padding:6px 14px;border:2px solid #d9b45c;border-radius:22px;
+  background:linear-gradient(180deg,#3b63d6 0%,#1d3a9e 48%,#10236b 52%,#0b1a52 100%);
+  box-shadow:inset 0 1px 0 #9fb8ff,inset 0 -2px 3px #0008,0 2px 3px #000b;
+  font:italic 900 12px/1.2 Arial,sans-serif;color:#fff;letter-spacing:.03em;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000,0 2px 2px #000a;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button:active {filter:brightness(1.2)}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button:focus-visible {outline:3px solid #ffe2a0;outline-offset:2px}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {
+  border-color:#a88540;
+  background:radial-gradient(ellipse 70% 42% at 50% 44%,#4f6f9f66,#0000 70%),
+    linear-gradient(180deg,#1a2a45b3,#0c1526d1),
+    url("content/home/home_character_frame_bg.png") center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px #3c2c0c,inset 0 1px 0 1px #f3d58a33,0 2px 3px #000b;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:first-child {
+  border-color:#f0cf7c;
+  background:radial-gradient(ellipse 72% 44% at 50% 44%,#c99a3c55,#0000 72%),
+    linear-gradient(180deg,#2a2a3ab3,#121626d1),
+    url("content/home/home_character_frame_bg.png") center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px #6b4b12,0 0 6px #e6c27a66,0 2px 3px #000b;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-slot {
+  color:#a9bddb;letter-spacing:.06em;text-shadow:0 1px 1px #000;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-leader {
+  color:#3a2106;letter-spacing:.06em;border:1px solid #6b4a12;border-radius:3px;
+  background:linear-gradient(180deg,#fff0b3,#e2b350 55%,#b8862a);text-shadow:0 1px 0 #ffeebf;
+  padding:0 4px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > strong {
+  color:#fff;text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000,0 2px 2px #000c;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > small {
+  font-style:italic;font-weight:900;color:#ffd660;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-home-play .bf-scene-featured .bf-scene-status {
+  border-color:#d9b45c;color:#fff;
+  background:linear-gradient(180deg,#3b63d6 0%,#1d3a9e 48%,#10236b 52%,#0b1a52 100%);
+  box-shadow:inset 0 1px 0 #9fb8ff,0 2px 3px #000b;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+}
+@media(max-width:379px){
+  /* Same plate art at its natural 286:58 ratio, smaller, so the plate and the
+   * one-line Edit Squad button share the heading row at 320px. */
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading > strong {
+    width:148px;height:30px;padding:0 15px 1px;font-size:12px;letter-spacing:.06em}
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {padding:6px 10px}
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {white-space:nowrap}
+@media(max-height:729px) and (max-width:379px){
+  /* Keep v641's 5px total squad inset on narrow short screens. */
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {padding:0;border-width:5px;border-image-width:5px}
+}
 /* Menu: auxiliary Home panels (same live nodes, moved off Home). */
 .bf-menu-home-extras{box-sizing:border-box;max-width:100%;margin:12px 0;padding:10px;
   border:1px solid #bca16a;border-radius:6px;background:#121d30;color:#e8eef8}

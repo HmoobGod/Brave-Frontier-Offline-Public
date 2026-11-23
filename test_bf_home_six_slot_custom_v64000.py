@@ -41,6 +41,16 @@ assert "grid-template-columns:repeat(3,minmax(0,1fr))" in v640_css
 # v641: leader row alignment and short-WebView compaction stay in the v640 layer.
 assert v640_css.count("/* v641 leader row") == 1 and v640_css.count("/* v641 short viewport") == 1
 assert "flex-direction:column;justify-content:flex-end;gap:2px;" in v640_css
+# v642: polish uses only original PNGs already staged by prepare_original_home_assets.py.
+assert v640_css.count("/* v642 CUSTOM Home visual polish") == 1
+PREP = (ROOT / "prepare_original_home_assets.py").read_text("utf-8")
+v642_css = v640_css.split("/* v642 CUSTOM Home visual polish", 1)[1].split("/* Menu: auxiliary Home panels", 1)[0]
+v642_art = sorted(set(re.findall(r'url\("content/([a-z_]+/[a-z0-9_]+\.png)"\)', v642_css)))
+assert v642_art == ["home/home_character_frame_bg.png", "mission_select/area_name_frame.png",
+                    "mission_select/mission_check_unit_frame.png"], v642_art
+for art in v642_art:
+    assert '"%s"' % art.split("/")[1] in PREP, art
+assert "data:image" not in v642_css and "min-height:" not in v642_css.replace("min-height:44", "")
 assert "@media(max-height:769px) and (min-width:380px){" in v640_css and "@media(max-height:729px) and (max-width:379px){" in v640_css
 assert len(CSS.encode("utf-8")) <= 128 * 1024 and len(JS.encode("utf-8")) <= 128 * 1024
 print("PASS v640 source: custom six-slot Home layer, no state/route writes, CI registered, offline")
@@ -183,6 +193,39 @@ def check_cells(page, tag, min_quest_gap=4):
     assert c["scrollW"] <= c["innerW"], (tag, c["scrollW"])
     return c
 
+
+POLISH = """() => {
+  const h=document.getElementById('bf-home'),sq=h.querySelector(':scope>.bf-scene-squad'),
+    hd=sq.querySelector(':scope>.bf-scene-heading'),t=hd.querySelector('strong'),b=hd.querySelector('button'),
+    r=e=>e.getBoundingClientRect(),cs=e=>getComputedStyle(e);
+  const cards=[...sq.querySelectorAll('#bf-scene-party>.bf-scene-member')];
+  return {rim:cs(sq).borderImageSource,rimW:cs(sq).borderTopWidth,plate:cs(t).backgroundImage,
+    plateRatio:r(t).width/r(t).height,title:t.textContent,titleFits:t.scrollWidth<=t.clientWidth,
+    btn:{text:b.textContent,h:r(b).height,w:r(b).width,oneLine:b.scrollWidth<=b.clientWidth&&r(b).height<50,
+      inRow:r(b).right<=r(hd).right+0.5&&r(b).left>=r(t).right,goto:b.dataset.bfGoto},
+    cardArt:cards.every(c=>cs(c).backgroundImage.includes('home_character_frame_bg.png')),
+    nameColor:cards.map(c=>cs(c.querySelector('strong')).color)};
+}"""
+DECODE = """async () => Promise.all(['content/mission_select/mission_check_unit_frame.png',
+  'content/mission_select/area_name_frame.png','content/home/home_character_frame_bg.png'].map(src=>
+  new Promise(ok=>{const i=new Image();i.onload=()=>ok([src,i.naturalWidth,i.naturalHeight]);
+  i.onerror=()=>ok([src,0,0]);i.src=src;})))"""
+
+
+def check_polish(page, tag):
+    p = page.evaluate(POLISH)
+    assert "mission_check_unit_frame.png" in p["rim"] and p["rimW"] in ("5px", "6px"), (tag, p)
+    assert "area_name_frame.png" in p["plate"] and abs(p["plateRatio"] - 286 / 58) < 0.1, (tag, p)
+    assert p["title"] == "YOUR SQUAD" and p["titleFits"], (tag, p)
+    b = p["btn"]
+    assert b["text"] == "EDIT SQUAD ›" and b["goto"] == "units", (tag, b)
+    assert b["h"] >= 44 and b["w"] >= 44 and b["oneLine"] and b["inRow"], (tag, b)
+    assert p["cardArt"] and set(p["nameColor"]) == {"rgb(255, 255, 255)"}, (tag, p)
+    assert sorted(page.evaluate(DECODE)) == [
+        ["content/home/home_character_frame_bg.png", 128, 350],
+        ["content/mission_select/area_name_frame.png", 286, 58],
+        ["content/mission_select/mission_check_unit_frame.png", 644, 293]], tag
+
 with sync_playwright() as pw:
     browser = pw.chromium.launch(headless=True, executable_path=chrome,
                                  args=["--no-sandbox", "--disable-dev-shm-usage"])
@@ -195,6 +238,7 @@ with sync_playwright() as pw:
         g = page.evaluate(LAYOUT)
         tag = f"{width}x{height}"
         check_cells(page, tag)
+        check_polish(page, tag)
         assert "bf-home-v640" in g["cls"] and "bf-home-v635" not in g["cls"] and "bf-home-v636" not in g["cls"], g["cls"]
         assert g["api"] == {"custom": True, "historical": False, "slots": 6}, g["api"]
         cards = g["cards"]
@@ -284,6 +328,7 @@ with sync_playwright() as pw:
             before = page.evaluate(SNAPSHOT)
             tag = f"{width}x{height}" + (f" font={font}" if font else "")
             c = check_cells(page, tag)
+            check_polish(page, tag)
             names = page.evaluate("""() => [...document.querySelectorAll('#bf-scene-party>.bf-scene-member')]
               .map((c,i)=>[c.querySelector('strong').textContent,effectiveUnit(P.squad[i]).name])""")
             assert all(a == b for a, b in names), (tag, names)  # full names kept
