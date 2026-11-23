@@ -38,6 +38,10 @@ for forbidden in ("font-size:9px", "font:800 9px", "font:700 9px", "letter-spaci
                   "pointer-events:none", "visibility:hidden"):
     assert forbidden not in v640_css, forbidden
 assert "grid-template-columns:repeat(3,minmax(0,1fr))" in v640_css
+# v641: leader row alignment and short-WebView compaction stay in the v640 layer.
+assert v640_css.count("/* v641 leader row") == 1 and v640_css.count("/* v641 short viewport") == 1
+assert "flex-direction:column;justify-content:flex-end;gap:2px;" in v640_css
+assert "@media(max-height:769px) and (min-width:380px){" in v640_css and "@media(max-height:729px) and (max-width:379px){" in v640_css
 assert len(CSS.encode("utf-8")) <= 128 * 1024 and len(JS.encode("utf-8")) <= 128 * 1024
 print("PASS v640 source: custom six-slot Home layer, no state/route writes, CI registered, offline")
 
@@ -132,6 +136,53 @@ LAYOUT = """() => {
     api:window.BFHomeSixSlotV640&&{custom:window.BFHomeSixSlotV640.custom,historical:window.BFHomeSixSlotV640.historicalGeometry,slots:window.BFHomeSixSlotV640.slots}}
 }"""
 
+
+# v641: top-row alignment, label clearance/clipping/overlap and Quest-above-footer.
+CELLS = """() => {
+  const h=document.getElementById('bf-home'),r=e=>e.getBoundingClientRect();
+  const nav=r(document.querySelector('.bf-navbar')).top;
+  const q=h.querySelector('.bf-home-play button.bf-scene-featured[data-bf-goto="quest"]'),qr=r(q);
+  let hit=0;for(let i=0;i<5;i++)for(let j=0;j<5;j++){const e=document.elementFromPoint(
+    qr.left+3+(qr.width-6)*i/4,qr.top+3+(qr.height-6)*j/4);if(e&&(e===q||q.contains(e)))hit++;}
+  const cells=[...h.querySelectorAll('#bf-scene-party>.bf-scene-member')].map(c=>{
+    const s=c.querySelector('.bf-scene-slot'),im=c.querySelector('img'),n=c.querySelector('strong'),
+      l=c.querySelector('small'),b=c.querySelector('.bf-scene-leader'),cs=getComputedStyle(c);
+    const inner=c.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+    const rg=document.createRange();rg.selectNodeContents(s);
+    const used=Math.max(b?r(b).width:0,...[...rg.getClientRects()].map(x=>x.width));
+    const bx=[s,im,n,l].map(r);let overlap=false;
+    for(let a=0;a<4;a++)for(let z=a+1;z<4;z++)if(bx[a].bottom>bx[z].top+0.5)overlap=true;
+    if(b&&(r(b).bottom>bx[0].bottom+0.5||r(b).top<bx[0].top-0.5))overlap=true;
+    return {img:bx[1].top,name:bx[2].top,clear:inner-used,overlap,
+      clip:s.scrollWidth>s.clientWidth||n.scrollWidth>n.clientWidth+1||l.scrollWidth>l.clientWidth+1,
+      inside:bx.every(x=>x.bottom<=r(c).bottom+0.5&&x.top>=r(c).top-0.5),leader:!!b,
+      slotText:s.textContent,artW:r(im).width,h:r(c).height}});
+  return {cells,quest:{top:qr.top,bottom:qr.bottom,h:qr.height,w:qr.width},hit,nav,
+    head:r(document.querySelector('.bf-shell-head')).bottom,scrollY,scrollW:document.documentElement.scrollWidth,innerW:innerWidth};
+}"""
+
+
+def check_cells(page, tag, min_quest_gap=4):
+    c = page.evaluate(CELLS)
+    cells = c["cells"]
+    assert len(cells) == 6, (tag, cells)
+    top = cells[:3]
+    for key in ("img", "name"):
+        spread = max(x[key] for x in top) - min(x[key] for x in top)
+        assert spread <= 1, (tag, key, spread, top)  # top-row portraits/names aligned
+    for i, x in enumerate(cells):
+        assert x["slotText"] == ("LEADERSLOT 1" if i == 0 else "SLOT %d" % (i + 1)), (tag, i, x)
+        assert x["leader"] == (i == 0), (tag, i, x)
+        assert x["clear"] >= 4, (tag, i, x)  # positive horizontal label clearance
+        assert not x["clip"] and not x["overlap"] and x["inside"], (tag, i, x)
+        assert x["artW"] >= 48 and x["h"] >= 110, (tag, i, x)
+    q = c["quest"]
+    assert c["scrollY"] == 0 and q["top"] >= c["head"] - 0.5, (tag, c)
+    assert q["bottom"] <= c["nav"] - min_quest_gap, (tag, q, c["nav"])  # whole Quest above footer
+    assert c["hit"] == 25 and q["h"] >= 150 and q["w"] >= 150, (tag, c["hit"], q)
+    assert c["scrollW"] <= c["innerW"], (tag, c["scrollW"])
+    return c
+
 with sync_playwright() as pw:
     browser = pw.chromium.launch(headless=True, executable_path=chrome,
                                  args=["--no-sandbox", "--disable-dev-shm-usage"])
@@ -143,6 +194,7 @@ with sync_playwright() as pw:
         before = page.evaluate(SNAPSHOT)
         g = page.evaluate(LAYOUT)
         tag = f"{width}x{height}"
+        check_cells(page, tag)
         assert "bf-home-v640" in g["cls"] and "bf-home-v635" not in g["cls"] and "bf-home-v636" not in g["cls"], g["cls"]
         assert g["api"] == {"custom": True, "historical": False, "slots": 6}, g["api"]
         cards = g["cards"]
@@ -216,5 +268,36 @@ with sync_playwright() as pw:
               f"Quest {g['quest']['top']:.0f}-{g['quest']['bottom']:.0f}px above footer {g['navTop']:.0f}, "
               "extras in Menu, Quest/Units/Summon/Menu routes, no state writes")
         page.close()
+    # SYNTHETIC reduced WebView heights (Android 15 insets shrink the page);
+    # this is Chromium geometry, NOT real Android WebView proof.
+    import subprocess
+    fonts = subprocess.run(["fc-list", ":", "family"], capture_output=True, text=True).stdout
+    stress = [None] + (["DejaVu Sans"] if "DejaVu Sans" in fonts else [])
+    for font in stress:
+        for width, height in ((320, 660), (393, 752), (413, 752), (540, 752)):
+            page, errors = open_app(browser, width, height)
+            if font:
+                page.add_style_tag(content="#bf-home *{font-family:'%s',sans-serif !important}" % font)
+            page.wait_for_function("""() => [...document.querySelectorAll(
+              '#bf-home img')].every(i => i.complete && i.naturalWidth > 0)""", timeout=20000)
+            page.evaluate("window.scrollTo(0,0)")
+            before = page.evaluate(SNAPSHOT)
+            tag = f"{width}x{height}" + (f" font={font}" if font else "")
+            c = check_cells(page, tag)
+            names = page.evaluate("""() => [...document.querySelectorAll('#bf-scene-party>.bf-scene-member')]
+              .map((c,i)=>[c.querySelector('strong').textContent,effectiveUnit(P.squad[i]).name])""")
+            assert all(a == b for a, b in names), (tag, names)  # full names kept
+            page.click('#bf-home .bf-home-play button.bf-scene-featured[data-bf-goto="quest"]')
+            assert page.evaluate("BF_homeNav.current") == "quest", tag
+            page.click('.bf-navbar button[data-bf-goto="home"]')
+            assert page.evaluate("BF_homeNav.current") == "home", tag
+            after = page.evaluate(SNAPSHOT)
+            assert after["player"] == before["player"] and after["writes"] == before["writes"], tag
+            assert not errors, errors
+            print(f"PASS v641 synthetic {tag}: Quest {c['quest']['top']:.0f}-{c['quest']['bottom']:.0f}px "
+                  f"above footer {c['nav']:.0f} (25/25 taps, no scroll), top row aligned, labels clear")
+            page.close()
+    if len(stress) == 1:
+        print("NOTE v641: DejaVu Sans unavailable; wider-font stress not run")
     browser.close()
 print("PASS v640: custom six-owned-unit Home (custom layout; not 2022 pixel parity, not device acceptance)")
