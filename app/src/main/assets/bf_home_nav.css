@@ -2232,3 +2232,6 @@ body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) 
 body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:120px}
 body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:72px}
 body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow[data-bf-wrap] {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:4px}
+/* v647: press feedback and off-state-inspired grayscale; no additional art staged. */
+:is(body.bf-menu-mode #bf-home.bf-home-v640,#bf-home.bf-home-v636,.bf-menu-home-extras) .bf-scene-toolrow>button:not(:disabled):active:is([data-bf-goto=quest],[data-bf-goto=menu])>img{filter:brightness(1.25) drop-shadow(0 2px 2px #000b)}
+:is(#bf-home,.bf-menu-home-extras) .bf-scene-locked[aria-disabled=true]>img:is([src$="home_win_arena.png"],[src$="home_win_raid_open.png"],[src$="home_win_randall.png"]){filter:grayscale(1)}

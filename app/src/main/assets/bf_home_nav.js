@@ -431,9 +431,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       if (unit) {
         card.type = 'button';
         card.dataset.bfHomeUnitId = String(baseId);
-        // v625: bind the visible card to its original owned source form.
-        // Event listeners may replace the current effective form before a
-        // manual handoff; stale cards must never inspect a different form.
+        // v625: bind to the owned source form; stale cards cannot inspect another form.
         const displayedFormId = unit.id;
         const displayedFormName = unit.name;
         const img = window.BFHomeFullArtV646?.(unit,bfOfflineUnitPortraitV266) ?? bfOfflineUnitPortraitV266(unit.portrait, unit.name);

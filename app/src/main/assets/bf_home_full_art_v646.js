@@ -18,6 +18,7 @@
     };
     const none = () => {
       image.dataset.bfArtFallback = 'none';
+      image.setAttribute('aria-label', 'Portrait unavailable for ' + String(name || 'Unit'));
       image.bfArtAttach();
     };
     const settle = () => {
