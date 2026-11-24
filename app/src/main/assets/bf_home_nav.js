@@ -436,7 +436,7 @@ function bfOfflineUnitPortraitV266(source, name) {
         // manual handoff; stale cards must never inspect a different form.
         const displayedFormId = unit.id;
         const displayedFormName = unit.name;
-        const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
+        const img = window.BFHomeFullArtV646?.(unit,bfOfflineUnitPortraitV266) ?? bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
         renderHomePortraitName(name, unit.name || 'Unit');
         if (index < 5 && !home.classList.contains('bf-home-v640')) shortLabelSourceNames[index] = unit.name;
@@ -463,6 +463,7 @@ function bfOfflineUnitPortraitV266(source, name) {
           ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
         card.title = 'Inspect ' + unit.name;
         card.append(slot, img, name, level);
+        img.bfArtAttach?.();
         card.addEventListener('click', () => {
           // Recheck the live slot and ownership: this card may predate a
           // roster import or squad edit. Navigation is a manual read only

@@ -45,7 +45,8 @@ chrome = shutil.which("chromium") or shutil.which("google-chrome") or shutil.whi
 assert chrome, "Chromium is required"
 HTML = (ASSETS / "index.html").read_text("utf-8").replace(
     "<head>", '<head><base href="http://bf-assets.test/">', 1)
-MODULES = [m for m in dict.fromkeys(re.findall(r"bf[0-9a-z_]*\.(?:js|css)", ACTIVITY)) if (ASSETS / m).is_file()]
+from bf_home_test_module_order import ART, home_modules, assert_exact_home_art, exercise_exact_form_and_missing_art
+MODULES = home_modules(ACTIVITY, ASSETS)
 TYPES = {".png": "image/png", ".jpg": "image/jpeg"}
 
 
@@ -76,6 +77,8 @@ def open_app(browser, width, height):
             page.add_style_tag(path=str(ASSETS / module))
         else:
             page.add_script_tag(path=str(ASSETS / module))
+    if ART in MODULES:
+        assert_exact_home_art(page, starter_fixture=True)
     return page, errors
 
 
@@ -120,6 +123,8 @@ with sync_playwright() as pw:
             page.wait_for_function("()=>[...document.querySelectorAll('#bf-home img')].every(i=>i.complete&&i.naturalWidth>0)", timeout=20000)
             assert page.evaluate("BF_homeNav.current") == "home"
             before = page.evaluate(SNAPSHOT)
+            if ART in MODULES and (width, height, scale) == (320, 740, 1.0):
+                exercise_exact_form_and_missing_art(page, SNAPSHOT)
             page.evaluate(SYNTHETIC_TEXT_SCALE, scale)
             page.evaluate("dispatchEvent(new Event('resize'))")
             page.evaluate("window.scrollTo(0,0)")
@@ -168,6 +173,8 @@ with sync_playwright() as pw:
             page.click('.bf-navbar button[data-bf-goto="menu"]')
             page.click('.bf-navbar button[data-bf-goto="home"]')
             assert page.evaluate("BF_homeNav.current") == "home", tag
+            if ART in MODULES:
+                assert_exact_home_art(page, starter_fixture=True)
             page.evaluate(SYNTHETIC_TEXT_SCALE, scale)
             page.evaluate("dispatchEvent(new Event('resize'))")
             assert page.evaluate("Number(document.getElementById('bf-home').dataset.bfFit)") == m["level"], tag
