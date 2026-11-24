@@ -255,3 +255,50 @@
   window.BFHomeBattleReadinessV420=Object.freeze({snapshot,refresh});
   refresh();
 })();
+
+/* v645 measured Home fit (separate from the v420 card; presentation only).
+   Sets #bf-home[data-bf-fit] to the lowest level that keeps the whole Quest
+   action >=8px above the fixed footer: 0 large art, 1-3 compact art/Quest,
+   4 Play moved above the squad (DOM order = visual = keyboard order). The
+   icon row wraps only if its labels overflow. System text size is never
+   changed; no storage, route, save or game state is touched. */
+(()=>{
+  'use strict';
+  const h=document.getElementById('bf-home'),n=document.querySelector('.bf-navbar');
+  const q=h?.querySelector('.bf-home-play button.bf-scene-featured[data-bf-goto="quest"]');
+  const t=h?.querySelector('.bf-scene-toolrow'),s=h?.querySelector(':scope > .bf-scene-squad');
+  const p=q?.closest('.bf-home-play');
+  if(!h||!n||!q||!t||!s||!p||window.BFHomeFitV645)return;
+  function fit(){
+    if(!q.offsetParent)return null;
+    // Remember the reading position before any trial layout changes.
+    const previousLevel=Number(h.dataset.bfFit||0),readingY=scrollY;
+    t.removeAttribute('data-bf-wrap');
+    if(t.scrollWidth>t.clientWidth+1)t.dataset.bfWrap='1';
+    // Keep focus in the Play section if a measured level requires moving it.
+    const focused=p.contains(document.activeElement)?document.activeElement:null;
+    let level=0,gap=0;
+    for(;;){
+      h.dataset.bfFit=String(level);
+      if(level>3){if(p.nextElementSibling!==s)s.before(p);}
+      else if(s.nextElementSibling!==p)s.after(p);
+      gap=n.getBoundingClientRect().top-q.getBoundingClientRect().bottom-scrollY;
+      if(gap>=8||level>3)break;
+      level++;
+    }
+    // Trial levels can temporarily shorten the page or trigger scroll anchoring.
+    // Restore the reading position only when the final fit level is unchanged.
+    // Restore BEFORE focus so preventScroll remains responsible for focus itself.
+    if(level===previousLevel&&scrollY!==readingY)window.scrollTo({top:readingY,behavior:'instant'});
+    // Relocation can blur a descendant. Never steal focus from another control.
+    if(focused?.isConnected&&p.contains(focused)&&
+       (document.activeElement===document.body||document.activeElement===document.documentElement))
+      focused.focus({preventScroll:true});
+    return {level,gap};
+  }
+  addEventListener('resize',fit);
+  addEventListener('bf-route-sync',fit);
+  document.fonts?.ready?.then(fit);
+  fit();
+  window.BFHomeFitV645=Object.freeze({fit,get level(){return Number(h.dataset.bfFit||0);}});
+})();
