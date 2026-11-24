@@ -1,0 +1,41 @@
+/* Home-only illustration selector. Exact effective form, never substitute another form. */
+(()=>{
+  'use strict';
+  const allowed = Object.freeze([10011,20011,30011,40011,50011,60011]);
+  window.BFHomeFullArtV646 = (unit, fallback) => {
+    if (!unit || !Number.isSafeInteger(unit.id) || !allowed.includes(unit.id) ||
+        typeof fallback !== 'function') return null;
+    const image = document.createElement('img');
+    image.alt = '';
+    image.style.imageRendering = 'auto';
+    const portrait = unit.portrait, name = unit.name;
+    // Complete a pre-attachment double failure at the card's append boundary.
+    // The same V266 fallback is used for attached and detached cards.
+    image.bfArtAttach = () => {
+      if (image.parentNode && image.dataset.bfArtFallback === 'none') {
+        image.replaceWith(fallback('', name));
+      }
+    };
+    const none = () => {
+      image.dataset.bfArtFallback = 'none';
+      image.bfArtAttach();
+    };
+    const settle = () => {
+      if (image.parentNode) { image.replaceWith(fallback(portrait, name)); return; }
+      if (image.dataset.bfArtFallback) return;
+      image.dataset.bfArtFallback = 'portrait';
+      image.style.imageRendering = '';
+      const stub = fallback(portrait, name);
+      if (stub instanceof HTMLImageElement && stub.getAttribute('src')) {
+        image.addEventListener('error', () => {
+          if (image.parentNode) image.replaceWith(fallback('', name));
+          else none();
+        }, {once:true});
+        image.src = stub.getAttribute('src');
+      } else none();
+    };
+    image.addEventListener('error', settle, {once:true});
+    image.src = 'content/unit/img/unit_ills_full_' + unit.id + '.png';
+    return image;
+  };
+})();

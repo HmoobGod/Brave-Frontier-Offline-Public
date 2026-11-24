@@ -70,9 +70,8 @@ chrome = shutil.which("chromium") or shutil.which("google-chrome") or shutil.whi
 assert chrome, "Chromium is required"
 HTML = (ASSETS / "index.html").read_text("utf-8").replace(
     "<head>", '<head><base href="http://bf-assets.test/">', 1)
-MODULES = [m for m in dict.fromkeys(re.findall(r"bf[0-9a-z_]*\.(?:js|css)", ACTIVITY))
-           if (ASSETS / m).is_file()]
-assert MODULES[:2] == ["bf_home_nav.js", "bf_home_nav.css"], MODULES[:2]
+from bf_home_test_module_order import home_modules
+MODULES = home_modules(ACTIVITY, ASSETS)
 TYPES = {".png": "image/png", ".jpg": "image/jpeg"}
 
 

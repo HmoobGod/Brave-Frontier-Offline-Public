@@ -386,6 +386,13 @@ public class MainActivity extends Activity {
                             "(function(){var style=document.createElement('style');" +
                             "style.textContent=" + JSONObject.quote(css) +
                             ";document.head.append(style);})();", null);
+                    // Optional Home-only illustration selector, loaded before initial party rendering.
+                    try {
+                        String fullArt = readPackagedText("bf_home_full_art_v646.js");
+                        view.evaluateJavascript(fullArt, null);
+                    } catch (IOException artError) {
+                        android.util.Log.w("BraveFrontier", "Optional Home art unavailable", artError);
+                    }
                     view.evaluateJavascript(js, null);
                     // v0.54: additive status overlay loaded AFTER the navigation header.
                     // Missing optional UI never blocks the original game or saves.
