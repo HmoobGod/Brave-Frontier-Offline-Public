@@ -2011,7 +2011,7 @@ body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {
   grid-column:auto;grid-row:auto;display:flex;flex-direction:column;
   align-items:center;justify-content:flex-start;gap:2px;
   width:auto;height:auto;min-width:0;min-height:118px;max-height:none;
-  margin:0;padding:5px 4px 6px;overflow:hidden;
+  margin:0;padding:3px 4px 4px;overflow:hidden;
   color:#fff;text-align:center;
   background:linear-gradient(180deg,#2a3f5f,#16233a);
   border:1px solid #6f87ab;border-radius:6px;
@@ -2031,7 +2031,7 @@ body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-s
 body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
 body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {
   position:static;display:block;flex:none;box-sizing:border-box;
-  width:60px;height:60px;max-width:100%;min-width:0;margin:2px auto 0;
+  width:80px;height:76px;max-width:100%;min-width:0;margin:2px auto 0;
   object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 1px #000);
 }
 body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {
@@ -2089,7 +2089,7 @@ body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > button:focus-visible
 @media(min-width:380px){
   body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {min-height:132px}
   body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
-  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:72px;height:72px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:104px;height:96px}
   body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > strong {font-size:12px}
 }
 /* v641 leader row: the generic .bf-scene-slot rule stacks its content in a
@@ -2222,3 +2222,13 @@ body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading bu
 .bf-menu-home-extras .bf-menu-locations .bf-scene-archive-label{grid-column:1/-1}
 .bf-menu-home-extras .bf-scene-place img{display:block;width:100%;height:auto;max-height:110px;object-fit:contain}
 .bf-menu-home-extras>*+*{margin-top:8px}
+/* v645 measured fit levels (set by the v645 fit in bf_home_battle_readiness_v420.js):
+ * art bytes unchanged; names, levels, leader, 44px targets and text size kept. */
+body.bf-menu-mode #bf-home.bf-home-v640[data-bf-fit="1"] #bf-scene-party > .bf-scene-member > img,body.bf-menu-mode #bf-home.bf-home-v640[data-bf-fit="1"] #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:60px;height:60px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member > img,body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:44px;height:44px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:140px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:92px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member {min-height:0}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:120px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:72px}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow[data-bf-wrap] {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:4px}

@@ -392,6 +392,7 @@ jobs:
           python3 test_bf_home_squad_frame_v63500.py
           python3 test_bf_home_artwork_first_v63600.py
           python3 test_bf_home_six_slot_custom_v64000.py
+          python3 test_bf_home_adaptive_fit_v64500.py
           python3 test_bf_home_lineup_readability_v62100.py
           python3 test_bf_home_sixth_slot_readability_v62300.py
           python3 test_bf_home_ui_accessibility_v24300.py
