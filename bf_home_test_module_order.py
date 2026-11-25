@@ -168,7 +168,7 @@ def assert_exact_home_art(page, *, starter_fixture=False):
     return rows
 
 
-def exercise_exact_form_and_missing_art(page, snapshot):
+def exercise_exact_form_and_missing_art(page, snapshot, open_missing):
     """Real effectiveUnit and refreshParty; synthetic in-memory state only, restored in finally."""
     before = page.evaluate(snapshot)
     assert_exact_home_art(page, starter_fixture=True)
@@ -186,19 +186,36 @@ def exercise_exact_form_and_missing_art(page, snapshot):
         page.evaluate('pairs=>{for(const [base] of pairs)delete P.evolutions[base];BFGlobalHome.refreshParty();}', pairs)
     assert_exact_home_art(page, starter_fixture=True)
     assert page.evaluate(snapshot) == before
-    # Force one image error by interception; the old portrait must remain usable.
+    # Force the missing image in a fresh context before the first request.
+    # Re-rendering an already decoded image can bypass routing in Chromium.
     pattern = '**/' + full_path(10011)
+    intercepted = []
     def missing(route):
         route.fulfill(status=404, body=b'')
-    page.route(pattern, missing)
+        intercepted.append(True)
+
+    missing_page, missing_errors = open_missing(lambda p: p.route(pattern, missing))
     try:
-        page.evaluate('()=>BFGlobalHome.refreshParty()')
-        card = page.locator('#bf-scene-party > [data-bf-home-unit-id="10011"]')
-        page.wait_for_function('''()=>{const i=document.querySelector('#bf-scene-party > [data-bf-home-unit-id="10011"] > img');
+        missing_before = missing_page.evaluate(snapshot)
+        assert missing_before['w'] == 0, 'fresh missing-art fixture wrote storage'
+        card = missing_page.locator('#bf-scene-party > [data-bf-home-unit-id="10011"]')
+        missing_page.wait_for_function('''()=>{const i=document.querySelector('#bf-scene-party > [data-bf-home-unit-id="10011"] > img');
           return i?.complete&&i.naturalWidth>0&&i.getAttribute('src')===effectiveUnit(10011).portrait;}''')
+        assert intercepted, 'missing-art route was never intercepted'
         assert card.evaluate("c=>!!c.querySelector('.bf-scene-leader')&&c.getAttribute('aria-label').startsWith('Inspect '+effectiveUnit(10011).name+', ')")
+        missing_page.wait_for_function("()=>[...document.querySelectorAll('#bf-scene-party > .bf-scene-member > img')].every(i=>i.complete&&i.naturalWidth>0)")
+        rows = missing_page.evaluate(CARD_PROBE)
+        assert len(rows) == 6 and len({r['base'] for r in rows}) == 6
+        assert {r['form'] for r in rows} == set(STARTER_ART_IDS)
+        for i, row in enumerate(rows):
+            assert row['owned'] and row['card'] == row['base'] and row['decoded']
+            assert row['name'] == row['expectedName'] and row['leader'] == (i == 0)
+            expected = row['expectedPortrait'] if row['form'] == 10011 else expected_src(row['form'], row['expectedPortrait'])
+            assert row['src'] == expected, (row['form'], 'wrong missing-art fixture image')
+        assert missing_page.evaluate(snapshot) == missing_before
+        assert not missing_errors, 'missing-art fixture page error'
     finally:
-        page.unroute(pattern, missing)
-        page.evaluate('()=>BFGlobalHome.refreshParty()')
+        missing_page.close()
+    # The original all-art page was never routed or mutated by the negative probe.
     assert_exact_home_art(page, starter_fixture=True)
     assert page.evaluate(snapshot) == before
