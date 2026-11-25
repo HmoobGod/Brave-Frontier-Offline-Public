@@ -310,8 +310,7 @@ button.bf-scene-place{cursor:pointer;color:inherit}
 .bf-mission-step-actions button:disabled{opacity:.43;cursor:not-allowed}
 .bf-mission-step-actions button:focus-visible{outline:3px solid #abe9fb;outline-offset:1px}
 #bf-quest-route-status{text-align:center;color:#ddcfae;font:900 10px/1.35 Arial,sans-serif}
-#bf-quest-battle-jump{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;padding:6px 9px;font-size:11px}
-#bf-quest-battle-jump img{width:min(100%,160px);height:61px;object-fit:contain;filter:drop-shadow(0 2px 2px #0009)}
+#bf-quest-battle-jump{display:flex;align-items:center;justify-content:center;min-height:44px;padding:8px 9px;font-size:12px}
 @media(max-width:359px){.bf-mission-step-actions{grid-template-columns:77px minmax(0,1fr) 77px}.bf-mission-step-actions button{font-size:9px}.bf-mission-step-actions button img{width:18px}.bf-mission-step-row button strong{font-size:10px}.bf-evo-preview{grid-template-columns:67px minmax(0,1fr)}}
 
 /* Original Global CLEAR ribbon shown only for genuinely cleared missions. */

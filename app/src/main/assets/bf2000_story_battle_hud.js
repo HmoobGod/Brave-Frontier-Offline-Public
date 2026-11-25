@@ -28,7 +28,8 @@
   '#bf2000-actions button{padding:8px 12px;min-height:42px;border:1px solid #d7b780;',
   'border-radius:5px;background:#76582c;color:white;font-weight:800}',
   '#bf2000-actions button:disabled{opacity:.45}',
-  '#bf2000-foot{display:block;margin-top:8px;color:#c2cbd3;font-size:11px}'
+  '#bf2000-foot{display:block;margin-top:8px;color:#c2cbd3;font-size:11px}',
+  '#bf650-squad{margin:8px 0;color:#e8dcc3;font:700 12px/1.45 system-ui,sans-serif;overflow-wrap:anywhere}'
  ].join('');
  document.head.append(sheet);
  const panel=document.createElement('section');panel.id='bf2000-run';
@@ -52,6 +53,29 @@
  actions.append(jump,next,retry);
  panel.append(heading,title,details,waves,status,actions,foot);
  questDetail.after(panel);
+ // v650: the native mission selector already prepares the battle. This is
+ // a read-only owned-squad summary, not an extra start or readiness gate.
+ const handoff=document.getElementById('bf-quest-battle-jump');
+ const squadInfo=document.createElement('p');squadInfo.id='bf650-squad';
+ if(handoff&&questDetail.contains(handoff)){
+   handoff.before(squadInfo);
+   handoff.setAttribute('aria-describedby',squadInfo.id);
+ }
+ function ownedSquadLabel(){
+   try{
+     if(!Array.isArray(P.squad)||P.squad.length>6||!Array.isArray(P.roster)||
+        typeof effectiveUnit!=='function')return null;
+     const seen=new Set();let leader='';
+     for(const id of P.squad){
+       if(!Number.isSafeInteger(id)||id<=0||seen.has(id)||!P.roster.includes(id))return null;
+       const unit=effectiveUnit(id);
+       if(!unit||typeof unit.name!=='string'||!unit.name.trim())return null;
+       if(!seen.size)leader=unit.name;
+       seen.add(id);
+     }
+     return 'SQUAD · '+seen.size+'/6 owned slots'+(leader?' · Leader: '+leader:'');
+   }catch(_){return null;}
+ }
  const region=q=>q.dungeonId>=300?2:q.dungeonId>=200?1:0;
  const cleared=q=>(P.questClears?.[q.missionId]||0)>0;
  // Share the core's canonical v7 save-success gate with the result screen.
@@ -118,7 +142,7 @@
      phase:String(S.phase||''),clears:P.questClears?.[q.missionId]||0,
      allies:party.filter(u=>u.hp>0).length,party:party.length,
      enemies:foes.filter(u=>u.hp>0).length,foes:foes.length,
-     enemyHp,enemyMaxHp,
+     enemyHp,enemyMaxHp,squadLabel:ownedSquadLabel(),
      nextId:upcomingQuest?.missionId||null,
      nextName:upcomingQuest?BFGlobalQuestText.sourceFor(upcomingQuest)?.mission?.name||'Mission '+upcomingQuest.missionId:null
    });
@@ -130,6 +154,8 @@
    const signature=JSON.stringify(state);
    if(signature===previous)return state;
    previous=signature;
+   squadInfo.textContent=(state.squadLabel||'SQUAD · unavailable')+
+     ' · Manage Squad above. View battle controls without restarting.';
    title.textContent=state.name+' · Mission '+state.missionId;
    details.textContent=state.dungeon+' · '+state.region+' · '+
      (state.archive?'Archived 2022 quest · demo battles':'Separate DEMO training mode')+

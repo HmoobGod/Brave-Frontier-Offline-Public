@@ -1061,11 +1061,13 @@ function bfOfflineUnitPortraitV266(source, name) {
   const list=document.getElementById('questlist');
   if(list) new MutationObserver(updateQuestDetails).observe(list,{childList:true});
   const battleLink=questDetail.querySelector('#bf-quest-battle-jump');
-  battleLink.setAttribute('aria-label','View existing battle controls for selected mission');
-  battleLink.innerHTML='<img src="content/mission_select/start_battle_btn1.png" alt="" /><span>VIEW DEMO BATTLE CONTROLS ↓</span>';
+  battleLink.setAttribute('aria-label','View existing battle controls; does not restart');
   battleLink.addEventListener('click',()=>{
     const canvas=document.getElementById('battle');
-    if(canvas) canvas.scrollIntoView({block:'start',behavior:'smooth'});
+    if(!canvas||window.BF_homeNav.current!=='quest'||!canvas.getClientRects().length)return;
+    canvas.tabIndex=-1;
+    canvas.focus({preventScroll:true});
+    canvas.scrollIntoView({block:'start',behavior:'instant'});
   });
   document.querySelector('.bf-navbar')?.addEventListener('click',() => {
     if(window.BF_homeNav.current==='quest') updateQuestDetails();
