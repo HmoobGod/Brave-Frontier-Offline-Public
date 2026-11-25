@@ -32,7 +32,8 @@
    'border:1px solid #a6b986;border-radius:5px;color:#f4f6e9';
  // Longer opt-in runs are still finite and remain subject to the exact
  // saved-clear, active Auto, foreground, quest-change and defeat gates.
- for(const n of [1,2,5,10,20,50]){
+ const MAX_REPEAT_COUNT=300;
+ for(let n=1;n<=MAX_REPEAT_COUNT;n++){
    const opt=document.createElement('option');opt.value=String(n);
    opt.textContent=n+' additional clears';picker.append(opt);
  }
@@ -210,7 +211,7 @@
  }
  function start(count=Number(picker.value)){
    if(session||!Number.isSafeInteger(count)||
-      ![1,2,5,10,20,50].includes(count))return false;
+      count<1||count>MAX_REPEAT_COUNT)return false;
    const s=safeResultSnapshot();
    if(!onQuest()||document.hidden||S.busy||S.mode!=='archive'||
       !s?.done||!s.victory||!s.archive||!s.stored||!s.canReplay||

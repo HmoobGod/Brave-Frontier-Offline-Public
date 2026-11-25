@@ -132,15 +132,15 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.start(2)') is False
  assert p.evaluate('window.__repeatCount')==0
  p.evaluate('delete BFGlobalBattleResultsV3000.committedClearCount')
- assert p.locator('#bf9800-repeat-count option').count()==6
+ assert p.locator('#bf9800-repeat-count option').count()==300
  assert p.locator('#bf9800-repeat-count option').all_text_contents()==[
-   '1 additional clears','2 additional clears','5 additional clears',
-   '10 additional clears','20 additional clears','50 additional clears']
+   f'{n} additional clears' for n in range(1,301)]
  assert p.locator('#bf9800-repeat-count').input_value()=='2'
- assert p.evaluate(api+'.start(0)') is False
- assert p.evaluate(api+'.start(21)') is False
- assert p.evaluate(api+'.start(51)') is False
- assert p.evaluate(api+'.start(1.5)') is False
+ for invalid in (0,-1,301,1.5):
+  assert p.evaluate(api+f'.start({invalid})') is False
+ assert p.evaluate(api+'.start("21")') is False
+ assert p.evaluate(api+'.start(NaN)') is False
+ assert p.evaluate(api+'.start(Infinity)') is False
  p.evaluate("window.__stored98=false")
  assert p.evaluate(api+'.start(2)') is False
  p.evaluate("window.__stored98=true")
@@ -732,6 +732,38 @@ with sync_playwright() as pw:
   assert p.evaluate('window.__repeatCount')==previous_replays
   assert p.evaluate('JSON.stringify(P)')==before_player
   p.evaluate('S.busy=false')
+ # Exercise the upper bound against the existing synthetic battle adapter,
+ # not real game progression. Restore all fixture fields afterwards.
+ upper=p.evaluate("""()=>{const r=BFGlobalQoLQuestRepeatV9800,
+   results=BFGlobalBattleResultsV3000,a=document.getElementById('auto'),
+   saved={...S},oldClear=P.questClears[1],oldReplay=__repeatCount,
+   oldStored=window.__stored98,oldReceipt=results.committedClearCount,
+   oldAuto=a.checked,oldMission=QUEST.missionId,oldWrites=__v98StorageWrites;
+   let exact=true;
+   try{
+     QUEST.missionId=1;S.busy=false;S.over=true;S.phase='Victory';
+     S.auto=false;a.checked=false;window.__stored98=true;
+     results.committedClearCount=()=>P.questClears[1];
+     if(!r.start(300))return false;
+     for(let n=1;n<=300;n++){
+       P.questClears[1]++;S.over=true;S.phase='Victory';
+       S.auto=false;a.checked=false;
+       r.poll();const status=r.statusSnapshot();
+       exact=exact&&status.completed===n&&status.active===(n<300)&&
+         __repeatCount-oldReplay===Math.min(n+1,300);
+       if(!exact)return false;
+     }
+     r.poll();
+     return exact&&!a.checked&&!S.auto&&__repeatCount-oldReplay===300&&
+       __v98StorageWrites===oldWrites;
+   }finally{
+     if(r.statusSnapshot().active)r.stop('Synthetic cleanup',false);
+     Object.assign(S,saved);P.questClears[1]=oldClear;__repeatCount=oldReplay;
+     window.__stored98=oldStored;QUEST.missionId=oldMission;a.checked=oldAuto;
+     if(oldReceipt===undefined)delete results.committedClearCount;
+     else results.committedClearCount=oldReceipt;
+   }}""")
+ assert upper is True
  # Re-injecting must not duplicate intervals, panels or listeners.
  p.add_script_tag(path=str(A/'bf9800_qol_cleared_quest_repeat.js'))
  assert p.locator('#bf9800-auto-repeat').count()==1
