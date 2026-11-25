@@ -1,7 +1,7 @@
 /* Home-only illustration selector. Exact effective form, never substitute another form. */
 (()=>{
   'use strict';
-  const allowed = Object.freeze([10011,20011,30011,40011,50011,60011]);
+  const allowed = Object.freeze([10011,10012,20011,20012,30011,30012,40011,40012,50011,50012,60011,60012]);
   window.BFHomeFullArtV646 = (unit, fallback) => {
     if (!unit || !Number.isSafeInteger(unit.id) || !allowed.includes(unit.id) ||
         typeof fallback !== 'function') return null;

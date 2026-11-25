@@ -57,7 +57,12 @@ def tree(*, selector=True, art=()):
 # --- constants and real checkout ---------------------------------------------
 assert H.ART_REDISTRIBUTION_AUTHORIZED is False
 assert H.MODES == ('fallback-only', 'full-art')
+assert H.STARTER_ART_IDS == (10011, 20011, 30011, 40011, 50011, 60011)
+assert H.EVOLVED_ART_IDS == (10012, 20012, 30012, 40012, 50012, 60012)
+assert len(H.FULL_ART_IDS) == len(set(H.FULL_ART_IDS)) == 12
+assert set(H.FULL_ART_IDS) == set(H.STARTER_ART_IDS + H.EVOLVED_ART_IDS)
 assert len(NAV_BYTES) <= 131072, len(NAV_BYTES)
+assert (ASSETS / H.CSS).stat().st_size <= 131072
 assert H.ART in ACTIVITY and (ASSETS / H.ART).is_file(), 'v646 selector must be integrated for this test'
 assert not list(ASSETS.glob('content/unit/img/unit_ills_full_*')) or os.environ.get(H.MODE_ENV) == 'full-art', \
     'restricted artwork present outside full-art mode'
@@ -92,7 +97,9 @@ with tempfile.TemporaryDirectory(prefix='bf646manifest_') as folder:
             fails(H.load_full_art_manifest, contains='manifest')
     with Env('full-art', manifest, '0'*64):
         fails(H.load_full_art_manifest, contains='pin mismatch')
-    for obj in ({}, {k:v for k,v in fixture.items() if k!='10011'}, dict(fixture, extra='0'*64),
+    for obj in ({}, {str(f): fixture[str(f)] for f in H.STARTER_ART_IDS},
+                {k:v for k,v in fixture.items() if k!='10012'},
+                {k:v for k,v in fixture.items() if k!='10011'}, dict(fixture, extra='0'*64),
                 dict(fixture, **{'10011':'bad'}), dict(fixture, **{'10011':True}), list(fixture)):
         with Env('full-art', manifest, put(encode(obj))):
             fails(H.load_full_art_manifest)
@@ -118,7 +125,10 @@ with tempfile.TemporaryDirectory(prefix='bf646manifest_') as folder:
         fails(H.load_full_art_manifest, contains='unavailable')
     with Env('full-art', manifest, pin):
         assert set(H.load_full_art_manifest()) == set(H.FULL_ART_IDS)
-        for art in ((), ((10011, b'not-art'),), tuple((f, f'synthetic-{f}'.encode()) for f in H.FULL_ART_IDS[:5]),
+        for art in ((), ((10011, b'not-art'),), tuple((f, f'synthetic-{f}'.encode()) for f in H.STARTER_ART_IDS),
+                    tuple((f, f'synthetic-{f}'.encode()) for f in H.FULL_ART_IDS if f != 60012),
+                    tuple((f, f'synthetic-{10011 if f == 10012 else f}'.encode()) for f in H.FULL_ART_IDS),
+                    tuple((f, f'synthetic-{f}'.encode()) for f in H.FULL_ART_IDS) + ((10013, b'x'),),
                     tuple((f, b'x') for f in H.FULL_ART_IDS)):
             root = tree(art=art)
             try:
@@ -139,7 +149,7 @@ with tempfile.TemporaryDirectory(prefix='bf646manifest_') as folder:
 print('PASS v646 mode: private pinned manifest admission; missing, partial and wrong art fail; synthetic integrity only')
 
 # --- fallback-only: restricted artwork must be absent -------------------------
-for art in (((10011, b'x'),), tuple((f, b'x') for f in H.FULL_ART_IDS)):
+for art in (((10011, b'x'),), ((10012, b'x'),), ((10013, b'x'),), tuple((f, b'x') for f in H.FULL_ART_IDS)):
     root = tree(art=art)
     try:
         with Env('fallback-only'):
@@ -161,7 +171,8 @@ portrait = 'data:image/png;base64,AAAA'
 for form in H.FULL_ART_IDS:
     assert H.expected_src(form, portrait, 'full-art') == H.full_path(form)
     assert H.expected_src(form, portrait, 'fallback-only') == portrait
-assert H.expected_src(10012, portrait, 'full-art') == portrait
+for unsupported in (10010, 10013, 60013, 99999, '10012', None):
+    assert H.expected_src(unsupported, portrait, 'full-art') == portrait
 fails(H.expected_src, 10011, portrait, 'auto')
 print('PASS v646 mode: full-art expects exact illustrations; fallback-only expects V266 portraits')
 
