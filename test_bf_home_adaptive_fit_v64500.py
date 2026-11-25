@@ -59,11 +59,13 @@ def serve(route):
         route.fulfill(status=404, body=b"")
 
 
-def open_app(browser, width, height):
+def open_app(browser, width, height, *, before_load=None):
     page = browser.new_page(viewport={"width": width, "height": height})
     errors = []
     page.on("pageerror", lambda error: errors.append(str(error)))
     page.route("http://bf-assets.test/**", serve)
+    if before_load is not None:
+        before_load(page)
     page.evaluate("""() => {const db={};let w=0;window.__v645Writes=()=>w;
       Object.defineProperty(window,'localStorage',{configurable:true,value:{
         getItem:k=>db[k]??null,setItem:(k,v)=>{w++;db[k]=String(v)},removeItem:k=>{w++;delete db[k]},
@@ -77,7 +79,7 @@ def open_app(browser, width, height):
             page.add_style_tag(path=str(ASSETS / module))
         else:
             page.add_script_tag(path=str(ASSETS / module))
-    if ART in MODULES:
+    if ART in MODULES and before_load is None:
         assert_exact_home_art(page, starter_fixture=True)
     return page, errors
 
@@ -124,7 +126,9 @@ with sync_playwright() as pw:
             assert page.evaluate("BF_homeNav.current") == "home"
             before = page.evaluate(SNAPSHOT)
             if ART in MODULES and (width, height, scale) == (320, 740, 1.0):
-                exercise_exact_form_and_missing_art(page, SNAPSHOT)
+                exercise_exact_form_and_missing_art(
+                    page, SNAPSHOT,
+                    lambda configure: open_app(browser, width, height, before_load=configure))
             page.evaluate(SYNTHETIC_TEXT_SCALE, scale)
             page.evaluate("dispatchEvent(new Event('resize'))")
             page.evaluate("window.scrollTo(0,0)")

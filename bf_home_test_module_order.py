@@ -2,7 +2,7 @@
 
 v646 R6: once the optional selector is integrated, every run must name its art
 mode in BF_HOME_ART_MODE. Nothing is inferred from which files happen to exist.
-  full-art      all six externally admitted fingerprints and exact full-art rendering (unchanged)
+  full-art      all twelve externally admitted fingerprints and exact full-art rendering
   fallback-only restricted artwork must be ABSENT; every card must show its V266 portrait
 """
 import hashlib
@@ -14,7 +14,9 @@ import re
 CSS = 'bf_home_nav.css'
 NAV = 'bf_home_nav.js'
 ART = 'bf_home_full_art_v646.js'
-FULL_ART_IDS = (10011, 20011, 30011, 40011, 50011, 60011)
+STARTER_ART_IDS = (10011, 20011, 30011, 40011, 50011, 60011)
+EVOLVED_ART_IDS = (10012, 20012, 30012, 40012, 50012, 60012)
+FULL_ART_IDS = tuple(sorted(STARTER_ART_IDS + EVOLVED_ART_IDS))
 MANIFEST_ENV = 'BF_HOME_ART_MANIFEST'
 MANIFEST_PIN_ENV = 'BF_HOME_ART_MANIFEST_SHA256'
 # The private operator supplies a previously authenticated pin from a trusted
@@ -86,7 +88,7 @@ def load_full_art_manifest(environ=None):
     except (ValueError, UnicodeError, RecursionError):
         raise AssertionError('invalid manifest JSON') from None
     assert isinstance(manifest, dict), 'manifest must be an object'
-    assert set(manifest) == {str(form) for form in FULL_ART_IDS}, 'manifest must contain exactly six forms'
+    assert set(manifest) == {str(form) for form in FULL_ART_IDS}, 'manifest must contain exactly twelve forms'
     assert all(isinstance(d, str) and re.fullmatch(r'[0-9a-f]{64}', d) for d in manifest.values()), 'invalid artwork digest'
     return {form: manifest[str(form)] for form in FULL_ART_IDS}
 
@@ -116,11 +118,14 @@ def home_modules(activity, assets):
         assert names[2] == ART, names[:3]
         mode = art_mode(True)
         if mode == 'full-art':
-            for form, digest in load_full_art_manifest().items():
+            admitted = load_full_art_manifest()
+            present = {str(p.relative_to(assets)) for p in assets.glob('content/unit/img/unit_ills_full_*')}
+            assert present <= {full_path(form) for form in admitted}, 'unexpected full-art file'
+            for form, digest in admitted.items():
                 assert (assets / full_path(form)).is_file(), (form, 'full-art mode: artwork missing')
                 data = (assets / full_path(form)).read_bytes()
                 assert hashlib.sha256(data).hexdigest() == digest, (form, 'art bytes')
-            banner = 'full-art (6/6 fingerprints verified)'
+            banner = 'full-art (12/12 fingerprints verified)'
         else:
             assert not any(k in os.environ for k in (MANIFEST_ENV, MANIFEST_PIN_ENV)), 'fallback-only mode must not receive private manifest settings'
             present = sorted(str(p.relative_to(assets)) for p in assets.glob('content/unit/img/unit_ills_full_*'))
@@ -159,38 +164,58 @@ def assert_exact_home_art(page, *, starter_fixture=False):
         expected = expected_src(r['form'], r['expectedPortrait'])
         assert r['src'] == expected, (r['base'], r['form'], 'wrong or missing exact-form artwork')
     if starter_fixture:
-        assert {r['form'] for r in rows} == set(FULL_ART_IDS), 'fixture must exercise all six art files'
+        assert {r['form'] for r in rows} == set(STARTER_ART_IDS), 'fixture must exercise all six starter forms'
     return rows
 
 
-def exercise_exact_form_and_missing_art(page, snapshot):
+def exercise_exact_form_and_missing_art(page, snapshot, open_missing):
     """Real effectiveUnit and refreshParty; synthetic in-memory state only, restored in finally."""
     before = page.evaluate(snapshot)
     assert_exact_home_art(page, starter_fixture=True)
-    # Inject a known valid evolution only into the disposable browser fixture.
-    page.evaluate('''()=>{if(P.evolutions[10011]!==undefined||!UNIT_BY_ID.has(10012))throw Error('bad evolution fixture');
-      P.evolutions[10011]=10012;BFGlobalHome.refreshParty();}''')
+    # All six authenticated first evolutions; synthetic in-memory fixture only.
+    pairs = list(zip(STARTER_ART_IDS, EVOLVED_ART_IDS))
+    page.evaluate('''pairs=>{if(pairs.some(([base,form])=>P.evolutions[base]!==undefined||!UNIT_BY_ID.has(form)))throw Error('bad evolution fixture');}''', pairs)
     try:
+        page.evaluate('''pairs=>{for(const [base,form] of pairs)P.evolutions[base]=form;BFGlobalHome.refreshParty();}''', pairs)
         rows = assert_exact_home_art(page)
-        first = next(r for r in rows if r['base'] == 10011)
-        assert first['form'] == 10012 and first['src'] == first['expectedPortrait']
+        expected = dict(pairs)
+        assert {r['base']: r['form'] for r in rows} == expected
+        for row in rows:
+            assert row['src'] == expected_src(expected[row['base']], row['expectedPortrait'])
     finally:
-        page.evaluate('()=>{delete P.evolutions[10011];BFGlobalHome.refreshParty();}')
+        page.evaluate('pairs=>{for(const [base] of pairs)delete P.evolutions[base];BFGlobalHome.refreshParty();}', pairs)
     assert_exact_home_art(page, starter_fixture=True)
     assert page.evaluate(snapshot) == before
-    # Force one image error by interception; the old portrait must remain usable.
+    # Force the missing image in a fresh context before the first request.
+    # Re-rendering an already decoded image can bypass routing in Chromium.
     pattern = '**/' + full_path(10011)
+    intercepted = []
     def missing(route):
         route.fulfill(status=404, body=b'')
-    page.route(pattern, missing)
+        intercepted.append(True)
+
+    missing_page, missing_errors = open_missing(lambda p: p.route(pattern, missing))
     try:
-        page.evaluate('()=>BFGlobalHome.refreshParty()')
-        card = page.locator('#bf-scene-party > [data-bf-home-unit-id="10011"]')
-        page.wait_for_function('''()=>{const i=document.querySelector('#bf-scene-party > [data-bf-home-unit-id="10011"] > img');
+        missing_before = missing_page.evaluate(snapshot)
+        assert missing_before['w'] == 0, 'fresh missing-art fixture wrote storage'
+        card = missing_page.locator('#bf-scene-party > [data-bf-home-unit-id="10011"]')
+        missing_page.wait_for_function('''()=>{const i=document.querySelector('#bf-scene-party > [data-bf-home-unit-id="10011"] > img');
           return i?.complete&&i.naturalWidth>0&&i.getAttribute('src')===effectiveUnit(10011).portrait;}''')
+        assert intercepted, 'missing-art route was never intercepted'
         assert card.evaluate("c=>!!c.querySelector('.bf-scene-leader')&&c.getAttribute('aria-label').startsWith('Inspect '+effectiveUnit(10011).name+', ')")
+        missing_page.wait_for_function("()=>[...document.querySelectorAll('#bf-scene-party > .bf-scene-member > img')].every(i=>i.complete&&i.naturalWidth>0)")
+        rows = missing_page.evaluate(CARD_PROBE)
+        assert len(rows) == 6 and len({r['base'] for r in rows}) == 6
+        assert {r['form'] for r in rows} == set(STARTER_ART_IDS)
+        for i, row in enumerate(rows):
+            assert row['owned'] and row['card'] == row['base'] and row['decoded']
+            assert row['name'] == row['expectedName'] and row['leader'] == (i == 0)
+            expected = row['expectedPortrait'] if row['form'] == 10011 else expected_src(row['form'], row['expectedPortrait'])
+            assert row['src'] == expected, (row['form'], 'wrong missing-art fixture image')
+        assert missing_page.evaluate(snapshot) == missing_before
+        assert not missing_errors, 'missing-art fixture page error'
     finally:
-        page.unroute(pattern, missing)
-        page.evaluate('()=>BFGlobalHome.refreshParty()')
+        missing_page.close()
+    # The original all-art page was never routed or mutated by the negative probe.
     assert_exact_home_art(page, starter_fixture=True)
     assert page.evaluate(snapshot) == before
