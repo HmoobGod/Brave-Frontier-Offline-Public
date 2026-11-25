@@ -145,9 +145,21 @@ with sync_playwright() as playwright:
     page.set_viewport_size({"width": 390, "height": 844})
     assert page.locator("#bf-scene-party .bf-scene-member").count() == 6
     assert page.locator("#bf-scene-party img").count() == 6
-    actual = page.locator("#bf-scene-party strong").all_text_contents()
-    expected = page.evaluate("P.squad.map(id => effectiveUnit(id).name)")
-    assert actual == expected, (actual, expected)
+    # v640 custom six-slot Home: every owned card shows its complete original
+    # name (no compact labels); the full name also stays in the aria-label.
+    labels = page.evaluate("""() => [...document.querySelectorAll('#bf-scene-party .bf-scene-member')].map((card, index) => {
+      const id = P.squad[index], original = effectiveUnit(id).name;
+      const shown = card.querySelector('strong').textContent.trim();
+      return {index, id, original, shown,
+        cardId: Number(card.dataset.bfHomeUnitId),
+        aria: card.getAttribute('aria-label') || '',
+        truthful: shown === original, markerCorrect: !/ ·[1-6]$/u.test(shown)};
+    })""")
+    assert len(labels) == 6, labels
+    for label in labels:
+        assert label["cardId"] == label["id"], label
+        assert label["truthful"] and label["markerCorrect"], label
+        assert label["aria"].startswith("Inspect " + label["original"] + ","), label
     assert page.locator(".bf-scene-places .bf-scene-place").count() == 6
     assert page.locator(".bf-scene-places button[data-bf-goto]").count() == 2
     assert page.locator(".bf-scene-places .bf-scene-locked").count() == 4

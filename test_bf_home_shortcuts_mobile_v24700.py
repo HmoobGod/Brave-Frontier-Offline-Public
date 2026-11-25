@@ -35,7 +35,8 @@ assert len(CSS.encode("utf8")) <= 128 * 1024
 assert len(JS.encode("utf8")) <= 128 * 1024
 home = JS.split("/* Build #9: original Global home location hub", 1)[1].split(
     "/* Build #11 - recovered BF1 Global artwork", 1)[0]
-for label in ("QUESTS", "UNITS", "SAVES", "UNIT BOX", "EXCHANGE · LATER"):
+# v643: icons match actions (Units = footer "Unit" cell, Unit Box = "View Units", MENU not SAVES).
+for label in ("QUESTS", "UNITS", "MENU", "UNIT BOX", "EXCHANGE · LATER"):
     assert f"<span>{label}</span>" in home
 assert home.count('class="bf-scene-tool-locked"') == 1
 assert 'aria-label="Exchange Hall not implemented" aria-disabled="true"' in home
@@ -72,7 +73,8 @@ with sync_playwright() as pw:
             cols: getComputedStyle(el).gridTemplateColumns.split(' ').length,
             scroll: el.scrollWidth, client: el.clientWidth
         })""")
-        assert grid["cols"] == (3 if width <= 412 else 5), (width, grid)
+        # v636: original layout_home2 icon row beneath the party frame, five across.
+        assert grid["cols"] == 5, (width, grid)
         assert grid["scroll"] <= grid["client"] + 2, (width, grid)
         for button in shortcuts.locator("button").all():
             metrics = button.evaluate("""el => ({
@@ -81,7 +83,7 @@ with sync_playwright() as pw:
                 label: parseFloat(getComputedStyle(el.querySelector('span')).fontSize),
                 visible: getComputedStyle(el).visibility
             })""")
-            assert metrics["width"] >= 44 and metrics["height"] >= 88, (width, metrics)
+            assert metrics["width"] >= 44 and metrics["height"] >= 64, (width, metrics)  # v636 icon row; >=44px touch
             assert metrics["label"] >= 10, (width, metrics)
             assert metrics["visible"] == "visible", (width, metrics)
         locked = shortcuts.locator(".bf-scene-tool-locked")

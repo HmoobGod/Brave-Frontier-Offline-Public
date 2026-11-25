@@ -17,6 +17,8 @@ on:
       - 'app/src/main/assets/bf_home_nav.css'
       - 'test_bf_home_ui_priority_v24200.py'
       - 'test_bf_home_gateway_live_v61800.py'
+      - 'test_bf_home_squad_frame_v63500.py'
+      - 'test_bf_home_artwork_first_v63600.py'
       - 'test_bf_home_lineup_readability_v62100.py'
       - 'test_bf_home_sixth_slot_readability_v62300.py'
       - 'test_bf_home_story_quick_select_v62000.py'
@@ -158,6 +160,10 @@ jobs:
         run: python3 test_bf_home_ui_priority_v24200.py --source-only
       - name: Verify real-app Home gateway geometry, art and active-label source gate
         run: python3 test_bf_home_gateway_live_v61800.py --source-only
+      - name: Verify original-style Home squad frame v635 source gate
+        run: python3 test_bf_home_squad_frame_v63500.py --source-only
+      - name: Verify artwork-first Home composition v636 source gate
+        run: python3 test_bf_home_artwork_first_v63600.py --source-only
       - name: Verify actual Home five-portrait readability and owned lineup source gate
         run: python3 test_bf_home_lineup_readability_v62100.py --source-only
       - name: Verify actual Home sixth owned squad readability and keyboard focus source gate

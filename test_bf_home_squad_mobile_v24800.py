@@ -62,7 +62,8 @@ with sync_playwright() as pw:
             cols:getComputedStyle(el).gridTemplateColumns.split(' ').length,
             scroll:el.scrollWidth,client:el.clientWidth
         })""")
-        assert sizes["cols"]==(5 if width<=412 else 6),(width,sizes)
+        # v640 custom six-slot Home: 3x2 squad at every width; no sixth strip.
+        assert sizes["cols"]==3,(width,sizes)
         assert sizes["scroll"] <= sizes["client"]+2,(width,sizes)
         for index,item in enumerate(cards.all()):
             assert item.get_attribute("aria-label")=="Empty squad slot"
@@ -70,10 +71,10 @@ with sync_playwright() as pw:
                 size:el.getBoundingClientRect().width,
                 minHeight:parseFloat(getComputedStyle(el).minHeight)
             })""")
-            assert m["size"] >= 36 and m["minHeight"] >= (44 if width<=412 and index==5 else 90),(width,index,m)
-        page.locator(".bf-scene-squad button[data-bf-goto='units']").click()
+            assert m["size"] >= 88 and m["minHeight"] >= 110,(width,index,m)
+        page.locator(".bf-scene-squad .bf-scene-heading button[data-bf-goto='units']").click()
         assert page.evaluate("BF_homeNav.current")=="units"
         assert not errors,(width,errors)
         page.close()
     browser.close()
-print("PASS v248/v615 browser: five main portraits + compact sixth phone slot, all six visible; Units route")
+print("PASS v248/v640 browser: six equal squad slots in a 3x2 grid, all six visible; Units route")

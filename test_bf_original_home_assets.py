@@ -24,11 +24,14 @@ expected = {
     "area_name_frame.png": (286, 58),
     "party_frame_quest_btn1.png": (210, 55),
     "mission_frame_off.png": (622, 176),
+    "character_frame.png": (644, 354),  # v635 original five-opening frame
 }
+# v643: the gift-box (Present) and shortcut-overlay icons are no longer staged;
+# Home no longer shows them for unrelated actions.
 expected.update({name: (100, 80) for name in (
-    "home_new_btn_menu1.png", "home_new_btn_box1.png",
-    "home_new_btn_exchange1.png", "home_new_btn_mission1.png",
-    "home_new_btn_shortcut1.png")})
+    "home_new_btn_menu1.png", "home_new_btn_exchange1.png", "home_new_btn_mission1.png")})
+for name in ("home_new_btn_box1.png", "home_new_btn_shortcut1.png"):
+    assert all(name not in sprites for _, sprites in PACKS.values()), name
 for group, (_, sprites) in PACKS.items():
     for name in sprites:
         asset = DESTINATION / "content" / group / name

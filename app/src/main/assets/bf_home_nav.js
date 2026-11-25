@@ -176,15 +176,74 @@ function bfOfflineUnitPortraitV266(source, name) {
       '<div class="bf-scene-heading"><strong role="heading" aria-level="2">HOME SHORTCUTS</strong><small>Available offline</small></div>',
       '<div class="bf-scene-toolrow">',
         '<button type="button" data-bf-goto="quest"><img src="content/home/home_new_btn_mission1.png" alt="" /><span>QUESTS</span></button>',
-        '<button type="button" data-bf-goto="units"><img src="content/home/home_new_btn_shortcut1.png" alt="" /><span>UNITS</span></button>',
-        '<button type="button" data-bf-goto="menu"><img src="content/home/home_new_btn_menu1.png" alt="" /><span>SAVES</span></button>',
-        '<button type="button" class="bf-scene-tool-box" data-bf-goto="units" data-bf-open-box="1" aria-label="Open owned Unit Box"><img src="content/home/home_new_btn_box1.png" alt="" /><span>UNIT BOX</span></button>',
+        '<button type="button" data-bf-goto="units"><i class="bf-nav-art bf-nav-art-units" aria-hidden="true"></i><span>UNITS</span></button>',
+        '<button type="button" data-bf-goto="menu"><img src="content/home/home_new_btn_menu1.png" alt="" /><span>MENU</span></button>',
+        '<button type="button" class="bf-scene-tool-box" data-bf-goto="units" data-bf-open-box="1" aria-label="Open owned Unit Box"><img src="content/unit_top/unit_top_box_btn1.png" alt="" /><span>UNIT BOX</span></button>',
         '<div class="bf-scene-tool-locked" role="group" aria-label="Exchange Hall not implemented" aria-disabled="true"><img src="content/home/home_new_btn_exchange1.png" alt="" /><span>EXCHANGE · LATER</span></div>',
       '</div>',
       '<button type="button" id="bf-home-build-info" aria-label="Open installed app build information" style="box-sizing:border-box;display:block;width:100%;min-height:44px;margin:8px 0 0;padding:9px 12px;color:#ffe2af;background:#21364d;border:1px solid #bca16a;border-radius:6px;font:800 12px Arial,sans-serif;text-align:center;cursor:pointer">VIEW BUILD VERSION / APP INFO</button>',
     '</section>',
-    '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features.</p>'
+    '<p class="bf-scene-note">Original Global graphics; recreated arrangement. Current Quest and Summon modes are demos. Unavailable locations are artwork previews, not simulated online features. Squad frame: archived layout_home2 slot coordinates; artwork scaling, unit placement and leader badge are reconstruction choices.</p>'
   ].join('');
+  // v635: original-style Home squad frame. Presentation only: the visible
+  // title stays in the DOM as the accessible level-1 heading and focus
+  // fallback; squad diagnostics move into a collapsed disclosure below.
+  home.classList.add('bf-home-v635');
+  const squadSectionV635 = home.querySelector('.bf-scene-squad');
+  const squadReferenceV635 = document.createElement('details');
+  squadReferenceV635.id = 'bf-home-squad-reference';
+  squadReferenceV635.hidden = true;
+  squadReferenceV635.innerHTML = '<summary>SQUAD SOURCE NOTES · 2022 reference data</summary>' +
+    '<div class="bf-home-squad-reference-body"></div>';
+  squadSectionV635.append(squadReferenceV635);
+  // Keep keyboard order equal to the visual order: portraits, then Edit Squad.
+  squadSectionV635.insertBefore(squadSectionV635.querySelector(':scope > .bf-scene-heading'), squadReferenceV635);
+  // v636: archived layout_home2 places the Home menu/action buttons
+  // (y~510-612) directly beneath the party frame (y161-517). Move the same
+  // original-art shortcut row there; routing stays delegated on #bf-home.
+  home.classList.add('bf-home-v636');
+  const toolrowV636 = home.querySelector('.bf-scene-tools > .bf-scene-toolrow');
+  if (toolrowV636) {
+    toolrowV636.setAttribute('aria-label', 'Home menu');
+    squadSectionV635.insertBefore(toolrowV636, squadReferenceV635);
+  }
+  // Reference notes stay one tap away at the bottom of Home (same live
+  // nodes, same disclosure) instead of occupying the first screen.
+  home.querySelector('.bf-scene-tools')?.append(squadReferenceV635);
+  // v640 custom six-slot Home: set before first paint (full names); may fail closed.
+  home.classList.replace('bf-home-v635','bf-home-v640');home.classList.remove('bf-home-v636');
+  // v638 local: keep the exact live Story node between playable Quest/Summon
+  // and archived inactive location previews; preserve handler and v7 state.
+  // Fail closed if the authenticated Home DOM sequence has changed.
+  const storyV638 = home.querySelector(':scope > .bf-scene-story');
+  const adventureV638 = home.querySelector(':scope > .bf-scene-explore');
+  const placesV638 = adventureV638?.querySelector(':scope > .bf-scene-places');
+  const summonV638 = placesV638?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]');
+  const archiveV638 = summonV638?.nextElementSibling;
+  if (storyV638 && adventureV638 && placesV638 && summonV638 &&
+      archiveV638?.classList.contains('bf-scene-archive-' + 'label') &&
+      storyV638.nextElementSibling === adventureV638 &&
+      summonV638.nextElementSibling === archiveV638) {
+    summonV638.insertAdjacentElement('afterend', storyV638);
+  }
+  const squadReferenceBodyV635 = squadReferenceV635.lastElementChild;
+  // Existing read-only modules insert these beside #bf-scene-party. Moving
+  // the same live nodes keeps their refresh hooks, roles and text intact.
+  const squadReferenceIdsV635 = ['bf12600-home-squad-cost', 'bf-home-element-reference',
+    'bf11600-home-base-reference'];
+  function relocateSquadReferencesV635() {
+    for (const id of squadReferenceIdsV635) {
+      const node = document.getElementById(id);
+      if (!node || node.parentElement !== squadSectionV635) continue;
+      const later = squadReferenceIdsV635.slice(squadReferenceIdsV635.indexOf(id) + 1)
+        .map(x => document.getElementById(x)).find(x => x?.parentElement === squadReferenceBodyV635);
+      squadReferenceBodyV635.insertBefore(node, later || null);
+    }
+    squadReferenceV635.hidden = squadReferenceBodyV635.childElementCount === 0;
+  }
+  new MutationObserver(relocateSquadReferencesV635).observe(squadSectionV635, {childList: true});
+  window.BFHomeSquadFrameV635 = Object.freeze({relocate: relocateSquadReferencesV635,
+    referenceIds: Object.freeze(squadReferenceIdsV635.slice())});
   // Keep navigation and source location names usable if original Home art
   // cannot load. No replacement image or playable-mode claim is invented.
   const homeArtFallbacks=new WeakMap();
@@ -232,6 +291,118 @@ function bfOfflineUnitPortraitV266(source, name) {
     if(!receipt||!Object.hasOwn(receipt,'value')||!Number.isSafeInteger(receipt.value)||receipt.value<0||receipt.value>1000000000||typeof demoLevel!=='function')return null;
     const level=demoLevel(receipt.value);return Number.isSafeInteger(level)&&level>=1&&level<=99?level:null;
   }catch(_){return null;}}
+  // R3: retain the exact archive name while grouping Japanese word segments.
+  // The grouping only affects HOME text nodes; unit IDs, labels, saves and
+  // manual interactions remain untouched. Not evidence of 2022 UI behavior.
+  function renderHomePortraitName(node, fullName) {
+    node.textContent = fullName;
+    // R4: presentation-only fallback for long unbroken Latin words when a
+    // condensed system font is missing; never alters visible/semantic text.
+    node.classList.toggle('bf-home-portrait-longword', /[A-Za-z]{11,}/u.test(fullName));
+    if (!/[\u3040-\u30ff\u3400-\u9fff]/u.test(fullName)) return;
+    node.lang = 'ja';
+    try {
+      // R4 fallback when older WebViews lack Intl.Segmenter: keep kana and
+      // full-width Latin runs indivisible, and use the verified source-name
+      // boundary between デラックス / ファイター. Never insert or remove glyphs.
+      const segments = typeof Intl.Segmenter === 'function'
+        ? [...new Intl.Segmenter('ja', {granularity:'word'}).segment(fullName)].map(s=>s.segment)
+        : (fullName.match(/[\u3400-\u9fff]|[\u3040-\u309f]+|[\u30a0-\u30ff]+|[\uff21-\uff3a\uff41-\uff5a]+|[A-Za-z0-9]+|\s+|./gu) || [fullName])
+            .flatMap(s=>s==='デラックスファイター'?['デラックス','ファイター']:[s]);
+      if (!segments.length || segments.join('') !== fullName) return;
+      const content = segments.map(s=>{
+        const part = document.createElement('span');
+        part.className = 'bf-home-portrait-word';
+        part.textContent = s;
+        return part;
+      });
+      node.replaceChildren(...content);
+    } catch (_) { node.textContent = fullName; }
+  }
+  // Owner-approved display-only short labels: source-name suffix or prefix,
+  // with a truthful squad-slot marker only if two visible labels would match.
+  // Never substitute, invent, or save a unit name or ID.  No catalog required.
+  let shortLabelRevision = 0, shortLabelFrame = 0, shortLabelSchedule = null;
+  let shortLabelObserver = null, shortLabelObservedWidth = null;
+  function assignShortHomeLabels(cards, sourceNames) {
+    const revision = ++shortLabelRevision;
+    const live = () => revision === shortLabelRevision && party.isConnected &&
+      cards.every((card, i) => party.children[i] === card);
+    const labels = sourceNames.map((full, index) => {
+      if (!full || !cards[index]?.querySelector('strong')) return null;
+      const words = full.trim().split(/\s+/u);
+      return words[words.length - 1] || full;
+    });
+    function measureFit(node, base, suffix) {
+      const rectWidth = node.getBoundingClientRect().width;
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      // Never emit a fabricated one-letter ellipsis when the layout or
+      // font is not measurable. The source suffix remains available.
+      if (!ctx || rectWidth < 12) return base + suffix;
+      ctx.font = getComputedStyle(node).font;
+      const allowed = rectWidth - 2;
+      const fits = text => ctx.measureText(text).width <= allowed;
+      if (fits(base + suffix)) return base + suffix;
+      const chars = Array.from(base);
+      while (chars.length > 3 && !fits(chars.join('') + '…' + suffix)) chars.pop();
+      return chars.length >= 3 && fits(chars.join('') + '…' + suffix)
+        ? chars.join('') + '…' + suffix : base + suffix;
+    }
+    // First paint: show only truthful source-derived suffixes. Do not
+    // measure a newly inserted, not-yet-laid-out node (the V… bug).
+    for (let i = 0; i < 5; i++) {
+      if (!labels[i]) continue;
+      const strong = cards[i].querySelector('strong');
+      strong.replaceChildren();strong.removeAttribute('lang');
+      strong.classList.remove('bf-home-portrait-longword');
+      strong.classList.add('bf-home-short-label');
+      strong.textContent = labels[i];
+    }
+    const fitLabels = () => {
+      if (!live()) return;
+      const texts = labels.map((base, i) => base === null ? null :
+        measureFit(cards[i].querySelector('strong'), base, ''));
+      // A collision may occur either in source suffixes or after ellipsis.
+      // Slot numbers are existing truthful context, not invented unit IDs.
+      const counts = new Map();
+      for (const label of texts) if (label !== null)
+        counts.set(label, (counts.get(label) || 0) + 1);
+      for (let i = 0; i < 5; i++) {
+        if (texts[i] === null) continue;
+        const strong = cards[i].querySelector('strong');
+        const suffix = counts.get(texts[i]) > 1 ? ' ·' + (i + 1) : '';
+        const next = suffix ? measureFit(strong, labels[i], suffix) : texts[i];
+        if (strong.textContent !== next) strong.textContent = next;
+      }
+    };
+    const scheduleFit = () => {
+      if (!live()) return;
+      if (shortLabelFrame) cancelAnimationFrame(shortLabelFrame);
+      shortLabelFrame = requestAnimationFrame(() => {
+        shortLabelFrame = 0;
+        if (live()) fitLabels();
+      });
+    };
+    shortLabelSchedule = scheduleFit;
+    // One observer per Home instance; widths only, not text/height changes.
+    if (!shortLabelObserver && typeof ResizeObserver === 'function') {
+      shortLabelObserver = new ResizeObserver(entries => {
+        const width = entries[0]?.contentRect.width;
+        if (!Number.isFinite(width) ||
+            (shortLabelObservedWidth !== null &&
+             Math.abs(width - shortLabelObservedWidth) < .25)) return;
+        shortLabelObservedWidth = width;
+        if (shortLabelSchedule) shortLabelSchedule();
+      });
+      shortLabelObserver.observe(party);
+    }
+    scheduleFit();
+    // Re-fit labels only, never refresh the party or mutate player storage.
+    if (document.fonts?.ready) document.fonts.ready.then(() => {
+      if (live()) scheduleFit();
+    });
+  }
   function refreshParty() {
     // Replacing the cards must not discard a keyboard user's place or
     // silently move them to a different unit. External focus stays untouched.
@@ -242,7 +413,7 @@ function bfOfflineUnitPortraitV266(source, name) {
     const stateValid=typeof P!=='undefined'&&P?.version===7&&Array.isArray(P.squad)&&P.squad.length<=6&&Array.isArray(P.roster)&&Array.from(P.roster).every(id=>Number.isSafeInteger(id)&&id>0)&&new Set(P.roster).size===P.roster.length;
     const members = stateValid ? P.squad.slice(0,6) : [];
 
-    const nodes = [], seen = new Set();
+    const nodes = [], seen = new Set(), shortLabelSourceNames = Array(5).fill(null);
     const roster = typeof P !== 'undefined' && Array.isArray(P?.roster) ? P.roster : null;
     let unverified = 0;
     for (let index = 0; index < 6; index++) {
@@ -260,17 +431,20 @@ function bfOfflineUnitPortraitV266(source, name) {
       if (unit) {
         card.type = 'button';
         card.dataset.bfHomeUnitId = String(baseId);
-        // v625: bind the visible card to its original owned source form.
-        // Event listeners may replace the current effective form before a
-        // manual handoff; stale cards must never inspect a different form.
+        // v625: bind to the owned source form; stale cards cannot inspect another form.
         const displayedFormId = unit.id;
         const displayedFormName = unit.name;
-        const img = bfOfflineUnitPortraitV266(unit.portrait, unit.name);
+        const img = window.BFHomeFullArtV646?.(unit,bfOfflineUnitPortraitV266) ?? bfOfflineUnitPortraitV266(unit.portrait, unit.name);
         const name = document.createElement('strong');
-        name.textContent = unit.name || 'Unit';
+        renderHomePortraitName(name, unit.name || 'Unit');
+        if (index < 5 && !home.classList.contains('bf-home-v640')) shortLabelSourceNames[index] = unit.name;
         const level = document.createElement('small');
         const observedLevel=verifiedDemoLevel(baseId);
-        level.textContent=observedLevel===null?'LEVEL UNAVAILABLE':'Lv.'+observedLevel;
+        // R6: keep a truthful compact label visible between the original
+        // five-slot frame ornaments; announce the full invalid-level state.
+        const levelUnknown=observedLevel===null;
+        level.textContent=levelUnknown?'Lv —':'Lv.'+observedLevel;
+        const announcedLevel=levelUnknown?'LEVEL UNAVAILABLE':level.textContent;
         // The first ordered owned slot is the leader slot; never promote
         // another visible card when slot one is empty or unverified.
         const slot = document.createElement('span');
@@ -283,10 +457,11 @@ function bfOfflineUnitPortraitV266(source, name) {
           slot.append(leader);
         }
         slot.append(document.createTextNode('SLOT ' + (index + 1)));
-        card.setAttribute('aria-label', 'Inspect ' + name.textContent + ', ' + level.textContent +
+        card.setAttribute('aria-label', 'Inspect ' + unit.name + ', ' + announcedLevel +
           ', ' + (index === 0 ? 'Leader, ' : '') + 'squad slot ' + (index + 1) + ' of 6');
-        card.title = 'Inspect owned unit';
+        card.title = 'Inspect ' + unit.name;
         card.append(slot, img, name, level);
+        img.bfArtAttach?.();
         card.addEventListener('click', () => {
           // Recheck the live slot and ownership: this card may predate a
           // roster import or squad edit. Navigation is a manual read only
@@ -360,6 +535,7 @@ function bfOfflineUnitPortraitV266(source, name) {
       nodes.push(card);
     }
     party.replaceChildren(...nodes);
+    assignShortHomeLabels(nodes, shortLabelSourceNames);
     partyReview.hidden = stateValid && unverified === 0;
     partyReview.textContent = !stateValid ? 'Squad data unavailable · ownership could not be verified. Open Units to review.' : unverified ?
       unverified + ' squad ' + (unverified === 1 ? 'entry needs' : 'entries need') +
@@ -1987,4 +2163,27 @@ function bfOfflineUnitPortraitV266(source, name) {
  window.addEventListener('bf-route-change',refresh);window.addEventListener('bf-route-sync',refresh);document.getElementById('squadpicker')?.addEventListener('change',refresh);
  // Party repaint also follows imports and form-provider changes, not just input changes.
  new MutationObserver(refresh).observe(party,{childList:true});window.BFHomeElementsB100=Object.freeze({snapshot,refresh});refresh();
+})();
+
+/* v640 CUSTOM six-owned-unit Home (owner-approved; NOT 2022 geometry). Same live
+   nodes/handlers/art; Quest+Summon first screen; extras moved to Menu. No writes. */
+(()=>{'use strict';const h=document.getElementById('bf-home');if(!h||window.BFHomeSixSlotV640||!h.classList.contains('bf-home-v640'))return;
+ const q=s=>h.querySelector(s),sq=q(':scope>.bf-scene-squad'),party=sq?.querySelector('#bf-scene-party'),hd=sq?.querySelector(':scope>.bf-scene-heading'),
+  ex=q(':scope>.bf-scene-explore'),pl=ex?.querySelector(':scope>.bf-scene-places'),al=pl?.querySelector(':scope>.bf-scene-archive-label'),
+  lk=pl?[...pl.querySelectorAll(':scope>.bf-scene-locked')]:[],st=q('.bf-scene-story'),tr=q('.bf-scene-toolrow'),tools=q(':scope>.bf-scene-tools'),menu=document.querySelector('.progresspanel');
+ if(!party||!hd||!pl||!pl.querySelector(':scope>button[data-bf-goto="quest"]')||!pl.querySelector(':scope>button[data-bf-goto="summon"]')||!al||lk.length!==4||!st||!tr||!tools||!menu){
+  h.classList.replace('bf-home-v640','bf-home-v635');h.classList.add('bf-home-v636');try{window.BFGlobalHome?.refreshParty?.();}catch(_){}return;}
+ sq.insertBefore(hd,party);const t=hd.querySelector('strong');if(t)t.textContent='YOUR SQUAD';
+ ex.classList.add('bf-home-play');ex.setAttribute('aria-label','Play');ex.after(st);tools.append(tr);st.after(tools);
+ const x=document.createElement('section');x.id='bf-menu-home-extras';x.className='bf-menu-home-extras';x.setAttribute('aria-labelledby','bf-menu-home-extras-title');
+ x.innerHTML='<h2 id="bf-menu-home-extras-title">GRAND GAIA · MORE</h2><p class="bf-menu-home-extras-intro">Location previews, quest preview, build info and notes moved from Home.</p>';
+ const loc=document.createElement('div');loc.className='bf-scene-places bf-menu-locations';loc.append(al,...lk);x.append(loc);
+ for(const n of [tools.querySelector('#bf-home-build-info'),tools.querySelector('#bf-home-squad-reference'),q(':scope>.bf-location-launch'),q(':scope>.bf-scene-note')])if(n)x.append(n);
+ menu.append(x);
+ const late=()=>{for(const id of ['bf420-home-readiness','bf054-home-details']){const n=document.getElementById(id);if(n?.parentElement===h)x.append(n);}};
+ new MutationObserver(late).observe(h,{childList:true});late();
+ x.addEventListener('click',e=>{if(!e.target.closest?.('#bf-home-build-info'))return;const i=document.getElementById('bf-about-build');if(i){i.open=true;i.querySelector('summary')?.focus();}});
+ // Missing preview art: hide the broken image; the name/status text remains.
+ x.addEventListener('error',e=>{if(e.target?.tagName==='IMG')e.target.hidden=true;},true);
+ window.BFHomeSixSlotV640=Object.freeze({custom:true,historicalGeometry:false,slots:6,menuSection:x.id,relocate:late});
 })();

@@ -11,6 +11,8 @@ R=Path(__file__).resolve().parent
 ASSETS=R/'app/src/main/assets'
 addon=(ASSETS/'bf054_header_status.js').read_text('utf-8')
 assert addon.count('/* BF_HEADER_STATUS_FIDELITY_V054 */')==1
+# Preserve the authored two-axis source crop. Chromium may serialize 'auto' as omitted.
+assert addon.count("'.bf-shell-head{aspect-ratio:644/174!important;background-size:100% auto!important;'")==1, 'authored original header crop was modified'
 assert 'bf_global_offline_demo_v7' not in addon, 'header overlay must never write saves'
 assert 'localStorage.setItem' not in addon
 assert 'min-height:44px' in addon
@@ -74,12 +76,15 @@ with sync_playwright() as pw:
     }""")
     assert css['oldImage'] and css['overflow']=='hidden',css
     assert 0.264 < css['height']/css['width'] < 0.279, css
-    assert css['backgroundSize']=='100% auto',css
+    assert css['backgroundSize'] in ('100% auto','100%'), ('computed header crop',css)
     assert page.evaluate('BF054HeaderStatus.state.percent')==0
     # The new native Home disclosure is closed by default, read-only and
     # reports genuinely unavailable Energy rather than fake regeneration.
     details=page.locator('#bf054-home-details')
     assert details.count()==1
+    # v640: the summoner details disclosure moved from Home to Menu (same node).
+    assert page.evaluate("!!document.getElementById('bf054-home-details').closest('#bf-menu-home-extras')")
+    page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
     assert details.get_attribute('open') is None
     assert 'Energy unavailable' in page.locator('#bf054-home-values').text_content()
     details.locator('summary').click()
@@ -92,6 +97,7 @@ with sync_playwright() as pw:
         page.set_viewport_size({'width':width,'height':844})
         summary_bounds=details.locator('summary').bounding_box()
         assert summary_bounds and summary_bounds['height']>=44,(width,summary_bounds)
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
     # Transient malformed v7 local data must not be represented as level one.
     # All mutations remain in test memory and are explicitly restored.
     invalid=page.evaluate("""()=>{
@@ -251,7 +257,9 @@ with sync_playwright() as pw:
     }""")
     assert page.evaluate("""() => {
       const h=document.getElementById('bf-home');
-      return h.lastElementChild?.id==='bf054-home-details' &&
+      // v640: the details disclosure lives in Menu, not at the end of Home.
+      return document.getElementById('bf054-home-details')?.parentElement?.id==='bf-menu-home-extras' &&
+        !h.contains(document.getElementById('bf054-home-details')) &&
         h.querySelector('#bf-scene-party')?.children.length===6;
     }""")
     # Emulate #420 late-loading a read-only reference panel next to Adventure.
@@ -279,25 +287,33 @@ with sync_playwright() as pw:
           cards=[...p.querySelectorAll('.bf-scene-member')],
           rects=cards.map(x=>x.getBoundingClientRect()),
           buttons=[...adventure.querySelectorAll('button.bf-scene-active')];
+        const extras=document.getElementById('bf-menu-home-extras'),
+          latePreview=document.getElementById('bf420-home-readiness'),
+          lateDetails=document.getElementById('bf054-home-details');
         return {
-          order:t.nextElementSibling===s&&s.nextElementSibling===story&&
-            story.nextElementSibling===adventure&&
-            adventure.nextElementSibling===preview&&
-            preview.nextElementSibling===tools,
-          detailsLast:h.lastElementChild===details,
+          // v640 custom Home: title > squad > Play (Quest, Summon) > Story >
+          // shortcuts; late read-only panels relocate to Menu, not Home.
+          order:t.nextElementSibling===s&&s.nextElementSibling===adventure&&
+            adventure.nextElementSibling===story&&story.nextElementSibling===tools&&
+            !preview&&latePreview?.parentElement===extras&&
+            h.querySelectorAll('.bf-scene-story').length===1&&
+            h.querySelectorAll('.bf-scene-explore').length===1,
+          detailsLast:!details&&lateDetails?.parentElement===extras,
           width:document.documentElement.scrollWidth,
           cols:getComputedStyle(p).gridTemplateColumns.split(' ').length,
           cards:cards.length,interactive:buttons.map(x=>x.dataset.bfGoto),
-          firstRow:rects.slice(0,5).every(x=>Math.abs(x.top-rects[0].top)<2),
-          sixthBelow:rects[5].top>=rects[0].bottom-2,
+          firstRow:rects.slice(0,3).every(x=>Math.abs(x.top-rects[0].top)<2)&&
+            rects.slice(3,6).every(x=>Math.abs(x.top-rects[3].top)<2),
+          sixthBelow:rects[3].top>=rects[0].bottom-2,
           hit:rects.every(x=>x.width>=36&&x.height>=44)
         };
       }""")
       assert layout['order'] and layout['detailsLast'],(width,layout)
       assert layout['cards']==6 and layout['interactive']==['quest','summon'],(width,layout)
-      assert layout['cols']==(5 if width<=412 else 6),(width,layout)
-      if width<=412:
-        assert layout['firstRow'] and layout['sixthBelow'],(width,layout)
+      # v640 custom six-slot Home: three columns, two rows of owned units at
+      # every width (owner-approved custom layout, not 2022 geometry).
+      assert layout['cols']==3,(width,layout)
+      assert layout['firstRow'] and layout['sixthBelow'],(width,layout)
       assert layout['hit'],(width,layout)
       assert layout['width']<=max(width,base_scroll_width),(width,layout)
       # In-memory Chromium image receipt; never publishes owner screenshots.
@@ -329,7 +345,9 @@ with sync_playwright() as pw:
           sixthButton:last.tagName==='BUTTON',
           sixthId:Number(last.dataset.bfHomeUnitId),
           expectedSixthId:old[5],
-          compact:css.gridColumnStart==='1'&&css.gridColumnEnd==='-1',
+          // v640: slot 6 is an ordinary third-column card in row two.
+          compact:Math.abs(r6.left-cards[2].getBoundingClientRect().left)<1&&
+            Math.abs(r6.top-cards[3].getBoundingClientRect().top)<1,
           below:r6.top>=r0.bottom-2,
           saveSame:localStorage.getItem('bf_global_offline_demo_v7')===storageBefore
         };
@@ -386,11 +404,14 @@ with sync_playwright() as pw:
     reward_state=page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
       quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
       writes:__headerWrites()})""")
+    # v640: the details readout is on the Menu screen.
+    page.locator('.bf-navbar button[data-bf-goto="menu"]').click()
     for width in (320,390,540):
         page.set_viewport_size({'width':width,'height':844})
         page.evaluate('BF054HeaderStatus.refresh()')
         bounds=page.locator('#bf054-home-next-level').bounding_box()
         assert bounds and bounds['x']>=0 and bounds['x']+bounds['width']<=width+1,(width,bounds)
+    page.locator('.bf-navbar button[data-bf-goto="home"]').click()
     assert page.evaluate("""()=>({p:JSON.stringify(P),s:JSON.stringify(S),
       quest:QUEST.missionId,raw:localStorage.getItem('bf_global_offline_demo_v7'),
       writes:__headerWrites()})""")==reward_state

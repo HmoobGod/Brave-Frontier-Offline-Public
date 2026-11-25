@@ -90,7 +90,7 @@ with sync_playwright() as pw:
         grid = page.locator(".bf-scene-places").evaluate(
             "(el)=>({scroll:el.scrollWidth,client:el.clientWidth})")
         assert grid["scroll"] <= grid["client"] + 2, (width, grid)
-        assert page.locator(".bf-scene-places button").count() == 2
+        assert page.locator(".bf-scene-places > button").count() == 2
         page.locator('.bf-scene-featured[data-bf-goto="quest"]').click()
         assert page.evaluate("BF_homeNav.current") == "quest"
         page.locator('.bf-navbar button[data-bf-goto="home"]').click()

@@ -92,22 +92,51 @@ with sync_playwright() as pw:
  p.add_script_tag(path=str(A/'bf_home_nav.js'))
  p.evaluate(api+'.refresh()')
  home=p.locator('#bf11600-home-base-reference')
- assert home.is_visible()
+ disclosure=p.locator('#bf-home-squad-reference')
+ # v635 deliberately relocates the same live node into a closed Home disclosure.
+ p.wait_for_function("""() => {const d=document.getElementById('bf-home-squad-reference');
+   const e=document.getElementById('bf11600-home-base-reference');
+   return !!d && !!e && !d.hidden && d.querySelector('.bf-home-squad-reference-body')?.contains(e);}""")
+ # v640: the squad source-notes disclosure (same live node) is on Menu.
+ assert p.evaluate("!!document.getElementById('bf-home-squad-reference').closest('#bf-menu-home-extras')")
+ p.locator('.bf-navbar button[data-bf-goto="menu"]').click()
+ assert disclosure.count()==1 and not disclosure.evaluate('(e)=>e.open')
+ assert disclosure.locator('summary').is_visible()
+ assert home.count()==1 and home.get_attribute('role')=='status'
+ assert home.get_attribute('aria-live')=='polite'
+ assert not home.is_visible()
  ids=p.evaluate('P.squad.map(id=>effectiveUnit(id).id)')
  expected_totals={k:sum(rows[id]['base'][k] for id in ids) for k in ('hp','atk','def','rec')}
  assert p.evaluate(api+'.homeReference().totals')==expected_totals
  stable=p.evaluate('JSON.stringify({P,S,QUEST})')
  assert 'NOT live battle stats' in home.text_content()
+ # Open through the user-accessible summary, then verify real readable geometry.
+ disclosure.locator('summary').click()
+ assert disclosure.evaluate('(e)=>e.open') and home.is_visible()
  for width in (320,390,540):
   p.set_viewport_size({'width':width,'height':844})
-  assert home.evaluate('(e)=>e.getBoundingClientRect().right<=innerWidth')
+  assert home.is_visible()
+  assert home.evaluate("""e=>{const r=e.getBoundingClientRect();
+    return r.width>0 && r.left>=-0.5 && r.right<=innerWidth+0.5;}""")
+ # The reference must keep updating in-place, not be replaced or made permanent.
  old=p.evaluate('P.squad')
+ p.evaluate('P.squad=[]')
+ p.evaluate(api+'.refresh()')
+ assert 'no squad selected' in home.text_content()
+ p.evaluate('(ids)=>{P.squad=ids}',old)
+ p.evaluate(api+'.refresh()')
+ assert 'NOT live battle stats' in home.text_content()
+ disclosure.locator('summary').click()
+ assert not disclosure.evaluate('(e)=>e.open') and not home.is_visible()
+ disclosure.locator('summary').click()
+ assert disclosure.evaluate('(e)=>e.open') and home.is_visible()
  for bad in ([old[0],old[0]],[999999],None):
   p.evaluate('(ids)=>{P.squad=ids}',bad)
   assert p.evaluate(api+'.homeReference()') is None
  p.evaluate('(ids)=>{P.squad=ids}',old)
- p.evaluate("BF_homeNav.go('home')")
+ p.evaluate("BF_homeNav.go('menu')")  # v640: reference disclosure is on Menu
  assert p.evaluate(api+'.homeReference().totals')==expected_totals
+ assert home.is_visible() and 'NOT live battle stats' in home.text_content()
  assert p.evaluate('JSON.stringify({P,S,QUEST})')==stable
  p.evaluate("BF_homeNav.go('units')")
  assert not home.is_visible()

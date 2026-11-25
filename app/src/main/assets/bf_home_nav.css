@@ -1529,6 +1529,71 @@ body.bf-menu-mode #bf054-home-details {
   }
 }
 
+/* v635 original Global Home squad frame (presentation only).
+   Evidence: archived layout_home2.csv (640x960 reference) places five
+   128x350 portraits at x=0/128/256/384/512 inside a 640x356 party frame
+   directly below the header; original character_frame.png (644x354, five
+   109px openings on a 128px pitch) and home_character_frame_bg.png (128x350).
+   Reconstruction choices, not verified client behavior: frame stretched to
+   the 640x356 region, thumbnail placement inside each slot, CSS LEADER badge
+   on slot one, sixth owned unit in a strip below the five historical openings,
+   diagnostics moved to a collapsed disclosure. No artwork bytes are altered. */
+#bf-home.bf-home-v635 .bf-scene-title{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;min-width:0!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0!important}
+#bf-home.bf-home-v635 .bf-scene-squad{display:flex;flex-direction:column;gap:6px;box-sizing:border-box;margin:0 0 10px;padding:0;border:0;border-radius:0;background:none;box-shadow:none}
+#bf-home.bf-home-v635 .bf-scene-squad>*{order:5}
+#bf-home.bf-home-v635 #bf-scene-party{order:1}
+#bf-home.bf-home-v635 #bf-scene-party-review{order:2}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading{order:3;display:flex;justify-content:flex-end;align-items:center;margin:0;padding:0;border:0;background:none;min-height:0}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading>strong{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+#bf-home.bf-home-v635 #bf-home-squad-reference{order:4}
+#bf-home.bf-home-v635 #bf-scene-party{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;box-sizing:border-box;width:100%;margin:0;padding:0;border:0;background:url("content/home/home_character_frame_bg.png") 0 0/20% auto repeat-x}
+#bf-home.bf-home-v635 #bf-scene-party::after{content:"";position:absolute;z-index:3;left:0;top:0;width:100%;aspect-ratio:640/356;background:url("content/home/character_frame.png") 0 0/100% 100% no-repeat;pointer-events:none}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5){grid-row:1;position:relative;box-sizing:border-box;display:block;width:100%;min-width:0;height:auto;min-height:90px;aspect-ratio:128/350;min-height:90px;margin:0;padding:0;overflow:hidden;color:#fff4d8;text-align:center;background:linear-gradient(transparent 58%,#000a 88%);border:0;border-radius:0;box-shadow:none;font:800 10px/1.15 Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>img,
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{position:absolute;left:9%;top:17%;width:82%;height:auto;aspect-ratio:1/1;margin:0;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 3px 3px #000c)}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-portrait-fallback{display:flex;align-items:center;justify-content:center;font:800 11px/1.1 Arial,sans-serif;text-align:center;overflow-wrap:anywhere;background:#0008}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{position:absolute;left:8%;right:8%;bottom:38%;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-width:none;white-space:normal;overflow-wrap:anywhere;text-overflow:clip;color:#fff4d8;font:800 10px/1.15 Arial,sans-serif;text-shadow:0 1px 2px #000,0 0 3px #000}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{position:absolute;left:8%;right:8%;bottom:21%;text-align:left;white-space:normal;overflow-wrap:normal;word-break:normal;color:#d8e6f7;font:700 10px/1.1 Arial,sans-serif;text-shadow:0 1px 2px #000;letter-spacing:0}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>.bf-scene-slot{position:absolute;left:8%;right:8%;top:9%;margin:0;padding:0;background:none;border:0;font-size:0;line-height:0}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5) .bf-scene-leader{display:inline-block;padding:2px 3px;color:#ffe9a8;background:none;border:0;font:italic 900 11px/1 Georgia,serif;letter-spacing:.02em;text-shadow:0 0 2px #000,1px 1px 0 #6a3b00,-1px -1px 0 #6a3b00}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member.bf-scene-empty:nth-child(-n+5){display:flex;align-items:center;justify-content:center;color:#d9c79e;background:#0006}
+#bf-home.bf-home-v635 #bf-scene-party>button.bf-scene-member:focus-visible{z-index:4;outline:3px solid #ffe2a0;outline-offset:-3px}
+#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(6){grid-row:2;grid-column:1/-1;margin-top:6px}
+#bf-home.bf-home-v635 .bf-scene-squad>.bf-scene-heading>button[data-bf-goto="units"]{min-height:44px;padding:6px 14px;font:800 12px Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference{box-sizing:border-box;max-width:100%;color:#e9dcc0;background:#0f1726cc;border:1px solid #6d5a3a;border-radius:5px;font:11px/1.45 Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference>summary{min-height:44px;box-sizing:border-box;display:flex;align-items:center;padding:6px 10px;cursor:pointer;color:#f3dfb2;font:800 11px Arial,sans-serif}
+#bf-home.bf-home-v635 #bf-home-squad-reference>summary:focus-visible{outline:3px solid #a7e2ff;outline-offset:-3px}
+#bf-home.bf-home-v635 .bf-home-squad-reference-body{padding:0 10px 8px}
+#bf-home.bf-home-v635 .bf-home-squad-reference-body>p{margin:6px 0!important}
+@media(min-width:510px){#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>strong{font-size:12px}#bf-home.bf-home-v635 #bf-scene-party>.bf-scene-member:nth-child(-n+5)>small{font-size:11px;letter-spacing:0}}
+
+/* v636 artwork-first Home composition (presentation only).
+   Evidence: archived layout_home2.csv puts the Home menu/action buttons at
+   y~510-612 directly beneath the 640x356 party frame (y161-517); original
+   home_new_btn_* PNGs are used unchanged. Reconstruction choices, not
+   verified client behavior: five-across cell sizing, labels under each
+   icon, compact status bar, visually hidden section headings (kept in the
+   accessibility tree). Locked/preview states stay visibly labeled. */
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{order:4;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;box-sizing:border-box;width:100%;margin:2px 0 0;padding:4px 2px;background:#0b111dcc;border-top:1px solid #8a6a32;border-bottom:1px solid #8a6a32}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>button,
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;min-width:44px;min-height:64px;margin:0;padding:2px 0;color:#fff1cf;background:none;border:0;border-radius:4px;box-shadow:none;text-align:center}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow img{display:block;width:100%;max-width:64px;height:44px;margin:0;object-fit:contain;filter:drop-shadow(0 2px 2px #000b)}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow span{display:block;max-width:100%;color:#fff1cf;font:800 10px/1.1 Arial,sans-serif;letter-spacing:0;overflow-wrap:normal;word-break:normal;text-shadow:0 1px 2px #000,0 0 3px #000}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked img{opacity:.5;filter:grayscale(.7)}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>.bf-scene-tool-locked span{color:#c9bda4}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>button:focus-visible{outline:3px solid #ffe2a0;outline-offset:-3px}
+#bf-home.bf-home-v636 .bf-scene-squad>.bf-home-squad-reference,#bf-home.bf-home-v636 #bf-home-squad-reference{order:5}
+#bf-home.bf-home-v636 .bf-scene-explore>.bf-scene-heading,
+#bf-home.bf-home-v636 .bf-scene-tools>.bf-scene-heading,
+#bf-home.bf-home-v636 .bf-scene-places>.bf-scene-available-label{position:absolute!important;width:1px!important;height:1px!important;min-height:0!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0!important}
+@media(max-width:360px){#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{gap:1px;padding:4px 1px}#bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow span{letter-spacing:-.3px}}
+#bf-home.bf-home-v636 .bf-scene-tools{margin-top:8px;padding:0;background:none;border:0;box-shadow:none}
+#bf-home.bf-home-v636 .bf-scene-story{margin:0 0 8px;padding:6px 8px;background:#0f1828e6;border:0;border-top:1px solid #8a6a32;border-bottom:1px solid #8a6a32;border-radius:0;box-shadow:none}
+#bf-home.bf-home-v636 .bf-scene-story>p{margin:0 0 6px;font-size:12px;line-height:1.35}
+/* v638: move the SAME live Story section into the full-width grid row
+   after playable Quest/Summon and before archived locked location previews. */
+#bf-home.bf-home-v636 .bf-scene-places>.bf-scene-story{grid-column:1/-1;min-width:0}
+
 /* v617 original-art centered Quest gateway: a real source-backed Home
    composition improvement, NOT authenticated 2022 pixel parity. Preserve
    active routes, original image bytes, disabled location visibility and
@@ -1653,11 +1718,10 @@ body.bf-menu-mode #bf054-home-details {
   }
 }
 
-/* v623 owner Home P0: readable sixth owned-squad card on 320-412px screens.
-   The original 2022 portrait source, sixth-slot order and manual Unit Box
-   navigation remain unchanged. A compact two-row grid gives the owned name
-   and level actual space instead of the legacy 44px/65px fixed layout. */
-@media(max-width:412px){
+/* v623/v638 owner Home P0: readable compact sixth owned-squad card on
+   320-540px screens. The original 2022 portrait source, sixth-slot order and
+   manual Unit Box navigation remain unchanged. Preserve two-row name/level. */
+@media(max-width:540px){
   body.bf-menu-mode #bf-home .bf-scene-party button.bf-scene-member:nth-child(6){
     box-sizing:border-box;
     display:grid;
@@ -1722,3 +1786,452 @@ body.bf-menu-mode #bf054-home-details {
     overflow-wrap:anywhere;
   }
 }
+
+/* v639 disposable viewport clearance (Home presentation only).
+   At 320px, compress ONLY decorative Home-menu spacing. Original five
+   portrait openings, footer, icon bytes, label size and button targets stay.
+   At 510-540px, share the compact sixth-owned-unit row with the existing
+   independent Edit Squad button. Keep DOM order and both hit areas separate.
+   No changes to the unit card identities, click listeners, saves or routing. */
+@media(max-width:360px){
+  #bf-home.bf-home-v636 .bf-scene-squad{margin-bottom:0!important}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow{padding-block:2px;margin-top:0}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow img{height:40px}
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-toolrow>*{min-height:64px;gap:1px;padding:1px 0}
+}
+@media(min-width:510px) and (max-width:540px){
+  #bf-home.bf-home-v636 #bf-scene-party>.bf-scene-member:nth-child(6){
+    width:calc(100% - 124px);justify-self:start
+  }
+  #bf-home.bf-home-v636 .bf-scene-squad>.bf-scene-heading{
+    position:relative;z-index:2;align-self:flex-end;margin-top:-50px
+  }
+}
+
+/* P0 Home first-screen refinement — disposable presentation-only candidate.
+ * ORIGINAL SOURCE EVIDENCE (unaltered bytes):
+ *   content/home/character_frame.png (644x354)
+ *   content/home/home_character_frame_bg.png (128x350)
+ *   content/unit_top/unit_top_edit_btn1.png (260x156; "Manage Squad" art)
+ * RECONSTRUCTION CHOICES (not authenticated April 2022 Global geometry):
+ *   enlarged existing unit thumbnail, name gutters avoiding gold frame posts,
+ *   compact owned sixth-unit strip, and artist-supplied Manage Squad art for
+ *   the existing edit button. Same nodes, routes, tap targets and save logic.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > img,
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > .bf-portrait-fallback {
+    left:4%;top:15%;width:92%;height:auto;max-width:none;object-fit:contain;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > .bf-scene-slot {
+    z-index:2;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    box-sizing:border-box;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+    width:auto;min-width:0;max-width:none;left:13%;right:13%;bottom:35%;
+    height:24px;min-height:24px;max-height:24px;padding:0;margin:0;
+    white-space:normal;overflow-wrap:anywhere;word-break:normal;
+    font:800 10px/12px Arial,sans-serif;text-align:center;overflow:hidden;
+    text-shadow:0 1px 3px #000,0 0 3px #000;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    left:13%;right:13%;bottom:19%;font-size:10px;text-align:left;
+  }
+  /* The sixth owned unit stays clickable and present beneath the five archival slots. */
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) {
+    grid-column:1/-1;box-sizing:border-box;width:calc(100% - 120px);
+    height:62px;min-height:62px;margin-top:5px;padding:5px 6px;
+    grid-template-columns:44px minmax(0,1fr);grid-template-rows:27px 25px;
+    column-gap:6px;row-gap:0;
+    border:0;border-top:1px solid #9e7b41;border-bottom:1px solid #7d6544;
+    border-radius:0;background:linear-gradient(90deg,#121926,#1e2735 80%,#141a26);
+    box-shadow:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-scene-slot {
+    position:absolute;width:1px;height:1px;min-width:0;min-height:0;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) img,
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
+    grid-column:1;grid-row:1/span 2;width:44px;height:44px;max-width:44px;
+    margin:0;object-fit:contain;align-self:center;
+  }
+  /* Missing-art fallback: keep the 11px one-line "NO ART" inside its own box
+   * at 320px (border-box 44px leaves 42px for ~39px of text). */
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) .bf-portrait-fallback {
+    width:44px;max-width:44px;padding:0 1px;white-space:nowrap;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) strong {
+    grid-column:2;grid-row:1;box-sizing:border-box;width:100%;min-width:0;
+    font:800 11px/1.2 Arial,sans-serif;align-self:end;text-align:left;
+    white-space:normal;overflow-wrap:anywhere;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > button.bf-scene-member:nth-child(6) small {
+    grid-column:2;grid-row:2;font:700 10px/1.2 Arial,sans-serif;
+    align-self:start;text-align:left;
+  }
+  /* Reuse archived Global unit-top Manage Squad artwork; button route unchanged. */
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading {
+    position:relative;z-index:4;align-self:flex-end;width:114px;
+    height:52px;min-height:52px;margin-top:-58px;margin-right:0;padding:0;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"] {
+    display:block;box-sizing:border-box;width:114px;height:52px;min-height:52px;min-width:114px;
+    padding:0;border:0;border-radius:0;background:transparent
+      url('content/unit_top/unit_top_edit_btn1.png') center/114px 52px no-repeat;
+    color:transparent;font-size:0;line-height:0;box-shadow:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"]:focus-visible {
+    outline:3px solid #ffe2a0;outline-offset:-3px;
+  }
+}
+
+/* R2 — disposable HOME-FIRST refinement corrections to R1.
+ * The original PNGs stay byte-identical; character geometry, name rendering
+ * and the art/label juxtaposition are reconstructed, NOT verified 2022 UI.
+ * Limit to phone widths through 412px; 413px+ retains pinned PR #635 rules.
+ * The original UNIT TOP Manage Squad text artwork is scaled proportionally
+ * (260x156 -> 87x52.2); live button text remains visible if the PNG fails.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    top:50%;bottom:auto;left:13%;right:13%;height:auto;min-height:0;max-height:none;
+    display:block;-webkit-line-clamp:unset;white-space:normal;
+    overflow:visible;overflow-wrap:break-word;word-break:normal;
+    font:800 10px/11px Arial,sans-serif;letter-spacing:-.2px;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    bottom:7%;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"] {
+    display:flex;align-items:flex-end;justify-content:center;position:relative;
+    box-sizing:border-box;min-width:114px;min-height:52px;width:114px;height:52px;
+    padding:0 3px 3px;border:1px solid #a68851;border-radius:4px;
+    background:url('content/unit_top/unit_top_edit_btn1.png') center -10px/87px 52.2px no-repeat,
+      linear-gradient(180deg,#283443,#111b2a);
+    color:#ffe8ba;font:800 10px/1.1 Arial,sans-serif;
+    letter-spacing:0;text-shadow:0 1px 2px #000,0 0 3px #000;
+    box-shadow:inset 0 1px 1px #e4c18155,0 2px 3px #0008;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 .bf-scene-squad > .bf-scene-heading > button[data-bf-goto="units"]:focus-visible {
+    outline:3px solid #ffe2a0 !important;outline-offset:-2px;
+  }
+}
+
+/* R3 isolated, presentation-only original-frame name wrap.
+ * 10px source UI type. Do NOT alter archived unit names or original PNGs.
+ * Verified Chromium lacks automatic English hyphenation despite html lang=en;
+ * a condensed system face keeps full English words together at phone widths.
+ * Japanese word segmentation is supplied by a view-only renderer and
+ * displayed as indivisible inline-blocks, retaining exact full name text.
+ * This is reconstructed typography, not authenticated 2022 Global geometry.
+ */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    left:8%;right:8%;font:800 10px/11px "Roboto Condensed","Liberation Sans Narrow",Arial,sans-serif;
+    letter-spacing:-1.3px;overflow-wrap:normal;word-break:normal;hyphens:none;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong > .bf-home-portrait-word {
+    display:inline-block;white-space:nowrap;max-width:100%;vertical-align:baseline;
+    letter-spacing:-1.65px;
+  }
+}
+
+/* R4 disposable Android-font portability, presentation only.
+ * Prefer Android's registered sans-serif-condensed before generic regular faces.
+ * The 320px opening is narrower than some 11+ character catalog words in
+ * regular-font fallback. Only those names need the smaller letter advance;
+ * all names remain the exact source text, at 10px and inside original art.
+ * Not an authenticated April 2022 native layout measurement. */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    font-family:"sans-serif-condensed","Roboto Condensed","Liberation Sans Narrow",Arial,sans-serif;
+  }
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-portrait-longword {
+    left:7.85%;right:7.85%;font-weight:500;letter-spacing:-1.7px;
+  }
+}
+
+/* R5 trial: restore visible word separation without changing source names. */
+@media (max-width:412px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong {
+    word-spacing:2.5px;
+  }
+}
+
+/* OWNER-APPROVED HOME Option A, disposable presentation prototype.
+ * Keep original five-portrait art; show unambiguous source-derived labels
+ * rather than compressing complete names into 11/128-wide frame openings.
+ * Full names remain in the owned unit button aria-label and Unit Box.
+ * Source art, player state, battle code and sixth slot are untouched. */
+body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-short-label {
+  left:9%;right:9%;top:50%;bottom:auto;height:14px;max-height:14px;min-height:0;
+  display:block;overflow:hidden;white-space:nowrap;text-overflow:clip;
+  overflow-wrap:normal;word-break:normal;hyphens:none;-webkit-line-clamp:unset;
+  padding:0;margin:0;font:800 10px/12px Arial,sans-serif;
+  letter-spacing:0;word-spacing:normal;text-align:center;
+}
+@media(min-width:510px){
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > strong.bf-home-short-label {font-size:12px;height:16px;max-height:16px;}
+}
+/* R6 original PNG alpha-mask clearance; v636 Home presentation only. */
+@media (min-width:413px) {
+  body.bf-menu-mode #bf-home.bf-home-v636 #bf-scene-party > .bf-scene-member:nth-child(-n+5) > small {
+    left:12%;
+  }
+}
+
+/* v640 CUSTOM six-owned-unit Home (owner-approved custom build layout; NOT
+ * 2022 historical geometry). Six equal owned-unit cards in a 3x2 squad,
+ * complete names, leader badge on the first owned slot, then Quest and
+ * Summon in the first screen at 320x740 and 393x852. Original PNG bytes are
+ * displayed unchanged; no frame, slot or art is fabricated. */
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {
+  box-sizing:border-box;margin:0 0 8px;padding:6px;
+  background:linear-gradient(180deg,#1b2b44,#0f1a2c);
+  border:1px solid #bca16a;border-radius:6px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading {
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  position:static;margin:0 0 6px;padding:0 2px;min-height:44px;
+  font:800 13px/1.2 Arial,sans-serif;color:#ffe2af;letter-spacing:.04em;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {
+  box-sizing:border-box;min-height:44px;min-width:44px;margin:0;padding:6px 12px;
+  font:800 12px/1.2 Arial,sans-serif;color:#2a1a05;
+  background:linear-gradient(180deg,#f6d993,#c9973f);border:1px solid #f9e6b5;border-radius:5px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party.bf-scene-party {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+  position:static;width:auto;height:auto;min-height:0;aspect-ratio:auto;
+  margin:0;padding:0;background:none;border:0;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {
+  box-sizing:border-box;position:relative;inset:auto;transform:none;
+  grid-column:auto;grid-row:auto;display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;gap:2px;
+  width:auto;height:auto;min-width:0;min-height:118px;max-height:none;
+  margin:0;padding:3px 4px 4px;overflow:hidden;
+  color:#fff;text-align:center;
+  background:linear-gradient(180deg,#2a3f5f,#16233a);
+  border:1px solid #6f87ab;border-radius:6px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:first-child {
+  border-color:#e6c27a;box-shadow:inset 0 0 0 1px #8a6a2c;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-slot {
+  position:static;display:flex;align-items:center;justify-content:center;gap:4px;
+  width:100%;min-height:16px;max-width:none;margin:0;padding:0;
+  font:700 10px/1.2 Arial,sans-serif;color:#c9d7eb;white-space:nowrap;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-leader {
+  position:static;display:inline-block;padding:1px 4px;
+  font:800 10px/1.2 Arial,sans-serif;color:#2a1a05;background:#e6c27a;border-radius:3px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {
+  position:static;display:block;flex:none;box-sizing:border-box;
+  width:80px;height:76px;max-width:100%;min-width:0;margin:2px auto 0;
+  object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 1px #000);
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {
+  display:flex;align-items:center;justify-content:center;padding:0 1px;
+  font:800 11px/1.1 Arial,sans-serif;white-space:nowrap;filter:none;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > strong {
+  position:static;inset:auto;display:block;box-sizing:border-box;
+  width:100%;max-width:100%;height:auto;min-height:0;max-height:none;margin:2px 0 0;padding:0 1px;
+  font:800 11px/1.25 Arial,sans-serif;color:#fff;letter-spacing:0;
+  white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;
+  -webkit-line-clamp:unset;text-shadow:0 1px 1px #000;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > small {
+  position:static;inset:auto;display:block;width:auto;height:auto;margin:auto 0 0;padding:0;
+  font:700 11px/1.2 Arial,sans-serif;color:#ffe2af;white-space:nowrap;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:focus-visible {
+  outline:3px solid #ffe2a0;outline-offset:2px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-empty {
+  justify-content:center;font:800 12px/1.2 Arial,sans-serif;color:#c9d7eb;
+}
+/* Play: the existing v617 Quest gateway (large centered Quest, compact Summon)
+ * applies unchanged; v640 only hides the duplicate visual headings. */
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-title {
+  position:absolute;width:1px;height:1px;min-width:0;min-height:0;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-home-play {margin:0 0 8px}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-home-play > .bf-scene-heading,
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-tools > .bf-scene-heading,
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-home-play .bf-scene-available-label {
+  position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-story {margin:0 0 8px}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-tools {margin:0 0 8px}
+/* Original shortcut icons, five across beneath Story (same PNG bytes). */
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow {
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;box-sizing:border-box;
+  width:100%;margin:0;padding:4px 2px;background:#121d30;border:1px solid #6f87ab;border-radius:6px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > button,
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > .bf-scene-tool-locked {
+  box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  gap:2px;min-width:44px;min-height:64px;margin:0;padding:2px 0;color:#fff1cf;
+  background:none;border:0;border-radius:4px;box-shadow:none;text-align:center;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow img {display:block;width:100%;max-width:64px;height:44px;margin:0;object-fit:contain;filter:drop-shadow(0 2px 2px #000b)}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow span {display:block;max-width:100%;color:#fff1cf;font:800 10px/1.1 Arial,sans-serif;letter-spacing:0;overflow-wrap:normal;word-break:normal;text-shadow:0 1px 2px #000}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > .bf-scene-tool-locked img {opacity:.5;filter:grayscale(.7)}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > .bf-scene-tool-locked span {color:#c9bda4}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow > button:focus-visible {outline:3px solid #ffe2a0;outline-offset:-3px}
+@media(min-width:380px){
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {min-height:132px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:104px;height:96px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > strong {font-size:12px}
+}
+/* v641 leader row: the generic .bf-scene-slot rule stacks its content in a
+ * column, so the slot-1 LEADER badge sat on its own line and pushed slot 1's
+ * portrait and name 14px below slots 2-3. Keep the badge on its own line (no
+ * width squeeze beside "SLOT 1"), but give every top-row label the same fixed
+ * two-line height (14px badge + 2px gap + 12px text) aligned to the bottom, so
+ * all three top-row portraits and names share one baseline. */
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-slot {
+  flex-direction:column;justify-content:flex-end;gap:2px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:nth-child(-n+3) .bf-scene-slot {
+  min-height:28px;
+}
+/* v641 short viewport: Android 15 pads the WebView by the status and
+ * navigation bars, so the page is shorter than the phone screen. Only where
+ * the full layout cannot keep the whole Quest action above the fixed footer
+ * (measured: below 730px tall under 380px wide, below 770px otherwise), shrink
+ * the portrait art and the Quest gateway art. Card min-height 110px, full
+ * names, levels, the 44px Edit Squad target and a >=160px Quest are kept. */
+@media(max-height:769px) and (min-width:380px){
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {min-height:110px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:60px;height:60px}
+}
+@media(max-height:769px) and (min-width:380px) and (max-width:412px){
+  body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:160px}
+  body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:120px}
+}
+@media(max-height:729px) and (max-width:379px){
+  /* Narrow phones also leave room for a two-line name in the top row. */
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {padding:4px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {min-height:110px;padding:4px}
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > img,
+  body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:50px;height:50px}
+  body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:160px}
+  body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:120px}
+}
+/* v642 CUSTOM Home visual polish (materials only; NOT 2022 layout parity).
+ * Uses original Global PNGs already staged from hash-verified archives, bytes
+ * unchanged, never cropped into new files:
+ *   mission_select/mission_check_unit_frame.png (644x293): blue stone rim of the
+ *     original pre-battle squad check frame, drawn as a 9-slice border only.
+ *   mission_select/area_name_frame.png (286x58): parchment title plate, at its
+ *     natural aspect ratio (as .bf-quest-scroll already uses it).
+ *   home/home_character_frame_bg.png (128x350): original Home unit-slot backdrop.
+ * Button, gold rim and outlined-text styling are CSS imitations of the original
+ * Global blue/gold buttons, not original art. Every box keeps its v640/v641
+ * border+padding total, so card and Quest geometry is unchanged. */
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {
+  padding:1px;border:6px solid #33506f;border-radius:0;
+  border-image:url("content/mission_select/mission_check_unit_frame.png") 14 / 6px round;
+  background:linear-gradient(180deg,#14223ac4,#0b1424d9),
+    url("content/home/home_character_frame_bg.png") center/auto 100% repeat-x;
+  background-clip:padding-box;box-shadow:0 3px 8px #000a;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading {padding:0 3px}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading > strong {
+  display:flex;align-items:center;justify-content:center;flex:none;box-sizing:border-box;
+  width:168px;height:34px;margin:0;padding:0 18px 1px;
+  background:url("content/mission_select/area_name_frame.png") center/100% 100% no-repeat;
+  font:900 13px/1 Arial,sans-serif;color:#2a1603;letter-spacing:.08em;white-space:nowrap;
+  text-shadow:0 1px 0 #f4e4bd;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {
+  padding:6px 14px;border:2px solid #d9b45c;border-radius:22px;
+  background:linear-gradient(180deg,#3b63d6 0%,#1d3a9e 48%,#10236b 52%,#0b1a52 100%);
+  box-shadow:inset 0 1px 0 #9fb8ff,inset 0 -2px 3px #0008,0 2px 3px #000b;
+  font:italic 900 12px/1.2 Arial,sans-serif;color:#fff;letter-spacing:.03em;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000,0 2px 2px #000a;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button:active {filter:brightness(1.2)}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button:focus-visible {outline:3px solid #ffe2a0;outline-offset:2px}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member {
+  border-color:#a88540;
+  background:radial-gradient(ellipse 70% 42% at 50% 44%,#4f6f9f66,#0000 70%),
+    linear-gradient(180deg,#1a2a45b3,#0c1526d1),
+    url("content/home/home_character_frame_bg.png") center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px #3c2c0c,inset 0 1px 0 1px #f3d58a33,0 2px 3px #000b;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member:first-child {
+  border-color:#f0cf7c;
+  background:radial-gradient(ellipse 72% 44% at 50% 44%,#c99a3c55,#0000 72%),
+    linear-gradient(180deg,#2a2a3ab3,#121626d1),
+    url("content/home/home_character_frame_bg.png") center/cover no-repeat;
+  box-shadow:inset 0 0 0 1px #6b4b12,0 0 6px #e6c27a66,0 2px 3px #000b;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-slot {
+  color:#a9bddb;letter-spacing:.06em;text-shadow:0 1px 1px #000;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member .bf-scene-leader {
+  color:#3a2106;letter-spacing:.06em;border:1px solid #6b4a12;border-radius:3px;
+  background:linear-gradient(180deg,#fff0b3,#e2b350 55%,#b8862a);text-shadow:0 1px 0 #ffeebf;
+  padding:0 4px;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > strong {
+  color:#fff;text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000,0 2px 2px #000c;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 #bf-scene-party > .bf-scene-member > small {
+  font-style:italic;font-weight:900;color:#ffd660;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-home-play .bf-scene-featured .bf-scene-status {
+  border-color:#d9b45c;color:#fff;
+  background:linear-gradient(180deg,#3b63d6 0%,#1d3a9e 48%,#10236b 52%,#0b1a52 100%);
+  box-shadow:inset 0 1px 0 #9fb8ff,0 2px 3px #000b;
+  text-shadow:0 1px 0 #000,1px 0 0 #000,-1px 0 0 #000,0 -1px 0 #000;
+}
+@media(max-width:379px){
+  /* Same plate art at its natural 286:58 ratio, smaller, so the plate and the
+   * one-line Edit Squad button share the heading row at 320px. */
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading > strong {
+    width:148px;height:30px;padding:0 15px 1px;font-size:12px;letter-spacing:.06em}
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {padding:6px 10px}
+}
+body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad > .bf-scene-heading button {white-space:nowrap}
+@media(max-height:729px) and (max-width:379px){
+  /* Keep v641's 5px total squad inset on narrow short screens. */
+  body.bf-menu-mode #bf-home.bf-home-v640 > .bf-scene-squad {padding:0;border-width:5px;border-image-width:5px}
+}
+/* v643: the Units shortcut shows the bottom nav's original footer_btn2 "Unit"
+ * cell at a fixed 43px (+1px) so it sits on the 44px icon line at all widths. */
+.bf-scene-toolrow i.bf-nav-art{width:43px;height:43px;margin-bottom:1px;background-size:205px 410px;background-position:-135px 0}
+/* Menu: auxiliary Home panels (same live nodes, moved off Home). */
+.bf-menu-home-extras{box-sizing:border-box;max-width:100%;margin:12px 0;padding:10px;
+  border:1px solid #bca16a;border-radius:6px;background:#121d30;color:#e8eef8}
+.bf-menu-home-extras>h2{margin:0 0 4px;font:800 15px/1.3 Arial,sans-serif;color:#ffe2af;letter-spacing:.04em}
+.bf-menu-home-extras-intro{margin:0 0 8px;font:13px/1.4 Arial,sans-serif;color:#c9d7eb}
+.bf-menu-home-extras .bf-menu-locations{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}
+.bf-menu-home-extras .bf-menu-locations .bf-scene-archive-label{grid-column:1/-1}
+.bf-menu-home-extras .bf-scene-place img{display:block;width:100%;height:auto;max-height:110px;object-fit:contain}
+.bf-menu-home-extras>*+*{margin-top:8px}
+/* v645 measured fit levels (set by the v645 fit in bf_home_battle_readiness_v420.js):
+ * art bytes unchanged; names, levels, leader, 44px targets and text size kept. */
+body.bf-menu-mode #bf-home.bf-home-v640[data-bf-fit="1"] #bf-scene-party > .bf-scene-member > img,body.bf-menu-mode #bf-home.bf-home-v640[data-bf-fit="1"] #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:60px;height:60px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member > img,body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member > .bf-portrait-fallback {width:44px;height:44px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:140px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="2"],[data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:92px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) #bf-scene-party > .bf-scene-member {min-height:0}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] {min-height:120px}
+body.bf-menu-mode #bf-home.bf-home-v640:is([data-bf-fit="3"],[data-bf-fit="4"]) .bf-scene-places button.bf-scene-featured[data-bf-goto="quest"] img {height:72px}
+body.bf-menu-mode #bf-home.bf-home-v640 .bf-scene-toolrow[data-bf-wrap] {grid-template-columns:repeat(3,minmax(0,1fr));row-gap:4px}
+/* v647: press feedback and off-state-inspired grayscale; no additional art staged. */
+:is(body.bf-menu-mode #bf-home.bf-home-v640,#bf-home.bf-home-v636,.bf-menu-home-extras) .bf-scene-toolrow>button:not(:disabled):active:is([data-bf-goto=quest],[data-bf-goto=menu])>img{filter:brightness(1.25) drop-shadow(0 2px 2px #000b)}
+:is(#bf-home,.bf-menu-home-extras) .bf-scene-locked[aria-disabled=true]>img:is([src$="home_win_arena.png"],[src$="home_win_raid_open.png"],[src$="home_win_randall.png"],[src$="home_win_gate.png"]){filter:grayscale(1) drop-shadow(0 2px 2px #000b)}

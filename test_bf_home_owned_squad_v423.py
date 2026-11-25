@@ -53,7 +53,7 @@ with sync_playwright() as pw:
             const k=localStorage.key(i);return [k,localStorage.getItem(k)]})),
           writes:__v423Writes()})"""
         slot_before=page.evaluate(slot_snapshot)
-        for width in (320,390,540):
+        for width in (320,390,393,412,413,540):
             page.set_viewport_size({'width':width,'height':844})
             page.evaluate('BFGlobalHome.refreshParty()')
             cards=page.locator('#bf-scene-party .bf-scene-member')
@@ -64,7 +64,16 @@ with sync_playwright() as pw:
                 assert f'squad slot {index+1} of 6' in cards.nth(index).get_attribute('aria-label')
                 assert ('Leader' in cards.nth(index).get_attribute('aria-label'))==(index==0)
                 assert cards.nth(index).locator('.bf-scene-leader').count()==int(index==0)
-                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'),(width,index)
+                # v640 custom six-slot Home: every slot caption, including slot
+                # 6, is visible and fits its box; every card shows its name/level.
+                assert role.get_attribute('aria-hidden') == 'true'
+                assert role.evaluate('(el)=>el.scrollWidth<=el.clientWidth'), (width, index)
+                card = cards.nth(index)
+                visible_name, visible_level = card.locator('strong'), card.locator('small')
+                assert visible_name.is_visible() and visible_level.is_visible(), (width, index)
+                full_name = visible_name.inner_text().strip()
+                assert full_name and ('Inspect ' + full_name + ', ') in card.get_attribute('aria-label'), (width, index)
+                assert card.get_attribute('title') == 'Inspect ' + full_name
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth')
         assert page.evaluate(slot_snapshot)==slot_before
         for first in (None, -1):
@@ -83,7 +92,7 @@ with sync_playwright() as pw:
           p:JSON.stringify(P),s:JSON.stringify(S),quest:QUEST.missionId,
           save:localStorage.getItem('bf_global_offline_demo_v7'),writes:__v423Writes()
         })""")
-        for width in (320,390,540):
+        for width in (320,390,393,412,413,540):
             page.set_viewport_size({"width":width,"height":844})
             for slot in (0,5):
                 portrait = page.locator('#bf-scene-party button.bf-scene-member').nth(slot)
@@ -232,8 +241,14 @@ with sync_playwright() as pw:
           finally{Object.assign(P,original);BFGlobalHome.refreshParty();}return {out,same:before===JSON.stringify({P,S})};}""")
         assert corrupt=={'out':[True]*7,'same':True},corrupt
         level_proof=page.evaluate("""()=>{const exp=P.unitExp,id=P.squad[0],before=JSON.stringify({P,S}),out=[];let getterCalls=0;
-          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');}
-          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(document.querySelector('#bf-scene-party button small').textContent==='LEVEL UNAVAILABLE');
+          const shortButAnnounced=()=>{
+            const card=document.querySelector('#bf-scene-party button');
+            return card?.querySelector('small')?.textContent==='Lv —' &&
+              card.getAttribute('aria-label').includes('LEVEL UNAVAILABLE') &&
+              card.getAttribute('aria-label').includes('Leader, squad slot 1 of 6');
+          };
+          try{for(const value of [null,{},[0],{[id]:'0'},{[id]:-1},{[id]:NaN}]){P.unitExp=value;BFGlobalHome.refreshParty();out.push(shortButAnnounced());}
+          P.unitExp={};Object.defineProperty(P.unitExp,String(id),{get:()=>{getterCalls++;return 0;}});BFGlobalHome.refreshParty();out.push(shortButAnnounced());
           }finally{P.unitExp=exp;BFGlobalHome.refreshParty();}return {out,getterCalls,same:before===JSON.stringify({P,S})};}""")
         assert level_proof=={'out':[True]*7,'getterCalls':0,'same':True},level_proof
         # Combined role/ownership/level behaviors must agree on the same painted cards.
@@ -267,7 +282,8 @@ with sync_playwright() as pw:
                 return buttons().length===6&&leaders()===1&&
                   first.querySelectorAll('.bf-scene-leader').length===1&&
                   first.getAttribute('aria-label').includes('squad slot 1 of 6')&&
-                  level.textContent==='LEVEL UNAVAILABLE'&&
+                  level.textContent==='Lv —'&&
+                  first.getAttribute('aria-label').includes('LEVEL UNAVAILABLE')&&
                   level.scrollWidth<=level.clientWidth&&
                   b.left>=a.left+first.clientLeft-.5&&b.right<=a.right-first.clientLeft+.5;
               };

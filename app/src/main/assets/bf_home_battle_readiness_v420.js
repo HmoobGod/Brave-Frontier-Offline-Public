@@ -8,7 +8,17 @@
   const explore=home?.querySelector('.bf-scene-explore');
   const campaign=window.BFGrandGaiaCampaignV100;
   const archive=window.BFOriginalGlobalQuestEnergyV14300;
-  if(!story || !explore || story.parentElement!==explore.parentElement ||
+  // v638 Home layout: Story may be the same live section reparented directly
+  // after playable Summon, before the archived, locked location previews.
+  // Require the exact Home-owned order; do not relax the source/mission gates.
+  const places=explore?.querySelector(':scope > .bf-scene-places');
+  const summon=places?.querySelector(':scope > button.bf-scene-featured[data-bf-goto="summon"]');
+  const archiveLabel=places?.querySelector(':scope > .bf-scene-archive-label');
+  const originalStoryPosition=story?.parentElement===explore?.parentElement;
+  const questFirstStoryPosition=places?.parentElement===explore &&
+    story?.parentElement===places && summon?.nextElementSibling===story &&
+    story?.nextElementSibling===archiveLabel;
+  if(!story || !explore || !(originalStoryPosition || questFirstStoryPosition) ||
      !window.BF_homeNav || !campaign ||
      !archive || typeof campaign.nextPlayable!=='function' ||
      typeof campaign.summary!=='function' ||
@@ -160,7 +170,12 @@
   // Explain the SAME fail-closed lock used for manual route controls.
   // Read-only and never a request to auto-start combat or change the save.
   function blockedReason(){
-    if(window.BF_homeNav?.current!=='home')return 'HOME NOT ACTIVE · Return Home to use these shortcuts.';
+    // v640: the card may be hosted in the Menu extras section; only the
+    // screen that actually shows the card may use its shortcuts.
+    const host=card.closest('#bf-menu-home-extras')?'menu':'home';
+    if(window.BF_homeNav?.current!==host)return host==='home'?
+      'HOME NOT ACTIVE · Return Home to use these shortcuts.':
+      'MENU NOT ACTIVE · Open Menu to use these shortcuts.';
     if(S?.busy===true)return 'TURN IN PROGRESS · Finish the current battle action first.';
     if(S?.auto===true)return 'AUTO BATTLE ACTIVE · Stop Auto before changing screens.';
     const repeat=window.BFGlobalQoLQuestRepeatV9800;
@@ -239,4 +254,51 @@
   });
   window.BFHomeBattleReadinessV420=Object.freeze({snapshot,refresh});
   refresh();
+})();
+
+/* v645 measured Home fit (separate from the v420 card; presentation only).
+   Sets #bf-home[data-bf-fit] to the lowest level that keeps the whole Quest
+   action >=8px above the fixed footer: 0 large art, 1-3 compact art/Quest,
+   4 Play moved above the squad (DOM order = visual = keyboard order). The
+   icon row wraps only if its labels overflow. System text size is never
+   changed; no storage, route, save or game state is touched. */
+(()=>{
+  'use strict';
+  const h=document.getElementById('bf-home'),n=document.querySelector('.bf-navbar');
+  const q=h?.querySelector('.bf-home-play button.bf-scene-featured[data-bf-goto="quest"]');
+  const t=h?.querySelector('.bf-scene-toolrow'),s=h?.querySelector(':scope > .bf-scene-squad');
+  const p=q?.closest('.bf-home-play');
+  if(!h||!n||!q||!t||!s||!p||window.BFHomeFitV645)return;
+  function fit(){
+    if(!q.offsetParent)return null;
+    // Remember the reading position before any trial layout changes.
+    const previousLevel=Number(h.dataset.bfFit||0),readingY=scrollY;
+    t.removeAttribute('data-bf-wrap');
+    if(t.scrollWidth>t.clientWidth+1)t.dataset.bfWrap='1';
+    // Keep focus in the Play section if a measured level requires moving it.
+    const focused=p.contains(document.activeElement)?document.activeElement:null;
+    let level=0,gap=0;
+    for(;;){
+      h.dataset.bfFit=String(level);
+      if(level>3){if(p.nextElementSibling!==s)s.before(p);}
+      else if(s.nextElementSibling!==p)s.after(p);
+      gap=n.getBoundingClientRect().top-q.getBoundingClientRect().bottom-scrollY;
+      if(gap>=8||level>3)break;
+      level++;
+    }
+    // Trial levels can temporarily shorten the page or trigger scroll anchoring.
+    // Restore the reading position only when the final fit level is unchanged.
+    // Restore BEFORE focus so preventScroll remains responsible for focus itself.
+    if(level===previousLevel&&scrollY!==readingY)window.scrollTo({top:readingY,behavior:'instant'});
+    // Relocation can blur a descendant. Never steal focus from another control.
+    if(focused?.isConnected&&p.contains(focused)&&
+       (document.activeElement===document.body||document.activeElement===document.documentElement))
+      focused.focus({preventScroll:true});
+    return {level,gap};
+  }
+  addEventListener('resize',fit);
+  addEventListener('bf-route-sync',fit);
+  document.fonts?.ready?.then(fit);
+  fit();
+  window.BFHomeFitV645=Object.freeze({fit,get level(){return Number(h.dataset.bfFit||0);}});
 })();

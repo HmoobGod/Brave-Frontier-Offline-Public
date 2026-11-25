@@ -106,7 +106,9 @@ with sync_playwright() as pw:
                 assert active.count() == 2, (width, active.count())
                 assert active.evaluate_all("(nodes)=>nodes.map(x=>x.dataset.bfGoto)") == [
                     "quest", "summon"], width
-                locked = page.locator("#bf-home .bf-scene-places .bf-scene-locked")
+                # v640: locked location previews moved off Home to the Menu section.
+                assert page.locator("#bf-home .bf-scene-locked").count() == 0
+                locked = page.locator("#bf-menu-home-extras .bf-scene-places .bf-scene-locked")
                 assert locked.count() == 4
                 assert locked.evaluate_all(
                     "(nodes)=>nodes.every(n=>n.getAttribute('aria-disabled')==='true')")

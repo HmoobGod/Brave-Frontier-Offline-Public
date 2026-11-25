@@ -163,6 +163,9 @@ jobs:
           python3 prepare_original_amdahl_art_v149.py
       - name: Test save recovery and offline combat
         shell: bash
+        env:
+          # v646: public CI never holds restricted artwork; full-art runs only on an authorized private machine.
+          BF_HOME_ART_MODE: fallback-only
         run: |
           python -m pip install playwright
           node research/test_bf_capture_import_v366.js
@@ -389,6 +392,11 @@ jobs:
           python3 test_bf_engine_ui_touch_v22700.py
           python3 test_bf_home_ui_priority_v24200.py
           python3 test_bf_home_gateway_live_v61800.py
+          python3 test_bf_home_squad_frame_v63500.py
+          python3 test_bf_home_artwork_first_v63600.py
+          python3 test_bf_home_six_slot_custom_v64000.py
+          python3 test_bf_home_adaptive_fit_v64500.py
+          python3 test_bf_home_art_mode_v64600.py
           python3 test_bf_home_lineup_readability_v62100.py
           python3 test_bf_home_sixth_slot_readability_v62300.py
           python3 test_bf_home_ui_accessibility_v24300.py

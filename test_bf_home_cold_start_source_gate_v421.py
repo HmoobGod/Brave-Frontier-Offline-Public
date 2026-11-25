@@ -73,26 +73,27 @@ with sync_playwright() as pw:
                 geometry=page.evaluate("""() => {
                   const home=document.getElementById('bf-home'),
                     title=home.querySelector('.bf-scene-title'),
-                    details=home.querySelector('#bf054-home-details'),
+                    details=document.getElementById('bf054-home-details'),
                     explore=home.querySelector('.bf-scene-explore'),
                     squad=home.querySelector('.bf-scene-squad'),
                     story=home.querySelector('.bf-scene-story'),
                     nav=document.querySelector('.bf-navbar').getBoundingClientRect(),
                     tiles=[...explore.querySelectorAll('button.bf-scene-active')];
                   return {
+                    // v640 custom Home: title > squad > Play (Quest, Summon) > Story.
                     adjacent:title.nextElementSibling===squad &&
-                      squad.nextElementSibling===story &&
-                      story.nextElementSibling===explore,
+                      squad.nextElementSibling===explore &&
+                      explore.nextElementSibling===story,
                     order:title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING,
                     orderOK:!!(title.compareDocumentPosition(squad)&Node.DOCUMENT_POSITION_FOLLOWING)&&
-                      !!(squad.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING)&&
-                      !!(story.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING),
+                      !!(squad.compareDocumentPosition(explore)&Node.DOCUMENT_POSITION_FOLLOWING)&&
+                      !!(explore.compareDocumentPosition(story)&Node.DOCUMENT_POSITION_FOLLOWING),
                     squadTop:squad.getBoundingClientRect().top,
                     squadBottom:squad.getBoundingClientRect().bottom,
                     squadCards:squad.querySelectorAll('.bf-scene-member').length,
                     cols:getComputedStyle(squad.querySelector('.bf-scene-party'))
                       .gridTemplateColumns.split(' ').length,
-                    details:details?.parentElement===home,
+                    details:details?.parentElement?.id==='bf-menu-home-extras',
                     routes:tiles.map(t=>t.dataset.bfGoto),
                     buttons:tiles.map(t=>{
                       const b=t.getBoundingClientRect();
@@ -103,7 +104,7 @@ with sync_playwright() as pw:
                   };
                 }""")
                 assert geometry["adjacent"] and geometry["orderOK"] and geometry["details"],(width,geometry)
-                assert geometry["squadCards"]==6 and geometry["cols"]==5,(width,geometry)
+                assert geometry["squadCards"]==6 and geometry["cols"]==3,(width,geometry)
                 assert geometry["squadTop"]>=0 and geometry["squadTop"]<geometry["navTop"],(width,geometry)
                 assert geometry["routes"]==["quest","summon"],(width,geometry)
                 assert len(geometry["buttons"])==2,(width,geometry)
@@ -118,13 +119,18 @@ with sync_playwright() as pw:
                 assert page.evaluate("""() => {
                   const home=document.getElementById('bf-home');
                   const e=home.querySelector('.bf-scene-explore');
-                  const p=home.querySelector('#bf420-home-readiness');
+                  const p=document.getElementById('bf420-home-readiness');
                   const squad=home.querySelector('.bf-scene-squad');
-                  return e.nextElementSibling===p &&
-                    p.nextElementSibling===home.querySelector('.bf-scene-tools') &&
+                  const story=home.querySelector('.bf-scene-story');
+                  // v640: the preview card is relocated to Menu; Home keeps
+                  // squad > Play > Story > shortcuts.
+                  return p?.parentElement?.id==='bf-menu-home-extras' && !home.contains(p) &&
+                    e.nextElementSibling===story &&
+                    story.nextElementSibling===home.querySelector('.bf-scene-tools') &&
+                    home.querySelectorAll('.bf-scene-story').length===1 &&
                     home.querySelector('.bf-scene-title').nextElementSibling===squad &&
                     home.querySelectorAll('.bf-scene-explore').length===1 &&
-                    home.querySelectorAll('#bf420-home-readiness').length===1;
+                    document.querySelectorAll('#bf420-home-readiness').length===1;
                 }"""),width
                 assert before==state(page),(width,before,state(page))
                 assert not errors,errors
