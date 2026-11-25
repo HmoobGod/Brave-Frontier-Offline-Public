@@ -47,7 +47,14 @@ for selector in ("home", "units", "quest", "summon", "menu"):
 for group, (_, sprites) in PACKS.items():
     for name in sprites:
         ref = f"content/{group}/{name}"
-        assert ref in js or ref in css, ref
+        # v650: the original Begin Quest sprite stays verified and staged,
+        # but must not label the view-only battle-controls handoff.
+        if ref == "content/mission_select/start_battle_btn1.png":
+            assert ref not in js and ref not in css, ref
+        else:
+            assert ref in js or ref in css, ref
+assert 'id="bf-quest-battle-jump">VIEW BATTLE CONTROLS' in js
+assert "battleLink.setAttribute('aria-label','View existing battle controls; does not restart')" in js
 for label in ("NOT YET AVAILABLE", "DEMO SUMMON", "CURRENT SQUAD"):
     assert label in js
 assert 'MutationObserver(refreshParty)' in js
