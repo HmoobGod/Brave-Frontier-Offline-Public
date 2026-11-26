@@ -626,3 +626,21 @@ afterEvaluate {
     }
     tasks.named('preBuild').configure { dependsOn tasks.named('patchOriginalAtkBBLevelsV7100') }
 }
+
+// STACK admission: preserve every existing preparation dependency; do not
+// attempt partial generation here. Verify before variant asset merging.
+// Explicit true requires the full exact prepared candidate. Without it,
+// reject any STACK residue and keep ordinary legacy generation permitted.
+afterEvaluate {
+    def stackPrepared = project.findProperty('bfStackPrepared')?.toString() == 'true'
+    def verifyStackGeneratedAssets = tasks.register('verifyStackGeneratedAssets', Exec) {
+        dependsOn tasks.named('preBuild')
+        workingDir rootProject.projectDir
+        commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
+            'tools/stack_candidate/verify_stack_a14.py', '--assets-dir', 'app/src/main/assets',
+            '--mode', stackPrepared ? 'prepared' : 'legacy'
+    }
+    tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
+        dependsOn verifyStackGeneratedAssets
+    }
+}
