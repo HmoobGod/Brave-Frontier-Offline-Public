@@ -161,6 +161,14 @@ jobs:
           python3 prepare_original_event_expressions_v2900.py
           python3 prepare_original_battle_controls.py
           python3 prepare_original_amdahl_art_v149.py
+      - name: Prepare exact STACK source candidate (no owner data)
+        run: |
+          python3 tools/stack_candidate/verify_stack_a17.py --assets-dir app/src/main/assets --mode baseline
+          python3 tools/stack_candidate/prepare_stack_a17.py --assets-dir app/src/main/assets --apply
+          python3 tools/stack_candidate/verify_stack_a17.py --assets-dir app/src/main/assets --mode prepared
+          node --check app/src/main/assets/bf_stack_copies.js
+          # This job checkout is ephemeral; source-only re-preparation is intentional.
+          python3 tools/stack_candidate/reprepare_stack_a17.py --checkout . --execute-disposable
       - name: Test save recovery and offline combat
         shell: bash
         env:
@@ -168,6 +176,10 @@ jobs:
           BF_HOME_ART_MODE: fallback-only
         run: |
           python -m pip install playwright
+          python3 tools/stack_candidate/a8_browser.py app/src/main/assets
+          python3 tools/stack_candidate/a9_browser.py app/src/main/assets
+          python3 tools/stack_candidate/a11_repeat_browser.py app/src/main/assets
+          node tools/stack_candidate/a13_lookup_test.cjs app/src/main/assets
           node research/test_bf_capture_import_v366.js
           python test_bf_single_hit_critical_combat_v9300.py
           python test_bf_multihit_critical_combat_v9500.py
@@ -580,7 +592,11 @@ jobs:
         run: python3 test_bf_about_build.py
       - name: Build debug APK
         # New public repository build numbering starts fresh; offset avoids APK downgrades.
+        env:
+          ORG_GRADLE_PROJECT_bfStackPrepared: 'true'
         run: gradle --no-daemon assembleDebug -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify STACK debug packaged asset identity
+        run: python3 tools/stack_candidate/verify_stack_a17.py --apk app/build/outputs/apk/debug/app-debug.apk --mode prepared
       - name: Verify v129 packaged read-only original seven-star Water source sprite
         run: python3 test_bf_packaged_7star_water_visual_v12900.py
       - name: Verify packaged original battle sprites
@@ -1016,7 +1032,11 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Build separate-app diagnostic APK (must not overwrite Current build)
+        env:
+          ORG_GRADLE_PROJECT_bfStackPrepared: 'true'
         run: gradle --no-daemon assembleDiagnostic -PciVersionCode=$((100000 + ${{ github.run_number }}))
+      - name: Verify STACK diagnostic packaged asset identity
+        run: python3 tools/stack_candidate/verify_stack_a17.py --apk app/build/outputs/apk/diagnostic/app-diagnostic.apk --mode prepared
       - name: Verify built APK IDs, original assets, and offline permissions
         run: python3 test_bf_isolated_diagnostic_build_v23700.py --packaged --emulator
       - name: Upload distinct diagnostic APK

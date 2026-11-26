@@ -393,6 +393,13 @@ public class MainActivity extends Activity {
                     } catch (IOException artError) {
                         android.util.Log.w("BraveFrontier", "Optional Home art unavailable", artError);
                     }
+                    // STACK Unit Box helper is optional on legacy assets and uses the ordinary 64 KiB budget.
+                    try {
+                        String stackCopies = readPackagedText("bf_stack_copies.js");
+                        view.evaluateJavascript(stackCopies, null);
+                    } catch (IOException stackError) {
+                        android.util.Log.w("BraveFrontier", "Optional STACK UI unavailable", stackError);
+                    }
                     view.evaluateJavascript(js, null);
                     // v0.54: additive status overlay loaded AFTER the navigation header.
                     // Missing optional UI never blocks the original game or saves.
