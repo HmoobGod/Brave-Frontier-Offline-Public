@@ -637,7 +637,7 @@ afterEvaluate {
         dependsOn tasks.named('preBuild')
         workingDir rootProject.projectDir
         commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
-            'tools/stack_candidate/verify_stack_a16.py', '--assets-dir', 'app/src/main/assets',
+            'tools/stack_candidate/verify_stack_a17.py', '--assets-dir', 'app/src/main/assets',
             '--mode', stackPrepared ? 'prepared' : 'legacy'
     }
     tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
