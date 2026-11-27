@@ -13,7 +13,10 @@ assert sum(TARG[u]['target']=='single_enemy' for u in DATA['skills'])==5
 assert [DATA['skills'][i]['levels'][0]['damageModifierPct'] for i in ['10011','10021','30022','50022']]==[30,150,50,70]
 html=(ROOT/'app/src/main/assets/index.html').read_text('utf-8')
 assert html.count('/* BF_GLOBAL_BB_POWER_V030 */')==1
-assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst))' in html
+if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+ assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst)+(burst?bfR16BurstBonus(p):0))' in html
+else:
+ assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst))' in html
 print('PASS 24 offensive BBs and source Lv1-10 records',flush=True)
 
 with sync_playwright() as pw:

@@ -24,8 +24,15 @@ core=(A/'index.html').read_text('utf8')
 assert js.count('BF_GLOBAL_ORIGINAL_TYPE5_ELEMENT_RESIST_V16600')==1
 assert len(js.encode())<12000
 assert core.count('BFGlobalOriginalElementResistV16600?.scaleIncoming(')==1
-assert core.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
-assert 'prototypeDamage(enemy.atk,target.def,target.guard ? .5 : 1)' in core
+if __import__('hashlib').sha256(core.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+ assert core.count('BFGlobalElementalCombatV6900?.scaleDamage(')==1
+ assert core.count('function bfR16Outgoing(p,foe,total)')==1
+ assert core.count('return api?.scaleDamage(total,element,foe.element)??total;')==1
+ assert 'bfR16Outgoing(p,foe,prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst)+(burst?bfR16BurstBonus(p):0)))' in core
+ assert 'bfR20Incoming(target,Math.round(((incoming)=>window.BFGlobalOriginalElementResistV16600?.scaleIncoming(incoming,enemy.element,target)??incoming)(((total)=>window.BFGlobalElementalCombatV6900?.scaleDamage(total,enemy.element,UNIT_BY_ID.get(target.unitId)?.element)??total)(prototypeDamage(bfR21EnemyAtk(enemy),bfR15Defense(target),bfR16GuardMultiplier(target))))))' in core
+else:
+ assert core.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
+ assert 'prototypeDamage(enemy.atk,target.def,target.guard ? .5 : 1)' in core
 assert not any(s in js for s in ('saveProgress(', 'localStorage', 'P.squad=', 'P.roster=', 'Math.random', 'fetch(', 'XMLHttpRequest'))
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf11400_original_global_leader_english.js")')<java.index('readPackagedText("bf16600_original_type5_element_resist.js")')

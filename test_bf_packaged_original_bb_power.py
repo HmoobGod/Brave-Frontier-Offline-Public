@@ -12,7 +12,10 @@ with zipfile.ZipFile(APK) as apk:
     assert html.count('/* BF_GLOBAL_BB_TARGETING_V028 */')==1
     assert html.count('/* BF_GLOBAL_BB_SUPPORT_V029 */')==1
     assert html.count('/* BF_GLOBAL_BB_POWER_V030 */')==1
-    assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst))' in html
+    if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+     assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst)+(burst?bfR16BurstBonus(p):0))' in html
+    else:
+     assert 'prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst))' in html
     assert 'bf_global_offline_demo_v7' in html
     pattern=r'const BF_ORIGINAL_BB_POWER=Object\.freeze\((\{.*?\})\);'
     record=re.search(pattern,html,re.S)

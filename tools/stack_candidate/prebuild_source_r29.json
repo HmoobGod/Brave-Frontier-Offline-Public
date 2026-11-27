@@ -1,0 +1,409 @@
+{
+  "base": "92ead0588142a2b270b0c222bfce2b43821a832f",
+  "source_blobs": {
+    "app/build.gradle": "9d897edf828b3d582e9b97c21d28847c088efda1",
+    ".github/workflows/build-debug-apk.yml": "b94d9b91314dfabade8e4918f1e0d99a728ebdb0",
+    "app/src/main/java/org/bravefrontier/offline/MainActivity.java": "85b4162def5354958b63f20d2b4a9effab81ee30"
+  },
+  "registered_blobs": {
+    "app/build.gradle": "906bfc262d9b737c336345b00ce2b79bbd65ef51",
+    ".github/workflows/build-debug-apk.yml": "f2db3c555db49a6f55e591eda4f1c539d25e16ae",
+    "app/src/main/java/org/bravefrontier/offline/MainActivity.java": "85b4162def5354958b63f20d2b4a9effab81ee30"
+  },
+  "tasks": [
+    [
+      "prepareDemoAssets",
+      "patch_bf_save_quarantine.py"
+    ],
+    [
+      "prepareGlobalHomeAssets",
+      "prepare_original_home_assets.py"
+    ],
+    [
+      "prepareGlobalMissionAssets",
+      "prepare_global_mission_expansion.py"
+    ],
+    [
+      "prepareOriginalGlobalBgm",
+      "prepare_original_bgm_assets.py"
+    ],
+    [
+      "prepareGlobalMistralMap",
+      "prepare_original_mistral_assets.py"
+    ],
+    [
+      "prepareOriginalBattleControls",
+      "prepare_original_battle_controls.py"
+    ],
+    [
+      "prepareGlobalUnitArchive",
+      "prepare_global_unit_archive.py"
+    ],
+    [
+      "prepareGlobalUnitCodex",
+      "prepare_global_unit_codex.py"
+    ],
+    [
+      "prepareOriginalBBTargeting",
+      "prepare_original_bb_targeting.py"
+    ],
+    [
+      "prepareOriginalBBSupport",
+      "prepare_original_bb_support.py"
+    ],
+    [
+      "prepareOriginalBBPower",
+      "prepare_original_bb_power.py"
+    ],
+    [
+      "prepareOriginalPlayableIdentity",
+      "prepare_original_playable_identity.py"
+    ],
+    [
+      "prepareOriginalSixEvolutions",
+      "prepare_original_six_evolutions.py"
+    ],
+    [
+      "prepareOriginalSecondStageEvolutions",
+      "prepare_original_second_stage_evolutions.py"
+    ],
+    [
+      "prepareOriginalMoreSecondStage",
+      "prepare_original_more_second_stage.py"
+    ],
+    [
+      "prepareOriginalFiveStarStarters",
+      "prepare_original_five_star_starters.py"
+    ],
+    [
+      "prepareOriginalOtherFiveStar",
+      "prepare_original_other_five_star.py"
+    ],
+    [
+      "prepareOriginalSixStarStarters",
+      "prepare_original_six_star_starters.py"
+    ],
+    [
+      "prepareOriginalOtherSixStar",
+      "prepare_original_other_six_star.py"
+    ],
+    [
+      "prepareEvolutionRoadmapV039",
+      "prepare_evolution_roadmap_v039.py"
+    ],
+    [
+      "prepareBattleBBGuideV040",
+      "prepare_battle_bb_guide_v040.py"
+    ],
+    [
+      "prepareSourceAwareAutoV041",
+      "prepare_source_aware_auto_v041.py"
+    ],
+    [
+      "prepareCoordinatedAutoV042",
+      "prepare_coordinated_auto_v042.py"
+    ],
+    [
+      "prepareOriginalSBBPreviewV043",
+      "prepare_original_sbb_preview_v043.py"
+    ],
+    [
+      "prepareExperimentalSBBV044",
+      "prepare_experimental_sbb_v044.py"
+    ],
+    [
+      "prepareEgorSnowfieldV045",
+      "prepare_egor_snowfield_v045.py"
+    ],
+    [
+      "prepareForestOfBeastsV046",
+      "prepare_forest_of_beasts_v046.py"
+    ],
+    [
+      "prepareMagutagalV047",
+      "prepare_magutagal_v047.py"
+    ],
+    [
+      "prepareQuestEnglishDataV048",
+      "prepare_quest_english_data_v048.py"
+    ],
+    [
+      "prepareRemainsMirzaV049",
+      "prepare_remains_mirza_v049.py"
+    ],
+    [
+      "prepareMonstersNestV050",
+      "prepare_monsters_nest_v050.py"
+    ],
+    [
+      "prepareTowerMistralV051",
+      "prepare_tower_of_mistral_v051.py"
+    ],
+    [
+      "prepareStoryBossV052",
+      "prepare_story_boss_v052.py"
+    ],
+    [
+      "prepareMonsterTrainingV053",
+      "prepare_monster_training_v053.py"
+    ],
+    [
+      "prepareTowerFormationsV055",
+      "prepare_tower_formations_v055.py"
+    ],
+    [
+      "prepareOriginalMistralEvidenceV060",
+      "prepare_original_mission_evidence_v060.py"
+    ],
+    [
+      "preparePlayableAttackFramesV065",
+      "prepare_playable_attack_frames_v065.py"
+    ],
+    [
+      "preparePlayableHitInspectorV070",
+      "prepare_playable_hit_inspector_v070.py"
+    ],
+    [
+      "prepareMorganOriginalV080",
+      "prepare_morgan_quests_v080.py"
+    ],
+    [
+      "prepareStLamiaV090",
+      "prepare_st_lamia_original_v090.py"
+    ],
+    [
+      "prepareHistoricalWaveLabV200",
+      "prepare_historical_wave_lab_v200.py"
+    ],
+    [
+      "prepareOriginalEventBackdropV2700",
+      "prepare_original_event_backdrop_v2700.py"
+    ],
+    [
+      "prepareOriginalEventExpressionsV2900",
+      "prepare_original_event_expressions_v2900.py"
+    ],
+    [
+      "patchBurstRecipientRecoveryV6700",
+      "patch_bf_burst_recipient_recovery_v6700.py"
+    ],
+    [
+      "patchOriginalElementalCombatV6900",
+      "patch_bf_elemental_combat_v6900.py"
+    ],
+    [
+      "patchOriginalAtkBBLevelsV7100",
+      "patch_bf_original_atk_bb_levels_v7100.py"
+    ]
+  ],
+  "script_blobs": {
+    "patch_bf_save_quarantine.py": "70ea469bd1dc46582b4e947f4f1410b40dcbc37a",
+    "prepare_original_home_assets.py": "cfb9e93fc8c4a9d36ccbcb0acee958515f1ce65a",
+    "prepare_global_mission_expansion.py": "700c151a5e17c3581d924e119cd6823e723936b8",
+    "prepare_original_bgm_assets.py": "37b4f34fa36b4054c20861f3df6a8572d8b1681e",
+    "prepare_original_mistral_assets.py": "e6c42144b6c6ebef875c2683f06a1e6de66dd39a",
+    "prepare_original_battle_controls.py": "4efaca5ca65cd7b9783bbef9e1aa553e691a271d",
+    "prepare_global_unit_archive.py": "889ae43d833374e27429f59289b298833c2a994f",
+    "prepare_global_unit_codex.py": "87e7a8608abdcb4d6e64eb3eca7bb6a7db1b2994",
+    "prepare_original_bb_targeting.py": "5033f2001da586f41ef1b4c4ff6619617d328510",
+    "prepare_original_bb_support.py": "f6df053804c1bdd0308f908e2ffc53c07c80dc44",
+    "prepare_original_bb_power.py": "5bd910968c4c506df0dd7dc8a019c6f9882245e3",
+    "prepare_original_playable_identity.py": "102c1ddccbadfff205016b497761eafc025b0333",
+    "prepare_original_six_evolutions.py": "35a27b9317052103c71806758dd07bddaa73ef55",
+    "prepare_original_second_stage_evolutions.py": "6701c1954acb18ec015e6e493293e732abd1a027",
+    "prepare_original_more_second_stage.py": "4bb9313eb1968da1d3108acec8bf70718287f67f",
+    "prepare_original_five_star_starters.py": "76b18212c495b4024a119f6646043751e3c9ea58",
+    "prepare_original_other_five_star.py": "d5a91b240c021becc56208d570b51da62c4a74d7",
+    "prepare_original_six_star_starters.py": "cdc3a3310a765dd3ac5b22e70a91973f0f352a9d",
+    "prepare_original_other_six_star.py": "5c71dba4e4e62d68eb36c4b4422a84f7a8aaf490",
+    "prepare_evolution_roadmap_v039.py": "a4040e8d1af38d76d6c6ad535bbb981f72576f65",
+    "prepare_battle_bb_guide_v040.py": "0016fea52506ad6e92a8e149f2124dce8a7ac0fb",
+    "prepare_source_aware_auto_v041.py": "e1bb550183a9195cd33b664fa2e5538f8ee47645",
+    "prepare_coordinated_auto_v042.py": "1986635c7d7525eb448e27027a623cb2d0819f85",
+    "prepare_original_sbb_preview_v043.py": "4bc502e88fef30b0588e81f433bb496a21c36710",
+    "prepare_experimental_sbb_v044.py": "e1ac93b9e1b7cdcba988588851961ee167661f05",
+    "prepare_egor_snowfield_v045.py": "b3747772dcb9a9d92ddce1a6c4567565ca23c138",
+    "prepare_forest_of_beasts_v046.py": "90e7824b365c97cff14c21a1bb4d600b9cd4a09f",
+    "prepare_magutagal_v047.py": "8afe876d6bcc5eeae5863f8c1bdfae56255f6e2d",
+    "prepare_quest_english_data_v048.py": "2c4792dfced8b076b0096dfd4b71f795fc068029",
+    "prepare_remains_mirza_v049.py": "601610d012f022ffbbe7fd2facaa4e531def0f11",
+    "prepare_monsters_nest_v050.py": "bafff82977e643c006e2469ab166d4a1c8e39025",
+    "prepare_tower_of_mistral_v051.py": "b16744d2bc5d55732e7dd2d9479eb2ce5576b842",
+    "prepare_story_boss_v052.py": "b4f63c4eb4fe8e7061ec1bbb86a7f5e4bd2c4425",
+    "prepare_monster_training_v053.py": "71089f0a11f00bffefe3409c6903c806401ddad0",
+    "prepare_tower_formations_v055.py": "5ba2fde75de02da64677e4671854b4c5ef0c3627",
+    "prepare_original_mission_evidence_v060.py": "55468ffab127bb22a407ceb490a8425530664d5e",
+    "prepare_playable_attack_frames_v065.py": "674a06f2b2c356d2133a536b224721d282e06e10",
+    "prepare_playable_hit_inspector_v070.py": "b546a65be5f4e21fd2c113594495702a9ae007f1",
+    "prepare_morgan_quests_v080.py": "f0677bb1c8234900166fd083e7c457d6171af6dc",
+    "prepare_st_lamia_original_v090.py": "d10c34808b89562bf712aba4f6e32da19b91e89d",
+    "prepare_historical_wave_lab_v200.py": "f03aa9e283fe5c389293d4bc8b80c9b2e104db23",
+    "prepare_original_event_backdrop_v2700.py": "bf9b2e69120771bc94c7e4a6cf13fa94bcc3e5c7",
+    "prepare_original_event_expressions_v2900.py": "f4925f81736b397a3affdb3f644e9737ebd5e7a0",
+    "patch_bf_burst_recipient_recovery_v6700.py": "c2cc8dde2a7f700a034ccb47342cc2c9be3b02eb",
+    "patch_bf_elemental_combat_v6900.py": "e5bc093229b6560cfe15be55aaa4451f32517413",
+    "patch_bf_original_atk_bb_levels_v7100.py": "cccc5f698bd5352575fc33e77db24f367d48f41e",
+    "patch_bf_source_wave_guard_v359.py": "c493db13435a53aa84c18cf330a5a043d662a072",
+    "patch_bf_wave_precombat_v360.py": "c95b8443e0d09d62c58c7542925338d2a71e4f6f",
+    "verify_original_mistral_evidence_v059.py": "534edb0b2924ce6a2f7f569c699ef69499a86da6",
+    "tools/stack_candidate/prebuild-order-a12.txt": "3f0f3ed6bfdb688e54473a18aeb14eb7abd95f78"
+  },
+  "original_named_edges": [
+    [
+      "prepareGlobalMissionAssets",
+      "prepareDemoAssets"
+    ],
+    [
+      "prepareGlobalUnitArchive",
+      "prepareGlobalMissionAssets"
+    ],
+    [
+      "prepareGlobalUnitCodex",
+      "prepareGlobalUnitArchive"
+    ],
+    [
+      "prepareOriginalBBTargeting",
+      "prepareGlobalUnitCodex"
+    ],
+    [
+      "prepareOriginalBBSupport",
+      "prepareOriginalBBTargeting"
+    ],
+    [
+      "prepareOriginalBBPower",
+      "prepareOriginalBBSupport"
+    ],
+    [
+      "prepareOriginalPlayableIdentity",
+      "prepareOriginalBBPower"
+    ],
+    [
+      "prepareOriginalSixEvolutions",
+      "prepareOriginalPlayableIdentity"
+    ],
+    [
+      "prepareOriginalSecondStageEvolutions",
+      "prepareOriginalSixEvolutions"
+    ],
+    [
+      "prepareOriginalMoreSecondStage",
+      "prepareOriginalSecondStageEvolutions"
+    ],
+    [
+      "prepareOriginalFiveStarStarters",
+      "prepareOriginalMoreSecondStage"
+    ],
+    [
+      "prepareOriginalOtherFiveStar",
+      "prepareOriginalFiveStarStarters"
+    ],
+    [
+      "prepareOriginalSixStarStarters",
+      "prepareOriginalOtherFiveStar"
+    ],
+    [
+      "prepareOriginalOtherSixStar",
+      "prepareOriginalSixStarStarters"
+    ],
+    [
+      "prepareEvolutionRoadmapV039",
+      "prepareOriginalOtherSixStar"
+    ],
+    [
+      "prepareBattleBBGuideV040",
+      "prepareEvolutionRoadmapV039"
+    ],
+    [
+      "prepareSourceAwareAutoV041",
+      "prepareBattleBBGuideV040"
+    ],
+    [
+      "prepareCoordinatedAutoV042",
+      "prepareSourceAwareAutoV041"
+    ],
+    [
+      "prepareOriginalSBBPreviewV043",
+      "prepareCoordinatedAutoV042"
+    ],
+    [
+      "prepareExperimentalSBBV044",
+      "prepareOriginalSBBPreviewV043"
+    ],
+    [
+      "prepareEgorSnowfieldV045",
+      "prepareExperimentalSBBV044"
+    ],
+    [
+      "prepareForestOfBeastsV046",
+      "prepareEgorSnowfieldV045"
+    ],
+    [
+      "prepareMagutagalV047",
+      "prepareForestOfBeastsV046"
+    ],
+    [
+      "prepareQuestEnglishDataV048",
+      "prepareMagutagalV047"
+    ],
+    [
+      "prepareRemainsMirzaV049",
+      "prepareQuestEnglishDataV048"
+    ],
+    [
+      "prepareMonstersNestV050",
+      "prepareRemainsMirzaV049"
+    ],
+    [
+      "prepareTowerMistralV051",
+      "prepareMonstersNestV050"
+    ],
+    [
+      "prepareStoryBossV052",
+      "prepareTowerMistralV051"
+    ],
+    [
+      "prepareMonsterTrainingV053",
+      "prepareStoryBossV052"
+    ],
+    [
+      "prepareTowerFormationsV055",
+      "prepareMonsterTrainingV053"
+    ],
+    [
+      "prepareOriginalMistralEvidenceV060",
+      "prepareTowerFormationsV055"
+    ],
+    [
+      "preparePlayableAttackFramesV065",
+      "prepareOriginalMistralEvidenceV060"
+    ],
+    [
+      "preparePlayableHitInspectorV070",
+      "preparePlayableAttackFramesV065"
+    ],
+    [
+      "prepareMorganOriginalV080",
+      "preparePlayableHitInspectorV070"
+    ],
+    [
+      "prepareStLamiaV090",
+      "prepareMorganOriginalV080"
+    ],
+    [
+      "prepareHistoricalWaveLabV200",
+      "prepareStLamiaV090"
+    ],
+    [
+      "patchBurstRecipientRecoveryV6700",
+      "prepareHistoricalWaveLabV200"
+    ],
+    [
+      "patchOriginalElementalCombatV6900",
+      "patchBurstRecipientRecoveryV6700"
+    ],
+    [
+      "patchOriginalAtkBBLevelsV7100",
+      "patchOriginalElementalCombatV6900"
+    ]
+  ]
+}

@@ -71,7 +71,7 @@ with sync_playwright() as pw:
         fields=page.locator(".training-panel .training-toolbar input, .training-panel .training-toolbar select")
         buttons=page.locator(".training-panel .train-actions button")
         assert fields.count()==3,(width,"Training search/filter/sort count")
-        assert buttons.count()==12,(width,"v274 Training buttons")
+        assert buttons.count()==18,(width,"v274 Training buttons")
         for label,items in (("forms",fields),("actions",buttons)):
             for i in range(items.count()):
                 size=items.nth(i).evaluate("""e=>({
@@ -95,6 +95,6 @@ with sync_playwright() as pw:
         assert before==page.evaluate(state),(width,"synthetic saved state changed")
         assert not errors,(width,errors[:3])
         ctx.close()
-        print("PASS v275",width,"three form fields and 12 actions >=44px; focus and save preserved")
+        print("PASS v275",width,"three form fields and 18 actions >=44px; focus and save preserved")
     browser.close()
 print("PASS v275 four widths; no owner save or device access")

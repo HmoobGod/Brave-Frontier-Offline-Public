@@ -56,10 +56,18 @@ with sync_playwright() as pw:
   HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};
   HTMLMediaElement.prototype.play=()=>Promise.resolve();
  }""")
- page.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
+ core=(A/'index.html').read_text('utf8')
+ r28=hashlib.sha256(core.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c'
+ page.set_content(core,wait_until='load',timeout=90000)
  assert page.evaluate('P.version')==7
- assert page.evaluate('UNIT_BY_ID.size')==72
- assert page.evaluate('UNIT_BY_ID.has(20016)') is False
+ if r28:
+  assert page.evaluate('UNIT_BY_ID.size')==84
+  assert page.evaluate("""()=>{const ids=[10016,10017,20016,20017,30016,30017,40016,40017,50016,50017,60016,60017];return Object.keys(BF_R13_FORMS).map(Number).join(',')===ids.join(',')&&ids.every(id=>UNIT_BY_ID.get(id)===BF_R13_FORMS[id]);}""")
+  assert page.evaluate('UNIT_BY_ID.has(20016)') is True
+  assert page.evaluate("""()=>{const u=UNIT_BY_ID.get(20016);return {id:u.id,rarity:u.rarity,base:u.stats,lordAtMax:u.originalLordStats,cap:u.originalMaxLevel,cost:u.originalUnitCost};}""")=={'id':20016,'rarity':7,'base':row['base'],'lordAtMax':row['lordAtMax'],'cap':120,'cost':38}
+ else:
+  assert page.evaluate('UNIT_BY_ID.size')==72
+  assert page.evaluate('UNIT_BY_ID.has(20016)') is False
  page.add_script_tag(path=str(A/'bf12500_full_original_normal_hits.js'))
  page.add_script_tag(path=str(A/'bf12800_original_starter_cgg_cgs.js'))
  assert page.evaluate('async()=>await BFGlobalOriginalStarterCggV12800.ready') is True
@@ -73,57 +81,100 @@ with sync_playwright() as pw:
  })""")
  assert profile['cgg']==23 and profile['attack']==attack
  assert profile['events']==damage and profile['originalArchive']==2258
- assert profile['sevenStarLive'] is False
- result=page.evaluate("""async({attack,damage,stats}) => {
-   const originalSave=JSON.stringify(P);
-   const stored=localStorage.getItem('bf_global_offline_demo_v7');
-   BF_debug.reset();
-   const earlier=UNIT_BY_ID.get(20015);
-   if(!earlier)return {error:'missing original 6-star base'};
-   const temporary={...earlier,id:20016,rarity:7,
-      name:'7-star Water SOURCE-ONLY test actor',
-      stats:{...stats},frameCount:23,
-      animation:{...earlier.animation,atk:attack}};
-   UNIT_BY_ID.set(20016,temporary);
-   if(BF_ARCHIVE_NORMAL_HITS['20016'])return {error:'unexpected production 7star combat'};
-   BF_ARCHIVE_NORMAL_HITS['20016']={
-      unitId:20016,weightsTotal:100,events:damage};
-   const actor=S.party[0];
-   actor.active=true;actor.unitId=20016;actor.name=temporary.name;
-   actor.hp=stats.hp;actor.maxHp=stats.hp;
-   actor.atk=stats.atk;actor.def=stats.def;actor.rec=stats.rec;
-   actor.bb=0;actor.action={kind:'attack',target:0};
-   S.enemies=[{slot:0,name:'Ephemeral target (no quest)',hp:999999,
-      maxHp:999999,atk:10,def:0,element:'Water'}];
-   S.mode='archive';S.over=false;S.target=0;
-   const start=S.enemies[0].hp;
-   wait=()=>Promise.resolve();
-   await performUnit(actor,epoch);
-   const result={unitId:actor.unitId,sourceRarity:temporary.rarity,
-      normalEvents:damage.length,weightedShare:damage.reduce((n,e)=>n+e[1],0),
-      sourceAttackKeys:attack.length,
-      simulatedDamage:start-S.enemies[0].hp,
-      DEMOBurstGauge:actor.bb,
-      saveVersion:P.version};
-   // The canvas animation loop reads UNIT_BY_ID for every live party actor.
-   // Reset the disposable battle (and invalidate its epoch) BEFORE dropping
-   // its temporary 7-star actor, otherwise the next rAF may render an ID
-   // that no longer exists and raise a nondeterministic page error.
-   BF_debug.reset();
-   await new Promise(resolve => requestAnimationFrame(resolve));
-   UNIT_BY_ID.delete(20016);
-   delete BF_ARCHIVE_NORMAL_HITS['20016'];
-   result.temporaryUnitGone=!UNIT_BY_ID.has(20016);
-   result.playerUnchanged=JSON.stringify(P)===originalSave;
-   result.localSaveUnchanged=localStorage.getItem('bf_global_offline_demo_v7')===stored;
-   return result;
- }""",{'attack':attack,'damage':damage,'stats':row['base']})
- assert result.get('unitId')==20016 and result['sourceRarity']==7,result
- assert result['normalEvents']==9 and result['weightedShare']==100,result
- assert result['sourceAttackKeys']==14,result
- assert result['simulatedDamage']>0 and result['DEMOBurstGauge']==34,result
- assert result['saveVersion']==7 and result['temporaryUnitGone'],result
- assert result['playerUnchanged'] and result['localSaveUnchanged'],result
+ if r28:
+  assert profile['sevenStarLive'] is True
+  assert page.evaluate('archivedNormalAttackEvents(20016)')==damage
+  assert page.evaluate('BF_R14_NORMAL[20016]')==damage
+  assert page.evaluate('BF_R14_SELENA_VISUAL.animation.atk.length')==len(attack)
+  result=page.evaluate("""async({damage,stats})=>{
+    const before=JSON.stringify(P),stored=localStorage.getItem('bf_global_offline_demo_v7');
+    const catalog=[...UNIT_BY_ID.entries()],production=UNIT_BY_ID.get(20016);
+    const originalHits=JSON.stringify(BF_ARCHIVE_NORMAL_HITS);
+    BF_debug.reset();
+    // Disposable battle-only actor, as in the legacy smoke. Use the existing
+    // production form and its real normal-hit dispatch; never replace/delete it.
+    const actor=S.party[0];
+    actor.active=true;actor.unitId=20016;actor.name=production.name;
+    actor.hp=stats.hp;actor.maxHp=stats.hp;actor.atk=stats.atk;
+    actor.def=stats.def;actor.rec=stats.rec;actor.bb=0;
+    actor.action={kind:'attack',target:0};
+    S.enemies=[{slot:0,name:'Ephemeral target (no quest)',hp:999999,maxHp:999999,atk:10,def:0,element:'Water'}];
+    S.mode='archive';S.over=false;S.target=0;
+    const start=S.enemies[0].hp,legacyGauge=S.r19?.enabled!==true;
+    const hitRows=archivedNormalAttackEvents(actor.unitId);
+    wait=()=>Promise.resolve();
+    await performUnit(actor,epoch);
+    const result={unitId:actor.unitId,sourceRarity:production.rarity,normalEvents:hitRows.length,
+       weightedShare:hitRows.reduce((n,e)=>n+e[1],0),sourceRowsMatch:JSON.stringify(hitRows)===JSON.stringify(damage),
+       simulatedDamage:start-S.enemies[0].hp,DEMOBurstGauge:actor.bb,legacyGauge,saveVersion:P.version};
+    BF_debug.reset();await new Promise(resolve=>requestAnimationFrame(resolve));
+    result.catalogUnchanged=UNIT_BY_ID.size===catalog.length&&catalog.every(([id,u])=>UNIT_BY_ID.get(id)===u);
+    result.productionUnchanged=UNIT_BY_ID.get(20016)===production;
+    result.normalCatalogUnchanged=JSON.stringify(BF_ARCHIVE_NORMAL_HITS)===originalHits;
+    result.playerUnchanged=JSON.stringify(P)===before;
+    result.localSaveUnchanged=localStorage.getItem('bf_global_offline_demo_v7')===stored;
+    return result;
+  }""",{'damage':damage,'stats':row['base']})
+  assert result.get('unitId')==20016 and result['sourceRarity']==7,result
+  assert result['normalEvents']==9 and result['weightedShare']==100 and result['sourceRowsMatch'],result
+  assert result['simulatedDamage']>0 and result['legacyGauge'] and result['DEMOBurstGauge']==34,result
+  assert result['saveVersion']==7 and result['catalogUnchanged'] and result['productionUnchanged'] and result['normalCatalogUnchanged'],result
+  assert result['playerUnchanged'] and result['localSaveUnchanged'],result
+ else:
+  assert profile['sevenStarLive'] is False
+  result=page.evaluate("""async({attack,damage,stats}) => {
+    const originalSave=JSON.stringify(P);
+    const stored=localStorage.getItem('bf_global_offline_demo_v7');
+    BF_debug.reset();
+    const earlier=UNIT_BY_ID.get(20015);
+    if(!earlier)return {error:'missing original 6-star base'};
+    const temporary={...earlier,id:20016,rarity:7,
+       name:'7-star Water SOURCE-ONLY test actor',
+       stats:{...stats},frameCount:23,
+       animation:{...earlier.animation,atk:attack}};
+    UNIT_BY_ID.set(20016,temporary);
+    if(BF_ARCHIVE_NORMAL_HITS['20016'])return {error:'unexpected production 7star combat'};
+    BF_ARCHIVE_NORMAL_HITS['20016']={
+       unitId:20016,weightsTotal:100,events:damage};
+    const actor=S.party[0];
+    actor.active=true;actor.unitId=20016;actor.name=temporary.name;
+    actor.hp=stats.hp;actor.maxHp=stats.hp;
+    actor.atk=stats.atk;actor.def=stats.def;actor.rec=stats.rec;
+    actor.bb=0;actor.action={kind:'attack',target:0};
+    S.enemies=[{slot:0,name:'Ephemeral target (no quest)',hp:999999,
+       maxHp:999999,atk:10,def:0,element:'Water'}];
+    S.mode='archive';S.over=false;S.target=0;
+    const start=S.enemies[0].hp;
+    wait=()=>Promise.resolve();
+    await performUnit(actor,epoch);
+    const result={unitId:actor.unitId,sourceRarity:temporary.rarity,
+       normalEvents:damage.length,weightedShare:damage.reduce((n,e)=>n+e[1],0),
+       sourceAttackKeys:attack.length,
+       simulatedDamage:start-S.enemies[0].hp,
+       DEMOBurstGauge:actor.bb,
+       saveVersion:P.version};
+    // The canvas animation loop reads UNIT_BY_ID for every live party actor.
+    // Reset the disposable battle (and invalidate its epoch) BEFORE dropping
+    // its temporary 7-star actor, otherwise the next rAF may render an ID
+    // that no longer exists and raise a nondeterministic page error.
+    BF_debug.reset();
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    UNIT_BY_ID.delete(20016);
+    delete BF_ARCHIVE_NORMAL_HITS['20016'];
+    result.temporaryUnitGone=!UNIT_BY_ID.has(20016);
+    result.playerUnchanged=JSON.stringify(P)===originalSave;
+    result.localSaveUnchanged=localStorage.getItem('bf_global_offline_demo_v7')===stored;
+    return result;
+  }""",{'attack':attack,'damage':damage,'stats':row['base']})
+  assert result.get('unitId')==20016 and result['sourceRarity']==7,result
+  assert result['normalEvents']==9 and result['weightedShare']==100,result
+  assert result['sourceAttackKeys']==14,result
+  assert result['simulatedDamage']>0 and result['DEMOBurstGauge']==34,result
+  assert result['saveVersion']==7 and result['temporaryUnitGone'],result
+  assert result['playerUnchanged'] and result['localSaveUnchanged'],result
  assert not errors,errors
  browser.close()
-print('PASS v147: source-authenticated 7-star Water nine original hit events and 14 CGS steps execute in ephemeral 2022 DEMO battle without crashes or saved roster/XP/state changes')
+if r28:
+ print('PASS v147 R28: production 7-star Water nine original normal hits, 14 source CGS steps, catalog and save unchanged in disposable battle')
+else:
+ print('PASS v147: source-authenticated 7-star Water nine original hit events and 14 CGS steps execute in ephemeral 2022 DEMO battle without crashes or saved roster/XP/state changes')

@@ -32,11 +32,15 @@ assert js.count(V['typedRowsSha256'])==1
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert 'readPackagedText("bf13000_original_starter_typed_evolution.js")' in java
 assert java.index('bf12600_original_squad_cost.js')<java.index('bf13000_original_starter_typed_evolution.js')
+html=(A/'index.html').read_text('utf8')
+r28=hashlib.sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c'
+if r28:
+ assert hashlib.sha256(js.encode('utf8')).hexdigest()=='c5851fb881b1786b19a38973e21d5089cac571f72689db043bf3fa65f47a487b'
 with sync_playwright() as pw:
  browser=pw.chromium.launch(headless=True,executable_path=shutil.which('chromium') or shutil.which('google-chrome') or shutil.which('google-chrome-stable'),args=['--no-sandbox','--disable-dev-shm-usage'])
  p=browser.new_page(viewport={'width':390,'height':844}); errors=[];p.on('pageerror',lambda e:errors.append(str(e)))
  p.evaluate('''()=>{const db={};Object.defineProperty(window,'localStorage',{configurable:true,value:{getItem:k=>db[k]??null,setItem:(k,v)=>db[k]=String(v),removeItem:k=>delete db[k]}});window.alert=()=>{};window.confirm=()=>true;HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.play=()=>Promise.resolve();HTMLMediaElement.prototype.pause=()=>{}}''')
- p.set_content((A/'index.html').read_text('utf8'),wait_until='load',timeout=90000)
+ p.set_content(html,wait_until='load',timeout=90000)
  assert p.evaluate('P.version')==7
  before=p.evaluate('JSON.stringify(P)')
  stored=p.evaluate("localStorage.getItem('bf_global_offline_demo_v7')")
@@ -81,7 +85,13 @@ with sync_playwright() as pw:
  assert p.evaluate(api+'.readiness(999999)') is None
  p.select_option('#bf13000-select','10016')
  assert 'material UNIT forms 0/4' in p.locator('#bf13000-readiness').inner_text()
- assert 'Legend Stone item inventory UNVERIFIED' in p.locator('#bf13000-readiness').inner_text()
+ if r28:
+  # The source-only reference API still rejects spending or forged inventory.
+  # R28 directs actual inventory and evolution checks to separate R13 cards.
+  assert 'Legend Stone inventory and readiness: see R13 playable evolution cards' in p.locator('#bf13000-readiness').inner_text()
+  assert 'This reference panel does not execute evolution; use the separate R13 experimental evolution cards.' in p.locator('#bf13000-source-evolutions small').inner_text()
+ else:
+  assert 'Legend Stone item inventory UNVERIFIED' in p.locator('#bf13000-readiness').inner_text()
  # A synthetic quantity at a generic DEMO materials key is NOT original
  # 2022 type-2 item inventory and must not unlock 7-star evolution.
  forged=p.evaluate("""()=>{
