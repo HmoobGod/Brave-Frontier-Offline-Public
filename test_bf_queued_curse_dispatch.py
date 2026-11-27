@@ -1,12 +1,26 @@
 """Queued BB then Curse must use the existing normal-hit path, with synthetic progress."""
 from pathlib import Path
-import ast,shutil,sys
+import ast,hashlib,shutil,sys
 R=Path(__file__).resolve().parent;A=R/'app/src/main/assets'
 HOOK='window.BFGlobalCurseBBLockV5900?.blockBurst?.(p.id);'
 assert HOOK in (R/'prepare_source_aware_auto_v041.py').read_text()
 assert 'python3 test_bf_queued_curse_dispatch.py' in (R/'.github/workflows/build-debug-apk.yml').read_text()
 if '--source-only' in sys.argv:print('PASS queued-Curse source: optional existing status API at action dispatch');raise SystemExit(0)
-html=(A/'index.html').read_text();assert html.count(HOOK)==1
+html=(A/'index.html').read_text()
+r28=hashlib.sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c'
+if r28:
+ # R28 has three p-dispatch sites (ordinary, mixed remainder, sequential)
+ # and one first-actor dispatch site. Each must retain Curse-before-Auto-before-action.
+ dispatch=HOOK+'window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);'
+ first=HOOK.replace('(p.id)','(first.id)')
+ assert html.count(HOOK)==3 and html.count(dispatch)==3
+ assert html.count(first)==1
+ assert html.count(first+'window.BF041SmartAuto?.reconsider?.(first);await performUnit(first,token);')==1
+ assert html.count('for(const p of rest){if(token!==epoch||!livingEnemies().length)break;if(!bfR15Owned(p))continue;'+dispatch)==1
+ assert html.count("async function sequential(p){if(token!==epoch||!livingEnemies().length||!bfR15Owned(p))return;const kind=p.action?.kind,tier=kind==='burst'?bfR14Tier(p):null;"+dispatch)==1
+ assert html.count('if(!await bfR21TryNormalRound(token)&&!await bfR26TryMixedRound(token)&&!await bfR25TryMixedRound(token))for(const p of liveParty()){if(!livingEnemies().length)break;'+dispatch)==1
+else:
+ assert html.count(HOOK)==1
 assert HOOK+'window.BF041SmartAuto?.reconsider?.(p);await performUnit(p,token);' in html
 from playwright.sync_api import sync_playwright
 from bf_capture_progress_audit import INSTALL_STORAGE,SNAPSHOT,assert_unchanged
