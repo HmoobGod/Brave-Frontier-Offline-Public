@@ -8,7 +8,10 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'BF_GLOBAL_BURST_RECIPIENT_RECOVERY_V6700' in js
  assert 'Math.round(ally.rec)' in js
  index=z.read('assets/index.html').decode('utf8')
- assert index.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally)')==1
+ if __import__('hashlib').sha256(index.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+  assert index.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally,p)')==1
+ else:
+  assert index.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally)')==1
  assert 'bf_global_offline_demo_v7' in index
 j=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert 'readPackagedText("bf6700_burst_recipient_rec.js")' in j

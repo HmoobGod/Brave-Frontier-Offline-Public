@@ -8,10 +8,22 @@ html=(A/'index.html').read_text('utf8')
 assert js.count('/* BF_GLOBAL_ELEMENTAL_COMBAT_V6900 */')==1
 assert len(js.encode('utf8'))<65536
 assert all(s not in js for s in ('localStorage','saveProgress(', 'BFAndroid'))
-assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
-assert 'UNIT_BY_ID.get(p.unitId)?.element,foe.element' in html
+if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+ assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==1
+ assert html.count('function bfR16Outgoing(p,foe,total)')==1
+ assert html.count('return api?.scaleDamage(total,element,foe.element)??total;')==1
+ assert 'bfR16Outgoing(p,foe,prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst)+(burst?bfR16BurstBonus(p):0)))' in html
+else:
+ assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
+if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+ assert "element=UNIT_BY_ID.get(p.unitId)?.element,buff=bfR15Active(p,'r16Weakness')" in html
+else:
+ assert 'UNIT_BY_ID.get(p.unitId)?.element,foe.element' in html
 assert 'enemy.element,UNIT_BY_ID.get(target.unitId)?.element' in html
-assert html.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally)')==1
+if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+ assert html.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally,p)')==1
+else:
+ assert html.count('BFGlobalBurstRecipientRecoveryV6700?.healAmount(base,ally)')==1
 java=(R/'app/src/main/java/org/bravefrontier/offline/MainActivity.java').read_text('utf8')
 assert java.index('readPackagedText("bf6700_burst_recipient_rec.js")')<java.index('readPackagedText("bf6900_elemental_combat.js")')
 with sync_playwright() as pw:

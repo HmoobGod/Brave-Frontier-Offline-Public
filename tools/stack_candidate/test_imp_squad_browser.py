@@ -1,0 +1,27 @@
+"""Browser integration test using real prepared game, catalog, copy ownership and v7 parser.
+Disposable in-memory Storage shim; no device or owner save; all network blocked.
+Usage: python test_imp_squad_browser.py <prepared assets dir>
+"""
+from pathlib import Path
+import sys, shutil, json
+from playwright.sync_api import sync_playwright
+root=Path(sys.argv[1]).resolve()
+with sync_playwright() as p:
+ b=p.chromium.launch(executable_path=shutil.which('chromium') or shutil.which('google-chrome'),args=['--no-sandbox','--disable-dev-shm-usage'],headless=True)
+ page=b.new_page(viewport={'width':390,'height':844});errors=[];page.on('pageerror',lambda e:errors.append(str(e)));page.route('**/*',lambda r:r.abort())
+ page.evaluate('''()=>{const db=new Map();window.__writes=0;window.__failWrite=false;Object.defineProperty(window,'localStorage',{configurable:true,value:{getItem:k=>db.has(k)?db.get(k):null,setItem:(k,v)=>{if(window.__failWrite)throw Error('simulated quota');db.set(k,String(v));window.__writes++},removeItem:k=>db.delete(k),key:i=>[...db.keys()][i]??null,get length(){return db.size}}});window.alert=()=>{};window.confirm=()=>true;HTMLMediaElement.prototype.load=()=>{};HTMLMediaElement.prototype.pause=()=>{};HTMLMediaElement.prototype.play=()=>Promise.resolve()}''')
+ page.set_content((root/'index.html').read_text('utf8'),wait_until='domcontentloaded',timeout=90000)
+ for n in ('bf_home_nav.js','bf_global_unit_archive.js','bf11000_source_starter_leader_skills.js','bf11100_original_starter_leader_combat.js','bf11200_all_playable_leader_source.js','bf11500_original_unit_level_caps.js','bf11600_original_lord_stats_data.js','bf11600_original_lord_stats_reference.js','bf16800_original_level_one_lord_combat.js','bf16900_optional_imp_fusion.js'):
+  page.add_script_tag(content=(root/n).read_text('utf8'))
+ out=page.evaluate('''()=>{const api=window.BFGlobalOptionalImpsV16900,copyId=1000000001;let checks=0;const ok=(v,m)=>{if(!v)throw Error(m);checks++};const eq=(a,b,m)=>ok(JSON.stringify(a)===JSON.stringify(b),m);const stock={molin:30,pakpak:30,ganju:30,fwahl:30,arton:20};
+ ok(P.version===7,'v7');ok(BFGlobalUnitArchive.count===2291,'real catalog');eq(api.original(10011),[400,160,80,80],'original caps');ok(!api.snapshot().enabled,'off by default');ok(document.getElementById('bf-imp-squad-feed-r1').disabled,'initial disabled');
+ const fixture=(squad=[10011,copyId],inv=stock,amounts={})=>{const n=defaultProgress();n.roster.push(copyId);n.unitExp[copyId]=0;n.squad=squad;n._bfUnitInstancesV1={nextId:copyId+1,baseById:{[copyId]:10011}};n._bfImpsV171={version:1,started:true,mode:'custom',amounts,inventory:{...inv},cursors:{}};P=parseProgress(n);saveRecoveryPending=false;ok(saveProgress(),'fixture persist');api.refresh();};
+ fixture();eq(stackOwnedUnit(copyId).id,10011,'real copy mapping');const before=JSON.stringify(P),saved=localStorage.getItem(SAVE_KEY),writes=window.__writes;const plan=api.planSquad();eq(JSON.stringify(P),before,'preview pure');eq(localStorage.getItem(SAVE_KEY),saved,'preview storage pure');eq(window.__writes,writes,'preview no writes');eq(plan.rows.map(r=>r.baseId),[10011,copyId],'two separate copies');eq(plan.total,10,'planned count');
+ document.getElementById('bf-imp-squad-feed-r1').click();eq(window.__writes,writes+1,'single write');eq(api.bonus(10011),[500,200,100,100],'base cap');eq(api.bonus(copyId),[500,200,100,100],'copy cap');eq(localStorage.getItem(SAVE_KEY),JSON.stringify(P),'persisted state');const after=JSON.parse(before);after._bfImpsV171=P._bfImpsV171;eq(P,after,'only Imp field changed');for(const k of Object.keys(stock))eq(api.stock()[k]+plan.rows.reduce((sum,r)=>sum+r.materials[k],0),stock[k],'conservation '+k);ok(document.getElementById('bf-imp-squad-feed-r1').disabled,'no more useful feed');
+ const raw=localStorage.getItem(SAVE_KEY);P=parseProgress(JSON.parse(raw));api.refresh();eq(api.bonus(copyId),[500,200,100,100],'parse roundtrip copy');eq(P._bfUnitInstancesV1.baseById,{[copyId]:10011},'roundtrip metadata');eq(P.squad,[10011,copyId],'roundtrip squad');
+ fixture([copyId,10011],{molin:0,pakpak:0,ganju:0,fwahl:0,arton:1});eq(api.planSquad().rows.map(r=>r.baseId),[copyId],'leader priority');ok(api.feedSquad(),'leader feed');eq(api.bonus(copyId),[150,60,60,60],'copy only');eq(api.bonus(10011),[0,0,0,0],'base unaffected');
+ fixture();const failBefore=JSON.stringify(P),failRaw=localStorage.getItem(SAVE_KEY),failWrites=window.__writes;window.__failWrite=true;eq(api.feedSquad(),false,'failed write rejected');window.__failWrite=false;eq(JSON.stringify(P),failBefore,'failed write rollback');eq(localStorage.getItem(SAVE_KEY),failRaw,'failed write stored bytes unchanged');eq(window.__writes,failWrites,'failed write count unchanged');
+ fixture();const recoverBefore=JSON.stringify(P),recoverRaw=localStorage.getItem(SAVE_KEY);saveRecoveryPending=true;eq(api.feedSquad(),false,'recovery lock');eq(JSON.stringify(P),recoverBefore,'recovery rollback');eq(localStorage.getItem(SAVE_KEY),recoverRaw,'recovery retains bytes');saveRecoveryPending=false;
+ fixture();P.squad=[10011,10011];eq(api.planSquad(),null,'repeated owned identity reject');P.squad=[10011,999999];eq(api.planSquad(),null,'unowned reject');return {checks,realCatalog:true,realCopyParser:true,oneWrite:true,roundtrip:true,storageFailureRollback:true,recoveryLock:true}}''')
+ assert not errors,errors
+ print('PASS actual prepared browser with disposable storage shim',json.dumps(out,sort_keys=True));b.close()

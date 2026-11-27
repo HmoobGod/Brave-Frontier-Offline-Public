@@ -8,8 +8,17 @@ with ZipFile(R/'app/build/outputs/apk/debug/app-debug.apk') as z:
  assert 'BF_GLOBAL_ORIGINAL_ATK_BB_LEVELS_V7100' in js and len(js.encode())<65536
  assert all(s not in js for s in ('localStorage','saveProgress(', 'BFAndroid'))
  html=z.read('assets/index.html').decode('utf8')
- assert html.count('BFGlobalOriginalAtkBBLevelsV7100?.boostFor(p.unitId)')==1
- assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
+ if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+  assert html.count('BFGlobalOriginalAtkBBLevelsV7100?.boostFor(p.unitId,p)')==1
+ else:
+  assert html.count('BFGlobalOriginalAtkBBLevelsV7100?.boostFor(p.unitId)')==1
+ if __import__('hashlib').sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c':
+  assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==1
+  assert html.count('function bfR16Outgoing(p,foe,total)')==1
+  assert html.count('return api?.scaleDamage(total,element,foe.element)??total;')==1
+  assert 'bfR16Outgoing(p,foe,prototypeDamage(effectivePlayerAtk(p),foe.def,bbDamageMultiplier(p,burst)+(burst?bfR16BurstBonus(p):0)))' in html
+ else:
+  assert html.count('BFGlobalElementalCombatV6900?.scaleDamage(')==2
  assert 'bf_global_offline_demo_v7' in html
 g=(R/'app/build.gradle').read_text('utf8')
 versions=[line.strip() for line in g.splitlines() if line.strip().startswith('versionName ')]

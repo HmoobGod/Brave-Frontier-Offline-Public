@@ -633,11 +633,38 @@ afterEvaluate {
 // reject any STACK residue and keep ordinary legacy generation permitted.
 afterEvaluate {
     def stackPrepared = project.findProperty('bfStackPrepared')?.toString() == 'true'
+    // Prepared progression only: retain all original preBuild scripts on their exact R1 input.
+    def prepareProgressionR28 = null
+    if (stackPrepared) {
+        def verifyProgressionR29Source = tasks.register('verifyProgressionR29Source', Exec) {
+            workingDir rootProject.projectDir
+            commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
+                'tools/stack_candidate/verify_prebuild_source_r29.py', '--checkout', rootProject.projectDir.absolutePath
+        }
+        def restoreProgressionR28Base = tasks.register('restoreProgressionR28Base', Exec) {
+            dependsOn verifyProgressionR29Source
+            workingDir rootProject.projectDir
+            commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
+                'tools/stack_candidate/restore_progression_r28_base.py', '--assets-dir', 'app/src/main/assets'
+        }
+        def progressionPreparationTasks = ['prepareDemoAssets', 'prepareGlobalHomeAssets', 'prepareGlobalMissionAssets', 'prepareOriginalGlobalBgm', 'prepareGlobalMistralMap', 'prepareOriginalBattleControls', 'prepareGlobalUnitArchive', 'prepareGlobalUnitCodex', 'prepareOriginalBBTargeting', 'prepareOriginalBBSupport', 'prepareOriginalBBPower', 'prepareOriginalPlayableIdentity', 'prepareOriginalSixEvolutions', 'prepareOriginalSecondStageEvolutions', 'prepareOriginalMoreSecondStage', 'prepareOriginalFiveStarStarters', 'prepareOriginalOtherFiveStar', 'prepareOriginalSixStarStarters', 'prepareOriginalOtherSixStar', 'prepareEvolutionRoadmapV039', 'prepareBattleBBGuideV040', 'prepareSourceAwareAutoV041', 'prepareCoordinatedAutoV042', 'prepareOriginalSBBPreviewV043', 'prepareExperimentalSBBV044', 'prepareEgorSnowfieldV045', 'prepareForestOfBeastsV046', 'prepareMagutagalV047', 'prepareQuestEnglishDataV048', 'prepareRemainsMirzaV049', 'prepareMonstersNestV050', 'prepareTowerMistralV051', 'prepareStoryBossV052', 'prepareMonsterTrainingV053', 'prepareTowerFormationsV055', 'prepareOriginalMistralEvidenceV060', 'preparePlayableAttackFramesV065', 'preparePlayableHitInspectorV070', 'prepareMorganOriginalV080', 'prepareStLamiaV090', 'prepareHistoricalWaveLabV200', 'prepareOriginalEventBackdropV2700', 'prepareOriginalEventExpressionsV2900', 'patchBurstRecipientRecoveryV6700', 'patchOriginalElementalCombatV6900', 'patchOriginalAtkBBLevelsV7100']
+        progressionPreparationTasks.eachWithIndex { taskName, position ->
+            def predecessor = position == 0 ? restoreProgressionR28Base : tasks.named(progressionPreparationTasks[position - 1])
+            tasks.named(taskName).configure { dependsOn predecessor }
+        }
+        prepareProgressionR28 = tasks.register('prepareProgressionR28', Exec) {
+            dependsOn tasks.named('preBuild')
+            workingDir rootProject.projectDir
+            commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
+                'tools/stack_candidate/prepare_progression_r28.py', '--assets-dir', 'app/src/main/assets', '--apply'
+        }
+    }
     def verifyStackGeneratedAssets = tasks.register('verifyStackGeneratedAssets', Exec) {
         dependsOn tasks.named('preBuild')
+        if (stackPrepared) { dependsOn prepareProgressionR28 }
         workingDir rootProject.projectDir
         commandLine System.getProperty('os.name').toLowerCase().contains('windows') ? 'py' : 'python3',
-            'tools/stack_candidate/verify_stack_a17.py', '--assets-dir', 'app/src/main/assets',
+            'tools/stack_candidate/verify_progression_r28.py', '--assets-dir', 'app/src/main/assets',
             '--mode', stackPrepared ? 'prepared' : 'legacy'
     }
     tasks.matching { it.name.startsWith('merge') && it.name.endsWith('Assets') }.configureEach {
