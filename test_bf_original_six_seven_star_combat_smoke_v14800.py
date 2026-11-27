@@ -2,7 +2,7 @@
 Confirms original 2022 hit timelines + CGS data run in DEMO engine; NEVER unlocks 7★.
 """
 from pathlib import Path
-import json,shutil
+import hashlib,json,shutil
 from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parent
 A=R/'app/src/main/assets'
@@ -34,6 +34,7 @@ for id in ids:
  assert r['originalEvo']['materialSlots'][-1]['type']==2
  assert r['originalEvo']['materialSlots'][-1]['id']==110100
 html=(A/'index.html').read_text('utf8')
+r28=hashlib.sha256(html.encode('utf8')).hexdigest()=='bbb6c33bbf0a1813c0b1f5a0222829291741bba820bf7e75385dda9b01efca1c'
 assert 'bf_global_offline_demo_v7' in html
 with sync_playwright() as pw:
  b=pw.chromium.launch(headless=True,
@@ -52,9 +53,15 @@ with sync_playwright() as pw:
  }""")
  p.set_content(html,wait_until='load',timeout=90000)
  assert p.evaluate('P.version')==7
- assert p.evaluate('UNIT_BY_ID.size')==72
- for id in ids:
-  assert p.evaluate('id=>!UNIT_BY_ID.has(id)',id) is True,id
+ if r28:
+  assert p.evaluate('UNIT_BY_ID.size')==84
+  assert p.evaluate("""()=>{const ids=[10016,10017,20016,20017,30016,30017,40016,40017,50016,50017,60016,60017];return Object.keys(BF_R13_FORMS).map(Number).join(',')===ids.join(',')&&ids.every(id=>UNIT_BY_ID.get(id)===BF_R13_FORMS[id]);}""")
+  for id in ids:
+   assert p.evaluate("""id=>{const u=UNIT_BY_ID.get(id);return {id:u.id,rarity:u.rarity,base:u.stats,lordAtMax:u.originalLordStats,cap:u.originalMaxLevel,cost:u.originalUnitCost};}""",id)=={'id':id,'rarity':7,'base':stats[id],'lordAtMax':rows[id]['lordAtMax'],'cap':120,'cost':38}
+ else:
+  assert p.evaluate('UNIT_BY_ID.size')==72
+  for id in ids:
+   assert p.evaluate('id=>!UNIT_BY_ID.has(id)',id) is True,id
  p.add_script_tag(path=str(A/'bf12500_full_original_normal_hits.js'))
  p.add_script_tag(path=str(A/'bf12800_original_starter_cgg_cgs.js'))
  assert p.evaluate('async()=>await BFGlobalOriginalStarterCggV12800.ready') is True
@@ -76,61 +83,113 @@ with sync_playwright() as pw:
   assert all(0<=v[0]<row['frameCount'] for v in row['attack']),row
   assert len(row['events'])==hits[id] and row['weights']==100,row
   assert all(len(v)==4 for v in row['events']),row
-  assert row['originalSource'] is True and row['inLiveRoster'] is False,row
- output=p.evaluate("""async rows=>{
-  const prior=JSON.stringify(P);
-  const saved=localStorage.getItem('bf_global_offline_demo_v7');
-  const values=[];
-  for(const row of rows){
+  if r28:
+   assert row['originalSource'] is True and row['inLiveRoster'] is True,row
+   assert p.evaluate('id=>archivedNormalAttackEvents(id)',id)==row['events'],row
+   assert p.evaluate('id=>BF_R14_NORMAL[id]',id)==row['events'],row
+  else:
+   assert row['originalSource'] is True and row['inLiveRoster'] is False,row
+ if r28:
+  output=p.evaluate("""async rows=>{
+   const prior=JSON.stringify(P),saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const catalog=[...UNIT_BY_ID.entries()],originalHits=JSON.stringify(BF_ARCHIVE_NORMAL_HITS);
+   const values=[];
+   for(const row of rows){
     const id=row.id;
     BF_debug.reset();
-    const prev=UNIT_BY_ID.get(id-1);
-    if(!prev)throw Error('Missing existing 6star source base '+id);
-    const temp={...prev,id,rarity:7,name:'TEMP Original 7star #'+id,
-      stats:{...row.base},frameCount:row.frameCount,
-      animation:{...prev.animation,atk:row.attack}};
-    if(UNIT_BY_ID.has(id)||BF_ARCHIVE_NORMAL_HITS[String(id)])
-      throw Error('Expected source 7star to be absent from gameplay '+id);
-    UNIT_BY_ID.set(id,temp);
-    BF_ARCHIVE_NORMAL_HITS[String(id)]={unitId:id,
-      weightsTotal:100,events:row.events};
+    const production=UNIT_BY_ID.get(id);
+    if(!production||!UNIT_BY_ID.has(id-1))throw Error('Missing production 7star or 6star base '+id);
     const actor=S.party[0];actor.active=true;
-    actor.unitId=id;actor.name=temp.name;
+    actor.unitId=id;actor.name=production.name;
     actor.hp=row.base.hp;actor.maxHp=row.base.hp;
     actor.atk=row.base.atk;actor.def=row.base.def;actor.rec=row.base.rec;
     actor.bb=0;actor.action={kind:'attack',target:0};
-    S.enemies=[{slot:0,name:'Lab dummy',hp:999999,
-      maxHp:999999,atk:10,def:0,element:'Water'}];
+    S.enemies=[{slot:0,name:'Lab dummy',hp:999999,maxHp:999999,atk:10,def:0,element:'Water'}];
     S.mode='archive';S.over=false;S.target=0;
-    const hp=S.enemies[0].hp;
+    const hp=S.enemies[0].hp,hitRows=archivedNormalAttackEvents(id);
     wait=()=>Promise.resolve();
     await performUnit(actor,epoch);
-    values.push({id,sourceHits:row.events.length,
-      sourceTotal:row.events.reduce((n,e)=>n+e[1],0),
-      sourceAtkCGSSteps:row.attack.length,
-      simulatedDamage:hp-S.enemies[0].hp,
+    values.push({id,sourceHits:hitRows.length,sourceTotal:hitRows.reduce((n,e)=>n+e[1],0),
+      sourceRowsMatch:JSON.stringify(hitRows)===JSON.stringify(row.events),
+      sourceAtkCGSSteps:row.attack.length,simulatedDamage:hp-S.enemies[0].hp,
       demoBBGauge:actor.bb,version:P.version});
-    // Prevent the next canvas frame from reading a removed temporary
-    // 7-star unit in animationFrame; preserve production roster isolation.
-    BF_debug.reset();
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    UNIT_BY_ID.delete(id);
-    delete BF_ARCHIVE_NORMAL_HITS[String(id)];
-  }
-  return {values,
-    productionForms:UNIT_BY_ID.size,
-    sourceIDsUnregistered:rows.every(r=>!UNIT_BY_ID.has(r.id)),
-    pUnchanged:JSON.stringify(P)===prior,
-    saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===saved};
- }""",[{**{'id':m['id'],'base':stats[m['id']],'frameCount':m['frameCount'],
-              'attack':m['attack'],'events':m['events']}} for m in overview])
- assert len(output['values'])==6,output
- for o in output['values']:
-  assert o['simulatedDamage']>0 and o['demoBBGauge']>=0,o
-  assert o['sourceHits']==hits[o['id']] and o['sourceTotal']==100,o
-  assert o['sourceAtkCGSSteps']>=1 and o['version']==7,o
- assert output['productionForms']==72 and output['sourceIDsUnregistered'],output
- assert output['pUnchanged'] and output['saveUnchanged'],output
+    BF_debug.reset();await new Promise(resolve=>requestAnimationFrame(resolve));
+    if(UNIT_BY_ID.size!==catalog.length||!catalog.every(([k,v])=>UNIT_BY_ID.get(k)===v)||JSON.stringify(BF_ARCHIVE_NORMAL_HITS)!==originalHits||JSON.stringify(P)!==prior||localStorage.getItem('bf_global_offline_demo_v7')!==saved)throw Error('Production catalog, hit table or save changed for '+id);
+   }
+   return {values,productionForms:UNIT_BY_ID.size,
+     sourceIDsRegistered:rows.every(r=>UNIT_BY_ID.get(r.id)===BF_R13_FORMS[r.id]),
+     catalogUnchanged:catalog.every(([k,v])=>UNIT_BY_ID.get(k)===v),
+     normalCatalogUnchanged:JSON.stringify(BF_ARCHIVE_NORMAL_HITS)===originalHits,
+     pUnchanged:JSON.stringify(P)===prior,saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""",[{**{'id':m['id'],'base':stats[m['id']],'frameCount':m['frameCount'],
+               'attack':m['attack'],'events':m['events']}} for m in overview])
+  assert len(output['values'])==6,output
+  assert [o['id'] for o in output['values']]==list(ids),output
+  for o in output['values']:
+   assert o['simulatedDamage']>0 and o['demoBBGauge']>=0,o
+   assert o['sourceHits']==hits[o['id']] and o['sourceTotal']==100 and o['sourceRowsMatch'],o
+   assert o['sourceAtkCGSSteps']>=1 and o['version']==7,o
+  assert output['productionForms']==84 and output['sourceIDsRegistered'],output
+  assert output['catalogUnchanged'] and output['normalCatalogUnchanged'],output
+  assert output['pUnchanged'] and output['saveUnchanged'],output
+ else:
+  output=p.evaluate("""async rows=>{
+   const prior=JSON.stringify(P);
+   const saved=localStorage.getItem('bf_global_offline_demo_v7');
+   const values=[];
+   for(const row of rows){
+     const id=row.id;
+     BF_debug.reset();
+     const prev=UNIT_BY_ID.get(id-1);
+     if(!prev)throw Error('Missing existing 6star source base '+id);
+     const temp={...prev,id,rarity:7,name:'TEMP Original 7star #'+id,
+       stats:{...row.base},frameCount:row.frameCount,
+       animation:{...prev.animation,atk:row.attack}};
+     if(UNIT_BY_ID.has(id)||BF_ARCHIVE_NORMAL_HITS[String(id)])
+       throw Error('Expected source 7star to be absent from gameplay '+id);
+     UNIT_BY_ID.set(id,temp);
+     BF_ARCHIVE_NORMAL_HITS[String(id)]={unitId:id,
+       weightsTotal:100,events:row.events};
+     const actor=S.party[0];actor.active=true;
+     actor.unitId=id;actor.name=temp.name;
+     actor.hp=row.base.hp;actor.maxHp=row.base.hp;
+     actor.atk=row.base.atk;actor.def=row.base.def;actor.rec=row.base.rec;
+     actor.bb=0;actor.action={kind:'attack',target:0};
+     S.enemies=[{slot:0,name:'Lab dummy',hp:999999,
+       maxHp:999999,atk:10,def:0,element:'Water'}];
+     S.mode='archive';S.over=false;S.target=0;
+     const hp=S.enemies[0].hp;
+     wait=()=>Promise.resolve();
+     await performUnit(actor,epoch);
+     values.push({id,sourceHits:row.events.length,
+       sourceTotal:row.events.reduce((n,e)=>n+e[1],0),
+       sourceAtkCGSSteps:row.attack.length,
+       simulatedDamage:hp-S.enemies[0].hp,
+       demoBBGauge:actor.bb,version:P.version});
+     // Prevent the next canvas frame from reading a removed temporary
+     // 7-star unit in animationFrame; preserve production roster isolation.
+     BF_debug.reset();
+     await new Promise(resolve => requestAnimationFrame(resolve));
+     UNIT_BY_ID.delete(id);
+     delete BF_ARCHIVE_NORMAL_HITS[String(id)];
+   }
+   return {values,
+     productionForms:UNIT_BY_ID.size,
+     sourceIDsUnregistered:rows.every(r=>!UNIT_BY_ID.has(r.id)),
+     pUnchanged:JSON.stringify(P)===prior,
+     saveUnchanged:localStorage.getItem('bf_global_offline_demo_v7')===saved};
+  }""",[{**{'id':m['id'],'base':stats[m['id']],'frameCount':m['frameCount'],
+               'attack':m['attack'],'events':m['events']}} for m in overview])
+  assert len(output['values'])==6,output
+  for o in output['values']:
+   assert o['simulatedDamage']>0 and o['demoBBGauge']>=0,o
+   assert o['sourceHits']==hits[o['id']] and o['sourceTotal']==100,o
+   assert o['sourceAtkCGSSteps']>=1 and o['version']==7,o
+  assert output['productionForms']==72 and output['sourceIDsUnregistered'],output
+  assert output['pUnchanged'] and output['saveUnchanged'],output
  assert not errors,errors
  b.close()
-print('PASS v148: six exact original 2022 7star normal hit/CGS profiles run ephemeral DEMO attacks (43 source hits), zero roster/save changes')
+if r28:
+ print('PASS v148 R28: six production seven-star forms, 43 original normal hit rows and source CGS profiles in disposable DEMO attacks, catalog and v7 save unchanged')
+else:
+ print('PASS v148: six exact original 2022 7star normal hit/CGS profiles run ephemeral DEMO attacks (43 source hits), zero roster/save changes')
