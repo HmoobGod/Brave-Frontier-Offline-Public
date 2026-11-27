@@ -4,6 +4,7 @@ No reward, game-state, save, unit, or network semantics are changed by v242.
 """
 from pathlib import Path
 import re
+import hashlib
 import sys
 
 R=Path(__file__).resolve().parent
@@ -126,6 +127,13 @@ with sync_playwright() as pw:
         # Source-selected strict ordering: v639 MUST not pass by silently
         # falling back to the historic v636 Story-before-Explore DOM order.
         quest_first_story='// v638 local: keep the exact live Story node' in J
+        # R28 removes this comment to fit the native Home asset budget,
+        # not the relocation. Select the same strict v639 contract only for
+        # the exact prepared Home asset, and verify its executable marker.
+        if hashlib.sha256(J.encode("utf8")).hexdigest()=="19881f187dad0d653f7eeb616b4cdb6f584303fe21020e610cd3167389d2a3fc":
+            assert not quest_first_story
+            assert J.count("summonV638.insertAdjacentElement('afterend', storyV638);")==1
+            quest_first_story=True
         expected_order=v639_order if quest_first_story else v636_order
         assert positions==expected_order,(width,'source-pinned exact Story order',positions)
         fidelity=page.locator("#bf-home").evaluate("""home=>{
